@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>龙翔电气网站后台</title>
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+    <div class="admin-layout" id="admin-page">
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>Long<span>xiang</span></h2>
+                <p>网站后台</p>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" data-view="dashboard" class="active">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                    控制台
+                </a>
+                <a href="#" data-view="products">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                    产品管理
+                </a>
+                <a href="#" data-view="inquiries">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a4 4 0 0 1-4 4H7l-4 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/></svg>
+                    询盘管理
+                </a>
+                <a href="#" data-view="company">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    公司信息
+                </a>
+                <a href="#" data-view="certifications">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15l-3.5 2 1-4-3-2.8 4-.3L12 6l1.5 3.9 4 .3-3 2.8 1 4z"/><path d="M5 21V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v17l-7-3z"/></svg>
+                    证书管理
+                </a>
+                <a href="#" class="logout-link" id="nav-logout">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    退出登录
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar" id="sidebar-avatar">A</div>
+                    <span class="user-name" id="sidebar-username">管理员</span>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="content-header">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <button class="mobile-menu-btn" id="mobile-menu-btn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                    </button>
+                    <h1 id="header-title">控制台</h1>
+                </div>
+            </header>
+
+            <div class="content-body">
+                <section class="view-section active" id="view-dashboard">
+                    <div class="section-header-bar"><h2>数据概览</h2></div>
+                    <div class="dashboard-grid">
+                        <div class="stat-card"><div class="stat-card-icon blue">□</div><div class="stat-card-value" id="stat-total">0</div><div class="stat-card-label">产品总数</div></div>
+                        <div class="stat-card"><div class="stat-card-icon gold">☆</div><div class="stat-card-value" id="stat-featured">0</div><div class="stat-card-label">首页推荐产品</div></div>
+                        <div class="stat-card"><div class="stat-card-icon green">◇</div><div class="stat-card-value" id="stat-categories">0</div><div class="stat-card-label">产品分类</div></div>
+                        <div class="stat-card"><div class="stat-card-icon navy">✉</div><div class="stat-card-value" id="stat-inquiries">0</div><div class="stat-card-label">询盘总数</div></div>
+                        <div class="stat-card"><div class="stat-card-icon gold">!</div><div class="stat-card-value" id="stat-new-inquiries">0</div><div class="stat-card-label">新询盘</div></div>
+                    </div>
+                    <div class="section-header-bar"><h2>产品分类统计</h2></div>
+                    <div class="category-stats-grid" id="category-stats"></div>
+                </section>
+
+                <section class="view-section" id="view-products">
+                    <div class="section-header-bar">
+                        <h2>产品管理</h2>
+                        <button class="btn btn-primary" id="btn-add-product">新增产品</button>
+                    </div>
+                    <div class="data-table-wrapper">
+                        <table class="data-table">
+                            <thead><tr><th>产品</th><th>分类</th><th>状态</th><th>简介</th><th>操作</th></tr></thead>
+                            <tbody id="products-tbody"><tr><td colspan="5" class="table-empty"><p>加载中...</p></td></tr></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section class="view-section" id="view-inquiries">
+                    <div class="section-header-bar">
+                        <h2>询盘管理</h2>
+                        <select id="inquiry-status-filter" class="toolbar-select">
+                            <option value="">全部状态</option>
+                            <option value="new">新询盘</option>
+                            <option value="read">已读</option>
+                            <option value="replied">已回复</option>
+                            <option value="closed">已关闭</option>
+                        </select>
+                    </div>
+                    <div class="data-table-wrapper">
+                        <table class="data-table">
+                            <thead><tr><th>客户</th><th>公司</th><th>主题</th><th>提交时间</th><th>状态</th><th>操作</th></tr></thead>
+                            <tbody id="inquiries-tbody"><tr><td colspan="6" class="table-empty"><p>加载中...</p></td></tr></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section class="view-section" id="view-company">
+                    <div class="section-header-bar"><h2>公司信息</h2></div>
+                    <form class="company-form" id="company-form">
+                        <div class="form-section-title">基础信息</div>
+                        <div class="form-row">
+                            <div class="form-group"><label>英文公司名</label><input type="text" id="company-name"></div>
+                            <div class="form-group"><label>中文公司名</label><input type="text" id="company-nameCN"></div>
+                        </div>
+                        <div class="form-row-3">
+                            <div class="form-group"><label>成立年份</label><input type="number" id="company-founded"></div>
+                            <div class="form-group"><label>股票代码</label><input type="text" id="company-stockCode"></div>
+                            <div class="form-group"><label>注册资本</label><input type="text" id="company-registeredCapital"></div>
+                        </div>
+                        <div class="form-section-title">联系方式</div>
+                        <div class="form-row">
+                            <div class="form-group"><label>电话</label><input type="text" id="company-phone"></div>
+                            <div class="form-group"><label>邮箱</label><input type="text" id="company-email"></div>
+                        </div>
+                        <div class="form-group"><label>地址</label><input type="text" id="company-address"></div>
+                        <div class="form-group"><label>总部地址</label><input type="text" id="company-headquarters"></div>
+                        <div class="form-row">
+                            <div class="form-group"><label>办公时间</label><input type="text" id="company-officeHours"></div>
+                            <div class="form-group"><label>淮阳基地</label><input type="text" id="company-huaiyangBase"></div>
+                        </div>
+                        <div class="form-section-title">即时通讯与统计</div>
+                        <div class="form-row">
+                            <div class="form-group"><label>WhatsApp 号码</label><input type="text" id="company-whatsapp" placeholder="例如 8613812345678"></div>
+                            <div class="form-group"><label>微信号</label><input type="text" id="company-wechat"></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><label>Skype 账号</label><input type="text" id="company-skype"></div>
+                            <div class="form-group"><label>GA4 跟踪 ID</label><input type="text" id="company-ga4TrackingId" placeholder="G-XXXXXXXXXX"></div>
+                        </div>
+                        <div class="form-section-title">公司介绍</div>
+                        <div class="form-row">
+                            <div class="form-group"><label>厂区面积</label><input type="text" id="company-factoryArea"></div>
+                            <div class="form-group"><label>专利数量</label><input type="text" id="company-patents"></div>
+                        </div>
+                        <div class="form-group"><label>研究合作伙伴数量</label><input type="text" id="company-researchPartners"></div>
+                        <div class="form-group"><label>公司描述</label><textarea id="company-description" rows="3"></textarea></div>
+                        <div class="form-group"><label>关于我们摘要</label><textarea id="company-aboutIntro" rows="3"></textarea></div>
+                        <div class="form-group"><label>关于我们详情</label><textarea id="company-aboutDetail" rows="3"></textarea></div>
+                        <div class="form-group"><label>页脚文案</label><textarea id="company-footerText" rows="2"></textarea></div>
+                        <div class="form-actions"><button type="submit" class="btn btn-primary" id="btn-save-company">保存公司信息</button></div>
+                    </form>
+                </section>
+
+                <section class="view-section" id="view-certifications">
+                    <div class="section-header-bar">
+                        <h2>证书管理</h2>
+                        <button class="btn btn-primary" id="btn-add-certification">新增证书</button>
+                    </div>
+                    <div class="data-table-wrapper">
+                        <table class="data-table">
+                            <thead><tr><th>证书名称</th><th>发证机构</th><th>有效期</th><th>图片路径</th><th>操作</th></tr></thead>
+                            <tbody id="certifications-tbody"><tr><td colspan="5" class="table-empty"><p>加载中...</p></td></tr></tbody>
+                        </table>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+
+        <div class="modal-overlay" id="product-modal">
+            <div class="modal">
+                <div class="modal-header"><h3 id="modal-title">新增产品</h3><button class="modal-close" id="modal-close">×</button></div>
+                <div class="modal-body">
+                    <form id="product-form">
+                        <div class="form-row">
+                            <div class="form-group"><label>产品 ID <span class="required">*</span></label><input type="text" id="field-id" placeholder="例如 sbh15"></div>
+                            <div class="form-group"><label>英文名称 <span class="required">*</span></label><input type="text" id="field-name"></div>
+                        </div>
+                        <div class="form-group"><label>阿拉伯语名称</label><input type="text" id="field-nameAr" dir="rtl"></div>
+                        <div class="form-group">
+                            <label>产品图片</label>
+                            <div class="image-upload-area" id="upload-area">
+                                <input type="file" id="field-image" accept="image/*">
+                                <div class="upload-placeholder"><p>点击或拖拽上传图片</p></div>
+                            </div>
+                            <div class="image-preview-container" id="image-preview" style="display:none;"></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>分类 <span class="required">*</span></label>
+                                <select id="field-category">
+                                    <option value="">选择分类</option>
+                                    <option value="oil-immersed">Oil-Immersed</option>
+                                    <option value="dry-type">Dry-Type</option>
+                                    <option value="special">Special</option>
+                                    <option value="combined">Combined</option>
+                                    <option value="switchgear">Switchgear</option>
+                                </select>
+                            </div>
+                            <div class="form-group"><label>英文分类名 <span class="required">*</span></label><input type="text" id="field-categoryLabel"></div>
+                        </div>
+                        <div class="form-group"><label>阿拉伯语分类名</label><input type="text" id="field-categoryLabelAr" dir="rtl"></div>
+                        <div class="form-group"><label>英文短描述</label><input type="text" id="field-shortDesc"></div>
+                        <div class="form-group"><label>阿拉伯语短描述</label><input type="text" id="field-shortDescAr" dir="rtl"></div>
+                        <div class="form-group"><label>英文详情</label><textarea id="field-description" rows="3"></textarea></div>
+                        <div class="form-group"><label>阿拉伯语详情</label><textarea id="field-descriptionAr" rows="3" dir="rtl"></textarea></div>
+                        <div class="form-row">
+                            <div class="form-group"><label>容量（逗号分隔）</label><input type="text" id="field-capacities"></div>
+                            <div class="form-group"><label>电压（逗号分隔）</label><input type="text" id="field-voltages"></div>
+                        </div>
+                        <div class="form-group">
+                            <label>技术参数</label>
+                            <div class="specs-list" id="specs-list"></div>
+                            <button type="button" class="btn-add-spec" id="btn-add-spec">新增参数行</button>
+                        </div>
+                        <div class="form-group"><label class="checkbox-label"><input type="checkbox" id="field-featured"> 首页推荐产品</label></div>
+                    </form>
+                </div>
+                <div class="modal-footer"><button class="btn btn-secondary" id="modal-cancel">取消</button><button class="btn btn-primary" id="modal-submit" type="submit" form="product-form">保存</button></div>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="inquiry-modal">
+            <div class="modal">
+                <div class="modal-header"><h3>询盘详情</h3><button class="modal-close" id="inquiry-modal-close">×</button></div>
+                <div class="modal-body">
+                    <div class="detail-grid" id="inquiry-detail"></div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>处理状态</label>
+                            <select id="inquiry-status">
+                                <option value="new">新询盘</option>
+                                <option value="read">已读</option>
+                                <option value="replied">已回复</option>
+                                <option value="closed">已关闭</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group"><label>管理员备注</label><textarea id="inquiry-notes" rows="4"></textarea></div>
+                </div>
+                <div class="modal-footer"><button class="btn btn-secondary" id="inquiry-cancel">关闭</button><button class="btn btn-primary" id="inquiry-save">保存状态</button></div>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="certification-modal">
+            <div class="modal">
+                <div class="modal-header"><h3 id="certification-modal-title">新增证书</h3><button class="modal-close" id="certification-modal-close">×</button></div>
+                <div class="modal-body">
+                    <form id="certification-form">
+                        <div class="form-group"><label>证书名称 <span class="required">*</span></label><input type="text" id="cert-name"></div>
+                        <div class="form-row">
+                            <div class="form-group"><label>发证机构</label><input type="text" id="cert-issuer"></div>
+                            <div class="form-group"><label>有效期</label><input type="text" id="cert-expiryDate"></div>
+                        </div>
+                        <div class="form-group"><label>图片路径</label><input type="text" id="cert-image" placeholder="例如 uploads/certificates/iso9001.jpg"></div>
+                        <div class="form-group"><label>说明</label><textarea id="cert-description" rows="3"></textarea></div>
+                    </form>
+                </div>
+                <div class="modal-footer"><button class="btn btn-secondary" id="certification-cancel">取消</button><button class="btn btn-primary" type="submit" form="certification-form">保存</button></div>
+            </div>
+        </div>
+
+        <div class="confirm-overlay" id="confirm-overlay">
+            <div class="confirm-dialog">
+                <h3 id="confirm-title">确认操作</h3>
+                <p id="confirm-message">确定要继续吗？</p>
+                <div class="confirm-actions">
+                    <button class="btn btn-secondary" id="confirm-cancel">取消</button>
+                    <button class="btn btn-danger" id="confirm-ok">确认</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="toast-container" id="toast-container"></div>
+    </div>
+    <script src="js/admin.js"></script>
+</body>
+</html>

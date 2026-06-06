@@ -1,0 +1,26 @@
+[
+  {
+    "id": "cert-iso9001",
+    "name": "ISO 9001 Quality Management",
+    "issuer": "Certification body to be updated",
+    "expiryDate": "",
+    "image": "",
+    "description": "Quality management certification placeholder. Replace with the official certificate image in the admin panel."
+  },
+  {
+    "id": "cert-iso14001",
+    "name": "ISO 14001 Environmental Management",
+    "issuer": "Certification body to be updated",
+    "expiryDate": "",
+    "image": "",
+    "description": "Environmental management certification placeholder. Replace with the official certificate image in the admin panel."
+  },
+  {
+    "id": "cert-iec",
+    "name": "IEC Standard Compliance",
+    "issuer": "Certification body to be updated",
+    "expiryDate": "",
+    "image": "",
+    "description": "International electrical standard compliance placeholder."
+  }
+]

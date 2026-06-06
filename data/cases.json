@@ -1,0 +1,32 @@
+[
+  {
+    "id": "case-central-asia-grid",
+    "projectName": "Central Asia Distribution Grid Upgrade",
+    "country": "Kazakhstan",
+    "region": "Central Asia",
+    "productModel": "S(B)H15 amorphous alloy distribution transformer",
+    "description": "Energy-saving distribution transformers supplied for utility-side network renewal and industrial park expansion.",
+    "image": "5、厂区厂貌/厂区.JPG",
+    "year": "2024"
+  },
+  {
+    "id": "case-middle-east-industrial",
+    "projectName": "Industrial Power Distribution Project",
+    "country": "Saudi Arabia",
+    "region": "Middle East",
+    "productModel": "SCB14 dry-type transformer and low-voltage switchgear",
+    "description": "Indoor dry-type transformer solution for a high-temperature industrial facility with strict fire-safety requirements.",
+    "image": "成品区/SCB14图片.png",
+    "year": "2023"
+  },
+  {
+    "id": "case-southeast-asia-solar",
+    "projectName": "Photovoltaic Power Collection Station",
+    "country": "Thailand",
+    "region": "Southeast Asia",
+    "productModel": "ZGS13 photovoltaic combined transformer",
+    "description": "Outdoor combined transformer package for solar farm power collection and grid connection.",
+    "image": "产品图片(1)/光伏发电用组合式变压器.jpg",
+    "year": "2024"
+  }
+]

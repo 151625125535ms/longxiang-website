@@ -1,0 +1,1482 @@
+[
+    {
+        "id":  "sbh15",
+        "name":  "S(B)H15 Amorphous Alloy Core Distribution Transformer",
+        "image":  "成品区/油式非晶S(B)H15.png",
+        "category":  "oil-immersed",
+        "categoryLabel":  "Oil-Immersed",
+        "shortDesc":  "Self-developed energy-efficient transformer with significantly reduced no-load losses, small excitation current and low reactive power consumption.",
+        "description":  "Self-developed energy-efficient amorphous alloy core distribution transformer with significantly reduced no-load losses, small excitation current and low reactive power consumption. Ideal for rural and urban distribution networks.",
+        "capacities":  [
+                           "30",
+                           "50",
+                           "63",
+                           "80",
+                           "100",
+                           "125",
+                           "160",
+                           "200",
+                           "250",
+                           "315",
+                           "400",
+                           "500",
+                           "630",
+                           "800",
+                           "1000",
+                           "1250",
+                           "1600",
+                           "2000",
+                           "2500"
+                       ],
+        "voltages":  [
+                         "10/0.4kV",
+                         "6/0.4kV",
+                         "35/0.4kV"
+                     ],
+        "specs":  [
+                      [
+                          "Product Model",
+                          "S(B)H15 Series"
+                      ],
+                      [
+                          "Core Type",
+                          "Amorphous Alloy"
+                      ],
+                      [
+                          "Phase",
+                          "Three Phase"
+                      ],
+                      [
+                          "Frequency",
+                          "50 Hz"
+                      ],
+                      [
+                          "Cooling Method",
+                          "ONAN"
+                      ],
+                      [
+                          "Insulation Level",
+                          "AC 35kV / LI 75kV"
+                      ],
+                      [
+                          "Temperature Rise",
+                          "65K"
+                      ],
+                      [
+                          "No-load Loss",
+                          "Significantly reduced vs conventional"
+                      ],
+                      [
+                          "Standard",
+                          "GB 20052 / IEC 60076"
+                      ],
+                      [
+                          "Application",
+                          "Power distribution networks"
+                      ]
+                  ],
+        "featured":  true,
+        "categoryLabelAr":  "محولات مغمورة بالزيت",
+        "nameAr":  "محول توزيع بقلب من السبيكة غير المتبلورة S(B)H15",
+        "shortDescAr":  "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق.",
+        "descriptionAr":  "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق."
+    },
+    {
+        "id":  "sbh21",
+        "name":  "S(B)H21 Amorphous Alloy Core Distribution Transformer",
+        "image":  "成品区/油式非晶S(B)H21.png",
+        "category":  "oil-immersed",
+        "categoryLabel":  "Oil-Immersed",
+        "shortDesc":  "A new generation of high-reliability amorphous alloy transformer with enhanced performance characteristics.",
+        "description":  "A new generation of high-reliability amorphous alloy transformer with enhanced performance characteristics, delivering superior energy savings and longer service life.",
+        "capacities":  [
+                           "30",
+                           "50",
+                           "63",
+                           "80",
+                           "100",
+                           "125",
+                           "160",
+                           "200",
+                           "250",
+                           "315",
+                           "400",
+                           "500",
+                           "630",
+                           "800",
+                           "1000",
+                           "1250",
+                           "1600",
+                           "2000"
+                       ],
+        "voltages":  [
+                         "10/0.4kV",
+                         "6/0.4kV"
+                     ],
+        "specs":  [
+                      [
+                          "Product Model",
+                          "S(B)H21 Series"
+                      ],
+                      [
+                          "Core Type",
+                          "Amorphous Alloy"
+                      ],
+                      [
+                          "Phase",
+                          "Three Phase"
+                      ],
+                      [
+                          "Frequency",
+                          "50 Hz"
+                      ],
+                      [
+                          "Cooling Method",
+                          "ONAN"
+                      ],
+                      [
+                          "Insulation Level",
+                          "AC 35kV / LI 75kV"
+                      ],
+                      [
+                          "Temperature Rise",
+                          "65K"
+                      ],
+                      [
+                          "No-load Loss",
+                          "Ultra-low"
+                      ],
+                      [
+                          "Standard",
+                          "GB 20052 / IEC 60076"
+                      ],
+                      [
+                          "Application",
+                          "Energy-efficient distribution"
+                      ]
+                  ],
+        "featured":  false,
+        "categoryLabelAr":  "محولات مغمورة بالزيت",
+        "nameAr":  "محول توزيع بقلب من السبيكة غير المتبلورة S(B)H21",
+        "shortDescAr":  "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق.",
+        "descriptionAr":  "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق."
+    },
+    {
+        "id":  "sbh25",
+        "name":  "S(B)H25 Amorphous Alloy Core Distribution Transformer",
+        "image":  "成品区/油式非晶S(B)H25.png",
+        "category":  "oil-immersed",
+        "categoryLabel":  "Oil-Immersed",
+        "shortDesc":  "Advanced amorphous alloy core technology delivering superior energy savings and operational reliability.",
+        "description":  "Advanced amorphous alloy core technology delivering superior energy savings and operational reliability for modern power distribution systems.",
+        "capacities":  [
+                           "30",
+                           "50",
+                           "80",
+                           "100",
+                           "160",
+                           "200",
+                           "315",
+                           "400",
+                           "500",
+                           "630",
+                           "800",
+                           "1000",
+                           "1600",
+                           "2000"
+                       ],
+        "voltages":  [
+                         "10/0.4kV",
+                         "6/0.4kV"
+                     ],
+        "specs":  [
+                      [
+                          "Product Model",
+                          "S(B)H25 Series"
+                      ],
+                      [
+                          "Core Type",
+                          "Amorphous Alloy"
+                      ],
+                      [
+                          "Phase",
+                          "Three Phase"
+                      ],
+                      [
+                          "Frequency",
+                          "50 Hz"
+                      ],
+                      [
+                          "Cooling Method",
+                          "ONAN"
+                      ],
+                      [
+                          "Insulation Level",
+                          "AC 35kV / LI 75kV"
+                      ],
+                      [
+                          "Temperature Rise",
+                          "65K"
+                      ],
+                      [
+                          "No-load Loss",
+                          "Ultra-low"
+                      ],
+                      [
+                          "Standard",
+                          "GB 20052 / IEC 60076"
+                      ],
+                      [
+                          "Application",
+                          "High-efficiency distribution"
+                      ]
+                  ],
+        "featured":  false,
+        "categoryLabelAr":  "محولات مغمورة بالزيت",
+        "nameAr":  "محول توزيع بقلب من السبيكة غير المتبلورة S(B)H25",
+        "shortDescAr":  "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق.",
+        "descriptionAr":  "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق."
+    },
+    {
+        "id":  "s13",
+        "name":  "S13 3D Wound Core Distribution Transformer",
+        "image":  "成品区/硅钢立体卷S13图片.png",
+        "category":  "oil-immersed",
+        "categoryLabel":  "Oil-Immersed",
+        "shortDesc":  "Innovative triangular wound core structure offering better performance, lower cost and higher reliability.",
+        "description":  "Innovative triangular wound core structure offering better performance, lower cost and higher reliability compared to traditional stacked core designs.",
+        "capacities":  [
+                           "30",
+                           "50",
+                           "63",
+                           "80",
+                           "100",
+                           "125",
+                           "160",
+                           "200",
+                           "250",
+                           "315",
+                           "400",
+                           "500",
+                           "630",
+                           "800",
+                           "1000",
+                           "1250",
+                           "1600"
+                       ],
+        "voltages":  [
+                         "10/0.4kV",
+                         "6/0.4kV"
+                     ],
+        "specs":  [
+                      [
+                          "Product Model",
+                          "S13-M.RL Series"
+                      ],
+                      [
+                          "Core Type",
+                          "3D Wound Core (Silicon Steel)"
+                      ],
+                      [
+                          "Phase",
+                          "Three Phase"
+                      ],
+                      [
+                          "Frequency",
+                          "50 Hz"
+                      ],
+                      [
+                          "Cooling Method",
+                          "ONAN"
+                      ],
+                      [
+                          "Insulation Level",
+                          "AC 35kV / LI 75kV"
+                      ],
+                      [
+                          "Temperature Rise",
+                          "65K"
+                      ],
+                      [
+                          "Core Structure",
+                          "Triangular wound core"
+                      ],
+                      [
+                          "Standard",
+                          "GB 20052 / IEC 60076"
+                      ],
+                      [
+                          "Application",
+                          "Distribution networks"
+                      ]
+                  ],
+        "featured":  true,
+        "categoryLabelAr":  "محولات مغمورة بالزيت",
+        "nameAr":  "محول توزيع بقلب ملفوف ثلاثي الأبعاد S13",
+        "shortDescAr":  "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق.",
+        "descriptionAr":  "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق."
+    },
+    {
+        "id":  "s20",
+        "name":  "S20-M.RL Oil-Immersed Power Transformer",
+        "image":  "产品图片(1)/S20-M.RL-30～160010油浸式电力变压器.jpg",
+        "category":  "oil-immersed",
+        "categoryLabel":  "Oil-Immersed",
+        "shortDesc":  "High-capacity oil-immersed power transformer designed for power transmission and distribution networks.",
+        "description":  "High-capacity oil-immersed power transformer designed for power transmission and distribution networks, meeting the latest national energy efficiency standards.",
+        "capacities":  [
+                           "30",
+                           "50",
+                           "80",
+                           "100",
+                           "160",
+                           "200",
+                           "315",
+                           "400",
+                           "500",
+                           "630",
+                           "800",
+                           "1000",
+                           "1250",
+                           "1600",
+                           "2000",
+                           "2500",
+                           "3150",
+                           "4000",
+                           "5000",
+                           "6300"
+                       ],
+        "voltages":  [
+                         "10/0.4kV",
+                         "35/10kV",
+                         "10/6.3kV"
+                     ],
+        "specs":  [
+                      [
+                          "Product Model",
+                          "S20-M.RL Series"
+                      ],
+                      [
+                          "Core Type",
+                          "Silicon Steel Wound Core"
+                      ],
+                      [
+                          "Phase",
+                          "Three Phase"
+                      ],
+                      [
+                          "Frequency",
+                          "50 Hz"
+                      ],
+                      [
+                          "Cooling Method",
+                          "ONAN / ONAF"
+                      ],
+                      [
+                          "Insulation Level",
+                          "AC 35kV / LI 75kV ~ AC 85kV / LI 200kV"
+                      ],
+                      [
+                          "Temperature Rise",
+                          "65K"
+                      ],
+                      [
+                          "Energy Standard",
+                          "GB 20052 Level 1"
+                      ],
+                      [
+                          "Standard",
+                          "GB/T 6451 / IEC 60076"
+                      ],
+                      [
+                          "Application",
+                          "Power transmission \u0026 distribution"
+                      ]
+                  ],
+        "featured":  false,
+        "categoryLabelAr":  "محولات مغمورة بالزيت",
+        "nameAr":  "محول قدرة مغمور بالزيت S20-M.RL",
+        "shortDescAr":  "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق.",
+        "descriptionAr":  "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق."
+    },
+    {
+        "id":  "high-overload",
+        "name":  "High Overload Distribution Transformer (Vegetable Oil)",
+        "image":  "产品图片(1)/油浸式（植物油）高过载配电变压器.jpg",
+        "category":  "oil-immersed",
+        "categoryLabel":  "Oil-Immersed",
+        "shortDesc":  "Eco-friendly vegetable oil insulated transformer with high overload capacity for demanding applications.",
+        "description":  "Eco-friendly vegetable oil insulated transformer with high overload capacity for demanding applications. The natural ester fluid provides superior fire safety and environmental protection.",
+        "capacities":  [
+                           "30",
+                           "50",
+                           "63",
+                           "80",
+                           "100",
+                           "125",
+                           "160",
+                           "200",
+                           "250",
+                           "315",
+                           "400",
+                           "500",
+                           "630"
+                       ],
+        "voltages":  [
+                         "10/0.4kV",
+                         "6/0.4kV"
+                     ],
+        "specs":  [
+                      [
+                          "Product Model",
+                          "S13-M.RL (Vegetable Oil)"
+                      ],
+                      [
+                          "Core Type",
+                          "Silicon Steel / Amorphous Alloy"
+                      ],
+                      [
+                          "Phase",
+                          "Three Phase"
+                      ],
+                      [
+                          "Frequency",
+                          "50 Hz"
+                      ],
+                      [
+                          "Cooling Method",
+                          "ONAN"
+                      ],
+                      [
+                          "Insulating Fluid",
+                          "Natural Ester (Vegetable Oil)"
+                      ],
+                      [
+                          "Fire Point",
+                          "\u003e300°C"
+                      ],
+                      [
+                          "Overload Capacity",
+                          "Up to 150% rated load"
+                      ],
+                      [
+                          "Standard",
+                          "GB/T 6451 / IEC 60076"
+                      ],
+                      [
+                          "Application",
+                          "High overload distribution"
+                      ]
+                  ],
+        "featured":  false,
+        "categoryLabelAr":  "محولات مغمورة بالزيت",
+        "nameAr":  "محول توزيع عالي التحميل بزيت نباتي",
+        "shortDescAr":  "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق.",
+        "descriptionAr":  "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق."
+    },
+    {
+        "id":  "anti-short-amorphous",
+        "name":  "Anti-Short-Circuit Amorphous Alloy Distribution Transformer",
+        "image":  "产品图片(1)/抗短路油浸式非晶合金铁芯配电变压器.jpg",
+        "category":  "oil-immersed",
+        "categoryLabel":  "Oil-Immersed",
+        "shortDesc":  "Enhanced short-circuit resistance design combining amorphous alloy efficiency with superior structural integrity.",
+        "description":  "Enhanced short-circuit resistance design combining amorphous alloy efficiency with superior structural integrity for maximum reliability in demanding grid conditions.",
+        "capacities":  [
+                           "30",
+                           "50",
+                           "80",
+                           "100",
+                           "160",
+                           "200",
+                           "315",
+                           "400",
+                           "500",
+                           "630",
+                           "800",
+                           "1000"
+                       ],
+        "voltages":  [
+                         "10/0.4kV",
+                         "6/0.4kV"
+                     ],
+        "specs":  [
+                      [
+                          "Product Model",
+                          "S(B)H15-M Series (Anti-Short-Circuit)"
+                      ],
+                      [
+                          "Core Type",
+                          "Amorphous Alloy"
+                      ],
+                      [
+                          "Phase",
+                          "Three Phase"
+                      ],
+                      [
+                          "Frequency",
+                          "50 Hz"
+                      ],
+                      [
+                          "Cooling Method",
+                          "ONAN"
+                      ],
+                      [
+                          "Short-Circuit Withstand",
+                          "Enhanced design"
+                      ],
+                      [
+                          "Insulation Level",
+                          "AC 35kV / LI 75kV"
+                      ],
+                      [
+                          "Standard",
+                          "GB 20052 / IEC 60076"
+                      ],
+                      [
+                          "Application",
+                          "Grid with high fault current"
+                      ]
+                  ],
+        "featured":  false,
+        "categoryLabelAr":  "محولات مغمورة بالزيت",
+        "nameAr":  "محول توزيع بسبيكة غير متبلورة مقاوم للقصر",
+        "shortDescAr":  "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق.",
+        "descriptionAr":  "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق."
+    },
+    {
+        "id":  "amorphous-veg-oil",
+        "name":  "Amorphous Alloy (Vegetable Oil) High Overload Transformer",
+        "image":  "产品图片(1)/非晶合金（植物油）高过载配电变压器.jpg",
+        "category":  "oil-immersed",
+        "categoryLabel":  "Oil-Immersed",
+        "shortDesc":  "Combining amorphous alloy core technology with environmentally friendly vegetable oil insulation.",
+        "description":  "Combining amorphous alloy core technology with environmentally friendly vegetable oil insulation for the ultimate in energy efficiency and environmental protection.",
+        "capacities":  [
+                           "30",
+                           "50",
+                           "80",
+                           "100",
+                           "160",
+                           "200",
+                           "315",
+                           "400",
+                           "500",
+                           "630"
+                       ],
+        "voltages":  [
+                         "10/0.4kV",
+                         "6/0.4kV"
+                     ],
+        "specs":  [
+                      [
+                          "Product Model",
+                          "S(B)H15 (Vegetable Oil)"
+                      ],
+                      [
+                          "Core Type",
+                          "Amorphous Alloy"
+                      ],
+                      [
+                          "Phase",
+                          "Three Phase"
+                      ],
+                      [
+                          "Frequency",
+                          "50 Hz"
+                      ],
+                      [
+                          "Cooling Method",
+                          "ONAN"
+                      ],
+                      [
+                          "Insulating Fluid",
+                          "Natural Ester (Vegetable Oil)"
+                      ],
+                      [
+                          "Fire Point",
+                          "\u003e300°C"
+                      ],
+                      [
+                          "No-load Loss",
+                          "Ultra-low"
+                      ],
+                      [
+                          "Standard",
+                          "GB 20052 / IEC 60076"
+                      ],
+                      [
+                          "Application",
+                          "Eco-friendly distribution"
+                      ]
+                  ],
+        "featured":  false,
+        "categoryLabelAr":  "محولات مغمورة بالزيت",
+        "nameAr":  "محول عالي التحميل بسبيكة غير متبلورة وزيت نباتي",
+        "shortDescAr":  "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق.",
+        "descriptionAr":  "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق."
+    },
+    {
+        "id":  "wound-core-oil",
+        "name":  "3D Wound Core Oil-Immersed Distribution Transformer",
+        "image":  "产品图片(1)/立体卷铁芯油浸式配电变压器.jpg",
+        "category":  "oil-immersed",
+        "categoryLabel":  "Oil-Immersed",
+        "shortDesc":  "Triangular wound core design for optimal magnetic circuit performance and energy efficiency.",
+        "description":  "Triangular wound core design for optimal magnetic circuit performance and energy efficiency. The unique core geometry reduces material usage while improving performance.",
+        "capacities":  [
+                           "30",
+                           "50",
+                           "63",
+                           "80",
+                           "100",
+                           "125",
+                           "160",
+                           "200",
+                           "250",
+                           "315",
+                           "400",
+                           "500",
+                           "630",
+                           "800"
+                       ],
+        "voltages":  [
+                         "10/0.4kV",
+                         "6/0.4kV"
+                     ],
+        "specs":  [
+                      [
+                          "Product Model",
+                          "S13-M.RL Series"
+                      ],
+                      [
+                          "Core Type",
+                          "3D Wound Core (Silicon Steel)"
+                      ],
+                      [
+                          "Phase",
+                          "Three Phase"
+                      ],
+                      [
+                          "Frequency",
+                          "50 Hz"
+                      ],
+                      [
+                          "Cooling Method",
+                          "ONAN"
+                      ],
+                      [
+                          "Core Structure",
+                          "Triangular wound core"
+                      ],
+                      [
+                          "Insulation Level",
+                          "AC 35kV / LI 75kV"
+                      ],
+                      [
+                          "Standard",
+                          "GB 20052 / IEC 60076"
+                      ],
+                      [
+                          "Application",
+                          "Energy-efficient distribution"
+                      ]
+                  ],
+        "featured":  false,
+        "categoryLabelAr":  "محولات مغمورة بالزيت",
+        "nameAr":  "محول توزيع مغمور بالزيت بقلب ملفوف ثلاثي الأبعاد",
+        "shortDescAr":  "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق.",
+        "descriptionAr":  "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق."
+    },
+    {
+        "id":  "aluminum",
+        "name":  "Oil-Immersed Power Transformer (Aluminum)",
+        "image":  "产品图片(1)/油浸式电力变压器（铝）.jpg",
+        "category":  "oil-immersed",
+        "categoryLabel":  "Oil-Immersed",
+        "shortDesc":  "Cost-effective aluminum wound oil-immersed power transformer for distribution applications.",
+        "description":  "Cost-effective aluminum wound oil-immersed power transformer for distribution applications. Provides reliable performance at competitive pricing.",
+        "capacities":  [
+                           "30",
+                           "50",
+                           "80",
+                           "100",
+                           "160",
+                           "200",
+                           "315",
+                           "400",
+                           "500",
+                           "630",
+                           "800",
+                           "1000",
+                           "1250",
+                           "1600",
+                           "2000",
+                           "2500"
+                       ],
+        "voltages":  [
+                         "10/0.4kV",
+                         "35/10kV"
+                     ],
+        "specs":  [
+                      [
+                          "Product Model",
+                          "S11/S13 Series (Aluminum)"
+                      ],
+                      [
+                          "Core Type",
+                          "Silicon Steel"
+                      ],
+                      [
+                          "Winding Material",
+                          "Aluminum"
+                      ],
+                      [
+                          "Phase",
+                          "Three Phase"
+                      ],
+                      [
+                          "Frequency",
+                          "50 Hz"
+                      ],
+                      [
+                          "Cooling Method",
+                          "ONAN"
+                      ],
+                      [
+                          "Insulation Level",
+                          "AC 35kV / LI 75kV"
+                      ],
+                      [
+                          "Standard",
+                          "GB/T 6451 / IEC 60076"
+                      ],
+                      [
+                          "Application",
+                          "Cost-effective distribution"
+                      ]
+                  ],
+        "featured":  false,
+        "categoryLabelAr":  "محولات مغمورة بالزيت",
+        "nameAr":  "محول قدرة مغمور بالزيت من الألومنيوم",
+        "shortDescAr":  "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق.",
+        "descriptionAr":  "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق."
+    },
+    {
+        "id":  "anti-short-3d",
+        "name":  "Anti-Short-Circuit 3D Wound Core Distribution Transformer",
+        "image":  "产品图片(1)/抗短路油浸式立体卷铁芯配电变压器.jpg",
+        "category":  "oil-immersed",
+        "categoryLabel":  "Oil-Immersed",
+        "shortDesc":  "Robust short-circuit resistant design utilizing advanced 3D wound core technology.",
+        "description":  "Robust short-circuit resistant design utilizing advanced 3D wound core technology for maximum reliability in demanding grid conditions.",
+        "capacities":  [
+                           "30",
+                           "50",
+                           "80",
+                           "100",
+                           "160",
+                           "200",
+                           "315",
+                           "400",
+                           "500",
+                           "630",
+                           "800",
+                           "1000"
+                       ],
+        "voltages":  [
+                         "10/0.4kV",
+                         "6/0.4kV"
+                     ],
+        "specs":  [
+                      [
+                          "Product Model",
+                          "S13-M.RL Series (Anti-Short-Circuit)"
+                      ],
+                      [
+                          "Core Type",
+                          "3D Wound Core"
+                      ],
+                      [
+                          "Phase",
+                          "Three Phase"
+                      ],
+                      [
+                          "Frequency",
+                          "50 Hz"
+                      ],
+                      [
+                          "Cooling Method",
+                          "ONAN"
+                      ],
+                      [
+                          "Short-Circuit Withstand",
+                          "Enhanced design"
+                      ],
+                      [
+                          "Core Structure",
+                          "Triangular wound core"
+                      ],
+                      [
+                          "Standard",
+                          "GB 20052 / IEC 60076"
+                      ],
+                      [
+                          "Application",
+                          "High reliability distribution"
+                      ]
+                  ],
+        "featured":  false,
+        "categoryLabelAr":  "محولات مغمورة بالزيت",
+        "nameAr":  "محول توزيع بقلب ملفوف ثلاثي الأبعاد مقاوم للقصر",
+        "shortDescAr":  "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق.",
+        "descriptionAr":  "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق."
+    },
+    {
+        "id":  "scb14",
+        "name":  "SCB14 Dry-Type Cast Resin Transformer",
+        "image":  "成品区/SCB14图片.png",
+        "category":  "dry-type",
+        "categoryLabel":  "Dry-Type",
+        "shortDesc":  "Epoxy resin insulated dry-type transformer with safe, reliable performance and simple maintenance.",
+        "description":  "Epoxy resin insulated dry-type transformer with safe, reliable performance and simple maintenance. Ideal for indoor installations where fire safety is paramount.",
+        "capacities":  [
+                           "30",
+                           "50",
+                           "80",
+                           "100",
+                           "125",
+                           "160",
+                           "200",
+                           "250",
+                           "315",
+                           "400",
+                           "500",
+                           "630",
+                           "800",
+                           "1000",
+                           "1250",
+                           "1600",
+                           "2000",
+                           "2500"
+                       ],
+        "voltages":  [
+                         "10/0.4kV",
+                         "6/0.4kV"
+                     ],
+        "specs":  [
+                      [
+                          "Product Model",
+                          "SCB14 Series"
+                      ],
+                      [
+                          "Core Type",
+                          "Silicon Steel"
+                      ],
+                      [
+                          "Phase",
+                          "Three Phase"
+                      ],
+                      [
+                          "Frequency",
+                          "50 Hz"
+                      ],
+                      [
+                          "Insulation Class",
+                          "F (155°C) / H (180°C)"
+                      ],
+                      [
+                          "Enclosure",
+                          "IP00 / IP20 / IP23 optional"
+                      ],
+                      [
+                          "Cooling Method",
+                          "AN / AF"
+                      ],
+                      [
+                          "Insulation Level",
+                          "AC 35kV / LI 75kV"
+                      ],
+                      [
+                          "Standard",
+                          "GB/T 10228 / IEC 60076-11"
+                      ],
+                      [
+                          "Application",
+                          "Indoor substations, commercial buildings"
+                      ]
+                  ],
+        "featured":  true,
+        "categoryLabelAr":  "محولات جافة",
+        "nameAr":  "محول جاف مصبوب بالراتنج SCB14",
+        "shortDescAr":  "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق.",
+        "descriptionAr":  "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق."
+    },
+    {
+        "id":  "single-phase-dry",
+        "name":  "Single-Phase Dry-Type Amorphous Alloy Transformer",
+        "image":  "成品区/单相干式非晶合金铁心配电变压器.jpg",
+        "category":  "dry-type",
+        "categoryLabel":  "Dry-Type",
+        "shortDesc":  "Compact single-phase dry-type transformer using amorphous alloy core for maximum energy efficiency.",
+        "description":  "Compact single-phase dry-type transformer using amorphous alloy core for maximum energy efficiency in single-phase distribution applications.",
+        "capacities":  [
+                           "5",
+                           "10",
+                           "15",
+                           "25",
+                           "30",
+                           "50",
+                           "63",
+                           "80",
+                           "100",
+                           "125",
+                           "160"
+                       ],
+        "voltages":  [
+                         "10/0.22kV",
+                         "10/0.24kV"
+                     ],
+        "specs":  [
+                      [
+                          "Product Model",
+                          "SCBH15 Series (Single Phase)"
+                      ],
+                      [
+                          "Core Type",
+                          "Amorphous Alloy"
+                      ],
+                      [
+                          "Phase",
+                          "Single Phase"
+                      ],
+                      [
+                          "Frequency",
+                          "50 Hz"
+                      ],
+                      [
+                          "Insulation Class",
+                          "F (155°C)"
+                      ],
+                      [
+                          "Cooling Method",
+                          "AN"
+                      ],
+                      [
+                          "No-load Loss",
+                          "Ultra-low"
+                      ],
+                      [
+                          "Standard",
+                          "GB/T 10228 / IEC 60076-11"
+                      ],
+                      [
+                          "Application",
+                          "Single-phase distribution"
+                      ]
+                  ],
+        "featured":  false,
+        "categoryLabelAr":  "محولات جافة",
+        "nameAr":  "محول جاف أحادي الطور بسبيكة غير متبلورة",
+        "shortDescAr":  "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق.",
+        "descriptionAr":  "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق."
+    },
+    {
+        "id":  "3phase-3limb",
+        "name":  "Three-Phase Three-Limb Amorphous Alloy Dry-Type Transformer",
+        "image":  "成品区/干式非晶三相三柱 .png",
+        "category":  "dry-type",
+        "categoryLabel":  "Dry-Type",
+        "shortDesc":  "Three-limb design dry-type transformer with reduced harmonics and improved efficiency.",
+        "description":  "Three-limb design dry-type transformer with reduced harmonics and improved efficiency using amorphous alloy core technology.",
+        "capacities":  [
+                           "30",
+                           "50",
+                           "80",
+                           "100",
+                           "160",
+                           "200",
+                           "315",
+                           "400",
+                           "500",
+                           "630",
+                           "800",
+                           "1000",
+                           "1250",
+                           "1600",
+                           "2000"
+                       ],
+        "voltages":  [
+                         "10/0.4kV",
+                         "6/0.4kV"
+                     ],
+        "specs":  [
+                      [
+                          "Product Model",
+                          "SCBH15 Series (Three-Limb)"
+                      ],
+                      [
+                          "Core Type",
+                          "Amorphous Alloy"
+                      ],
+                      [
+                          "Core Structure",
+                          "Three-Limb"
+                      ],
+                      [
+                          "Phase",
+                          "Three Phase"
+                      ],
+                      [
+                          "Frequency",
+                          "50 Hz"
+                      ],
+                      [
+                          "Insulation Class",
+                          "F (155°C) / H (180°C)"
+                      ],
+                      [
+                          "Cooling Method",
+                          "AN / AF"
+                      ],
+                      [
+                          "Standard",
+                          "GB/T 10228 / IEC 60076-11"
+                      ],
+                      [
+                          "Application",
+                          "Commercial \u0026 industrial distribution"
+                      ]
+                  ],
+        "featured":  false,
+        "categoryLabelAr":  "محولات جافة",
+        "nameAr":  "محول جاف ثلاثي الطور بثلاثة أعمدة من السبيكة غير المتبلورة",
+        "shortDescAr":  "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق.",
+        "descriptionAr":  "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق."
+    },
+    {
+        "id":  "3phase-5limb",
+        "name":  "Three-Phase Five-Limb Amorphous Alloy Dry-Type Transformer",
+        "image":  "成品区/干式非晶三相五柱.png",
+        "category":  "dry-type",
+        "categoryLabel":  "Dry-Type",
+        "shortDesc":  "Five-limb structure providing superior magnetic flux distribution and lower noise operation.",
+        "description":  "Five-limb structure providing superior magnetic flux distribution and lower noise operation for noise-sensitive environments.",
+        "capacities":  [
+                           "30",
+                           "50",
+                           "80",
+                           "100",
+                           "160",
+                           "200",
+                           "315",
+                           "400",
+                           "500",
+                           "630",
+                           "800",
+                           "1000",
+                           "1250",
+                           "1600",
+                           "2000",
+                           "2500"
+                       ],
+        "voltages":  [
+                         "10/0.4kV",
+                         "35/0.4kV"
+                     ],
+        "specs":  [
+                      [
+                          "Product Model",
+                          "SCBH15 Series (Five-Limb)"
+                      ],
+                      [
+                          "Core Type",
+                          "Amorphous Alloy"
+                      ],
+                      [
+                          "Core Structure",
+                          "Five-Limb"
+                      ],
+                      [
+                          "Phase",
+                          "Three Phase"
+                      ],
+                      [
+                          "Frequency",
+                          "50 Hz"
+                      ],
+                      [
+                          "Insulation Class",
+                          "F (155°C) / H (180°C)"
+                      ],
+                      [
+                          "Cooling Method",
+                          "AN / AF"
+                      ],
+                      [
+                          "Noise Level",
+                          "Low"
+                      ],
+                      [
+                          "Standard",
+                          "GB/T 10228 / IEC 60076-11"
+                      ],
+                      [
+                          "Application",
+                          "Noise-sensitive installations"
+                      ]
+                  ],
+        "featured":  false,
+        "categoryLabelAr":  "محولات جافة",
+        "nameAr":  "محول جاف ثلاثي الطور بخمسة أعمدة من السبيكة غير المتبلورة",
+        "shortDescAr":  "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق.",
+        "descriptionAr":  "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق."
+    },
+    {
+        "id":  "dgh",
+        "name":  "DGH Series Dry-Type Amorphous Alloy Furnace Transformer",
+        "image":  "成品区/电炉变图片.png",
+        "category":  "special",
+        "categoryLabel":  "Special",
+        "shortDesc":  "Purpose-built furnace transformer with higher efficiency, lower noise and better safety features compared to conventional designs.",
+        "description":  "Purpose-built furnace transformer with higher efficiency, lower noise and better safety features compared to conventional designs for industrial furnace applications.",
+        "capacities":  [
+                           "100",
+                           "200",
+                           "315",
+                           "500",
+                           "630",
+                           "800",
+                           "1000",
+                           "1250",
+                           "1600",
+                           "2000",
+                           "2500",
+                           "3150",
+                           "4000",
+                           "5000"
+                       ],
+        "voltages":  [
+                         "10kV",
+                         "35kV",
+                         "6kV"
+                     ],
+        "specs":  [
+                      [
+                          "Product Model",
+                          "DGH Series"
+                      ],
+                      [
+                          "Core Type",
+                          "Amorphous Alloy"
+                      ],
+                      [
+                          "Phase",
+                          "Three Phase"
+                      ],
+                      [
+                          "Frequency",
+                          "50 Hz"
+                      ],
+                      [
+                          "Insulation Class",
+                          "F (155°C) / H (180°C)"
+                      ],
+                      [
+                          "Cooling Method",
+                          "AN / AF"
+                      ],
+                      [
+                          "Application",
+                          "Electric arc furnace, induction furnace"
+                      ],
+                      [
+                          "Standard",
+                          "GB/T 10228 / IEC 60076-11"
+                      ],
+                      [
+                          "Features",
+                          "High efficiency, low noise"
+                      ]
+                  ],
+        "featured":  true,
+        "categoryLabelAr":  "محولات خاصة",
+        "nameAr":  "محول فرن جاف بسبيكة غير متبلورة سلسلة DGH",
+        "shortDescAr":  "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق.",
+        "descriptionAr":  "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق."
+    },
+    {
+        "id":  "traction",
+        "name":  "Traction Mining Explosion-Proof Transformer",
+        "image":  "成品区/牵引矿用防爆.png",
+        "category":  "special",
+        "categoryLabel":  "Special",
+        "shortDesc":  "Explosion-proof dry-type transformer engineered for hazardous mining environments with enhanced safety features.",
+        "description":  "Explosion-proof dry-type transformer engineered for hazardous mining environments with enhanced safety features and rugged construction.",
+        "capacities":  [
+                           "50",
+                           "100",
+                           "160",
+                           "200",
+                           "315",
+                           "400",
+                           "500",
+                           "630",
+                           "800",
+                           "1000"
+                       ],
+        "voltages":  [
+                         "10/0.4kV",
+                         "6/0.4kV",
+                         "10/1.2kV"
+                     ],
+        "specs":  [
+                      [
+                          "Product Model",
+                          "KSG Series"
+                      ],
+                      [
+                          "Core Type",
+                          "Silicon Steel / Amorphous Alloy"
+                      ],
+                      [
+                          "Phase",
+                          "Three Phase"
+                      ],
+                      [
+                          "Frequency",
+                          "50 Hz"
+                      ],
+                      [
+                          "Protection Class",
+                          "IP55 / IP56"
+                      ],
+                      [
+                          "Explosion-Proof",
+                          "Exd I / Exd IIBT4"
+                      ],
+                      [
+                          "Insulation Class",
+                          "F (155°C) / H (180°C)"
+                      ],
+                      [
+                          "Standard",
+                          "GB 3836 / IEC 60079"
+                      ],
+                      [
+                          "Application",
+                          "Mining, hazardous environments"
+                      ]
+                  ],
+        "featured":  true,
+        "categoryLabelAr":  "محولات خاصة",
+        "nameAr":  "محول جر وتعدين مقاوم للانفجار",
+        "shortDescAr":  "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق.",
+        "descriptionAr":  "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق."
+    },
+    {
+        "id":  "wind-power",
+        "name":  "ZGSBH15 Wind Power Combined Transformer (Vegetable Oil)",
+        "image":  "产品图片(1)/风力发电用（植物油）组合式变压器.jpg",
+        "category":  "combined",
+        "categoryLabel":  "Combined",
+        "shortDesc":  "Vegetable oil insulated combined transformer specifically designed for wind power generation applications.",
+        "description":  "Vegetable oil insulated combined transformer specifically designed for wind power generation applications with integrated protection and switching equipment.",
+        "capacities":  [
+                           "500",
+                           "630",
+                           "800",
+                           "1000",
+                           "1250",
+                           "1600",
+                           "2000",
+                           "2500",
+                           "3150",
+                           "4000"
+                       ],
+        "voltages":  [
+                         "35/0.69kV",
+                         "10/0.69kV",
+                         "35/0.4kV"
+                     ],
+        "specs":  [
+                      [
+                          "Product Model",
+                          "ZGSBH15-ZG Series"
+                      ],
+                      [
+                          "Core Type",
+                          "Amorphous Alloy"
+                      ],
+                      [
+                          "Phase",
+                          "Three Phase"
+                      ],
+                      [
+                          "Frequency",
+                          "50 Hz"
+                      ],
+                      [
+                          "Insulating Fluid",
+                          "Natural Ester (Vegetable Oil)"
+                      ],
+                      [
+                          "Fire Point",
+                          "\u003e300°C"
+                      ],
+                      [
+                          "Protection",
+                          "Full-size enclosure"
+                      ],
+                      [
+                          "Standard",
+                          "GB/T 17467 / IEC 62271-202"
+                      ],
+                      [
+                          "Application",
+                          "Wind power generation"
+                      ]
+                  ],
+        "featured":  true,
+        "categoryLabelAr":  "محولات مركبة",
+        "nameAr":  "محول مركب لطاقة الرياح ZGSBH15 بزيت نباتي",
+        "shortDescAr":  "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق.",
+        "descriptionAr":  "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق."
+    },
+    {
+        "id":  "pv-combined",
+        "name":  "ZGS13 Photovoltaic Power Combined Transformer",
+        "image":  "产品图片(1)/光伏发电用（植物油）组合式变压器.jpg",
+        "category":  "combined",
+        "categoryLabel":  "Combined",
+        "shortDesc":  "Combined transformer unit for photovoltaic power generation systems with integrated protection and control.",
+        "description":  "Combined transformer unit for photovoltaic power generation systems with integrated protection and control. Designed for outdoor solar farm installations.",
+        "capacities":  [
+                           "315",
+                           "400",
+                           "500",
+                           "630",
+                           "800",
+                           "1000",
+                           "1250",
+                           "1600",
+                           "2000",
+                           "2500",
+                           "3150"
+                       ],
+        "voltages":  [
+                         "35/0.4kV",
+                         "10/0.4kV",
+                         "35/0.8kV"
+                     ],
+        "specs":  [
+                      [
+                          "Product Model",
+                          "ZGS13-ZG Series"
+                      ],
+                      [
+                          "Core Type",
+                          "Silicon Steel / Amorphous Alloy"
+                      ],
+                      [
+                          "Phase",
+                          "Three Phase"
+                      ],
+                      [
+                          "Frequency",
+                          "50 Hz"
+                      ],
+                      [
+                          "Insulating Fluid",
+                          "Natural Ester (Vegetable Oil)"
+                      ],
+                      [
+                          "Protection",
+                          "Full-size enclosure"
+                      ],
+                      [
+                          "Cooling Method",
+                          "ONAN"
+                      ],
+                      [
+                          "Standard",
+                          "GB/T 17467 / IEC 62271-202"
+                      ],
+                      [
+                          "Application",
+                          "Solar / PV power generation"
+                      ]
+                  ],
+        "featured":  false,
+        "categoryLabelAr":  "محولات مركبة",
+        "nameAr":  "محول مركب للطاقة الكهروضوئية ZGS13",
+        "shortDescAr":  "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق.",
+        "descriptionAr":  "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق."
+    },
+    {
+        "id":  "gcs",
+        "name":  "GCS Low-Voltage Withdrawable Switchgear",
+        "image":  "成品区/非晶立体卷.png",
+        "category":  "switchgear",
+        "categoryLabel":  "Switchgear",
+        "shortDesc":  "Low-voltage withdrawable switchgear suitable for power plants, substations, petrochemical plants, industrial and mining enterprises, and high-rise buildings.",
+        "description":  "Low-voltage withdrawable switchgear suitable for power plants, substations, petrochemical plants, industrial and mining enterprises, and high-rise buildings.",
+        "capacities":  [
+                           "630A",
+                           "1000A",
+                           "1250A",
+                           "1600A",
+                           "2000A",
+                           "2500A",
+                           "3200A",
+                           "4000A"
+                       ],
+        "voltages":  [
+                         "380V",
+                         "660V"
+                     ],
+        "specs":  [
+                      [
+                          "Product Model",
+                          "GCS Series"
+                      ],
+                      [
+                          "Type",
+                          "Low-Voltage Withdrawable Switchgear"
+                      ],
+                      [
+                          "Rated Voltage",
+                          "380V / 660V"
+                      ],
+                      [
+                          "Frequency",
+                          "50 Hz"
+                      ],
+                      [
+                          "Protection Class",
+                          "IP30 / IP40"
+                      ],
+                      [
+                          "Busbar Rating",
+                          "Up to 4000A"
+                      ],
+                      [
+                          "Breaking Capacity",
+                          "Up to 80kA"
+                      ],
+                      [
+                          "Standard",
+                          "GB 7251 / IEC 61439"
+                      ],
+                      [
+                          "Application",
+                          "Power distribution, motor control"
+                      ]
+                  ],
+        "featured":  false,
+        "categoryLabelAr":  "معدات مفاتيح كهربائية",
+        "nameAr":  "لوحة مفاتيح منخفضة الجهد قابلة للسحب GCS",
+        "shortDescAr":  "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق.",
+        "descriptionAr":  "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق."
+    }
+]
