@@ -29,6 +29,7 @@ function normalizeInquiry(body) {
         email: String(body.email || '').trim(),
         company: String(body.company || '').trim(),
         phone: String(body.phone || '').trim(),
+        productContext: String(body.productContext || '').trim(),
         subject: String(body.subject || '').trim(),
         message: String(body.message || '').trim()
     };
@@ -91,7 +92,8 @@ async function sendNotification(inquiry) {
             'Name: ' + inquiry.name,
             'Email: ' + inquiry.email,
             'Company: ' + (inquiry.company || '-'),
-            'Phone: ' + (inquiry.phone || '-'),
+            'WhatsApp / Phone: ' + (inquiry.phone || '-'),
+            'Interested Product: ' + (inquiry.productContext || '-'),
             'Subject: ' + inquiry.subject,
             'Message:',
             inquiry.message,

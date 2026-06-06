@@ -582,6 +582,9 @@
                     '<div class="detail-item detail-full"><strong>消息内容</strong><p>' + escapeHtml(item.message || '') + '</p></div>';
                 document.getElementById('inquiry-status').value = item.status || 'new';
                 document.getElementById('inquiry-notes').value = item.notes || '';
+                if (item.productContext) {
+                    document.getElementById('inquiry-detail').insertAdjacentHTML('beforeend', detailItem('Product', item.productContext));
+                }
                 document.getElementById('inquiry-modal').classList.add('show');
 
                 if (item.status === 'new') {

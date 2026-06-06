@@ -653,8 +653,9 @@
                 '</div>' +
                 '<form class="inquiry-form" data-inquiry-form>' +
                     '<input type="hidden" name="productContext" value="">' +
+                    '<div class="form-group"><label for="modal-product-context">Interested Product</label><input id="modal-product-context" name="productContextDisplay" readonly></div>' +
                     '<div class="form-row"><div class="form-group"><label for="modal-name">Full Name *</label><input id="modal-name" name="name" required></div><div class="form-group"><label for="modal-email">Email Address *</label><input id="modal-email" type="email" name="email" required></div></div>' +
-                    '<div class="form-row"><div class="form-group"><label for="modal-company">Company Name</label><input id="modal-company" name="company"></div><div class="form-group"><label for="modal-phone">Phone Number</label><input id="modal-phone" name="phone"></div></div>' +
+                    '<div class="form-row"><div class="form-group"><label for="modal-company">Company Name</label><input id="modal-company" name="company"></div><div class="form-group"><label for="modal-phone">WhatsApp / Phone</label><input id="modal-phone" name="phone"></div></div>' +
                     '<div class="form-group"><label for="modal-subject">Subject *</label><select id="modal-subject" name="subject" required><option value="quote">Request a Quote</option><option value="technical">Technical Consultation</option><option value="partnership">Business Partnership</option><option value="support">After-Sales Support</option><option value="other">Other Inquiry</option></select></div>' +
                     '<div class="form-group"><label for="modal-message">Message *</label><textarea id="modal-message" name="message" rows="5" required></textarea></div>' +
                     '<button type="submit" class="btn btn-primary">Submit Message</button>' +
@@ -688,14 +689,16 @@
         var form = modal.querySelector('form');
         var productName = context && (context.productName || context.name);
         var productId = context && context.productId;
+        var productContext = productName ? productName + (productId ? ' (' + productId + ')' : '') : '';
         if (form) {
-            if (form.elements.productContext) form.elements.productContext.value = productId || productName || '';
+            if (form.elements.productContext) form.elements.productContext.value = productContext;
+            if (form.elements.productContextDisplay) form.elements.productContextDisplay.value = productContext || (isArabic ? 'General inquiry' : 'General inquiry');
             if (form.elements.subject) form.elements.subject.value = 'quote';
             if (form.elements.message && productName) {
                 form.elements.message.value = isArabic
                     ? 'أرغب في طلب السعر والتفاصيل الفنية لهذا المنتج: ' + productName + (productId ? ' (' + productId + ')' : '') + '.'
-                    : 'I would like to request pricing and technical details for: ' + productName + (productId ? ' (' + productId + ')' : '') + '.';
-            } else if (form.elements.message && !form.elements.message.value) {
+                    : 'I am interested in ' + productContext + '. Please send pricing and technical details.';
+            } else if (form.elements.message) {
                 form.elements.message.value = '';
             }
         }
@@ -735,7 +738,8 @@
                 company: (form.elements.company && form.elements.company.value || '').trim(),
                 phone: (form.elements.phone && form.elements.phone.value || '').trim(),
                 subject: (form.elements.subject && form.elements.subject.value || '').trim(),
-                message: (form.elements.message && form.elements.message.value || '').trim()
+                message: (form.elements.message && form.elements.message.value || '').trim(),
+                productContext: (form.elements.productContext && form.elements.productContext.value || '').trim()
             };
 
             var errors = [];

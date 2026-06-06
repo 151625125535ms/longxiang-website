@@ -3275,6 +3275,12 @@ p:last-child {
     background: var(--color-white-pure);
 }
 
+.inquiry-form input[readonly] {
+    background: #F5F7FA;
+    color: var(--color-gray-700);
+    cursor: default;
+}
+
 .floating-inquiry {
     position: fixed;
     right: 24px;
