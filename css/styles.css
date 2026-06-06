@@ -1241,7 +1241,7 @@ p:last-child {
 }
 
 .footer {
-    background: #1B306A;
+    background: var(--color-navy);
     color: rgba(255, 255, 255, 0.7);
     padding-top: 4.5rem;
 }
