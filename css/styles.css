@@ -1775,12 +1775,14 @@ p:last-child {
         width: 80%;
         max-width: 350px;
         height: 100vh;
+        overflow-y: auto;
+        overflow-x: hidden;
         background: var(--color-navy);
         flex-direction: column;
         align-items: flex-start;
-        justify-content: center;
-        padding: var(--spacing-3xl);
-        gap: var(--spacing-xl);
+        justify-content: flex-start;
+        padding: calc(var(--navbar-height) + 28px) var(--spacing-2xl) var(--spacing-3xl);
+        gap: var(--spacing-lg);
         transform: translateX(100%);
         transition: transform var(--transition-base);
         z-index: 1000;
@@ -3476,6 +3478,12 @@ p:last-child {
     transform: translateY(-2px);
 }
 
+.mobile-menu-open .floating-inquiry {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
 .contact-info-card {
     border: 1px solid var(--color-gray-200);
     border-radius: 6px;
@@ -3795,6 +3803,9 @@ p:last-child {
         padding: 9px 12px;
         text-align: center;
         color: var(--color-gray-600);
+        white-space: normal;
+        overflow-wrap: anywhere;
+        line-height: 1.45;
     }
 
     .hero-hex {
@@ -3867,6 +3878,45 @@ p:last-child {
 }
 
 @media (max-width: 560px) {
+    .navbar .container {
+        display: grid;
+        grid-template-columns: max-content minmax(0, 1fr) 28px;
+        gap: 10px;
+        padding-right: 16px;
+        padding-left: 16px;
+    }
+
+    .nav-logo {
+        flex: 0 1 auto;
+        min-width: 0;
+    }
+
+    .nav-logo-text {
+        font-size: 1.12rem;
+        white-space: nowrap;
+    }
+
+    .language-switcher {
+        justify-self: end;
+        min-width: 0;
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    .language-switcher select {
+        width: 86px;
+        max-width: 86px;
+        padding-right: 22px;
+        padding-left: 8px;
+        font-size: 0.78rem;
+    }
+
+    .hamburger {
+        display: flex;
+        flex: 0 0 28px;
+        width: 28px;
+    }
+
     .footer .container {
         width: 92%;
     }
@@ -3924,6 +3974,7 @@ p:last-child {
 
 .education-page-hero h1 {
     max-width: 760px;
+    overflow-wrap: normal;
 }
 
 .education-page-hero p {
@@ -4181,6 +4232,26 @@ p:last-child {
         padding-top: 150px;
     }
 
+    .education-page-hero h1 {
+        max-width: 100%;
+        font-size: clamp(2.1rem, 9vw, 2.7rem);
+        line-height: 1.14;
+    }
+
+    .education-page-hero p {
+        max-width: 100%;
+        font-size: 1rem;
+        line-height: 1.7;
+    }
+
+    .education-intro .about-intro-image {
+        order: 0;
+    }
+
+    .education-intro .about-intro-image img {
+        height: 260px;
+    }
+
     .education-pillar-grid {
         grid-template-columns: 1fr;
     }
@@ -4198,7 +4269,15 @@ p:last-child {
 
 @media (max-width: 560px) {
     .education-page-hero h1 {
-        font-size: clamp(2rem, 12vw, 2.6rem);
+        font-size: clamp(1.9rem, 8.5vw, 2.25rem);
+        max-width: min(100%, 340px);
+        word-break: normal;
+    }
+
+    .education-page-hero p,
+    .education-intro .about-intro-text,
+    .education-scene-content {
+        max-width: min(100%, 340px);
     }
 
     .education-card-image img,

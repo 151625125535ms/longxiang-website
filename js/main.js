@@ -213,7 +213,9 @@
             hamburger.classList.toggle('active');
             navLinks.classList.toggle('active');
             if (mobileOverlay) mobileOverlay.classList.toggle('active');
-            document.body.style.overflow = navLinks.classList.contains('active') ? 'hidden' : '';
+            var isOpen = navLinks.classList.contains('active');
+            document.body.classList.toggle('mobile-menu-open', isOpen);
+            document.body.style.overflow = isOpen ? 'hidden' : '';
         });
 
         navLinks.querySelectorAll('a').forEach(function (link) {
@@ -221,6 +223,7 @@
                 hamburger.classList.remove('active');
                 navLinks.classList.remove('active');
                 if (mobileOverlay) mobileOverlay.classList.remove('active');
+                document.body.classList.remove('mobile-menu-open');
                 document.body.style.overflow = '';
             });
         });
@@ -230,6 +233,7 @@
                 hamburger.classList.remove('active');
                 navLinks.classList.remove('active');
                 mobileOverlay.classList.remove('active');
+                document.body.classList.remove('mobile-menu-open');
                 document.body.style.overflow = '';
             });
         }
@@ -239,6 +243,7 @@
                 hamburger.classList.remove('active');
                 navLinks.classList.remove('active');
                 if (mobileOverlay) mobileOverlay.classList.remove('active');
+                document.body.classList.remove('mobile-menu-open');
                 document.body.style.overflow = '';
             }
         });

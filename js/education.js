@@ -77,7 +77,7 @@
 
         var title = heroEl.querySelector('h1');
         var subtitle = heroEl.querySelector('p');
-        if (title) title.textContent = localized(hero, 'title') || 'Education';
+        if (title) title.textContent = (localized(hero, 'title') || 'Education').replace(/School-Enterprise/g, 'School\u2011Enterprise');
         if (subtitle) subtitle.textContent = localized(hero, 'subtitle');
     }
 
