@@ -168,11 +168,17 @@
         });
     }
 
-    function renderEmpty(group, sub) {
+    function renderEmpty(group, sub, search) {
         var label = taxonomyLabel(group, sub);
-        container.innerHTML = '<div class="empty-state">' +
-            escapeHtml(label) + (isArabic ? ' سيتم تحديث المنتجات قريباً.' : ' products will be updated soon.') +
-            '</div>';
+        var msg;
+        if (search) {
+            msg = isArabic
+                ? 'لا توجد نتائج لـ "' + escapeHtml(search) + '" في ' + escapeHtml(label) + '.'
+                : 'No results for "' + escapeHtml(search) + '" in ' + escapeHtml(label) + '.';
+        } else {
+            msg = escapeHtml(label) + (isArabic ? ' سيتم تحديث المنتجات قريباً.' : ' products will be updated soon.');
+        }
+        container.innerHTML = '<div class="empty-state">' + msg + '</div>';
     }
 
     function renderFilterStatus(filter, total) {
