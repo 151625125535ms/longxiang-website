@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -105,7 +105,17 @@
                 <div class="footer-conversion footer-column">
                     <h4>طلب عرض سعر</h4>
                     <p class="footer-conversion-text">أرسل متطلبات مشروعك وسيتواصل فريقنا معك بسرعة.</p>
-                    <a href="contact.html" class="footer-conversion-link">اتصل بنا</a>
+                    <form class="footer-quote-form" data-inquiry-form>
+                        <input type="hidden" name="name" value="زائر طلب عرض سعر من التذييل">
+                        <input type="hidden" name="subject" value="quote">
+                        <input type="hidden" name="productContext" value="طلب عرض سعر من التذييل">
+                        <textarea name="message" rows="4" placeholder="* الرسالة" required></textarea>
+                        <div class="footer-quote-row">
+                            <input type="email" name="email" placeholder="* البريد الإلكتروني" required>
+                            <input type="text" name="phone" placeholder="واتساب / الهاتف">
+                        </div>
+                        <button type="submit">إرسال</button>
+                    </form>
                 </div>
             </div>
             <div class="footer-bottom"><p>&copy; 2024 Henan Longxiang Electrical Co., Ltd. All Rights Reserved.</p></div>

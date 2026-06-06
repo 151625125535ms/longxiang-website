@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -105,7 +105,17 @@
                 <div class="footer-conversion footer-column">
                     <h4>Request Quote</h4>
                     <p class="footer-conversion-text">Share your project requirements and our team will respond quickly.</p>
-                    <a href="contact.html" class="footer-conversion-link">Contact Us</a>
+                    <form class="footer-quote-form" data-inquiry-form>
+                        <input type="hidden" name="name" value="Footer Quote Visitor">
+                        <input type="hidden" name="subject" value="quote">
+                        <input type="hidden" name="productContext" value="Footer request quote">
+                        <textarea name="message" rows="4" placeholder="* Message" required></textarea>
+                        <div class="footer-quote-row">
+                            <input type="email" name="email" placeholder="* E-mail" required>
+                            <input type="text" name="phone" placeholder="WhatsApp / Phone">
+                        </div>
+                        <button type="submit">SUBMIT</button>
+                    </form>
                 </div>
             </div>
             <div class="footer-bottom"><p>&copy; 2024 Henan Longxiang Electrical Co., Ltd. All Rights Reserved.</p></div>

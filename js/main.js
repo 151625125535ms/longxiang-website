@@ -559,7 +559,17 @@
                 '<div class="footer-conversion footer-column">' +
                     '<h4>' + (isArabic ? 'طلب عرض سعر' : 'Request Quote') + '</h4>' +
                     '<p class="footer-conversion-text">' + (isArabic ? 'أرسل متطلبات مشروعك وسيتواصل فريقنا معك بسرعة.' : 'Share your project requirements and our team will respond quickly.') + '</p>' +
-                    '<a href="' + pageHref('contact.html') + '" class="footer-conversion-link">' + (isArabic ? 'اتصل بنا' : 'Contact Us') + '</a>' +
+                    '<form class="footer-quote-form" data-inquiry-form>' +
+                        '<input type="hidden" name="name" value="' + (isArabic ? 'زائر طلب عرض سعر من التذييل' : 'Footer Quote Visitor') + '">' +
+                        '<input type="hidden" name="subject" value="quote">' +
+                        '<input type="hidden" name="productContext" value="' + (isArabic ? 'طلب عرض سعر من التذييل' : 'Footer request quote') + '">' +
+                        '<textarea name="message" rows="4" placeholder="' + (isArabic ? '* الرسالة' : '* Message') + '" required></textarea>' +
+                        '<div class="footer-quote-row">' +
+                            '<input type="email" name="email" placeholder="' + (isArabic ? '* البريد الإلكتروني' : '* E-mail') + '" required>' +
+                            '<input type="text" name="phone" placeholder="' + (isArabic ? 'واتساب / الهاتف' : 'WhatsApp / Phone') + '">' +
+                        '</div>' +
+                        '<button type="submit">' + (isArabic ? 'إرسال' : 'SUBMIT') + '</button>' +
+                    '</form>' +
                 '</div>';
         });
     }
