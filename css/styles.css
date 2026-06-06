@@ -2622,6 +2622,12 @@ p:last-child {
     background: #F4F5F9;
 }
 
+.products-showcase-redesign .container {
+    max-width: none;
+    padding-right: 0;
+    padding-left: 0;
+}
+
 .products-showcase-redesign .section-header {
     margin-bottom: 34px;
 }
