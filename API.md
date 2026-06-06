@@ -319,6 +319,191 @@
 
 ---
 
+## 教育与校企合作 `/api/education`
+
+> 需求来源：Codex 需要制作可后台管理的 `education.html`。后端实现前，前端可以用 `data/education.json` 作为 fallback；后端实现后以前端公开页读取 `GET /api/education` 为准。
+
+### Education 内容对象 schema
+
+```json
+{
+  "updatedAt": "2026-06-06T00:00:00.000Z",
+  "hero": {
+    "eyebrow": "Industry-Education Integration",
+    "title": "Education & School-Enterprise Cooperation",
+    "titleAr": "التعليم والتعاون بين المدرسة والمؤسسة",
+    "subtitle": "Longxiang integrates industry resources, engineering practice, and research collaboration to cultivate high-quality electrical and new energy talent.",
+    "subtitleAr": "...",
+    "backgroundImage": "assets/education/images/campus-hero.jpg"
+  },
+  "stats": [
+    {
+      "id": "experience",
+      "value": "20+",
+      "label": "Years of Industry Experience",
+      "labelAr": "..."
+    },
+    {
+      "id": "founded",
+      "value": "2016",
+      "label": "Joint College Founded",
+      "labelAr": "..."
+    }
+  ],
+  "sections": [
+    {
+      "id": "industry-college",
+      "layout": "image-right",
+      "title": "Co-built Industrial College",
+      "titleAr": "...",
+      "summary": "In 2016, Longxiang and Henan Mechanical and Electrical Vocational College co-built Longxiang Electrical Engineering College.",
+      "summaryAr": "...",
+      "body": [
+        "Four core majors: power system automation, electrical automation, power supply technology, distributed generation and smart microgrid.",
+        "Project-based teaching connects classrooms with industrial parks and real engineering scenarios."
+      ],
+      "bodyAr": [],
+      "image": "assets/education/images/college-plaque.jpg",
+      "images": [
+        "assets/education/images/college-campus.jpg",
+        "assets/education/images/group-photo.jpg"
+      ],
+      "cards": []
+    },
+    {
+      "id": "talent-training",
+      "layout": "cards",
+      "title": "Collaborative Talent Training",
+      "titleAr": "...",
+      "summary": "Full-cycle talent development covering training, internship, employment, and professional improvement.",
+      "summaryAr": "...",
+      "body": [],
+      "bodyAr": [],
+      "image": "",
+      "images": [],
+      "cards": [
+        {
+          "id": "internship",
+          "title": "Internship & Practical Training",
+          "titleAr": "...",
+          "text": "Line-field teaching, alternating study and training, on-post internship, and dual-mentor quality assurance.",
+          "textAr": "...",
+          "image": "assets/education/images/training-classroom.jpg"
+        }
+      ]
+    }
+  ],
+  "cta": {
+    "title": "Build Your Training Program with Longxiang",
+    "titleAr": "...",
+    "text": "Contact our education cooperation team for curriculum, training equipment, and joint talent development.",
+    "textAr": "...",
+    "buttonText": "Contact Education Team",
+    "buttonTextAr": "...",
+    "href": "contact.html"
+  }
+}
+```
+
+**字段说明**
+
+| 字段 | 类型 | 必填 | 说明 |
+|---|---|---|---|
+| `updatedAt` | string | | ISO 8601 更新时间 |
+| `hero` | object | ✅ | Education 页面首屏内容 |
+| `hero.eyebrow` | string | | 首屏小标题 |
+| `hero.title / hero.titleAr` | string | ✅ / | 英文与阿语标题 |
+| `hero.subtitle / hero.subtitleAr` | string | ✅ / | 英文与阿语副标题 |
+| `hero.backgroundImage` | string | | 首屏背景图路径 |
+| `stats` | array | | 数据概览，建议 4 项，最多 8 项 |
+| `stats[].id` | string | ✅ | 稳定 ID，例如 `experience` |
+| `stats[].value` | string | ✅ | 展示数值，例如 `20+` |
+| `stats[].label / labelAr` | string | ✅ / | 展示标签 |
+| `sections` | array | ✅ | 页面内容模块，按数组顺序展示 |
+| `sections[].id` | string | ✅ | 稳定 ID，例如 `industry-college` |
+| `sections[].layout` | string | ✅ | `image-right` / `image-left` / `cards` / `gallery` / `text` |
+| `sections[].title / titleAr` | string | ✅ / | 模块标题 |
+| `sections[].summary / summaryAr` | string | | 模块摘要 |
+| `sections[].body / bodyAr` | string[] | | 段落或要点列表 |
+| `sections[].image` | string | | 主图 |
+| `sections[].images` | string[] | | 图集 |
+| `sections[].cards` | array | | 卡片型模块内容 |
+| `sections[].cards[].id` | string | ✅ | 卡片稳定 ID |
+| `sections[].cards[].title / titleAr` | string | ✅ / | 卡片标题 |
+| `sections[].cards[].text / textAr` | string | | 卡片说明 |
+| `sections[].cards[].image` | string | | 卡片图片 |
+| `cta` | object | | 页面底部行动区 |
+| `cta.href` | string | | CTA 链接，默认 `contact.html` |
+
+**建议初始模块 ID**
+
+| id | 内容来源 |
+|---|---|
+| `industry-college` | 共建产业学院 |
+| `talent-training` | 人才协同培育 |
+| `training-equipment` | 教学装备研发 |
+| `research-global` | 产学研与国际化 |
+| `cooperation-philosophy` | 合作理念 |
+
+---
+
+### GET `/api/education`
+获取 Education 页面内容。**无需认证**，前端公开页面调用。
+
+**成功响应** `200` — Education 内容对象（结构见上方 schema）。
+
+**失败响应** `500`
+```json
+{ "error": "Failed to read education content." }
+```
+
+---
+
+### PUT `/api/education` 🔒
+更新 Education 页面内容。**需要认证**。请求体为完整 Education 内容对象（全量替换）。
+
+> ⚠️ 当前建议使用全量替换，提交时需携带所有字段，否则缺失字段会被清空。后续如需局部更新，需要先修改本接口契约。
+
+**请求体**
+```json
+{
+  "hero": { "title": "Education & School-Enterprise Cooperation", "subtitle": "...", "backgroundImage": "assets/education/images/campus-hero.jpg" },
+  "stats": [],
+  "sections": [],
+  "cta": { "title": "Build Your Training Program with Longxiang", "href": "contact.html" }
+}
+```
+
+**成功响应** `200`
+```json
+{
+  "message": "Education content updated.",
+  "education": { "updatedAt": "2026-06-06T00:00:00.000Z", "hero": {}, "stats": [], "sections": [], "cta": {} }
+}
+```
+
+**失败响应** `400`
+```json
+{ "error": "hero.title is required. sections must be an array." }
+```
+
+---
+
+### POST `/api/education/upload` 🔒
+上传 Education 页面图片。**需要认证**。请求格式 `multipart/form-data`，字段名 `image`。
+
+**限制**：仅 jpeg / jpg / png / webp，最大 10MB。
+
+**成功响应** `200`
+```json
+{
+  "path": "uploads/education/education-xxx.jpg",
+  "filename": "education-xxx.jpg"
+}
+```
+
+---
+
 ## 错误响应格式
 
 所有错误统一格式：
@@ -340,4 +525,5 @@
 
 | 日期 | 操作方 | 变更内容 |
 |---|---|---|
+| 2026-06-06 | Codex | 新增 Education 后台管理接口需求与内容 schema |
 | 2026-06-06 | Claude | 初始版本，整理现有所有接口 |
