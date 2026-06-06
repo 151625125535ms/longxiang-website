@@ -1286,6 +1286,26 @@ h1, h2, h3, h4, h5, h6 {
     }
 }
 
+/* Loading skeletons */
+@keyframes shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.skeleton {
+    display: block;
+    height: 13px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #f0f2f5 25%, #e4e7eb 50%, #f0f2f5 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s ease-in-out infinite;
+}
+
+.skeleton-row td {
+    padding: 16px;
+    vertical-align: middle;
+}
+
 /* Product search toolbar */
 .table-toolbar {
     display: flex;

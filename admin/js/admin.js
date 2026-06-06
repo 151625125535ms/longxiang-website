@@ -281,6 +281,7 @@
         }
 
         function loadDashboard() {
+            ['stat-total', 'stat-featured', 'stat-categories', 'stat-inquiries', 'stat-new-inquiries'].forEach(function (id) { setText(id, '—'); });
             Promise.all([
                 apiRequest('/products'),
                 apiRequest('/inquiries?pageSize=200')
@@ -317,7 +318,21 @@
             if (el) el.textContent = value;
         }
 
+        function skeletonRows(cols, count) {
+            var widths = ['70%', '50%', '45%', '60%', '35%', '55%'];
+            var cells = '';
+            for (var i = 0; i < cols; i++) {
+                cells += '<td><div class="skeleton" style="width:' + widths[i % widths.length] + '"></div></td>';
+            }
+            var result = '';
+            for (var j = 0; j < count; j++) {
+                result += '<tr class="skeleton-row">' + cells + '</tr>';
+            }
+            return result;
+        }
+
         function loadProducts() {
+            document.getElementById('products-tbody').innerHTML = skeletonRows(5, 5);
             apiRequest('/products').then(function (data) {
                 products = data;
                 renderProductsTable();
@@ -544,6 +559,7 @@
         }
 
         function loadInquiries() {
+            document.getElementById('inquiries-tbody').innerHTML = skeletonRows(6, 5);
             var status = document.getElementById('inquiry-status-filter').value;
             var url = '/inquiries?pageSize=200' + (status ? '&status=' + encodeURIComponent(status) : '');
             apiRequest(url).then(function (data) {
@@ -694,6 +710,7 @@
         }
 
         function loadCertifications() {
+            document.getElementById('certifications-tbody').innerHTML = skeletonRows(5, 4);
             apiRequest('/certifications').then(function (data) {
                 certifications = data;
                 renderCertificationsTable();
