@@ -2695,7 +2695,8 @@ p:last-child {
 .products-catalog-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 0;
+    column-gap: 0;
+    row-gap: 20px;
     width: 94%;
     max-width: 1620px;
     margin-right: auto;
@@ -2706,7 +2707,7 @@ p:last-child {
     display: flex;
     flex-direction: column;
     min-height: 100%;
-    margin: 0 10px 20px;
+    margin: 0 10px;
     padding: 20px;
     border: 0;
     border-radius: 5px;
