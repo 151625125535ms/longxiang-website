@@ -563,7 +563,7 @@
         function bindInquiryEvents() {
             var filter = document.getElementById('inquiry-status-filter');
             if (filter) filter.addEventListener('change', loadInquiries);
-            bindModalClose('inquiry-modal', ['inquiry-modal-close', 'inquiry-cancel']);
+            bindDrawerClose('inquiry-drawer-overlay', ['inquiry-drawer-close', 'inquiry-cancel']);
             var save = document.getElementById('inquiry-save');
             if (save) save.addEventListener('click', saveInquiryStatus);
         }
@@ -585,7 +585,7 @@
                 if (item.productContext) {
                     document.getElementById('inquiry-detail').insertAdjacentHTML('beforeend', detailItem('Product', item.productContext));
                 }
-                document.getElementById('inquiry-modal').classList.add('show');
+                document.getElementById('inquiry-drawer-overlay').classList.add('show');
 
                 if (item.status === 'new') {
                     apiRequest('/inquiries/' + encodeURIComponent(id), { method: 'PUT', body: { status: 'read', notes: item.notes || '' } })
@@ -612,7 +612,7 @@
                 }
             }).then(function () {
                 showToast('询盘状态已保存');
-                closeModal('inquiry-modal');
+                closeDrawer('inquiry-drawer-overlay');
                 loadInquiries();
             }).catch(function (err) { showToast('保存失败：' + err.message, 'error'); });
         }
@@ -757,8 +757,26 @@
             var modal = document.getElementById(modalId);
             if (modal) modal.classList.remove('show');
             if (modalId === 'product-modal') editingProductId = null;
-            if (modalId === 'inquiry-modal') editingInquiryId = null;
             if (modalId === 'certification-modal') editingCertificationId = null;
+        }
+
+        function closeDrawer(overlayId) {
+            var overlay = document.getElementById(overlayId);
+            if (overlay) overlay.classList.remove('show');
+            if (overlayId === 'inquiry-drawer-overlay') editingInquiryId = null;
+        }
+
+        function bindDrawerClose(overlayId, buttonIds) {
+            buttonIds.forEach(function (id) {
+                var btn = document.getElementById(id);
+                if (btn) btn.addEventListener('click', function () { closeDrawer(overlayId); });
+            });
+            var overlay = document.getElementById(overlayId);
+            if (overlay) {
+                overlay.addEventListener('click', function (e) {
+                    if (e.target === overlay) closeDrawer(overlayId);
+                });
+            }
         }
 
         function formatDate(value) {

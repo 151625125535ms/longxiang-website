@@ -62,11 +62,11 @@
                 <section class="view-section active" id="view-dashboard">
                     <div class="section-header-bar"><h2>数据概览</h2></div>
                     <div class="dashboard-grid">
-                        <div class="stat-card"><div class="stat-card-icon blue">□</div><div class="stat-card-value" id="stat-total">0</div><div class="stat-card-label">产品总数</div></div>
-                        <div class="stat-card"><div class="stat-card-icon gold">☆</div><div class="stat-card-value" id="stat-featured">0</div><div class="stat-card-label">首页推荐产品</div></div>
-                        <div class="stat-card"><div class="stat-card-icon green">◇</div><div class="stat-card-value" id="stat-categories">0</div><div class="stat-card-label">产品分类</div></div>
-                        <div class="stat-card"><div class="stat-card-icon navy">✉</div><div class="stat-card-value" id="stat-inquiries">0</div><div class="stat-card-label">询盘总数</div></div>
-                        <div class="stat-card"><div class="stat-card-icon gold">!</div><div class="stat-card-value" id="stat-new-inquiries">0</div><div class="stat-card-label">新询盘</div></div>
+                        <div class="stat-card"><div class="stat-card-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div><div class="stat-card-value" id="stat-total">0</div><div class="stat-card-label">产品总数</div></div>
+                        <div class="stat-card"><div class="stat-card-icon gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div><div class="stat-card-value" id="stat-featured">0</div><div class="stat-card-label">首页推荐产品</div></div>
+                        <div class="stat-card"><div class="stat-card-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div><div class="stat-card-value" id="stat-categories">0</div><div class="stat-card-label">产品分类</div></div>
+                        <div class="stat-card"><div class="stat-card-icon navy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><div class="stat-card-value" id="stat-inquiries">0</div><div class="stat-card-label">询盘总数</div></div>
+                        <div class="stat-card"><div class="stat-card-icon gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div><div class="stat-card-value" id="stat-new-inquiries">0</div><div class="stat-card-label">新询盘</div></div>
                     </div>
                     <div class="section-header-bar"><h2>产品分类统计</h2></div>
                     <div class="category-stats-grid" id="category-stats"></div>
@@ -220,25 +220,31 @@
             </div>
         </div>
 
-        <div class="modal-overlay" id="inquiry-modal">
-            <div class="modal">
-                <div class="modal-header"><h3>询盘详情</h3><button class="modal-close" id="inquiry-modal-close">×</button></div>
-                <div class="modal-body">
+        <div class="drawer-overlay" id="inquiry-drawer-overlay">
+            <div class="drawer" id="inquiry-drawer">
+                <div class="drawer-header">
+                    <h3>询盘详情</h3>
+                    <button class="drawer-close" id="inquiry-drawer-close">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                </div>
+                <div class="drawer-body">
                     <div class="detail-grid" id="inquiry-detail"></div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>处理状态</label>
-                            <select id="inquiry-status">
-                                <option value="new">新询盘</option>
-                                <option value="read">已读</option>
-                                <option value="replied">已回复</option>
-                                <option value="closed">已关闭</option>
-                            </select>
-                        </div>
+                    <div class="form-group" style="margin-top:16px;">
+                        <label>处理状态</label>
+                        <select id="inquiry-status">
+                            <option value="new">新询盘</option>
+                            <option value="read">已读</option>
+                            <option value="replied">已回复</option>
+                            <option value="closed">已关闭</option>
+                        </select>
                     </div>
                     <div class="form-group"><label>管理员备注</label><textarea id="inquiry-notes" rows="4"></textarea></div>
                 </div>
-                <div class="modal-footer"><button class="btn btn-secondary" id="inquiry-cancel">关闭</button><button class="btn btn-primary" id="inquiry-save">保存状态</button></div>
+                <div class="drawer-footer">
+                    <button class="btn btn-secondary" id="inquiry-cancel">关闭</button>
+                    <button class="btn btn-primary" id="inquiry-save">保存状态</button>
+                </div>
             </div>
         </div>
 
