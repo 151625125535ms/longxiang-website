@@ -3161,6 +3161,38 @@ p:last-child {
     text-align: center;
 }
 
+.catalog-page-button,
+.catalog-page-ellipsis {
+    display: inline-flex;
+    min-width: 38px;
+    height: 38px;
+    align-items: center;
+    justify-content: center;
+    margin: 0 4px;
+    border: 1px solid var(--color-gray-200);
+    border-radius: 4px;
+    background: var(--color-white-pure);
+    color: var(--color-gray-700);
+    font-weight: 700;
+}
+
+.catalog-page-button:hover,
+.catalog-page-button.active {
+    border-color: var(--color-tech-blue);
+    background: var(--color-tech-blue);
+    color: var(--color-white-pure);
+}
+
+.catalog-page-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+}
+
+.catalog-page-ellipsis {
+    border-color: transparent;
+    background: transparent;
+}
+
 .inquiry-modal {
     position: fixed;
     inset: 0;

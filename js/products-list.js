@@ -8,6 +8,7 @@
     var assetPrefix = isArabic ? '../' : '';
     var selectedCompare = [];
     var productsCache = [];
+    var pageSize = 9;
 
     var taxonomy = [
         {
@@ -54,6 +55,16 @@
         return new URLSearchParams(window.location.search).get(name);
     }
 
+    function setQueryParams(params) {
+        var url = new URL(window.location.href);
+        Object.keys(params).forEach(function (key) {
+            var value = params[key];
+            if (value === '' || value == null || value === false) url.searchParams.delete(key);
+            else url.searchParams.set(key, value);
+        });
+        window.history.replaceState(null, '', url.toString());
+    }
+
     function localize(product, field) {
         if (isArabic) {
             var arabicField = field + 'Ar';
@@ -75,6 +86,27 @@
 
     function detailHref(product) {
         return 'product-detail.html?id=' + encodeURIComponent(product.id);
+    }
+
+    function productSearchText(product) {
+        var parts = [
+            product.id,
+            product.name,
+            product.shortDesc,
+            product.description,
+            product.categoryLabel,
+            product.group,
+            product.subCategory
+        ];
+        if (Array.isArray(product.capacities)) parts = parts.concat(product.capacities);
+        if (Array.isArray(product.voltages)) parts = parts.concat(product.voltages);
+        if (Array.isArray(product.specs)) {
+            product.specs.forEach(function (row) {
+                if (Array.isArray(row)) parts = parts.concat(row);
+                else parts.push(row);
+            });
+        }
+        return parts.join(' ').toLowerCase();
     }
 
     function createProductCard(product) {
@@ -102,7 +134,7 @@
                 '<button type="button" class="product-card-action inquiry" data-inquiry-product data-product-id="' + escapeHtml(product.id) + '" data-product-name="' + escapeHtml(name) + '">' + (isArabic ? 'استعلام السعر' : 'Price Inquiry') + '</button>' +
             '</div>' +
             '<label class="product-compare-control">' +
-                '<input type="checkbox" data-compare-product="' + escapeHtml(product.id) + '">' +
+                '<input type="checkbox" data-compare-product="' + escapeHtml(product.id) + '"' + (selectedCompare.indexOf(product.id) !== -1 ? ' checked' : '') + '>' +
                 '<span>' + (isArabic ? 'إضافة للمقارنة' : 'Compare') + '</span>' +
             '</label>';
 
@@ -110,9 +142,12 @@
     }
 
     function selectedFilter() {
+        var page = parseInt(getQueryParam('page') || '1', 10);
         return {
             group: getQueryParam('group') || 'transformer',
-            sub: getQueryParam('sub') || ''
+            sub: getQueryParam('sub') || '',
+            search: getQueryParam('search') || '',
+            page: Number.isFinite(page) && page > 0 ? page : 1
         };
     }
 
@@ -129,7 +164,7 @@
             if (product.group !== group) return false;
             if (sub && product.subCategory !== sub) return false;
             if (!keyword) return true;
-            return [product.name, product.shortDesc, product.description, product.categoryLabel].join(' ').toLowerCase().indexOf(keyword) !== -1;
+            return productSearchText(product).indexOf(keyword) !== -1;
         });
     }
 
@@ -140,19 +175,78 @@
             '</div>';
     }
 
+    function renderFilterStatus(filter, total) {
+        var status = document.querySelector('.catalog-filter-status');
+        var current = document.getElementById('catalog-current-filter');
+        if (!status || !current) return;
+        var parts = [taxonomyLabel(filter.group, filter.sub)];
+        if (filter.search) parts.push('Keyword: "' + filter.search + '"');
+        current.textContent = parts.join(' / ') + ' (' + total + ')';
+        status.hidden = false;
+    }
+
+    function renderPagination(total, page) {
+        var pagination = document.querySelector('.catalog-pagination');
+        if (!pagination) return;
+        var pageCount = Math.ceil(total / pageSize);
+        pagination.innerHTML = '';
+        if (pageCount <= 1) return;
+
+        function addButton(label, targetPage, disabled, active) {
+            var button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'catalog-page-button' + (active ? ' active' : '');
+            button.textContent = label;
+            button.disabled = !!disabled;
+            button.setAttribute('data-catalog-page', targetPage);
+            pagination.appendChild(button);
+        }
+
+        addButton('<', Math.max(1, page - 1), page === 1, false);
+        for (var i = 1; i <= pageCount; i += 1) {
+            if (i === 1 || i === pageCount || Math.abs(i - page) <= 1) {
+                addButton(String(i), i, false, i === page);
+            } else if (i === 2 || i === pageCount - 1) {
+                var ellipsis = document.createElement('span');
+                ellipsis.className = 'catalog-page-ellipsis';
+                ellipsis.textContent = '...';
+                pagination.appendChild(ellipsis);
+            }
+        }
+        addButton('>', Math.min(pageCount, page + 1), page === pageCount, false);
+
+        pagination.querySelectorAll('[data-catalog-page]').forEach(function (button) {
+            button.addEventListener('click', function () {
+                updatePage(parseInt(button.getAttribute('data-catalog-page'), 10));
+            });
+        });
+    }
+
     function renderProducts(products) {
         var filter = selectedFilter();
         var keywordEl = document.getElementById('catalog-search');
-        var keyword = keywordEl ? keywordEl.value : '';
-        var list = filterProducts(products, filter.group, filter.sub, keyword);
+        if (keywordEl && keywordEl.value !== filter.search) keywordEl.value = filter.search;
+        var list = filterProducts(products, filter.group, filter.sub, filter.search);
+        var pageCount = Math.max(1, Math.ceil(list.length / pageSize));
+        var currentPage = Math.min(filter.page, pageCount);
+        var pageItems = list.slice((currentPage - 1) * pageSize, currentPage * pageSize);
         var title = document.getElementById('catalog-title');
         var summary = document.getElementById('catalog-summary');
+
+        if (filter.page !== currentPage) {
+            setQueryParams({ page: currentPage > 1 ? currentPage : '' });
+        }
 
         if (title) title.textContent = taxonomyLabel(filter.group, filter.sub);
         if (summary) {
             summary.textContent = list.length
                 ? list.length + (isArabic ? ' منتج متاح' : ' products available')
                 : (isArabic ? 'سيتم تحديث المنتجات قريباً.' : 'Products to be updated.');
+        }
+
+        renderFilterStatus(filter, list.length);
+        if (summary && list.length && pageCount > 1) {
+            summary.textContent += ' / Page ' + currentPage + ' of ' + pageCount;
         }
 
         document.querySelectorAll('[data-product-filter]').forEach(function (button) {
@@ -163,11 +257,13 @@
 
         container.innerHTML = '';
         if (!list.length) {
-            renderEmpty(filter.group, filter.sub);
+            renderEmpty(filter.group, filter.sub, filter.search);
+            renderPagination(0, 1);
+            renderCompareBar();
             return;
         }
 
-        list.forEach(function (product) {
+        pageItems.forEach(function (product) {
             container.appendChild(createProductCard(product));
         });
 
@@ -178,15 +274,36 @@
         }
 
         initProductCompareControls();
+        renderPagination(list.length, currentPage);
+        renderCompareBar();
     }
 
     function updateFilter(group, sub) {
-        var url = new URL(window.location.href);
-        url.searchParams.set('group', group);
-        if (sub) url.searchParams.set('sub', sub);
-        else url.searchParams.delete('sub');
-        window.history.replaceState(null, '', url.toString());
+        setQueryParams({ group: group, sub: sub || '', page: '' });
+        closeCategoryPanel();
         renderProducts(productsCache);
+    }
+
+    function updateSearch(keyword) {
+        setQueryParams({ search: (keyword || '').trim(), page: '' });
+        renderProducts(productsCache);
+    }
+
+    function updatePage(page) {
+        setQueryParams({ page: page > 1 ? page : '' });
+        renderProducts(productsCache);
+    }
+
+    function clearFilters() {
+        setQueryParams({ group: 'transformer', sub: '', search: '', page: '' });
+        renderProducts(productsCache);
+    }
+
+    function closeCategoryPanel() {
+        var tree = document.getElementById('product-category-tree');
+        var toggle = document.querySelector('.product-category-toggle');
+        if (tree) tree.classList.remove('is-open');
+        if (toggle) toggle.setAttribute('aria-expanded', 'false');
     }
 
     function initProductTree() {
@@ -199,8 +316,32 @@
 
         var search = document.getElementById('catalog-search');
         if (search) {
-            search.addEventListener('input', function () { renderProducts(productsCache); });
+            search.value = selectedFilter().search;
+            search.addEventListener('input', function () { updateSearch(search.value); });
         }
+
+        var searchButton = document.querySelector('.catalog-search-submit');
+        if (searchButton && search) {
+            searchButton.addEventListener('click', function () { updateSearch(search.value); });
+        }
+
+        var clearButton = document.querySelector('.catalog-clear-filters');
+        if (clearButton) clearButton.addEventListener('click', clearFilters);
+
+        var toggle = document.querySelector('.product-category-toggle');
+        var tree = document.getElementById('product-category-tree');
+        if (toggle && tree) {
+            toggle.addEventListener('click', function () {
+                var open = !tree.classList.contains('is-open');
+                tree.classList.toggle('is-open', open);
+                toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+            });
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape') closeCategoryPanel();
+            });
+        }
+
+        window.addEventListener('popstate', function () { renderProducts(productsCache); });
     }
 
     function showError() {
