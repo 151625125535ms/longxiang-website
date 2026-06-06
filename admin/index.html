@@ -77,6 +77,20 @@
                         <h2>产品管理</h2>
                         <button class="btn btn-primary" id="btn-add-product">新增产品</button>
                     </div>
+                    <div class="table-toolbar">
+                        <div class="search-input-wrap">
+                            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                            <input type="text" id="product-search" class="search-input" placeholder="搜索产品名称或 ID…">
+                        </div>
+                        <select id="product-category-filter" class="toolbar-select">
+                            <option value="">全部分类</option>
+                            <option value="oil-immersed">Oil-Immersed</option>
+                            <option value="dry-type">Dry-Type</option>
+                            <option value="special">Special</option>
+                            <option value="combined">Combined</option>
+                            <option value="switchgear">Switchgear</option>
+                        </select>
+                    </div>
                     <div class="data-table-wrapper">
                         <table class="data-table">
                             <thead><tr><th>产品</th><th>分类</th><th>状态</th><th>简介</th><th>操作</th></tr></thead>

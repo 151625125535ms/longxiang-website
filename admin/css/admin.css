@@ -1286,6 +1286,49 @@ h1, h2, h3, h4, h5, h6 {
     }
 }
 
+/* Product search toolbar */
+.table-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 4px 0 16px;
+    flex-wrap: wrap;
+}
+
+.search-input-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 15px;
+    height: 15px;
+    color: var(--color-gray-400);
+    pointer-events: none;
+}
+
+.search-input {
+    width: 100%;
+    padding: 8px 12px 8px 34px;
+    border: 1px solid var(--color-gray-300);
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    background: #fff;
+    outline: none;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    box-sizing: border-box;
+}
+
+.search-input:focus {
+    border-color: var(--color-blue);
+    box-shadow: 0 0 0 3px rgba(0, 163, 224, 0.12);
+}
+
 /* Company Form Tabs */
 .form-tabs {
     display: flex;

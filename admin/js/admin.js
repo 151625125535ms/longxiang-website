@@ -329,12 +329,23 @@
         function renderProductsTable() {
             var tbody = document.getElementById('products-tbody');
             if (!tbody) return;
-            if (!products.length) {
-                tbody.innerHTML = '<tr><td colspan="5" class="table-empty"><p>暂无产品</p></td></tr>';
+
+            var searchVal = ((document.getElementById('product-search') || {}).value || '').trim().toLowerCase();
+            var catVal = (document.getElementById('product-category-filter') || {}).value || '';
+            var filtered = products.filter(function (p) {
+                var matchSearch = !searchVal ||
+                    p.name.toLowerCase().indexOf(searchVal) !== -1 ||
+                    p.id.toLowerCase().indexOf(searchVal) !== -1;
+                var matchCat = !catVal || p.category === catVal;
+                return matchSearch && matchCat;
+            });
+
+            if (!filtered.length) {
+                tbody.innerHTML = '<tr><td colspan="5" class="table-empty"><p>' + (products.length ? '无匹配产品' : '暂无产品') + '</p></td></tr>';
                 return;
             }
 
-            tbody.innerHTML = products.map(function (product) {
+            tbody.innerHTML = filtered.map(function (product) {
                 return '<tr>' +
                     '<td><div class="product-name-cell"><img class="product-thumb" src="../' + escapeHtml(product.image || '') + '" alt=""><div><div class="product-name-text">' + escapeHtml(product.name) + '</div><div class="product-id-text">' + escapeHtml(product.id) + '</div></div></div></td>' +
                     '<td><span class="badge badge-blue">' + escapeHtml(product.categoryLabel || product.category) + '</span></td>' +
@@ -355,6 +366,11 @@
         function bindProductEvents() {
             var btnAddProduct = document.getElementById('btn-add-product');
             if (btnAddProduct) btnAddProduct.addEventListener('click', function () { openProductModal(null); });
+
+            var productSearch = document.getElementById('product-search');
+            if (productSearch) productSearch.addEventListener('input', renderProductsTable);
+            var productCatFilter = document.getElementById('product-category-filter');
+            if (productCatFilter) productCatFilter.addEventListener('change', renderProductsTable);
 
             bindModalClose('product-modal', ['modal-close', 'modal-cancel']);
 
