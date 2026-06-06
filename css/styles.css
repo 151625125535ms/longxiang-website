@@ -2535,29 +2535,21 @@ p:last-child {
 }
 
 .hero-hex .hero-overlay {
-    background:
-        linear-gradient(90deg, rgba(11, 17, 24, 0.75), rgba(11, 17, 24, 0.28), rgba(11, 17, 24, 0.78)),
-        radial-gradient(circle at center, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.52));
+    display: none;
 }
 
 .hero-hex-panel {
     position: relative;
     z-index: 2;
     width: min(760px, 92vw);
-    min-height: 430px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 20px;
-    padding: 58px 48px 52px;
+    padding: 0 48px;
     color: var(--color-white-pure);
     text-align: center;
-    background: linear-gradient(145deg, rgba(45, 52, 60, 0.78), rgba(22, 28, 35, 0.82));
-    border: 2px solid #86888A;
-    border-radius: 22px;
-    clip-path: polygon(18% 4%, 82% 4%, 99% 50%, 82% 96%, 18% 96%, 1% 50%);
-    box-shadow: 0 28px 80px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.16);
 }
 
 .hero-hex .hero-hex-logo {
@@ -3146,7 +3138,7 @@ p:last-child {
 
     .hero-hex-panel {
         width: min(500px, 94vw);
-        padding: 50px 34px;
+        padding: 0 24px;
     }
 }
 
@@ -3196,8 +3188,8 @@ p:last-child {
     .hero-hex-panel {
         clip-path: none;
         aspect-ratio: auto;
-        min-height: 420px;
-        border-radius: 18px;
+        min-height: 0;
+        border-radius: 0;
     }
 
     .hero-hex-actions {
