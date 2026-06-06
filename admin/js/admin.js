@@ -341,6 +341,7 @@
                 products = data;
                 renderProductsTable();
             }).catch(function (err) {
+                document.getElementById('products-tbody').innerHTML = '<tr><td colspan="5" class="table-empty"><p>加载失败，请刷新重试</p></td></tr>';
                 showToast('加载产品失败：' + err.message, 'error');
             });
         }
@@ -353,8 +354,8 @@
             var catVal = (document.getElementById('product-category-filter') || {}).value || '';
             var filtered = products.filter(function (p) {
                 var matchSearch = !searchVal ||
-                    p.name.toLowerCase().indexOf(searchVal) !== -1 ||
-                    p.id.toLowerCase().indexOf(searchVal) !== -1;
+                    (p.name || '').toLowerCase().indexOf(searchVal) !== -1 ||
+                    (p.id || '').toLowerCase().indexOf(searchVal) !== -1;
                 var matchCat = !catVal || p.category === catVal;
                 return matchSearch && matchCat;
             });
@@ -598,6 +599,8 @@
         function toggleFeatured(productId) {
             var product = products.find(function (p) { return p.id === productId; });
             if (!product) return;
+            var badge = document.querySelector('[data-toggle-featured="' + productId + '"]');
+            if (badge) badge.style.pointerEvents = 'none';
             var newFeatured = !product.featured;
             apiRequest('/products/' + encodeURIComponent(productId), {
                 method: 'PUT',
@@ -607,7 +610,10 @@
                 renderProductsTable();
                 setText('stat-featured', products.filter(function (p) { return p.featured; }).length);
                 showToast(newFeatured ? '已加入首页推荐' : '已取消首页推荐');
-            }).catch(function (err) { showToast('操作失败：' + err.message, 'error'); });
+            }).catch(function (err) {
+                if (badge) badge.style.pointerEvents = '';
+                showToast('操作失败：' + err.message, 'error');
+            });
         }
 
         function loadInquiries() {
@@ -617,7 +623,10 @@
             apiRequest(url).then(function (data) {
                 inquiries = data.items || [];
                 renderInquiriesTable();
-            }).catch(function (err) { showToast('加载询盘失败：' + err.message, 'error'); });
+            }).catch(function (err) {
+                document.getElementById('inquiries-tbody').innerHTML = '<tr><td colspan="6" class="table-empty"><p>加载失败，请刷新重试</p></td></tr>';
+                showToast('加载询盘失败：' + err.message, 'error');
+            });
         }
 
         function renderInquiriesTable() {
@@ -674,7 +683,7 @@
                     document.getElementById('inquiry-status').value = 'replied';
                     showToast('状态已更新为已回复');
                     loadInquiries();
-                }).catch(function () {});
+                }).catch(function (err) { showToast('状态更新失败：' + err.message, 'error'); });
             }
         }
 
@@ -706,7 +715,7 @@
                             document.getElementById('inquiry-status').value = 'read';
                             loadInquiries();
                         })
-                        .catch(function () {});
+                        .catch(function (err) { showToast('标记已读失败：' + err.message, 'error'); });
                 }
             }).catch(function (err) { showToast('加载询盘详情失败：' + err.message, 'error'); });
         }
@@ -795,7 +804,10 @@
             apiRequest('/certifications').then(function (data) {
                 certifications = data;
                 renderCertificationsTable();
-            }).catch(function (err) { showToast('加载证书失败：' + err.message, 'error'); });
+            }).catch(function (err) {
+                document.getElementById('certifications-tbody').innerHTML = '<tr><td colspan="5" class="table-empty"><p>加载失败，请刷新重试</p></td></tr>';
+                showToast('加载证书失败：' + err.message, 'error');
+            });
         }
 
         function renderCertificationsTable() {
