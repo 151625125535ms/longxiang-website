@@ -2561,7 +2561,7 @@ p:last-child {
 
 .hero-hex .hero-hex-title {
     margin: 0;
-    max-width: 460px;
+    max-width: none;
     color: var(--color-white-pure);
     font-family: var(--font-body);
     font-size: clamp(1.05rem, 1.45vw, 1.35rem);
@@ -2569,6 +2569,7 @@ p:last-child {
     line-height: 1.28;
     letter-spacing: 0.06em;
     text-transform: uppercase;
+    white-space: nowrap;
 }
 
 .hero-hex-actions {
@@ -3197,6 +3198,10 @@ p:last-child {
         width: 100%;
     }
 
+    .hero-hex .hero-hex-title {
+        white-space: normal;
+    }
+
     .hero-hex-btn {
         width: min(260px, 100%);
     }
@@ -3213,6 +3218,12 @@ p:last-child {
 }
 
 @media (max-width: 560px) {
+    .hero-hex .hero-hex-title {
+        width: min(330px, 100%);
+        font-size: 0.95rem;
+        letter-spacing: 0.03em;
+    }
+
     .products-home-grid,
     .products-catalog-grid {
         grid-template-columns: 1fr;
