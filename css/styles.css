@@ -1248,10 +1248,16 @@ p:last-child {
 
 .footer-grid {
     display: grid;
-    grid-template-columns: 1.5fr 1fr 1fr 1.2fr;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.6fr) minmax(280px, 1fr);
     gap: var(--spacing-2xl);
     padding-bottom: var(--spacing-3xl);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer-navigation {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--spacing-2xl);
 }
 
 .footer-brand .nav-logo {
@@ -1327,6 +1333,37 @@ p:last-child {
     color: var(--color-gold);
     min-width: 20px;
     margin-top: 3px;
+}
+
+.footer-conversion {
+    padding-left: var(--spacing-xl);
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer-conversion-text {
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 0.9rem;
+    line-height: 1.7;
+    margin-bottom: var(--spacing-lg);
+}
+
+.footer-conversion-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    padding: 0 var(--spacing-lg);
+    background: var(--color-blue);
+    border-radius: var(--radius-md);
+    color: var(--color-white-pure);
+    font-weight: 700;
+    transition: all var(--transition-base);
+}
+
+.footer-conversion-link:hover {
+    background: var(--color-gold);
+    color: var(--color-navy);
+    transform: translateY(-2px);
 }
 
 .footer-bottom {
@@ -1739,6 +1776,18 @@ p:last-child {
     .footer-grid {
         grid-template-columns: 1fr;
         gap: var(--spacing-2xl);
+    }
+
+    .footer-navigation {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-xl);
+    }
+
+    .footer-conversion {
+        padding-left: 0;
+        padding-top: var(--spacing-xl);
+        border-left: 0;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .footer-bottom {
