@@ -5,10 +5,12 @@ const { JWT_SECRET } = require('../middleware/auth');
 
 const router = express.Router();
 
-const ADMIN_USERNAME = 'admin';
-const ADMIN_PASSWORD_HASH = bcrypt.hashSync('admin123', 10);
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
+// Hash is computed once at startup; bcrypt.hashSync is intentional (startup cost, not per-request)
+const ADMIN_PASSWORD_HASH = bcrypt.hashSync(ADMIN_PASSWORD, 10);
 
-router.post('/login', (req, res) => {
+router.post('/login', function (req, res) {
     const { username, password } = req.body;
 
     if (!username || !password) {
@@ -28,7 +30,7 @@ router.post('/login', (req, res) => {
     res.json({ token, username: ADMIN_USERNAME });
 });
 
-router.get('/verify', (req, res) => {
+router.get('/verify', function (req, res) {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return res.status(401).json({ valid: false });
