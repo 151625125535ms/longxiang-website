@@ -326,7 +326,7 @@
             if (!container) return;
 
             var sorted = inquiries.slice().sort(function (a, b) {
-                return new Date(b.submittedAt || 0) - new Date(a.submittedAt || 0);
+                return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
             }).slice(0, 6);
 
             if (!sorted.length) {
@@ -338,7 +338,7 @@
                 var isNew = item.status === 'new';
                 var name = escapeHtml(item.name || '—');
                 var subject = escapeHtml(item.subject || item.product || '（无主题）');
-                var date = item.submittedAt ? new Date(item.submittedAt).toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' }) : '';
+                var date = item.createdAt ? new Date(item.createdAt).toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' }) : '';
                 return '<div class="recent-inquiry-item" data-id="' + escapeHtml(item.id) + '" role="button" tabindex="0" aria-label="查看询盘：' + name + '">' +
                     '<div class="recent-inquiry-dot' + (isNew ? ' new' : '') + '"></div>' +
                     '<div class="recent-inquiry-info">' +
