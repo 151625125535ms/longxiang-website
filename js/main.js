@@ -803,6 +803,34 @@
     function initFeaturedProducts() {
         var container = document.getElementById('featured-products-container');
         if (!container) return;
+        var categoryContainer = document.getElementById('featured-product-categories');
+        var homeCategories = [
+            { category: 'oil-immersed', label: 'Oil Immersed Transformer', labelAr: 'محول مغمور بالزيت', href: 'products.html?group=transformer&sub=oil-immersed' },
+            { category: 'dry-type', label: 'Dry Type Transformer', labelAr: 'محول جاف', href: 'products.html?group=transformer&sub=dry-type' },
+            { category: 'combined', label: 'Combined Transformer', labelAr: 'محول مدمج', href: 'products.html?group=transformer&sub=combined' },
+            { category: 'special', label: 'Special Transformer', labelAr: 'محول خاص', href: 'products.html?group=transformer&sub=special' }
+        ];
+
+        function renderFeaturedCategories(products) {
+            if (!categoryContainer) return;
+            categoryContainer.innerHTML = '';
+            homeCategories.forEach(function (category, index) {
+                var sample = products.find(function (product) { return product.category === category.category; });
+                var label = isArabic ? (category.labelAr || category.label) : category.label;
+                var link = document.createElement('a');
+                link.className = 'home-product-category fade-in';
+                link.href = pageHref(category.href);
+                link.setAttribute('data-delay', (index * 100).toString());
+                link.innerHTML =
+                    '<span class="home-product-category-image">' +
+                        (sample && sample.image
+                            ? '<img src="' + assetPrefix + escapeHtml(sample.image) + '" alt="' + escapeHtml(label) + '" loading="lazy">'
+                            : '<span class="home-product-category-fallback">' + escapeHtml(label.charAt(0)) + '</span>') +
+                    '</span>' +
+                    '<span class="home-product-category-title">' + escapeHtml(label) + '</span>';
+                categoryContainer.appendChild(link);
+            });
+        }
 
         function createFeaturedCard(product, index) {
             var card = document.createElement('div');
@@ -830,6 +858,7 @@
 
         function renderFeatured(products) {
             container.innerHTML = '';
+            renderFeaturedCategories(products);
             var featured = products.filter(function (product) { return product.featured; });
             products.forEach(function (product) {
                 if (featured.length < 8 && featured.indexOf(product) === -1) featured.push(product);

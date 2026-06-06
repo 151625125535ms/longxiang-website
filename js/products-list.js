@@ -16,7 +16,9 @@
             labelAr: 'المحولات',
             children: [
                 { sub: 'oil-immersed', label: 'Oil Immersed Transformer', labelAr: 'محول مغمور بالزيت' },
-                { sub: 'dry-type', label: 'Dry Type Transformer', labelAr: 'محول جاف' }
+                { sub: 'dry-type', label: 'Dry Type Transformer', labelAr: 'محول جاف' },
+                { sub: 'combined', label: 'Combined Transformer', labelAr: 'محول مدمج' },
+                { sub: 'special', label: 'Special Transformer', labelAr: 'محول خاص' }
             ]
         },
         {
