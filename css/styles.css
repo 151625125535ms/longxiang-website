@@ -2830,12 +2830,16 @@ p:last-child {
 }
 
 .all-products-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     width: 200px;
     border: 2px solid #1B306A;
     border-radius: 50px;
     background: transparent;
     color: #1B306A;
     font-weight: 800;
+    white-space: nowrap;
 }
 
 .all-products-btn:hover {
