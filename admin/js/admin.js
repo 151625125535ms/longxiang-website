@@ -415,12 +415,10 @@
             var form = document.getElementById('product-form');
             if (form) form.addEventListener('submit', saveProduct);
 
-            ['field-id', 'field-name', 'field-categoryLabel'].forEach(function (fid) {
-                var el = document.getElementById(fid);
-                if (el) el.addEventListener('input', function () { clearFieldError(fid); });
+            [['field-id','input'],['field-name','input'],['field-categoryLabel','input'],['field-category','change']].forEach(function (pair) {
+                var el = document.getElementById(pair[0]);
+                if (el) el.addEventListener(pair[1], function () { clearFieldError(pair[0]); });
             });
-            var catSel = document.getElementById('field-category');
-            if (catSel) catSel.addEventListener('change', function () { clearFieldError('field-category'); });
         }
 
         function openProductModal(productId) {
@@ -521,10 +519,9 @@
             field.classList.add('input-error');
             var existing = field.parentNode.querySelector('.field-error-msg');
             if (!existing) {
-                var msg = document.createElement('span');
-                msg.className = 'field-error-msg';
-                field.parentNode.appendChild(msg);
-                existing = msg;
+                existing = document.createElement('span');
+                existing.className = 'field-error-msg';
+                field.parentNode.appendChild(existing);
             }
             existing.textContent = message;
         }
@@ -534,7 +531,7 @@
             if (!field) return;
             field.classList.remove('input-error');
             var msg = field.parentNode.querySelector('.field-error-msg');
-            if (msg) msg.textContent = '';
+            if (msg) msg.parentNode.removeChild(msg);
         }
 
         function saveProduct(e) {
@@ -668,9 +665,10 @@
                 '&body=' + encodeURIComponent(body)
             );
             if (openedInquiry.status !== 'replied' && openedInquiry.status !== 'closed') {
+                var currentNotes = document.getElementById('inquiry-notes').value;
                 apiRequest('/inquiries/' + encodeURIComponent(openedInquiry.id), {
                     method: 'PUT',
-                    body: { status: 'replied', notes: document.getElementById('inquiry-notes').value }
+                    body: { status: 'replied', notes: currentNotes }
                 }).then(function () {
                     openedInquiry.status = 'replied';
                     document.getElementById('inquiry-status').value = 'replied';
