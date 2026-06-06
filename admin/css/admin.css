@@ -1286,6 +1286,45 @@ h1, h2, h3, h4, h5, h6 {
     }
 }
 
+/* Company Form Tabs */
+.form-tabs {
+    display: flex;
+    gap: 2px;
+    border-bottom: 2px solid var(--color-gray-200);
+    margin-bottom: 24px;
+}
+
+.form-tab-btn {
+    padding: 10px 20px;
+    border: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    background: transparent;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-gray-500);
+    transition: color var(--transition-fast), border-color var(--transition-fast);
+    white-space: nowrap;
+}
+
+.form-tab-btn:hover {
+    color: var(--color-navy);
+}
+
+.form-tab-btn.active {
+    color: var(--color-blue);
+    border-bottom-color: var(--color-blue);
+}
+
+.form-tab-panel {
+    display: none;
+}
+
+.form-tab-panel.active {
+    display: block;
+}
+
 /* Inquiry Drawer */
 .drawer-overlay {
     position: fixed;

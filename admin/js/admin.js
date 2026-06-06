@@ -630,6 +630,15 @@
         function bindCompanyEvents() {
             var form = document.getElementById('company-form');
             if (!form) return;
+            form.querySelectorAll('.form-tab-btn').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var tab = btn.getAttribute('data-tab');
+                    form.querySelectorAll('.form-tab-btn').forEach(function (b) { b.classList.remove('active'); });
+                    form.querySelectorAll('.form-tab-panel').forEach(function (p) { p.classList.remove('active'); });
+                    btn.classList.add('active');
+                    document.getElementById('tab-' + tab).classList.add('active');
+                });
+            });
             form.addEventListener('submit', function (e) {
                 e.preventDefault();
                 var data = {};

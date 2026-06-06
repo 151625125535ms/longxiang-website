@@ -107,46 +107,59 @@
                 <section class="view-section" id="view-company">
                     <div class="section-header-bar"><h2>公司信息</h2></div>
                     <form class="company-form" id="company-form">
-                        <div class="form-section-title">基础信息</div>
-                        <div class="form-row">
-                            <div class="form-group"><label>英文公司名</label><input type="text" id="company-name"></div>
-                            <div class="form-group"><label>中文公司名</label><input type="text" id="company-nameCN"></div>
+                        <div class="form-tabs">
+                            <button type="button" class="form-tab-btn active" data-tab="company-basic">基础信息</button>
+                            <button type="button" class="form-tab-btn" data-tab="company-contact">联系方式</button>
+                            <button type="button" class="form-tab-btn" data-tab="company-web">网站设置</button>
+                            <button type="button" class="form-tab-btn" data-tab="company-about">公司简介</button>
                         </div>
-                        <div class="form-row-3">
-                            <div class="form-group"><label>成立年份</label><input type="number" id="company-founded"></div>
-                            <div class="form-group"><label>股票代码</label><input type="text" id="company-stockCode"></div>
-                            <div class="form-group"><label>注册资本</label><input type="text" id="company-registeredCapital"></div>
+
+                        <div class="form-tab-panel active" id="tab-company-basic">
+                            <div class="form-row">
+                                <div class="form-group"><label>英文公司名</label><input type="text" id="company-name"></div>
+                                <div class="form-group"><label>中文公司名</label><input type="text" id="company-nameCN"></div>
+                            </div>
+                            <div class="form-row-3">
+                                <div class="form-group"><label>成立年份</label><input type="number" id="company-founded"></div>
+                                <div class="form-group"><label>股票代码</label><input type="text" id="company-stockCode"></div>
+                                <div class="form-group"><label>注册资本</label><input type="text" id="company-registeredCapital"></div>
+                            </div>
                         </div>
-                        <div class="form-section-title">联系方式</div>
-                        <div class="form-row">
-                            <div class="form-group"><label>电话</label><input type="text" id="company-phone"></div>
-                            <div class="form-group"><label>邮箱</label><input type="text" id="company-email"></div>
-                        </div>
-                        <div class="form-group"><label>地址</label><input type="text" id="company-address"></div>
-                        <div class="form-group"><label>总部地址</label><input type="text" id="company-headquarters"></div>
-                        <div class="form-row">
-                            <div class="form-group"><label>办公时间</label><input type="text" id="company-officeHours"></div>
-                            <div class="form-group"><label>淮阳基地</label><input type="text" id="company-huaiyangBase"></div>
-                        </div>
-                        <div class="form-section-title">即时通讯与统计</div>
-                        <div class="form-row">
-                            <div class="form-group"><label>WhatsApp 号码</label><input type="text" id="company-whatsapp" placeholder="例如 8613812345678"></div>
-                            <div class="form-group"><label>微信号</label><input type="text" id="company-wechat"></div>
-                        </div>
-                        <div class="form-row">
+
+                        <div class="form-tab-panel" id="tab-company-contact">
+                            <div class="form-row">
+                                <div class="form-group"><label>电话</label><input type="text" id="company-phone"></div>
+                                <div class="form-group"><label>邮箱</label><input type="text" id="company-email"></div>
+                            </div>
+                            <div class="form-group"><label>地址</label><input type="text" id="company-address"></div>
+                            <div class="form-group"><label>总部地址</label><input type="text" id="company-headquarters"></div>
+                            <div class="form-row">
+                                <div class="form-group"><label>办公时间</label><input type="text" id="company-officeHours"></div>
+                                <div class="form-group"><label>淮阳基地</label><input type="text" id="company-huaiyangBase"></div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group"><label>WhatsApp 号码</label><input type="text" id="company-whatsapp" placeholder="例如 8613812345678"></div>
+                                <div class="form-group"><label>微信号</label><input type="text" id="company-wechat"></div>
+                            </div>
                             <div class="form-group"><label>Skype 账号</label><input type="text" id="company-skype"></div>
+                        </div>
+
+                        <div class="form-tab-panel" id="tab-company-web">
                             <div class="form-group"><label>GA4 跟踪 ID</label><input type="text" id="company-ga4TrackingId" placeholder="G-XXXXXXXXXX"></div>
+                            <div class="form-group"><label>页脚文案</label><textarea id="company-footerText" rows="3"></textarea></div>
                         </div>
-                        <div class="form-section-title">公司介绍</div>
-                        <div class="form-row">
-                            <div class="form-group"><label>厂区面积</label><input type="text" id="company-factoryArea"></div>
-                            <div class="form-group"><label>专利数量</label><input type="text" id="company-patents"></div>
+
+                        <div class="form-tab-panel" id="tab-company-about">
+                            <div class="form-row">
+                                <div class="form-group"><label>厂区面积</label><input type="text" id="company-factoryArea"></div>
+                                <div class="form-group"><label>专利数量</label><input type="text" id="company-patents"></div>
+                            </div>
+                            <div class="form-group"><label>研究合作伙伴数量</label><input type="text" id="company-researchPartners"></div>
+                            <div class="form-group"><label>公司描述</label><textarea id="company-description" rows="3"></textarea></div>
+                            <div class="form-group"><label>关于我们摘要</label><textarea id="company-aboutIntro" rows="3"></textarea></div>
+                            <div class="form-group"><label>关于我们详情</label><textarea id="company-aboutDetail" rows="3"></textarea></div>
                         </div>
-                        <div class="form-group"><label>研究合作伙伴数量</label><input type="text" id="company-researchPartners"></div>
-                        <div class="form-group"><label>公司描述</label><textarea id="company-description" rows="3"></textarea></div>
-                        <div class="form-group"><label>关于我们摘要</label><textarea id="company-aboutIntro" rows="3"></textarea></div>
-                        <div class="form-group"><label>关于我们详情</label><textarea id="company-aboutDetail" rows="3"></textarea></div>
-                        <div class="form-group"><label>页脚文案</label><textarea id="company-footerText" rows="2"></textarea></div>
+
                         <div class="form-actions"><button type="submit" class="btn btn-primary" id="btn-save-company">保存公司信息</button></div>
                     </form>
                 </section>
