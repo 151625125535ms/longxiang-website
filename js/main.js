@@ -555,25 +555,12 @@
                         navLink('products.html', isArabic ? 'معدات المفاتيح' : 'Switchgear', '', '?group=switchgear') +
                     '</div>' +
                 '</div>' +
-                '<div class="footer-column">' +
-                    '<h4>' + (isArabic ? 'تواصل معنا' : 'Contact Us') + '</h4>' +
-                    '<div class="footer-contact-item" data-company-contact="email"><span class="icon">✉</span><span class="footer-contact-value">hnlxdq2003@163.com</span></div>' +
-                    '<div class="footer-contact-item" data-company-contact="address"><span class="icon">⌖</span><span class="footer-contact-value">Longhu New District, Xinzheng, Zhengzhou, Henan, China</span></div>' +
-                    '<div class="messenger-links" data-communication-links></div>' +
+                '</div>' +
+                '<div class="footer-conversion footer-column">' +
+                    '<h4>' + (isArabic ? 'طلب عرض سعر' : 'Request Quote') + '</h4>' +
+                    '<p class="footer-conversion-text">' + (isArabic ? 'أرسل متطلبات مشروعك وسيتواصل فريقنا معك بسرعة.' : 'Share your project requirements and our team will respond quickly.') + '</p>' +
+                    '<a href="' + pageHref('contact.html') + '" class="footer-conversion-link">' + (isArabic ? 'اتصل بنا' : 'Contact Us') + '</a>' +
                 '</div>';
-            var footerNavigation = grid.querySelector('.footer-navigation');
-            if (footerNavigation) {
-                var footerColumns = footerNavigation.querySelectorAll('.footer-column');
-                var conversionColumn = footerColumns[2];
-                if (conversionColumn) {
-                    conversionColumn.className = 'footer-conversion footer-column';
-                    conversionColumn.innerHTML =
-                        '<h4>' + (isArabic ? 'طلب عرض سعر' : 'Request Quote') + '</h4>' +
-                        '<p class="footer-conversion-text">' + (isArabic ? 'أرسل متطلبات مشروعك وسيتواصل فريقنا معك بسرعة.' : 'Share your project requirements and our team will respond quickly.') + '</p>' +
-                        '<a href="' + pageHref('contact.html') + '" class="footer-conversion-link">' + (isArabic ? 'اتصل بنا' : 'Contact Us') + '</a>';
-                    grid.appendChild(conversionColumn);
-                }
-            }
         });
     }
 
