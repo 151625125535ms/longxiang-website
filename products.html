@@ -61,29 +61,58 @@
         </div>
     </section>
     <main>
-        <section class="section bg-light">
-            <div class="container">
-                <div class="product-catalog-layout">
-                    <aside class="product-tree fade-in" aria-label="Product categories">
+        <section class="section bg-light product-directory-section">
+            <div class="container product-directory-container">
+                <button type="button" class="product-category-toggle" aria-controls="product-category-tree" aria-expanded="false">
+                    All Categories
+                </button>
+                <div class="product-catalog-layout product-directory-layout">
+                    <aside class="product-tree product-directory-tree fade-in" id="product-category-tree" aria-label="Product categories">
                         <div class="product-tree-title">Product Categories</div>
-                        <button type="button" class="tree-parent active" data-product-filter data-group="transformer">Transformer</button>
-                        <button type="button" class="tree-child" data-product-filter data-group="transformer" data-sub="oil-immersed">Oil Immersed Transformer</button>
-                        <button type="button" class="tree-child" data-product-filter data-group="transformer" data-sub="dry-type">Dry Type Transformer</button>
-                        <button type="button" class="tree-child" data-product-filter data-group="transformer" data-sub="combined">Combined Transformer</button>
-                        <button type="button" class="tree-child" data-product-filter data-group="transformer" data-sub="special">Special Transformer</button>
-                        <button type="button" class="tree-parent" data-product-filter data-group="ev-charger">EV charger</button>
-                        <button type="button" class="tree-child" data-product-filter data-group="ev-charger" data-sub="ac">AC EV Charging Station</button>
-                        <button type="button" class="tree-child" data-product-filter data-group="ev-charger" data-sub="dc">DC EV Charging Station</button>
-                        <button type="button" class="tree-parent" data-product-filter data-group="switchgear">Switchgear</button>
-                        <button type="button" class="tree-child" data-product-filter data-group="switchgear" data-sub="high-voltage">High-Voltage Switchgear</button>
-                        <button type="button" class="tree-child" data-product-filter data-group="switchgear" data-sub="medium-low-voltage">Medium&Low Voltage Switchgear</button>
+                        <div class="product-tree-body">
+                            <div class="product-tree-group">
+                                <button type="button" class="tree-parent active" data-product-filter data-group="transformer">Transformer</button>
+                                <div class="tree-children">
+                                    <button type="button" class="tree-child" data-product-filter data-group="transformer" data-sub="oil-immersed">Oil Immersed Transformer</button>
+                                    <button type="button" class="tree-child" data-product-filter data-group="transformer" data-sub="dry-type">Dry Type Transformer</button>
+                                    <button type="button" class="tree-child" data-product-filter data-group="transformer" data-sub="combined">Combined Transformer</button>
+                                    <button type="button" class="tree-child" data-product-filter data-group="transformer" data-sub="special">Special Transformer</button>
+                                </div>
+                            </div>
+                            <div class="product-tree-group">
+                                <button type="button" class="tree-parent" data-product-filter data-group="ev-charger">EV charger</button>
+                                <div class="tree-children">
+                                    <button type="button" class="tree-child" data-product-filter data-group="ev-charger" data-sub="ac">AC EV Charging Station</button>
+                                    <button type="button" class="tree-child" data-product-filter data-group="ev-charger" data-sub="dc">DC EV Charging Station</button>
+                                </div>
+                            </div>
+                            <div class="product-tree-group">
+                                <button type="button" class="tree-parent" data-product-filter data-group="switchgear">Switchgear</button>
+                                <div class="tree-children">
+                                    <button type="button" class="tree-child" data-product-filter data-group="switchgear" data-sub="high-voltage">High-Voltage Switchgear</button>
+                                    <button type="button" class="tree-child" data-product-filter data-group="switchgear" data-sub="medium-low-voltage">Medium&Low Voltage Switchgear</button>
+                                </div>
+                            </div>
+                        </div>
                     </aside>
-                    <div class="catalog-content">
-                        <div class="catalog-toolbar fade-in">
-                            <div><h2 id="catalog-title">Transformer</h2><p id="catalog-summary">Browse our full range of power distribution equipment.</p></div>
-                            <input class="catalog-search" id="catalog-search" type="search" placeholder="Search products">
+                    <div class="catalog-content product-directory-content">
+                        <div class="catalog-toolbar product-directory-toolbar fade-in">
+                            <div class="catalog-heading">
+                                <h2 id="catalog-title">Transformer</h2>
+                                <p id="catalog-summary">Browse our full range of power distribution equipment.</p>
+                            </div>
+                            <div class="catalog-search-form" role="search">
+                                <input class="catalog-search" id="catalog-search" type="search" placeholder="Search products by name or model" aria-label="Search products">
+                                <button type="button" class="catalog-search-submit">Search</button>
+                            </div>
+                        </div>
+                        <div class="catalog-filter-status fade-in" aria-live="polite" hidden>
+                            <span class="catalog-filter-label">Current filter:</span>
+                            <span id="catalog-current-filter">Transformer</span>
+                            <button type="button" class="catalog-clear-filters">Clear filters</button>
                         </div>
                         <div class="products-catalog-grid" data-stagger="100" id="products-container"></div>
+                        <nav class="catalog-pagination" aria-label="Product pagination"></nav>
                     </div>
                 </div>
             </div>
