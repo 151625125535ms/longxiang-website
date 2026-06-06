@@ -217,6 +217,7 @@
         if (avatarEl) avatarEl.textContent = getUsername().charAt(0).toUpperCase();
 
         bindNavigation();
+        bindDashboardActions();
         bindProductEvents();
         bindInquiryEvents();
         bindCompanyEvents();
@@ -310,11 +311,77 @@
             setText('stat-new-inquiries', inquiries.filter(function (item) { return item.status === 'new'; }).length);
 
             var catGrid = document.getElementById('category-stats');
-            if (!catGrid) return;
-            catGrid.innerHTML = Object.keys(categoryMap).map(function (key) {
-                var count = products.filter(function (p) { return p.category === key; }).length;
-                return '<div class="category-stat-card"><span class="badge badge-blue">' + count + '</span><div><div class="category-stat-count">' + count + '</div><div class="category-stat-label">' + escapeHtml(categoryMap[key]) + '</div></div></div>';
+            if (catGrid) {
+                catGrid.innerHTML = Object.keys(categoryMap).map(function (key) {
+                    var count = products.filter(function (p) { return p.category === key; }).length;
+                    return '<div class="category-stat-card"><span class="badge badge-blue">' + count + '</span><div><div class="category-stat-count">' + count + '</div><div class="category-stat-label">' + escapeHtml(categoryMap[key]) + '</div></div></div>';
+                }).join('');
+            }
+
+            renderRecentInquiries();
+        }
+
+        function renderRecentInquiries() {
+            var container = document.getElementById('recent-inquiries-list');
+            if (!container) return;
+
+            var sorted = inquiries.slice().sort(function (a, b) {
+                return new Date(b.submittedAt || 0) - new Date(a.submittedAt || 0);
+            }).slice(0, 6);
+
+            if (!sorted.length) {
+                container.innerHTML = '<p class="recent-inquiries-empty">暂无询盘记录</p>';
+                return;
+            }
+
+            container.innerHTML = sorted.map(function (item) {
+                var isNew = item.status === 'new';
+                var name = escapeHtml(item.name || '—');
+                var subject = escapeHtml(item.subject || item.product || '（无主题）');
+                var date = item.submittedAt ? new Date(item.submittedAt).toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' }) : '';
+                return '<div class="recent-inquiry-item" data-id="' + escapeHtml(item.id) + '" role="button" tabindex="0" aria-label="查看询盘：' + name + '">' +
+                    '<div class="recent-inquiry-dot' + (isNew ? ' new' : '') + '"></div>' +
+                    '<div class="recent-inquiry-info">' +
+                        '<div class="recent-inquiry-name">' + name + '</div>' +
+                        '<div class="recent-inquiry-subject">' + subject + '</div>' +
+                    '</div>' +
+                    '<div class="recent-inquiry-time">' + date + '</div>' +
+                    '</div>';
             }).join('');
+
+            container.querySelectorAll('.recent-inquiry-item').forEach(function (el) {
+                el.addEventListener('click', function () {
+                    var id = el.getAttribute('data-id');
+                    if (id) openInquiryModal(id);
+                });
+                el.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter' || e.key === ' ') el.click();
+                });
+            });
+        }
+
+        function bindDashboardActions() {
+            document.querySelectorAll('[data-action]').forEach(function (el) {
+                el.addEventListener('click', function () {
+                    var action = el.getAttribute('data-action');
+                    if (action === 'add-product') {
+                        switchView('products');
+                        setTimeout(function () {
+                            var btn = document.getElementById('btn-add-product');
+                            if (btn) btn.click();
+                        }, 50);
+                    } else if (action === 'view-inquiries') {
+                        switchView('inquiries');
+                    } else if (action === 'view-products') {
+                        switchView('products');
+                    } else if (action === 'view-company') {
+                        switchView('company');
+                    }
+                });
+                el.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter' || e.key === ' ') el.click();
+                });
+            });
         }
 
         function setText(id, value) {
@@ -371,7 +438,7 @@
                     '<td><span class="badge badge-blue">' + escapeHtml(product.categoryLabel || product.category) + '</span></td>' +
                     '<td><span class="badge badge-toggle ' + (product.featured ? 'badge-gold' : 'badge-navy') + '" data-toggle-featured="' + escapeHtml(product.id) + '">' + (product.featured ? '首页推荐' : '普通') + '</span></td>' +
                     '<td class="cell-muted">' + escapeHtml(product.shortDesc || '') + '</td>' +
-                    '<td><div class="actions-cell"><button class="btn btn-icon btn-icon-edit" data-edit-product="' + escapeHtml(product.id) + '">' + ICON_EDIT + '</button><button class="btn btn-icon btn-icon-delete" data-delete-product="' + escapeHtml(product.id) + '">' + ICON_DELETE + '</button></div></td>' +
+                    '<td><div class="actions-cell"><button class="btn btn-icon btn-icon-edit" aria-label="编辑产品" data-edit-product="' + escapeHtml(product.id) + '">' + ICON_EDIT + '</button><button class="btn btn-icon btn-icon-delete" aria-label="删除产品" data-delete-product="' + escapeHtml(product.id) + '">' + ICON_DELETE + '</button></div></td>' +
                     '</tr>';
             }).join('');
 
@@ -518,10 +585,12 @@
             var field = document.getElementById(fieldId);
             if (!field) return;
             field.classList.add('input-error');
+            field.setAttribute('aria-invalid', 'true');
             var existing = field.parentNode.querySelector('.field-error-msg');
             if (!existing) {
                 existing = document.createElement('span');
                 existing.className = 'field-error-msg';
+                existing.setAttribute('role', 'alert');
                 field.parentNode.appendChild(existing);
             }
             existing.textContent = message;
@@ -531,6 +600,7 @@
             var field = document.getElementById(fieldId);
             if (!field) return;
             field.classList.remove('input-error');
+            field.removeAttribute('aria-invalid');
             var msg = field.parentNode.querySelector('.field-error-msg');
             if (msg) msg.parentNode.removeChild(msg);
         }
@@ -642,7 +712,7 @@
                     '<td>' + escapeHtml(item.subject || '-') + '</td>' +
                     '<td>' + formatDate(item.createdAt) + '</td>' +
                     '<td><span class="badge ' + (STATUS_BADGES[item.status] || 'badge-blue') + '">' + (STATUS_LABELS[item.status] || item.status) + '</span></td>' +
-                    '<td><div class="actions-cell"><button class="btn btn-icon btn-icon-view" data-view-inquiry="' + escapeHtml(item.id) + '">' + ICON_VIEW + '</button><button class="btn btn-icon btn-icon-delete" data-delete-inquiry="' + escapeHtml(item.id) + '">' + ICON_DELETE + '</button></div></td>' +
+                    '<td><div class="actions-cell"><button class="btn btn-icon btn-icon-view" aria-label="查看询盘" data-view-inquiry="' + escapeHtml(item.id) + '">' + ICON_VIEW + '</button><button class="btn btn-icon btn-icon-delete" aria-label="删除询盘" data-delete-inquiry="' + escapeHtml(item.id) + '">' + ICON_DELETE + '</button></div></td>' +
                     '</tr>';
             }).join('');
             tbody.querySelectorAll('[data-view-inquiry]').forEach(function (btn) {
@@ -817,7 +887,7 @@
                 return;
             }
             tbody.innerHTML = certifications.map(function (item) {
-                return '<tr><td>' + escapeHtml(item.name) + '</td><td>' + escapeHtml(item.issuer || '-') + '</td><td>' + escapeHtml(item.expiryDate || '-') + '</td><td class="cell-muted">' + escapeHtml(item.image || '未设置') + '</td><td><div class="actions-cell"><button class="btn btn-icon btn-icon-edit" data-edit-cert="' + escapeHtml(item.id) + '">' + ICON_EDIT + '</button><button class="btn btn-icon btn-icon-delete" data-delete-cert="' + escapeHtml(item.id) + '">' + ICON_DELETE + '</button></div></td></tr>';
+                return '<tr><td>' + escapeHtml(item.name) + '</td><td>' + escapeHtml(item.issuer || '-') + '</td><td>' + escapeHtml(item.expiryDate || '-') + '</td><td class="cell-muted">' + escapeHtml(item.image || '未设置') + '</td><td><div class="actions-cell"><button class="btn btn-icon btn-icon-edit" aria-label="编辑证书" data-edit-cert="' + escapeHtml(item.id) + '">' + ICON_EDIT + '</button><button class="btn btn-icon btn-icon-delete" aria-label="删除证书" data-delete-cert="' + escapeHtml(item.id) + '">' + ICON_DELETE + '</button></div></td></tr>';
             }).join('');
             tbody.querySelectorAll('[data-edit-cert]').forEach(function (btn) {
                 btn.addEventListener('click', function () { openCertificationModal(btn.getAttribute('data-edit-cert')); });

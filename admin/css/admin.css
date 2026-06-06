@@ -67,7 +67,6 @@ ul, ol {
 button {
     cursor: pointer;
     border: none;
-    outline: none;
     background: none;
     font-family: inherit;
 }
@@ -75,6 +74,15 @@ button {
 input, textarea, select {
     font-family: inherit;
     font-size: inherit;
+}
+
+/* Focus-visible: keyboard nav only, no outline on mouse click */
+:focus-visible {
+    outline: 2px solid var(--color-blue);
+    outline-offset: 2px;
+}
+
+:focus:not(:focus-visible) {
     outline: none;
 }
 
@@ -570,8 +578,12 @@ h1, h2, h3, h4, h5, h6 {
     transition: background var(--transition-fast);
 }
 
+.data-table tbody tr {
+    cursor: default;
+}
+
 .data-table tbody tr:hover {
-    background: rgba(0, 163, 224, 0.03);
+    background: rgba(0, 163, 224, 0.06);
 }
 
 .data-table tbody tr:last-child td {
@@ -1434,6 +1446,163 @@ h1, h2, h3, h4, h5, h6 {
 
 .form-tab-panel.active {
     display: block;
+}
+
+/* Dashboard bottom row: quick actions + recent inquiries */
+.dashboard-bottom-row {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 24px;
+    margin-top: 32px;
+    align-items: start;
+}
+
+.dashboard-panel {
+    background: var(--color-white-pure);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-gray-200);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.dashboard-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--color-gray-200);
+}
+
+.dashboard-panel-header h3 {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--color-navy);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.dashboard-panel-header a {
+    font-size: 0.8rem;
+    color: var(--color-blue);
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.dashboard-panel-header a:hover {
+    text-decoration: underline;
+}
+
+.quick-actions-list {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.quick-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 14px;
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-gray-700);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.quick-action-btn svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    color: var(--color-blue);
+}
+
+.quick-action-btn:hover {
+    background: var(--color-gray-100);
+    color: var(--color-navy);
+}
+
+.recent-inquiry-list {
+    padding: 0;
+}
+
+.recent-inquiry-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 13px 20px;
+    border-bottom: 1px solid var(--color-gray-200);
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.recent-inquiry-item:last-child {
+    border-bottom: none;
+}
+
+.recent-inquiry-item:hover {
+    background: rgba(0, 163, 224, 0.04);
+}
+
+.recent-inquiry-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: var(--color-gray-300);
+}
+
+.recent-inquiry-dot.new {
+    background: var(--color-danger);
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.18);
+}
+
+.recent-inquiry-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.recent-inquiry-name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-navy);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.recent-inquiry-subject {
+    font-size: 0.78rem;
+    color: var(--color-gray-500);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 2px;
+}
+
+.recent-inquiry-time {
+    font-size: 0.75rem;
+    color: var(--color-gray-400);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.recent-inquiries-empty {
+    padding: 28px 20px;
+    text-align: center;
+    color: var(--color-gray-400);
+    font-size: 0.85rem;
+}
+
+@media (max-width: 1024px) {
+    .dashboard-bottom-row {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* Inquiry Drawer */

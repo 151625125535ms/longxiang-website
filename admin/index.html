@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>龙翔电气网站后台</title>
-    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/admin.css?v=2">
 </head>
 <body>
     <div class="admin-layout" id="admin-page">
@@ -70,6 +70,40 @@
                     </div>
                     <div class="section-header-bar"><h2>产品分类统计</h2></div>
                     <div class="category-stats-grid" id="category-stats"></div>
+
+                    <div class="dashboard-bottom-row">
+                        <div class="dashboard-panel">
+                            <div class="dashboard-panel-header"><h3>快捷操作</h3></div>
+                            <div class="quick-actions-list">
+                                <button class="quick-action-btn" data-action="add-product" aria-label="新增产品">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><line x1="12" y1="22.08" x2="12" y2="12"/><line x1="3.27" y1="6.96" x2="12" y2="12.01"/><line x1="20.73" y1="6.96" x2="12" y2="12.01"/></svg>
+                                    新增产品
+                                </button>
+                                <button class="quick-action-btn" data-action="view-inquiries" aria-label="查看询盘">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                                    查看询盘
+                                </button>
+                                <button class="quick-action-btn" data-action="view-products" aria-label="产品列表">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                                    产品列表
+                                </button>
+                                <button class="quick-action-btn" data-action="view-company" aria-label="公司信息">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                                    公司信息
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-panel">
+                            <div class="dashboard-panel-header">
+                                <h3>最新询盘</h3>
+                                <a role="button" tabindex="0" data-action="view-inquiries">查看全部</a>
+                            </div>
+                            <div class="recent-inquiry-list" id="recent-inquiries-list">
+                                <p class="recent-inquiries-empty">加载中...</p>
+                            </div>
+                        </div>
+                    </div>
                 </section>
 
                 <section class="view-section" id="view-products">
@@ -290,6 +324,6 @@
 
         <div class="toast-container" id="toast-container"></div>
     </div>
-    <script src="js/admin.js"></script>
+    <script src="js/admin.js?v=2"></script>
 </body>
 </html>
