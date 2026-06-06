@@ -247,31 +247,15 @@
             </div>
         </div>
 
-        <div class="drawer-overlay" id="inquiry-drawer-overlay">
-            <div class="drawer" id="inquiry-drawer">
-                <div class="drawer-header">
-                    <h3>询盘详情</h3>
-                    <button class="drawer-close" id="inquiry-drawer-close">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                    </button>
-                </div>
-                <div class="drawer-body">
+        <div class="modal-overlay" id="inquiry-modal">
+            <div class="modal">
+                <div class="modal-header"><h3>询盘详情</h3><button class="modal-close" id="inquiry-modal-close">×</button></div>
+                <div class="modal-body">
                     <div class="detail-grid" id="inquiry-detail"></div>
-                    <div class="form-group" style="margin-top:16px;">
-                        <label>处理状态</label>
-                        <select id="inquiry-status">
-                            <option value="new">新询盘</option>
-                            <option value="read">已读</option>
-                            <option value="replied">已回复</option>
-                            <option value="closed">已关闭</option>
-                        </select>
-                    </div>
+                    <div class="form-group" style="margin-top:16px;"><label>处理状态</label><select id="inquiry-status"><option value="new">新询盘</option><option value="read">已读</option><option value="replied">已回复</option><option value="closed">已关闭</option></select></div>
                     <div class="form-group"><label>管理员备注</label><textarea id="inquiry-notes" rows="4"></textarea></div>
                 </div>
-                <div class="drawer-footer">
-                    <button class="btn btn-secondary" id="inquiry-cancel">关闭</button>
-                    <button class="btn btn-primary" id="inquiry-save">保存状态</button>
-                </div>
+                <div class="modal-footer"><button class="btn btn-reply" id="inquiry-reply"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;margin-right:6px;vertical-align:middle;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>邮件回复</button><button class="btn btn-secondary" id="inquiry-cancel">关闭</button><button class="btn btn-primary" id="inquiry-save">保存状态</button></div>
             </div>
         </div>
 

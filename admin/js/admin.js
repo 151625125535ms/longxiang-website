@@ -11,6 +11,9 @@
     ];
     var STATUS_LABELS = { new: '新询盘', read: '已读', replied: '已回复', closed: '已关闭' };
     var STATUS_BADGES = { new: 'badge-gold', read: 'badge-blue', replied: 'badge-green', closed: 'badge-navy' };
+    var ICON_EDIT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
+    var ICON_DELETE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>';
+    var ICON_VIEW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
 
     function getToken() {
         return localStorage.getItem('admin_token');
@@ -205,6 +208,7 @@
         var editingProductId = null;
         var uploadedImagePath = '';
         var editingInquiryId = null;
+        var openedInquiry = null;
         var editingCertificationId = null;
 
         var usernameEl = document.getElementById('sidebar-username');
@@ -364,9 +368,9 @@
                 return '<tr>' +
                     '<td><div class="product-name-cell"><img class="product-thumb" src="../' + escapeHtml(product.image || '') + '" alt=""><div><div class="product-name-text">' + escapeHtml(product.name) + '</div><div class="product-id-text">' + escapeHtml(product.id) + '</div></div></div></td>' +
                     '<td><span class="badge badge-blue">' + escapeHtml(product.categoryLabel || product.category) + '</span></td>' +
-                    '<td>' + (product.featured ? '<span class="badge badge-gold">首页推荐</span>' : '<span class="badge badge-navy">普通</span>') + '</td>' +
+                    '<td><span class="badge badge-toggle ' + (product.featured ? 'badge-gold' : 'badge-navy') + '" data-toggle-featured="' + escapeHtml(product.id) + '">' + (product.featured ? '首页推荐' : '普通') + '</span></td>' +
                     '<td class="cell-muted">' + escapeHtml(product.shortDesc || '') + '</td>' +
-                    '<td><div class="actions-cell"><button class="btn btn-icon btn-icon-edit" data-edit-product="' + escapeHtml(product.id) + '">编</button><button class="btn btn-icon btn-icon-delete" data-delete-product="' + escapeHtml(product.id) + '">删</button></div></td>' +
+                    '<td><div class="actions-cell"><button class="btn btn-icon btn-icon-edit" data-edit-product="' + escapeHtml(product.id) + '">' + ICON_EDIT + '</button><button class="btn btn-icon btn-icon-delete" data-delete-product="' + escapeHtml(product.id) + '">' + ICON_DELETE + '</button></div></td>' +
                     '</tr>';
             }).join('');
 
@@ -375,6 +379,9 @@
             });
             tbody.querySelectorAll('[data-delete-product]').forEach(function (btn) {
                 btn.addEventListener('click', function () { deleteProduct(btn.getAttribute('data-delete-product')); });
+            });
+            tbody.querySelectorAll('[data-toggle-featured]').forEach(function (badge) {
+                badge.addEventListener('click', function () { toggleFeatured(badge.getAttribute('data-toggle-featured')); });
             });
         }
 
@@ -407,6 +414,13 @@
 
             var form = document.getElementById('product-form');
             if (form) form.addEventListener('submit', saveProduct);
+
+            ['field-id', 'field-name', 'field-categoryLabel'].forEach(function (fid) {
+                var el = document.getElementById(fid);
+                if (el) el.addEventListener('input', function () { clearFieldError(fid); });
+            });
+            var catSel = document.getElementById('field-category');
+            if (catSel) catSel.addEventListener('change', function () { clearFieldError('field-category'); });
         }
 
         function openProductModal(productId) {
@@ -501,16 +515,42 @@
             return specs;
         }
 
+        function showFieldError(fieldId, message) {
+            var field = document.getElementById(fieldId);
+            if (!field) return;
+            field.classList.add('input-error');
+            var existing = field.parentNode.querySelector('.field-error-msg');
+            if (!existing) {
+                var msg = document.createElement('span');
+                msg.className = 'field-error-msg';
+                field.parentNode.appendChild(msg);
+                existing = msg;
+            }
+            existing.textContent = message;
+        }
+
+        function clearFieldError(fieldId) {
+            var field = document.getElementById(fieldId);
+            if (!field) return;
+            field.classList.remove('input-error');
+            var msg = field.parentNode.querySelector('.field-error-msg');
+            if (msg) msg.textContent = '';
+        }
+
         function saveProduct(e) {
             e.preventDefault();
             var id = document.getElementById('field-id').value.trim();
             var name = document.getElementById('field-name').value.trim();
             var category = document.getElementById('field-category').value;
             var categoryLabel = document.getElementById('field-categoryLabel').value.trim();
-            if (!id || !name || !category || !categoryLabel) {
-                showToast('请填写产品 ID、英文名称、分类和分类名', 'error');
-                return;
-            }
+
+            ['field-id', 'field-name', 'field-category', 'field-categoryLabel'].forEach(clearFieldError);
+            var valid = true;
+            if (!id) { showFieldError('field-id', '请填写产品 ID'); valid = false; }
+            if (!name) { showFieldError('field-name', '请填写英文名称'); valid = false; }
+            if (!category) { showFieldError('field-category', '请选择分类'); valid = false; }
+            if (!categoryLabel) { showFieldError('field-categoryLabel', '请填写英文分类名'); valid = false; }
+            if (!valid) return;
 
             var payload = {
                 id: id,
@@ -558,6 +598,21 @@
             });
         }
 
+        function toggleFeatured(productId) {
+            var product = products.find(function (p) { return p.id === productId; });
+            if (!product) return;
+            var newFeatured = !product.featured;
+            apiRequest('/products/' + encodeURIComponent(productId), {
+                method: 'PUT',
+                body: { featured: newFeatured }
+            }).then(function () {
+                product.featured = newFeatured;
+                renderProductsTable();
+                setText('stat-featured', products.filter(function (p) { return p.featured; }).length);
+                showToast(newFeatured ? '已加入首页推荐' : '已取消首页推荐');
+            }).catch(function (err) { showToast('操作失败：' + err.message, 'error'); });
+        }
+
         function loadInquiries() {
             document.getElementById('inquiries-tbody').innerHTML = skeletonRows(6, 5);
             var status = document.getElementById('inquiry-status-filter').value;
@@ -581,7 +636,7 @@
                     '<td>' + escapeHtml(item.subject || '-') + '</td>' +
                     '<td>' + formatDate(item.createdAt) + '</td>' +
                     '<td><span class="badge ' + (STATUS_BADGES[item.status] || 'badge-blue') + '">' + (STATUS_LABELS[item.status] || item.status) + '</span></td>' +
-                    '<td><div class="actions-cell"><button class="btn btn-sm btn-secondary" data-view-inquiry="' + escapeHtml(item.id) + '">查看</button><button class="btn btn-sm btn-danger" data-delete-inquiry="' + escapeHtml(item.id) + '">删除</button></div></td>' +
+                    '<td><div class="actions-cell"><button class="btn btn-icon btn-icon-view" data-view-inquiry="' + escapeHtml(item.id) + '">' + ICON_VIEW + '</button><button class="btn btn-icon btn-icon-delete" data-delete-inquiry="' + escapeHtml(item.id) + '">' + ICON_DELETE + '</button></div></td>' +
                     '</tr>';
             }).join('');
             tbody.querySelectorAll('[data-view-inquiry]').forEach(function (btn) {
@@ -595,14 +650,41 @@
         function bindInquiryEvents() {
             var filter = document.getElementById('inquiry-status-filter');
             if (filter) filter.addEventListener('change', loadInquiries);
-            bindDrawerClose('inquiry-drawer-overlay', ['inquiry-drawer-close', 'inquiry-cancel']);
+            bindModalClose('inquiry-modal', ['inquiry-modal-close', 'inquiry-cancel']);
             var save = document.getElementById('inquiry-save');
             if (save) save.addEventListener('click', saveInquiryStatus);
+            var reply = document.getElementById('inquiry-reply');
+            if (reply) reply.addEventListener('click', replyByEmail);
+        }
+
+        function replyByEmail() {
+            if (!openedInquiry || !openedInquiry.email) return;
+            var subject = 'Re: ' + (openedInquiry.subject || 'Your Inquiry');
+            var body = 'Dear ' + (openedInquiry.name || '') + ',\n\n\n\n---\nOriginal message:\n' + (openedInquiry.message || '');
+            window.open(
+                'https://mail.google.com/mail/?view=cm' +
+                '&to=' + encodeURIComponent(openedInquiry.email) +
+                '&su=' + encodeURIComponent(subject) +
+                '&body=' + encodeURIComponent(body)
+            );
+            if (openedInquiry.status !== 'replied' && openedInquiry.status !== 'closed') {
+                apiRequest('/inquiries/' + encodeURIComponent(openedInquiry.id), {
+                    method: 'PUT',
+                    body: { status: 'replied', notes: document.getElementById('inquiry-notes').value }
+                }).then(function () {
+                    openedInquiry.status = 'replied';
+                    document.getElementById('inquiry-status').value = 'replied';
+                    showToast('状态已更新为已回复');
+                    loadInquiries();
+                }).catch(function () {});
+            }
         }
 
         function openInquiryModal(id) {
             editingInquiryId = id;
+            openedInquiry = null;
             apiRequest('/inquiries/' + encodeURIComponent(id)).then(function (item) {
+                openedInquiry = item;
                 document.getElementById('inquiry-detail').innerHTML =
                     detailItem('客户姓名', item.name) +
                     detailItem('邮箱', item.email) +
@@ -617,11 +699,12 @@
                 if (item.productContext) {
                     document.getElementById('inquiry-detail').insertAdjacentHTML('beforeend', detailItem('Product', item.productContext));
                 }
-                document.getElementById('inquiry-drawer-overlay').classList.add('show');
+                document.getElementById('inquiry-modal').classList.add('show');
 
                 if (item.status === 'new') {
                     apiRequest('/inquiries/' + encodeURIComponent(id), { method: 'PUT', body: { status: 'read', notes: item.notes || '' } })
                         .then(function () {
+                            openedInquiry.status = 'read';
                             document.getElementById('inquiry-status').value = 'read';
                             loadInquiries();
                         })
@@ -644,7 +727,7 @@
                 }
             }).then(function () {
                 showToast('询盘状态已保存');
-                closeDrawer('inquiry-drawer-overlay');
+                closeModal('inquiry-modal');
                 loadInquiries();
             }).catch(function (err) { showToast('保存失败：' + err.message, 'error'); });
         }
@@ -724,7 +807,7 @@
                 return;
             }
             tbody.innerHTML = certifications.map(function (item) {
-                return '<tr><td>' + escapeHtml(item.name) + '</td><td>' + escapeHtml(item.issuer || '-') + '</td><td>' + escapeHtml(item.expiryDate || '-') + '</td><td class="cell-muted">' + escapeHtml(item.image || '未设置') + '</td><td><div class="actions-cell"><button class="btn btn-sm btn-secondary" data-edit-cert="' + escapeHtml(item.id) + '">编辑</button><button class="btn btn-sm btn-danger" data-delete-cert="' + escapeHtml(item.id) + '">删除</button></div></td></tr>';
+                return '<tr><td>' + escapeHtml(item.name) + '</td><td>' + escapeHtml(item.issuer || '-') + '</td><td>' + escapeHtml(item.expiryDate || '-') + '</td><td class="cell-muted">' + escapeHtml(item.image || '未设置') + '</td><td><div class="actions-cell"><button class="btn btn-icon btn-icon-edit" data-edit-cert="' + escapeHtml(item.id) + '">' + ICON_EDIT + '</button><button class="btn btn-icon btn-icon-delete" data-delete-cert="' + escapeHtml(item.id) + '">' + ICON_DELETE + '</button></div></td></tr>';
             }).join('');
             tbody.querySelectorAll('[data-edit-cert]').forEach(function (btn) {
                 btn.addEventListener('click', function () { openCertificationModal(btn.getAttribute('data-edit-cert')); });
@@ -800,6 +883,7 @@
             if (modal) modal.classList.remove('show');
             if (modalId === 'product-modal') editingProductId = null;
             if (modalId === 'certification-modal') editingCertificationId = null;
+            if (modalId === 'inquiry-modal') { editingInquiryId = null; openedInquiry = null; }
         }
 
         function closeDrawer(overlayId) {

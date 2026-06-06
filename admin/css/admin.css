@@ -667,6 +667,54 @@ h1, h2, h3, h4, h5, h6 {
     color: var(--color-white-pure);
 }
 
+.btn-icon-view {
+    background: rgba(40, 167, 69, 0.1);
+    color: var(--color-success);
+}
+
+.btn-icon-view:hover {
+    background: var(--color-success);
+    color: var(--color-white-pure);
+}
+
+.badge-toggle {
+    cursor: pointer;
+    user-select: none;
+    transition: opacity 0.15s, transform 0.15s;
+}
+
+.badge-toggle:hover {
+    opacity: 0.8;
+    transform: scale(1.05);
+}
+
+.btn-reply {
+    margin-right: auto;
+    background: rgba(0, 163, 224, 0.08);
+    color: var(--color-blue);
+    border: 1px solid rgba(0, 163, 224, 0.25);
+    display: inline-flex;
+    align-items: center;
+}
+
+.btn-reply:hover {
+    background: var(--color-blue);
+    color: #fff;
+    border-color: var(--color-blue);
+}
+
+.input-error {
+    border-color: var(--color-danger) !important;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.12) !important;
+}
+
+.field-error-msg {
+    display: block;
+    color: var(--color-danger);
+    font-size: 0.78rem;
+    margin-top: 5px;
+}
+
 .modal-overlay {
     position: fixed;
     inset: 0;
