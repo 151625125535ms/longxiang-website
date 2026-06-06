@@ -2765,6 +2765,10 @@ p:last-child {
     font-size: 0.85rem;
 }
 
+.trust-testimonials {
+    margin-top: 40px;
+}
+
 .product-catalog-layout {
     display: grid;
     grid-template-columns: 280px minmax(0, 1fr);
