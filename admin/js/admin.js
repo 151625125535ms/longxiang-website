@@ -205,6 +205,7 @@
         var editingProductId = null;
         var uploadedImagePath = '';
         var editingInquiryId = null;
+        var openedInquiry = null;
         var editingCertificationId = null;
 
         var usernameEl = document.getElementById('sidebar-username');
@@ -566,11 +567,35 @@
             bindModalClose('inquiry-modal', ['inquiry-modal-close', 'inquiry-cancel']);
             var save = document.getElementById('inquiry-save');
             if (save) save.addEventListener('click', saveInquiryStatus);
+            var reply = document.getElementById('inquiry-reply');
+            if (reply) reply.addEventListener('click', replyByEmail);
+        }
+
+        function replyByEmail() {
+            if (!openedInquiry || !openedInquiry.email) return;
+            var subject = 'Re: ' + (openedInquiry.subject || 'Your Inquiry');
+            var body = 'Dear ' + (openedInquiry.name || '') + ',\n\n\n\n---\nOriginal message:\n' + (openedInquiry.message || '');
+            window.open('mailto:' + encodeURIComponent(openedInquiry.email) +
+                '?subject=' + encodeURIComponent(subject) +
+                '&body=' + encodeURIComponent(body));
+            if (openedInquiry.status !== 'replied' && openedInquiry.status !== 'closed') {
+                apiRequest('/inquiries/' + encodeURIComponent(openedInquiry.id), {
+                    method: 'PUT',
+                    body: { status: 'replied', notes: document.getElementById('inquiry-notes').value }
+                }).then(function () {
+                    openedInquiry.status = 'replied';
+                    document.getElementById('inquiry-status').value = 'replied';
+                    showToast('状态已更新为已回复');
+                    loadInquiries();
+                }).catch(function () {});
+            }
         }
 
         function openInquiryModal(id) {
             editingInquiryId = id;
+            openedInquiry = null;
             apiRequest('/inquiries/' + encodeURIComponent(id)).then(function (item) {
+                openedInquiry = item;
                 document.getElementById('inquiry-detail').innerHTML =
                     detailItem('客户姓名', item.name) +
                     detailItem('邮箱', item.email) +

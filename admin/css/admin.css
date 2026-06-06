@@ -744,6 +744,21 @@ h1, h2, h3, h4, h5, h6 {
     border-top: 1px solid var(--color-gray-200);
 }
 
+.btn-reply {
+    margin-right: auto;
+    background: rgba(0, 163, 224, 0.08);
+    color: var(--color-blue);
+    border: 1px solid rgba(0, 163, 224, 0.25);
+    display: inline-flex;
+    align-items: center;
+}
+
+.btn-reply:hover {
+    background: var(--color-blue);
+    color: #fff;
+    border-color: var(--color-blue);
+}
+
 .form-group {
     margin-bottom: 20px;
 }
