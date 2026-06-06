@@ -425,6 +425,8 @@
                     (p.id || '').toLowerCase().indexOf(searchVal) !== -1;
                 var matchCat = !catVal || p.category === catVal;
                 return matchSearch && matchCat;
+            }).sort(function (a, b) {
+                return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);
             });
 
             if (!filtered.length) {
