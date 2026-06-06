@@ -2612,10 +2612,10 @@ p:last-child {
 .hero-hex-btn.solutions { background: var(--color-tech-blue); }
 .hero-hex-btn.solutions:hover { background: var(--color-tech-blue-dark); }
 .hero-hex-btn.contact {
-    background: #333333;
-    border: 2px solid #86888A;
+    background: #16A34A;
+    border: 2px solid #15803D;
 }
-.hero-hex-btn.contact:hover { background: #252525; }
+.hero-hex-btn.contact:hover { background: #15803D; }
 
 .products-showcase-redesign {
     padding-top: 72px;
