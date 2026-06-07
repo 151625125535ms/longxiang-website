@@ -101,7 +101,7 @@
             '<div class="container"><div class="stats-grid">' +
             stats.map(function (stat) {
                 var value = stat.value || '';
-                var numeric = /^\d+$/.test(value) ? ' data-count="' + escapeHtml(value) + '">' + escapeHtml(value) : '>' + escapeHtml(value);
+                var numeric = /^\d+$/.test(value) ? ' data-count="' + escapeHtml(value) + '">0' : '>' + escapeHtml(value);
                 return '<div class="stat-item fade-in">' +
                     '<div class="stat-number"' + numeric + '</div>' +
                     '<div class="stat-divider"></div>' +
@@ -269,6 +269,9 @@
             pageRoot.querySelectorAll('.fade-in, .fade-in-left, .fade-in-right, .fade-in-scale').forEach(function (el) {
                 el.classList.add('visible');
             });
+        }
+        if (typeof window.initStatCounters === 'function') {
+            window.initStatCounters();
         }
     }
 

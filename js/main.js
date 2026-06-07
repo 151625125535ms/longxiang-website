@@ -371,6 +371,8 @@
         statNumbers.forEach(function (el) { observer.observe(el); });
     }
 
+    window.initStatCounters = initStatCounters;
+
     function animateCounter(element) {
         var target = parseInt(element.getAttribute('data-count'), 10);
         if (isNaN(target)) return;
