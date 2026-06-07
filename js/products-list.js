@@ -42,6 +42,42 @@
         }
     ];
 
+    function apiCategoriesToTaxonomy(cats) {
+        return cats.map(function (g) {
+            return {
+                group: g.id,
+                label: g.label,
+                labelAr: g.labelAr || g.label,
+                children: (g.subcategories || []).map(function (s) {
+                    return { sub: s.id, label: s.label, labelAr: s.labelAr || s.label };
+                })
+            };
+        });
+    }
+
+    function rebuildProductTree(taxon) {
+        var treeBody = document.querySelector('.product-tree-body');
+        if (!treeBody) return;
+        var filter = selectedFilter();
+        // All dynamic values are passed through escapeHtml() — safe against XSS.
+        treeBody.innerHTML = taxon.map(function (group) {
+            var groupLabel = isArabic ? (group.labelAr || group.label) : group.label;
+            var isActive = group.group === filter.group && !filter.sub;
+            var subs = (group.children || []).map(function (child) {
+                var childLabel = isArabic ? (child.labelAr || child.label) : child.label;
+                var childActive = group.group === filter.group && child.sub === filter.sub;
+                return '<button type="button" class="tree-child' + (childActive ? ' active' : '') +
+                    '" data-product-filter data-group="' + escapeHtml(group.group) +
+                    '" data-sub="' + escapeHtml(child.sub) + '">' + escapeHtml(childLabel) + '</button>';
+            }).join('');
+            return '<div class="product-tree-group">' +
+                '<button type="button" class="tree-parent' + (isActive ? ' active' : '') +
+                '" data-product-filter data-group="' + escapeHtml(group.group) + '">' + escapeHtml(groupLabel) + '</button>' +
+                '<div class="tree-children">' + subs + '</div>' +
+                '</div>';
+        }).join('');
+    }
+
     function escapeHtml(value) {
         return String(value == null ? '' : value)
             .replace(/&/g, '&amp;')
@@ -402,29 +438,41 @@
     }
 
     function loadProducts() {
-        fetch('/api/products')
-            .then(function (res) {
-                if (!res.ok) throw new Error('API request failed');
-                return res.json();
-            })
-            .then(function (products) {
-                productsCache = products.map(normalizeProduct);
+        var catPromise = fetch('/api/categories')
+            .then(function (res) { return res.ok ? res.json() : []; })
+            .catch(function () { return []; });
+
+        var prodPromise = fetch('/api/products')
+            .then(function (res) { return res.ok ? res.json() : null; })
+            .catch(function () { return null; });
+
+        Promise.all([catPromise, prodPromise]).then(function (results) {
+            var cats = results[0];
+            var prods = results[1];
+
+            if (Array.isArray(cats) && cats.length) {
+                taxonomy = apiCategoriesToTaxonomy(cats);
+                rebuildProductTree(taxonomy);
+            }
+
+            if (prods) {
+                productsCache = prods.map(normalizeProduct);
                 initProductTree();
                 renderProducts(productsCache);
-            })
-            .catch(function () {
+            } else {
                 fetch(assetPrefix + 'data/products.json')
                     .then(function (res) {
-                        if (!res.ok) throw new Error('Fallback request failed');
+                        if (!res.ok) throw new Error('Fallback failed');
                         return res.json();
                     })
-                    .then(function (products) {
-                        productsCache = products.map(normalizeProduct);
+                    .then(function (fallbackProds) {
+                        productsCache = fallbackProds.map(normalizeProduct);
                         initProductTree();
                         renderProducts(productsCache);
                     })
                     .catch(showError);
-            });
+            }
+        });
     }
 
     if (document.readyState === 'loading') {
