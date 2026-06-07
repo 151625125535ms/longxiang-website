@@ -23,6 +23,9 @@ try { rateLimit = require('express-rate-limit'); } catch (err) { rateLimit = nul
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Required for accurate client IP detection when behind a reverse proxy
+app.set('trust proxy', 1);
+
 const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
     ? process.env.ALLOWED_ORIGINS.split(',').map(function (o) { return o.trim(); })
     : null;
