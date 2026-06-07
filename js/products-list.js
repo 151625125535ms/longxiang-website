@@ -168,8 +168,17 @@
         });
     }
 
-    function renderEmpty(group, sub) {
+    function renderEmpty(group, sub, search) {
         var label = taxonomyLabel(group, sub);
+        var keyword = (search || '').trim();
+        if (keyword) {
+            container.innerHTML = '<div class="empty-state">' +
+                (isArabic
+                    ? '賱丕 鬲賵噩丿 賳鬲丕卅噩 賱賭 "' + escapeHtml(keyword) + '" 賮賷 ' + escapeHtml(label) + '.'
+                    : 'No results for "' + escapeHtml(keyword) + '" in ' + escapeHtml(label) + '.') +
+                '</div>';
+            return;
+        }
         container.innerHTML = '<div class="empty-state">' +
             escapeHtml(label) + (isArabic ? ' سيتم تحديث المنتجات قريباً.' : ' products will be updated soon.') +
             '</div>';
