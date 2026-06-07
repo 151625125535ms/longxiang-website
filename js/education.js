@@ -263,9 +263,13 @@
     }
 
     function hydrateRenderedUi() {
-        pageRoot.querySelectorAll('.fade-in, .fade-in-left, .fade-in-right, .fade-in-scale').forEach(function (el) {
-            el.classList.add('visible');
-        });
+        if (typeof window.initScrollAnimations === 'function') {
+            window.initScrollAnimations();
+        } else {
+            pageRoot.querySelectorAll('.fade-in, .fade-in-left, .fade-in-right, .fade-in-scale').forEach(function (el) {
+                el.classList.add('visible');
+            });
+        }
     }
 
     fetchJson('/api/education', assetPrefix + 'data/education.json')
