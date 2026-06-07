@@ -35,6 +35,10 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15l-3.5 2 1-4-3-2.8 4-.3L12 6l1.5 3.9 4 .3-3 2.8 1 4z"/><path d="M5 21V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v17l-7-3z"/></svg>
                     证书管理
                 </a>
+                <a href="#" data-view="categories">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                    分类管理
+                </a>
                 <a href="#" class="logout-link" id="nav-logout">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
                     退出登录
@@ -118,11 +122,6 @@
                         </div>
                         <select id="product-category-filter" class="toolbar-select">
                             <option value="">全部分类</option>
-                            <option value="oil-immersed">Oil-Immersed</option>
-                            <option value="dry-type">Dry-Type</option>
-                            <option value="special">Special</option>
-                            <option value="combined">Combined</option>
-                            <option value="switchgear">Switchgear</option>
                         </select>
                     </div>
                     <div class="data-table-wrapper">
@@ -130,6 +129,16 @@
                             <thead><tr><th>产品</th><th>分类</th><th>状态</th><th>简介</th><th>操作</th></tr></thead>
                             <tbody id="products-tbody"><tr><td colspan="5" class="table-empty"><p>加载中...</p></td></tr></tbody>
                         </table>
+                    </div>
+                </section>
+
+                <section class="view-section" id="view-categories">
+                    <div class="section-header-bar">
+                        <h2>分类管理</h2>
+                        <button class="btn btn-primary" id="btn-add-category">新增大类</button>
+                    </div>
+                    <div class="category-tree" id="category-tree">
+                        <p class="table-empty">加载中...</p>
                     </div>
                 </section>
 
@@ -248,19 +257,23 @@
                         </div>
                         <div class="form-row">
                             <div class="form-group">
-                                <label>分类 <span class="required">*</span></label>
-                                <select id="field-category">
-                                    <option value="">选择分类</option>
-                                    <option value="oil-immersed">Oil-Immersed</option>
-                                    <option value="dry-type">Dry-Type</option>
-                                    <option value="special">Special</option>
-                                    <option value="combined">Combined</option>
-                                    <option value="switchgear">Switchgear</option>
+                                <label>大类 <span class="required">*</span></label>
+                                <select id="field-group">
+                                    <option value="">选择大类</option>
                                 </select>
                             </div>
-                            <div class="form-group"><label>英文分类名 <span class="required">*</span></label><input type="text" id="field-categoryLabel"></div>
+                            <div class="form-group">
+                                <label>小类 <span class="required">*</span></label>
+                                <select id="field-subCategory" disabled>
+                                    <option value="">请先选择大类</option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="form-group"><label>阿拉伯语分类名</label><input type="text" id="field-categoryLabelAr" dir="rtl"></div>
+                        <input type="hidden" id="field-category">
+                        <div class="form-row">
+                            <div class="form-group"><label>英文分类名</label><input type="text" id="field-categoryLabel" placeholder="自动填写，可修改"></div>
+                            <div class="form-group"><label>阿拉伯语分类名</label><input type="text" id="field-categoryLabelAr" dir="rtl" placeholder="自动填写，可修改"></div>
+                        </div>
                         <div class="form-group"><label>英文短描述</label><input type="text" id="field-shortDesc"></div>
                         <div class="form-group"><label>阿拉伯语短描述</label><input type="text" id="field-shortDescAr" dir="rtl"></div>
                         <div class="form-group"><label>英文详情</label><textarea id="field-description" rows="3"></textarea></div>
@@ -311,6 +324,20 @@
             </div>
         </div>
 
+        <div class="modal-overlay" id="cat-modal">
+            <div class="modal modal-sm">
+                <div class="modal-header"><h3 id="cat-modal-title">新增大类</h3><button class="modal-close" id="cat-modal-close">×</button></div>
+                <div class="modal-body">
+                    <form id="cat-form">
+                        <div class="form-group"><label>英文名称 <span class="required">*</span></label><input type="text" id="cat-label" placeholder="e.g. Transformer"></div>
+                        <div class="form-group"><label>阿拉伯语名称</label><input type="text" id="cat-labelAr" dir="rtl"></div>
+                        <div class="form-group"><label>中文名称</label><input type="text" id="cat-labelZh"></div>
+                    </form>
+                </div>
+                <div class="modal-footer"><button class="btn btn-secondary" id="cat-modal-cancel">取消</button><button class="btn btn-primary" id="cat-modal-submit">保存</button></div>
+            </div>
+        </div>
+
         <div class="confirm-overlay" id="confirm-overlay">
             <div class="confirm-dialog">
                 <h3 id="confirm-title">确认操作</h3>
@@ -324,6 +351,6 @@
 
         <div class="toast-container" id="toast-container"></div>
     </div>
-    <script src="js/admin.js?v=2"></script>
+    <script src="js/admin.js?v=4"></script>
 </body>
 </html>

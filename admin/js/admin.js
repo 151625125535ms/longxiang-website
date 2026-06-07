@@ -2,13 +2,7 @@
     'use strict';
 
     var API_BASE = '../api';
-    var CATEGORIES = [
-        { value: 'oil-immersed', label: 'Oil-Immersed', labelAr: 'محولات مغمورة بالزيت' },
-        { value: 'dry-type', label: 'Dry-Type', labelAr: 'محولات جافة' },
-        { value: 'special', label: 'Special', labelAr: 'محولات خاصة' },
-        { value: 'combined', label: 'Combined', labelAr: 'محولات مركبة' },
-        { value: 'switchgear', label: 'Switchgear', labelAr: 'معدات مفاتيح كهربائية' }
-    ];
+    var categories = [];
     var STATUS_LABELS = { new: '新询盘', read: '已读', replied: '已回复', closed: '已关闭' };
     var STATUS_BADGES = { new: 'badge-gold', read: 'badge-blue', replied: 'badge-green', closed: 'badge-navy' };
     var ICON_EDIT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
@@ -210,6 +204,9 @@
         var editingInquiryId = null;
         var openedInquiry = null;
         var editingCertificationId = null;
+        var catModalMode = null;
+        var catModalGroupId = null;
+        var catModalSubId = null;
 
         var usernameEl = document.getElementById('sidebar-username');
         var avatarEl = document.getElementById('sidebar-avatar');
@@ -222,6 +219,8 @@
         bindInquiryEvents();
         bindCompanyEvents();
         bindCertificationEvents();
+        bindCategoryEvents();
+        loadCategories();
         switchView('dashboard');
 
         function bindNavigation() {
@@ -274,7 +273,8 @@
                 products: '产品管理',
                 inquiries: '询盘管理',
                 company: '公司信息',
-                certifications: '证书管理'
+                certifications: '证书管理',
+                categories: '分类管理'
             };
             document.getElementById('header-title').textContent = titles[view] || '';
 
@@ -283,6 +283,7 @@
             if (view === 'inquiries') loadInquiries();
             if (view === 'company') loadCompany();
             if (view === 'certifications') loadCertifications();
+            if (view === 'categories') renderCategoriesView();
         }
 
         function loadDashboard() {
@@ -301,21 +302,25 @@
 
         function renderDashboard() {
             var featured = products.filter(function (p) { return p.featured; });
-            var categoryMap = {};
-            products.forEach(function (p) { categoryMap[p.category] = p.categoryLabel; });
 
             setText('stat-total', products.length);
             setText('stat-featured', featured.length);
-            setText('stat-categories', Object.keys(categoryMap).length);
+            setText('stat-categories', categories.length);
             setText('stat-inquiries', inquiries.length);
             setText('stat-new-inquiries', inquiries.filter(function (item) { return item.status === 'new'; }).length);
 
             var catGrid = document.getElementById('category-stats');
             if (catGrid) {
-                catGrid.innerHTML = Object.keys(categoryMap).map(function (key) {
-                    var count = products.filter(function (p) { return p.category === key; }).length;
-                    return '<div class="category-stat-card"><span class="badge badge-blue">' + count + '</span><div><div class="category-stat-count">' + count + '</div><div class="category-stat-label">' + escapeHtml(categoryMap[key]) + '</div></div></div>';
-                }).join('');
+                if (!categories.length) {
+                    catGrid.innerHTML = '<p class="table-empty">分类加载中…</p>';
+                } else {
+                    catGrid.innerHTML = categories.map(function (group) {
+                        var count = products.filter(function (p) {
+                            return p.group === group.id || (!p.group && group.id === 'transformer');
+                        }).length;
+                        return '<div class="category-stat-card"><span class="badge badge-blue">' + count + '</span><div><div class="category-stat-count">' + count + '</div><div class="category-stat-label">' + escapeHtml(group.label) + '</div></div></div>';
+                    }).join('');
+                }
             }
 
             renderRecentInquiries();
@@ -423,7 +428,16 @@
                 var matchSearch = !searchVal ||
                     (p.name || '').toLowerCase().indexOf(searchVal) !== -1 ||
                     (p.id || '').toLowerCase().indexOf(searchVal) !== -1;
-                var matchCat = !catVal || p.category === catVal;
+                var matchCat = !catVal;
+                if (!matchCat) {
+                    var parts = catVal.split('/');
+                    if (parts.length === 2) {
+                        matchCat = (p.group === parts[0] && p.subCategory === parts[1]) ||
+                            (!p.group && p.category === parts[1]);
+                    } else {
+                        matchCat = p.group === catVal || (!p.group && p.category === catVal);
+                    }
+                }
                 return matchSearch && matchCat;
             }).sort(function (a, b) {
                 return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);
@@ -469,13 +483,41 @@
 
             bindModalClose('product-modal', ['modal-close', 'modal-cancel']);
 
-            var category = document.getElementById('field-category');
-            if (category) {
-                category.addEventListener('change', function () {
-                    var match = CATEGORIES.find(function (item) { return item.value === category.value; });
-                    if (!match) return;
-                    if (!document.getElementById('field-categoryLabel').value) document.getElementById('field-categoryLabel').value = match.label;
-                    if (!document.getElementById('field-categoryLabelAr').value) document.getElementById('field-categoryLabelAr').value = match.labelAr;
+            var groupSelect = document.getElementById('field-group');
+            var subSelect = document.getElementById('field-subCategory');
+
+            if (groupSelect) {
+                groupSelect.addEventListener('change', function () {
+                    clearFieldError('field-group');
+                    var groupId = groupSelect.value;
+                    var group = categories.find(function (g) { return g.id === groupId; });
+                    subSelect.innerHTML = '<option value="">选择小类</option>';
+                    subSelect.disabled = !group;
+                    document.getElementById('field-category').value = '';
+                    document.getElementById('field-categoryLabel').value = '';
+                    document.getElementById('field-categoryLabelAr').value = '';
+                    if (group) {
+                        group.subcategories.forEach(function (s) {
+                            subSelect.innerHTML += '<option value="' + escapeHtml(s.id) + '">' + escapeHtml(s.label) + '</option>';
+                        });
+                    }
+                });
+            }
+
+            if (subSelect) {
+                subSelect.addEventListener('change', function () {
+                    clearFieldError('field-subCategory');
+                    var groupId = groupSelect ? groupSelect.value : '';
+                    var subId = subSelect.value;
+                    var group = categories.find(function (g) { return g.id === groupId; });
+                    var sub = group && group.subcategories.find(function (s) { return s.id === subId; });
+                    document.getElementById('field-category').value = subId;
+                    if (sub) {
+                        if (!document.getElementById('field-categoryLabel').value)
+                            document.getElementById('field-categoryLabel').value = sub.label || '';
+                        if (!document.getElementById('field-categoryLabelAr').value)
+                            document.getElementById('field-categoryLabelAr').value = sub.labelAr || '';
+                    }
                 });
             }
 
@@ -488,7 +530,7 @@
             var form = document.getElementById('product-form');
             if (form) form.addEventListener('submit', saveProduct);
 
-            [['field-id','input'],['field-name','input'],['field-categoryLabel','input'],['field-category','change']].forEach(function (pair) {
+            [['field-id','input'],['field-name','input']].forEach(function (pair) {
                 var el = document.getElementById(pair[0]);
                 if (el) el.addEventListener(pair[1], function () { clearFieldError(pair[0]); });
             });
@@ -506,6 +548,7 @@
             document.getElementById('image-preview').innerHTML = '';
             document.getElementById('upload-area').style.display = '';
             document.getElementById('field-id').disabled = !!productId;
+            populateGroupSelect();
 
             if (productId) {
                 title.textContent = '编辑产品';
@@ -517,6 +560,17 @@
                 addSpecRow('', '');
             }
             modal.classList.add('show');
+        }
+
+        function populateGroupSelect() {
+            var groupSelect = document.getElementById('field-group');
+            var subSelect = document.getElementById('field-subCategory');
+            if (!groupSelect) return;
+            groupSelect.innerHTML = '<option value="">选择大类</option>';
+            categories.forEach(function (g) {
+                groupSelect.innerHTML += '<option value="' + escapeHtml(g.id) + '">' + escapeHtml(g.label) + '</option>';
+            });
+            if (subSelect) { subSelect.innerHTML = '<option value="">请先选择大类</option>'; subSelect.disabled = true; }
         }
 
         function fillProductForm(product) {
@@ -531,6 +585,25 @@
             if (uploadedImagePath) showImagePreview('../' + uploadedImagePath);
             (product.specs || []).forEach(function (spec) { addSpecRow(spec[0], spec[1]); });
             if (!(product.specs || []).length) addSpecRow('', '');
+
+            var groupId = product.group || (product.category === 'switchgear' ? 'switchgear' : (product.category === 'ev-charger' ? 'ev-charger' : 'transformer'));
+            var subId = product.subCategory || product.category || '';
+            var groupSelect = document.getElementById('field-group');
+            var subSelect = document.getElementById('field-subCategory');
+            if (groupSelect) {
+                groupSelect.value = groupId;
+                var group = categories.find(function (g) { return g.id === groupId; });
+                if (subSelect) {
+                    subSelect.innerHTML = '<option value="">选择小类</option>';
+                    subSelect.disabled = false;
+                    if (group) {
+                        group.subcategories.forEach(function (s) {
+                            subSelect.innerHTML += '<option value="' + escapeHtml(s.id) + '">' + escapeHtml(s.label) + '</option>';
+                        });
+                    }
+                    subSelect.value = subId;
+                }
+            }
         }
 
         function uploadProductImage() {
@@ -614,25 +687,34 @@
             e.preventDefault();
             var id = document.getElementById('field-id').value.trim();
             var name = document.getElementById('field-name').value.trim();
-            var category = document.getElementById('field-category').value;
+            var groupId = (document.getElementById('field-group') || {}).value || '';
+            var subCategoryId = (document.getElementById('field-subCategory') || {}).value || '';
+            var category = document.getElementById('field-category').value || subCategoryId;
             var categoryLabel = document.getElementById('field-categoryLabel').value.trim();
 
-            ['field-id', 'field-name', 'field-category', 'field-categoryLabel'].forEach(clearFieldError);
+            ['field-id', 'field-name', 'field-group', 'field-subCategory'].forEach(clearFieldError);
             var valid = true;
             if (!id) { showFieldError('field-id', '请填写产品 ID'); valid = false; }
             if (!name) { showFieldError('field-name', '请填写英文名称'); valid = false; }
-            if (!category) { showFieldError('field-category', '请选择分类'); valid = false; }
-            if (!categoryLabel) { showFieldError('field-categoryLabel', '请填写英文分类名'); valid = false; }
+            if (!groupId) { showFieldError('field-group', '请选择大类'); valid = false; }
+            if (!subCategoryId) { showFieldError('field-subCategory', '请选择小类'); valid = false; }
             if (!valid) return;
+
+            var group = categories.find(function (g) { return g.id === groupId; });
+            var sub = group && group.subcategories.find(function (s) { return s.id === subCategoryId; });
+            var resolvedLabel = categoryLabel || (sub ? sub.label : subCategoryId);
+            var resolvedLabelAr = document.getElementById('field-categoryLabelAr').value.trim() || (sub ? sub.labelAr : '');
 
             var payload = {
                 id: id,
                 name: name,
                 nameAr: document.getElementById('field-nameAr').value.trim(),
                 image: uploadedImagePath,
-                category: category,
-                categoryLabel: categoryLabel,
-                categoryLabelAr: document.getElementById('field-categoryLabelAr').value.trim(),
+                group: groupId,
+                subCategory: subCategoryId,
+                category: category || subCategoryId,
+                categoryLabel: resolvedLabel,
+                categoryLabelAr: resolvedLabelAr,
                 shortDesc: document.getElementById('field-shortDesc').value.trim(),
                 shortDescAr: document.getElementById('field-shortDescAr').value.trim(),
                 description: document.getElementById('field-description').value.trim(),
@@ -688,6 +770,176 @@
             }).catch(function (err) {
                 if (badge) badge.style.pointerEvents = '';
                 showToast('操作失败：' + err.message, 'error');
+            });
+        }
+
+        function loadCategories() {
+            apiRequest('/categories').then(function (data) {
+                categories = Array.isArray(data) ? data : [];
+                populateCategoryFilter();
+                if (document.getElementById('view-categories').classList.contains('active')) {
+                    renderCategoriesView();
+                }
+                if (document.getElementById('view-dashboard').classList.contains('active') && products.length) {
+                    renderDashboard();
+                }
+            }).catch(function () {
+                categories = [];
+            });
+        }
+
+        function populateCategoryFilter() {
+            var filter = document.getElementById('product-category-filter');
+            if (!filter) return;
+            filter.innerHTML = '<option value="">全部分类</option>';
+            categories.forEach(function (group) {
+                var optgroup = document.createElement('optgroup');
+                optgroup.label = group.label;
+                group.subcategories.forEach(function (sub) {
+                    var opt = document.createElement('option');
+                    opt.value = group.id + '/' + sub.id;
+                    opt.textContent = sub.label;
+                    optgroup.appendChild(opt);
+                });
+                filter.appendChild(optgroup);
+            });
+        }
+
+        function renderCategoriesView() {
+            var tree = document.getElementById('category-tree');
+            if (!tree) return;
+            if (!categories.length) {
+                tree.innerHTML = '<p class="table-empty">暂无分类数据</p>';
+                return;
+            }
+            tree.innerHTML = categories.map(function (group) {
+                var subs = group.subcategories.map(function (sub) {
+                    return '<div class="cat-sub-item">' +
+                        '<span class="cat-sub-label">' + escapeHtml(sub.label) + (sub.labelZh ? '<em class="cat-label-zh">（' + escapeHtml(sub.labelZh) + '）</em>' : '') + '</span>' +
+                        '<div class="cat-actions">' +
+                            '<button class="btn btn-icon btn-icon-edit" title="编辑小类" data-edit-sub="' + escapeHtml(group.id + '/' + sub.id) + '">' + ICON_EDIT + '</button>' +
+                            '<button class="btn btn-icon btn-icon-delete" title="删除小类" data-delete-sub="' + escapeHtml(group.id + '/' + sub.id) + '">' + ICON_DELETE + '</button>' +
+                        '</div></div>';
+                }).join('');
+                return '<div class="cat-group">' +
+                    '<div class="cat-group-header">' +
+                        '<span class="cat-group-label">' + escapeHtml(group.label) + (group.labelZh ? '<em class="cat-label-zh">（' + escapeHtml(group.labelZh) + '）</em>' : '') + '</span>' +
+                        '<div class="cat-actions">' +
+                            '<button class="btn btn-sm btn-secondary" data-add-sub="' + escapeHtml(group.id) + '">+ 新增小类</button>' +
+                            '<button class="btn btn-icon btn-icon-edit" title="编辑大类" data-edit-group="' + escapeHtml(group.id) + '">' + ICON_EDIT + '</button>' +
+                            '<button class="btn btn-icon btn-icon-delete" title="删除大类" data-delete-group="' + escapeHtml(group.id) + '">' + ICON_DELETE + '</button>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="cat-subs">' + (subs || '<p class="cat-empty">暂无小类</p>') + '</div>' +
+                '</div>';
+            }).join('');
+
+            tree.querySelectorAll('[data-edit-group]').forEach(function (btn) {
+                btn.addEventListener('click', function () { openCatModal('edit-group', btn.getAttribute('data-edit-group'), null); });
+            });
+            tree.querySelectorAll('[data-delete-group]').forEach(function (btn) {
+                btn.addEventListener('click', function () { deleteCatGroup(btn.getAttribute('data-delete-group')); });
+            });
+            tree.querySelectorAll('[data-add-sub]').forEach(function (btn) {
+                btn.addEventListener('click', function () { openCatModal('add-sub', btn.getAttribute('data-add-sub'), null); });
+            });
+            tree.querySelectorAll('[data-edit-sub]').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var parts = btn.getAttribute('data-edit-sub').split('/');
+                    openCatModal('edit-sub', parts[0], parts[1]);
+                });
+            });
+            tree.querySelectorAll('[data-delete-sub]').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var parts = btn.getAttribute('data-delete-sub').split('/');
+                    deleteCatSub(parts[0], parts[1]);
+                });
+            });
+        }
+
+        function openCatModal(mode, groupId, subId) {
+            catModalMode = mode;
+            catModalGroupId = groupId;
+            catModalSubId = subId;
+
+            var titles = { 'add-group': '新增大类', 'edit-group': '编辑大类', 'add-sub': '新增小类', 'edit-sub': '编辑小类' };
+            document.getElementById('cat-modal-title').textContent = titles[mode] || '分类';
+
+            var group = groupId && categories.find(function (g) { return g.id === groupId; });
+            var sub = group && subId && group.subcategories.find(function (s) { return s.id === subId; });
+            var src = (mode === 'edit-group') ? group : (mode === 'edit-sub' ? sub : null);
+
+            document.getElementById('cat-label').value = src ? (src.label || '') : '';
+            document.getElementById('cat-labelAr').value = src ? (src.labelAr || '') : '';
+            document.getElementById('cat-labelZh').value = src ? (src.labelZh || '') : '';
+
+            document.getElementById('cat-modal').classList.add('show');
+            setTimeout(function () { var el = document.getElementById('cat-label'); if (el) el.focus(); }, 50);
+        }
+
+        function saveCatModal() {
+            var label = document.getElementById('cat-label').value.trim();
+            if (!label) { document.getElementById('cat-label').focus(); showToast('请填写英文名称', 'error'); return; }
+            var body = {
+                label: label,
+                labelAr: document.getElementById('cat-labelAr').value.trim(),
+                labelZh: document.getElementById('cat-labelZh').value.trim()
+            };
+            var url, method;
+            if (catModalMode === 'add-group') { url = '/categories'; method = 'POST'; }
+            else if (catModalMode === 'edit-group') { url = '/categories/' + encodeURIComponent(catModalGroupId); method = 'PUT'; }
+            else if (catModalMode === 'add-sub') { url = '/categories/' + encodeURIComponent(catModalGroupId) + '/subcategories'; method = 'POST'; }
+            else if (catModalMode === 'edit-sub') { url = '/categories/' + encodeURIComponent(catModalGroupId) + '/subcategories/' + encodeURIComponent(catModalSubId); method = 'PUT'; }
+            apiRequest(url, { method: method, body: body }).then(function () {
+                showToast('已保存');
+                closeModal('cat-modal');
+                loadCategories();
+                renderCategoriesView();
+            }).catch(function (err) { showToast('保存失败：' + err.message, 'error'); });
+        }
+
+        function deleteCatGroup(groupId) {
+            var group = categories.find(function (g) { return g.id === groupId; });
+            showConfirm('删除大类', '确定删除大类 "' + (group ? group.label : groupId) + '" 及其所有小类吗？此操作不可恢复。').then(function (ok) {
+                if (!ok) return;
+                apiRequest('/categories/' + encodeURIComponent(groupId), { method: 'DELETE' }).then(function () {
+                    showToast('大类已删除');
+                    loadCategories();
+                    renderCategoriesView();
+                }).catch(function (err) { showToast('删除失败：' + err.message, 'error'); });
+            });
+        }
+
+        function deleteCatSub(groupId, subId) {
+            var group = categories.find(function (g) { return g.id === groupId; });
+            var sub = group && group.subcategories.find(function (s) { return s.id === subId; });
+            showConfirm('删除小类', '确定删除小类 "' + (sub ? sub.label : subId) + '" 吗？').then(function (ok) {
+                if (!ok) return;
+                apiRequest('/categories/' + encodeURIComponent(groupId) + '/subcategories/' + encodeURIComponent(subId), { method: 'DELETE' }).then(function () {
+                    showToast('小类已删除');
+                    loadCategories();
+                    renderCategoriesView();
+                }).catch(function (err) { showToast('删除失败：' + err.message, 'error'); });
+            });
+        }
+
+        function bindCategoryEvents() {
+            var btnAdd = document.getElementById('btn-add-category');
+            if (btnAdd) btnAdd.addEventListener('click', function () { openCatModal('add-group', null, null); });
+
+            var catModalClose = document.getElementById('cat-modal-close');
+            if (catModalClose) catModalClose.addEventListener('click', function () { closeModal('cat-modal'); });
+            var catModalCancel = document.getElementById('cat-modal-cancel');
+            if (catModalCancel) catModalCancel.addEventListener('click', function () { closeModal('cat-modal'); });
+            var catModalSubmit = document.getElementById('cat-modal-submit');
+            if (catModalSubmit) catModalSubmit.addEventListener('click', saveCatModal);
+
+            var catForm = document.getElementById('cat-form');
+            if (catForm) catForm.addEventListener('submit', function (e) { e.preventDefault(); saveCatModal(); });
+
+            var overlay = document.getElementById('cat-modal');
+            if (overlay) overlay.addEventListener('click', function (e) {
+                if (e.target === overlay) closeModal('cat-modal');
             });
         }
 
