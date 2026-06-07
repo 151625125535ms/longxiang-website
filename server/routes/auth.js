@@ -6,7 +6,11 @@ const { JWT_SECRET } = require('../middleware/auth');
 const router = express.Router();
 
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
+let ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+if (!ADMIN_PASSWORD) {
+    ADMIN_PASSWORD = require('crypto').randomBytes(16).toString('hex');
+    console.warn('WARNING: ADMIN_PASSWORD env var not set. A random password has been generated — you will not be able to log in. Set ADMIN_PASSWORD in production.');
+}
 // Hash is computed once at startup; bcrypt.hashSync is intentional (startup cost, not per-request)
 const ADMIN_PASSWORD_HASH = bcrypt.hashSync(ADMIN_PASSWORD, 10);
 
