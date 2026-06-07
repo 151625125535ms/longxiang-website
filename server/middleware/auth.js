@@ -1,6 +1,12 @@
 const jwt = require('jsonwebtoken');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'longxiang-secret-key-2024';
+let JWT_SECRET;
+if (process.env.JWT_SECRET) {
+    JWT_SECRET = process.env.JWT_SECRET;
+} else {
+    JWT_SECRET = require('crypto').randomBytes(32).toString('hex');
+    console.warn('WARNING: JWT_SECRET env var not set. Using a random key — all sessions will be invalidated on restart. Set JWT_SECRET in production.');
+}
 
 function authMiddleware(req, res, next) {
     const authHeader = req.headers['authorization'];
