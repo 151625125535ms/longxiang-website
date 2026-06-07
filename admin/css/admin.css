@@ -915,6 +915,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .image-upload-area .upload-placeholder {
     color: var(--color-gray-400);
+    pointer-events: none;
 }
 
 .image-upload-area .upload-placeholder svg {

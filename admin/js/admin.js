@@ -527,7 +527,15 @@
             }
 
             var imageInput = document.getElementById('field-image');
-            if (imageInput) imageInput.addEventListener('change', uploadProductImage);
+            var uploadArea = document.getElementById('upload-area');
+            if (uploadArea && imageInput) {
+                uploadArea.addEventListener('click', function (e) {
+                    if (e.target !== imageInput) imageInput.click();
+                });
+                imageInput.addEventListener('change', uploadProductImage);
+            } else if (imageInput) {
+                imageInput.addEventListener('change', uploadProductImage);
+            }
 
             var btnAddSpec = document.getElementById('btn-add-spec');
             if (btnAddSpec) btnAddSpec.addEventListener('click', function () { addSpecRow('', ''); });
