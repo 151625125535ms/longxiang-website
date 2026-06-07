@@ -784,11 +784,15 @@
                 document.getElementById('inquiry-modal').classList.add('show');
 
                 if (item.status === 'new') {
+                    openedInquiry.status = 'read';
                     apiRequest('/inquiries/' + encodeURIComponent(id), { method: 'PUT', body: { status: 'read', notes: item.notes || '' } })
                         .then(function () {
-                            openedInquiry.status = 'read';
                             document.getElementById('inquiry-status').value = 'read';
-                            loadInquiries();
+                            if (currentView === 'inquiries') {
+                                loadInquiries();
+                            } else {
+                                renderRecentInquiries();
+                            }
                         })
                         .catch(function (err) { showToast('标记已读失败：' + err.message, 'error'); });
                 }
