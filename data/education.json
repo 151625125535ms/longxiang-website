@@ -78,7 +78,12 @@
           "titleAr": "",
           "text": "Coursework combines technical lectures, project review, and engineering case discussion.",
           "textAr": "",
-          "image": "assets/education/images/classroom-project-discussion.jpeg"
+          "image": "assets/education/images/classroom-project-discussion.jpeg",
+          "points": [
+            "Technical lectures and practical case reviews",
+            "Project-based teaching connected to industrial parks",
+            "Dual-mentor guidance from teachers and engineers"
+          ]
         },
         {
           "id": "field-training",
@@ -86,7 +91,12 @@
           "titleAr": "",
           "text": "Students train in real outdoor electrical scenarios with safety supervision and practical tasks.",
           "textAr": "",
-          "image": "assets/education/images/field-practical-training.jpeg"
+          "image": "assets/education/images/field-practical-training.jpeg",
+          "points": [
+            "Line-field teaching and alternating study-training model",
+            "Power equipment, photovoltaic, wind power, and energy storage scenarios",
+            "On-post internships that prepare students for engineering work"
+          ]
         },
         {
           "id": "dual-mentor",

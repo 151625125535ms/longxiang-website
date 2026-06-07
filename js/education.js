@@ -66,6 +66,12 @@
         }).join('') + '</ul>';
     }
 
+    function localizedList(item, key) {
+        if (!item) return [];
+        if (isArabic && item[key + 'Ar'] && item[key + 'Ar'].length) return item[key + 'Ar'];
+        return item[key] || [];
+    }
+
     function renderPageNav() {
         if (isArabic) return '';
         return '<nav class="education-page-nav" aria-label="Education page sections">' +
@@ -150,11 +156,13 @@
         var equipment = findSection(data, 'training-equipment');
         var cards = talent && talent.cards ? talent.cards.slice(0, 2) : [];
         var sceneItems = cards.map(function (card) {
+            var points = localizedList(card, 'points');
+            if (!points.length) points = localizedList(card, 'body');
             return {
                 title: localized(card, 'title'),
                 text: localized(card, 'text'),
                 image: card.image,
-                points: []
+                points: points
             };
         });
 
