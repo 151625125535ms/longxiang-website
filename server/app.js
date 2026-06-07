@@ -23,8 +23,11 @@ try { rateLimit = require('express-rate-limit'); } catch (err) { rateLimit = nul
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Required for accurate client IP detection when behind a reverse proxy
-app.set('trust proxy', 1);
+// Only trust proxy XFF headers when explicitly configured — avoids IP spoofing for rate limiting.
+// Set TRUST_PROXY to the upstream proxy IP/CIDR (e.g. "10.0.0.0/8") or "1" for loopback-only.
+if (process.env.TRUST_PROXY) {
+    app.set('trust proxy', process.env.TRUST_PROXY);
+}
 
 const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
     ? process.env.ALLOWED_ORIGINS.split(',').map(function (o) { return o.trim(); })
