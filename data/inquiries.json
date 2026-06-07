@@ -9,7 +9,7 @@
     "message": "Browser form submission test. This record should be deleted automatically.",
     "ip": "::ffff:127.0.0.1",
     "createdAt": "2026-05-19T12:21:36.123Z",
-    "status": "new",
+    "status": "read",
     "repliedAt": "",
     "notes": ""
   }
