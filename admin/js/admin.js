@@ -894,7 +894,6 @@
                 showToast('已保存');
                 closeModal('cat-modal');
                 loadCategories();
-                renderCategoriesView();
             }).catch(function (err) { showToast('保存失败：' + err.message, 'error'); });
         }
 
@@ -905,7 +904,6 @@
                 apiRequest('/categories/' + encodeURIComponent(groupId), { method: 'DELETE' }).then(function () {
                     showToast('大类已删除');
                     loadCategories();
-                    renderCategoriesView();
                 }).catch(function (err) { showToast('删除失败：' + err.message, 'error'); });
             });
         }
@@ -918,7 +916,6 @@
                 apiRequest('/categories/' + encodeURIComponent(groupId) + '/subcategories/' + encodeURIComponent(subId), { method: 'DELETE' }).then(function () {
                     showToast('小类已删除');
                     loadCategories();
-                    renderCategoriesView();
                 }).catch(function (err) { showToast('删除失败：' + err.message, 'error'); });
             });
         }

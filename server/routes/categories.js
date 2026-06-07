@@ -16,7 +16,9 @@ function writeCategories(categories) {
 }
 
 function slugify(text) {
-    return String(text).trim().toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
+    const slug = String(text).trim().toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
+    // Non-ASCII labels (e.g. Chinese) produce an empty slug — use a short random fallback.
+    return slug || makeId('').slice(0, 8);
 }
 
 function validateGroup(body) {

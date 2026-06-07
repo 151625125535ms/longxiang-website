@@ -33,21 +33,21 @@
   },
   {
     "id": "ev-charger",
-    "label": "EV Charger",
+    "label": "Charger Station",
     "labelAr": "شواحن المركبات الكهربائية",
     "labelZh": "充电桩",
     "subcategories": [
-      {
-        "id": "ac",
-        "label": "AC EV Charging Station",
-        "labelAr": "محطة شحن تيار متردد",
-        "labelZh": "交流充电桩"
-      },
       {
         "id": "dc",
         "label": "DC EV Charging Station",
         "labelAr": "محطة شحن تيار مستمر",
         "labelZh": "直流充电桩"
+      },
+      {
+        "id": "ac-ev-charger-station",
+        "label": "AC EV Charger Station",
+        "labelAr": "",
+        "labelZh": "交流充电桩"
       }
     ]
   },
@@ -68,6 +68,12 @@
         "label": "Medium & Low Voltage Switchgear",
         "labelAr": "معدات مفاتيح الجهد المتوسط والمنخفض",
         "labelZh": "中低压开关柜"
+      },
+      {
+        "id": "complete-sets",
+        "label": "Complete Sets of Equipment",
+        "labelAr": "معدات مجموعات كاملة",
+        "labelZh": "成套设备"
       }
     ]
   }
