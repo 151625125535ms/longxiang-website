@@ -971,25 +971,6 @@
             if (modalId === 'inquiry-modal') { editingInquiryId = null; openedInquiry = null; }
         }
 
-        function closeDrawer(overlayId) {
-            var overlay = document.getElementById(overlayId);
-            if (overlay) overlay.classList.remove('show');
-            if (overlayId === 'inquiry-drawer-overlay') editingInquiryId = null;
-        }
-
-        function bindDrawerClose(overlayId, buttonIds) {
-            buttonIds.forEach(function (id) {
-                var btn = document.getElementById(id);
-                if (btn) btn.addEventListener('click', function () { closeDrawer(overlayId); });
-            });
-            var overlay = document.getElementById(overlayId);
-            if (overlay) {
-                overlay.addEventListener('click', function (e) {
-                    if (e.target === overlay) closeDrawer(overlayId);
-                });
-            }
-        }
-
         function formatDate(value) {
             if (!value) return '-';
             var date = new Date(value);
