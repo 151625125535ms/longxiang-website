@@ -3981,6 +3981,70 @@ p:last-child {
     max-width: 720px;
 }
 
+.education-page-nav {
+    position: sticky;
+    top: calc(var(--navbar-height) + 8px);
+    z-index: 20;
+    border-bottom: 1px solid rgba(10, 22, 40, 0.08);
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 10px 28px rgba(10, 22, 40, 0.06);
+    backdrop-filter: blur(12px);
+}
+
+.education-page-nav .container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(0.5rem, 2vw, 1.25rem);
+    min-height: 68px;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.education-page-nav .container::-webkit-scrollbar {
+    display: none;
+}
+
+.education-page-nav a {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0 16px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-full);
+    color: var(--color-gray-600);
+    font-size: 0.84rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    transition: color var(--transition-base), border-color var(--transition-base), background var(--transition-base), transform var(--transition-base);
+}
+
+.education-page-nav a:hover,
+.education-page-nav a:focus-visible {
+    border-color: rgba(212, 168, 67, 0.45);
+    background: rgba(212, 168, 67, 0.1);
+    color: var(--color-navy);
+    transform: translateY(-1px);
+}
+
+.education-page-nav a:focus-visible {
+    outline: 2px solid rgba(0, 163, 224, 0.35);
+    outline-offset: 2px;
+}
+
+.education-overview,
+.education-pillars,
+.education-scenes,
+.education-gallery-section,
+.education-plaques,
+.education-philosophy,
+.education-cta {
+    scroll-margin-top: calc(var(--navbar-height) + 88px);
+}
+
 .education-overview {
     background: var(--color-white-pure);
 }
@@ -4228,6 +4292,23 @@ p:last-child {
 }
 
 @media (max-width: 768px) {
+    .education-page-nav {
+        top: calc(var(--navbar-height) + 8px);
+    }
+
+    .education-page-nav .container {
+        justify-content: flex-start;
+        min-height: 58px;
+        padding-right: 16px;
+        padding-left: 16px;
+    }
+
+    .education-page-nav a {
+        min-height: 42px;
+        padding: 0 14px;
+        font-size: 0.78rem;
+    }
+
     .education-page-hero {
         padding-top: 150px;
     }

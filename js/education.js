@@ -66,6 +66,18 @@
         }).join('') + '</ul>';
     }
 
+    function renderPageNav() {
+        if (isArabic) return '';
+        return '<nav class="education-page-nav" aria-label="Education page sections">' +
+            '<div class="container">' +
+            '<a href="#industrial-college">Industrial College</a>' +
+            '<a href="#cooperation-pillars">Cooperation Pillars</a>' +
+            '<a href="#training-scenes">Training Scenes</a>' +
+            '<a href="#education-gallery">Gallery</a>' +
+            '<a href="#education-contact">Contact Team</a>' +
+            '</div></nav>';
+    }
+
     function renderHero(data) {
         var hero = data.hero || {};
         var heroEl = document.querySelector('.education-page-hero');
@@ -102,7 +114,7 @@
     function renderOverview(section) {
         if (!section) return '';
         var body = isArabic && section.bodyAr && section.bodyAr.length ? section.bodyAr : section.body;
-        return '<section class="section education-overview">' +
+        return '<section class="section education-overview" id="industrial-college">' +
             '<div class="container"><div class="about-intro education-intro">' +
             '<div class="about-intro-text fade-in-left">' +
             '<h2>' + escapeHtml(localized(section, 'title')) + '</h2>' +
@@ -118,7 +130,7 @@
         var sections = ids.map(function (id) { return findSection(data, id); }).filter(Boolean);
         if (!sections.length) return '';
 
-        return '<section class="section bg-light education-pillars">' +
+        return '<section class="section bg-light education-pillars" id="cooperation-pillars">' +
             '<div class="container">' +
             '<div class="section-header fade-in"><h2>Cooperation Pillars</h2>' +
             '<p>Longxiang brings together school-enterprise cooperation, practical teaching, equipment platforms, and research collaboration.</p></div>' +
@@ -157,7 +169,7 @@
 
         if (!sceneItems.length) return '';
 
-        return '<section class="section education-scenes">' +
+        return '<section class="section education-scenes" id="training-scenes">' +
             '<div class="container">' +
             '<div class="section-header fade-in"><h2>Training Scenes</h2>' +
             '<p>From classroom discussion to field operation, Longxiang turns engineering practice into visible learning scenarios.</p></div>' +
@@ -177,7 +189,7 @@
     function renderGallery(section) {
         if (!section || !section.images || !section.images.length) return '';
 
-        return '<section class="section bg-light education-gallery-section">' +
+        return '<section class="section bg-light education-gallery-section" id="education-gallery">' +
             '<div class="container">' +
             '<div class="section-header fade-in"><h2>' + escapeHtml(localized(section, 'title')) + '</h2>' +
             '<p>' + escapeHtml(localized(section, 'summary')) + '</p></div>' +
@@ -195,7 +207,7 @@
         if (!section || !section.images || !section.images.length) return '';
         var labels = ['Vocational Education Demonstration', 'Industry-Education Integration', 'Teaching & Production Base'];
 
-        return '<section class="section education-plaques">' +
+        return '<section class="section education-plaques" id="cooperation-platform">' +
             '<div class="container">' +
             '<div class="section-header fade-in"><h2>Recognized Cooperation Platform</h2>' +
             '<p>Longxiang&rsquo;s education work is supported by school-enterprise cooperation bases and industry-education integration platforms.</p></div>' +
@@ -212,7 +224,7 @@
     function renderPhilosophy(section) {
         if (!section) return '';
         var body = isArabic && section.bodyAr && section.bodyAr.length ? section.bodyAr : section.body;
-        return '<section class="section bg-light education-philosophy">' +
+        return '<section class="section bg-light education-philosophy" id="cooperation-philosophy">' +
             '<div class="container">' +
             '<div class="section-header fade-in"><h2>' + escapeHtml(localized(section, 'title')) + '</h2>' +
             '<p>' + escapeHtml(localized(section, 'summary')) + '</p></div>' +
@@ -222,7 +234,7 @@
 
     function renderCta(data) {
         var cta = data.cta || {};
-        return '<section class="cta-section education-cta">' +
+        return '<section class="cta-section education-cta" id="education-contact">' +
             '<div class="container">' +
             '<h2 class="fade-in">' + escapeHtml(localized(cta, 'title')) + '</h2>' +
             '<p class="fade-in">' + escapeHtml(localized(cta, 'text')) + '</p>' +
@@ -238,6 +250,7 @@
 
         renderHero(data);
         pageRoot.innerHTML =
+            renderPageNav() +
             renderOverview(industryCollege) +
             renderStats(data) +
             renderPillars(data) +
