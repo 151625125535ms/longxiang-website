@@ -8,6 +8,11 @@
     var ICON_EDIT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
     var ICON_DELETE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>';
     var ICON_VIEW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+    var CJK_RE = /[一-鿿㐀-䶿豈-﫿]/;
+
+    function hasChinese(str) {
+        return CJK_RE.test(str);
+    }
 
     function getToken() {
         return localStorage.getItem('admin_token');
@@ -695,7 +700,9 @@
             ['field-id', 'field-name', 'field-group', 'field-subCategory'].forEach(clearFieldError);
             var valid = true;
             if (!id) { showFieldError('field-id', '请填写产品 ID'); valid = false; }
+            if (id && hasChinese(id)) { showFieldError('field-id', '产品 ID 不能包含中文'); valid = false; }
             if (!name) { showFieldError('field-name', '请填写英文名称'); valid = false; }
+            if (name && hasChinese(name)) { showFieldError('field-name', '英文名称不能包含中文'); valid = false; }
             if (!groupId) { showFieldError('field-group', '请选择大类'); valid = false; }
             if (!subCategoryId) { showFieldError('field-subCategory', '请选择小类'); valid = false; }
             if (!valid) return;
@@ -880,6 +887,7 @@
         function saveCatModal() {
             var label = document.getElementById('cat-label').value.trim();
             if (!label) { document.getElementById('cat-label').focus(); showToast('请填写英文名称', 'error'); return; }
+            if (hasChinese(label)) { document.getElementById('cat-label').focus(); showToast('英文名称不能包含中文，请将中文填写在"中文名称"字段', 'error'); return; }
             var body = {
                 label: label,
                 labelAr: document.getElementById('cat-labelAr').value.trim(),
