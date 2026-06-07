@@ -1,3 +1,5 @@
+require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
+
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -7,6 +9,7 @@ const productsRoutes = require('./routes/products');
 const companyRoutes = require('./routes/company');
 const inquiriesRoutes = require('./routes/inquiries');
 const certificationsRoutes = require('./routes/certifications');
+const categoriesRoutes = require('./routes/categories');
 
 let compression = null;
 try { compression = require('compression'); } catch (err) { compression = null; }
@@ -79,6 +82,7 @@ app.use(express.static(path.join(__dirname, '..'), {
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads'), { maxAge: '30d' }));
 
 app.use('/api/auth', authRoutes);
+app.use('/api/categories', categoriesRoutes);
 app.use('/api/products', productsRoutes);
 app.use('/api/company', companyRoutes);
 app.use('/api/inquiries', inquiriesRoutes);
