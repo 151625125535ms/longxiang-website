@@ -719,7 +719,7 @@
                 form.elements.message.value = isArabic
                     ? 'أرغب في طلب السعر والتفاصيل الفنية لهذا المنتج: ' + productName + (productId ? ' (' + productId + ')' : '') + '.'
                     : 'I am interested in ' + productContext + '. Please send pricing and technical details.';
-            } else if (form.elements.message) {
+            } else if (form.elements.message && !form.elements.message.value) {
                 form.elements.message.value = '';
             }
         }
