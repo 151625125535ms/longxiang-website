@@ -438,7 +438,7 @@
                 return '<tr>' +
                     '<td><div class="product-name-cell"><img class="product-thumb" src="../' + escapeHtml(product.image || '') + '" alt=""><div><div class="product-name-text">' + escapeHtml(product.name) + '</div><div class="product-id-text">' + escapeHtml(product.id) + '</div></div></div></td>' +
                     '<td><span class="badge badge-blue">' + escapeHtml(product.categoryLabel || product.category) + '</span></td>' +
-                    '<td><span class="badge badge-toggle ' + (product.featured ? 'badge-gold' : 'badge-navy') + '" data-toggle-featured="' + escapeHtml(product.id) + '">' + (product.featured ? '首页推荐' : '普通') + '</span></td>' +
+                    '<td><span class="badge badge-toggle ' + (product.featured ? 'badge-gold' : 'badge-navy') + '" role="button" tabindex="0" aria-label="' + (product.featured ? '取消首页推荐' : '设为首页推荐') + '" data-toggle-featured="' + escapeHtml(product.id) + '">' + (product.featured ? '首页推荐' : '普通') + '</span></td>' +
                     '<td class="cell-muted">' + escapeHtml(product.shortDesc || '') + '</td>' +
                     '<td><div class="actions-cell"><button class="btn btn-icon btn-icon-edit" aria-label="编辑产品" data-edit-product="' + escapeHtml(product.id) + '">' + ICON_EDIT + '</button><button class="btn btn-icon btn-icon-delete" aria-label="删除产品" data-delete-product="' + escapeHtml(product.id) + '">' + ICON_DELETE + '</button></div></td>' +
                     '</tr>';
@@ -452,6 +452,9 @@
             });
             tbody.querySelectorAll('[data-toggle-featured]').forEach(function (badge) {
                 badge.addEventListener('click', function () { toggleFeatured(badge.getAttribute('data-toggle-featured')); });
+                badge.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleFeatured(badge.getAttribute('data-toggle-featured')); }
+                });
             });
         }
 
