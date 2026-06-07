@@ -676,12 +676,12 @@
             var newFeatured = !product.featured;
             apiRequest('/products/' + encodeURIComponent(productId), {
                 method: 'PUT',
-                body: { featured: newFeatured }
-            }).then(function () {
-                product.featured = newFeatured;
+                body: Object.assign({}, product, { featured: newFeatured })
+            }).then(function (updated) {
+                product.featured = updated.featured;
                 renderProductsTable();
                 setText('stat-featured', products.filter(function (p) { return p.featured; }).length);
-                showToast(newFeatured ? '已加入首页推荐' : '已取消首页推荐');
+                showToast(updated.featured ? '已加入首页推荐' : '已取消首页推荐');
             }).catch(function (err) {
                 if (badge) badge.style.pointerEvents = '';
                 showToast('操作失败：' + err.message, 'error');
