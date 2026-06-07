@@ -12,13 +12,13 @@ let compression = null;
 try { compression = require('compression'); } catch (err) { compression = null; }
 
 let helmet = null;
-try { helmet = require('helmet'); } catch (err) { helmet = null; }
+try { helmet = require('helmet'); } catch (err) { helmet = null; console.warn('WARNING: helmet not found. Security headers will not be set.'); }
 
 let morgan = null;
-try { morgan = require('morgan'); } catch (err) { morgan = null; }
+try { morgan = require('morgan'); } catch (err) { morgan = null; console.warn('WARNING: morgan not found. HTTP request logging is disabled.'); }
 
 let rateLimit = null;
-try { rateLimit = require('express-rate-limit'); } catch (err) { rateLimit = null; }
+try { rateLimit = require('express-rate-limit'); } catch (err) { rateLimit = null; console.warn('WARNING: express-rate-limit not found. Rate limiting is disabled.'); }
 
 const app = express();
 const PORT = process.env.PORT || 3000;
