@@ -70,5 +70,19 @@
         "labelZh": "中低压开关柜"
       }
     ]
+  },
+  {
+    "id": "test",
+    "label": "test",
+    "labelAr": "",
+    "labelZh": "",
+    "subcategories": [
+      {
+        "id": "test2",
+        "label": "test2",
+        "labelAr": "",
+        "labelZh": ""
+      }
+    ]
   }
 ]
