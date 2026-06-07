@@ -14,6 +14,7 @@ const router = express.Router();
 const DATA_FILE = path.join(__dirname, '..', '..', 'data', 'inquiries.json');
 const COMPANY_FILE = path.join(__dirname, '..', '..', 'data', 'company.json');
 const STATUSES = ['new', 'read', 'replied', 'closed'];
+const STATUS_PRIORITY = { new: 0, read: 1, replied: 2, closed: 3 };
 
 function readInquiries() {
     return readJson(DATA_FILE, []);
@@ -184,6 +185,11 @@ router.put('/:id', authMiddleware, (req, res) => {
         const nextStatus = String(req.body.status || inquiries[index].status).trim();
         if (!STATUSES.includes(nextStatus)) {
             return res.status(400).json({ error: 'Invalid inquiry status.' });
+        }
+
+        // Prevent race condition: silently reject status downgrade (e.g. replied → read)
+        if (STATUS_PRIORITY[nextStatus] < STATUS_PRIORITY[inquiries[index].status]) {
+            return res.json(inquiries[index]);
         }
 
         inquiries[index] = {
