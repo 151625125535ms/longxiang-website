@@ -212,6 +212,7 @@
         var catModalMode = null;
         var catModalGroupId = null;
         var catModalSubId = null;
+        var isCompanyDirty = false;
 
         var usernameEl = document.getElementById('sidebar-username');
         var avatarEl = document.getElementById('sidebar-avatar');
@@ -265,6 +266,11 @@
         }
 
         function switchView(view) {
+            var companySection = document.getElementById('view-company');
+            if (view !== 'company' && isCompanyDirty && companySection && companySection.classList.contains('active')) {
+                if (!confirm('公司信息有未保存的改动，确定离开？')) return;
+                isCompanyDirty = false;
+            }
             document.querySelectorAll('.sidebar-nav a[data-view]').forEach(function (link) {
                 link.classList.toggle('active', link.getAttribute('data-view') === view);
             });
@@ -1096,6 +1102,7 @@
         function bindCompanyEvents() {
             var form = document.getElementById('company-form');
             if (!form) return;
+            form.addEventListener('input', function () { isCompanyDirty = true; });
             form.querySelectorAll('.form-tab-btn').forEach(function (btn) {
                 btn.addEventListener('click', function () {
                     var tab = btn.getAttribute('data-tab');
@@ -1116,6 +1123,7 @@
                 btn.disabled = true;
                 btn.textContent = '保存中...';
                 apiRequest('/company', { method: 'PUT', body: data }).then(function () {
+                    isCompanyDirty = false;
                     showToast('公司信息已保存');
                 }).catch(function (err) {
                     showToast('保存公司信息失败：' + err.message, 'error');
