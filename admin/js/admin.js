@@ -759,17 +759,31 @@
                 featured: document.getElementById('field-featured').checked
             };
 
-            var request = editingProductId
-                ? apiRequest('/products/' + encodeURIComponent(editingProductId), { method: 'PUT', body: payload })
-                : apiRequest('/products', { method: 'POST', body: payload });
+            var submitBtn = document.getElementById('modal-submit');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = '保存中...';
+                submitBtn.classList.add('btn-loading');
+            }
 
-            request.then(function () {
-                showToast(editingProductId ? '产品已更新' : '产品已新增');
-                closeModal('product-modal');
-                loadProducts();
-            }).catch(function (err) {
-                showToast('保存产品失败：' + err.message, 'error');
-            });
+            setTimeout(function () {
+                var request = editingProductId
+                    ? apiRequest('/products/' + encodeURIComponent(editingProductId), { method: 'PUT', body: payload })
+                    : apiRequest('/products', { method: 'POST', body: payload });
+
+                request.then(function () {
+                    showToast(editingProductId ? '产品已更新' : '产品已新增');
+                    closeModal('product-modal');
+                    loadProducts();
+                }).catch(function (err) {
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = '保存';
+                        submitBtn.classList.remove('btn-loading');
+                    }
+                    showToast('保存产品失败：' + err.message, 'error');
+                });
+            }, 1000);
         }
 
         function splitList(value) {

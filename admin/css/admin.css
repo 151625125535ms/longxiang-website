@@ -1855,3 +1855,27 @@ h1, h2, h3, h4, h5, h6 {
 .modal.modal-sm {
     max-width: 440px;
 }
+
+/* Button loading state */
+.btn-loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.82;
+    padding-right: 2.2rem !important;
+}
+.btn-loading::after {
+    content: '';
+    position: absolute;
+    right: 0.65rem;
+    top: 50%;
+    width: 0.85rem;
+    height: 0.85rem;
+    margin-top: -0.425rem;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: btn-spin 0.65s linear infinite;
+}
+@keyframes btn-spin {
+    to { transform: rotate(360deg); }
+}
