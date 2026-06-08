@@ -505,7 +505,7 @@
             var productCatFilter = document.getElementById('product-category-filter');
             if (productCatFilter) productCatFilter.addEventListener('change', renderProductsTable);
 
-            bindModalClose('product-modal', ['modal-close', 'modal-cancel']);
+            bindModalClose('product-modal', ['modal-close', 'modal-cancel'], false);
 
             var groupSelect = document.getElementById('field-group');
             var subSelect = document.getElementById('field-subCategory');
@@ -1246,16 +1246,18 @@
             });
         }
 
-        function bindModalClose(modalId, buttonIds) {
+        function bindModalClose(modalId, buttonIds, overlayClose) {
             buttonIds.forEach(function (id) {
                 var btn = document.getElementById(id);
                 if (btn) btn.addEventListener('click', function () { closeModal(modalId); });
             });
-            var modal = document.getElementById(modalId);
-            if (modal) {
-                modal.addEventListener('click', function (e) {
-                    if (e.target === modal) closeModal(modalId);
-                });
+            if (overlayClose !== false) {
+                var modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.addEventListener('click', function (e) {
+                        if (e.target === modal) closeModal(modalId);
+                    });
+                }
             }
         }
 
