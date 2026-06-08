@@ -14,3 +14,4 @@ yarn-error.log*
 
 # Runtime data — never overwrite with git
 data/inquiries.json
+data/company.json

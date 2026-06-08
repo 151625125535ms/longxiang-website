@@ -1127,12 +1127,18 @@
         }
 
         function loadCompany() {
+            var btn = document.getElementById('btn-save-company');
+            if (btn) { btn.disabled = true; btn.textContent = '加载中...'; }
             apiRequest('/company').then(function (data) {
                 Object.keys(data).forEach(function (key) {
                     var field = document.getElementById('company-' + key);
                     if (field) field.value = data[key];
                 });
-            }).catch(function (err) { showToast('加载公司信息失败：' + err.message, 'error'); });
+            }).catch(function (err) {
+                showToast('加载公司信息失败：' + err.message, 'error');
+            }).finally(function () {
+                if (btn) { btn.disabled = false; btn.textContent = '保存公司信息'; }
+            });
         }
 
         function bindCertificationEvents() {
