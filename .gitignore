@@ -11,3 +11,6 @@ yarn-error.log*
 .env
 .env.local
 .env.*.local
+
+# Runtime data — never overwrite with git
+data/inquiries.json
