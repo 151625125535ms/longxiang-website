@@ -1522,16 +1522,16 @@
   {
     "id": "LXAC_7KW",
     "name": "7kW AC Charger (Without Display)",
-    "nameAr": "محول توزيع بقلب من السبيكة غير المتبلورة S(B)H15",
+    "nameAr": "",
     "image": "uploads/product-1780850659338-29890338.PNG",
     "group": "ev-charger",
     "subCategory": "ac-ev-charger-station",
     "category": "ac-ev-charger-station",
     "categoryLabel": "AC EV Charger Station",
     "categoryLabelAr": "",
-    "shortDesc": "Real-time operation monitoring and comprehensive control protection",
+    "shortDesc": "Safe & convenient 7kW AC charger without display. Supports multiple charging modes & scheduled charging. Fully GB standard compatible.",
     "shortDescAr": "",
-    "description": "Real-time operation monitoring and comprehensive control protection; Intelligent chip ensures safe and reliable charging without damaging vehicles; 10-layer safety protection for worry-free outdoor use.",
+    "description": "Equipped with an intelligent chip and 10-layer safety protection, it uses a three-color LED strip to indicate operating status. It supports three charging modes: card swipe, QR code scan, and plug-and-charge, allows scheduled charging to utilize off-peak electricity rates, features grid-friendly operation, and is fully compatible with all new energy passenger vehicles compliant with Chinese National Standards (GB).",
     "descriptionAr": "",
     "capacities": [],
     "voltages": [],
@@ -1591,6 +1591,266 @@
       [
         "Protection Features",
         "Over-voltage protection, Under-voltage protection, Short-circuit protection, Leakage protection"
+      ]
+    ],
+    "featured": false
+  },
+  {
+    "id": "LXAC-7kW",
+    "name": "7kW AC Charger (With Display)",
+    "nameAr": "",
+    "image": "uploads/product-1780924299426-131896112.PNG",
+    "group": "ev-charger",
+    "subCategory": "ac-ev-charger-station",
+    "category": "ac-ev-charger-station",
+    "categoryLabel": "AC EV Charger Station",
+    "categoryLabelAr": "",
+    "shortDesc": "Safe & convenient 7kW AC charger without display. Supports multiple charging modes & scheduled charging. Fully GB standard compatible.",
+    "shortDescAr": "",
+    "description": "Equipped with an intelligent chip and 10-layer safety protection, it uses a three-color LED strip to indicate operating status. It supports three charging modes: card swipe, QR code scan, and plug-and-charge, allows scheduled charging to utilize off-peak electricity rates, features grid-friendly operation, and is fully compatible with all new energy passenger vehicles compliant with Chinese National Standards (GB).",
+    "descriptionAr": "",
+    "capacities": [],
+    "voltages": [],
+    "specs": [
+      [
+        "Model",
+        "LXAC-7kW"
+      ],
+      [
+        "Power Rating",
+        "7kW"
+      ],
+      [
+        "Rated Input/Output Voltage",
+        "AC220V ± 20%"
+      ],
+      [
+        "Rated Output Current",
+        "32A"
+      ],
+      [
+        "Activation Methods",
+        "Mobile QR Code Scan, Card Swipe (Optional)"
+      ],
+      [
+        "Charging Connector",
+        "GB/T 20234.2 Chinese National Standard AC Charging Connector"
+      ],
+      [
+        "Cable Length",
+        "5m (Customizable)"
+      ],
+      [
+        "Operation Indicator",
+        "Three-color LED strip: Indicates standby, charging and alarm statuses"
+      ],
+      [
+        "IP Rating",
+        "IP55"
+      ],
+      [
+        "Accuracy Class",
+        "/ 2"
+      ],
+      [
+        "Product Weight",
+        "<4kg (excluding mounting pole)"
+      ],
+      [
+        "Product Dimensions W×H×D (mm)",
+        "Wall-mounted: 230 × 320 × 85 mm"
+      ],
+      [
+        "Product Dimensions W×H×D (mm)",
+        "Floor-standing: 230 × 1480 × 85 mm"
+      ],
+      [
+        "Protection Features",
+        "Over-voltage protection, Under-voltage protection, Short-circuit protection, Leakage protection"
+      ]
+    ],
+    "featured": false
+  },
+  {
+    "id": "LXAC-14kW",
+    "name": "14kW Dual-Gun AC Charger",
+    "nameAr": "",
+    "image": "uploads/product-1780924533823-744208322.PNG",
+    "group": "ev-charger",
+    "subCategory": "ac-ev-charger-station",
+    "category": "ac-ev-charger-station",
+    "categoryLabel": "AC EV Charger Station",
+    "categoryLabelAr": "",
+    "shortDesc": "The main control system performs intelligent self-checks, automatically displays faults and reports them to the central system.",
+    "shortDescAr": "",
+    "description": "The main control system performs intelligent self-checks, automatically displays faults and reports them to the central system.\nThe main control system intelligently verifies proper connection of the charging connector. Power is only supplied to the charging interface when the connector is fully inserted. If the connector is unexpectedly disconnected, the charger will immediately stop power output to ensure personal safety.\nEquipped with over-voltage, under-voltage and overload protection functions. The charger automatically stops charging to protect equipment when the voltage exceeds the over-voltage threshold or falls below the under-voltage threshold. When the current exceeds the overload threshold, it sends an alarm signal after a delay and automatically cuts off the charging power supply.\nIntegrated short-circuit and leakage protection functions, with protection covering the entire electrical circuit from the charger's input terminal to the charging gun's output terminal.",
+    "descriptionAr": "",
+    "capacities": [],
+    "voltages": [],
+    "specs": [
+      [
+        "Model",
+        "LXAC-14kW"
+      ],
+      [
+        "Rated Input/Output Voltage",
+        "AC220V50Hz ±20%"
+      ],
+      [
+        "Maximum Power Per Channel",
+        "7kW"
+      ],
+      [
+        "Maximum Total Power",
+        "14kW"
+      ],
+      [
+        "Standby Power Consumption",
+        "<6W"
+      ],
+      [
+        "Billing Method",
+        "Charging by kWh or free of charge"
+      ],
+      [
+        "Payment Methods",
+        "Card swipe, QR code scan (Alipay & WeChat Pay)"
+      ],
+      [
+        "Housing Material",
+        "Galvanized steel plate (spray-plastic coating, glossy PC panel)"
+      ],
+      [
+        "Display Type",
+        "Color LCD display"
+      ],
+      [
+        "Cable Length",
+        "5m"
+      ],
+      [
+        "Accuracy Class",
+        "Class 2"
+      ],
+      [
+        "Operating Temperature",
+        "-30°C to +55°C"
+      ],
+      [
+        "Operating Humidity",
+        "5% to 95% RH"
+      ],
+      [
+        "Operating Altitude",
+        "<3000m"
+      ],
+      [
+        "IP Rating",
+        "IP54"
+      ],
+      [
+        "Installation Method",
+        "Floor-mounted"
+      ],
+      [
+        "Product Weight",
+        "45kg"
+      ],
+      [
+        "Product Dimensions",
+        "550 × 220 × 1500 mm (L × W × H)"
+      ]
+    ],
+    "featured": false
+  },
+  {
+    "id": "LX-DC-20kW/30kW/40kW",
+    "name": "Low Power DC Chargers (20kW/30kW/40kW)",
+    "nameAr": "",
+    "image": "uploads/product-1780926437475-390153854.PNG",
+    "group": "ev-charger",
+    "subCategory": "dc",
+    "category": "dc",
+    "categoryLabel": "DC EV Charging Station",
+    "categoryLabelAr": "محطة شحن تيار مستمر",
+    "shortDesc": "Charging efficiency >95% for superior energy savings",
+    "shortDescAr": "",
+    "description": "Product Features:Charging efficiency >95% for superior energy savings; DC 300~1000V constant power output, compatible with various new energy vehicles compliant with Chinese National Standards (GB).\nEnergy-Saving & Noise Reduction:Adopts standby module cutoff technology for ultra-low standby power consumption; Equipped with intelligent noise reduction technology for ultra-quiet and safe operation.\nSafe & Reliable:Dustproof and waterproof design for easy maintenance; Dual protection system ensures comprehensive charging safety; Supports remote proactive maintenance for real-time equipment health monitoring.\nPower Sharing:Supports multi-unit interconnected expansion, with a maximum charging power of 80kW and maximum charging current of 150A per gun.",
+    "descriptionAr": "",
+    "capacities": [],
+    "voltages": [],
+    "specs": [
+      [
+        "Model",
+        "LXDC-20kW, 30kW, 40kW"
+      ],
+      [
+        "Rated Input Voltage Range",
+        "AC 380V ±15% 3-phase 5-wire system"
+      ],
+      [
+        "Rated Power",
+        "20kW, 30kW, 40kW"
+      ],
+      [
+        "Output Voltage Range",
+        "200~1000V DC"
+      ],
+      [
+        "Output Current Range",
+        "2~66.7A, 2~100A, 2~133.3A"
+      ],
+      [
+        "Peak Efficiency",
+        ">95%"
+      ],
+      [
+        "Activation Methods",
+        "Mobile QR Code Scan, Card Swipe (Optional)"
+      ],
+      [
+        "Network Connectivity",
+        "Ethernet, 4G"
+      ],
+      [
+        "Charging Connector",
+        "GB/T 20234.3 Chinese National Standard DC Charging Connector"
+      ],
+      [
+        "Cable Length",
+        "5m (Customizable)"
+      ],
+      [
+        "Operation Indicator",
+        "Three-color LED strip: Indicates standby, charging and alarm statuses"
+      ],
+      [
+        "IP Rating",
+        "IP54"
+      ],
+      [
+        "Noise Level",
+        "≤65dB"
+      ],
+      [
+        "Installation Method",
+        "Wall-mounted or floor-standing (pole-mounted)"
+      ],
+      [
+        "Product Weight",
+        "<35kg (20kW) / <45kg (30kW) / <50kg (40kW)"
+      ],
+      [
+        "Product Dimensions W×H×D (mm)",
+        "Wall-mounted: 400×600×200 mm / 530×680×260 mm"
+      ],
+      [
+        "Product Dimensions W×H×D (mm)",
+        "Floor-standing: 400×1600×200 mm / 530×1570×377 mm"
+      ],
+      [
+        "Protection Features",
+        "Input over/under-voltage protection, output short-circuit protection, etc."
       ]
     ],
     "featured": false
