@@ -4441,38 +4441,14 @@ p:last-child {
     }
 
     .product-card-v2 .product-card-footer {
-        margin-top: 8px;
-        grid-template-columns: minmax(0, 1fr) auto;
-        gap: 10px;
-        padding-top: 6px;
+        margin-top: 10px;
+        gap: 8px;
+        padding-top: 8px;
     }
 
     .product-card-v2 .product-card-action {
-        min-height: 38px;
+        min-height: 40px;
         font-size: 0.9rem;
-    }
-
-    .products-home-grid .product-card-v2 .product-card-action.details {
-        padding-top: 6px;
-        padding-bottom: 6px;
-        border-color: #2A7FC2;
-        background: #2A7FC2;
-        color: var(--color-white-pure);
-    }
-
-    .products-home-grid .product-card-v2 .product-card-action.inquiry {
-        min-width: 74px;
-        min-height: 36px;
-        padding-right: 0;
-        padding-left: 0;
-        padding-top: 6px;
-        padding-bottom: 6px;
-        border-color: transparent;
-        background: transparent;
-        color: var(--color-navy);
-        font-size: 0.78rem;
-        text-decoration: underline;
-        text-underline-offset: 3px;
     }
 
     .floating-inquiry {
