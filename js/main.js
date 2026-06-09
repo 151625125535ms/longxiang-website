@@ -602,6 +602,7 @@
         var locations = company.mapLocations || {};
         var frame = document.querySelector('[data-company-google-map-frame]');
         var tabs = Array.from(document.querySelectorAll('[data-contact-map-target]'));
+        var panel = frame && frame.closest('.contact-location-panel');
         if (!frame || !tabs.length) return;
 
         tabs.forEach(function (tab) {
@@ -619,12 +620,15 @@
                 if (!next) return;
                 var nextEmbedUrl = next.mapEmbedUrl || next.googleMapsEmbedUrl;
                 if (nextEmbedUrl) frame.src = nextEmbedUrl;
+                if (panel) panel.setAttribute('data-map-location', key);
                 tabs.forEach(function (item) { item.classList.toggle('active', item === tab); });
             });
         });
 
         var active = tabs.find(function (tab) { return tab.classList.contains('active'); }) || tabs[0];
-        var activeLocation = locations[active.getAttribute('data-contact-map-target')];
+        var activeKey = active.getAttribute('data-contact-map-target');
+        var activeLocation = locations[activeKey];
+        if (panel) panel.setAttribute('data-map-location', activeKey);
         var activeEmbedUrl = activeLocation && (activeLocation.mapEmbedUrl || activeLocation.googleMapsEmbedUrl);
         if (activeEmbedUrl) frame.src = activeEmbedUrl;
     }
