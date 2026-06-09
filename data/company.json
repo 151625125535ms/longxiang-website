@@ -28,7 +28,7 @@
   "instagram": "https://www.instagram.com/merr_ick233?igsh=MTlpdjF4NGdodGJmbg==",
   "youtube": "https://youtube.com/@merrick-n4y?si=eAgL-Cc6rR8XrA1p",
   "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=34.5920246095604%2C113.71983991110623",
-  "googleMapsEmbedUrl": "https://www.google.com/maps/dir/34.5920246095604,113.71983991110623/33.700610534021,114.8518125937413?hl=en&z=8&t=m&output=embed",
+  "googleMapsEmbedUrl": "https://www.google.com/maps?q=34.5920246095604%2C113.71983991110623&z=15&t=m&output=embed",
   "openStreetMapUrl": "https://www.openstreetmap.org/?mlat=34.5920246095604&mlon=113.71983991110623#map=17/34.5920246095604/113.71983991110623",
   "mapLocations": {
     "electric": {
