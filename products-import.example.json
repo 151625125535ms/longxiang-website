@@ -1,0 +1,35 @@
+{
+  "defaults": {
+    "featured": false
+  },
+  "products": [
+    {
+      "id": "EXAMPLE-LXAC-7kW",
+      "name": "7kW AC EV Charging Station (No Display)",
+      "nameAr": "محطة شحن تيار متردد 7 كيلوواط بدون شاشة عرض",
+      "sourceImage": "第17页-104.PNG",
+      "category": "ac",
+      "shortDesc": "A 7kW AC charging station without display, designed for safe outdoor charging with status monitoring, multiple start modes and reliable protection.",
+      "shortDescAr": "محطة شحن تيار متردد بقدرة 7 كيلوواط بدون شاشة، مخصصة للشحن الخارجي الآمن مع مراقبة الحالة وطرق تشغيل متعددة وحماية موثوقة.",
+      "description": "The LXAC-7kW AC EV charging station provides safe and convenient charging for electric vehicles. It supports operating status monitoring, control protection, intelligent chip control, multiple charging modes such as mobile QR code scanning, optional card swiping and plug-and-charge, plus three-color indicator status display. Scheduled and orderly charging help avoid peak electricity prices, protect grid safety and reduce manual operation.",
+      "descriptionAr": "توفر محطة الشحن LXAC-7kW شحنا آمنا ومريحا للمركبات الكهربائية. تدعم مراقبة حالة التشغيل ووظائف الحماية والتحكم الذكي، مع عدة طرق للشحن مثل مسح رمز QR عبر الهاتف، وبطاقة اختيارية، والشحن بمجرد التوصيل، إضافة إلى مؤشر ثلاثي الألوان لحالة الشحن. كما يدعم الشحن المجدول والمنظم لتجنب أوقات الذروة وحماية الشبكة وتقليل التشغيل اليدوي.",
+      "capacities": [],
+      "voltages": [],
+      "specs": [
+        ["型号", "LXAC-7kW"],
+        ["功率等级", "7kW"],
+        ["额定输入/输出电压", "AC220V ±20%"],
+        ["额定输出电流", "32A"],
+        ["启动方式", "手机扫码、刷卡（选配）"],
+        ["充电接口", "国标交流充电枪 GB/T 20234.2"],
+        ["枪线长度", "5m（可定制）"],
+        ["工作指示灯", "三色指示灯带：显示待机、充电、告警状态"],
+        ["防护等级", "IP55"],
+        ["计量等级", "2"],
+        ["产品重量", "<4kg（不含立柱）"],
+        ["产品尺寸W×H×D（mm）", "壁挂式：230 x 320 x 85；立柱式：230 x 1480 x 85"],
+        ["保护特性", "过压保护、欠压保护、短路保护、漏电保护"]
+      ]
+    }
+  ]
+}

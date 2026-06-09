@@ -4,6 +4,7 @@
   "description": "Henan Longxiang Electrical Co., Ltd. Official Website",
   "main": "server/app.js",
   "scripts": {
+    "products:import": "node scripts/import-products.js",
     "start": "node server/app.js"
   },
   "dependencies": {
