@@ -611,11 +611,14 @@
             if (location) {
                 var title = tab.querySelector('strong');
                 var address = tab.querySelector('span');
+                var directions = tab.querySelector('[data-contact-map-directions]');
                 if (title && location.mapLabel) title.textContent = location.mapLabel;
                 if (address && location.mapSubLabel) address.textContent = location.mapSubLabel;
+                if (directions && location.directionsUrl) directions.href = location.directionsUrl;
             }
 
-            tab.addEventListener('click', function () {
+            var switchControl = tab.querySelector('.contact-map-tab-main') || tab;
+            switchControl.addEventListener('click', function () {
                 var next = locations[key];
                 if (!next) return;
                 var nextEmbedUrl = next.mapEmbedUrl || next.googleMapsEmbedUrl;

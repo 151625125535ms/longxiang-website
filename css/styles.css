@@ -4096,13 +4096,24 @@ p:last-child {
 
 .contact-map-tab {
     min-height: 54px;
-    padding: 9px 12px;
     border: 1px solid rgba(10, 22, 40, 0.12);
     border-radius: 6px;
     background: rgba(255, 255, 255, 0.94);
     color: var(--color-navy);
-    text-align: left;
     box-shadow: 0 10px 24px rgba(10, 22, 40, 0.1);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 36px;
+    align-items: stretch;
+    overflow: hidden;
+}
+
+.contact-map-tab-main {
+    min-width: 0;
+    padding: 9px 10px 9px 12px;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    text-align: left;
     cursor: pointer;
 }
 
@@ -4131,6 +4142,27 @@ p:last-child {
 
 .contact-map-tab.active span {
     color: rgba(255, 255, 255, 0.78);
+}
+
+.contact-map-directions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    min-height: 100%;
+    color: var(--color-brand-red);
+    background: rgba(225, 37, 27, 0.06);
+    text-decoration: none;
+}
+
+.contact-map-directions svg {
+    width: 18px;
+    height: 18px;
+}
+
+.contact-map-tab.active .contact-map-directions {
+    color: var(--color-brand-red);
+    background: var(--color-white-pure);
 }
 
 .contact-map-frame {
@@ -6449,7 +6481,20 @@ p:last-child {
 
     .contact-map-tab {
         min-height: 48px;
-        padding: 8px 10px;
+        grid-template-columns: minmax(0, 1fr) 34px;
+    }
+
+    .contact-map-tab-main {
+        padding: 8px 8px 8px 10px;
+    }
+
+    .contact-map-directions {
+        width: 34px;
+    }
+
+    .contact-map-directions svg {
+        width: 16px;
+        height: 16px;
     }
 
     .contact-map-tab strong {
