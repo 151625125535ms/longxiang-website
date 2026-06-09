@@ -64,6 +64,7 @@ html {
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
     font-size: 16px;
+    overflow-x: hidden;
 }
 
 body {
@@ -1820,6 +1821,27 @@ p:last-child {
         --navbar-height: 65px;
     }
 
+    html,
+    body {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: clip;
+    }
+
+    .navbar,
+    .navbar .container,
+    main,
+    .page-hero,
+    .section,
+    .footer {
+        max-width: 100%;
+    }
+
+    .fade-in-left,
+    .fade-in-right {
+        transform: none;
+    }
+
     .hamburger {
         display: flex;
     }
@@ -1828,8 +1850,8 @@ p:last-child {
         position: fixed;
         top: 0;
         right: 0;
-        width: 80%;
-        max-width: 350px;
+        width: min(82vw, 320px);
+        max-width: calc(100vw - 24px);
         height: 100vh;
         overflow-y: auto;
         overflow-x: hidden;
@@ -1843,6 +1865,7 @@ p:last-child {
         transition: transform var(--transition-base);
         z-index: 1000;
         box-shadow: -10px 0 40px rgba(0, 0, 0, 0.3);
+        contain: layout paint;
     }
 
     .nav-links.active {
@@ -3842,6 +3865,7 @@ p:last-child {
 
 .product-detail-content-card,
 .product-detail-sidebar {
+    min-width: 0;
     border: 1px solid var(--color-gray-200);
     border-radius: 6px;
     background: var(--color-white-pure);
