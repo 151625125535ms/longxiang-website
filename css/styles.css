@@ -4325,23 +4325,6 @@ p:last-child {
         display: none;
     }
 
-    .product-directory-section .product-card-v2 .product-card-image::after {
-        content: 'Quick View';
-        position: absolute;
-        right: 8px;
-        bottom: 8px;
-        left: 8px;
-        display: flex;
-        min-height: 24px;
-        align-items: center;
-        justify-content: center;
-        border-radius: 3px;
-        background: rgba(31, 111, 178, 0.92);
-        color: var(--color-white-pure);
-        font-size: 0.67rem;
-        font-weight: 800;
-        letter-spacing: 0;
-    }
 }
 
 @media (max-width: 560px) {
