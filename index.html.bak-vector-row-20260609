@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Henan Longxiang Electrical Co., Ltd. manufactures transformer, switchgear, and low-carbon power equipment.">
+    <title>Henan Longxiang Electrical Co., Ltd. | Power Transmission & Distribution Equipment</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="stylesheet" href="css/styles.css?v=20260606a">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="nav-logo">
+                <span class="nav-logo-text">LONG<span>XIANG</span></span>
+            </a>
+
+            <div class="nav-links">
+                <div class="nav-item"><a href="index.html" class="active">Home</a></div>
+                <div class="nav-item has-dropdown">
+                    <a href="products.html" class="">Products</a>
+                    <div class="nav-dropdown">
+                        <a href="products.html?group=transformer">Transformer</a>
+                        <a href="products.html?group=ev-charger">EV charger</a>
+                        <a href="products.html?group=switchgear">Switchgear</a>
+                    </div>
+                </div>
+                <div class="nav-item has-dropdown">
+                    <a href="solutions.html" class="">Solutions</a>
+                    <div class="nav-dropdown">
+                        <a href="solutions.html#pv-solution">C&I PV Solution</a>
+                        <a href="solutions.html#wind-pv-ess-ev">C&I Wind+PV+ESS+EV Charging Solution</a>
+                        <a href="solutions.html#smart-microgrid">C&I Smart Microgrid Solution</a>
+                    </div>
+                </div>
+                <div class="nav-item"><a href="education.html" class="">Education</a></div>
+                <div class="nav-item has-dropdown">
+                    <a href="about.html" class="">About Us</a>
+                    <div class="nav-dropdown">
+                        <a href="about.html">About LongXiang</a>
+                        <a href="certifications.html">Certificates</a>
+                    </div>
+                </div>
+                <div class="nav-item"><a href="contact.html" class="">Contact</a></div>
+            </div>
+            <div class="hamburger"><span></span><span></span><span></span></div>
+        </div>
+    </nav>
+    <div class="mobile-menu-overlay"></div>
+
+    <section class="hero hero-hex">
+        <div class="hero-bg" style="background-image: url('5、厂区厂貌/龙翔公司正门.jpg');"></div>
+        <div class="hero-overlay"></div>
+        <div class="hero-hex-panel">
+            <img src="longxiang-logo-symbol.png" alt="Longxiang Electrical logo" class="hero-hex-logo">
+            <h1 class="hero-hex-title">HENAN LONGXIANG ELECTRICAL CO., LTD.</h1>
+            <div class="hero-hex-actions">
+                <a href="products.html" class="hero-hex-btn products">Products</a>
+                <a href="solutions.html" class="hero-hex-btn solutions">Solutions</a>
+                <a href="contact.html" class="hero-hex-btn contact">Contact</a>
+            </div>
+        </div>
+    </section>
+
+    <main>
+        <section class="section products-showcase-redesign products-showcase-compact" id="products">
+            <div class="container">
+                <div class="section-header fade-in">
+                    <h2>Products</h2>
+                </div>
+                <div class="home-product-categories fade-in" id="featured-product-categories" aria-label="Product categories"></div>
+                <div class="products-home-grid" data-stagger="100" id="featured-products-container"></div>
+                <div class="text-center mt-4 fade-in"><a href="products.html" class="btn all-products-btn">All Products</a></div>
+            </div>
+        </section>
+
+        <section class="section bg-light" id="trust">
+            <div class="container">
+                <div class="section-header fade-in">
+                    <h2>Trusted by Industry Leaders</h2>
+                    <p>Our equipment supports critical infrastructure across China and international power projects.</p>
+                </div>
+                <div class="trust-logos fade-in" style="display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:32px;padding:20px 0;">
+                    <div class="trust-chip"><strong>State Grid</strong><span>Corporation of China</span></div>
+                    <div class="trust-chip"><strong>China Southern</strong><span>Power Grid</span></div>
+                    <div class="trust-chip"><strong>Chongqing</strong><span>Power Bureau</span></div>
+                    <div class="trust-chip"><strong>Henan Electric</strong><span>Power Company</span></div>
+                </div>
+                <div class="testimonials-grid trust-testimonials fade-in">
+                    <div class="testimonial-card">
+                        <p class="testimonial-text">&quot;Longxiang Electrical has been our trusted transformer supplier for years. Their amorphous alloy transformers deliver exceptional energy savings and reliability.&quot;</p>
+                        <div class="testimonial-author">
+                            <div class="testimonial-author-info">
+                                <strong>Power Distribution Director</strong>
+                                <span>State Grid Corporation</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-card">
+                        <p class="testimonial-text">&quot;The quality and after-sales service from Longxiang are outstanding. Their technical team provided excellent support throughout the project lifecycle.&quot;</p>
+                        <div class="testimonial-author">
+                            <div class="testimonial-author-info">
+                                <strong>Project Manager</strong>
+                                <span>Chongqing 500kV Substation Project</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-card">
+                        <p class="testimonial-text">&quot;We chose Longxiang for their innovative amorphous alloy technology. The energy efficiency improvements have exceeded our expectations.&quot;</p>
+                        <div class="testimonial-author">
+                            <div class="testimonial-author-info">
+                                <strong>Chief Engineer</strong>
+                                <span>Huaiyang Industrial Park</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section bg-white" id="why-choose">
+            <div class="container">
+                <div class="section-header fade-in"><h2>Why Choose Longxiang</h2></div>
+                <div class="features-grid" data-stagger="150">
+                    <div class="feature-card fade-in"><div class="feature-icon">&#9889;</div><h4>Energy Innovation</h4><p>Focused on amorphous alloy transformer technology and low-carbon electrical equipment.</p></div>
+                    <div class="feature-card fade-in"><div class="feature-icon">&#9878;</div><h4>Listed Enterprise</h4><p>NEEQ listed company, stock code 836070, with long-term governance and manufacturing discipline.</p></div>
+                    <div class="feature-card fade-in"><div class="feature-icon">&#10003;</div><h4>Quality Assured</h4><p>Trusted power equipment supplier with patent certifications and modern testing capability.</p></div>
+                    <div class="feature-card fade-in"><div class="feature-icon">&#9711;</div><h4>Lifecycle Service</h4><p>Engineering support from model selection through production, delivery, and after-sales service.</p></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="stats-section" id="stats">
+            <div class="container">
+                <div class="stats-grid">
+                    <div class="stat-item fade-in"><div class="stat-number" data-count="2003">0</div><div class="stat-divider"></div><div class="stat-label">Year Founded</div></div>
+                    <div class="stat-item fade-in"><div class="stat-number" data-count="10000">0</div><div class="stat-divider"></div><div class="stat-label">Sq.m Factory Area</div></div>
+                    <div class="stat-item fade-in"><div class="stat-number" data-count="100">0</div><div class="stat-divider"></div><div class="stat-label">Patent Certifications</div></div>
+                    <div class="stat-item fade-in"><div class="stat-number" data-count="20">0</div><div class="stat-divider"></div><div class="stat-label">Research Partners</div></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="cta-section">
+            <div class="container">
+                <h2 class="fade-in">Ready to Power Your Next Project?</h2>
+                <p class="fade-in">Get in touch with our team to discuss your power distribution needs.</p>
+                <div class="cta-buttons fade-in"><a href="contact.html" class="btn btn-gold btn-lg">Get a Quote</a></div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-company">
+                    <div class="footer-brand">
+                        <a href="index.html" class="nav-logo"><span class="nav-logo-text">LONG<span>XIANG</span></span></a>
+                        <p>Providing intelligent, low-carbon power equipment and cultivating excellent professional electrical talent since 2003.</p>
+                    </div>
+                    <div class="footer-contact-item" data-company-contact="email"><span class="icon">&#9993;</span><span class="footer-contact-value">hnlxdq2003@163.com</span></div>
+                    <div class="footer-contact-item" data-company-contact="address"><span class="icon">&#8982;</span><span class="footer-contact-value">Longhu New District, Xinzheng, Zhengzhou, Henan, China</span></div>
+                    <div class="messenger-links" data-communication-links></div>
+                </div>
+                <div class="footer-navigation">
+                    <div class="footer-column">
+                        <h4>Quick Links</h4>
+                        <div class="footer-links">
+                            <a href="index.html">Home</a>
+                            <a href="products.html">Products</a>
+                            <a href="solutions.html">Solutions</a>
+                            <a href="education.html">Education</a>
+                            <a href="about.html">About Us</a>
+                            <a href="contact.html">Contact</a>
+                        </div>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Products</h4>
+                        <div class="footer-links">
+                            <a href="products.html?group=transformer">Transformer</a>
+                            <a href="products.html?group=ev-charger">EV charger</a>
+                            <a href="products.html?group=switchgear">Switchgear</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-conversion footer-column">
+                    <h4>Request Quote</h4>
+                    <p class="footer-conversion-text">Share your project requirements and our team will respond quickly.</p>
+                    <form class="footer-quote-form" data-inquiry-form>
+                        <input type="hidden" name="name" value="Footer Quote Visitor">
+                        <input type="hidden" name="subject" value="quote">
+                        <input type="hidden" name="productContext" value="Footer request quote">
+                        <textarea name="message" rows="4" placeholder="* Message" required></textarea>
+                        <div class="footer-quote-row">
+                            <input type="email" name="email" placeholder="* E-mail" required>
+                            <input type="text" name="phone" placeholder="WhatsApp / Phone">
+                        </div>
+                        <button type="submit">SUBMIT</button>
+                    </form>
+                </div>
+            </div>
+            <div class="footer-bottom"><p>&copy; 2024 Henan Longxiang Electrical Co., Ltd. All Rights Reserved.</p></div>
+        </div>
+    </footer>
+    <button class="back-to-top" aria-label="Back to top">&uarr;</button>
+    <script src="js/main.js"></script>
+</body>
+</html>
