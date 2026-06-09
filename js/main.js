@@ -209,42 +209,75 @@
     function initMobileMenu() {
         if (!hamburger || !navLinks) return;
 
+        function closeMobileMenu() {
+            hamburger.classList.remove('active');
+            navLinks.classList.remove('active');
+            if (mobileOverlay) mobileOverlay.classList.remove('active');
+            navLinks.querySelectorAll('.nav-item.has-dropdown.is-open').forEach(function (openItem) {
+                openItem.classList.remove('is-open');
+                var openLink = openItem.querySelector(':scope > a');
+                if (openLink) openLink.setAttribute('aria-expanded', 'false');
+            });
+            document.body.classList.remove('mobile-menu-open');
+            document.body.style.overflow = '';
+        }
+
         hamburger.addEventListener('click', function () {
             hamburger.classList.toggle('active');
             navLinks.classList.toggle('active');
             if (mobileOverlay) mobileOverlay.classList.toggle('active');
             var isOpen = navLinks.classList.contains('active');
+            if (!isOpen) {
+                closeMobileMenu();
+                return;
+            }
             document.body.classList.toggle('mobile-menu-open', isOpen);
             document.body.style.overflow = isOpen ? 'hidden' : '';
         });
 
+        navLinks.querySelectorAll('.nav-item.has-dropdown > a').forEach(function (link) {
+            link.setAttribute('aria-expanded', 'false');
+            link.addEventListener('click', function (event) {
+                if (!window.matchMedia('(max-width: 768px)').matches) return;
+
+                event.preventDefault();
+                var item = link.closest('.nav-item');
+                var willOpen = item && !item.classList.contains('is-open');
+
+                navLinks.querySelectorAll('.nav-item.has-dropdown.is-open').forEach(function (openItem) {
+                    if (openItem !== item) {
+                        openItem.classList.remove('is-open');
+                        var openLink = openItem.querySelector(':scope > a');
+                        if (openLink) openLink.setAttribute('aria-expanded', 'false');
+                    }
+                });
+
+                if (item) item.classList.toggle('is-open', willOpen);
+                link.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+            });
+        });
+
         navLinks.querySelectorAll('a').forEach(function (link) {
-            link.addEventListener('click', function () {
-                hamburger.classList.remove('active');
-                navLinks.classList.remove('active');
-                if (mobileOverlay) mobileOverlay.classList.remove('active');
-                document.body.classList.remove('mobile-menu-open');
-                document.body.style.overflow = '';
+            link.addEventListener('click', function (event) {
+                if (window.matchMedia('(max-width: 768px)').matches &&
+                    link.closest('.nav-item.has-dropdown') &&
+                    link.parentElement && link.parentElement.classList.contains('has-dropdown')) {
+                    return;
+                }
+
+                closeMobileMenu();
             });
         });
 
         if (mobileOverlay) {
             mobileOverlay.addEventListener('click', function () {
-                hamburger.classList.remove('active');
-                navLinks.classList.remove('active');
-                mobileOverlay.classList.remove('active');
-                document.body.classList.remove('mobile-menu-open');
-                document.body.style.overflow = '';
+                closeMobileMenu();
             });
         }
 
         document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape' && navLinks.classList.contains('active')) {
-                hamburger.classList.remove('active');
-                navLinks.classList.remove('active');
-                if (mobileOverlay) mobileOverlay.classList.remove('active');
-                document.body.classList.remove('mobile-menu-open');
-                document.body.style.overflow = '';
+                closeMobileMenu();
             }
         });
     }
