@@ -1,5 +1,4 @@
 const express = require('express');
-const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
 const { authMiddleware } = require('../middleware/auth');
@@ -10,11 +9,7 @@ const DATA_FILE = path.join(__dirname, '..', '..', 'data', 'certifications.json'
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        const uploadDir = path.join(__dirname, '..', '..', 'uploads');
-        if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
-        }
-        cb(null, uploadDir);
+        cb(null, path.join(__dirname, '..', '..', 'uploads'));
     },
     filename: function (req, file, cb) {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
