@@ -6362,3 +6362,37 @@ p:last-child {
         line-height: 1.2;
     }
 }
+
+@media (max-width: 560px) {
+    .navbar .container {
+        grid-template-columns: max-content max-content 28px;
+        justify-content: space-between;
+        gap: 8px;
+    }
+
+    .language-switcher {
+        width: 104px;
+        justify-self: end;
+    }
+
+    .language-switcher select {
+        width: 104px;
+        max-width: 104px;
+        min-height: 34px;
+        padding: 6px 26px 6px 10px;
+        font-size: 0.82rem;
+        line-height: 1.2;
+    }
+}
+
+@media (max-width: 340px) {
+    .nav-logo-text {
+        font-size: 1rem;
+    }
+
+    .language-switcher,
+    .language-switcher select {
+        width: 104px;
+        max-width: 104px;
+    }
+}
