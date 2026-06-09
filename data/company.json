@@ -28,7 +28,7 @@
   "instagram": "https://www.instagram.com/merr_ick233?igsh=MTlpdjF4NGdodGJmbg==",
   "youtube": "https://youtube.com/@merrick-n4y?si=eAgL-Cc6rR8XrA1p",
   "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=34.59%2C113.72",
-  "googleMapsEmbedUrl": "https://www.google.com/maps?ll=34.59,113.72&z=17&t=m&output=embed",
+  "googleMapsEmbedUrl": "https://www.google.com/maps?q=34.59%2C113.72&z=17&t=m&output=embed",
   "openStreetMapUrl": "https://www.openstreetmap.org/?mlat=34.59&mlon=113.72#map=17/34.59/113.72",
   "mapLocations": {
     "electric": {
@@ -40,8 +40,8 @@
       "mapCenter": "34.59,113.72",
       "directionsUrl": "https://www.google.com/maps/dir/?api=1&destination=34.59%2C113.72&travelmode=driving",
       "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=34.59%2C113.72",
-      "mapEmbedUrl": "https://www.google.com/maps?ll=34.59,113.72&z=17&t=m&output=embed",
-      "googleMapsEmbedUrl": "https://www.google.com/maps?ll=34.59,113.72&z=17&t=m&output=embed",
+      "mapEmbedUrl": "https://www.google.com/maps?q=34.59%2C113.72&z=17&t=m&output=embed",
+      "googleMapsEmbedUrl": "https://www.google.com/maps?q=34.59%2C113.72&z=17&t=m&output=embed",
       "openStreetMapUrl": "https://www.openstreetmap.org/?mlat=34.59&mlon=113.72#map=17/34.59/113.72"
     },
     "newEnergy": {
@@ -53,8 +53,8 @@
       "mapCenter": "33.71,114.86",
       "directionsUrl": "https://www.google.com/maps/dir/?api=1&destination=33.71%2C114.86&travelmode=driving",
       "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=33.71%2C114.86",
-      "mapEmbedUrl": "https://www.google.com/maps?ll=33.71,114.86&z=17&t=m&output=embed",
-      "googleMapsEmbedUrl": "https://www.google.com/maps?ll=33.71,114.86&z=17&t=m&output=embed",
+      "mapEmbedUrl": "https://www.google.com/maps?q=33.71%2C114.86&z=17&t=m&output=embed",
+      "googleMapsEmbedUrl": "https://www.google.com/maps?q=33.71%2C114.86&z=17&t=m&output=embed",
       "openStreetMapUrl": "https://www.openstreetmap.org/?mlat=33.71&mlon=114.86#map=17/33.71/114.86"
     }
   },

@@ -606,6 +606,7 @@
         var mapCompany = document.querySelector('[data-contact-map-company]');
         var mapAddress = document.querySelector('[data-contact-map-address]');
         var mapOpen = document.querySelector('[data-contact-map-open]');
+        var mapMarkerName = document.querySelector('[data-contact-map-marker-name]');
         if (!frame || !tabs.length) return;
 
         function syncMapInfo(location) {
@@ -613,6 +614,7 @@
             if (mapCompany && location.name) mapCompany.textContent = location.name;
             if (mapAddress) mapAddress.textContent = location.displayAddress || location.address || '';
             if (mapOpen) mapOpen.href = location.googleMapsUrl || location.directionsUrl || '#';
+            if (mapMarkerName) mapMarkerName.textContent = location.name || '';
         }
 
         tabs.forEach(function (tab) {
