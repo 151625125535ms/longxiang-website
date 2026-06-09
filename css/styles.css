@@ -3135,6 +3135,19 @@ p:last-child {
     font-size: 0.85rem;
 }
 
+.trust-logos {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 32px;
+    padding: 20px 0;
+}
+
+#trust {
+    scroll-margin-top: calc(var(--navbar-height) + 16px);
+}
+
 .trust-testimonials {
     margin-top: 40px;
 }
@@ -6519,6 +6532,95 @@ p:last-child {
 
     .hero-hex-actions {
         width: min(280px, 100%);
+    }
+}
+
+@media (max-width: 600px) {
+    #trust.section {
+        padding: 42px 0 46px;
+    }
+
+    #trust .section-header {
+        margin-bottom: 18px;
+    }
+
+    #trust .section-header h2 {
+        font-size: clamp(1.7rem, 8vw, 2.05rem);
+        line-height: 1.12;
+    }
+
+    #trust .section-header p {
+        max-width: 330px;
+        margin-right: auto;
+        margin-left: auto;
+        font-size: 0.92rem;
+        line-height: 1.5;
+    }
+
+    #trust .trust-logos {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        padding: 4px 0 0;
+    }
+
+    #trust .trust-chip {
+        min-width: 0;
+        min-height: 84px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 13px 8px;
+        border-radius: 6px;
+        box-shadow: none;
+    }
+
+    #trust .trust-chip strong {
+        font-size: 0.9rem;
+        line-height: 1.2;
+    }
+
+    #trust .trust-chip span {
+        margin-top: 4px;
+        font-size: 0.72rem;
+        line-height: 1.25;
+    }
+
+    #trust .trust-testimonials {
+        gap: 12px;
+        margin-top: 22px;
+    }
+
+    #trust .testimonial-card {
+        padding: 18px 16px;
+        border-radius: 6px;
+        box-shadow: none;
+    }
+
+    #trust .testimonial-card::before {
+        top: 6px;
+        left: 12px;
+        font-size: 2.4rem;
+        opacity: 0.08;
+    }
+
+    #trust .testimonial-text {
+        margin-bottom: 12px;
+        font-size: 0.9rem;
+        line-height: 1.55;
+    }
+
+    #trust .testimonial-author-info strong {
+        font-size: 0.86rem;
+        line-height: 1.25;
+    }
+
+    #trust .testimonial-author-info span {
+        display: block;
+        margin-top: 3px;
+        font-size: 0.76rem;
+        line-height: 1.3;
     }
 }
 
