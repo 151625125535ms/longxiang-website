@@ -6433,6 +6433,8 @@ p:last-child {
         gap: 14px;
         border-left: 3px solid var(--color-gold);
         background: transparent;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
         box-shadow: none;
         text-align: left;
     }
