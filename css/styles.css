@@ -6647,7 +6647,7 @@ p:last-child {
 @media (max-width: 768px) {
     .nav-links .nav-item.has-dropdown > a {
         width: 100%;
-        justify-content: center;
+        justify-content: flex-start;
     }
 
     .nav-links .nav-item.has-dropdown > a::before {
@@ -6701,5 +6701,33 @@ p:last-child {
         padding-bottom: 8px;
         opacity: 1;
         visibility: visible;
+    }
+}
+
+@media (max-width: 768px) {
+    .nav-links {
+        align-items: stretch;
+    }
+
+    .nav-links .nav-item,
+    .nav-links .nav-item.has-dropdown {
+        text-align: left;
+    }
+
+    .nav-links .nav-item > a,
+    .nav-links .nav-item.has-dropdown > a {
+        justify-content: flex-start;
+        width: 100%;
+        padding-left: 6px;
+        text-align: left;
+    }
+
+    .nav-links .nav-dropdown {
+        padding-right: 0;
+        padding-left: 22px;
+    }
+
+    .nav-links .nav-dropdown a {
+        text-align: left;
     }
 }
