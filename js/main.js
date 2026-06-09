@@ -617,14 +617,16 @@
             tab.addEventListener('click', function () {
                 var next = locations[key];
                 if (!next) return;
-                if (next.googleMapsEmbedUrl) frame.src = next.googleMapsEmbedUrl;
+                var nextEmbedUrl = next.mapEmbedUrl || next.googleMapsEmbedUrl;
+                if (nextEmbedUrl) frame.src = nextEmbedUrl;
                 tabs.forEach(function (item) { item.classList.toggle('active', item === tab); });
             });
         });
 
         var active = tabs.find(function (tab) { return tab.classList.contains('active'); }) || tabs[0];
         var activeLocation = locations[active.getAttribute('data-contact-map-target')];
-        if (activeLocation && activeLocation.googleMapsEmbedUrl) frame.src = activeLocation.googleMapsEmbedUrl;
+        var activeEmbedUrl = activeLocation && (activeLocation.mapEmbedUrl || activeLocation.googleMapsEmbedUrl);
+        if (activeEmbedUrl) frame.src = activeEmbedUrl;
     }
 
     function updateFooterNavigation() {
