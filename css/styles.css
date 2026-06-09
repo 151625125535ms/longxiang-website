@@ -6397,3 +6397,125 @@ p:last-child {
         max-width: 104px;
     }
 }
+
+.hero-hex-subtitle {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.78);
+    font-size: clamp(1rem, 2vw, 1.2rem);
+    line-height: 1.55;
+    text-align: center;
+}
+
+@media (max-width: 600px) {
+    .hero-hex {
+        min-height: 72vh;
+        align-items: flex-end;
+        justify-content: flex-start;
+        padding: calc(var(--navbar-height) + 44px) 16px 56px;
+    }
+
+    .hero-hex .hero-bg {
+        background-position: 42% center;
+        filter: saturate(0.95) contrast(1.08);
+    }
+
+    .hero-hex .hero-overlay {
+        background:
+            linear-gradient(180deg, rgba(7, 17, 32, 0.78) 0%, rgba(7, 17, 32, 0.34) 34%, rgba(7, 17, 32, 0.78) 100%),
+            linear-gradient(90deg, rgba(7, 17, 32, 0.82), rgba(7, 17, 32, 0.28));
+    }
+
+    .hero-hex-panel {
+        width: 100%;
+        max-width: 360px;
+        align-items: flex-start;
+        padding: 0 0 0 12px;
+        gap: 14px;
+        border-left: 3px solid var(--color-gold);
+        background: transparent;
+        box-shadow: none;
+        text-align: left;
+    }
+
+    .hero-hex .hero-hex-logo {
+        display: none;
+    }
+
+    .hero-hex .hero-hex-title {
+        width: min(330px, 100%);
+        color: var(--color-white-pure);
+        font-size: clamp(2rem, 8.4vw, 2.45rem);
+        font-weight: 800;
+        line-height: 1.08;
+        letter-spacing: 0;
+        text-align: left;
+        text-transform: none;
+    }
+
+    .hero-hex-subtitle {
+        max-width: 330px;
+        color: rgba(255, 255, 255, 0.82);
+        font-size: 0.96rem;
+        line-height: 1.5;
+        text-align: left;
+    }
+
+    .hero-hex-actions {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        width: min(330px, 100%);
+        gap: 10px;
+    }
+
+    .hero-hex-btn {
+        width: 100%;
+        min-width: 0;
+        height: 46px;
+        border: 1px solid rgba(255, 255, 255, 0.62);
+        border-radius: 4px;
+        box-shadow: none;
+        font-size: 0.78rem;
+        letter-spacing: 0.02em;
+    }
+
+    .hero-hex-btn.products {
+        border-color: var(--color-brand-red);
+        background: var(--color-brand-red);
+    }
+
+    .hero-hex-btn.solutions {
+        border-color: rgba(255, 255, 255, 0.72);
+        background: rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(8px);
+    }
+
+    .hero-hex-btn.contact {
+        display: none;
+    }
+
+    .products-showcase-compact {
+        margin-top: 0;
+        padding-top: 34px;
+    }
+}
+
+@media (max-width: 360px) {
+    .hero-hex {
+        min-height: 70vh;
+        padding-bottom: 48px;
+    }
+
+    .hero-hex .hero-hex-title {
+        max-width: 270px;
+        font-size: 1.86rem;
+    }
+
+    .hero-hex-subtitle {
+        max-width: 270px;
+        font-size: 0.9rem;
+    }
+
+    .hero-hex-actions {
+        width: min(280px, 100%);
+    }
+}
