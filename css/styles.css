@@ -6365,14 +6365,15 @@ p:last-child {
 
 @media (max-width: 560px) {
     .navbar .container {
-        grid-template-columns: max-content max-content 28px;
-        justify-content: space-between;
-        gap: 8px;
+        grid-template-columns: max-content minmax(0, 1fr) 28px;
+        justify-content: normal;
+        gap: 6px;
     }
 
     .language-switcher {
         width: 104px;
         justify-self: end;
+        transform: translateX(14px);
     }
 
     .language-switcher select {
