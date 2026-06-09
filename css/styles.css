@@ -1179,9 +1179,9 @@ p:last-child {
 
 .contact-section {
     display: grid;
-    grid-template-columns: 1fr 1.2fr;
-    gap: var(--spacing-4xl);
-    align-items: start;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.92fr);
+    gap: clamp(28px, 4vw, 56px);
+    align-items: stretch;
 }
 
 .contact-info h3 {
@@ -3817,6 +3817,31 @@ p:last-child {
     color: var(--color-gray-600);
 }
 
+.contact-social-block {
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 1px solid var(--color-gray-200);
+}
+
+.contact-social-block h4 {
+    margin-bottom: 12px;
+    color: var(--color-navy);
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+}
+
+.contact-social-block .messenger-link {
+    border-color: rgba(10, 22, 40, 0.12);
+    background: var(--color-white-pure);
+    color: var(--color-navy);
+}
+
+.contact-social-block .messenger-link:hover {
+    border-color: var(--color-brand-red);
+    background: var(--color-brand-red);
+    color: var(--color-white-pure);
+}
+
 .wechat-placeholder {
     display: flex;
     flex-direction: column;
@@ -3997,6 +4022,7 @@ p:last-child {
 
 .contact-location-panel {
     align-items: flex-start;
+    min-height: 100%;
     text-align: left;
     background:
         linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)),
@@ -4004,6 +4030,15 @@ p:last-child {
         radial-gradient(circle at 70% 60%, rgba(0, 163, 224, 0.08) 1px, transparent 1px),
         var(--color-gray-200);
     background-size: auto, 30px 30px, 24px 24px, auto;
+}
+
+.contact-form-section {
+    background: var(--color-white-pure);
+}
+
+.contact-form-section .contact-form {
+    max-width: 980px;
+    margin: 0 auto;
 }
 
 .map-actions {
@@ -6278,6 +6313,24 @@ p:last-child {
         gap: 24px;
     }
 
+    .contact-location-panel {
+        min-height: 220px;
+        padding: 22px 16px;
+    }
+
+    .contact-location-panel .module-kicker {
+        margin-bottom: 10px;
+    }
+
+    .contact-location-panel h3 {
+        font-size: 1.1rem;
+    }
+
+    .contact-location-panel p {
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
     .contact-primary-section {
         padding-top: 38px;
     }
@@ -6354,8 +6407,25 @@ p:last-child {
         overflow-wrap: break-word;
     }
 
+    .contact-social-block {
+        margin-top: 14px;
+        padding-top: 12px;
+    }
+
+    .contact-social-block h4 {
+        margin-bottom: 8px;
+        font-size: 0.86rem;
+    }
+
     .contact-messenger-links {
-        display: none;
+        display: flex;
+        gap: 8px;
+    }
+
+    .contact-messenger-links .messenger-link {
+        min-height: 34px;
+        padding: 0 10px;
+        font-size: 0.78rem;
     }
 }
 

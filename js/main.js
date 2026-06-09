@@ -670,6 +670,9 @@
         if (company.tiktok) {
             links.push(createMessengerLink('TikTok', company.tiktok, 'tiktok', 'click_tiktok'));
         }
+        if (company.instagram) {
+            links.push(createMessengerLink('Instagram', company.instagram, 'instagram', 'click_instagram'));
+        }
         if (company.youtube) {
             links.push(createMessengerLink('YouTube', company.youtube, 'youtube', 'click_youtube'));
         }

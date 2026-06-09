@@ -8,7 +8,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-    <link rel="stylesheet" href="css/styles.css?v=20260609contact1">
+    <link rel="stylesheet" href="css/styles.css?v=20260609contact2">
 </head>
 <body>
 
@@ -78,31 +78,34 @@
                             <div class="contact-info-row"><span>&#9635;</span><div><strong>Huaiyang Base</strong><span data-company-field="huaiyangBase">Huaiyang District, Zhoukou, Henan Province, China</span></div></div>
                             <div class="contact-info-row"><span>&#9671;</span><div><strong>WhatsApp / WeChat</strong><span data-company-field="whatsapp">To be updated</span></div></div>
                         </div>
-                        <div class="messenger-links contact-messenger-links" data-communication-links></div>
+                        <div class="contact-social-block">
+                            <h4>Social Media</h4>
+                            <div class="messenger-links contact-messenger-links" data-communication-links></div>
+                        </div>
                     </div>
-                    <div class="contact-form fade-in-right">
-                        <form id="contactForm">
-                            <div class="form-row"><div class="form-group"><label for="name">Full Name *</label><input type="text" id="name" name="name" required placeholder="Your full name"></div><div class="form-group"><label for="email">Email Address *</label><input type="email" id="email" name="email" required placeholder="your@email.com"></div></div>
-                            <div class="form-row"><div class="form-group"><label for="company">Company Name</label><input type="text" id="company" name="company" placeholder="Your company name"></div><div class="form-group"><label for="phone">Phone Number</label><input type="tel" id="phone" name="phone" placeholder="+1-xxx-xxx-xxxx"></div></div>
-                            <div class="form-group"><label for="subject">Subject *</label><select id="subject" name="subject" required><option value="">Select a topic</option><option value="quote">Request a Quote</option><option value="technical">Technical Consultation</option><option value="partnership">Business Partnership</option><option value="support">After-Sales Support</option><option value="other">Other Inquiry</option></select></div>
-                            <div class="form-group"><label for="message">Message *</label><textarea id="message" name="message" rows="5" required placeholder="Tell us about your requirements..."></textarea></div>
-                            <button type="submit" class="btn btn-primary">Send Message</button>
-                        </form>
+                    <div class="map-placeholder contact-location-panel fade-in-right">
+                        <div class="module-kicker"><span class="module-icon module-icon-map"></span><span>Location</span></div>
+                        <h3>Zhengzhou, Henan, China</h3>
+                        <p><span data-company-field="headquarters">Longhu New District Industrial Park, Xinzheng, Zhengzhou, Henan Province, China</span></p>
+                        <div class="map-actions">
+                            <a href="#" data-company-google-map target="_blank" rel="noopener">Google Maps</a>
+                            <a href="#" data-company-osm-map target="_blank" rel="noopener">OpenStreetMap</a>
+                        </div>
+                        <div class="communication-qr map-qr" data-company-map-qr hidden></div>
                     </div>
                 </div>
             </div>
         </section>
-        <section class="section bg-light contact-map-section">
+        <section class="section contact-form-section">
             <div class="container">
-                <div class="map-placeholder contact-location-panel fade-in">
-                    <div class="module-kicker"><span class="module-icon module-icon-map"></span><span>Location</span></div>
-                    <h3>Zhengzhou, Henan, China</h3>
-                    <p><span data-company-field="headquarters">Longhu New District Industrial Park, Xinzheng, Zhengzhou, Henan Province, China</span></p>
-                    <div class="map-actions">
-                        <a href="#" data-company-google-map target="_blank" rel="noopener">Google Maps</a>
-                        <a href="#" data-company-osm-map target="_blank" rel="noopener">OpenStreetMap</a>
-                    </div>
-                    <div class="communication-qr map-qr" data-company-map-qr hidden></div>
+                <div class="contact-form fade-in">
+                    <form id="contactForm">
+                        <div class="form-row"><div class="form-group"><label for="name">Full Name *</label><input type="text" id="name" name="name" required placeholder="Your full name"></div><div class="form-group"><label for="email">Email Address *</label><input type="email" id="email" name="email" required placeholder="your@email.com"></div></div>
+                        <div class="form-row"><div class="form-group"><label for="company">Company Name</label><input type="text" id="company" name="company" placeholder="Your company name"></div><div class="form-group"><label for="phone">Phone Number</label><input type="tel" id="phone" name="phone" placeholder="+1-xxx-xxx-xxxx"></div></div>
+                        <div class="form-group"><label for="subject">Subject *</label><select id="subject" name="subject" required><option value="">Select a topic</option><option value="quote">Request a Quote</option><option value="technical">Technical Consultation</option><option value="partnership">Business Partnership</option><option value="support">After-Sales Support</option><option value="other">Other Inquiry</option></select></div>
+                        <div class="form-group"><label for="message">Message *</label><textarea id="message" name="message" rows="5" required placeholder="Tell us about your requirements..."></textarea></div>
+                        <button type="submit" class="btn btn-primary">Send Message</button>
+                    </form>
                 </div>
             </div>
         </section>
