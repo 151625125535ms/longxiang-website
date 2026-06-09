@@ -1,0 +1,118 @@
+{
+  "defaults": {
+    "featured": false
+  },
+  "products": [
+    {
+      "id": "SCBH15",
+      "name": "SC(B)H15 Dry-Type Amorphous Alloy Core Distribution Transformer",
+      "nameAr": "محول توزيع جاف بقلب من السبيكة غير المتبلورة SC(B)H15",
+      "image": "uploads/product-scbh15-dry-amorphous.png",
+      "category": "dry-type",
+      "shortDesc": "An energy-efficiency level 3 dry-type amorphous alloy core distribution transformer with low no-load loss, low no-load current and reliable indoor operation.",
+      "shortDescAr": "محول توزيع جاف بقلب من السبيكة غير المتبلورة بمستوى كفاءة 3 وخسائر لا حمل منخفضة وتشغيل داخلي موثوق.",
+      "description": "The SC(B)H15 dry-type amorphous alloy core distribution transformer uses amorphous alloy core material to reduce no-load loss and no-load current. It offers safe, reliable, environmentally friendly and flame-retardant performance, and is suitable for high-rise buildings, airports, stations, ports, subways, hospitals, power plants, metallurgy, shopping centers, residential areas and petrochemical sites.",
+      "descriptionAr": "يستخدم محول SC(B)H15 الجاف قلبا من السبيكة غير المتبلورة لتقليل خسائر وتيار اللاحمل. يتميز بالأمان والاعتمادية وحماية البيئة ومقاومة اللهب، ويناسب المباني العالية والمطارات والمحطات والموانئ والمترو والمستشفيات ومحطات الطاقة والمراكز التجارية والمناطق السكنية.",
+      "capacities": ["30", "50", "80", "100", "125", "160", "200", "250", "315", "400", "500", "630", "800", "1000", "1250", "1600", "2000", "2500"],
+      "voltages": ["11/0.4kV", "10.5/0.4kV", "10/0.4kV", "6.3/0.4kV", "6/0.4kV"],
+      "specs": [
+        ["Product Model", "SC(B)H15"],
+        ["Efficiency Level", "Level 3"],
+        ["Transformer Type", "Dry-type amorphous alloy core distribution transformer"],
+        ["Rated Capacity Range", "30-2500kVA"],
+        ["High Voltage", "11kV, 10.5kV, 10kV, 6.3kV, 6kV"],
+        ["Low Voltage", "0.4kV"],
+        ["High-Voltage Tapping Range", "±5% or ±2 x 2.5%"],
+        ["Connection Symbol", "Dyn11"],
+        ["Short-Circuit Impedance", "4.0%, 6%, 8% depending on capacity"],
+        ["Installation", "Indoor or outdoor"],
+        ["Altitude", "≤1000m"],
+        ["Ambient Temperature", "Maximum +40°C; maximum daily average +30°C; maximum annual average +20°C; minimum -25°C"],
+        ["Standards", "GB 1094.1, GB 1094.3, GB 1094.5, GB 1094.11, GB/T 22072, GB 20052, JB/T 3837"]
+      ]
+    },
+    {
+      "id": "SCBH17",
+      "name": "SC(B)H17 Dry-Type Amorphous Alloy Core Distribution Transformer",
+      "nameAr": "محول توزيع جاف بقلب من السبيكة غير المتبلورة SC(B)H17",
+      "image": "uploads/product-scbh17-dry-amorphous.png",
+      "category": "dry-type",
+      "shortDesc": "An energy-efficiency level 2 dry-type amorphous alloy core distribution transformer with further reduced losses and compact dry-type structure.",
+      "shortDescAr": "محول توزيع جاف بقلب من السبيكة غير المتبلورة بمستوى كفاءة 2 مع خسائر أقل وبنية جافة مدمجة.",
+      "description": "The SC(B)H17 series is an energy-efficiency level 2 dry-type amorphous alloy core distribution transformer. It retains the safe, flame-retardant and low-maintenance characteristics of the SC(B)H dry-type platform while further reducing transformer losses compared with the level 3 product.",
+      "descriptionAr": "سلسلة SC(B)H17 هي محولات توزيع جافة بقلب من السبيكة غير المتبلورة بمستوى كفاءة 2. تحافظ على خصائص الأمان ومقاومة اللهب وقلة الصيانة مع تقليل الخسائر مقارنة بمنتجات مستوى الكفاءة 3.",
+      "capacities": ["30", "50", "80", "100", "125", "160", "200", "250", "315", "400", "500", "630", "800", "1000", "1250", "1600", "2000", "2500"],
+      "voltages": ["11/0.4kV", "10.5/0.4kV", "10/0.4kV", "6.3/0.4kV", "6/0.4kV"],
+      "specs": [
+        ["Product Model", "SC(B)H17"],
+        ["Efficiency Level", "Level 2"],
+        ["Transformer Type", "Dry-type amorphous alloy core distribution transformer"],
+        ["Rated Capacity Range", "30-2500kVA"],
+        ["High Voltage", "11kV, 10.5kV, 10kV, 6.3kV, 6kV"],
+        ["Low Voltage", "0.4kV"],
+        ["High-Voltage Tapping Range", "±5% or ±2 x 2.5%"],
+        ["Connection Symbol", "Dyn11"],
+        ["Short-Circuit Impedance", "4.0% or 6% depending on capacity"],
+        ["Installation", "Indoor or outdoor"],
+        ["Altitude", "≤1000m"],
+        ["Ambient Temperature", "Maximum +40°C; maximum daily average +30°C; maximum annual average +20°C; minimum -25°C"],
+        ["Standards", "GB 1094.1, GB 1094.3, GB 1094.5, GB 1094.11, GB/T 22072, GB 20052, JB/T 3837"]
+      ]
+    },
+    {
+      "id": "SCBH19",
+      "name": "SC(B)H19 Dry-Type Amorphous Alloy Core Distribution Transformer",
+      "nameAr": "محول توزيع جاف بقلب من السبيكة غير المتبلورة SC(B)H19",
+      "image": "uploads/product-scbh19-dry-amorphous.png",
+      "category": "dry-type",
+      "shortDesc": "An energy-efficiency level 1 dry-type amorphous alloy core distribution transformer with premium no-load loss reduction.",
+      "shortDescAr": "محول توزيع جاف بقلب من السبيكة غير المتبلورة بمستوى كفاءة 1 وخفض متميز لخسائر اللاحمل.",
+      "description": "The SC(B)H19 series is an energy-efficiency level 1 dry-type amorphous alloy core distribution transformer. Built on amorphous alloy core technology, it is designed for projects requiring the highest dry-type energy-saving level, reliable operation and reduced operating cost.",
+      "descriptionAr": "سلسلة SC(B)H19 هي محولات توزيع جافة بقلب من السبيكة غير المتبلورة بمستوى كفاءة 1. صممت للمشاريع التي تتطلب أعلى مستوى من توفير الطاقة في المحولات الجافة واعتمادية عالية وتكلفة تشغيل منخفضة.",
+      "capacities": ["30", "50", "80", "100", "125", "160", "200", "250", "315", "400", "500", "630", "800", "1000", "1250", "1600", "2000", "2500"],
+      "voltages": ["11/0.4kV", "10.5/0.4kV", "10/0.4kV", "6.3/0.4kV", "6/0.4kV"],
+      "specs": [
+        ["Product Model", "SC(B)H19"],
+        ["Efficiency Level", "Level 1"],
+        ["Transformer Type", "Dry-type amorphous alloy core distribution transformer"],
+        ["Rated Capacity Range", "30-2500kVA"],
+        ["High Voltage", "11kV, 10.5kV, 10kV, 6.3kV, 6kV"],
+        ["Low Voltage", "0.4kV"],
+        ["High-Voltage Tapping Range", "±5% or ±2 x 2.5%"],
+        ["Connection Symbol", "Dyn11"],
+        ["Short-Circuit Impedance", "4.0% or 6% depending on capacity"],
+        ["Installation", "Indoor"],
+        ["Altitude", "≤1000m"],
+        ["Ambient Temperature", "Maximum +40°C; maximum daily average +30°C; maximum annual average +20°C; minimum -25°C"],
+        ["Standards", "GB 1094.1, GB 1094.3, GB 1094.5, GB 1094.11, GB/T 22072, GB 20052, JB/T 3837"]
+      ]
+    },
+    {
+      "id": "SBH21-M-RL",
+      "name": "S(B)H21-M.RL Oil-Immersed Amorphous Alloy 3D Wound Core Distribution Transformer",
+      "nameAr": "محول توزيع مغمور بالزيت بقلب ملفوف ثلاثي الأبعاد من السبيكة غير المتبلورة S(B)H21-M.RL",
+      "image": "uploads/product-sbh21-m-rl-amorphous-wound-core.png",
+      "category": "oil-immersed",
+      "shortDesc": "An oil-immersed amorphous alloy 3D wound core distribution transformer with energy-efficiency level 2 performance and strong short-circuit resistance.",
+      "shortDescAr": "محول توزيع مغمور بالزيت بقلب ملفوف ثلاثي الأبعاد من السبيكة غير المتبلورة بمستوى كفاءة 2 ومقاومة قوية للقصر.",
+      "description": "The S(B)H21-M.RL oil-immersed amorphous alloy 3D wound core transformer combines amorphous alloy material and 3D wound core structure. It provides low no-load loss, strong short-circuit resistance, low noise, compact structure and improved operating efficiency for distribution networks.",
+      "descriptionAr": "يجمع محول S(B)H21-M.RL بين مادة السبيكة غير المتبلورة وبنية القلب الملفوف ثلاثي الأبعاد. يوفر خسائر لا حمل منخفضة ومقاومة قوية للقصر وضجيجا منخفضا وهيكلا مدمجا وكفاءة تشغيل أفضل لشبكات التوزيع.",
+      "capacities": ["30", "50", "80", "100", "125", "160", "200", "250", "315", "400", "500", "630", "800", "1000", "1250", "1600", "2000", "2500"],
+      "voltages": ["11/0.4kV", "10.5/0.4kV", "10/0.4kV", "6.3/0.4kV", "6/0.4kV"],
+      "specs": [
+        ["Product Model", "S(B)H21-M.RL"],
+        ["Efficiency Level", "Level 2"],
+        ["Transformer Type", "Oil-immersed amorphous alloy 3D wound core distribution transformer"],
+        ["Core Type", "Amorphous alloy 3D wound core"],
+        ["Rated Capacity Range", "30-2500kVA"],
+        ["High Voltage", "11kV, 10.5kV, 10kV, 6.3kV, 6kV"],
+        ["Low Voltage", "0.4kV"],
+        ["Connection Symbol", "Dyn11"],
+        ["Installation", "Indoor or outdoor"],
+        ["Altitude", "≤1000m"],
+        ["Ambient Temperature", "Maximum +40°C; maximum daily average +30°C; maximum annual average +20°C; minimum -25°C"],
+        ["Standards", "GB 1094.1, GB 1094.2, GB 1094.3, GB 1094.5, GB/T 25446, T/CEEIA 287, GB 20052, JB/T 3837"]
+      ]
+    }
+  ]
+}
