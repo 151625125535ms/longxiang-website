@@ -598,6 +598,35 @@
         });
     }
 
+    function initContactMapTabs(company) {
+        var locations = company.mapLocations || {};
+        var frame = document.querySelector('[data-company-google-map-frame]');
+        var tabs = Array.from(document.querySelectorAll('[data-contact-map-target]'));
+        if (!frame || !tabs.length) return;
+
+        tabs.forEach(function (tab) {
+            var key = tab.getAttribute('data-contact-map-target');
+            var location = locations[key];
+            if (location) {
+                var title = tab.querySelector('strong');
+                var address = tab.querySelector('span');
+                if (title && location.name) title.textContent = location.name;
+                if (address && location.address) address.textContent = location.address;
+            }
+
+            tab.addEventListener('click', function () {
+                var next = locations[key];
+                if (!next) return;
+                if (next.googleMapsEmbedUrl) frame.src = next.googleMapsEmbedUrl;
+                tabs.forEach(function (item) { item.classList.toggle('active', item === tab); });
+            });
+        });
+
+        var active = tabs.find(function (tab) { return tab.classList.contains('active'); }) || tabs[0];
+        var activeLocation = locations[active.getAttribute('data-contact-map-target')];
+        if (activeLocation && activeLocation.googleMapsEmbedUrl) frame.src = activeLocation.googleMapsEmbedUrl;
+    }
+
     function updateFooterNavigation() {
         document.querySelectorAll('.footer-grid').forEach(function (grid) {
             grid.innerHTML =
@@ -735,6 +764,7 @@
             .then(function (company) {
                 companyCache = company;
                 updateCompanyDom(company);
+                initContactMapTabs(company);
                 renderCommunicationWidgets(company);
                 injectGa(company.ga4TrackingId);
                 initSeoMeta(company);

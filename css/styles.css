@@ -3862,21 +3862,14 @@ p:last-child {
 
 .contact-social-icons a {
     display: inline-flex;
-    width: 42px;
-    height: 42px;
+    width: 44px;
+    height: 44px;
     align-items: center;
     justify-content: center;
-    border-radius: 50%;
-    color: var(--color-white-pure);
+    border-radius: 10px;
+    background: var(--color-white-pure);
+    color: var(--color-navy);
     transition: transform var(--transition-base), box-shadow var(--transition-base);
-}
-
-.contact-social-icons a[data-company-instagram-link] {
-    background: #111827;
-}
-
-.contact-social-icons a[data-company-youtube-link] {
-    background: #e30000;
 }
 
 .contact-social-icons a:hover {
@@ -3885,22 +3878,20 @@ p:last-child {
 }
 
 .contact-social-icons svg {
-    width: 20px;
-    height: 20px;
+    width: 28px;
+    height: 28px;
+}
+
+.contact-social-icons a[data-company-instagram-link] svg circle,
+.contact-social-icons a[data-company-instagram-link] svg rect + circle {
     fill: none;
-    stroke: currentColor;
-    stroke-width: 1.9;
-    stroke-linecap: round;
-    stroke-linejoin: round;
+    stroke: var(--color-white-pure);
+    stroke-width: 1.8;
 }
 
 .contact-social-icons a[data-company-youtube-link] svg {
-    fill: currentColor;
-    stroke: none;
-}
-
-.contact-social-icons a[data-company-youtube-link] svg path:last-child {
-    fill: var(--color-white-pure);
+    width: 32px;
+    height: 32px;
 }
 
 .wechat-placeholder {
@@ -4085,11 +4076,61 @@ p:last-child {
     align-items: flex-start;
     min-height: 100%;
     position: relative;
-    justify-content: flex-end;
+    justify-content: flex-start;
     overflow: hidden;
     padding: 0;
     text-align: left;
     background: var(--color-white-pure);
+}
+
+.contact-map-tabs {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    right: 16px;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.contact-map-tab {
+    min-height: 72px;
+    padding: 12px 14px;
+    border: 1px solid rgba(10, 22, 40, 0.12);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.94);
+    color: var(--color-navy);
+    text-align: left;
+    box-shadow: 0 10px 24px rgba(10, 22, 40, 0.1);
+    cursor: pointer;
+}
+
+.contact-map-tab strong,
+.contact-map-tab span {
+    display: block;
+}
+
+.contact-map-tab strong {
+    font-size: 0.78rem;
+    line-height: 1.25;
+}
+
+.contact-map-tab span {
+    margin-top: 4px;
+    color: var(--color-gray-600);
+    font-size: 0.72rem;
+    line-height: 1.25;
+}
+
+.contact-map-tab.active {
+    border-color: var(--color-brand-red);
+    background: var(--color-brand-red);
+    color: var(--color-white-pure);
+}
+
+.contact-map-tab.active span {
+    color: rgba(255, 255, 255, 0.78);
 }
 
 .contact-map-frame {
@@ -6395,8 +6436,30 @@ p:last-child {
     }
 
     .contact-location-panel {
-        min-height: 320px;
+        min-height: 360px;
         padding: 0;
+    }
+
+    .contact-map-tabs {
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        gap: 6px;
+    }
+
+    .contact-map-tab {
+        min-height: 76px;
+        padding: 9px 10px;
+    }
+
+    .contact-map-tab strong {
+        font-size: 0.68rem;
+        line-height: 1.2;
+    }
+
+    .contact-map-tab span {
+        font-size: 0.62rem;
+        line-height: 1.2;
     }
 
     .contact-location-panel .module-kicker {
