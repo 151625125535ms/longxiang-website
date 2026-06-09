@@ -561,6 +561,16 @@
         setCompanyText('[data-company-contact="address"] .footer-contact-value', company.address);
         setCompanyHref('[data-company-email-link]', 'mailto:' + company.email);
         setCompanyHref('[data-company-phone-link]', 'tel:' + company.phone);
+        setCompanyHref('[data-company-instagram-link]', company.instagram);
+        setCompanyHref('[data-company-youtube-link]', company.youtube);
+        document.querySelectorAll('[data-company-google-map-frame]').forEach(function (el) {
+            if (company.googleMapsEmbedUrl) {
+                el.src = company.googleMapsEmbedUrl;
+                el.hidden = false;
+            } else {
+                el.hidden = true;
+            }
+        });
         document.querySelectorAll('[data-company-google-map]').forEach(function (el) {
             if (company.googleMapsUrl) {
                 el.href = company.googleMapsUrl;
