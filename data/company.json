@@ -7,9 +7,9 @@
   "phone": "0371-85901122",
   "email": "hnlxdq2003@163.com",
   "address": "Longhu New District, Xinzheng, Zhengzhou, Henan, China",
-  "headquarters": "Longhu New District Industrial Park, Xinzheng, Zhengzhou, Henan Province, China",
+  "headquarters": "Xinzheng City, Zhengzhou City, Henan Province, P.R. China",
   "officeHours": "Monday-Friday, 9:00-18:00 (UTC+8)",
-  "huaiyangBase": "Huaiyang District, Zhoukou, Henan Province, China",
+  "huaiyangBase": "Huaiyang District, Zhoukou City, Henan Province, P.R. China",
   "factoryArea": "10,000+ m²",
   "patents": "100+",
   "researchPartners": "20+",
@@ -27,8 +27,9 @@
   "tiktok": "",
   "instagram": "https://www.instagram.com/merr_ick233?igsh=MTlpdjF4NGdodGJmbg==",
   "youtube": "https://youtube.com/@merrick-n4y?si=eAgL-Cc6rR8XrA1p",
-  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Longhu%20New%20District%20Industrial%20Park%2C%20Xinzheng%2C%20Zhengzhou%2C%20Henan%2C%20China",
-  "openStreetMapUrl": "https://www.openstreetmap.org/search?query=Longhu%20New%20District%20Industrial%20Park%2C%20Xinzheng%2C%20Zhengzhou%2C%20Henan%2C%20China",
+  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Xinzheng%20City%2C%20Zhengzhou%20City%2C%20Henan%20Province%2C%20China",
+  "googleMapsEmbedUrl": "https://www.google.com/maps?q=Xinzheng%20City%2C%20Zhengzhou%20City%2C%20Henan%20Province%2C%20China&output=embed",
+  "openStreetMapUrl": "https://www.openstreetmap.org/search?query=Xinzheng%20City%2C%20Zhengzhou%20City%2C%20Henan%20Province%2C%20China",
   "mapQr": "",
   "ga4TrackingId": ""
 }
