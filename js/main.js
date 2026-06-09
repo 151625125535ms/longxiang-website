@@ -611,8 +611,8 @@
             if (location) {
                 var title = tab.querySelector('strong');
                 var address = tab.querySelector('span');
-                if (title && location.name) title.textContent = location.name;
-                if (address && location.address) address.textContent = location.address;
+                if (title && location.mapLabel) title.textContent = location.mapLabel;
+                if (address && location.mapSubLabel) address.textContent = location.mapSubLabel;
             }
 
             tab.addEventListener('click', function () {
