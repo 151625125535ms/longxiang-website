@@ -4451,6 +4451,12 @@ p:last-child {
         font-size: 0.9rem;
     }
 
+    .products-showcase-redesign .product-card-v2.fade-in {
+        opacity: 1;
+        transform: none;
+        transition: box-shadow var(--transition-base), transform var(--transition-base);
+    }
+
     .floating-inquiry {
         right: 16px;
         bottom: 12px;
