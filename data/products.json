@@ -3492,5 +3492,320 @@
       ]
     ],
     "featured": false
+  },
+  {
+    "id": "GGD",
+    "name": "GGD Low-Voltage Fixed Complete Switchgear",
+    "nameAr": "لوحة مفاتيح منخفضة الجهد ثابتة كاملة GGD",
+    "image": "uploads/product-ggd-low-voltage-fixed-switchgear.png",
+    "category": "medium-low-voltage",
+    "group": "switchgear",
+    "subCategory": "medium-low-voltage",
+    "categoryLabel": "Medium&Low Voltage Switchgear",
+    "categoryLabelAr": "معدات مفاتيح الجهد المتوسط والمنخفض",
+    "shortDesc": "A low-voltage fixed distribution cabinet for power plants, substations and industrial distribution systems.",
+    "shortDescAr": "لوحة توزيع ثابتة منخفضة الجهد لمحطات الطاقة والمحطات الفرعية وأنظمة التوزيع الصناعية.",
+    "description": "GGD low-voltage fixed complete switchgear is designed for AC 50Hz distribution systems with rated working voltage of 380V and rated working current up to 3150A. It is suitable for power conversion, distribution and control in power plants, substations, factories, mines and high-rise buildings, with flexible scheme combinations and reliable protection.",
+    "descriptionAr": "تم تصميم لوحة GGD الثابتة منخفضة الجهد لأنظمة توزيع التيار المتردد 50Hz بجهد تشغيل 380V وتيار تشغيل حتى 3150A. وهي مناسبة للتحويل والتوزيع والتحكم في محطات الطاقة والمحطات الفرعية والمصانع والمناجم والمباني العالية، مع تركيبات مرنة وحماية موثوقة.",
+    "capacities": [],
+    "voltages": [
+      "380V"
+    ],
+    "specs": [
+      [
+        "Product Model",
+        "GGD"
+      ],
+      [
+        "Switchgear Type",
+        "Low-voltage fixed complete switchgear"
+      ],
+      [
+        "Rated Working Voltage",
+        "AC 380V"
+      ],
+      [
+        "Rated Frequency",
+        "50Hz"
+      ],
+      [
+        "Rated Working Current",
+        "Up to 3150A"
+      ],
+      [
+        "Rated Current",
+        "400A, 600A, 1000A, 1500A, 1600A, 2000A, 2500A, 3150A"
+      ],
+      [
+        "Rated Short-Circuit Breaking Current",
+        "15kA, 30kA, 50kA"
+      ],
+      [
+        "Rated Short-Time Withstand Current",
+        "15kA, 30kA, 50kA"
+      ],
+      [
+        "Rated Peak Withstand Current",
+        "30kA, 63kA, 105kA"
+      ],
+      [
+        "Protection Rating",
+        "IP30"
+      ],
+      [
+        "Ambient Temperature",
+        "-5°C to +40°C, 24h average ≤35°C"
+      ],
+      [
+        "Altitude",
+        "≤2000m"
+      ],
+      [
+        "Standards",
+        "IEC 439, GB 7251"
+      ]
+    ],
+    "featured": false
+  },
+  {
+    "id": "KYN28-12",
+    "name": "KYN28-12 Indoor Metal-Clad Withdrawable Switchgear",
+    "nameAr": "معدات مفاتيح داخلية معدنية مغلفة قابلة للسحب KYN28-12",
+    "image": "uploads/product-kyn28-12-metal-clad-switchgear.png",
+    "category": "high-voltage",
+    "group": "switchgear",
+    "subCategory": "high-voltage",
+    "categoryLabel": "High-Voltage Switchgear",
+    "categoryLabelAr": "معدات مفاتيح الجهد العالي",
+    "shortDesc": "An indoor AC metal-clad withdrawable switchgear for 3.6-12kV three-phase 50Hz single-busbar systems.",
+    "shortDescAr": "معدات مفاتيح داخلية معدنية قابلة للسحب لأنظمة 3.6-12kV ثلاثية الطور 50Hz ذات قضيب توصيل مفرد.",
+    "description": "KYN28-12 indoor metal-clad withdrawable switchgear is used in 3.6-12kV three-phase AC 50Hz single-busbar and sectionalized single-busbar systems. It is mainly used for power plants, medium and small generators, industrial and mining distribution, secondary substations and motor starting. It supports control, protection and measurement and can be equipped with VD4 or VS1 vacuum circuit breakers.",
+    "descriptionAr": "تستخدم معدات KYN28-12 المعدنية الداخلية القابلة للسحب في أنظمة 3.6-12kV ثلاثية الطور 50Hz ذات قضيب توصيل مفرد أو مقسم. وتستخدم في محطات الطاقة والمولدات المتوسطة والصغيرة والتوزيع الصناعي والمحطات الفرعية وتشغيل المحركات، وتدعم التحكم والحماية والقياس مع إمكانية تجهيز قواطع فراغية VD4 أو VS1.",
+    "capacities": [],
+    "voltages": [
+      "3kV",
+      "6kV",
+      "7.2kV",
+      "12kV"
+    ],
+    "specs": [
+      [
+        "Product Model",
+        "KYN28-12"
+      ],
+      [
+        "Switchgear Type",
+        "Indoor metal-clad withdrawable switchgear"
+      ],
+      [
+        "Rated Voltage",
+        "3kV, 6kV, 7.2kV, 12kV"
+      ],
+      [
+        "Rated Frequency",
+        "50Hz"
+      ],
+      [
+        "Circuit Breaker Rated Current",
+        "630A, 1250A, 1600A, 2000A, 2500A, 3150A"
+      ],
+      [
+        "Switchgear Rated Current",
+        "630A, 1250A, 1600A, 2000A, 2500A, 3150A"
+      ],
+      [
+        "Rated Dynamic Stable Current",
+        "16kA, 20kA, 25kA, 31.5kA, 40kA, 50kA"
+      ],
+      [
+        "Rated Peak Withstand Current",
+        "40kA, 50kA, 63kA, 80kA, 100kA, 125kA"
+      ],
+      [
+        "Rated Short-Circuit Breaking Current",
+        "16kA, 20kA, 25kA, 31.5kA, 40kA, 50kA"
+      ],
+      [
+        "Insulation Level",
+        "1min power-frequency withstand voltage 24/32/42kV; lightning impulse withstand voltage 40/60/75kV"
+      ],
+      [
+        "Protection Rating",
+        "Enclosure IP4X, compartment and circuit-breaker door open IP2X"
+      ],
+      [
+        "Ambient Temperature",
+        "-10°C to +40°C"
+      ],
+      [
+        "Altitude",
+        "≤1000m"
+      ],
+      [
+        "Standards",
+        "IEC 298, GB 3906, DL/T 404"
+      ]
+    ],
+    "featured": false
+  },
+  {
+    "id": "KYN-12",
+    "name": "KYN-12 Indoor Dry-Air Metal-Clad Withdrawable Switchgear",
+    "nameAr": "معدات مفاتيح داخلية معدنية قابلة للسحب بعزل هواء جاف KYN-12",
+    "image": "uploads/product-kyn-12-dry-air-switchgear.png",
+    "category": "high-voltage",
+    "group": "switchgear",
+    "subCategory": "high-voltage",
+    "categoryLabel": "High-Voltage Switchgear",
+    "categoryLabelAr": "معدات مفاتيح الجهد العالي",
+    "shortDesc": "An indoor dry-air metal-clad withdrawable switchgear for humid and harsh 3.6-12kV distribution environments.",
+    "shortDescAr": "معدات مفاتيح معدنية داخلية قابلة للسحب بعزل هواء جاف لبيئات التوزيع الرطبة والقاسية بجهد 3.6-12kV.",
+    "description": "KYN-12 indoor dry-air metal-clad withdrawable switchgear is designed for 3.6-12kV three-phase AC 50Hz systems, especially humid and harsh environments. It helps solve condensation-related equipment faults and improves stability and safety, while retaining the control, protection and measurement functions of KYN-type switchgear.",
+    "descriptionAr": "تم تصميم معدات KYN-12 المعدنية الداخلية القابلة للسحب بعزل الهواء الجاف لأنظمة 3.6-12kV ثلاثية الطور 50Hz، وخاصة في البيئات الرطبة والقاسية. تساعد على تقليل أعطال التكاثف وتحسين الاستقرار والسلامة، مع الحفاظ على وظائف التحكم والحماية والقياس لمعدات KYN.",
+    "capacities": [],
+    "voltages": [
+      "3kV",
+      "6kV",
+      "7.2kV",
+      "12kV"
+    ],
+    "specs": [
+      [
+        "Product Model",
+        "KYN-12"
+      ],
+      [
+        "Switchgear Type",
+        "Indoor dry-air metal-clad withdrawable switchgear"
+      ],
+      [
+        "Rated Voltage",
+        "3kV, 6kV, 7.2kV, 12kV"
+      ],
+      [
+        "Rated Frequency",
+        "50Hz"
+      ],
+      [
+        "Circuit Breaker Rated Current",
+        "630A, 1250A, 1600A, 2000A, 2500A, 3150A"
+      ],
+      [
+        "Switchgear Rated Current",
+        "630A, 1250A, 1600A, 2000A, 2500A, 3150A"
+      ],
+      [
+        "Rated Dynamic Stable Current",
+        "16kA, 20kA, 25kA, 31.5kA, 40kA, 50kA"
+      ],
+      [
+        "Rated Peak Withstand Current",
+        "40kA, 50kA, 63kA, 80kA, 100kA, 125kA"
+      ],
+      [
+        "Rated Short-Circuit Breaking Current",
+        "16kA, 20kA, 25kA, 31.5kA, 40kA, 50kA"
+      ],
+      [
+        "Insulation Level",
+        "1min power-frequency withstand voltage 24/32/42kV; lightning impulse withstand voltage 40/60/75kV"
+      ],
+      [
+        "Protection Rating",
+        "Enclosure IP4X, compartment and circuit-breaker door open IP2X"
+      ],
+      [
+        "Ambient Temperature",
+        "-10°C to +40°C"
+      ],
+      [
+        "Altitude",
+        "≤1000m"
+      ],
+      [
+        "Installation Site",
+        "Free from fire, explosion hazard, severe pollution, chemical corrosion and violent vibration"
+      ]
+    ],
+    "featured": false
+  },
+  {
+    "id": "LXWZ",
+    "name": "LXWZ High-Voltage Reactive Power Compensation Complete Device",
+    "nameAr": "جهاز تعويض القدرة غير الفعالة عالي الجهد الكامل LXWZ",
+    "image": "uploads/product-lxwz-reactive-power-compensation.png",
+    "category": "high-voltage",
+    "group": "switchgear",
+    "subCategory": "high-voltage",
+    "categoryLabel": "High-Voltage Switchgear",
+    "categoryLabelAr": "معدات مفاتيح الجهد العالي",
+    "shortDesc": "A high-voltage reactive power automatic compensation device for 10kV and 35kV substations.",
+    "shortDescAr": "جهاز تعويض تلقائي للقدرة غير الفعالة عالي الجهد لمحطات 10kV و35kV.",
+    "description": "LXWZ high-voltage reactive power automatic compensation device is suitable for 10kV and 35kV substations. It performs capacitor bank switching according to reactive power, voltage, power factor and other parameters, improving line power factor, reducing line loss, improving voltage quality and saving energy.",
+    "descriptionAr": "يناسب جهاز LXWZ للتعويض التلقائي للقدرة غير الفعالة عالية الجهد محطات 10kV و35kV. يقوم بتشغيل مجموعات المكثفات وفقا للقدرة غير الفعالة والجهد ومعامل القدرة وغيرها من المعلمات، مما يحسن معامل القدرة ويقلل خسائر الخط ويحسن جودة الجهد ويوفر الطاقة.",
+    "capacities": [],
+    "voltages": [
+      "10kV",
+      "35kV"
+    ],
+    "specs": [
+      [
+        "Product Model",
+        "LXWZ"
+      ],
+      [
+        "Device Type",
+        "High-voltage reactive power compensation complete device"
+      ],
+      [
+        "Rated Voltage",
+        "12kV"
+      ],
+      [
+        "Long-Term Operating Voltage",
+        "10kV"
+      ],
+      [
+        "Rated Frequency",
+        "50Hz"
+      ],
+      [
+        "Measurement Accuracy",
+        ">0.05"
+      ],
+      [
+        "Connection Method",
+        "Star connection, neutral point not grounded"
+      ],
+      [
+        "Overvoltage Operation",
+        "Long-term operation below 1.1 times rated voltage"
+      ],
+      [
+        "Overcurrent Operation",
+        "Long-term operation below 1.3 times capacitor-bank rated current"
+      ],
+      [
+        "Discharge Performance",
+        "Residual capacitor voltage can be reduced to below 50V within 5 seconds after capacitor bank is disconnected"
+      ],
+      [
+        "Relative Humidity",
+        "≤90%"
+      ],
+      [
+        "Wind Speed",
+        "≤34m/s"
+      ],
+      [
+        "Altitude",
+        "≤2500m"
+      ],
+      [
+        "Ambient Temperature",
+        "-25°C to +55°C, 24h average ≤35°C"
+      ]
+    ],
+    "featured": false
   }
 ]
