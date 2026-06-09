@@ -1590,5 +1590,817 @@
       ]
     ],
     "featured": false
+  },
+  {
+    "id": "LXAC-7kW-display",
+    "name": "7kW AC EV Charging Station (Display Version)",
+    "nameAr": "محطة شحن تيار متردد 7 كيلوواط مع شاشة عرض",
+    "image": "uploads/product-lxac-7kw-display.png",
+    "category": "ac",
+    "group": "ev-charger",
+    "subCategory": "ac",
+    "categoryLabel": "AC EV Charging Station",
+    "categoryLabelAr": "محطة شحن تيار متردد",
+    "shortDesc": "A 7kW AC EV charging station with a 4.3-inch color touch screen, safe charging protection and multiple start modes.",
+    "shortDescAr": "محطة شحن تيار متردد بقدرة 7 كيلوواط مع شاشة لمس ملونة ووظائف حماية وطرق تشغيل متعددة.",
+    "description": "The display version of the LXAC-7kW AC charging station provides visible charging status, safe control protection and convenient interaction. It supports mobile QR code scanning, optional card swiping, GB/T AC charging interface and three-color status indicators for standby, charging and alarm states.",
+    "descriptionAr": "توفر نسخة الشاشة من محطة LXAC-7kW عرضا واضحا لحالة الشحن وحماية آمنة وتحكما مريحا. تدعم مسح رمز QR عبر الهاتف وبطاقة اختيارية وواجهة شحن تيار متردد وفق معيار GB/T ومؤشرات حالة بثلاثة ألوان.",
+    "capacities": [],
+    "voltages": [],
+    "specs": [
+      [
+        "Product Model",
+        "LXAC-7kW"
+      ],
+      [
+        "Power Rating",
+        "7kW"
+      ],
+      [
+        "Rated Input / Output Voltage",
+        "AC220V ±20%"
+      ],
+      [
+        "Rated Output Current",
+        "32A"
+      ],
+      [
+        "Start Mode",
+        "Mobile QR code scanning, card swiping (optional)"
+      ],
+      [
+        "Charging Connector",
+        "GB/T AC charging connector, GB/T 20234.2"
+      ],
+      [
+        "Display",
+        "4.3-inch color touch screen"
+      ],
+      [
+        "Cable Length",
+        "5m (customizable)"
+      ],
+      [
+        "Working Indicator",
+        "Three-color indicator strip: standby, charging and alarm status"
+      ],
+      [
+        "Protection Rating",
+        "IP55"
+      ],
+      [
+        "Metering Accuracy Class",
+        "Class 2"
+      ],
+      [
+        "Product Weight",
+        "<4kg (excluding column)"
+      ],
+      [
+        "Dimensions (W x H x D)",
+        "Wall-mounted: 230 x 320 x 85 mm; column-mounted: 230 x 1480 x 85 mm"
+      ],
+      [
+        "Protection Features",
+        "Over-voltage protection, under-voltage protection, short-circuit protection, leakage protection"
+      ]
+    ],
+    "featured": false
+  },
+  {
+    "id": "LXAC-14kW",
+    "name": "14kW Dual-Gun AC EV Charging Station",
+    "nameAr": "محطة شحن تيار متردد مزدوجة بقدرة 14 كيلوواط",
+    "image": "uploads/product-lxac-14kw.png",
+    "category": "ac",
+    "group": "ev-charger",
+    "subCategory": "ac",
+    "categoryLabel": "AC EV Charging Station",
+    "categoryLabelAr": "محطة شحن تيار متردد",
+    "shortDesc": "A 14kW dual-gun AC charging station with intelligent self-check, protection functions, color display and floor-mounted installation.",
+    "shortDescAr": "محطة شحن تيار متردد مزدوجة بقدرة 14 كيلوواط مع فحص ذاتي ذكي وحماية وشاشة ملونة وتركيب أرضي.",
+    "description": "The LXAC-14kW dual-gun AC charging station supports intelligent main-control self-check, connection detection and abnormal-output protection. It provides over-voltage, under-voltage, overload and leakage protection, with card or QR-code payment, color LCD display and floor-mounted installation for public or commercial charging sites.",
+    "descriptionAr": "تدعم محطة LXAC-14kW فحصا ذاتيا ذكيا للنظام الرئيسي واكتشاف الاتصال وحماية من الخرج غير الطبيعي. وتوفر حماية من زيادة وانخفاض الجهد والحمل الزائد والتسرب، مع الدفع بالبطاقة أو رمز QR وشاشة LCD ملونة وتركيب أرضي.",
+    "capacities": [],
+    "voltages": [],
+    "specs": [
+      [
+        "Product Model",
+        "LXAC-14kW"
+      ],
+      [
+        "Input / Output Voltage",
+        "AC220V 50Hz ±20%"
+      ],
+      [
+        "Single-Gun Maximum Power",
+        "7kW"
+      ],
+      [
+        "Total Maximum Power",
+        "14kW"
+      ],
+      [
+        "Standby Power",
+        "<6W"
+      ],
+      [
+        "Billing Method",
+        "Charging by energy or by time"
+      ],
+      [
+        "Payment Method",
+        "Card swiping and QR-code payment"
+      ],
+      [
+        "Enclosure Material",
+        "Sheet-metal housing, oxidized black sheet-metal panel"
+      ],
+      [
+        "Display",
+        "Color LCD display"
+      ],
+      [
+        "Cable Length",
+        "5m"
+      ],
+      [
+        "Metering Accuracy Class",
+        "Class 2"
+      ],
+      [
+        "Operating Temperature",
+        "-30°C to +55°C"
+      ],
+      [
+        "Operating Humidity",
+        "5% to 95%"
+      ],
+      [
+        "Operating Altitude",
+        "<3000m"
+      ],
+      [
+        "Protection Rating",
+        "IP54"
+      ],
+      [
+        "Installation Method",
+        "Floor-mounted"
+      ],
+      [
+        "Product Weight",
+        "45kg"
+      ],
+      [
+        "Dimensions",
+        "550 x 220 x 1500 mm (L x W x H)"
+      ]
+    ],
+    "featured": false
+  },
+  {
+    "id": "LXDC-20-30-40kW",
+    "name": "20kW / 30kW / 40kW Low-Power DC EV Charging Station",
+    "nameAr": "محطة شحن تيار مستمر منخفضة القدرة 20/30/40 كيلوواط",
+    "image": "uploads/product-lxdc-20-30-40kw.png",
+    "category": "dc",
+    "group": "ev-charger",
+    "subCategory": "dc",
+    "categoryLabel": "DC EV Charging Station",
+    "categoryLabelAr": "محطة شحن تيار مستمر",
+    "shortDesc": "A compact DC charging station for 20kW, 30kW and 40kW output with high efficiency, low standby power and flexible installation.",
+    "shortDescAr": "محطة شحن تيار مستمر مدمجة بقدرات 20 و30 و40 كيلوواط بكفاءة عالية واستهلاك استعداد منخفض وتركيب مرن.",
+    "description": "The LXDC low-power DC charging station supports DC300-1000V constant-power output, peak efficiency above 95%, Ethernet or 4G networking, mobile QR code scanning and optional card swiping. It is suitable for a wide range of GB/T electric vehicles and supports wall-mounted or column-mounted installation.",
+    "descriptionAr": "تدعم محطة LXDC منخفضة القدرة خرج تيار مستمر بجهد DC300-1000V وكفاءة ذروة تتجاوز 95%، مع اتصال إيثرنت أو 4G وتشغيل عبر QR أو بطاقة اختيارية. وهي مناسبة لمركبات GB/T مع تركيب جداري أو عمودي.",
+    "capacities": [],
+    "voltages": [],
+    "specs": [
+      [
+        "Product Model",
+        "LXDC-20kW, 30kW, 40kW"
+      ],
+      [
+        "Input Voltage Range",
+        "AC380V ±15%, three-phase five-wire"
+      ],
+      [
+        "Rated Power",
+        "20kW, 30kW, 40kW"
+      ],
+      [
+        "Output Voltage Range",
+        "200-1000V DC"
+      ],
+      [
+        "Output Current Range",
+        "2-66.7A, 2-100A, 2-133.3A"
+      ],
+      [
+        "Peak Efficiency",
+        ">95%"
+      ],
+      [
+        "Start Mode",
+        "Mobile QR code scanning, card swiping (optional)"
+      ],
+      [
+        "Network Connection",
+        "Ethernet, 4G"
+      ],
+      [
+        "Charging Connector",
+        "GB/T DC charging connector"
+      ],
+      [
+        "Cable Length",
+        "5m (customizable)"
+      ],
+      [
+        "Working Indicator",
+        "Three-color indicator strip: standby, charging and alarm status"
+      ],
+      [
+        "Protection Rating",
+        "IP54"
+      ],
+      [
+        "Noise",
+        "≤65dB"
+      ],
+      [
+        "Installation Method",
+        "Wall-mounted or column-mounted"
+      ],
+      [
+        "Product Weight",
+        "<35kg, <45kg, <50kg"
+      ],
+      [
+        "Dimensions (W x H x D)",
+        "Wall-mounted: 400 x 600 x 200 mm; column-mounted: 400 x 1600 x 200 mm; wall-mounted: 530 x 680 x 260 mm; column-mounted: 530 x 1570 x 377 mm"
+      ],
+      [
+        "Protection Features",
+        "Input over-voltage protection, output over-voltage protection and related protections"
+      ]
+    ],
+    "featured": false
+  },
+  {
+    "id": "LXDC-120-400kW",
+    "name": "120kW-400kW DC EV Charging Station",
+    "nameAr": "محطة شحن تيار مستمر بقدرة 120 إلى 400 كيلوواط",
+    "image": "uploads/product-lxdc-120-400kw.png",
+    "category": "dc",
+    "group": "ev-charger",
+    "subCategory": "dc",
+    "categoryLabel": "DC EV Charging Station",
+    "categoryLabelAr": "محطة شحن تيار مستمر",
+    "shortDesc": "A high-power integrated dual-gun DC charging station covering 120kW to 400kW output for reliable fast charging.",
+    "shortDescAr": "محطة شحن تيار مستمر عالية القدرة مزدوجة المسدس من 120 إلى 400 كيلوواط للشحن السريع الموثوق.",
+    "description": "The LXDC 120-400kW DC charging station supports intelligent scheduling, charging operation, settlement, remote upgrade and monitoring. It offers high-voltage DC output, dual protection, monitoring and alarm functions, with 7-inch touch display and GB/T DC charging connector.",
+    "descriptionAr": "تدعم محطة LXDC بقدرة 120-400 كيلوواط الجدولة الذكية والتشغيل والتسوية والترقية والمراقبة عن بعد. توفر خرج تيار مستمر عالي الجهد وحماية مزدوجة ومراقبة وإنذارا، مع شاشة لمس 7 بوصات وموصل شحن GB/T.",
+    "capacities": [],
+    "voltages": [],
+    "specs": [
+      [
+        "Product Model",
+        "LXDC integrated dual-gun charging station"
+      ],
+      [
+        "Specific Models",
+        "LXDC-120kW, 160kW, 240kW, 320kW, 400kW"
+      ],
+      [
+        "Input Voltage Range",
+        "AC380V ±15%, three-phase five-wire"
+      ],
+      [
+        "Power Range",
+        "120kW, 160kW, 240kW, 320kW, 400kW"
+      ],
+      [
+        "Output Voltage Range",
+        "200-1000V DC"
+      ],
+      [
+        "Single-Gun Maximum Current",
+        "250A (300A for 400kW single gun)"
+      ],
+      [
+        "Peak Efficiency",
+        ">95%"
+      ],
+      [
+        "Start Mode",
+        "QR code scanning, VIN, card swiping (optional)"
+      ],
+      [
+        "Network Connection",
+        "4G"
+      ],
+      [
+        "Charging Connector",
+        "GB/T 20234.3"
+      ],
+      [
+        "Cable Length",
+        "5m"
+      ],
+      [
+        "Display",
+        "7-inch touch screen"
+      ],
+      [
+        "Working Indicator",
+        "Three-color indicator strip: standby, charging and alarm status"
+      ],
+      [
+        "Protection Rating",
+        "IP54"
+      ],
+      [
+        "Noise",
+        "≤65dB"
+      ],
+      [
+        "Cooling Method",
+        "Air cooling"
+      ],
+      [
+        "Product Weight",
+        "<265kg, <400kg"
+      ],
+      [
+        "Dimensions (W x H x D)",
+        "800 x 1700 x 425 mm; 800 x 1700 x 565 mm; 800 x 1700 x 655 mm"
+      ],
+      [
+        "Protection Features",
+        "Input over-voltage, input under-voltage, output over-voltage, output short-circuit, over-temperature and communication protection"
+      ]
+    ],
+    "featured": false
+  },
+  {
+    "id": "LXDC480-1280kW",
+    "name": "480kW-1280kW DC EV Charging Stack",
+    "nameAr": "مجموعة شحن تيار مستمر بقدرة 480 إلى 1280 كيلوواط",
+    "image": "uploads/product-lxdc480-1280kw.png",
+    "category": "dc",
+    "group": "ev-charger",
+    "subCategory": "dc",
+    "categoryLabel": "DC EV Charging Station",
+    "categoryLabelAr": "محطة شحن تيار مستمر",
+    "shortDesc": "A flexible high-power DC charging stack from 480kW to 1280kW with centralized power management and intelligent terminal allocation.",
+    "shortDescAr": "مجموعة شحن تيار مستمر عالية القدرة من 480 إلى 1280 كيلوواط مع إدارة طاقة مركزية وتوزيع ذكي للأطراف.",
+    "description": "The LXDC480-1280kW DC charging stack integrates centralized power management, intelligent charging strategy and flexible terminal configuration. It supports multiple charging terminals, remote monitoring, data encryption, high-voltage DC output and dual safety protection for large charging stations.",
+    "descriptionAr": "تدمج مجموعة LXDC480-1280kW إدارة طاقة مركزية واستراتيجية شحن ذكية وتكوين أطراف مرن. وتدعم عدة أطراف شحن ومراقبة عن بعد وتشفير البيانات وخرج تيار مستمر عالي الجهد وحماية مزدوجة لمحطات الشحن الكبيرة.",
+    "capacities": [],
+    "voltages": [],
+    "specs": [
+      [
+        "Product Model",
+        "LXDC DC charging stack"
+      ],
+      [
+        "Specific Model",
+        "LXDC480-1280kW"
+      ],
+      [
+        "Input Voltage Range",
+        "AC380V ±15%, three-phase five-wire"
+      ],
+      [
+        "Power Range",
+        "480kW-1280kW"
+      ],
+      [
+        "Output Voltage Range",
+        "200-1000V DC"
+      ],
+      [
+        "Single-Gun Maximum Current",
+        "Fast terminal 250A; liquid-cooled terminal 600A"
+      ],
+      [
+        "Voltage Accuracy",
+        "≤±1%"
+      ],
+      [
+        "Current Accuracy",
+        "≤±0.5%"
+      ],
+      [
+        "Peak Efficiency",
+        ">95%"
+      ],
+      [
+        "Charging Connector",
+        "4-16 terminals"
+      ],
+      [
+        "Protection Rating",
+        "IP55"
+      ],
+      [
+        "Noise",
+        "≤65dB (with silencer)"
+      ],
+      [
+        "Cooling Method",
+        "Intelligent air cooling / liquid cooling"
+      ],
+      [
+        "Product Weight",
+        "<750kg, <1200kg, <1500kg"
+      ],
+      [
+        "Dimensions (W x H x D)",
+        "1486 x 1835 x 1200 mm; 1700 x 1835 x 1200 mm; 2150 x 1975 x 800 mm"
+      ],
+      [
+        "Protection Features",
+        "Input over-voltage, input under-voltage, output over-voltage, output short-circuit, over-temperature and communication protection"
+      ]
+    ],
+    "featured": false
+  },
+  {
+    "id": "portable-storage-1kw-3kwh",
+    "name": "1kW / 3kWh Portable Energy Storage System",
+    "nameAr": "نظام تخزين طاقة محمول 1 كيلوواط / 3 كيلوواط ساعة",
+    "image": "uploads/product-portable-storage-1kw-3kwh.png",
+    "category": "energy-storage",
+    "group": "energy-storage",
+    "subCategory": "energy-storage",
+    "categoryLabel": "Energy Storage System",
+    "categoryLabelAr": "Energy Storage System",
+    "shortDesc": "A portable lithium battery energy storage system for outdoor travel, emergency power supply, rescue and mobile work scenarios.",
+    "shortDescAr": "نظام تخزين طاقة محمول ببطارية ليثيوم للاستخدام الخارجي والطوارئ والإنقاذ والعمل المتنقل.",
+    "description": "The 1kW / 3kWh portable energy storage system provides stable AC and DC power output for outdoor travel, emergency backup, medical rescue and field operations. It supports multiple output interfaces such as AC socket, USB, Type-C and DC, and can be charged by mains power or solar energy.",
+    "descriptionAr": "يوفر نظام التخزين المحمول 1 كيلوواط / 3 كيلوواط ساعة خرج تيار متردد ومستمر مستقرا للسفر الخارجي والطوارئ والإنقاذ والعمل الميداني. يدعم واجهات متعددة مثل AC وUSB وType-C وDC، ويمكن شحنه من الكهرباء أو الطاقة الشمسية.",
+    "capacities": [],
+    "voltages": [],
+    "specs": [
+      [
+        "Name",
+        "Portable energy storage (1kW · 3kWh)"
+      ],
+      [
+        "Specification",
+        "1kW · 3kWh, 25.6V 120Ah"
+      ],
+      [
+        "PV Module",
+        "620Wp"
+      ],
+      [
+        "Rated Output Power",
+        "2kW"
+      ],
+      [
+        "Maximum Peak Power",
+        "4kW"
+      ],
+      [
+        "Rated Output Voltage",
+        "230Vac (single-phase)"
+      ],
+      [
+        "Rated Frequency",
+        "50Hz"
+      ],
+      [
+        "Output Waveform",
+        "Pure sine wave"
+      ],
+      [
+        "Switching Time",
+        "10ms (typical)"
+      ],
+      [
+        "Battery Type",
+        "Lithium iron phosphate"
+      ],
+      [
+        "Rated Battery Voltage",
+        "25.6V"
+      ],
+      [
+        "Battery Voltage",
+        "20-29.2V"
+      ],
+      [
+        "Rated Capacity",
+        "120Ah"
+      ],
+      [
+        "String Method",
+        "1P8S"
+      ],
+      [
+        "Energy",
+        "3kWh"
+      ],
+      [
+        "MPPT Quantity",
+        "1"
+      ],
+      [
+        "Maximum Input Power",
+        "1200W"
+      ],
+      [
+        "Maximum Input Current",
+        "16A"
+      ],
+      [
+        "Maximum Open-Circuit Voltage",
+        "100V"
+      ],
+      [
+        "MPPT Operating Voltage Range",
+        "12-100Vdc"
+      ],
+      [
+        "Dimensions",
+        "550 x 295 x 270 mm"
+      ],
+      [
+        "Weight",
+        "33kg"
+      ],
+      [
+        "Cooling Method",
+        "Built-in fan"
+      ]
+    ],
+    "featured": false
+  },
+  {
+    "id": "portable-storage-3kw-5kwh",
+    "name": "3kW / 5kWh Portable Energy Storage System",
+    "nameAr": "نظام تخزين طاقة محمول 3 كيلوواط / 5 كيلوواط ساعة",
+    "image": "uploads/product-portable-storage-3kw-5kwh.png",
+    "category": "energy-storage",
+    "group": "energy-storage",
+    "subCategory": "energy-storage",
+    "categoryLabel": "Energy Storage System",
+    "categoryLabelAr": "Energy Storage System",
+    "shortDesc": "A 3kW / 5kWh portable energy storage system using lithium iron phosphate battery for stable AC/DC output.",
+    "shortDescAr": "نظام تخزين طاقة محمول 3 كيلوواط / 5 كيلوواط ساعة ببطارية فوسفات حديد الليثيوم وخرج مستقر.",
+    "description": "The 3kW / 5kWh portable energy storage system is designed for outdoor equipment, emergency backup, field work and distributed power supply. It provides stable AC and DC output, supports multiple output ports and uses a battery management system for over-charge, over-discharge, overload, short-circuit and temperature protection.",
+    "descriptionAr": "صمم نظام التخزين المحمول 3 كيلوواط / 5 كيلوواط ساعة للمعدات الخارجية والطوارئ والعمل الميداني ومصادر الطاقة الموزعة. يوفر خرجا مستقرا ويدعم منافذ متعددة مع نظام إدارة بطارية للحماية من الشحن والتفريغ الزائد والحمل الزائد والقصر والحرارة.",
+    "capacities": [],
+    "voltages": [],
+    "specs": [
+      [
+        "Name",
+        "Portable energy storage (3kW · 5kWh)"
+      ],
+      [
+        "Specification",
+        "3kW · 5kWh, 25.6V 200Ah"
+      ],
+      [
+        "PV Module",
+        "620Wp"
+      ],
+      [
+        "Rated Output Power",
+        "6kW"
+      ],
+      [
+        "Maximum Peak Power",
+        "12kW"
+      ],
+      [
+        "Rated Output Voltage",
+        "230Vac (single-phase)"
+      ],
+      [
+        "Rated Frequency",
+        "50/60Hz"
+      ],
+      [
+        "Output Waveform",
+        "Pure sine wave"
+      ],
+      [
+        "Switching Time",
+        "10ms (typical)"
+      ],
+      [
+        "Battery Type",
+        "Lithium iron phosphate"
+      ],
+      [
+        "Rated Battery Voltage",
+        "25.6V"
+      ],
+      [
+        "Battery Voltage",
+        "20-29.2V"
+      ],
+      [
+        "Rated Capacity",
+        "200Ah"
+      ],
+      [
+        "String Method",
+        "1P8S"
+      ],
+      [
+        "Energy",
+        "5.12kWh"
+      ],
+      [
+        "MPPT Quantity",
+        "1"
+      ],
+      [
+        "Maximum Input Power",
+        "Single circuit 27A/9kW; dual circuit 22.5A/15kW"
+      ],
+      [
+        "Maximum Input Current",
+        "27A"
+      ],
+      [
+        "Maximum Open-Circuit Voltage",
+        "500V"
+      ],
+      [
+        "MPPT Operating Voltage Range",
+        "60-450Vdc"
+      ],
+      [
+        "Dimensions",
+        "550 x 295 x 270 mm"
+      ],
+      [
+        "Weight",
+        "38kg"
+      ],
+      [
+        "Cooling Method",
+        "Built-in fan"
+      ]
+    ],
+    "featured": false
+  },
+  {
+    "id": "TS-MES-115K12L",
+    "name": "High-Rate Liquid-Cooled Energy Storage Cabinet",
+    "nameAr": "خزانة تخزين طاقة مبردة بالسائل عالية المعدل",
+    "image": "uploads/product-ts-mes-115k12l.png",
+    "category": "energy-storage",
+    "group": "energy-storage",
+    "subCategory": "energy-storage",
+    "categoryLabel": "Energy Storage System",
+    "categoryLabelAr": "Energy Storage System",
+    "shortDesc": "A modular high-rate liquid-cooled energy storage cabinet for wind, solar, independent storage and industrial energy storage applications.",
+    "shortDescAr": "خزانة تخزين طاقة مبردة بالسائل عالية المعدل للتطبيقات الشمسية والرياح والتخزين المستقل والصناعي.",
+    "description": "The TS-MES-115K12L high-rate liquid-cooled energy storage cabinet integrates battery system, battery management, power conversion, energy management, fire protection, thermal management and monitoring subsystems. It supports modular configuration, high energy density, fast response and remote operation for industrial energy storage scenarios.",
+    "descriptionAr": "تدمج خزانة TS-MES-115K12L نظام البطاريات وإدارة البطارية وتحويل الطاقة وإدارة الطاقة والحماية من الحريق والإدارة الحرارية والمراقبة. تدعم التصميم المعياري وكثافة طاقة عالية واستجابة سريعة وتشغيلا عن بعد.",
+    "capacities": [],
+    "voltages": [],
+    "specs": [
+      [
+        "Product Name",
+        "High-rate liquid-cooled energy storage cabinet"
+      ],
+      [
+        "Specific Model",
+        "TS-MES-115K12L"
+      ],
+      [
+        "Rated Power",
+        "115kW"
+      ],
+      [
+        "Voltage Range",
+        "640-890VDC"
+      ],
+      [
+        "Rated Energy",
+        "12.44kWh"
+      ],
+      [
+        "Rated Charging Current",
+        "180A"
+      ],
+      [
+        "Maximum Continuous Charging Current",
+        "200A"
+      ],
+      [
+        "Rated Discharging Current",
+        "180A"
+      ],
+      [
+        "Maximum Continuous Discharging Current",
+        "200A"
+      ],
+      [
+        "Dimensions (W x D x H)",
+        "1280 x 1350 x 1950 mm"
+      ],
+      [
+        "Protection Rating",
+        "IP54"
+      ],
+      [
+        "Operating Temperature",
+        "-20°C to +45°C"
+      ],
+      [
+        "Operating Humidity",
+        "≤95%"
+      ],
+      [
+        "Operating Altitude",
+        "≤2000m"
+      ]
+    ],
+    "featured": false
+  },
+  {
+    "id": "TS-LES-920K100L",
+    "name": "High-Rate Liquid-Cooled Energy Storage Container",
+    "nameAr": "حاوية تخزين طاقة مبردة بالسائل عالية المعدل",
+    "image": "uploads/product-ts-les-920k100l.png",
+    "category": "energy-storage",
+    "group": "energy-storage",
+    "subCategory": "energy-storage",
+    "categoryLabel": "Energy Storage System",
+    "categoryLabelAr": "Energy Storage System",
+    "shortDesc": "A containerized high-rate liquid-cooled energy storage system for large-scale industrial and renewable energy storage stations.",
+    "shortDescAr": "نظام تخزين طاقة حاوي مبرد بالسائل عالي المعدل لمحطات التخزين الصناعية والطاقة المتجددة الكبيرة.",
+    "description": "The TS-LES-920K100L high-rate liquid-cooled energy storage container is a containerized energy storage product for wind-solar stations, independent storage stations, power plants and industrial energy storage. It uses modular design and supports high-efficiency conversion, intelligent monitoring and coordinated cloud operation.",
+    "descriptionAr": "حاوية TS-LES-920K100L هي منتج تخزين طاقة حاوي لمحطات الرياح والطاقة الشمسية ومحطات التخزين المستقلة والمصانع والتطبيقات الصناعية. تعتمد تصميما معياريا وتدعم التحويل عالي الكفاءة والمراقبة الذكية والتشغيل السحابي.",
+    "capacities": [],
+    "voltages": [],
+    "specs": [
+      [
+        "Product Name",
+        "High-rate liquid-cooled energy storage container"
+      ],
+      [
+        "Specific Model",
+        "TS-LES-920K100L"
+      ],
+      [
+        "Rated Power",
+        "920kW"
+      ],
+      [
+        "Voltage Range",
+        "640-890VDC"
+      ],
+      [
+        "Rated Energy",
+        "99.5kWh"
+      ],
+      [
+        "Rated Charging Current",
+        "1440A"
+      ],
+      [
+        "Maximum Continuous Charging Current",
+        "1600A"
+      ],
+      [
+        "Rated Discharging Current",
+        "1440A"
+      ],
+      [
+        "Maximum Continuous Discharging Current",
+        "1600A"
+      ],
+      [
+        "Dimensions (W x D x H)",
+        "4200 x 1500 x 2600 mm"
+      ],
+      [
+        "Protection Rating",
+        "IP54"
+      ],
+      [
+        "Operating Temperature",
+        "-20°C to +45°C"
+      ],
+      [
+        "Operating Humidity",
+        "≤95%"
+      ],
+      [
+        "Operating Altitude",
+        "≤2000m"
+      ]
+    ],
+    "featured": false
   }
 ]

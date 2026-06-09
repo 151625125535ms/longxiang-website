@@ -52,6 +52,12 @@ const CATEGORY_META = {
     subCategory: 'medium-low-voltage',
     categoryLabel: 'Medium&Low Voltage Switchgear',
     categoryLabelAr: 'معدات مفاتيح الجهد المتوسط والمنخفض'
+  },
+  'energy-storage': {
+    group: 'energy-storage',
+    subCategory: 'energy-storage',
+    categoryLabel: 'Energy Storage System',
+    categoryLabelAr: 'Energy Storage System'
   }
 };
 

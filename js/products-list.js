@@ -39,6 +39,14 @@
                 { sub: 'high-voltage', label: 'High-Voltage Switchgear', labelAr: 'معدات مفاتيح الجهد العالي' },
                 { sub: 'medium-low-voltage', label: 'Medium&Low Voltage Switchgear', labelAr: 'معدات مفاتيح الجهد المتوسط والمنخفض' }
             ]
+        },
+        {
+            group: 'energy-storage',
+            label: 'Energy Storage',
+            labelAr: 'أنظمة تخزين الطاقة',
+            children: [
+                { sub: 'energy-storage', label: 'Energy Storage System', labelAr: 'نظام تخزين الطاقة' }
+            ]
         }
     ];
 
