@@ -2786,5 +2786,373 @@
       ]
     ],
     "featured": false
+  },
+  {
+    "id": "SCB13",
+    "name": "SC(B)13 Silicon Steel Laminated Dry-Type Power Transformer",
+    "nameAr": "محول قدرة جاف بشرائح فولاذ سيليكونية SC(B)13",
+    "image": "uploads/product-scb13-silicon-dry.png",
+    "category": "dry-type",
+    "group": "transformer",
+    "subCategory": "dry-type",
+    "categoryLabel": "Dry Type Transformer",
+    "categoryLabelAr": "محول جاف",
+    "shortDesc": "An energy-efficiency level 3 silicon steel laminated dry-type power transformer with safe, reliable and low-maintenance operation.",
+    "shortDescAr": "محول قدرة جاف بشرائح فولاذ سيليكونية بمستوى كفاءة 3 وتشغيل آمن وموثوق وقليل الصيانة.",
+    "description": "The SC(B)13 silicon steel laminated dry-type power transformer uses high-quality cold-rolled oriented silicon steel sheets. It features safe and reliable operation, flame-retardant dry-type insulation, low noise, good environmental performance and easy maintenance for buildings, stations, hospitals, power plants and industrial distribution systems.",
+    "descriptionAr": "يستخدم محول SC(B)13 الجاف شرائح فولاذ سيليكونية موجهة ومدرفلة على البارد. يتميز بالتشغيل الآمن والموثوق والعزل الجاف المقاوم للهب والضجيج المنخفض وسهولة الصيانة للمباني والمحطات والمستشفيات وأنظمة التوزيع الصناعية.",
+    "capacities": [
+      "30",
+      "50",
+      "80",
+      "100",
+      "125",
+      "160",
+      "200",
+      "250",
+      "315",
+      "400",
+      "500",
+      "630",
+      "800",
+      "1000",
+      "1250",
+      "1600",
+      "2000",
+      "2500"
+    ],
+    "voltages": [
+      "11/0.4kV",
+      "10.5/0.4kV",
+      "10/0.4kV",
+      "6.3/0.4kV",
+      "6/0.4kV"
+    ],
+    "specs": [
+      [
+        "Product Model",
+        "SC(B)13"
+      ],
+      [
+        "Efficiency Level",
+        "Level 3"
+      ],
+      [
+        "Transformer Type",
+        "Silicon steel laminated dry-type power transformer"
+      ],
+      [
+        "Rated Capacity Range",
+        "30-2500kVA"
+      ],
+      [
+        "High Voltage",
+        "11kV, 10.5kV, 10kV, 6.3kV, 6kV"
+      ],
+      [
+        "Low Voltage",
+        "0.4kV"
+      ],
+      [
+        "High-Voltage Tapping Range",
+        "±5% or ±2 x 2.5%"
+      ],
+      [
+        "Connection Symbol",
+        "Dyn11"
+      ],
+      [
+        "Short-Circuit Impedance",
+        "4.0% or 6% depending on capacity"
+      ],
+      [
+        "Installation",
+        "Indoor"
+      ],
+      [
+        "Altitude",
+        "≤1000m"
+      ],
+      [
+        "Ambient Temperature",
+        "Maximum +40°C; maximum daily average +30°C; maximum annual average +20°C; minimum -25°C"
+      ],
+      [
+        "Standards",
+        "GB 1094.1, GB 1094.3, GB 1094.5, GB 1094.11, GB/T 10228, GB 20052, JB/T 3837"
+      ]
+    ],
+    "featured": false
+  },
+  {
+    "id": "SCB18",
+    "name": "SC(B)18 Silicon Steel Laminated Dry-Type Power Transformer",
+    "nameAr": "محول قدرة جاف بشرائح فولاذ سيليكونية SC(B)18",
+    "image": "uploads/product-scb18-silicon-dry.png",
+    "category": "dry-type",
+    "group": "transformer",
+    "subCategory": "dry-type",
+    "categoryLabel": "Dry Type Transformer",
+    "categoryLabelAr": "محول جاف",
+    "shortDesc": "An energy-efficiency level 1 silicon steel laminated dry-type power transformer for high-efficiency distribution applications.",
+    "shortDescAr": "محول قدرة جاف بشرائح فولاذ سيليكونية بمستوى كفاءة 1 لتطبيقات التوزيع عالية الكفاءة.",
+    "description": "The SC(B)18 series is an energy-efficiency level 1 silicon steel laminated dry-type power transformer. It is designed for projects requiring higher energy-saving performance, reliable dry-type insulation, low operating loss and stable service in indoor distribution environments.",
+    "descriptionAr": "سلسلة SC(B)18 هي محولات قدرة جافة بشرائح فولاذ سيليكونية بمستوى كفاءة 1. صممت للمشاريع التي تتطلب أداء أعلى في توفير الطاقة وعزلا جافا موثوقا وخسائر تشغيل منخفضة.",
+    "capacities": [
+      "30",
+      "50",
+      "80",
+      "100",
+      "125",
+      "160",
+      "200",
+      "250",
+      "315",
+      "400",
+      "500",
+      "630",
+      "800",
+      "1000",
+      "1250",
+      "1600",
+      "2000",
+      "2500"
+    ],
+    "voltages": [
+      "11/0.4kV",
+      "10.5/0.4kV",
+      "10/0.4kV",
+      "6.3/0.4kV",
+      "6/0.4kV"
+    ],
+    "specs": [
+      [
+        "Product Model",
+        "SC(B)18"
+      ],
+      [
+        "Efficiency Level",
+        "Level 1"
+      ],
+      [
+        "Transformer Type",
+        "Silicon steel laminated dry-type power transformer"
+      ],
+      [
+        "Rated Capacity Range",
+        "30-2500kVA"
+      ],
+      [
+        "High Voltage",
+        "11kV, 10.5kV, 10kV, 6.3kV, 6kV"
+      ],
+      [
+        "Low Voltage",
+        "0.4kV"
+      ],
+      [
+        "High-Voltage Tapping Range",
+        "±5% or ±2 x 2.5%"
+      ],
+      [
+        "Connection Symbol",
+        "Dyn11"
+      ],
+      [
+        "Short-Circuit Impedance",
+        "4.0% or 6% depending on capacity"
+      ],
+      [
+        "Installation",
+        "Indoor"
+      ],
+      [
+        "Altitude",
+        "≤1000m"
+      ],
+      [
+        "Ambient Temperature",
+        "Maximum +40°C; maximum daily average +30°C; maximum annual average +20°C; minimum -25°C"
+      ],
+      [
+        "Standards",
+        "GB 1094.1, GB 1094.3, GB 1094.5, GB 1094.11, GB/T 10228, GB 20052, JB/T 3837"
+      ]
+    ],
+    "featured": false
+  },
+  {
+    "id": "S22-M-RL",
+    "name": "S22-M.RL Oil-Immersed 3D Wound Core Distribution Transformer",
+    "nameAr": "محول توزيع مغمور بالزيت بقلب ملفوف ثلاثي الأبعاد S22-M.RL",
+    "image": "uploads/product-s22-m-rl-silicon-wound-core.png",
+    "category": "oil-immersed",
+    "group": "transformer",
+    "subCategory": "oil-immersed",
+    "categoryLabel": "Oil Immersed Transformer",
+    "categoryLabelAr": "محول مغمور بالزيت",
+    "shortDesc": "An energy-efficiency level 1 oil-immersed 3D wound core distribution transformer with reduced loss and compact magnetic circuit.",
+    "shortDescAr": "محول توزيع مغمور بالزيت بقلب ملفوف ثلاثي الأبعاد بمستوى كفاءة 1 وخسائر منخفضة ودائرة مغناطيسية مدمجة.",
+    "description": "The S22-M.RL oil-immersed 3D wound core transformer uses a three-phase symmetrical 3D wound core structure. It provides low no-load loss, low no-load current, strong short-circuit resistance, compact structure and high energy efficiency for distribution networks.",
+    "descriptionAr": "يستخدم محول S22-M.RL المغمور بالزيت بنية قلب ملفوف ثلاثي الأبعاد متناظرة. يوفر خسائر وتيار لا حمل منخفضين ومقاومة قوية للقصر وهيكلا مدمجا وكفاءة طاقة عالية لشبكات التوزيع.",
+    "capacities": [
+      "30",
+      "50",
+      "63",
+      "80",
+      "100",
+      "125",
+      "160",
+      "200",
+      "250",
+      "315",
+      "400",
+      "500",
+      "630",
+      "800",
+      "1000",
+      "1250",
+      "1600",
+      "2000",
+      "2500"
+    ],
+    "voltages": [
+      "11/0.4kV",
+      "10.5/0.4kV",
+      "10/0.4kV",
+      "6.3/0.4kV",
+      "6/0.4kV"
+    ],
+    "specs": [
+      [
+        "Product Model",
+        "S22-M.RL"
+      ],
+      [
+        "Efficiency Level",
+        "Level 1"
+      ],
+      [
+        "Transformer Type",
+        "Oil-immersed 3D wound core distribution transformer"
+      ],
+      [
+        "Rated Capacity Range",
+        "30-2500kVA"
+      ],
+      [
+        "High Voltage",
+        "11kV, 10.5kV, 10kV, 6.3kV, 6kV"
+      ],
+      [
+        "Low Voltage",
+        "0.4kV"
+      ],
+      [
+        "Connection Symbol",
+        "Dyn11"
+      ],
+      [
+        "Short-Circuit Impedance",
+        "4.0%, 4.5% or 5.0% depending on capacity"
+      ],
+      [
+        "Installation",
+        "Indoor or outdoor"
+      ],
+      [
+        "Altitude",
+        "≤1000m"
+      ],
+      [
+        "Ambient Temperature",
+        "Maximum +40°C; maximum daily average +30°C; maximum annual average +20°C; minimum -25°C"
+      ],
+      [
+        "Standards",
+        "GB 1094.1, GB 1094.2, GB 1094.3, GB 1094.5, GB/T 25438, GB 20052, JB/T 3837"
+      ]
+    ],
+    "featured": false
+  },
+  {
+    "id": "S22-M",
+    "name": "S22-M Oil-Immersed Power Transformer",
+    "nameAr": "محول قدرة مغمور بالزيت S22-M",
+    "image": "uploads/product-s22-m-oil-immersed.png",
+    "category": "oil-immersed",
+    "group": "transformer",
+    "subCategory": "oil-immersed",
+    "categoryLabel": "Oil Immersed Transformer",
+    "categoryLabelAr": "محول مغمور بالزيت",
+    "shortDesc": "An energy-efficiency level 1 oil-immersed power transformer designed for reliable and economical distribution operation.",
+    "shortDescAr": "محول قدرة مغمور بالزيت بمستوى كفاءة 1 مصمم لتشغيل توزيع موثوق واقتصادي.",
+    "description": "The S22-M oil-immersed transformer is designed for high-efficiency power distribution. It offers reduced losses compared with S20 products, stable operation, strong short-circuit resistance and outdoor or indoor installation adaptability.",
+    "descriptionAr": "صمم محول S22-M المغمور بالزيت لتوزيع الطاقة عالي الكفاءة. يوفر خسائر أقل مقارنة بمنتجات S20 وتشغيلا مستقرا ومقاومة قوية للقصر وإمكانية التركيب داخليا أو خارجيا.",
+    "capacities": [
+      "30",
+      "50",
+      "63",
+      "80",
+      "100",
+      "125",
+      "160",
+      "200",
+      "250",
+      "315",
+      "400",
+      "500",
+      "630",
+      "800",
+      "1000",
+      "1250",
+      "1600",
+      "2000",
+      "2500"
+    ],
+    "voltages": [
+      "10/0.4kV",
+      "6/0.4kV",
+      "35/0.4kV"
+    ],
+    "specs": [
+      [
+        "Product Model",
+        "S22-M"
+      ],
+      [
+        "Efficiency Level",
+        "Level 1"
+      ],
+      [
+        "Transformer Type",
+        "Oil-immersed power transformer"
+      ],
+      [
+        "Rated Capacity Range",
+        "30-2500kVA"
+      ],
+      [
+        "Cooling Method",
+        "ONAN"
+      ],
+      [
+        "Installation",
+        "Indoor or outdoor"
+      ],
+      [
+        "Application",
+        "Power distribution networks"
+      ],
+      [
+        "Protection Features",
+        "Reliable insulation, stable operation and short-circuit resistance"
+      ],
+      [
+        "Standard",
+        "GB 20052 / IEC 60076"
+      ]
+    ],
+    "featured": false
   }
 ]
