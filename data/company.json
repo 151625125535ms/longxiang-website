@@ -35,14 +35,16 @@
       "name": "Henan Longxiang Electric Co., Ltd.",
       "address": "Longhu Sub-district, Xinzheng City, Zhengzhou City, Henan Province, P.R. China",
       "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Longhu%20Sub-district%2C%20Xinzheng%20City%2C%20Zhengzhou%20City%2C%20Henan%20Province%2C%20China",
-      "googleMapsEmbedUrl": "https://www.google.com/maps?q=Longhu%20Sub-district%2C%20Xinzheng%20City%2C%20Zhengzhou%20City%2C%20Henan%20Province%2C%20China&output=embed",
+      "mapEmbedUrl": "https://www.openstreetmap.org/export/embed.html?bbox=113.55%2C34.52%2C113.77%2C34.68&layer=mapnik&marker=34.6000%2C113.6600",
+      "googleMapsEmbedUrl": "https://www.openstreetmap.org/export/embed.html?bbox=113.55%2C34.52%2C113.77%2C34.68&layer=mapnik&marker=34.6000%2C113.6600",
       "openStreetMapUrl": "https://www.openstreetmap.org/search?query=Longhu%20Sub-district%2C%20Xinzheng%20City%2C%20Zhengzhou%20City%2C%20Henan%20Province%2C%20China"
     },
     "newEnergy": {
       "name": "Henan Longxiang New Energy Technology Co., Ltd.",
       "address": "Huaiyang District, Zhoukou City, Henan Province, P.R. China",
       "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Huaiyang%20District%2C%20Zhoukou%20City%2C%20Henan%20Province%2C%20China",
-      "googleMapsEmbedUrl": "https://www.google.com/maps?q=Huaiyang%20District%2C%20Zhoukou%20City%2C%20Henan%20Province%2C%20China&output=embed",
+      "mapEmbedUrl": "https://www.openstreetmap.org/export/embed.html?bbox=114.75%2C33.66%2C114.95%2C33.80&layer=mapnik&marker=33.7331%2C114.8500",
+      "googleMapsEmbedUrl": "https://www.openstreetmap.org/export/embed.html?bbox=114.75%2C33.66%2C114.95%2C33.80&layer=mapnik&marker=33.7331%2C114.8500",
       "openStreetMapUrl": "https://www.openstreetmap.org/search?query=Huaiyang%20District%2C%20Zhoukou%20City%2C%20Henan%20Province%2C%20China"
     }
   },
