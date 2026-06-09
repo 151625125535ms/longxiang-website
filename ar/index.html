@@ -8,7 +8,49 @@
     <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
-    <link rel="stylesheet" href="../css/styles.css?v=20260606a">
+    <link rel="stylesheet" href="../css/styles.css?v=20260609vector2">
+    <style>
+        @media (max-width: 768px) {
+            .products-showcase-redesign .home-product-categories {
+                display: grid !important;
+                grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+                gap: 8px !important;
+                width: calc(100% - 2px) !important;
+                margin: -18px auto 32px !important;
+            }
+            .products-showcase-redesign .home-product-category {
+                min-width: 0 !important;
+                gap: 8px !important;
+            }
+            .products-showcase-redesign .home-product-category-image {
+                width: clamp(50px, 18vw, 68px) !important;
+                height: clamp(50px, 18vw, 68px) !important;
+            }
+            .products-showcase-redesign .home-product-category-image img {
+                padding: 10px !important;
+            }
+            .products-showcase-redesign .home-product-category-title {
+                max-width: 100% !important;
+                font-size: 0.68rem !important;
+                line-height: 1.18 !important;
+                overflow-wrap: anywhere !important;
+            }
+        }
+        @media (max-width: 360px) {
+            .products-showcase-redesign .home-product-categories {
+                gap: 4px !important;
+            }
+            .products-showcase-redesign .home-product-category-image {
+                width: 48px !important;
+                height: 48px !important;
+            }
+            .products-showcase-redesign .home-product-category-title {
+                width: 100% !important;
+                font-size: 0.58rem !important;
+                letter-spacing: 0 !important;
+            }
+        }
+    </style>
 </head>
 <body>
 
