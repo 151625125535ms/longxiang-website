@@ -6284,3 +6284,81 @@ p:last-child {
         display: none;
     }
 }
+
+@media (max-width: 600px) {
+    .floating-inquiry,
+    .back-to-top {
+        display: none;
+    }
+
+    .products-showcase-redesign .product-card-v2 .product-card-body h4,
+    .product-directory-section .product-card-v2 .product-card-body h4 {
+        display: block;
+        min-height: 0;
+        overflow: visible;
+        -webkit-line-clamp: unset;
+        -webkit-box-orient: initial;
+    }
+
+    .products-showcase-redesign .product-card-v2 .product-card-body p {
+        display: none;
+    }
+
+    .products-showcase-redesign .products-home-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        padding: 0 12px;
+    }
+
+    .products-showcase-redesign .product-card.product-card-v2 {
+        margin: 0;
+        padding: 10px;
+        border-radius: 8px;
+    }
+
+    .products-showcase-redesign .product-card-v2 .product-card-image {
+        height: 112px;
+        margin-bottom: 8px;
+    }
+
+    .products-showcase-redesign .product-card-v2 .product-card-body h4 {
+        font-size: 0.74rem;
+        line-height: 1.22;
+        overflow-wrap: anywhere;
+    }
+
+    .products-showcase-redesign .product-card-v2 .product-card-footer {
+        display: none;
+    }
+
+    .product-directory-section .product-card-v2 .product-card-body h4 {
+        font-size: 0.72rem;
+        line-height: 1.24;
+        overflow-wrap: anywhere;
+    }
+
+    .all-products-btn {
+        width: min(100%, 210px);
+    }
+}
+
+@media (max-width: 360px) {
+    .products-showcase-redesign .products-home-grid {
+        gap: 10px;
+        padding: 0 10px;
+    }
+
+    .products-showcase-redesign .product-card-v2 .product-card-image {
+        height: 98px;
+    }
+
+    .products-showcase-redesign .product-card-v2 .product-card-body h4 {
+        font-size: 0.66rem;
+        line-height: 1.18;
+    }
+
+    .product-directory-section .product-card-v2 .product-card-body h4 {
+        font-size: 0.66rem;
+        line-height: 1.2;
+    }
+}
