@@ -77,9 +77,9 @@
         return '<nav class="education-page-nav" aria-label="Education page sections">' +
             '<div class="container">' +
             '<a href="#industrial-college">Industrial College</a>' +
-            '<a href="#cooperation-pillars">Cooperation Pillars</a>' +
-            '<a href="#training-scenes">Training Scenes</a>' +
-            '<a href="#education-gallery">Gallery</a>' +
+            '<a href="#cooperation-pillars">Four Cooperation Modes</a>' +
+            '<a href="#training-scenes">Training & Equipment</a>' +
+            '<a href="#education-gallery">International Cooperation</a>' +
             '<a href="#education-contact">Contact Team</a>' +
             '</div></nav>';
     }
@@ -138,8 +138,8 @@
 
         return '<section class="section bg-light education-pillars" id="cooperation-pillars">' +
             '<div class="container">' +
-            '<div class="section-header fade-in"><h2>Cooperation Pillars</h2>' +
-            '<p>Longxiang brings together school-enterprise cooperation, practical teaching, equipment platforms, and research collaboration.</p></div>' +
+            '<div class="section-header fade-in"><h2>Four Cooperation Modes</h2>' +
+            '<p>Longxiang packages industrial college building, talent training, teaching equipment, and international cooperation into clear partner-facing programs.</p></div>' +
             '<div class="features-grid education-pillar-grid" data-stagger="120">' +
             sections.map(function (section) {
                 return '<article class="feature-card fade-in">' +
@@ -260,7 +260,6 @@
         pageRoot.innerHTML =
             renderPageNav() +
             renderOverview(industryCollege) +
-            renderStats(data) +
             renderPillars(data) +
             renderScenes(data) +
             renderGallery(gallery) +

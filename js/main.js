@@ -528,6 +528,31 @@
         setCompanyText('[data-company-contact="address"] .footer-contact-value', company.address);
         setCompanyHref('[data-company-email-link]', 'mailto:' + company.email);
         setCompanyHref('[data-company-phone-link]', 'tel:' + company.phone);
+        document.querySelectorAll('[data-company-google-map]').forEach(function (el) {
+            if (company.googleMapsUrl) {
+                el.href = company.googleMapsUrl;
+                el.hidden = false;
+            } else {
+                el.hidden = true;
+            }
+        });
+        document.querySelectorAll('[data-company-osm-map]').forEach(function (el) {
+            if (company.openStreetMapUrl) {
+                el.href = company.openStreetMapUrl;
+                el.hidden = false;
+            } else {
+                el.hidden = true;
+            }
+        });
+
+        document.querySelectorAll('[data-company-map-qr]').forEach(function (el) {
+            if (company.mapQr) {
+                el.innerHTML = '<img src="' + escapeHtml(resolveAssetPath(company.mapQr)) + '" alt="Map QR code"><span>' + (isArabic ? 'رمز موقع الشركة' : 'Company location QR') + '</span>';
+                el.hidden = false;
+            } else {
+                el.hidden = true;
+            }
+        });
     }
 
     function updateFooterNavigation() {
@@ -564,19 +589,10 @@
                 '</div>' +
                 '</div>' +
                 '<div class="footer-conversion footer-column">' +
-                    '<h4>' + (isArabic ? 'طلب عرض سعر' : 'Request Quote') + '</h4>' +
-                    '<p class="footer-conversion-text">' + (isArabic ? 'أرسل متطلبات مشروعك وسيتواصل فريقنا معك بسرعة.' : 'Share your project requirements and our team will respond quickly.') + '</p>' +
-                    '<form class="footer-quote-form" data-inquiry-form>' +
-                        '<input type="hidden" name="name" value="' + (isArabic ? 'زائر طلب عرض سعر من التذييل' : 'Footer Quote Visitor') + '">' +
-                        '<input type="hidden" name="subject" value="quote">' +
-                        '<input type="hidden" name="productContext" value="' + (isArabic ? 'طلب عرض سعر من التذييل' : 'Footer request quote') + '">' +
-                        '<textarea name="message" rows="4" placeholder="' + (isArabic ? '* الرسالة' : '* Message') + '" required></textarea>' +
-                        '<div class="footer-quote-row">' +
-                            '<input type="email" name="email" placeholder="' + (isArabic ? '* البريد الإلكتروني' : '* E-mail') + '" required>' +
-                            '<input type="text" name="phone" placeholder="' + (isArabic ? 'واتساب / الهاتف' : 'WhatsApp / Phone') + '">' +
-                        '</div>' +
-                        '<button type="submit">' + (isArabic ? 'إرسال' : 'SUBMIT') + '</button>' +
-                    '</form>' +
+                    '<h4>' + (isArabic ? 'وسائل التواصل' : 'External Media') + '</h4>' +
+                    '<p class="footer-conversion-text">' + (isArabic ? 'تابع لونغشيانغ أو تواصل مع فريق المبيعات عبر القنوات الرسمية.' : 'Follow Longxiang or reach our sales team through official channels.') + '</p>' +
+                    '<div class="messenger-links footer-social-links" data-communication-links></div>' +
+                    '<button type="button" class="footer-quote-button" data-open-inquiry>' + (isArabic ? 'طلب عرض سعر' : 'Request Quote') + '</button>' +
                 '</div>';
         });
     }
@@ -593,11 +609,36 @@
         return link;
     }
 
+    function appendQr(container, label, src) {
+        if (!src) return;
+        var qr = document.createElement('div');
+        qr.className = 'communication-qr';
+        qr.innerHTML =
+            '<img src="' + escapeHtml(resolveAssetPath(src)) + '" alt="' + escapeHtml(label) + ' QR code">' +
+            '<span>' + escapeHtml(label) + '</span>';
+        container.appendChild(qr);
+    }
+
+    function resolveAssetPath(path) {
+        if (!path) return '';
+        if (/^(https?:)?\/\//.test(path) || path.charAt(0) === '/' || /^data:/.test(path)) return path;
+        return assetPrefix + path;
+    }
+
     function renderCommunicationWidgets(company) {
         var links = [];
         if (company.whatsapp) {
             var number = String(company.whatsapp).replace(/[^\d]/g, '');
             if (number) links.push(createMessengerLink('WhatsApp', 'https://wa.me/' + number, 'whatsapp', 'click_whatsapp'));
+        }
+        if (company.line) {
+            links.push(createMessengerLink('Line', company.line, 'line', 'click_line'));
+        }
+        if (company.tiktok) {
+            links.push(createMessengerLink('TikTok', company.tiktok, 'tiktok', 'click_tiktok'));
+        }
+        if (company.youtube) {
+            links.push(createMessengerLink('YouTube', company.youtube, 'youtube', 'click_youtube'));
         }
         if (company.skype) {
             links.push(createMessengerLink('Skype', 'skype:' + encodeURIComponent(company.skype) + '?chat', 'skype', 'click_skype'));
@@ -614,8 +655,11 @@
                 wechat.innerHTML = '<strong>WeChat</strong><span>' + escapeHtml(company.wechat) + '</span>';
                 container.appendChild(wechat);
             }
-            if (!links.length && !company.wechat) {
-                container.innerHTML = '<div class="wechat-placeholder"><strong>WhatsApp / WeChat</strong><span>' + (isArabic ? 'سيتم التحديث' : 'To be updated') + '</span></div>';
+            appendQr(container, 'WhatsApp', company.whatsappQr);
+            appendQr(container, 'WeChat', company.wechatQr);
+            appendQr(container, 'Line', company.lineQr);
+            if (!container.children.length) {
+                container.innerHTML = '<div class="wechat-placeholder"><strong>TikTok / Line / WhatsApp / YouTube</strong><span>' + (isArabic ? 'سيتم التحديث' : 'To be updated') + '</span></div>';
             }
         });
 
@@ -832,17 +876,20 @@
         if (!container) return;
         var categoryContainer = document.getElementById('featured-product-categories');
         var homeCategories = [
-            { category: 'oil-immersed', label: 'Oil Immersed Transformer', labelAr: 'محول مغمور بالزيت', href: 'products.html?group=transformer&sub=oil-immersed' },
-            { category: 'dry-type', label: 'Dry Type Transformer', labelAr: 'محول جاف', href: 'products.html?group=transformer&sub=dry-type' },
-            { category: 'combined', label: 'Combined Transformer', labelAr: 'محول مدمج', href: 'products.html?group=transformer&sub=combined' },
-            { category: 'special', label: 'Special Transformer', labelAr: 'محول خاص', href: 'products.html?group=transformer&sub=special' }
+            { group: 'transformer', label: 'Transformer', labelAr: 'المحولات', href: 'products.html?group=transformer', icon: '首页矢量图/变压器.png' },
+            { group: 'ev-charger', label: 'EV Charger', labelAr: 'شواحن المركبات الكهربائية', href: 'products.html?group=ev-charger', icon: '首页矢量图/充电桩.png' },
+            { group: 'switchgear', label: 'Switchgear', labelAr: 'معدات المفاتيح', href: 'products.html?group=switchgear', icon: '首页矢量图/成套电气.png' }
         ];
 
         function renderFeaturedCategories(products) {
             if (!categoryContainer) return;
             categoryContainer.innerHTML = '';
             homeCategories.forEach(function (category, index) {
-                var sample = products.find(function (product) { return product.category === category.category; });
+                var sample = products.map(function (product) {
+                    return Object.assign({}, product, {
+                        group: product.group || (product.category === 'switchgear' ? 'switchgear' : 'transformer')
+                    });
+                }).find(function (product) { return product.group === category.group; });
                 var label = isArabic ? (category.labelAr || category.label) : category.label;
                 var link = document.createElement('a');
                 link.className = 'home-product-category fade-in';
@@ -850,8 +897,10 @@
                 link.setAttribute('data-delay', (index * 100).toString());
                 link.innerHTML =
                     '<span class="home-product-category-image">' +
-                        (sample && sample.image
-                            ? '<img src="' + assetPrefix + escapeHtml(sample.image) + '" alt="' + escapeHtml(label) + '" loading="lazy">'
+                        (category.icon
+                            ? '<img src="' + assetPrefix + escapeHtml(category.icon) + '" alt="' + escapeHtml(label) + '" loading="lazy">'
+                            : sample && sample.image
+                                ? '<img src="' + assetPrefix + escapeHtml(sample.image) + '" alt="' + escapeHtml(label) + '" loading="lazy">'
                             : '<span class="home-product-category-fallback">' + escapeHtml(label.charAt(0)) + '</span>') +
                     '</span>' +
                     '<span class="home-product-category-title">' + escapeHtml(label) + '</span>';
@@ -915,7 +964,12 @@
             }
 
             container.innerHTML = data.map(function (cert) {
-                var image = cert.image ? '<img src="' + escapeHtml(cert.image) + '" alt="' + escapeHtml(cert.name) + '">' : '<div class="cert-placeholder">CERT</div>';
+                var file = cert.image || '';
+                var image = file
+                    ? (/\.pdf($|\?)/i.test(file)
+                        ? '<a class="cert-placeholder cert-file-link" href="' + escapeHtml(resolveAssetPath(file)) + '" target="_blank" rel="noopener">PDF</a>'
+                        : '<img src="' + escapeHtml(resolveAssetPath(file)) + '" alt="' + escapeHtml(cert.name) + '">')
+                    : '<div class="cert-placeholder">CERT</div>';
                 return '<article class="cert-card fade-in">' +
                     '<div class="cert-media">' + image + '</div>' +
                     '<div class="cert-body">' +

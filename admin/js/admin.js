@@ -3,11 +3,14 @@
 
     var API_BASE = '../api';
     var CATEGORIES = [
-        { value: 'oil-immersed', label: 'Oil-Immersed', labelAr: 'محولات مغمورة بالزيت' },
-        { value: 'dry-type', label: 'Dry-Type', labelAr: 'محولات جافة' },
-        { value: 'special', label: 'Special', labelAr: 'محولات خاصة' },
-        { value: 'combined', label: 'Combined', labelAr: 'محولات مركبة' },
-        { value: 'switchgear', label: 'Switchgear', labelAr: 'معدات مفاتيح كهربائية' }
+        { value: 'oil-immersed', group: 'transformer', subCategory: 'oil-immersed', label: 'Oil Immersed Transformer', labelAr: 'محول مغمور بالزيت' },
+        { value: 'dry-type', group: 'transformer', subCategory: 'dry-type', label: 'Dry Type Transformer', labelAr: 'محول جاف' },
+        { value: 'combined', group: 'transformer', subCategory: 'combined', label: 'Combined Transformer', labelAr: 'محول مدمج' },
+        { value: 'special', group: 'transformer', subCategory: 'special', label: 'Special Transformer', labelAr: 'محول خاص' },
+        { value: 'ac', group: 'ev-charger', subCategory: 'ac', label: 'AC EV Charging Station', labelAr: 'محطة شحن تيار متردد' },
+        { value: 'dc', group: 'ev-charger', subCategory: 'dc', label: 'DC EV Charging Station', labelAr: 'محطة شحن تيار مستمر' },
+        { value: 'high-voltage', group: 'switchgear', subCategory: 'high-voltage', label: 'High-Voltage Switchgear', labelAr: 'معدات مفاتيح الجهد العالي' },
+        { value: 'medium-low-voltage', group: 'switchgear', subCategory: 'medium-low-voltage', label: 'Medium&Low Voltage Switchgear', labelAr: 'معدات مفاتيح الجهد المتوسط والمنخفض' }
     ];
     var STATUS_LABELS = { new: '新询盘', read: '已读', replied: '已回复', closed: '已关闭' };
     var STATUS_BADGES = { new: 'badge-gold', read: 'badge-blue', replied: 'badge-green', closed: 'badge-navy' };
@@ -210,6 +213,8 @@
         var editingInquiryId = null;
         var openedInquiry = null;
         var editingCertificationId = null;
+        var uploadedCertificationPath = '';
+        var currentView = 'dashboard';
 
         var usernameEl = document.getElementById('sidebar-username');
         var avatarEl = document.getElementById('sidebar-avatar');
@@ -261,6 +266,7 @@
         }
 
         function switchView(view) {
+            currentView = view;
             document.querySelectorAll('.sidebar-nav a[data-view]').forEach(function (link) {
                 link.classList.toggle('active', link.getAttribute('data-view') === view);
             });
@@ -423,7 +429,7 @@
                 var matchSearch = !searchVal ||
                     (p.name || '').toLowerCase().indexOf(searchVal) !== -1 ||
                     (p.id || '').toLowerCase().indexOf(searchVal) !== -1;
-                var matchCat = !catVal || p.category === catVal;
+                var matchCat = !catVal || p.category === catVal || p.subCategory === catVal || p.group === catVal;
                 return matchSearch && matchCat;
             }).sort(function (a, b) {
                 return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);
@@ -520,10 +526,20 @@
         }
 
         function fillProductForm(product) {
-            ['id', 'name', 'nameAr', 'category', 'categoryLabel', 'categoryLabelAr', 'shortDesc', 'shortDescAr', 'description', 'descriptionAr'].forEach(function (key) {
+            ['id', 'name', 'nameAr', 'categoryLabel', 'categoryLabelAr', 'shortDesc', 'shortDescAr', 'description', 'descriptionAr'].forEach(function (key) {
                 var field = document.getElementById('field-' + key);
                 if (field) field.value = product[key] || '';
             });
+            var categoryField = document.getElementById('field-category');
+            if (categoryField) {
+                if (product.group === 'ev-charger' || product.group === 'switchgear') {
+                    categoryField.value = product.subCategory || product.category || '';
+                } else if (product.category === 'switchgear') {
+                    categoryField.value = product.subCategory || 'medium-low-voltage';
+                } else {
+                    categoryField.value = product.subCategory || product.category || '';
+                }
+            }
             document.getElementById('field-capacities').value = (product.capacities || []).join(', ');
             document.getElementById('field-voltages').value = (product.voltages || []).join(', ');
             document.getElementById('field-featured').checked = !!product.featured;
@@ -616,6 +632,7 @@
             var name = document.getElementById('field-name').value.trim();
             var category = document.getElementById('field-category').value;
             var categoryLabel = document.getElementById('field-categoryLabel').value.trim();
+            var categoryMeta = CATEGORIES.find(function (item) { return item.value === category; }) || {};
 
             ['field-id', 'field-name', 'field-category', 'field-categoryLabel'].forEach(clearFieldError);
             var valid = true;
@@ -631,6 +648,8 @@
                 nameAr: document.getElementById('field-nameAr').value.trim(),
                 image: uploadedImagePath,
                 category: category,
+                group: categoryMeta.group || (category === 'switchgear' ? 'switchgear' : 'transformer'),
+                subCategory: categoryMeta.subCategory || category,
                 categoryLabel: categoryLabel,
                 categoryLabelAr: document.getElementById('field-categoryLabelAr').value.trim(),
                 shortDesc: document.getElementById('field-shortDesc').value.trim(),
@@ -876,6 +895,8 @@
             bindModalClose('certification-modal', ['certification-modal-close', 'certification-cancel']);
             var form = document.getElementById('certification-form');
             if (form) form.addEventListener('submit', saveCertification);
+            var certFile = document.getElementById('cert-file');
+            if (certFile) certFile.addEventListener('change', uploadCertificationFile);
         }
 
         function loadCertifications() {
@@ -908,6 +929,7 @@
 
         function openCertificationModal(id) {
             editingCertificationId = id;
+            uploadedCertificationPath = '';
             document.getElementById('certification-form').reset();
             document.getElementById('certification-modal-title').textContent = id ? '编辑证书' : '新增证书';
             if (id) {
@@ -916,9 +938,29 @@
                     ['name', 'issuer', 'expiryDate', 'image', 'description'].forEach(function (key) {
                         document.getElementById('cert-' + key).value = item[key] || '';
                     });
+                    uploadedCertificationPath = item.image || '';
                 }
             }
             document.getElementById('certification-modal').classList.add('show');
+        }
+
+        function uploadCertificationFile() {
+            var file = this.files[0];
+            if (!file) return;
+            var formData = new FormData();
+            formData.append('file', file);
+            fetch(API_BASE + '/certifications/upload', {
+                method: 'POST',
+                headers: { Authorization: 'Bearer ' + getToken() },
+                body: formData
+            }).then(function (res) { return res.json(); })
+                .then(function (data) {
+                    if (data.error) throw new Error(data.error);
+                    uploadedCertificationPath = data.path;
+                    document.getElementById('cert-image').value = data.path;
+                    showToast('证书文件上传成功');
+                })
+                .catch(function (err) { showToast('证书文件上传失败：' + err.message, 'error'); });
         }
 
         function saveCertification(e) {
@@ -927,7 +969,7 @@
                 name: document.getElementById('cert-name').value.trim(),
                 issuer: document.getElementById('cert-issuer').value.trim(),
                 expiryDate: document.getElementById('cert-expiryDate').value.trim(),
-                image: document.getElementById('cert-image').value.trim(),
+                image: document.getElementById('cert-image').value.trim() || uploadedCertificationPath,
                 description: document.getElementById('cert-description').value.trim()
             };
             if (!payload.name) {

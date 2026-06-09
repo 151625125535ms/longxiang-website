@@ -5,6 +5,8 @@
         "image":  "成品区/油式非晶S(B)H15.png",
         "category":  "oil-immersed",
         "categoryLabel":  "Oil-Immersed",
+        "group":  "transformer",
+        "subCategory":  "oil-immersed",
         "shortDesc":  "Self-developed energy-efficient transformer with significantly reduced no-load losses, small excitation current and low reactive power consumption.",
         "description":  "Self-developed energy-efficient amorphous alloy core distribution transformer with significantly reduced no-load losses, small excitation current and low reactive power consumption. Ideal for rural and urban distribution networks.",
         "capacities":  [
@@ -87,6 +89,8 @@
         "image":  "成品区/油式非晶S(B)H21.png",
         "category":  "oil-immersed",
         "categoryLabel":  "Oil-Immersed",
+        "group":  "transformer",
+        "subCategory":  "oil-immersed",
         "shortDesc":  "A new generation of high-reliability amorphous alloy transformer with enhanced performance characteristics.",
         "description":  "A new generation of high-reliability amorphous alloy transformer with enhanced performance characteristics, delivering superior energy savings and longer service life.",
         "capacities":  [
@@ -167,6 +171,8 @@
         "image":  "成品区/油式非晶S(B)H25.png",
         "category":  "oil-immersed",
         "categoryLabel":  "Oil-Immersed",
+        "group":  "transformer",
+        "subCategory":  "oil-immersed",
         "shortDesc":  "Advanced amorphous alloy core technology delivering superior energy savings and operational reliability.",
         "description":  "Advanced amorphous alloy core technology delivering superior energy savings and operational reliability for modern power distribution systems.",
         "capacities":  [
@@ -243,6 +249,8 @@
         "image":  "成品区/硅钢立体卷S13图片.png",
         "category":  "oil-immersed",
         "categoryLabel":  "Oil-Immersed",
+        "group":  "transformer",
+        "subCategory":  "oil-immersed",
         "shortDesc":  "Innovative triangular wound core structure offering better performance, lower cost and higher reliability.",
         "description":  "Innovative triangular wound core structure offering better performance, lower cost and higher reliability compared to traditional stacked core designs.",
         "capacities":  [
@@ -322,6 +330,8 @@
         "image":  "产品图片(1)/S20-M.RL-30～160010油浸式电力变压器.jpg",
         "category":  "oil-immersed",
         "categoryLabel":  "Oil-Immersed",
+        "group":  "transformer",
+        "subCategory":  "oil-immersed",
         "shortDesc":  "High-capacity oil-immersed power transformer designed for power transmission and distribution networks.",
         "description":  "High-capacity oil-immersed power transformer designed for power transmission and distribution networks, meeting the latest national energy efficiency standards.",
         "capacities":  [
@@ -405,6 +415,8 @@
         "image":  "产品图片(1)/油浸式（植物油）高过载配电变压器.jpg",
         "category":  "oil-immersed",
         "categoryLabel":  "Oil-Immersed",
+        "group":  "transformer",
+        "subCategory":  "oil-immersed",
         "shortDesc":  "Eco-friendly vegetable oil insulated transformer with high overload capacity for demanding applications.",
         "description":  "Eco-friendly vegetable oil insulated transformer with high overload capacity for demanding applications. The natural ester fluid provides superior fire safety and environmental protection.",
         "capacities":  [
@@ -480,6 +492,8 @@
         "image":  "产品图片(1)/抗短路油浸式非晶合金铁芯配电变压器.jpg",
         "category":  "oil-immersed",
         "categoryLabel":  "Oil-Immersed",
+        "group":  "transformer",
+        "subCategory":  "oil-immersed",
         "shortDesc":  "Enhanced short-circuit resistance design combining amorphous alloy efficiency with superior structural integrity.",
         "description":  "Enhanced short-circuit resistance design combining amorphous alloy efficiency with superior structural integrity for maximum reliability in demanding grid conditions.",
         "capacities":  [
@@ -550,6 +564,8 @@
         "image":  "产品图片(1)/非晶合金（植物油）高过载配电变压器.jpg",
         "category":  "oil-immersed",
         "categoryLabel":  "Oil-Immersed",
+        "group":  "transformer",
+        "subCategory":  "oil-immersed",
         "shortDesc":  "Combining amorphous alloy core technology with environmentally friendly vegetable oil insulation.",
         "description":  "Combining amorphous alloy core technology with environmentally friendly vegetable oil insulation for the ultimate in energy efficiency and environmental protection.",
         "capacities":  [
@@ -622,6 +638,8 @@
         "image":  "产品图片(1)/立体卷铁芯油浸式配电变压器.jpg",
         "category":  "oil-immersed",
         "categoryLabel":  "Oil-Immersed",
+        "group":  "transformer",
+        "subCategory":  "oil-immersed",
         "shortDesc":  "Triangular wound core design for optimal magnetic circuit performance and energy efficiency.",
         "description":  "Triangular wound core design for optimal magnetic circuit performance and energy efficiency. The unique core geometry reduces material usage while improving performance.",
         "capacities":  [
@@ -694,6 +712,8 @@
         "image":  "产品图片(1)/油浸式电力变压器（铝）.jpg",
         "category":  "oil-immersed",
         "categoryLabel":  "Oil-Immersed",
+        "group":  "transformer",
+        "subCategory":  "oil-immersed",
         "shortDesc":  "Cost-effective aluminum wound oil-immersed power transformer for distribution applications.",
         "description":  "Cost-effective aluminum wound oil-immersed power transformer for distribution applications. Provides reliable performance at competitive pricing.",
         "capacities":  [
@@ -768,6 +788,8 @@
         "image":  "产品图片(1)/抗短路油浸式立体卷铁芯配电变压器.jpg",
         "category":  "oil-immersed",
         "categoryLabel":  "Oil-Immersed",
+        "group":  "transformer",
+        "subCategory":  "oil-immersed",
         "shortDesc":  "Robust short-circuit resistant design utilizing advanced 3D wound core technology.",
         "description":  "Robust short-circuit resistant design utilizing advanced 3D wound core technology for maximum reliability in demanding grid conditions.",
         "capacities":  [
@@ -838,6 +860,8 @@
         "image":  "成品区/SCB14图片.png",
         "category":  "dry-type",
         "categoryLabel":  "Dry-Type",
+        "group":  "transformer",
+        "subCategory":  "dry-type",
         "shortDesc":  "Epoxy resin insulated dry-type transformer with safe, reliable performance and simple maintenance.",
         "description":  "Epoxy resin insulated dry-type transformer with safe, reliable performance and simple maintenance. Ideal for indoor installations where fire safety is paramount.",
         "capacities":  [
@@ -918,6 +942,8 @@
         "image":  "成品区/单相干式非晶合金铁心配电变压器.jpg",
         "category":  "dry-type",
         "categoryLabel":  "Dry-Type",
+        "group":  "transformer",
+        "subCategory":  "dry-type",
         "shortDesc":  "Compact single-phase dry-type transformer using amorphous alloy core for maximum energy efficiency.",
         "description":  "Compact single-phase dry-type transformer using amorphous alloy core for maximum energy efficiency in single-phase distribution applications.",
         "capacities":  [
@@ -987,6 +1013,8 @@
         "image":  "成品区/干式非晶三相三柱 .png",
         "category":  "dry-type",
         "categoryLabel":  "Dry-Type",
+        "group":  "transformer",
+        "subCategory":  "dry-type",
         "shortDesc":  "Three-limb design dry-type transformer with reduced harmonics and improved efficiency.",
         "description":  "Three-limb design dry-type transformer with reduced harmonics and improved efficiency using amorphous alloy core technology.",
         "capacities":  [
@@ -1060,6 +1088,8 @@
         "image":  "成品区/干式非晶三相五柱.png",
         "category":  "dry-type",
         "categoryLabel":  "Dry-Type",
+        "group":  "transformer",
+        "subCategory":  "dry-type",
         "shortDesc":  "Five-limb structure providing superior magnetic flux distribution and lower noise operation.",
         "description":  "Five-limb structure providing superior magnetic flux distribution and lower noise operation for noise-sensitive environments.",
         "capacities":  [
@@ -1138,6 +1168,8 @@
         "image":  "成品区/电炉变图片.png",
         "category":  "special",
         "categoryLabel":  "Special",
+        "group":  "transformer",
+        "subCategory":  "special",
         "shortDesc":  "Purpose-built furnace transformer with higher efficiency, lower noise and better safety features compared to conventional designs.",
         "description":  "Purpose-built furnace transformer with higher efficiency, lower noise and better safety features compared to conventional designs for industrial furnace applications.",
         "capacities":  [
@@ -1211,6 +1243,8 @@
         "image":  "成品区/牵引矿用防爆.png",
         "category":  "special",
         "categoryLabel":  "Special",
+        "group":  "transformer",
+        "subCategory":  "special",
         "shortDesc":  "Explosion-proof dry-type transformer engineered for hazardous mining environments with enhanced safety features.",
         "description":  "Explosion-proof dry-type transformer engineered for hazardous mining environments with enhanced safety features and rugged construction.",
         "capacities":  [
@@ -1280,6 +1314,8 @@
         "image":  "产品图片(1)/风力发电用（植物油）组合式变压器.jpg",
         "category":  "combined",
         "categoryLabel":  "Combined",
+        "group":  "transformer",
+        "subCategory":  "combined",
         "shortDesc":  "Vegetable oil insulated combined transformer specifically designed for wind power generation applications.",
         "description":  "Vegetable oil insulated combined transformer specifically designed for wind power generation applications with integrated protection and switching equipment.",
         "capacities":  [
@@ -1349,6 +1385,8 @@
         "image":  "产品图片(1)/光伏发电用（植物油）组合式变压器.jpg",
         "category":  "combined",
         "categoryLabel":  "Combined",
+        "group":  "transformer",
+        "subCategory":  "combined",
         "shortDesc":  "Combined transformer unit for photovoltaic power generation systems with integrated protection and control.",
         "description":  "Combined transformer unit for photovoltaic power generation systems with integrated protection and control. Designed for outdoor solar farm installations.",
         "capacities":  [
@@ -1419,6 +1457,8 @@
         "image":  "成品区/非晶立体卷.png",
         "category":  "switchgear",
         "categoryLabel":  "Switchgear",
+        "group":  "switchgear",
+        "subCategory":  "medium-low-voltage",
         "shortDesc":  "Low-voltage withdrawable switchgear suitable for power plants, substations, petrochemical plants, industrial and mining enterprises, and high-rise buildings.",
         "description":  "Low-voltage withdrawable switchgear suitable for power plants, substations, petrochemical plants, industrial and mining enterprises, and high-rise buildings.",
         "capacities":  [

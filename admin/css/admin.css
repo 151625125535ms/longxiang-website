@@ -76,6 +76,24 @@ input, textarea, select {
     font-size: inherit;
 }
 
+input:disabled,
+textarea:disabled,
+select:disabled {
+    background: var(--color-gray-100);
+    color: var(--color-gray-500);
+    cursor: not-allowed;
+}
+
+.form-help-text {
+    margin-bottom: 18px;
+    padding: 12px 14px;
+    border-left: 3px solid var(--color-gold);
+    border-radius: var(--radius-sm);
+    background: rgba(212, 168, 67, 0.1);
+    color: var(--color-gray-600);
+    font-size: 0.9rem;
+}
+
 /* Focus-visible: keyboard nav only, no outline on mouse click */
 :focus-visible {
     outline: 2px solid var(--color-blue);

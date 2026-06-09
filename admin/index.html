@@ -118,11 +118,15 @@
                         </div>
                         <select id="product-category-filter" class="toolbar-select">
                             <option value="">全部分类</option>
-                            <option value="oil-immersed">Oil-Immersed</option>
-                            <option value="dry-type">Dry-Type</option>
-                            <option value="special">Special</option>
-                            <option value="combined">Combined</option>
-                            <option value="switchgear">Switchgear</option>
+                            <option value="oil-immersed">Transformer / Oil Immersed</option>
+                            <option value="dry-type">Transformer / Dry Type</option>
+                            <option value="combined">Transformer / Combined</option>
+                            <option value="special">Transformer / Special</option>
+                            <option value="ac">EV Charger / AC</option>
+                            <option value="dc">EV Charger / DC</option>
+                            <option value="high-voltage">Switchgear / High Voltage</option>
+                            <option value="medium-low-voltage">Switchgear / Medium & Low Voltage</option>
+                            <option value="switchgear">Switchgear / Legacy</option>
                         </select>
                     </div>
                     <div class="data-table-wrapper">
@@ -163,14 +167,15 @@
                         </div>
 
                         <div class="form-tab-panel active" id="tab-company-basic">
+                            <p class="form-help-text">公司名称、成立年份、股票代码和注册资本为固定展示字段，修改前请先确认资料来源。</p>
                             <div class="form-row">
-                                <div class="form-group"><label>英文公司名</label><input type="text" id="company-name"></div>
-                                <div class="form-group"><label>中文公司名</label><input type="text" id="company-nameCN"></div>
+                                <div class="form-group"><label>英文公司名</label><input type="text" id="company-name" disabled></div>
+                                <div class="form-group"><label>中文公司名</label><input type="text" id="company-nameCN" disabled></div>
                             </div>
                             <div class="form-row-3">
-                                <div class="form-group"><label>成立年份</label><input type="number" id="company-founded"></div>
-                                <div class="form-group"><label>股票代码</label><input type="text" id="company-stockCode"></div>
-                                <div class="form-group"><label>注册资本</label><input type="text" id="company-registeredCapital"></div>
+                                <div class="form-group"><label>成立年份</label><input type="number" id="company-founded" disabled></div>
+                                <div class="form-group"><label>股票代码</label><input type="text" id="company-stockCode" disabled></div>
+                                <div class="form-group"><label>注册资本</label><input type="text" id="company-registeredCapital" disabled></div>
                             </div>
                         </div>
 
@@ -189,12 +194,27 @@
                                 <div class="form-group"><label>WhatsApp 号码</label><input type="text" id="company-whatsapp" placeholder="例如 8613812345678"></div>
                                 <div class="form-group"><label>微信号</label><input type="text" id="company-wechat"></div>
                             </div>
-                            <div class="form-group"><label>Skype 账号</label><input type="text" id="company-skype"></div>
+                            <div class="form-row">
+                                <div class="form-group"><label>Line 链接</label><input type="text" id="company-line" placeholder="https://line.me/..."></div>
+                                <div class="form-group"><label>TikTok 链接</label><input type="text" id="company-tiktok" placeholder="https://www.tiktok.com/@..."></div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group"><label>YouTube 链接</label><input type="text" id="company-youtube" placeholder="https://www.youtube.com/..."></div>
+                                <div class="form-group"><label>Skype 账号</label><input type="text" id="company-skype"></div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group"><label>WhatsApp 二维码路径</label><input type="text" id="company-whatsappQr" placeholder="uploads/whatsapp-qr.png"></div>
+                                <div class="form-group"><label>微信二维码路径</label><input type="text" id="company-wechatQr" placeholder="uploads/wechat-qr.png"></div>
+                            </div>
+                            <div class="form-group"><label>Line 二维码路径</label><input type="text" id="company-lineQr" placeholder="uploads/line-qr.png"></div>
                         </div>
 
                         <div class="form-tab-panel" id="tab-company-web">
                             <div class="form-group"><label>GA4 跟踪 ID</label><input type="text" id="company-ga4TrackingId" placeholder="G-XXXXXXXXXX"></div>
                             <div class="form-group"><label>页脚文案</label><textarea id="company-footerText" rows="3"></textarea></div>
+                            <div class="form-group"><label>Google Maps 外链</label><input type="text" id="company-googleMapsUrl" placeholder="https://maps.google.com/..."></div>
+                            <div class="form-group"><label>OpenStreetMap 外链</label><input type="text" id="company-openStreetMapUrl" placeholder="https://www.openstreetmap.org/..."></div>
+                            <div class="form-group"><label>地图二维码路径</label><input type="text" id="company-mapQr" placeholder="uploads/map-qr.png"></div>
                         </div>
 
                         <div class="form-tab-panel" id="tab-company-about">
@@ -251,11 +271,14 @@
                                 <label>分类 <span class="required">*</span></label>
                                 <select id="field-category">
                                     <option value="">选择分类</option>
-                                    <option value="oil-immersed">Oil-Immersed</option>
-                                    <option value="dry-type">Dry-Type</option>
-                                    <option value="special">Special</option>
-                                    <option value="combined">Combined</option>
-                                    <option value="switchgear">Switchgear</option>
+                                    <option value="oil-immersed">Transformer / Oil Immersed</option>
+                                    <option value="dry-type">Transformer / Dry Type</option>
+                                    <option value="combined">Transformer / Combined</option>
+                                    <option value="special">Transformer / Special</option>
+                                    <option value="ac">EV Charger / AC</option>
+                                    <option value="dc">EV Charger / DC</option>
+                                    <option value="high-voltage">Switchgear / High Voltage</option>
+                                    <option value="medium-low-voltage">Switchgear / Medium & Low Voltage</option>
                                 </select>
                             </div>
                             <div class="form-group"><label>英文分类名 <span class="required">*</span></label><input type="text" id="field-categoryLabel"></div>
@@ -303,7 +326,8 @@
                             <div class="form-group"><label>发证机构</label><input type="text" id="cert-issuer"></div>
                             <div class="form-group"><label>有效期</label><input type="text" id="cert-expiryDate"></div>
                         </div>
-                        <div class="form-group"><label>图片路径</label><input type="text" id="cert-image" placeholder="例如 uploads/certificates/iso9001.jpg"></div>
+                        <div class="form-group"><label>证书文件</label><input type="file" id="cert-file" accept="image/*,.pdf"></div>
+                        <div class="form-group"><label>图片/文件路径</label><input type="text" id="cert-image" placeholder="例如 uploads/certification-xxx.jpg"></div>
                         <div class="form-group"><label>说明</label><textarea id="cert-description" rows="3"></textarea></div>
                     </form>
                 </div>

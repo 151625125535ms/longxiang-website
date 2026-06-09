@@ -2,11 +2,11 @@
   "updatedAt": "2026-06-07T00:00:00.000Z",
   "hero": {
     "eyebrow": "",
-    "title": "Education & School-Enterprise Cooperation",
+    "title": "Industry-Education Cooperation for Power Talent",
     "titleAr": "",
-    "subtitle": "Longxiang connects industry resources, engineering practice, and research collaboration to cultivate high-quality electrical and new energy talent.",
+    "subtitle": "Longxiang turns power equipment manufacturing, project practice, and international cooperation into training platforms for colleges, utilities, and industrial partners.",
     "subtitleAr": "",
-    "backgroundImage": "assets/education/images/campus-main-building.jpeg"
+    "backgroundImage": "assets/education/images/international-cooperation-leadership.jpeg"
   },
   "stats": [
     {
@@ -40,12 +40,12 @@
       "layout": "image-right",
       "title": "Co-built Industrial College",
       "titleAr": "",
-      "summary": "In 2016, Longxiang and Henan Mechanical and Electrical Vocational College co-built Longxiang Electrical Engineering College as a model platform for deep industry-education integration.",
+      "summary": "A joint industrial college platform that links electrical majors with real manufacturing, engineering delivery, and new energy application scenarios.",
       "summaryAr": "",
       "body": [
-        "The cooperation focuses on power system automation, electrical automation, power supply technology, distributed generation, and smart microgrid education.",
-        "Professional programs are connected with real industry chains, practical engineering projects, and Longxiang's electrical equipment manufacturing base.",
-        "The model brings classrooms closer to industrial parks so students can learn through project-based engineering scenarios."
+        "Co-built programs connect classrooms with Longxiang's transformer, switchgear, photovoltaic, storage, and charging equipment resources.",
+        "The platform helps colleges present employable, project-ready talent development to local industry and overseas partners.",
+        "Longxiang can support curriculum cases, factory practice, training equipment, and joint demonstration programs."
       ],
       "bodyAr": [],
       "image": "assets/education/images/longxiang-electrical-college-building.jpeg",
@@ -62,11 +62,11 @@
       "layout": "cards",
       "title": "Collaborative Talent Training",
       "titleAr": "",
-      "summary": "Longxiang supports a full-cycle training pathway that connects practical training, internship, employment, and professional improvement.",
+      "summary": "A full-cycle training pathway connecting teaching, practical training, internship, employment, and professional improvement.",
       "summaryAr": "",
       "body": [
-        "The talent training system covers line-field teaching, alternating study and training, on-post internships, and dual-mentor guidance.",
-        "Training scenarios extend from power equipment to photovoltaic, wind power, and energy storage applications."
+        "The talent system supports dual-mentor teaching, field practice, alternating study-training, and on-post internship routes.",
+        "Training scenarios extend from transformers and switchgear to photovoltaic, wind power, energy storage, and charging applications."
       ],
       "bodyAr": [],
       "image": "assets/education/images/smart-grid-training-classroom.jpeg",
@@ -111,14 +111,14 @@
     {
       "id": "training-equipment",
       "layout": "image-left",
-      "title": "Training Equipment Development",
+      "title": "Teaching Equipment R&D",
       "titleAr": "",
-      "summary": "Longxiang transforms electrical manufacturing experience into teaching equipment, training platforms, and practical learning environments.",
+      "summary": "Longxiang transforms manufacturing know-how into teachable equipment platforms for electrical and new energy majors.",
       "summaryAr": "",
       "body": [
-        "Training platforms cover electrical control, switchgear, power distribution, testing, and operation scenarios.",
-        "The equipment supports hands-on teaching, skills assessment, and integrated teaching-production training.",
-        "Practical hardware helps students understand system structure, operation logic, and maintenance workflow."
+        "Training platforms can cover electrical control, switchgear, distribution, testing, operation, and maintenance workflows.",
+        "Practical hardware supports hands-on teaching, skill assessment, and integrated teaching-production demonstrations.",
+        "Equipment can be configured for colleges, vocational training bases, and overseas power talent programs."
       ],
       "bodyAr": [],
       "image": "assets/education/images/electrical-training-panel.jpeg",
@@ -133,18 +133,19 @@
     {
       "id": "research-global",
       "layout": "image-right",
-      "title": "Research & International Cooperation",
+      "title": "Industry-Research & International Cooperation",
       "titleAr": "",
-      "summary": "Longxiang integrates research resources to support technical innovation, industry upgrading, and international education cooperation.",
+      "summary": "International cooperation and research collaboration help partners introduce power equipment experience, standards, and training capacity.",
       "summaryAr": "",
       "body": [
-        "The company cooperates with universities and research institutes on smart microgrid, new energy, green charging station, and advanced power equipment topics.",
-        "The education platform supports the export of Chinese standards, technical know-how, and equipment experience for international power talent training.",
-        "Longxiang continues to explore overseas cooperation models for power and new energy vocational education."
+        "Longxiang works with education and research partners on smart microgrid, new energy, charging station, and advanced power equipment topics.",
+        "The platform supports technical exchange, overseas training cooperation, and localized power talent development.",
+        "International cooperation materials should use verified leadership and partner photos supplied by the company."
       ],
       "bodyAr": [],
-      "image": "assets/education/images/school-enterprise-training-banner.png",
+      "image": "assets/education/images/international-cooperation-leadership.jpeg",
       "images": [
+        "assets/education/images/international-cooperation-leadership.jpeg",
         "assets/education/images/auditorium-education-meeting.jpeg",
         "assets/education/images/seminar-training-session.png",
         "assets/education/images/factory-visit-workshop.jpeg",
@@ -184,7 +185,7 @@
       "bodyAr": [],
       "image": "",
       "images": [
-        "assets/education/images/campus-main-building.jpeg",
+        "assets/education/images/international-cooperation-leadership.jpeg",
         "assets/education/images/student-group-photo.jpeg",
         "assets/education/images/smart-grid-training-classroom.jpeg",
         "assets/education/images/pole-climbing-training.jpeg",
