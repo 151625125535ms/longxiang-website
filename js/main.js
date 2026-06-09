@@ -564,8 +564,9 @@
         setCompanyHref('[data-company-instagram-link]', company.instagram);
         setCompanyHref('[data-company-youtube-link]', company.youtube);
         document.querySelectorAll('[data-company-google-map-frame]').forEach(function (el) {
-            if (company.googleMapsEmbedUrl) {
-                el.src = company.googleMapsEmbedUrl;
+            var embedUrl = company.googleMyMapsEmbedUrl || company.googleMapsEmbedUrl;
+            if (embedUrl) {
+                el.src = embedUrl;
                 el.hidden = false;
             } else {
                 el.hidden = true;
@@ -606,7 +607,6 @@
         var mapCompany = document.querySelector('[data-contact-map-company]');
         var mapAddress = document.querySelector('[data-contact-map-address]');
         var mapOpen = document.querySelector('[data-contact-map-open]');
-        var mapMarkerName = document.querySelector('[data-contact-map-marker-name]');
         if (!frame || !tabs.length) return;
 
         function syncMapInfo(location) {
@@ -614,7 +614,6 @@
             if (mapCompany && location.name) mapCompany.textContent = location.name;
             if (mapAddress) mapAddress.textContent = location.displayAddress || location.address || '';
             if (mapOpen) mapOpen.href = location.googleMapsUrl || location.directionsUrl || '#';
-            if (mapMarkerName) mapMarkerName.textContent = location.name || '';
         }
 
         tabs.forEach(function (tab) {

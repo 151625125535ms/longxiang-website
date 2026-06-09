@@ -27,9 +27,9 @@
   "tiktok": "",
   "instagram": "https://www.instagram.com/merr_ick233?igsh=MTlpdjF4NGdodGJmbg==",
   "youtube": "https://youtube.com/@merrick-n4y?si=eAgL-Cc6rR8XrA1p",
-  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=34.59%2C113.72",
-  "googleMapsEmbedUrl": "https://www.google.com/maps?q=34.59%2C113.72&z=17&t=m&output=embed",
-  "openStreetMapUrl": "https://www.openstreetmap.org/?mlat=34.59&mlon=113.72#map=17/34.59/113.72",
+  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=34.5920246095604%2C113.71983991110623",
+  "googleMapsEmbedUrl": "https://www.google.com/maps/dir/34.5920246095604,113.71983991110623/33.700610534021,114.8518125937413?hl=en&z=8&t=m&output=embed",
+  "openStreetMapUrl": "https://www.openstreetmap.org/?mlat=34.5920246095604&mlon=113.71983991110623#map=17/34.5920246095604/113.71983991110623",
   "mapLocations": {
     "electric": {
       "name": "Henan Longxiang Electric Co., Ltd.",
@@ -37,12 +37,12 @@
       "mapSubLabel": "Longhu Sub-district",
       "address": "中国河南省郑州市新郑市龙湖街道泰山路1号河南龙翔电气股份有限公司",
       "displayAddress": "Longhu Sub-district, Xinzheng City, Zhengzhou City, Henan Province, P.R. China",
-      "mapCenter": "34.59,113.72",
-      "directionsUrl": "https://www.google.com/maps/dir/?api=1&destination=34.59%2C113.72&travelmode=driving",
-      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=34.59%2C113.72",
-      "mapEmbedUrl": "https://www.google.com/maps?q=34.59%2C113.72&z=17&t=m&output=embed",
-      "googleMapsEmbedUrl": "https://www.google.com/maps?q=34.59%2C113.72&z=17&t=m&output=embed",
-      "openStreetMapUrl": "https://www.openstreetmap.org/?mlat=34.59&mlon=113.72#map=17/34.59/113.72"
+      "mapCenter": "34.5920246095604,113.71983991110623",
+      "directionsUrl": "https://www.google.com/maps/dir/?api=1&destination=34.5920246095604%2C113.71983991110623&travelmode=driving",
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=34.5920246095604%2C113.71983991110623",
+      "mapEmbedUrl": "https://www.google.com/maps?q=34.5920246095604%2C113.71983991110623&z=17&t=m&output=embed",
+      "googleMapsEmbedUrl": "https://www.google.com/maps?q=34.5920246095604%2C113.71983991110623&z=17&t=m&output=embed",
+      "openStreetMapUrl": "https://www.openstreetmap.org/?mlat=34.5920246095604&mlon=113.71983991110623#map=17/34.5920246095604/113.71983991110623"
     },
     "newEnergy": {
       "name": "Henan Longxiang New Energy Technology Co., Ltd.",
@@ -50,14 +50,15 @@
       "mapSubLabel": "Zhoukou City",
       "address": "中国河南省周口市淮阳区河南龙翔新能源科技有限公司",
       "displayAddress": "Huaiyang District, Zhoukou City, Henan Province, P.R. China",
-      "mapCenter": "33.71,114.86",
-      "directionsUrl": "https://www.google.com/maps/dir/?api=1&destination=33.71%2C114.86&travelmode=driving",
-      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=33.71%2C114.86",
-      "mapEmbedUrl": "https://www.google.com/maps?q=33.71%2C114.86&z=17&t=m&output=embed",
-      "googleMapsEmbedUrl": "https://www.google.com/maps?q=33.71%2C114.86&z=17&t=m&output=embed",
-      "openStreetMapUrl": "https://www.openstreetmap.org/?mlat=33.71&mlon=114.86#map=17/33.71/114.86"
+      "mapCenter": "33.700610534021,114.8518125937413",
+      "directionsUrl": "https://www.google.com/maps/dir/?api=1&destination=33.700610534021%2C114.8518125937413&travelmode=driving",
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=33.700610534021%2C114.8518125937413",
+      "mapEmbedUrl": "https://www.google.com/maps?q=33.700610534021%2C114.8518125937413&z=17&t=m&output=embed",
+      "googleMapsEmbedUrl": "https://www.google.com/maps?q=33.700610534021%2C114.8518125937413&z=17&t=m&output=embed",
+      "openStreetMapUrl": "https://www.openstreetmap.org/?mlat=33.700610534021&mlon=114.8518125937413#map=17/33.700610534021/114.8518125937413"
     }
   },
   "mapQr": "",
-  "ga4TrackingId": ""
+  "ga4TrackingId": "",
+  "googleMyMapsEmbedUrl": ""
 }
