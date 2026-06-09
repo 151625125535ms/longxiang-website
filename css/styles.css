@@ -6121,3 +6121,56 @@ p:last-child {
         left: 12px;
     }
 }
+
+@media (max-width: 600px) {
+    .product-detail-specs {
+        margin-top: var(--spacing-xl);
+    }
+
+    .product-specs-table,
+    .product-specs-table tbody,
+    .product-specs-table tr,
+    .product-specs-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .product-specs-table {
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .product-specs-table tr {
+        margin-bottom: 12px;
+        border: 1px solid var(--color-gray-200);
+        border-radius: 8px;
+        background: var(--color-white-pure);
+        box-shadow: 0 8px 22px rgba(10, 22, 40, 0.06);
+        overflow: hidden;
+    }
+
+    .product-specs-table td {
+        padding: 0;
+        font-size: 0.95rem;
+        line-height: 1.55;
+    }
+
+    .product-specs-table td:first-child {
+        width: 100%;
+        padding: 10px 14px 8px;
+        background: var(--color-gray-100);
+        color: var(--color-navy);
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+
+    .product-specs-table td:last-child {
+        padding: 12px 14px 14px;
+        color: var(--color-gray-700);
+        font-weight: 500;
+        overflow-wrap: break-word;
+        word-break: normal;
+    }
+}
