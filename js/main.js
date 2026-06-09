@@ -603,7 +603,17 @@
         var frame = document.querySelector('[data-company-google-map-frame]');
         var tabs = Array.from(document.querySelectorAll('[data-contact-map-target]'));
         var panel = frame && frame.closest('.contact-location-panel');
+        var mapCompany = document.querySelector('[data-contact-map-company]');
+        var mapAddress = document.querySelector('[data-contact-map-address]');
+        var mapOpen = document.querySelector('[data-contact-map-open]');
         if (!frame || !tabs.length) return;
+
+        function syncMapInfo(location) {
+            if (!location) return;
+            if (mapCompany && location.name) mapCompany.textContent = location.name;
+            if (mapAddress) mapAddress.textContent = location.displayAddress || location.address || '';
+            if (mapOpen) mapOpen.href = location.googleMapsUrl || location.directionsUrl || '#';
+        }
 
         tabs.forEach(function (tab) {
             var key = tab.getAttribute('data-contact-map-target');
@@ -624,6 +634,7 @@
                 var nextEmbedUrl = next.mapEmbedUrl || next.googleMapsEmbedUrl;
                 if (nextEmbedUrl) frame.src = nextEmbedUrl;
                 if (panel) panel.setAttribute('data-map-location', key);
+                syncMapInfo(next);
                 tabs.forEach(function (item) { item.classList.toggle('active', item === tab); });
             });
         });
@@ -634,6 +645,7 @@
         if (panel) panel.setAttribute('data-map-location', activeKey);
         var activeEmbedUrl = activeLocation && (activeLocation.mapEmbedUrl || activeLocation.googleMapsEmbedUrl);
         if (activeEmbedUrl) frame.src = activeEmbedUrl;
+        syncMapInfo(activeLocation);
     }
 
     function updateFooterNavigation() {
