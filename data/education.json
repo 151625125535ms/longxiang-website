@@ -81,11 +81,11 @@
       "modeNumber": "02",
       "title": "Collaborative Talent Training",
       "titleAr": "",
-      "tagline": "Build a closed loop from training to employment and upgrading.",
-      "summary": "Longxiang provides full-cycle talent development services for colleges and enterprise clients, connecting practical training, internship, employment, teacher development, and customized workforce training.",
+      "tagline": "Train students and upgrade teachers through real enterprise scenarios.",
+      "summary": "Longxiang connects student practice, internships, teacher enterprise placement, and faculty technical workshops into one school-enterprise training pathway.",
       "body": [
         "The program covers power equipment, photovoltaic, wind power, energy storage, and charging applications.",
-        "Dual-mentor teaching combines college instructors and enterprise engineers to protect training quality and workplace readiness."
+        "Dual-mentor teaching combines college instructors, enterprise engineers, and teacher training support."
       ],
       "image": "assets/education/images/field-practical-training.jpeg",
       "images": [
@@ -94,18 +94,16 @@
         "assets/education/images/field-practical-training.jpeg",
         "assets/education/images/teacher-training-classroom.png"
       ],
-      "bestFor": "Colleges improving employability, enterprises building internal electrical teams, and training centers adding new energy courses.",
+      "bestFor": "Colleges improving student employability, teacher engineering capability, and new energy course delivery.",
       "deliverables": [
-        "Line-field teaching and alternating study-training programs",
-        "On-post internships and practical project tasks",
-        "Special operation, UAV, new energy O&M, and electrical safety training",
-        "Enterprise-customized courses for parks, utilities, property operators, and industrial users",
-        "Teacher enterprise placement and technical workshops for dual-qualified faculty"
+        "Line-field teaching, practical projects, and on-post internships",
+        "Teacher enterprise placement and technical workshops for dual-qualified faculty",
+        "Special operation, UAV, new energy O&M, and electrical safety training"
       ],
       "outcomes": [
         "Students train with real scenarios before employment",
-        "Teachers gain industry-facing technical updates",
-        "Enterprise teams receive targeted safety, O&M, and energy-saving capability upgrades"
+        "Teachers gain enterprise practice experience and updated engineering cases",
+        "Colleges strengthen dual-qualified faculty teams and reusable course resources"
       ],
       "cards": [
         {
@@ -113,8 +111,8 @@
           "text": "Practical training, alternating study-training, post internship, and employment preparation."
         },
         {
-          "title": "Skill Upgrade Courses",
-          "text": "Electrical safety, new power systems, energy saving, UAV, special operation, and new energy O&M."
+          "title": "Teacher Training",
+          "text": "Enterprise placement, technical workshops, engineering case study, and course co-development for dual-qualified faculty."
         },
         {
           "title": "Dual-Mentor System",
