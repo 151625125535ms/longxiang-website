@@ -321,8 +321,11 @@
     function closeCategoryPanel() {
         var tree = document.getElementById('product-category-tree');
         var toggle = document.querySelector('.product-category-toggle');
+        var backdrop = document.querySelector('.product-category-backdrop');
         if (tree) tree.classList.remove('is-open');
         if (toggle) toggle.setAttribute('aria-expanded', 'false');
+        if (backdrop) backdrop.classList.remove('is-open');
+        document.body.classList.remove('product-category-panel-open');
     }
 
     function initProductTree() {
@@ -351,14 +354,30 @@
         var tree = document.getElementById('product-category-tree');
         var closeButton = document.querySelector('.product-category-close');
         if (toggle && tree) {
+            var backdrop = document.querySelector('.product-category-backdrop');
+            if (!backdrop) {
+                backdrop = document.createElement('div');
+                backdrop.className = 'product-category-backdrop';
+                backdrop.setAttribute('aria-hidden', 'true');
+                tree.parentElement.insertBefore(backdrop, tree);
+            }
+
             toggle.addEventListener('click', function () {
                 var open = !tree.classList.contains('is-open');
                 tree.classList.toggle('is-open', open);
                 toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+                backdrop.classList.toggle('is-open', open);
+                document.body.classList.toggle('product-category-panel-open', open);
             });
             if (closeButton) {
                 closeButton.addEventListener('click', closeCategoryPanel);
+                closeButton.addEventListener('touchstart', function (event) {
+                    event.preventDefault();
+                    closeCategoryPanel();
+                }, { passive: false });
             }
+            backdrop.addEventListener('click', closeCategoryPanel);
+            backdrop.addEventListener('touchstart', closeCategoryPanel, { passive: true });
             document.addEventListener('click', function (event) {
                 if (!tree.classList.contains('is-open')) return;
                 if (tree.contains(event.target) || toggle.contains(event.target)) return;
