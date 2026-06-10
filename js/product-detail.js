@@ -150,7 +150,9 @@
                         return res.json();
                     })
                     .then(function (products) {
-                        var product = products.find(function (item) { return item.id === productId; });
+                        var product = products.find(function (item) {
+                            return item.id === productId || (Array.isArray(item.aliases) && item.aliases.indexOf(productId) !== -1);
+                        });
                         renderProduct(product);
                     })
                     .catch(function () { renderProduct(null); });

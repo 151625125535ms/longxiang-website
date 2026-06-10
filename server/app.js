@@ -9,6 +9,7 @@ const productsRoutes = require('./routes/products');
 const companyRoutes = require('./routes/company');
 const inquiriesRoutes = require('./routes/inquiries');
 const certificationsRoutes = require('./routes/certifications');
+const { ensureDirectory, resolveUploadDir } = require('./lib/fileStore');
 
 let compression = null;
 try { compression = require('compression'); } catch (err) { compression = null; }
@@ -70,6 +71,10 @@ if (rateLimit) {
     app.use('/api', apiLimiter);
 }
 
+const uploadDir = resolveUploadDir();
+ensureDirectory(uploadDir);
+app.use('/uploads', express.static(uploadDir, { maxAge: '30d', fallthrough: false }));
+
 app.use(express.static(path.join(__dirname, '..'), {
     maxAge: '7d',
     setHeaders: function (res, filePath) {
@@ -78,7 +83,6 @@ app.use(express.static(path.join(__dirname, '..'), {
         }
     }
 }));
-app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads'), { maxAge: '30d' }));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productsRoutes);

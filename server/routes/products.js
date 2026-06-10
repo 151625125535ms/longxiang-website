@@ -1,28 +1,32 @@
 const express = require('express');
-const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
 const { authMiddleware } = require('../middleware/auth');
+const { ensureDirectory, readJson, resolveDataFile, resolveUploadDir, resolveUploadPublicPath, writeJsonAtomic } = require('../lib/fileStore');
 
 const router = express.Router();
-const DATA_FILE = path.join(__dirname, '..', '..', 'data', 'products.json');
+const FALLBACK_DATA_FILE = path.join(__dirname, '..', '..', 'data', 'products.json');
+const DATA_FILE = resolveDataFile('PRODUCTS_DATA_FILE', FALLBACK_DATA_FILE);
+const UPLOAD_DIR = resolveUploadDir();
+const UPLOAD_PUBLIC_PATH = resolveUploadPublicPath();
 
 function readProducts() {
-    const data = fs.readFileSync(DATA_FILE, 'utf-8');
-    return JSON.parse(data);
+    return readJson(DATA_FILE, [], FALLBACK_DATA_FILE);
 }
 
 function writeProducts(products) {
-    fs.writeFileSync(DATA_FILE, JSON.stringify(products, null, 2), 'utf-8');
+    writeJsonAtomic(DATA_FILE, products, 'products');
+}
+
+function matchesProductId(product, id) {
+    if (product.id === id) return true;
+    return Array.isArray(product.aliases) && product.aliases.indexOf(id) !== -1;
 }
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        const uploadDir = path.join(__dirname, '..', '..', 'uploads');
-        if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
-        }
-        cb(null, uploadDir);
+        ensureDirectory(UPLOAD_DIR);
+        cb(null, UPLOAD_DIR);
     },
     filename: function (req, file, cb) {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -66,7 +70,7 @@ router.get('/', (req, res) => {
 router.get('/:id', (req, res) => {
     try {
         const products = readProducts();
-        const product = products.find(p => p.id === req.params.id);
+        const product = products.find(p => matchesProductId(p, req.params.id));
         if (!product) {
             return res.status(404).json({ error: 'Product not found.' });
         }
@@ -83,7 +87,7 @@ router.post('/', authMiddleware, (req, res) => {
         if (!newProduct.id || !newProduct.name) {
             return res.status(400).json({ error: 'Product id and name are required.' });
         }
-        if (products.find(p => p.id === newProduct.id)) {
+        if (products.find(p => matchesProductId(p, newProduct.id))) {
             return res.status(400).json({ error: 'Product id already exists.' });
         }
         products.push(newProduct);
@@ -97,11 +101,11 @@ router.post('/', authMiddleware, (req, res) => {
 router.put('/:id', authMiddleware, (req, res) => {
     try {
         const products = readProducts();
-        const index = products.findIndex(p => p.id === req.params.id);
+        const index = products.findIndex(p => matchesProductId(p, req.params.id));
         if (index === -1) {
             return res.status(404).json({ error: 'Product not found.' });
         }
-        const updatedProduct = { ...products[index], ...req.body, id: req.params.id };
+        const updatedProduct = { ...products[index], ...req.body, id: products[index].id };
         products[index] = updatedProduct;
         writeProducts(products);
         res.json(updatedProduct);
@@ -113,7 +117,7 @@ router.put('/:id', authMiddleware, (req, res) => {
 router.delete('/:id', authMiddleware, (req, res) => {
     try {
         const products = readProducts();
-        const index = products.findIndex(p => p.id === req.params.id);
+        const index = products.findIndex(p => matchesProductId(p, req.params.id));
         if (index === -1) {
             return res.status(404).json({ error: 'Product not found.' });
         }
@@ -129,7 +133,7 @@ router.post('/upload', authMiddleware, upload.single('image'), (req, res) => {
     if (!req.file) {
         return res.status(400).json({ error: 'No file uploaded.' });
     }
-    const imagePath = 'uploads/' + req.file.filename;
+    const imagePath = UPLOAD_PUBLIC_PATH + '/' + req.file.filename;
     res.json({ path: imagePath, filename: req.file.filename });
 });
 

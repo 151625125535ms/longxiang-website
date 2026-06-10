@@ -2,14 +2,26 @@ const express = require('express');
 const path = require('path');
 const multer = require('multer');
 const { authMiddleware } = require('../middleware/auth');
-const { readJson, writeJson, makeId } = require('../lib/fileStore');
+const {
+    ensureDirectory,
+    makeId,
+    readJson,
+    resolveDataFile,
+    resolveUploadDir,
+    resolveUploadPublicPath,
+    writeJsonAtomic
+} = require('../lib/fileStore');
 
 const router = express.Router();
-const DATA_FILE = path.join(__dirname, '..', '..', 'data', 'certifications.json');
+const FALLBACK_DATA_FILE = path.join(__dirname, '..', '..', 'data', 'certifications.json');
+const DATA_FILE = resolveDataFile('CERTIFICATIONS_DATA_FILE', FALLBACK_DATA_FILE);
+const UPLOAD_DIR = resolveUploadDir();
+const UPLOAD_PUBLIC_PATH = resolveUploadPublicPath();
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, path.join(__dirname, '..', '..', 'uploads'));
+        ensureDirectory(UPLOAD_DIR);
+        cb(null, UPLOAD_DIR);
     },
     filename: function (req, file, cb) {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -30,11 +42,11 @@ const upload = multer({
 });
 
 function readCertifications() {
-    return readJson(DATA_FILE, []);
+    return readJson(DATA_FILE, [], FALLBACK_DATA_FILE);
 }
 
 function writeCertifications(certifications) {
-    writeJson(DATA_FILE, certifications);
+    writeJsonAtomic(DATA_FILE, certifications, 'certifications');
 }
 
 router.get('/', (req, res) => {
@@ -107,7 +119,7 @@ router.post('/upload', authMiddleware, upload.single('file'), (req, res) => {
     if (!req.file) {
         return res.status(400).json({ error: 'No file uploaded.' });
     }
-    res.json({ path: 'uploads/' + req.file.filename, filename: req.file.filename });
+    res.json({ path: UPLOAD_PUBLIC_PATH + '/' + req.file.filename, filename: req.file.filename });
 });
 
 module.exports = router;

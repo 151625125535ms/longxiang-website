@@ -1,7 +1,7 @@
 const express = require('express');
 const path = require('path');
 const { authMiddleware } = require('../middleware/auth');
-const { readJson, writeJson, makeId } = require('../lib/fileStore');
+const { makeId, readJson, resolveDataFile, writeJsonAtomic } = require('../lib/fileStore');
 
 let nodemailer = null;
 try {
@@ -11,17 +11,19 @@ try {
 }
 
 const router = express.Router();
-const DATA_FILE = path.join(__dirname, '..', '..', 'data', 'inquiries.json');
-const COMPANY_FILE = path.join(__dirname, '..', '..', 'data', 'company.json');
+const FALLBACK_DATA_FILE = path.join(__dirname, '..', '..', 'data', 'inquiries.json');
+const FALLBACK_COMPANY_FILE = path.join(__dirname, '..', '..', 'data', 'company.json');
+const DATA_FILE = resolveDataFile('INQUIRIES_DATA_FILE', FALLBACK_DATA_FILE);
+const COMPANY_FILE = resolveDataFile('COMPANY_DATA_FILE', FALLBACK_COMPANY_FILE);
 const STATUSES = ['new', 'read', 'replied', 'closed'];
 const STATUS_PRIORITY = { new: 0, read: 1, replied: 2, closed: 3 };
 
 function readInquiries() {
-    return readJson(DATA_FILE, []);
+    return readJson(DATA_FILE, [], FALLBACK_DATA_FILE);
 }
 
 function writeInquiries(inquiries) {
-    writeJson(DATA_FILE, inquiries);
+    writeJsonAtomic(DATA_FILE, inquiries, 'inquiries');
 }
 
 function normalizeInquiry(body) {
@@ -55,7 +57,7 @@ function getClientIp(req) {
 function getNotifyTarget() {
     if (process.env.INQUIRY_NOTIFY_TO) return process.env.INQUIRY_NOTIFY_TO;
     try {
-        const company = readJson(COMPANY_FILE, {});
+        const company = readJson(COMPANY_FILE, {}, FALLBACK_COMPANY_FILE);
         return company.email || '';
     } catch (err) {
         return '';
