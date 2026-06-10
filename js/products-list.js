@@ -349,11 +349,20 @@
 
         var toggle = document.querySelector('.product-category-toggle');
         var tree = document.getElementById('product-category-tree');
+        var closeButton = document.querySelector('.product-category-close');
         if (toggle && tree) {
             toggle.addEventListener('click', function () {
                 var open = !tree.classList.contains('is-open');
                 tree.classList.toggle('is-open', open);
                 toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+            });
+            if (closeButton) {
+                closeButton.addEventListener('click', closeCategoryPanel);
+            }
+            document.addEventListener('click', function (event) {
+                if (!tree.classList.contains('is-open')) return;
+                if (tree.contains(event.target) || toggle.contains(event.target)) return;
+                closeCategoryPanel();
             });
             document.addEventListener('keydown', function (event) {
                 if (event.key === 'Escape') closeCategoryPanel();
