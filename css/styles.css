@@ -8794,6 +8794,16 @@ p:last-child {
     white-space: normal;
 }
 
+[dir="rtl"] .solution-check-list li {
+    padding-right: 1.8rem;
+    padding-left: 0;
+}
+
+[dir="rtl"] .solution-check-list li::before {
+    right: 0;
+    left: auto;
+}
+
 @media (max-width: 768px) {
     [dir="rtl"] body {
         font-size: 1rem;

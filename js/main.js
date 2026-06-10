@@ -104,6 +104,8 @@
             ev: 'شواحن المركبات الكهربائية',
             switchgear: 'معدات المفاتيح',
             solutions: 'الحلول',
+            epc: 'المقاولات العامة للمشاريع الكهربائية',
+            lineOm: 'تشغيل وصيانة الخطوط',
             pv: 'حل الطاقة الشمسية التجارية والصناعية',
             wind: 'حل الرياح والطاقة الشمسية والتخزين والشحن',
             microgrid: 'حل الشبكة المصغرة الذكية',
@@ -119,6 +121,8 @@
             ev: 'EV charger',
             switchgear: 'Switchgear',
             solutions: 'Solutions',
+            epc: 'Engineering General Contracting',
+            lineOm: 'Line Operation & Maintenance',
             pv: 'C&I PV Solution',
             wind: 'C&I Wind+PV+ESS+EV Charging Solution',
             microgrid: 'C&I Smart Microgrid Solution',
@@ -137,8 +141,8 @@
                 { page: 'products.html', label: labels.switchgear, hash: '?group=switchgear' }
             ], ['products.html', 'product-detail.html']) +
             navItem('solutions.html', labels.solutions, [
-                { page: 'solutions.html', label: 'Engineering General Contracting', hash: '#engineering-epc' },
-                { page: 'solutions.html', label: 'Line Operation & Maintenance', hash: '#line-om' },
+                { page: 'solutions.html', label: labels.epc, hash: '#engineering-epc' },
+                { page: 'solutions.html', label: labels.lineOm, hash: '#line-om' },
                 { page: 'solutions.html', label: labels.wind, hash: '#wind-pv-ess-ev' },
                 { page: 'solutions.html', label: labels.microgrid, hash: '#smart-microgrid' },
                 { page: 'solutions.html', label: labels.pv, hash: '#pv-solution' }
