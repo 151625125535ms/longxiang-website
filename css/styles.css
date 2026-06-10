@@ -6725,7 +6725,7 @@ p:last-child {
     border: 1px solid var(--color-gray-200);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-md);
-    padding: var(--spacing-xl);
+    padding: var(--spacing-md);
 }
 
 .solution-stack-devices {
