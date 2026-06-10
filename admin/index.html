@@ -253,14 +253,18 @@
                 <section class="view-section" id="view-education">
                     <div class="section-header-bar"><h2>Education Content</h2></div>
                     <form class="company-form" id="education-form">
-                        <div class="form-group">
-                            <label>Education JSON</label>
-                            <textarea id="education-json" rows="24" spellcheck="false" style="font-family:Consolas,monospace;"></textarea>
-                        </div>
+                        <div id="education-editor" class="education-editor"></div>
                         <div class="form-row">
                             <div class="form-group">
                                 <label>Upload image</label>
                                 <input type="file" id="education-image" accept="image/*">
+                            </div>
+                            <div class="form-group">
+                                <label>Apply uploaded image to</label>
+                                <select id="education-upload-target">
+                                    <option value="hero.backgroundImage">Hero background</option>
+                                    <option value="gallery.images">Gallery images</option>
+                                </select>
                             </div>
                             <div class="form-group">
                                 <label>Uploaded path</label>

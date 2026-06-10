@@ -1005,38 +1005,45 @@
             if (form) form.addEventListener('submit', saveEducation);
             var imageInput = document.getElementById('education-image');
             if (imageInput) imageInput.addEventListener('change', uploadEducationImage);
+            var editor = document.getElementById('education-editor');
+            if (editor) {
+                editor.addEventListener('click', function (e) {
+                    var action = e.target.getAttribute('data-education-action');
+                    if (!action) return;
+                    e.preventDefault();
+                    handleEducationAction(action, e.target);
+                });
+            }
         }
 
         function loadEducation() {
-            var textarea = document.getElementById('education-json');
-            if (textarea) textarea.value = 'Loading...';
+            var editor = document.getElementById('education-editor');
+            if (editor) editor.innerHTML = '<div class="table-empty"><p>Loading...</p></div>';
             apiRequest('/education').then(function (data) {
                 educationContent = data;
-                if (textarea) textarea.value = JSON.stringify(data, null, 2);
+                renderEducationEditor(data);
             }).catch(function (err) {
-                if (textarea) textarea.value = '';
+                if (editor) editor.innerHTML = '<div class="table-empty"><p>Load failed</p></div>';
                 showToast('Load education content failed: ' + err.message, 'error');
             });
         }
 
         function saveEducation(e) {
             e.preventDefault();
-            var textarea = document.getElementById('education-json');
             var btn = document.getElementById('btn-save-education');
-            var payload;
             try {
-                payload = JSON.parse(textarea.value || '{}');
+                var payload = collectEducationForm();
             } catch (err) {
-                showToast('Education JSON is invalid: ' + err.message, 'error');
+                showToast(err.message, 'error');
                 return;
             }
             if (btn) {
                 btn.disabled = true;
                 btn.textContent = 'Saving...';
             }
-            apiRequest('/education', { method: 'PUT', body: payload }).then(function (data) {
+            apiRequest('/education/editor', { method: 'PUT', body: payload }).then(function (data) {
                 educationContent = data.education || payload;
-                textarea.value = JSON.stringify(educationContent, null, 2);
+                renderEducationEditor(educationContent);
                 showToast('Education content saved');
             }).catch(function (err) {
                 showToast('Save education content failed: ' + err.message, 'error');
@@ -1062,9 +1069,311 @@
                     if (data.error) throw new Error(data.error);
                     var pathInput = document.getElementById('education-upload-path');
                     if (pathInput) pathInput.value = data.path;
+                    applyEducationUploadedPath(data.path);
                     showToast('Education image uploaded');
                 })
                 .catch(function (err) { showToast('Education image upload failed: ' + err.message, 'error'); });
+        }
+
+        function educationField(name, label, value, type) {
+            type = type || 'text';
+            if (type === 'textarea') {
+                return '<div class="form-group"><label>' + label + '</label><textarea data-edu-field="' + name + '" rows="3">' + escapeHtml(value || '') + '</textarea></div>';
+            }
+            return '<div class="form-group"><label>' + label + '</label><input type="' + type + '" data-edu-field="' + name + '" value="' + escapeHtml(value || '') + '"></div>';
+        }
+
+        function educationListField(name, label, value) {
+            return educationField(name, label, listToText(value), 'textarea');
+        }
+
+        function listToText(value) {
+            return Array.isArray(value) ? value.join('\n') : (value || '');
+        }
+
+        function textToList(value) {
+            return String(value || '').split(/\r?\n/).map(function (item) { return item.trim(); }).filter(Boolean);
+        }
+
+        function findEducationSection(id) {
+            return (educationContent && educationContent.sections || []).filter(function (section) {
+                return section.id === id;
+            })[0] || null;
+        }
+
+        function editableEducationSections(data) {
+            return (data.sections || []).filter(function (section) {
+                return section.id !== 'gallery' && section.id !== 'cooperation-philosophy';
+            });
+        }
+
+        function renderEducationEditor(data) {
+            var editor = document.getElementById('education-editor');
+            if (!editor) return;
+            var hero = data.hero || {};
+            var stats = data.stats || [];
+            var sections = editableEducationSections(data);
+            var gallery = findEducationSectionFrom(data, 'gallery') || {};
+            var philosophy = findEducationSectionFrom(data, 'cooperation-philosophy') || {};
+            var cta = data.cta || {};
+
+            editor.innerHTML =
+                '<div class="education-panel">' +
+                    '<h3>Hero</h3>' +
+                    '<div class="form-row">' +
+                        educationField('hero.eyebrow', 'Small label', hero.eyebrow) +
+                        educationField('hero.backgroundImage', 'Background image', hero.backgroundImage) +
+                    '</div>' +
+                    educationField('hero.title', 'English title', hero.title) +
+                    educationField('hero.titleAr', 'Arabic title', hero.titleAr) +
+                    educationField('hero.subtitle', 'English subtitle', hero.subtitle, 'textarea') +
+                    educationField('hero.subtitleAr', 'Arabic subtitle', hero.subtitleAr, 'textarea') +
+                '</div>' +
+                '<div class="education-panel">' +
+                    '<div class="education-panel-head"><h3>Stats</h3><button type="button" class="btn btn-secondary" data-education-action="add-stat">Add stat</button></div>' +
+                    '<div id="education-stats">' + stats.map(renderEducationStat).join('') + '</div>' +
+                '</div>' +
+                '<div class="education-panel">' +
+                    '<div class="education-panel-head"><h3>Content sections</h3><button type="button" class="btn btn-secondary" data-education-action="add-section">Add section</button></div>' +
+                    '<div id="education-sections">' + sections.map(renderEducationSection).join('') + '</div>' +
+                '</div>' +
+                '<div class="education-panel">' +
+                    '<h3>Gallery</h3>' +
+                    educationField('gallery.title', 'English title', gallery.title) +
+                    educationField('gallery.titleAr', 'Arabic title', gallery.titleAr) +
+                    educationField('gallery.summary', 'English summary', gallery.summary, 'textarea') +
+                    educationField('gallery.summaryAr', 'Arabic summary', gallery.summaryAr, 'textarea') +
+                    educationListField('gallery.images', 'Images, one path per line', gallery.images) +
+                '</div>' +
+                '<div class="education-panel">' +
+                    '<h3>Philosophy</h3>' +
+                    educationField('philosophy.summary', 'English title', philosophy.summary) +
+                    educationField('philosophy.summaryAr', 'Arabic title', philosophy.summaryAr) +
+                    educationListField('philosophy.body', 'English paragraphs, one per line', philosophy.body) +
+                    educationListField('philosophy.bodyAr', 'Arabic paragraphs, one per line', philosophy.bodyAr) +
+                '</div>' +
+                '<div class="education-panel">' +
+                    '<h3>Call to action</h3>' +
+                    '<div class="form-row">' +
+                        educationField('cta.title', 'English title', cta.title) +
+                        educationField('cta.titleAr', 'Arabic title', cta.titleAr) +
+                    '</div>' +
+                    educationField('cta.text', 'English text', cta.text, 'textarea') +
+                    educationField('cta.textAr', 'Arabic text', cta.textAr, 'textarea') +
+                    '<div class="form-row">' +
+                        educationField('cta.buttonText', 'English button', cta.buttonText) +
+                        educationField('cta.buttonTextAr', 'Arabic button', cta.buttonTextAr) +
+                        educationField('cta.href', 'Button link', cta.href || 'contact.html') +
+                    '</div>' +
+                '</div>';
+
+            refreshEducationUploadTargets();
+        }
+
+        function findEducationSectionFrom(data, id) {
+            return (data.sections || []).filter(function (section) { return section.id === id; })[0] || null;
+        }
+
+        function renderEducationStat(stat, index) {
+            return '<div class="education-repeat-item" data-edu-stat>' +
+                '<div class="education-repeat-head"><strong>Stat ' + (index + 1) + '</strong><button type="button" class="btn btn-danger" data-education-action="remove-item">Remove</button></div>' +
+                '<div class="form-row-3">' +
+                    educationField('stat.id', 'ID', stat.id || ('stat-' + (index + 1))) +
+                    educationField('stat.value', 'Value', stat.value) +
+                    educationField('stat.label', 'English label', stat.label) +
+                '</div>' +
+                educationField('stat.labelAr', 'Arabic label', stat.labelAr) +
+                '</div>';
+        }
+
+        function renderEducationSection(section, index) {
+            return '<div class="education-repeat-item" data-edu-section>' +
+                '<div class="education-repeat-head"><strong>' + escapeHtml(section.title || ('Section ' + (index + 1))) + '</strong><button type="button" class="btn btn-danger" data-education-action="remove-item">Remove</button></div>' +
+                '<div class="form-row-3">' +
+                    educationField('section.id', 'ID', section.id || ('section-' + (index + 1))) +
+                    educationField('section.modeNumber', 'Number', section.modeNumber || String(index + 1).padStart(2, '0')) +
+                    educationField('section.image', 'Main image', section.image) +
+                '</div>' +
+                educationField('section.title', 'English title', section.title) +
+                educationField('section.titleAr', 'Arabic title', section.titleAr) +
+                educationField('section.tagline', 'English tagline', section.tagline) +
+                educationField('section.taglineAr', 'Arabic tagline', section.taglineAr) +
+                educationField('section.summary', 'English summary', section.summary, 'textarea') +
+                educationField('section.summaryAr', 'Arabic summary', section.summaryAr, 'textarea') +
+                educationField('section.bestFor', 'Best for', section.bestFor, 'textarea') +
+                educationField('section.bestForAr', 'Best for Arabic', section.bestForAr, 'textarea') +
+                '<div class="form-row">' +
+                    educationListField('section.deliverables', 'Deliverables, one per line', section.deliverables) +
+                    educationListField('section.outcomes', 'Outcomes, one per line', section.outcomes) +
+                '</div>' +
+                '<div class="form-row">' +
+                    educationListField('section.deliverablesAr', 'Deliverables Arabic, one per line', section.deliverablesAr) +
+                    educationListField('section.outcomesAr', 'Outcomes Arabic, one per line', section.outcomesAr) +
+                '</div>' +
+                educationListField('section.images', 'Proof images, one path per line', section.images) +
+                '<div class="education-panel-head"><h4>Cards</h4><button type="button" class="btn btn-secondary" data-education-action="add-card">Add card</button></div>' +
+                '<div data-edu-cards>' + (section.cards || []).map(renderEducationCard).join('') + '</div>' +
+                '</div>';
+        }
+
+        function renderEducationCard(card, index) {
+            return '<div class="education-card-editor" data-edu-card>' +
+                '<div class="education-repeat-head"><strong>Card ' + (index + 1) + '</strong><button type="button" class="btn btn-danger" data-education-action="remove-item">Remove</button></div>' +
+                '<div class="form-row">' +
+                    educationField('card.title', 'English title', card.title) +
+                    educationField('card.titleAr', 'Arabic title', card.titleAr) +
+                '</div>' +
+                '<div class="form-row">' +
+                    educationField('card.text', 'English text', card.text, 'textarea') +
+                    educationField('card.textAr', 'Arabic text', card.textAr, 'textarea') +
+                '</div>' +
+                '</div>';
+        }
+
+        function handleEducationAction(action, target) {
+            if (action === 'remove-item') {
+                var item = target.closest('[data-edu-stat], [data-edu-section], [data-edu-card]');
+                if (item) item.parentNode.removeChild(item);
+                refreshEducationUploadTargets();
+            }
+            if (action === 'add-stat') {
+                document.getElementById('education-stats').insertAdjacentHTML('beforeend', renderEducationStat({}, document.querySelectorAll('[data-edu-stat]').length));
+            }
+            if (action === 'add-section') {
+                document.getElementById('education-sections').insertAdjacentHTML('beforeend', renderEducationSection({}, document.querySelectorAll('[data-edu-section]').length));
+                refreshEducationUploadTargets();
+            }
+            if (action === 'add-card') {
+                var cards = target.closest('[data-edu-section]').querySelector('[data-edu-cards]');
+                cards.insertAdjacentHTML('beforeend', renderEducationCard({}, cards.querySelectorAll('[data-edu-card]').length));
+            }
+        }
+
+        function fieldValue(container, name) {
+            var el = container.querySelector('[data-edu-field="' + name + '"]');
+            return el ? el.value.trim() : '';
+        }
+
+        function collectEducationForm() {
+            var editor = document.getElementById('education-editor');
+            if (!editor) throw new Error('Education editor is not ready.');
+            var payload = {
+                hero: {
+                    eyebrow: fieldValue(editor, 'hero.eyebrow'),
+                    title: fieldValue(editor, 'hero.title'),
+                    titleAr: fieldValue(editor, 'hero.titleAr'),
+                    subtitle: fieldValue(editor, 'hero.subtitle'),
+                    subtitleAr: fieldValue(editor, 'hero.subtitleAr'),
+                    backgroundImage: fieldValue(editor, 'hero.backgroundImage')
+                },
+                stats: [],
+                sections: [],
+                gallery: {
+                    title: fieldValue(editor, 'gallery.title'),
+                    titleAr: fieldValue(editor, 'gallery.titleAr'),
+                    summary: fieldValue(editor, 'gallery.summary'),
+                    summaryAr: fieldValue(editor, 'gallery.summaryAr'),
+                    images: textToList(fieldValue(editor, 'gallery.images'))
+                },
+                philosophy: {
+                    summary: fieldValue(editor, 'philosophy.summary'),
+                    summaryAr: fieldValue(editor, 'philosophy.summaryAr'),
+                    body: textToList(fieldValue(editor, 'philosophy.body')),
+                    bodyAr: textToList(fieldValue(editor, 'philosophy.bodyAr'))
+                },
+                cta: {
+                    title: fieldValue(editor, 'cta.title'),
+                    titleAr: fieldValue(editor, 'cta.titleAr'),
+                    text: fieldValue(editor, 'cta.text'),
+                    textAr: fieldValue(editor, 'cta.textAr'),
+                    buttonText: fieldValue(editor, 'cta.buttonText'),
+                    buttonTextAr: fieldValue(editor, 'cta.buttonTextAr'),
+                    href: fieldValue(editor, 'cta.href') || 'contact.html'
+                }
+            };
+            editor.querySelectorAll('[data-edu-stat]').forEach(function (item) {
+                payload.stats.push({
+                    id: fieldValue(item, 'stat.id'),
+                    value: fieldValue(item, 'stat.value'),
+                    label: fieldValue(item, 'stat.label'),
+                    labelAr: fieldValue(item, 'stat.labelAr')
+                });
+            });
+            editor.querySelectorAll('[data-edu-section]').forEach(function (item) {
+                var section = {
+                    id: fieldValue(item, 'section.id'),
+                    modeNumber: fieldValue(item, 'section.modeNumber'),
+                    title: fieldValue(item, 'section.title'),
+                    titleAr: fieldValue(item, 'section.titleAr'),
+                    tagline: fieldValue(item, 'section.tagline'),
+                    taglineAr: fieldValue(item, 'section.taglineAr'),
+                    summary: fieldValue(item, 'section.summary'),
+                    summaryAr: fieldValue(item, 'section.summaryAr'),
+                    image: fieldValue(item, 'section.image'),
+                    images: textToList(fieldValue(item, 'section.images')),
+                    bestFor: fieldValue(item, 'section.bestFor'),
+                    bestForAr: fieldValue(item, 'section.bestForAr'),
+                    deliverables: textToList(fieldValue(item, 'section.deliverables')),
+                    deliverablesAr: textToList(fieldValue(item, 'section.deliverablesAr')),
+                    outcomes: textToList(fieldValue(item, 'section.outcomes')),
+                    outcomesAr: textToList(fieldValue(item, 'section.outcomesAr')),
+                    cards: []
+                };
+                item.querySelectorAll('[data-edu-card]').forEach(function (cardEl) {
+                    section.cards.push({
+                        title: fieldValue(cardEl, 'card.title'),
+                        titleAr: fieldValue(cardEl, 'card.titleAr'),
+                        text: fieldValue(cardEl, 'card.text'),
+                        textAr: fieldValue(cardEl, 'card.textAr')
+                    });
+                });
+                payload.sections.push(section);
+            });
+            if (!payload.hero.title) throw new Error('Hero English title is required.');
+            return payload;
+        }
+
+        function refreshEducationUploadTargets() {
+            var select = document.getElementById('education-upload-target');
+            if (!select) return;
+            var current = select.value;
+            var options = [
+                '<option value="hero.backgroundImage">Hero background</option>',
+                '<option value="gallery.images">Gallery images</option>'
+            ];
+            document.querySelectorAll('[data-edu-section]').forEach(function (section, index) {
+                var title = fieldValue(section, 'section.title') || ('Section ' + (index + 1));
+                options.push('<option value="section.' + index + '.image">' + escapeHtml(title) + ' main image</option>');
+                options.push('<option value="section.' + index + '.images">' + escapeHtml(title) + ' proof images</option>');
+            });
+            select.innerHTML = options.join('');
+            select.value = current && select.querySelector('option[value="' + current + '"]') ? current : 'hero.backgroundImage';
+        }
+
+        function appendLineValue(el, value) {
+            if (!el) return;
+            el.value = (el.value.trim() ? el.value.trim() + '\n' : '') + value;
+        }
+
+        function applyEducationUploadedPath(path) {
+            var select = document.getElementById('education-upload-target');
+            var target = select ? select.value : 'hero.backgroundImage';
+            var editor = document.getElementById('education-editor');
+            if (!editor) return;
+            if (target === 'hero.backgroundImage') {
+                var hero = editor.querySelector('[data-edu-field="hero.backgroundImage"]');
+                if (hero) hero.value = path;
+            } else if (target === 'gallery.images') {
+                appendLineValue(editor.querySelector('[data-edu-field="gallery.images"]'), path);
+            } else if (/^section\.(\d+)\.image$/.test(target)) {
+                var imageMatch = target.match(/^section\.(\d+)\.image$/);
+                var section = editor.querySelectorAll('[data-edu-section]')[Number(imageMatch[1])];
+                if (section) section.querySelector('[data-edu-field="section.image"]').value = path;
+            } else if (/^section\.(\d+)\.images$/.test(target)) {
+                var listMatch = target.match(/^section\.(\d+)\.images$/);
+                var listSection = editor.querySelectorAll('[data-edu-section]')[Number(listMatch[1])];
+                if (listSection) appendLineValue(listSection.querySelector('[data-edu-field="section.images"]'), path);
+            }
         }
 
         function bindModalClose(modalId, buttonIds) {
