@@ -119,7 +119,7 @@
 
     function createProductCard(product) {
         var card = document.createElement('article');
-        card.className = 'product-card product-card-v2 fade-in show';
+        card.className = 'product-card product-card-v2 fade-in visible show';
         card.setAttribute('data-group', product.group);
         card.setAttribute('data-sub-category', product.subCategory || '');
 
