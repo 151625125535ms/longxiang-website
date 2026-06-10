@@ -1,5 +1,9 @@
 # Agent Instructions
 
+## 语言规范
+
+所有自然语言均使用中文。
+
 Before working in this repository, read and follow [WORKFLOW.md](WORKFLOW.md).
 
 Key rules:

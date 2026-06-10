@@ -37,7 +37,7 @@
                 </a>
                 <a href="#" data-view="education">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg>
-                    Education
+                    教育合作
                 </a>
                 <a href="#" class="logout-link" id="nav-logout">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
@@ -251,27 +251,33 @@
                 </section>
 
                 <section class="view-section" id="view-education">
-                    <div class="section-header-bar"><h2>Education Content</h2></div>
+                    <div class="section-header-bar"><h2>教育合作内容管理</h2></div>
                     <form class="company-form" id="education-form">
                         <div id="education-editor" class="education-editor"></div>
+                        <div class="education-upload-panel">
+                            <div class="education-upload-copy">
+                                <strong>上传图片并选择用途</strong>
+                                <span>上传成功后会自动填入对应位置，不需要手动复制路径。</span>
+                            </div>
                         <div class="form-row">
                             <div class="form-group">
-                                <label>Upload image</label>
+                                <label>上传图片</label>
                                 <input type="file" id="education-image" accept="image/*">
                             </div>
                             <div class="form-group">
-                                <label>Apply uploaded image to</label>
+                                <label>图片用途</label>
                                 <select id="education-upload-target">
-                                    <option value="hero.backgroundImage">Hero background</option>
-                                    <option value="gallery.images">Gallery images</option>
+                                    <option value="hero.backgroundImage">设为页面顶部背景图</option>
+                                    <option value="gallery.images">加入图片资料</option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label>Uploaded path</label>
+                                <label>上传后的图片路径</label>
                                 <input type="text" id="education-upload-path" readonly>
                             </div>
                         </div>
-                        <div class="form-actions"><button type="submit" class="btn btn-primary" id="btn-save-education">Save Education Content</button></div>
+                        </div>
+                        <div class="education-sticky-save"><button type="submit" class="btn btn-primary" id="btn-save-education">保存修改</button></div>
                     </form>
                 </section>
 

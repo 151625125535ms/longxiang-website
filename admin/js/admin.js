@@ -285,7 +285,7 @@
                 company: '公司信息',
                 certifications: '证书管理'
             };
-            document.getElementById('header-title').textContent = titles[view] || (view === 'education' ? 'Education Content' : '');
+            document.getElementById('header-title').textContent = titles[view] || (view === 'education' ? '教育合作内容管理' : '');
 
             if (view === 'dashboard') loadDashboard();
             if (view === 'products') loadProducts();
@@ -1018,13 +1018,13 @@
 
         function loadEducation() {
             var editor = document.getElementById('education-editor');
-            if (editor) editor.innerHTML = '<div class="table-empty"><p>Loading...</p></div>';
+            if (editor) editor.innerHTML = '<div class="table-empty"><p>正在加载教育合作内容...</p></div>';
             apiRequest('/education').then(function (data) {
                 educationContent = data;
                 renderEducationEditor(data);
             }).catch(function (err) {
-                if (editor) editor.innerHTML = '<div class="table-empty"><p>Load failed</p></div>';
-                showToast('Load education content failed: ' + err.message, 'error');
+                if (editor) editor.innerHTML = '<div class="table-empty"><p>加载失败，请稍后重试。</p></div>';
+                showToast('加载教育合作内容失败：' + err.message, 'error');
             });
         }
 
@@ -1039,18 +1039,18 @@
             }
             if (btn) {
                 btn.disabled = true;
-                btn.textContent = 'Saving...';
+                btn.textContent = '正在保存...';
             }
             apiRequest('/education/editor', { method: 'PUT', body: payload }).then(function (data) {
                 educationContent = data.education || payload;
                 renderEducationEditor(educationContent);
-                showToast('Education content saved');
+                showToast('已保存，可刷新前台页面查看效果');
             }).catch(function (err) {
-                showToast('Save education content failed: ' + err.message, 'error');
+                showToast('保存教育合作内容失败：' + translateEducationError(err.message), 'error');
             }).finally(function () {
                 if (btn) {
                     btn.disabled = false;
-                    btn.textContent = 'Save Education Content';
+                    btn.textContent = '保存修改';
                 }
             });
         }
@@ -1070,21 +1070,31 @@
                     var pathInput = document.getElementById('education-upload-path');
                     if (pathInput) pathInput.value = data.path;
                     applyEducationUploadedPath(data.path);
-                    showToast('Education image uploaded');
+                    showToast('图片已上传，并已填入所选位置');
                 })
-                .catch(function (err) { showToast('Education image upload failed: ' + err.message, 'error'); });
+                .catch(function (err) { showToast('图片上传失败：' + translateEducationError(err.message), 'error'); });
         }
 
-        function educationField(name, label, value, type) {
+        function translateEducationError(message) {
+            var text = String(message || '');
+            if (text.indexOf('hero.title is required') !== -1) return '页面顶部主标题不能为空。';
+            if (text.indexOf('No file uploaded') !== -1) return '请选择要上传的图片。';
+            if (text.indexOf('Only jpeg') !== -1) return '只能上传 jpeg、jpg、png 或 webp 图片。';
+            return text || '请检查填写内容后重试。';
+        }
+
+        function educationField(name, label, value, type, help, required) {
             type = type || 'text';
+            var requiredMark = required ? ' <span class="required">*</span>' : '';
+            var helpHtml = help ? '<p class="field-help">' + escapeHtml(help) + '</p>' : '';
             if (type === 'textarea') {
-                return '<div class="form-group"><label>' + label + '</label><textarea data-edu-field="' + name + '" rows="3">' + escapeHtml(value || '') + '</textarea></div>';
+                return '<div class="form-group"><label>' + label + requiredMark + '</label><textarea data-edu-field="' + name + '" rows="3">' + escapeHtml(value || '') + '</textarea>' + helpHtml + '</div>';
             }
-            return '<div class="form-group"><label>' + label + '</label><input type="' + type + '" data-edu-field="' + name + '" value="' + escapeHtml(value || '') + '"></div>';
+            return '<div class="form-group"><label>' + label + requiredMark + '</label><input type="' + type + '" data-edu-field="' + name + '" value="' + escapeHtml(value || '') + '">' + helpHtml + '</div>';
         }
 
-        function educationListField(name, label, value) {
-            return educationField(name, label, listToText(value), 'textarea');
+        function educationListField(name, label, value, help) {
+            return educationField(name, label, listToText(value), 'textarea', help || '每行填写一条内容，保存后会按列表显示。');
         }
 
         function listToText(value) {
@@ -1118,56 +1128,81 @@
             var cta = data.cta || {};
 
             editor.innerHTML =
-                '<div class="education-panel">' +
-                    '<h3>Hero</h3>' +
-                    '<div class="form-row">' +
-                        educationField('hero.eyebrow', 'Small label', hero.eyebrow) +
-                        educationField('hero.backgroundImage', 'Background image', hero.backgroundImage) +
-                    '</div>' +
-                    educationField('hero.title', 'English title', hero.title) +
-                    educationField('hero.titleAr', 'Arabic title', hero.titleAr) +
-                    educationField('hero.subtitle', 'English subtitle', hero.subtitle, 'textarea') +
-                    educationField('hero.subtitleAr', 'Arabic subtitle', hero.subtitleAr, 'textarea') +
+                '<div class="education-guide">' +
+                    '<strong>填写顺序：看说明、填内容、保存并查看</strong>' +
+                    '<span>每个模块只影响前台教育合作页面的一个区域。普通维护只需填写中文界面里的常用字段，阿拉伯语内容放在“更多语言内容”中。</span>' +
                 '</div>' +
-                '<div class="education-panel">' +
-                    '<div class="education-panel-head"><h3>Stats</h3><button type="button" class="btn btn-secondary" data-education-action="add-stat">Add stat</button></div>' +
+                '<div class="education-panel education-panel-blue">' +
+                    educationPanelTitle('▣', '页面顶部展示', '管理访客第一眼看到的标题、简介和背景图。', '影响页面位置：教育合作页面最上方首屏。') +
+                    '<div class="form-row">' +
+                        educationField('hero.eyebrow', '小标题', hero.eyebrow, 'text', '示例：School-Enterprise Cooperation') +
+                        educationField('hero.backgroundImage', '背景图路径', hero.backgroundImage, 'text', '示例：assets/education/images/longxiang-electrical-college-hero.png') +
+                    '</div>' +
+                    educationField('hero.title', '主标题', hero.title, 'textarea', '请填写页面顶部的大标题，否则前台首屏会缺少标题。', true) +
+                    educationField('hero.subtitle', '简介', hero.subtitle, 'textarea', '简要说明教育合作能力，建议 1 到 2 句话。') +
+                    educationLanguageDetails(
+                        educationField('hero.titleAr', '阿拉伯语主标题', hero.titleAr) +
+                        educationField('hero.subtitleAr', '阿拉伯语简介', hero.subtitleAr, 'textarea')
+                    ) +
+                '</div>' +
+                '<div class="education-panel education-panel-gold">' +
+                    educationPanelTitle('№', '核心数字', '管理页面上的实力数字和成果数字。', '影响页面位置：页面顶部下方的数字卡片区域。') +
+                    '<div class="education-panel-head"><h3>数字卡片</h3><button type="button" class="btn btn-secondary" data-education-action="add-stat">新增数字</button></div>' +
                     '<div id="education-stats">' + stats.map(renderEducationStat).join('') + '</div>' +
                 '</div>' +
-                '<div class="education-panel">' +
-                    '<div class="education-panel-head"><h3>Content sections</h3><button type="button" class="btn btn-secondary" data-education-action="add-section">Add section</button></div>' +
+                '<div class="education-panel education-panel-green">' +
+                    educationPanelTitle('☰', '合作内容', '管理每一个合作方案板块，例如产业学院、人才培养、教学设备、国际合作。', '影响页面位置：页面主体内容，每个板块是一段完整介绍。') +
+                    '<div class="education-panel-head"><h3>合作板块</h3><button type="button" class="btn btn-secondary" data-education-action="add-section">新增合作板块</button></div>' +
                     '<div id="education-sections">' + sections.map(renderEducationSection).join('') + '</div>' +
                 '</div>' +
-                '<div class="education-panel">' +
-                    '<h3>Gallery</h3>' +
-                    educationField('gallery.title', 'English title', gallery.title) +
-                    educationField('gallery.titleAr', 'Arabic title', gallery.titleAr) +
-                    educationField('gallery.summary', 'English summary', gallery.summary, 'textarea') +
-                    educationField('gallery.summaryAr', 'Arabic summary', gallery.summaryAr, 'textarea') +
-                    educationListField('gallery.images', 'Images, one path per line', gallery.images) +
+                '<div class="education-panel education-panel-purple">' +
+                    educationPanelTitle('▧', '图片资料', '管理页面里的证明图片和现场图片。', '影响页面位置：集中展示学校、培训、合作现场等图片的区域。') +
+                    educationField('gallery.title', '图片资料标题', gallery.title, 'text', '示例：Proof in Real Scenarios') +
+                    educationField('gallery.summary', '图片资料说明', gallery.summary, 'textarea', '说明这些图片展示了哪些合作现场或证明材料。') +
+                    educationListField('gallery.images', '图片路径列表', gallery.images, '每行一个图片路径；上传图片后可选择“加入图片资料”自动追加。') +
+                    educationLanguageDetails(
+                        educationField('gallery.titleAr', '阿拉伯语图片资料标题', gallery.titleAr) +
+                        educationField('gallery.summaryAr', '阿拉伯语图片资料说明', gallery.summaryAr, 'textarea')
+                    ) +
                 '</div>' +
-                '<div class="education-panel">' +
-                    '<h3>Philosophy</h3>' +
-                    educationField('philosophy.summary', 'English title', philosophy.summary) +
-                    educationField('philosophy.summaryAr', 'Arabic title', philosophy.summaryAr) +
-                    educationListField('philosophy.body', 'English paragraphs, one per line', philosophy.body) +
-                    educationListField('philosophy.bodyAr', 'Arabic paragraphs, one per line', philosophy.bodyAr) +
+                '<div class="education-panel education-panel-navy">' +
+                    educationPanelTitle('¶', '合作理念', '管理页面底部偏总结性的理念文字。', '影响页面位置：合作理念总结区域。') +
+                    educationField('philosophy.summary', '理念标题', philosophy.summary, 'text', '示例：Industry empowers education, education feeds industry.') +
+                    educationListField('philosophy.body', '段落内容', philosophy.body, '每行代表一段，后台保存后前台会显示为多段文字。') +
+                    educationLanguageDetails(
+                        educationField('philosophy.summaryAr', '阿拉伯语理念标题', philosophy.summaryAr) +
+                        educationListField('philosophy.bodyAr', '阿拉伯语段落内容', philosophy.bodyAr)
+                    ) +
                 '</div>' +
-                '<div class="education-panel">' +
-                    '<h3>Call to action</h3>' +
+                '<div class="education-panel education-panel-red">' +
+                    educationPanelTitle('☎', '联系引导', '管理引导客户联系公司的最后一段话。', '影响页面位置：页面底部联系咨询区域。') +
                     '<div class="form-row">' +
-                        educationField('cta.title', 'English title', cta.title) +
-                        educationField('cta.titleAr', 'Arabic title', cta.titleAr) +
+                        educationField('cta.title', '标题', cta.title, 'text', '示例：Start a Cooperation Plan for Your School') +
+                        educationField('cta.href', '按钮跳转位置', cta.href || 'contact.html', 'text', '默认 contact.html，表示跳转到联系页面。') +
                     '</div>' +
-                    educationField('cta.text', 'English text', cta.text, 'textarea') +
-                    educationField('cta.textAr', 'Arabic text', cta.textAr, 'textarea') +
-                    '<div class="form-row">' +
-                        educationField('cta.buttonText', 'English button', cta.buttonText) +
-                        educationField('cta.buttonTextAr', 'Arabic button', cta.buttonTextAr) +
-                        educationField('cta.href', 'Button link', cta.href || 'contact.html') +
-                    '</div>' +
+                    educationField('cta.text', '说明文字', cta.text, 'textarea', '说明客户联系前可以准备哪些合作需求。') +
+                    educationField('cta.buttonText', '按钮文字', cta.buttonText, 'text', '示例：Discuss Cooperation') +
+                    educationLanguageDetails(
+                        educationField('cta.titleAr', '阿拉伯语标题', cta.titleAr) +
+                        educationField('cta.textAr', '阿拉伯语说明文字', cta.textAr, 'textarea') +
+                        educationField('cta.buttonTextAr', '阿拉伯语按钮文字', cta.buttonTextAr)
+                    ) +
                 '</div>';
 
             refreshEducationUploadTargets();
+        }
+
+        function educationPanelTitle(icon, title, description, location) {
+            return '<div class="education-module-head">' +
+                '<span class="education-module-icon">' + icon + '</span>' +
+                '<div><h3>' + title + '</h3><p>' + description + '</p><small>' + location + '</small></div>' +
+                '</div>' +
+                '<ol class="education-steps"><li>看说明</li><li>填内容</li><li>保存并查看</li></ol>';
+        }
+
+        function educationLanguageDetails(content) {
+            return '<details class="education-advanced"><summary>更多语言内容（默认可不改）</summary>' +
+                '<div class="education-advanced-body">' + content + '</div></details>';
         }
 
         function findEducationSectionFrom(data, id) {
@@ -1176,76 +1211,97 @@
 
         function renderEducationStat(stat, index) {
             return '<div class="education-repeat-item" data-edu-stat>' +
-                '<div class="education-repeat-head"><strong>Stat ' + (index + 1) + '</strong><button type="button" class="btn btn-danger" data-education-action="remove-item">Remove</button></div>' +
+                '<div class="education-repeat-head"><strong>数字 ' + (index + 1) + '</strong><button type="button" class="btn btn-danger" data-education-action="remove-item">删除数字</button></div>' +
                 '<div class="form-row-3">' +
-                    educationField('stat.id', 'ID', stat.id || ('stat-' + (index + 1))) +
-                    educationField('stat.value', 'Value', stat.value) +
-                    educationField('stat.label', 'English label', stat.label) +
+                    educationField('stat.id', '内部标识', stat.id || ('stat-' + (index + 1)), 'text', '用于系统识别，建议使用英文或拼音，例如 industry-experience。') +
+                    educationField('stat.value', '数字', stat.value, 'text', '示例：20+、2016、4。') +
+                    educationField('stat.label', '说明文字', stat.label, 'text', '说明这个数字代表什么。') +
                 '</div>' +
-                educationField('stat.labelAr', 'Arabic label', stat.labelAr) +
+                educationLanguageDetails(educationField('stat.labelAr', '阿拉伯语说明文字', stat.labelAr)) +
                 '</div>';
         }
 
         function renderEducationSection(section, index) {
             return '<div class="education-repeat-item" data-edu-section>' +
-                '<div class="education-repeat-head"><strong>' + escapeHtml(section.title || ('Section ' + (index + 1))) + '</strong><button type="button" class="btn btn-danger" data-education-action="remove-item">Remove</button></div>' +
+                '<div class="education-repeat-head"><strong>' + escapeHtml(section.title || ('合作板块 ' + (index + 1))) + '</strong><button type="button" class="btn btn-danger" data-education-action="remove-item">删除板块</button></div>' +
                 '<div class="form-row-3">' +
-                    educationField('section.id', 'ID', section.id || ('section-' + (index + 1))) +
-                    educationField('section.modeNumber', 'Number', section.modeNumber || String(index + 1).padStart(2, '0')) +
-                    educationField('section.image', 'Main image', section.image) +
+                    educationField('section.id', '内部标识', section.id || ('section-' + (index + 1)), 'text', '用于锚点和系统识别，建议使用英文或拼音。') +
+                    educationField('section.modeNumber', '板块编号', section.modeNumber || String(index + 1).padStart(2, '0'), 'text', '示例：01、02、03。') +
+                    educationField('section.image', '主图路径', section.image, 'text', '上传图片后可选择“设为某个合作板块主图”自动填入。') +
                 '</div>' +
-                educationField('section.title', 'English title', section.title) +
-                educationField('section.titleAr', 'Arabic title', section.titleAr) +
-                educationField('section.tagline', 'English tagline', section.tagline) +
-                educationField('section.taglineAr', 'Arabic tagline', section.taglineAr) +
-                educationField('section.summary', 'English summary', section.summary, 'textarea') +
-                educationField('section.summaryAr', 'Arabic summary', section.summaryAr, 'textarea') +
-                educationField('section.bestFor', 'Best for', section.bestFor, 'textarea') +
-                educationField('section.bestForAr', 'Best for Arabic', section.bestForAr, 'textarea') +
+                educationField('section.title', '板块标题', section.title, 'text', '示例：Co-built Industrial College') +
+                educationField('section.tagline', '一句话亮点', section.tagline, 'text', '用一句话说明这个合作方案最突出的价值。') +
+                educationField('section.summary', '详细说明', section.summary, 'textarea', '介绍这个合作板块的主要内容。') +
+                educationListField('section.body', '补充段落', section.body, '每行代表一段，用于保留原有详细资料。') +
+                educationField('section.bestFor', '适合对象', section.bestFor, 'textarea', '说明哪些学校、机构或项目适合这个合作方案。') +
                 '<div class="form-row">' +
-                    educationListField('section.deliverables', 'Deliverables, one per line', section.deliverables) +
-                    educationListField('section.outcomes', 'Outcomes, one per line', section.outcomes) +
+                    educationListField('section.deliverables', '交付内容', section.deliverables, '每行一条，说明龙翔可以提供什么。') +
+                    educationListField('section.outcomes', '合作成果', section.outcomes, '每行一条，说明合作后能形成什么成果。') +
                 '</div>' +
-                '<div class="form-row">' +
-                    educationListField('section.deliverablesAr', 'Deliverables Arabic, one per line', section.deliverablesAr) +
-                    educationListField('section.outcomesAr', 'Outcomes Arabic, one per line', section.outcomesAr) +
-                '</div>' +
-                educationListField('section.images', 'Proof images, one path per line', section.images) +
-                '<div class="education-panel-head"><h4>Cards</h4><button type="button" class="btn btn-secondary" data-education-action="add-card">Add card</button></div>' +
+                educationListField('section.images', '证明图片', section.images, '每行一个图片路径；上传图片后可选择“加入某个合作板块证明图片”自动追加。') +
+                educationLanguageDetails(
+                    educationField('section.titleAr', '阿拉伯语板块标题', section.titleAr) +
+                    educationField('section.taglineAr', '阿拉伯语一句话亮点', section.taglineAr) +
+                    educationField('section.summaryAr', '阿拉伯语详细说明', section.summaryAr, 'textarea') +
+                    educationListField('section.bodyAr', '阿拉伯语补充段落', section.bodyAr) +
+                    educationField('section.bestForAr', '阿拉伯语适合对象', section.bestForAr, 'textarea') +
+                    '<div class="form-row">' +
+                        educationListField('section.deliverablesAr', '阿拉伯语交付内容', section.deliverablesAr) +
+                        educationListField('section.outcomesAr', '阿拉伯语合作成果', section.outcomesAr) +
+                    '</div>'
+                ) +
+                '<div class="education-panel-head"><h4>说明卡片</h4><button type="button" class="btn btn-secondary" data-education-action="add-card">新增说明卡片</button></div>' +
                 '<div data-edu-cards>' + (section.cards || []).map(renderEducationCard).join('') + '</div>' +
                 '</div>';
         }
 
         function renderEducationCard(card, index) {
             return '<div class="education-card-editor" data-edu-card>' +
-                '<div class="education-repeat-head"><strong>Card ' + (index + 1) + '</strong><button type="button" class="btn btn-danger" data-education-action="remove-item">Remove</button></div>' +
-                '<div class="form-row">' +
-                    educationField('card.title', 'English title', card.title) +
-                    educationField('card.titleAr', 'Arabic title', card.titleAr) +
-                '</div>' +
-                '<div class="form-row">' +
-                    educationField('card.text', 'English text', card.text, 'textarea') +
-                    educationField('card.textAr', 'Arabic text', card.textAr, 'textarea') +
-                '</div>' +
+                '<div class="education-repeat-head"><strong>说明卡片 ' + (index + 1) + '</strong><button type="button" class="btn btn-danger" data-education-action="remove-item">删除卡片</button></div>' +
+                educationField('card.title', '卡片标题', card.title, 'text', '示例：Four Core Major Directions') +
+                educationField('card.text', '卡片说明', card.text, 'textarea', '简短说明这个卡片要表达的重点。') +
+                educationLanguageDetails(
+                    educationField('card.titleAr', '阿拉伯语卡片标题', card.titleAr) +
+                    educationField('card.textAr', '阿拉伯语卡片说明', card.textAr, 'textarea')
+                ) +
                 '</div>';
         }
 
         function handleEducationAction(action, target) {
             if (action === 'remove-item') {
                 var item = target.closest('[data-edu-stat], [data-edu-section], [data-edu-card]');
-                if (item) item.parentNode.removeChild(item);
-                refreshEducationUploadTargets();
+                if (!item) return;
+                var title = '删除内容';
+                var message = '删除后该内容将不会在页面显示，是否继续？';
+                if (item.hasAttribute('data-edu-stat')) {
+                    title = '删除数字';
+                    message = '删除后该数字卡片将不会在页面显示，是否继续？';
+                } else if (item.hasAttribute('data-edu-section')) {
+                    title = '删除合作板块';
+                    message = '删除后该合作板块将不会在页面显示，是否继续？';
+                } else if (item.hasAttribute('data-edu-card')) {
+                    title = '删除说明卡片';
+                    message = '删除后该说明卡片将不会在页面显示，是否继续？';
+                }
+                showConfirm(title, message).then(function (ok) {
+                    if (!ok) return;
+                    item.parentNode.removeChild(item);
+                    refreshEducationUploadTargets();
+                });
             }
             if (action === 'add-stat') {
                 document.getElementById('education-stats').insertAdjacentHTML('beforeend', renderEducationStat({}, document.querySelectorAll('[data-edu-stat]').length));
+                showToast('已新增数字，请填写数字和说明文字');
             }
             if (action === 'add-section') {
                 document.getElementById('education-sections').insertAdjacentHTML('beforeend', renderEducationSection({}, document.querySelectorAll('[data-edu-section]').length));
                 refreshEducationUploadTargets();
+                showToast('已新增合作板块，请填写标题、说明和图片');
             }
             if (action === 'add-card') {
                 var cards = target.closest('[data-edu-section]').querySelector('[data-edu-cards]');
                 cards.insertAdjacentHTML('beforeend', renderEducationCard({}, cards.querySelectorAll('[data-edu-card]').length));
+                showToast('已新增说明卡片');
             }
         }
 
@@ -1256,7 +1312,7 @@
 
         function collectEducationForm() {
             var editor = document.getElementById('education-editor');
-            if (!editor) throw new Error('Education editor is not ready.');
+            if (!editor) throw new Error('教育合作编辑器尚未加载完成，请刷新后重试。');
             var payload = {
                 hero: {
                     eyebrow: fieldValue(editor, 'hero.eyebrow'),
@@ -1309,6 +1365,8 @@
                     taglineAr: fieldValue(item, 'section.taglineAr'),
                     summary: fieldValue(item, 'section.summary'),
                     summaryAr: fieldValue(item, 'section.summaryAr'),
+                    body: textToList(fieldValue(item, 'section.body')),
+                    bodyAr: textToList(fieldValue(item, 'section.bodyAr')),
                     image: fieldValue(item, 'section.image'),
                     images: textToList(fieldValue(item, 'section.images')),
                     bestFor: fieldValue(item, 'section.bestFor'),
@@ -1329,7 +1387,7 @@
                 });
                 payload.sections.push(section);
             });
-            if (!payload.hero.title) throw new Error('Hero English title is required.');
+            if (!payload.hero.title) throw new Error('请填写主标题，否则页面顶部会缺少标题。');
             return payload;
         }
 
@@ -1338,13 +1396,13 @@
             if (!select) return;
             var current = select.value;
             var options = [
-                '<option value="hero.backgroundImage">Hero background</option>',
-                '<option value="gallery.images">Gallery images</option>'
+                '<option value="hero.backgroundImage">设为页面顶部背景图</option>',
+                '<option value="gallery.images">加入图片资料</option>'
             ];
             document.querySelectorAll('[data-edu-section]').forEach(function (section, index) {
-                var title = fieldValue(section, 'section.title') || ('Section ' + (index + 1));
-                options.push('<option value="section.' + index + '.image">' + escapeHtml(title) + ' main image</option>');
-                options.push('<option value="section.' + index + '.images">' + escapeHtml(title) + ' proof images</option>');
+                var title = fieldValue(section, 'section.title') || ('合作板块 ' + (index + 1));
+                options.push('<option value="section.' + index + '.image">设为“' + escapeHtml(title) + '”主图</option>');
+                options.push('<option value="section.' + index + '.images">加入“' + escapeHtml(title) + '”证明图片</option>');
             });
             select.innerHTML = options.join('');
             select.value = current && select.querySelector('option[value="' + current + '"]') ? current : 'hero.backgroundImage';
