@@ -683,10 +683,20 @@
                 '</div>' +
                 '</div>' +
                 '<div class="footer-conversion footer-column">' +
-                    '<h4>' + (isArabic ? 'وسائل التواصل' : 'External Media') + '</h4>' +
-                    '<p class="footer-conversion-text">' + (isArabic ? 'تابع لونغشيانغ أو تواصل مع فريق المبيعات عبر القنوات الرسمية.' : 'Follow Longxiang or reach our sales team through official channels.') + '</p>' +
-                    '<div class="messenger-links footer-social-links" data-communication-links></div>' +
-                    '<button type="button" class="footer-quote-button" data-open-inquiry>' + (isArabic ? 'طلب عرض سعر' : 'Request Quote') + '</button>' +
+                    '<h4>' + (isArabic ? 'طلب عرض سعر' : 'Request Quote') + '</h4>' +
+                    '<p class="footer-conversion-text">' + (isArabic ? 'أرسل متطلبات مشروعك وسيتواصل فريقنا معك بسرعة.' : 'Share your project requirements and our team will respond quickly.') + '</p>' +
+                    '<form class="footer-quote-form" data-inquiry-form>' +
+                        '<input type="hidden" name="name" value="' + (isArabic ? 'زائر طلب عرض سعر من التذييل' : 'Footer Quote Visitor') + '">' +
+                        '<input type="hidden" name="subject" value="quote">' +
+                        '<input type="hidden" name="productContext" value="' + (isArabic ? 'طلب عرض سعر من التذييل' : 'Footer request quote') + '">' +
+                        '<textarea name="message" rows="4" placeholder="' + (isArabic ? '* الرسالة' : '* Message') + '" required></textarea>' +
+                        '<div class="footer-quote-row">' +
+                            '<input type="email" name="email" placeholder="' + (isArabic ? '* البريد الإلكتروني' : '* E-mail') + '" required>' +
+                            '<input type="text" name="phone" placeholder="' + (isArabic ? 'واتساب / الهاتف' : 'WhatsApp / Phone') + '">' +
+                        '</div>' +
+                        '<button type="submit">' + (isArabic ? 'إرسال' : 'SUBMIT') + '</button>' +
+                        '<div class="form-status" aria-live="polite"></div>' +
+                    '</form>' +
                 '</div>';
         });
     }
