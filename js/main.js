@@ -691,13 +691,24 @@
         });
     }
 
-    function createMessengerLink(label, href, className, trackingName) {
+    var SOCIAL_ICON_SVG = {
+        instagram: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4" y="4" width="16" height="16" rx="5"></rect><circle cx="12" cy="12" r="3.4"></circle><circle cx="17.2" cy="6.8" r="1"></circle></svg>',
+        youtube: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="6.5" width="18" height="11" rx="3.2"></rect><path d="M10.4 9.4L15.2 12l-4.8 2.6z"></path></svg>'
+    };
+
+    function createMessengerLink(label, href, className, trackingName, iconName) {
         var link = document.createElement('a');
-        link.className = 'messenger-link ' + className;
+        link.className = 'messenger-link ' + className + (iconName ? ' is-icon' : '');
         link.href = href;
         link.target = '_blank';
         link.rel = 'noopener';
-        link.textContent = label;
+        link.setAttribute('aria-label', label);
+        link.setAttribute('title', label);
+        if (iconName && SOCIAL_ICON_SVG[iconName]) {
+            link.innerHTML = SOCIAL_ICON_SVG[iconName] + '<span class="sr-only">' + escapeHtml(label) + '</span>';
+        } else {
+            link.textContent = label;
+        }
         link.setAttribute('data-track-event', trackingName);
         link.addEventListener('click', function () { trackEvent(trackingName); });
         return link;
@@ -732,10 +743,10 @@
             links.push(createMessengerLink('TikTok', company.tiktok, 'tiktok', 'click_tiktok'));
         }
         if (company.instagram) {
-            links.push(createMessengerLink('Instagram', company.instagram, 'instagram', 'click_instagram'));
+            links.push(createMessengerLink('Instagram', company.instagram, 'instagram', 'click_instagram', 'instagram'));
         }
         if (company.youtube) {
-            links.push(createMessengerLink('YouTube', company.youtube, 'youtube', 'click_youtube'));
+            links.push(createMessengerLink('YouTube', company.youtube, 'youtube', 'click_youtube', 'youtube'));
         }
         if (company.skype) {
             links.push(createMessengerLink('Skype', 'skype:' + encodeURIComponent(company.skype) + '?chat', 'skype', 'click_skype'));
