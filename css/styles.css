@@ -6654,10 +6654,6 @@ p:last-child {
     gap: var(--spacing-xl);
 }
 
-.solution-project-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
 .solution-diagram-card {
     padding: var(--spacing-xl);
     background: linear-gradient(180deg, var(--color-white-pure), #F6FAFD);
@@ -6672,11 +6668,6 @@ p:last-child {
     object-fit: contain;
     background: var(--color-white-pure);
     border: 1px solid var(--color-gray-200);
-}
-
-.solution-project-grid .solution-diagram-card img {
-    padding: 0;
-    object-fit: cover;
 }
 
 .solution-diagram-card h3 {
