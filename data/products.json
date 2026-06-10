@@ -1373,7 +1373,7 @@
         "Wind power generation"
       ]
     ],
-    "featured": true,
+    "featured": false,
     "categoryLabelAr": "محولات مركبة",
     "nameAr": "محول مركب لطاقة الرياح ZGSBH15 بزيت نباتي",
     "shortDescAr": "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق.",
@@ -3646,7 +3646,7 @@
         "IEC 298, GB 3906, DL/T 404"
       ]
     ],
-    "featured": true
+    "featured": false
   },
   {
     "id": "KYN-12",
@@ -3727,7 +3727,7 @@
         "Free from fire, explosion hazard, severe pollution, chemical corrosion and violent vibration"
       ]
     ],
-    "featured": true
+    "featured": false
   },
   {
     "id": "LXWZ",
