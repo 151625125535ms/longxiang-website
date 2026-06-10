@@ -748,6 +748,7 @@
         injectMeta('', 'og:description', description);
         injectMeta('', 'og:type', 'website');
         injectMeta('', 'og:url', url);
+        injectAlternateSeoLinks(url);
         injectMeta('', 'og:image', window.location.origin + '/' + encodeURI('5、厂区厂貌/龙翔公司正门.jpg'));
 
         var path = window.location.pathname;
@@ -782,6 +783,33 @@
             script.textContent = JSON.stringify(schema);
             document.head.appendChild(script);
         }
+    }
+
+    function upsertLink(rel, attrs) {
+        var selector = 'link[rel="' + rel + '"]';
+        if (attrs.hreflang) selector += '[hreflang="' + attrs.hreflang + '"]';
+        var link = document.querySelector(selector);
+        if (!link) {
+            link = document.createElement('link');
+            link.rel = rel;
+            if (attrs.hreflang) link.setAttribute('hreflang', attrs.hreflang);
+            document.head.appendChild(link);
+        }
+        Object.keys(attrs).forEach(function (key) {
+            link.setAttribute(key, attrs[key]);
+        });
+    }
+
+    function injectAlternateSeoLinks(currentUrl) {
+        var origin = window.location.origin;
+        var path = window.location.pathname.replace(/\\/g, '/');
+        var search = window.location.search || '';
+        var enPath = path.replace(/^\/ar\//, '/');
+        var arPath = /^\/ar\//.test(path) ? path : '/ar' + (path.charAt(0) === '/' ? path : '/' + path);
+        upsertLink('canonical', { href: currentUrl });
+        upsertLink('alternate', { hreflang: 'en', href: origin + enPath + search });
+        upsertLink('alternate', { hreflang: 'ar', href: origin + arPath + search });
+        upsertLink('alternate', { hreflang: 'x-default', href: origin + enPath + search });
     }
 
     function injectGa(trackingId) {
@@ -1119,6 +1147,7 @@
                 '</form>' +
             '</div>';
         document.body.appendChild(modal);
+        ensureInquiryExtraFields(modal.querySelector('form'));
 
         modal.addEventListener('click', function (event) {
             if (event.target === modal || event.target.classList.contains('inquiry-dialog-close')) closeInquiryModal();
@@ -1127,6 +1156,24 @@
             if (event.key === 'Escape') closeInquiryModal();
         });
         bindInquiryForm(modal.querySelector('form'));
+    }
+
+    function ensureInquiryExtraFields(form) {
+        if (!form || form.querySelector('[name="country"]')) return;
+        var subjectGroup = form.querySelector('#modal-subject') ? form.querySelector('#modal-subject').closest('.form-group') : null;
+        if (!subjectGroup) return;
+        var rowOne = document.createElement('div');
+        rowOne.className = 'form-row';
+        rowOne.innerHTML =
+            '<div class="form-group"><label for="modal-country">' + (isArabic ? 'الدولة' : 'Country') + '</label><input id="modal-country" name="country"></div>' +
+            '<div class="form-group"><label for="modal-product-type">' + (isArabic ? 'نوع المنتج' : 'Product Type') + '</label><input id="modal-product-type" name="productType" placeholder="' + (isArabic ? 'محول / مفاتيح / شاحن' : 'Transformer / Switchgear / EV Charger') + '"></div>';
+        var rowTwo = document.createElement('div');
+        rowTwo.className = 'form-row';
+        rowTwo.innerHTML =
+            '<div class="form-group"><label for="modal-quantity-scale">' + (isArabic ? 'الكمية أو حجم المشروع' : 'Quantity or Project Scale') + '</label><input id="modal-quantity-scale" name="quantityOrScale"></div>' +
+            '<div class="form-group"><label for="modal-voltage-capacity">' + (isArabic ? 'الجهد أو السعة المطلوبة' : 'Required Voltage or Capacity') + '</label><input id="modal-voltage-capacity" name="requiredVoltageOrCapacity"></div>';
+        form.insertBefore(rowOne, subjectGroup);
+        form.insertBefore(rowTwo, subjectGroup);
     }
 
     function ensureFloatingInquiry() {
@@ -1196,6 +1243,10 @@
                 email: (form.elements.email && form.elements.email.value || '').trim(),
                 company: (form.elements.company && form.elements.company.value || '').trim(),
                 phone: (form.elements.phone && form.elements.phone.value || '').trim(),
+                country: (form.elements.country && form.elements.country.value || '').trim(),
+                productType: (form.elements.productType && form.elements.productType.value || '').trim(),
+                quantityOrScale: (form.elements.quantityOrScale && form.elements.quantityOrScale.value || '').trim(),
+                requiredVoltageOrCapacity: (form.elements.requiredVoltageOrCapacity && form.elements.requiredVoltageOrCapacity.value || '').trim(),
                 subject: (form.elements.subject && form.elements.subject.value || '').trim(),
                 message: (form.elements.message && form.elements.message.value || '').trim(),
                 productContext: (form.elements.productContext && form.elements.productContext.value || '').trim()
