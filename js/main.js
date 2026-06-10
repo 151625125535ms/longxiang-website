@@ -34,9 +34,264 @@
     }
 
     function trackEvent(name, params) {
-        if (typeof window.gtag === 'function') {
+        if (isConsentGranted('analytics') && typeof window.gtag === 'function') {
             window.gtag('event', name, params || {});
         }
+    }
+
+    var CONSENT_KEY = 'lx_cookie_consent_v1';
+    var gaTrackingId = '';
+
+    function defaultConsent() {
+        return {
+            necessary: true,
+            analytics: false,
+            functional: false,
+            updatedAt: ''
+        };
+    }
+
+    function readConsent() {
+        try {
+            var stored = localStorage.getItem(CONSENT_KEY);
+            if (!stored) return defaultConsent();
+            var parsed = JSON.parse(stored);
+            return {
+                necessary: true,
+                analytics: parsed.analytics === true,
+                functional: parsed.functional === true,
+                updatedAt: parsed.updatedAt || ''
+            };
+        } catch (err) {
+            return defaultConsent();
+        }
+    }
+
+    function hasStoredConsent() {
+        try {
+            return !!localStorage.getItem(CONSENT_KEY);
+        } catch (err) {
+            return false;
+        }
+    }
+
+    function saveConsent(next) {
+        var consent = Object.assign(defaultConsent(), next || {}, {
+            necessary: true,
+            updatedAt: new Date().toISOString()
+        });
+        localStorage.setItem(CONSENT_KEY, JSON.stringify(consent));
+        updateGoogleConsent(consent);
+        loadGaIfAllowed();
+        applyFunctionalEmbeds();
+        updateConsentUi(consent);
+        window.dispatchEvent(new CustomEvent('lx:cookie-consent-change', { detail: consent }));
+        return consent;
+    }
+
+    function isConsentGranted(category) {
+        return readConsent()[category] === true;
+    }
+
+    function initGoogleConsentMode() {
+        window.dataLayer = window.dataLayer || [];
+        window.gtag = window.gtag || function () { window.dataLayer.push(arguments); };
+        if (window.__lxConsentDefaultSet) return;
+        window.__lxConsentDefaultSet = true;
+        window.gtag('consent', 'default', {
+            analytics_storage: 'denied',
+            ad_storage: 'denied',
+            ad_user_data: 'denied',
+            ad_personalization: 'denied'
+        });
+        updateGoogleConsent(readConsent());
+    }
+
+    function updateGoogleConsent(consent) {
+        if (typeof window.gtag !== 'function') return;
+        window.gtag('consent', 'update', {
+            analytics_storage: consent.analytics ? 'granted' : 'denied',
+            ad_storage: 'denied',
+            ad_user_data: 'denied',
+            ad_personalization: 'denied'
+        });
+    }
+
+    function loadGaIfAllowed() {
+        if (gaTrackingId && isConsentGranted('analytics')) injectGa(gaTrackingId);
+    }
+
+    function setFunctionalEmbed(el, src) {
+        if (!el || !src) return;
+        el.setAttribute('data-consent-category', 'functional');
+        el.setAttribute('data-consent-src', src);
+        if (isConsentGranted('functional')) {
+            el.src = src;
+            el.hidden = false;
+        } else {
+            el.removeAttribute('src');
+            el.hidden = true;
+        }
+        ensureEmbedPlaceholder(el);
+    }
+
+    function applyFunctionalEmbeds() {
+        document.querySelectorAll('[data-consent-category="functional"][data-consent-src]').forEach(function (el) {
+            var src = el.getAttribute('data-consent-src');
+            ensureEmbedPlaceholder(el);
+            var placeholder = getEmbedPlaceholder(el);
+            if (isConsentGranted('functional')) {
+                if (src && el.getAttribute('src') !== src) el.setAttribute('src', src);
+                el.hidden = false;
+                if (placeholder) placeholder.hidden = true;
+            } else {
+                el.removeAttribute('src');
+                el.hidden = true;
+                if (placeholder) placeholder.hidden = false;
+            }
+        });
+    }
+
+    function getEmbedPlaceholder(el) {
+        var parent = el && el.parentElement;
+        return parent ? parent.querySelector(':scope > .consent-embed-placeholder') : null;
+    }
+
+    function ensureEmbedPlaceholder(el) {
+        if (!el || !el.parentElement || getEmbedPlaceholder(el)) return;
+        var placeholder = document.createElement('div');
+        placeholder.className = 'consent-embed-placeholder';
+        placeholder.innerHTML =
+            '<div>' +
+                '<strong>' + (isArabic ? '&#1610;&#1578;&#1591;&#1604;&#1576; &#1607;&#1584;&#1575; &#1575;&#1604;&#1605;&#1581;&#1578;&#1608;&#1609; &#1605;&#1608;&#1575;&#1601;&#1602;&#1577; &#1608;&#1592;&#1610;&#1601;&#1610;&#1577;' : 'Functional consent required') + '</strong>' +
+                '<p>' + (isArabic ? '&#1606;&#1581;&#1606; &#1606;&#1581;&#1592;&#1585; &#1605;&#1581;&#1578;&#1608;&#1609; &#1575;&#1604;&#1582;&#1585;&#1575;&#1574;&#1591; &#1608;&#1575;&#1604;&#1601;&#1610;&#1583;&#1610;&#1608; &#1605;&#1606; &#1571;&#1591;&#1585;&#1575;&#1601; &#1579;&#1575;&#1604;&#1579;&#1577; &#1581;&#1578;&#1609; &#1578;&#1608;&#1575;&#1601;&#1602;.' : 'Maps and videos from third parties are blocked until you allow functional cookies.') + '</p>' +
+                '<button type="button" data-allow-functional>' + (isArabic ? 'السماح بملفات تعريف الارتباط الوظيفية' : 'Allow functional cookies') + '</button>' +
+            '</div>';
+        placeholder.querySelector('[data-allow-functional]').addEventListener('click', function () {
+            saveConsent(Object.assign(readConsent(), { functional: true }));
+        });
+        el.parentElement.appendChild(placeholder);
+    }
+
+    function consentText() {
+        return isArabic ? {
+            title: 'إعدادات ملفات تعريف الارتباط',
+            intro: '&#1606;&#1587;&#1578;&#1582;&#1583;&#1605; &#1575;&#1604;&#1578;&#1582;&#1586;&#1610;&#1606; &#1575;&#1604;&#1590;&#1585;&#1608;&#1585;&#1610; &#1604;&#1578;&#1588;&#1594;&#1610;&#1604; &#1575;&#1604;&#1605;&#1608;&#1602;&#1593;. &#1604;&#1606; &#1606;&#1581;&#1605;&#1604; &#1575;&#1604;&#1578;&#1581;&#1604;&#1610;&#1604;&#1575;&#1578; &#1571;&#1608; &#1575;&#1604;&#1582;&#1585;&#1575;&#1574;&#1591; &#1571;&#1608; &#1575;&#1604;&#1601;&#1610;&#1583;&#1610;&#1608; &#1576;&#1583;&#1608;&#1606; &#1605;&#1608;&#1575;&#1601;&#1602;&#1578;&#1603;.',
+            necessary: '&#1590;&#1585;&#1608;&#1585;&#1610;',
+            necessaryDesc: '&#1605;&#1591;&#1604;&#1608;&#1576; &#1604;&#1604;&#1594;&#1577; &#1608;&#1575;&#1604;&#1571;&#1605;&#1575;&#1606; &#1608;&#1608;&#1592;&#1575;&#1574;&#1601; &#1575;&#1604;&#1605;&#1608;&#1602;&#1593; &#1575;&#1604;&#1571;&#1587;&#1575;&#1587;&#1610;&#1577;.',
+            analytics: '&#1575;&#1604;&#1578;&#1581;&#1604;&#1610;&#1604;&#1575;&#1578;',
+            analyticsDesc: '&#1610;&#1587;&#1575;&#1593;&#1583;&#1606;&#1575; Google Analytics &#1593;&#1604;&#1609; &#1601;&#1607;&#1605; &#1575;&#1587;&#1578;&#1582;&#1583;&#1575;&#1605; &#1575;&#1604;&#1605;&#1608;&#1602;&#1593;.',
+            functional: '&#1608;&#1592;&#1610;&#1601;&#1610;',
+            functionalDesc: '&#1610;&#1587;&#1605;&#1581; &#1576;&#1578;&#1588;&#1594;&#1610;&#1604; &#1601;&#1610;&#1583;&#1610;&#1608; YouTube &#1608;&#1582;&#1585;&#1575;&#1574;&#1591; Google.',
+            accept: 'قبول الكل',
+            reject: 'رفض الكل',
+            customize: 'تخصيص',
+            save: 'حفظ الإعدادات',
+            close: 'إغلاق'
+        } : {
+            title: 'Cookie settings',
+            intro: 'We use necessary storage to run the site. Analytics, maps, and video are not loaded unless you opt in.',
+            necessary: 'Necessary',
+            necessaryDesc: 'Required for language, security, and core site functions.',
+            analytics: 'Analytics',
+            analyticsDesc: 'Helps us understand site usage with Google Analytics.',
+            functional: 'Functional',
+            functionalDesc: 'Allows YouTube videos and Google Maps embeds to load.',
+            accept: 'Accept all',
+            reject: 'Reject all',
+            customize: 'Customize',
+            save: 'Save settings',
+            close: 'Close'
+        };
+    }
+
+    function consentToggle(name, label, desc, checked, disabled) {
+        return '<label class="cookie-consent-toggle">' +
+            '<span><strong>' + label + '</strong><small>' + desc + '</small></span>' +
+            '<input type="checkbox" name="' + name + '"' + (checked ? ' checked' : '') + (disabled ? ' disabled' : '') + '>' +
+            '</label>';
+    }
+
+    function ensureConsentUi() {
+        if (document.getElementById('cookie-consent-root')) return;
+        var text = consentText();
+        var root = document.createElement('div');
+        root.id = 'cookie-consent-root';
+        root.innerHTML =
+            '<section class="cookie-consent-banner" role="region" aria-label="' + text.title + '" hidden>' +
+                '<div><h2>' + text.title + '</h2><p>' + text.intro + '</p></div>' +
+                '<div class="cookie-consent-actions">' +
+                    '<button type="button" data-consent-accept>' + text.accept + '</button>' +
+                    '<button type="button" data-consent-reject>' + text.reject + '</button>' +
+                    '<button type="button" data-consent-customize>' + text.customize + '</button>' +
+                '</div>' +
+            '</section>' +
+            '<div class="cookie-consent-modal" hidden>' +
+                '<div class="cookie-consent-dialog" role="dialog" aria-modal="true" aria-labelledby="cookie-consent-title">' +
+                    '<div class="cookie-consent-dialog-header"><h2 id="cookie-consent-title">' + text.title + '</h2><button type="button" data-consent-close aria-label="' + text.close + '">&times;</button></div>' +
+                    '<p>' + text.intro + '</p>' +
+                    '<form data-consent-form>' +
+                        consentToggle('necessary', text.necessary, text.necessaryDesc, true, true) +
+                        consentToggle('analytics', text.analytics, text.analyticsDesc, false, false) +
+                        consentToggle('functional', text.functional, text.functionalDesc, false, false) +
+                        '<div class="cookie-consent-actions"><button type="submit">' + text.save + '</button><button type="button" data-consent-reject>' + text.reject + '</button><button type="button" data-consent-accept>' + text.accept + '</button></div>' +
+                    '</form>' +
+                '</div>' +
+            '</div>';
+        document.body.appendChild(root);
+
+        root.addEventListener('click', function (event) {
+            if (event.target.closest('[data-consent-accept]')) saveConsent({ analytics: true, functional: true });
+            if (event.target.closest('[data-consent-reject]')) saveConsent({ analytics: false, functional: false });
+            if (event.target.closest('[data-consent-customize]')) openConsentSettings();
+            if (event.target.closest('[data-consent-close]')) closeConsentSettings();
+        });
+        root.querySelector('[data-consent-form]').addEventListener('submit', function (event) {
+            event.preventDefault();
+            saveConsent({
+                analytics: event.target.elements.analytics.checked,
+                functional: event.target.elements.functional.checked
+            });
+        });
+        document.addEventListener('click', function (event) {
+            var trigger = event.target.closest('[data-cookie-settings]');
+            if (!trigger) return;
+            event.preventDefault();
+            openConsentSettings();
+        });
+        updateConsentUi(readConsent());
+    }
+
+    function updateConsentUi(consent) {
+        var root = document.getElementById('cookie-consent-root');
+        if (!root) return;
+        var banner = root.querySelector('.cookie-consent-banner');
+        var modal = root.querySelector('.cookie-consent-modal');
+        var form = root.querySelector('[data-consent-form]');
+        if (form) {
+            form.elements.analytics.checked = consent.analytics === true;
+            form.elements.functional.checked = consent.functional === true;
+        }
+        if (banner) banner.hidden = hasStoredConsent();
+        if (modal) modal.hidden = true;
+    }
+
+    function openConsentSettings() {
+        ensureConsentUi();
+        updateConsentUi(readConsent());
+        var modal = document.querySelector('.cookie-consent-modal');
+        if (modal) modal.hidden = false;
+    }
+
+    function closeConsentSettings() {
+        var modal = document.querySelector('.cookie-consent-modal');
+        if (modal) modal.hidden = true;
+    }
+
+    function initCookieConsent() {
+        initGoogleConsentMode();
+        ensureConsentUi();
+        applyFunctionalEmbeds();
     }
 
     function currentPageName() {
@@ -530,7 +785,8 @@
     }
 
     function injectGa(trackingId) {
-        if (!trackingId || document.querySelector('script[data-ga4-script]')) return;
+        gaTrackingId = trackingId || gaTrackingId;
+        if (!trackingId || !isConsentGranted('analytics') || document.querySelector('script[data-ga4-script]')) return;
         var script = document.createElement('script');
         script.async = true;
         script.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(trackingId);
@@ -539,6 +795,7 @@
 
         window.dataLayer = window.dataLayer || [];
         window.gtag = window.gtag || function () { window.dataLayer.push(arguments); };
+        updateGoogleConsent(readConsent());
         window.gtag('js', new Date());
         window.gtag('config', trackingId);
     }
@@ -578,9 +835,9 @@
         document.querySelectorAll('[data-company-google-map-frame]').forEach(function (el) {
             var embedUrl = company.googleMyMapsEmbedUrl || company.googleMapsEmbedUrl;
             if (embedUrl) {
-                el.src = embedUrl;
-                el.hidden = false;
+                setFunctionalEmbed(el, embedUrl);
             } else {
+                el.removeAttribute('src');
                 el.hidden = true;
             }
         });
@@ -645,7 +902,7 @@
                 var next = locations[key];
                 if (!next) return;
                 var nextEmbedUrl = next.mapEmbedUrl || next.googleMapsEmbedUrl;
-                if (nextEmbedUrl) frame.src = nextEmbedUrl;
+                if (nextEmbedUrl) setFunctionalEmbed(frame, nextEmbedUrl);
                 if (panel) panel.setAttribute('data-map-location', key);
                 syncMapInfo(next);
                 tabs.forEach(function (item) { item.classList.toggle('active', item === tab); });
@@ -657,7 +914,7 @@
         var activeLocation = locations[activeKey];
         if (panel) panel.setAttribute('data-map-location', activeKey);
         var activeEmbedUrl = activeLocation && (activeLocation.mapEmbedUrl || activeLocation.googleMapsEmbedUrl);
-        if (activeEmbedUrl) frame.src = activeEmbedUrl;
+        if (activeEmbedUrl) setFunctionalEmbed(frame, activeEmbedUrl);
         syncMapInfo(activeLocation);
     }
 
@@ -683,6 +940,7 @@
                         navLink('education.html', isArabic ? 'التعليم' : 'Education') +
                         navLink('about.html', isArabic ? 'من نحن' : 'About Us') +
                         navLink('contact.html', isArabic ? 'اتصل بنا' : 'Contact') +
+                        '<button type="button" class="footer-cookie-settings" data-cookie-settings>' + (isArabic ? 'إعدادات ملفات تعريف الارتباط' : 'Cookie Settings') + '</button>' +
                     '</div>' +
                 '</div>' +
                 '<div class="footer-column">' +
@@ -821,7 +1079,8 @@
                 updateCompanyDom(company);
                 initContactMapTabs(company);
                 renderCommunicationWidgets(company);
-                injectGa(company.ga4TrackingId);
+                gaTrackingId = company.ga4TrackingId || '';
+                loadGaIfAllowed();
                 initSeoMeta(company);
             })
             .catch(function () {});
@@ -1122,6 +1381,7 @@
 
     function init() {
         if (applyLanguagePreference()) return;
+        initCookieConsent();
         initUnifiedNavigation();
         injectFavicons();
         initLanguageSwitcher();
