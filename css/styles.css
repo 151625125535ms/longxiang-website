@@ -9544,3 +9544,58 @@ p:last-child {
         padding: 12px 0;
     }
 }
+
+/* Inner page top typography: keep homepage as the only oversized brand hero. */
+.page-hero h1 {
+    max-width: 760px;
+    font-size: clamp(2rem, 3vw, 3rem);
+    line-height: 1.12;
+}
+
+.about-hero-content h1,
+.solutions-hero h1 {
+    max-width: 780px;
+    font-size: clamp(2rem, 3.4vw, 3.25rem);
+    line-height: 1.12;
+}
+
+.about-hero-content p,
+.solutions-hero p,
+.page-hero > .container > p {
+    max-width: 720px;
+    font-size: clamp(1rem, 1.2vw, 1.14rem);
+    line-height: 1.68;
+}
+
+[dir="rtl"] .page-hero h1,
+[dir="rtl"] .about-hero-content h1,
+[dir="rtl"] .solutions-hero h1 {
+    max-width: 740px;
+    font-size: clamp(1.85rem, 3vw, 2.9rem);
+    line-height: 1.28;
+}
+
+[dir="rtl"] .about-hero-content p,
+[dir="rtl"] .solutions-hero p,
+[dir="rtl"] .page-hero > .container > p {
+    max-width: 740px;
+    font-size: clamp(0.98rem, 1.15vw, 1.08rem);
+    line-height: 1.86;
+}
+
+@media (max-width: 640px) {
+    .page-hero h1,
+    .about-hero-content h1,
+    .solutions-hero h1 {
+        max-width: min(100%, 370px);
+        font-size: clamp(1.75rem, 7.4vw, 2.35rem);
+        line-height: 1.14;
+    }
+
+    [dir="rtl"] .page-hero h1,
+    [dir="rtl"] .about-hero-content h1,
+    [dir="rtl"] .solutions-hero h1 {
+        font-size: clamp(1.65rem, 7vw, 2.15rem);
+        line-height: 1.32;
+    }
+}
