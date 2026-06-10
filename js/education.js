@@ -34,6 +34,47 @@
         return item[key] || [];
     }
 
+    function t(key) {
+        var labels = isArabic ? {
+            pageNav: 'أقسام صفحة التعليم',
+            models: 'نماذج التعاون',
+            industrialCollege: 'الكلية الصناعية',
+            talentTraining: 'تدريب المواهب',
+            teachingEquipment: 'معدات التدريب',
+            researchGlobal: 'البحث والتعاون الدولي',
+            contact: 'تواصل معنا',
+            fourModels: 'أربعة نماذج للتعاون',
+            introTitle: 'اختر مسار تعاون يمكن عرضه وتشغيله وتوسيعه.',
+            introText: 'تقدم Longxiang حلول تعاون تعليمية عملية تشمل بناء المنصات، وتنمية المواهب، وتسليم معدات التدريب، والبحث والتوسع الدولي.',
+            bestFor: 'مناسب لـ',
+            delivers: 'ما تقدمه Longxiang',
+            outcomes: 'نتائج الشريك',
+            proofAlt: 'دليل تعاون',
+            proofOverlay: 'دليل التعاون',
+            philosophy: 'فلسفة التعاون',
+            discuss: 'مناقشة التعاون'
+        } : {
+            pageNav: 'Education page sections',
+            models: 'Models',
+            industrialCollege: 'Industrial College',
+            talentTraining: 'Talent Training',
+            teachingEquipment: 'Teaching Equipment',
+            researchGlobal: 'R&D + Global',
+            contact: 'Contact',
+            fourModels: 'Four cooperation models',
+            introTitle: 'Choose a cooperation path that can be shown, operated, and scaled.',
+            introText: 'Based on the school-enterprise cooperation document, Longxiang packages education cooperation into four buyer-friendly solutions: platform building, talent development, equipment delivery, and research plus international expansion.',
+            bestFor: 'Best for',
+            delivers: 'What Longxiang Delivers',
+            outcomes: 'Partner Outcomes',
+            proofAlt: 'Longxiang education cooperation image',
+            proofOverlay: 'Cooperation Proof',
+            philosophy: 'Cooperation philosophy',
+            discuss: 'Discuss Cooperation'
+        };
+        return labels[key] || key;
+    }
+
     function fetchJson(url, fallbackUrl) {
         return fetch(url)
             .then(function (res) {
@@ -70,20 +111,19 @@
         var selected = (images || []).slice(0, 3);
         if (!selected.length) return '';
         return '<div class="education-proof-strip">' + selected.map(function (src, index) {
-            return '<figure>' + imageHtml(src, title + ' proof ' + (index + 1)) + '</figure>';
+            return '<figure>' + imageHtml(src, title + ' ' + t('proofOverlay') + ' ' + (index + 1)) + '</figure>';
         }).join('') + '</div>';
     }
 
     function renderPageNav() {
-        if (isArabic) return '';
-        return '<nav class="education-page-nav" aria-label="Education page sections">' +
+        return '<nav class="education-page-nav" aria-label="' + escapeHtml(t('pageNav')) + '">' +
             '<div class="container">' +
-            '<a href="#cooperation-models">Models</a>' +
-            '<a href="#industry-college">Industrial College</a>' +
-            '<a href="#talent-training">Talent Training</a>' +
-            '<a href="#training-equipment">Teaching Equipment</a>' +
-            '<a href="#research-global">R&D + Global</a>' +
-            '<a href="#education-contact">Contact</a>' +
+            '<a href="#cooperation-models">' + escapeHtml(t('models')) + '</a>' +
+            '<a href="#industry-college">' + escapeHtml(t('industrialCollege')) + '</a>' +
+            '<a href="#talent-training">' + escapeHtml(t('talentTraining')) + '</a>' +
+            '<a href="#training-equipment">' + escapeHtml(t('teachingEquipment')) + '</a>' +
+            '<a href="#research-global">' + escapeHtml(t('researchGlobal')) + '</a>' +
+            '<a href="#education-contact">' + escapeHtml(t('contact')) + '</a>' +
             '</div></nav>';
     }
 
@@ -128,9 +168,9 @@
         return '<section class="section education-conversion" id="cooperation-models">' +
             '<div class="container">' +
             '<div class="education-conversion-head fade-in">' +
-            '<span class="section-kicker">Four cooperation models</span>' +
-            '<h2>Choose a cooperation path that can be shown, operated, and scaled.</h2>' +
-            '<p>Based on the school-enterprise cooperation document, Longxiang packages education cooperation into four buyer-friendly solutions: platform building, talent development, equipment delivery, and research plus international expansion.</p>' +
+            '<span class="section-kicker">' + escapeHtml(t('fourModels')) + '</span>' +
+            '<h2>' + escapeHtml(t('introTitle')) + '</h2>' +
+            '<p>' + escapeHtml(t('introText')) + '</p>' +
             '</div>' +
             '<div class="education-model-grid">' +
             sections.map(function (section) {
@@ -157,12 +197,12 @@
             '<div class="education-mode-copy fade-in">' +
             '<span class="education-mode-number">' + escapeHtml(section.modeNumber || String(index + 1).padStart(2, '0')) + '</span>' +
             '<h2>' + escapeHtml(localized(section, 'title')) + '</h2>' +
-            '<p class="education-mode-tagline">' + escapeHtml(section.tagline || '') + '</p>' +
+            '<p class="education-mode-tagline">' + escapeHtml(localized(section, 'tagline') || '') + '</p>' +
             '<p class="education-mode-summary">' + escapeHtml(localized(section, 'summary')) + '</p>' +
-            '<div class="education-buyer-fit"><strong>Best for</strong><span>' + escapeHtml(section.bestFor || '') + '</span></div>' +
+            '<div class="education-buyer-fit"><strong>' + escapeHtml(t('bestFor')) + '</strong><span>' + escapeHtml(localized(section, 'bestFor') || '') + '</span></div>' +
             '<div class="education-mode-columns">' +
-            '<div><h4>What Longxiang Delivers</h4>' + renderList(localizedList(section, 'deliverables')) + '</div>' +
-            '<div><h4>Partner Outcomes</h4>' + renderList(localizedList(section, 'outcomes')) + '</div>' +
+            '<div><h4>' + escapeHtml(t('delivers')) + '</h4>' + renderList(localizedList(section, 'deliverables')) + '</div>' +
+            '<div><h4>' + escapeHtml(t('outcomes')) + '</h4>' + renderList(localizedList(section, 'outcomes')) + '</div>' +
             '</div>' +
             '</div></div>' +
             (cards.length ? '<div class="education-offer-grid">' + cards.map(function (card) {
@@ -184,8 +224,8 @@
             '<div class="gallery-grid education-gallery-grid" data-stagger="80">' +
             section.images.slice(0, 8).map(function (src, index) {
                 return '<div class="gallery-item fade-in">' +
-                    imageHtml(src, 'Longxiang education cooperation image ' + (index + 1)) +
-                    '<div class="gallery-item-overlay"><span>Cooperation Proof</span></div>' +
+                    imageHtml(src, t('proofAlt') + ' ' + (index + 1)) +
+                    '<div class="gallery-item-overlay"><span>' + escapeHtml(t('proofOverlay')) + '</span></div>' +
                     '</div>';
             }).join('') +
             '</div></div></section>';
@@ -197,7 +237,7 @@
         return '<section class="section education-philosophy" id="cooperation-philosophy">' +
             '<div class="container">' +
             '<div class="education-philosophy-panel fade-in">' +
-            '<span class="section-kicker">Cooperation philosophy</span>' +
+            '<span class="section-kicker">' + escapeHtml(t('philosophy')) + '</span>' +
             '<h2>' + escapeHtml(localized(section, 'summary')) + '</h2>' +
             body.map(function (item) { return '<p>' + escapeHtml(item) + '</p>'; }).join('') +
             '</div></div></section>';
@@ -210,7 +250,7 @@
             '<h2 class="fade-in">' + escapeHtml(localized(cta, 'title')) + '</h2>' +
             '<p class="fade-in">' + escapeHtml(localized(cta, 'text')) + '</p>' +
             '<div class="cta-buttons fade-in"><a href="' + escapeHtml(cta.href || 'contact.html') + '" class="btn btn-gold btn-lg">' +
-            escapeHtml(localized(cta, 'buttonText') || 'Discuss Cooperation') +
+            escapeHtml(localized(cta, 'buttonText') || t('discuss')) +
             '</a></div></div></section>';
     }
 

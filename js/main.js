@@ -551,14 +551,20 @@
         });
     }
 
+    function companyValue(company, key) {
+        if (!company) return '';
+        if (isArabic && company[key + 'Ar']) return company[key + 'Ar'];
+        return company[key] || '';
+    }
+
     function updateCompanyDom(company) {
         Object.keys(company).forEach(function (key) {
-            setCompanyText('[data-company-field="' + key + '"]', company[key]);
+            setCompanyText('[data-company-field="' + key + '"]', companyValue(company, key));
         });
 
-        setCompanyText('.footer-brand p', company.footerText);
+        setCompanyText('.footer-brand p', companyValue(company, 'footerText'));
         setCompanyText('[data-company-contact="email"] .footer-contact-value', company.email);
-        setCompanyText('[data-company-contact="address"] .footer-contact-value', company.address);
+        setCompanyText('[data-company-contact="address"] .footer-contact-value', companyValue(company, 'address'));
         setCompanyHref('[data-company-email-link]', 'mailto:' + company.email);
         setCompanyHref('[data-company-phone-link]', 'tel:' + company.phone);
         setCompanyHref('[data-company-instagram-link]', company.instagram);
@@ -611,8 +617,8 @@
 
         function syncMapInfo(location) {
             if (!location) return;
-            if (mapCompany && location.name) mapCompany.textContent = location.name;
-            if (mapAddress) mapAddress.textContent = location.displayAddress || location.address || '';
+            if (mapCompany && location.name) mapCompany.textContent = companyValue(location, 'name');
+            if (mapAddress) mapAddress.textContent = companyValue(location, 'displayAddress') || companyValue(location, 'address') || '';
             if (mapOpen) mapOpen.href = location.googleMapsUrl || location.directionsUrl || '#';
         }
 
@@ -623,8 +629,8 @@
                 var title = tab.querySelector('strong');
                 var address = tab.querySelector('span');
                 var directions = tab.querySelector('[data-contact-map-directions]');
-                if (title && location.mapLabel) title.textContent = location.mapLabel;
-                if (address && location.mapSubLabel) address.textContent = location.mapSubLabel;
+                if (title && location.mapLabel) title.textContent = companyValue(location, 'mapLabel');
+                if (address && location.mapSubLabel) address.textContent = companyValue(location, 'mapSubLabel');
                 if (directions && location.directionsUrl) directions.href = location.directionsUrl;
             }
 
@@ -655,7 +661,7 @@
                 '<div class="footer-company">' +
                     '<div class="footer-brand">' +
                         '<a href="' + pageHref('index.html') + '" class="nav-logo"><span class="nav-logo-text">LONG<span>XIANG</span></span></a>' +
-                        '<p>Providing intelligent, low-carbon power equipment and cultivating excellent professional electrical talent since 2003.</p>' +
+                        '<p>' + (isArabic ? 'نوفر معدات طاقة ذكية منخفضة الكربون ونساهم في تنمية الكفاءات الكهربائية المهنية منذ عام 2003.' : 'Providing intelligent, low-carbon power equipment and cultivating excellent professional electrical talent since 2003.') + '</p>' +
                     '</div>' +
                     '<div class="footer-contact-item" data-company-contact="email"><span class="icon">&#9993;</span><span class="footer-contact-value">hnlxdq2003@163.com</span></div>' +
                     '<div class="footer-contact-item" data-company-contact="address"><span class="icon">&#8982;</span><span class="footer-contact-value">Longhu New District, Xinzheng, Zhengzhou, Henan, China</span></div>' +
@@ -839,12 +845,12 @@
                 '</div>' +
                 '<form class="inquiry-form" data-inquiry-form>' +
                     '<input type="hidden" name="productContext" value="">' +
-                    '<div class="form-group"><label for="modal-product-context">Interested Product</label><input id="modal-product-context" name="productContextDisplay" readonly></div>' +
-                    '<div class="form-row"><div class="form-group"><label for="modal-name">Full Name *</label><input id="modal-name" name="name" required></div><div class="form-group"><label for="modal-email">Email Address *</label><input id="modal-email" type="email" name="email" required></div></div>' +
-                    '<div class="form-row"><div class="form-group"><label for="modal-company">Company Name</label><input id="modal-company" name="company"></div><div class="form-group"><label for="modal-phone">WhatsApp / Phone</label><input id="modal-phone" name="phone"></div></div>' +
-                    '<div class="form-group"><label for="modal-subject">Subject *</label><select id="modal-subject" name="subject" required><option value="quote">Request a Quote</option><option value="technical">Technical Consultation</option><option value="partnership">Business Partnership</option><option value="support">After-Sales Support</option><option value="other">Other Inquiry</option></select></div>' +
-                    '<div class="form-group"><label for="modal-message">Message *</label><textarea id="modal-message" name="message" rows="5" required></textarea></div>' +
-                    '<button type="submit" class="btn btn-primary">Submit Message</button>' +
+                    '<div class="form-group"><label for="modal-product-context">' + (isArabic ? 'المنتج المطلوب' : 'Interested Product') + '</label><input id="modal-product-context" name="productContextDisplay" readonly></div>' +
+                    '<div class="form-row"><div class="form-group"><label for="modal-name">' + (isArabic ? 'الاسم الكامل *' : 'Full Name *') + '</label><input id="modal-name" name="name" required></div><div class="form-group"><label for="modal-email">' + (isArabic ? 'البريد الإلكتروني *' : 'Email Address *') + '</label><input id="modal-email" type="email" name="email" required></div></div>' +
+                    '<div class="form-row"><div class="form-group"><label for="modal-company">' + (isArabic ? 'اسم الشركة' : 'Company Name') + '</label><input id="modal-company" name="company"></div><div class="form-group"><label for="modal-phone">' + (isArabic ? 'واتساب / الهاتف' : 'WhatsApp / Phone') + '</label><input id="modal-phone" name="phone"></div></div>' +
+                    '<div class="form-group"><label for="modal-subject">' + (isArabic ? 'الموضوع *' : 'Subject *') + '</label><select id="modal-subject" name="subject" required><option value="quote">' + (isArabic ? 'طلب عرض سعر' : 'Request a Quote') + '</option><option value="technical">' + (isArabic ? 'استشارة فنية' : 'Technical Consultation') + '</option><option value="partnership">' + (isArabic ? 'شراكة تجارية' : 'Business Partnership') + '</option><option value="support">' + (isArabic ? 'دعم ما بعد البيع' : 'After-Sales Support') + '</option><option value="other">' + (isArabic ? 'استفسار آخر' : 'Other Inquiry') + '</option></select></div>' +
+                    '<div class="form-group"><label for="modal-message">' + (isArabic ? 'الرسالة *' : 'Message *') + '</label><textarea id="modal-message" name="message" rows="5" required></textarea></div>' +
+                    '<button type="submit" class="btn btn-primary">' + (isArabic ? 'إرسال الرسالة' : 'Submit Message') + '</button>' +
                 '</form>' +
             '</div>';
         document.body.appendChild(modal);
@@ -878,7 +884,7 @@
         var productContext = productName ? productName + (productId ? ' (' + productId + ')' : '') : '';
         if (form) {
             if (form.elements.productContext) form.elements.productContext.value = productContext;
-            if (form.elements.productContextDisplay) form.elements.productContextDisplay.value = productContext || (isArabic ? 'General inquiry' : 'General inquiry');
+            if (form.elements.productContextDisplay) form.elements.productContextDisplay.value = productContext || (isArabic ? 'استفسار عام' : 'General inquiry');
             if (form.elements.subject) form.elements.subject.value = 'quote';
             if (form.elements.message && productName) {
                 form.elements.message.value = isArabic
@@ -910,7 +916,9 @@
         if (productId && form.elements.subject && form.elements.message) {
             form.elements.subject.value = 'quote';
             if (!form.elements.message.value) {
-                form.elements.message.value = 'I would like to request pricing and technical details for product: ' + productId;
+                form.elements.message.value = isArabic
+                    ? 'أرغب في طلب السعر والتفاصيل الفنية للمنتج: ' + productId
+                    : 'I would like to request pricing and technical details for product: ' + productId;
             }
         }
 

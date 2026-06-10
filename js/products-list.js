@@ -182,7 +182,7 @@
         if (keyword) {
             container.innerHTML = '<div class="empty-state">' +
                 (isArabic
-                    ? '賱丕 鬲賵噩丿 賳鬲丕卅噩 賱賭 "' + escapeHtml(keyword) + '" 賮賷 ' + escapeHtml(label) + '.'
+                    ? 'لا توجد نتائج لـ "' + escapeHtml(keyword) + '" ضمن ' + escapeHtml(label) + '.'
                     : 'No results for "' + escapeHtml(keyword) + '" in ' + escapeHtml(label) + '.') +
                 '</div>';
             return;
@@ -197,7 +197,7 @@
         var current = document.getElementById('catalog-current-filter');
         if (!status || !current) return;
         var parts = [taxonomyLabel(filter.group, filter.sub)];
-        if (filter.search) parts.push('Keyword: "' + filter.search + '"');
+        if (filter.search) parts.push((isArabic ? 'كلمة البحث: "' : 'Keyword: "') + filter.search + '"');
         current.textContent = parts.join(' / ') + ' (' + total + ')';
         status.hidden = false;
     }
@@ -263,7 +263,9 @@
 
         renderFilterStatus(filter, list.length);
         if (summary && list.length && pageCount > 1) {
-            summary.textContent += ' / Page ' + currentPage + ' of ' + pageCount;
+            summary.textContent += isArabic
+                ? ' / الصفحة ' + currentPage + ' من ' + pageCount
+                : ' / Page ' + currentPage + ' of ' + pageCount;
         }
 
         document.querySelectorAll('[data-product-filter]').forEach(function (button) {

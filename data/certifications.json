@@ -2,25 +2,34 @@
   {
     "id": "cert-iso9001",
     "name": "ISO 9001 Quality Management",
+    "nameAr": "ISO 9001 نظام إدارة الجودة",
     "issuer": "Certification body to be updated",
+    "issuerAr": "سيتم تحديث جهة الاعتماد",
     "expiryDate": "",
     "image": "",
-    "description": "Quality management certification placeholder. Replace with the official certificate image in the admin panel."
+    "description": "Quality management certification placeholder. Replace with the official certificate image in the admin panel.",
+    "descriptionAr": "شهادة إدارة الجودة. يرجى استبدالها بصورة الشهادة الرسمية من لوحة الإدارة."
   },
   {
     "id": "cert-iso14001",
     "name": "ISO 14001 Environmental Management",
+    "nameAr": "ISO 14001 نظام الإدارة البيئية",
     "issuer": "Certification body to be updated",
+    "issuerAr": "سيتم تحديث جهة الاعتماد",
     "expiryDate": "",
     "image": "",
-    "description": "Environmental management certification placeholder. Replace with the official certificate image in the admin panel."
+    "description": "Environmental management certification placeholder. Replace with the official certificate image in the admin panel.",
+    "descriptionAr": "شهادة الإدارة البيئية. يرجى استبدالها بصورة الشهادة الرسمية من لوحة الإدارة."
   },
   {
     "id": "cert-iec",
     "name": "IEC Standard Compliance",
+    "nameAr": "الامتثال لمعايير IEC",
     "issuer": "Certification body to be updated",
+    "issuerAr": "سيتم تحديث جهة الاعتماد",
     "expiryDate": "",
     "image": "",
-    "description": "International electrical standard compliance placeholder."
+    "description": "International electrical standard compliance placeholder.",
+    "descriptionAr": "بيان امتثال لمعايير الكهرباء الدولية."
   }
 ]

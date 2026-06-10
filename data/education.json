@@ -3,31 +3,35 @@
   "hero": {
     "eyebrow": "School-Enterprise Cooperation",
     "title": "Build Power & New Energy Talent Programs with an Industrial Manufacturer",
-    "titleAr": "",
+    "titleAr": "بناء برامج مواهب الطاقة والطاقة الجديدة مع مصنع صناعي",
     "subtitle": "Longxiang converts 20+ years of power equipment manufacturing, project delivery, training equipment, and international cooperation into market-ready education partnerships for colleges, vocational groups, utilities, and overseas institutions.",
-    "subtitleAr": "",
+    "subtitleAr": "تحول Longxiang خبرة تزيد على 20 عاماً في تصنيع معدات الطاقة وتنفيذ المشروعات ومعدات التدريب والتعاون الدولي إلى شراكات تعليمية جاهزة للسوق مع الكليات ومجموعات التعليم المهني وشركات المرافق والمؤسسات الخارجية.",
     "backgroundImage": "assets/education/images/longxiang-electrical-college-hero.png"
   },
   "stats": [
     {
       "id": "industry-experience",
       "value": "20+",
-      "label": "Years in Power & New Energy Equipment"
+      "label": "Years in Power & New Energy Equipment",
+      "labelAr": "عاماً في معدات الطاقة والطاقة الجديدة"
     },
     {
       "id": "joint-college",
       "value": "2016",
-      "label": "Longxiang Electrical Engineering College Founded"
+      "label": "Longxiang Electrical Engineering College Founded",
+      "labelAr": "تأسيس كلية Longxiang للهندسة الكهربائية"
     },
     {
       "id": "core-majors",
       "value": "4",
-      "label": "Core Electrical & Microgrid Majors"
+      "label": "Core Electrical & Microgrid Majors",
+      "labelAr": "تخصصات أساسية في الكهرباء والشبكات المصغرة"
     },
     {
       "id": "research-partners",
       "value": "20+",
-      "label": "University & Research Institute Partners"
+      "label": "University & Research Institute Partners",
+      "labelAr": "شريكاً من الجامعات ومعاهد البحث"
     }
   ],
   "sections": [
@@ -35,12 +39,18 @@
       "id": "industry-college",
       "modeNumber": "01",
       "title": "Co-built Industrial College",
-      "titleAr": "",
+      "titleAr": "كلية صناعية مشتركة البناء",
       "tagline": "Turn a major into a visible industry-education benchmark.",
+      "taglineAr": "تحويل التخصص إلى نموذج مرئي للتكامل بين الصناعة والتعليم.",
       "summary": "Longxiang helps colleges build a branded industrial college around power systems, electrical automation, power supply technology, distributed generation, and smart microgrids.",
+      "summaryAr": "تساعد Longxiang الكليات على بناء كلية صناعية ذات علامة واضحة حول أنظمة الطاقة والأتمتة الكهربائية وتقنيات الإمداد بالطاقة والتوليد الموزع والشبكات المصغرة الذكية.",
       "body": [
         "In 2016, Longxiang and Henan Mechanical and Electrical Vocational College co-built Longxiang Electrical Engineering College, a nationally recognized deep industry-education integration project.",
         "The model places majors on the industrial chain and moves learning scenarios into the industrial park, using real engineering tasks to drive teaching."
+      ],
+      "bodyAr": [
+        "في عام 2016، شاركت Longxiang وكلية خنان المهنية للميكانيكا والكهرباء في بناء كلية Longxiang للهندسة الكهربائية كمشروع معترف به للتكامل العميق بين الصناعة والتعليم.",
+        "يربط النموذج التخصصات بالسلسلة الصناعية وينقل سيناريوهات التعلم إلى الحديقة الصناعية، مع استخدام مهام هندسية حقيقية لدعم التدريس."
       ],
       "image": "assets/education/images/longxiang-electrical-college-building.jpeg",
       "images": [
@@ -50,29 +60,47 @@
         "assets/education/images/industry-education-integration-plaque.jpeg"
       ],
       "bestFor": "Vocational colleges, applied universities, industrial parks, and local governments seeking a demonstrable industry-education platform.",
+      "bestForAr": "الكليات المهنية والجامعات التطبيقية والمجمعات الصناعية والحكومات المحلية التي تحتاج إلى منصة واضحة للتكامل بين الصناعة والتعليم.",
       "deliverables": [
         "Industrial college planning and cooperation framework",
         "Major cluster design for power and new energy fields",
         "Real project cases connected to Longxiang manufacturing and delivery scenarios",
         "Campus-industry presentation materials for enrollment, inspection, and promotion"
       ],
+      "deliverablesAr": [
+        "تخطيط الكلية الصناعية وإطار التعاون",
+        "تصميم مجموعة تخصصات لمجالات الطاقة والطاقة الجديدة",
+        "حالات مشروعات حقيقية مرتبطة بسيناريوهات تصنيع وتسليم Longxiang",
+        "مواد عرض تربط الحرم الجامعي بالصناعة للتسجيل والزيارات والترويج"
+      ],
       "outcomes": [
         "A stronger enrollment story for electrical and new energy majors",
         "A replicable school-enterprise cooperation model",
         "Visible training scenarios linked with industry demand"
       ],
+      "outcomesAr": [
+        "قصة قبول أقوى لتخصصات الكهرباء والطاقة الجديدة",
+        "نموذج تعاون قابل للتكرار بين المدرسة والمؤسسة",
+        "سيناريوهات تدريب مرئية مرتبطة بطلب الصناعة"
+      ],
       "cards": [
         {
           "title": "Four Core Major Directions",
+          "titleAr": "أربعة اتجاهات تخصصية أساسية",
           "text": "Power system automation, electrical automation, power supply technology, distributed generation and smart microgrid."
+          ,"textAr": "أتمتة أنظمة الطاقة، الأتمتة الكهربائية، تقنيات الإمداد بالطاقة، التوليد الموزع والشبكات المصغرة الذكية."
         },
         {
           "title": "Line-Field Education Model",
+          "titleAr": "نموذج التعليم بين الخط والميدان",
           "text": "Classroom, training site, production line, and project site are connected into one learning pathway."
+          ,"textAr": "يربط الفصل وموقع التدريب وخط الإنتاج وموقع المشروع في مسار تعلم واحد."
         },
         {
           "title": "Benchmark Cooperation Story",
+          "titleAr": "قصة تعاون مرجعية",
           "text": "A joint college model with recognition from central and education authorities."
+          ,"textAr": "نموذج كلية مشتركة يحظى باعتراف من الجهات المركزية والتعليمية."
         }
       ]
     },
@@ -80,12 +108,18 @@
       "id": "talent-training",
       "modeNumber": "02",
       "title": "Collaborative Talent Training",
-      "titleAr": "",
+      "titleAr": "تدريب المواهب بشكل تعاوني",
       "tagline": "Train students and upgrade teachers through real enterprise scenarios.",
+      "taglineAr": "تدريب الطلاب وتطوير المعلمين عبر سيناريوهات مؤسسية حقيقية.",
       "summary": "Longxiang connects student practice, internships, teacher enterprise placement, and faculty technical workshops into one school-enterprise training pathway.",
+      "summaryAr": "تربط Longxiang التدريب العملي للطلاب والتدريب الداخلي وانتداب المعلمين داخل المؤسسة وورش العمل الفنية في مسار واحد للتدريب بين المدرسة والمؤسسة.",
       "body": [
         "The program covers power equipment, photovoltaic, wind power, energy storage, and charging applications.",
         "Dual-mentor teaching combines college instructors, enterprise engineers, and teacher training support."
+      ],
+      "bodyAr": [
+        "يغطي البرنامج معدات الطاقة والطاقة الشمسية وطاقة الرياح وتخزين الطاقة وتطبيقات الشحن.",
+        "يجمع نظام المرشدين المزدوج بين معلمي الكلية ومهندسي المؤسسة ودعم تدريب المعلمين."
       ],
       "image": "assets/education/images/field-practical-training.jpeg",
       "images": [
@@ -95,28 +129,45 @@
         "assets/education/images/teacher-training-classroom.png"
       ],
       "bestFor": "Colleges improving student employability, teacher engineering capability, and new energy course delivery.",
+      "bestForAr": "الكليات التي تعمل على تحسين قابلية توظيف الطلاب وقدرات المعلمين الهندسية وتقديم مقررات الطاقة الجديدة.",
       "deliverables": [
         "Line-field teaching, practical projects, and on-post internships",
         "Teacher enterprise placement and technical workshops for dual-qualified faculty",
         "Special operation, UAV, new energy O&M, and electrical safety training"
+      ],
+      "deliverablesAr": [
+        "تعليم بين الخط والميدان ومشروعات عملية وتدريب في مواقع العمل",
+        "انتداب المعلمين داخل المؤسسة وورش فنية لأعضاء هيئة التدريس مزدوجي التأهيل",
+        "تدريب على العمليات الخاصة والطائرات بدون طيار وتشغيل وصيانة الطاقة الجديدة والسلامة الكهربائية"
       ],
       "outcomes": [
         "Students train with real scenarios before employment",
         "Teachers gain enterprise practice experience and updated engineering cases",
         "Colleges strengthen dual-qualified faculty teams and reusable course resources"
       ],
+      "outcomesAr": [
+        "يتدرب الطلاب على سيناريوهات حقيقية قبل التوظيف",
+        "يكتسب المعلمون خبرة ممارسة داخل المؤسسة وحالات هندسية محدثة",
+        "تعزز الكليات فرق المعلمين مزدوجي التأهيل وموارد المقررات القابلة لإعادة الاستخدام"
+      ],
       "cards": [
         {
           "title": "Student Training Path",
+          "titleAr": "مسار تدريب الطلاب",
           "text": "Practical training, alternating study-training, post internship, and employment preparation."
+          ,"textAr": "تدريب عملي، وتناوب بين الدراسة والتدريب، وتدريب وظيفي، وتحضير للتوظيف."
         },
         {
           "title": "Teacher Training",
+          "titleAr": "تدريب المعلمين",
           "text": "Enterprise placement, technical workshops, engineering case study, and course co-development for dual-qualified faculty."
+          ,"textAr": "انتداب داخل المؤسسة، وورش فنية، ودراسة حالات هندسية، وتطوير مشترك للمقررات لأعضاء هيئة التدريس مزدوجي التأهيل."
         },
         {
           "title": "Dual-Mentor System",
+          "titleAr": "نظام المرشدين المزدوج",
           "text": "College teachers and Longxiang engineers jointly guide technical learning and professional behavior."
+          ,"textAr": "يوجه معلمو الكلية ومهندسو Longxiang التعلم الفني والسلوك المهني بصورة مشتركة."
         }
       ]
     },
@@ -124,12 +175,18 @@
       "id": "training-equipment",
       "modeNumber": "03",
       "title": "Teaching Equipment R&D",
-      "titleAr": "",
+      "titleAr": "بحث وتطوير معدات التدريب",
       "tagline": "Make training bases look and operate like real engineering sites.",
+      "taglineAr": "جعل قواعد التدريب تبدو وتعمل مثل مواقع هندسية حقيقية.",
       "summary": "Longxiang works with colleges to develop teaching tools, lab platforms, and training equipment that match real industrial standards and support teaching, practice, assessment, and innovation.",
+      "summaryAr": "تتعاون Longxiang مع الكليات لتطوير أدوات تعليمية ومنصات مختبرية ومعدات تدريب تطابق المعايير الصناعية الحقيقية وتدعم التعليم والممارسة والتقييم والابتكار.",
       "body": [
         "Core platforms include smart microgrid training platforms, virtual power plant simulation systems, high- and low-voltage electrical training devices, new energy simulation equipment, and energy efficiency management systems.",
         "The equipment is modular and intelligent, supporting classroom teaching, hands-on training, skill assessment, and student innovation projects."
+      ],
+      "bodyAr": [
+        "تشمل المنصات الأساسية منصات تدريب الشبكات المصغرة الذكية وأنظمة محاكاة محطات الطاقة الافتراضية وأجهزة التدريب الكهربائي للجهد العالي والمنخفض ومعدات محاكاة الطاقة الجديدة وأنظمة إدارة كفاءة الطاقة.",
+        "تتميز المعدات بالوحداتية والذكاء، وتدعم التدريس الصفي والتدريب العملي وتقييم المهارات ومشروعات ابتكار الطلاب."
       ],
       "image": "assets/education/images/electrical-training-panel.jpeg",
       "images": [
@@ -139,6 +196,7 @@
         "assets/education/images/cabinet-practice-visit.jpeg"
       ],
       "bestFor": "Schools building electrical labs, new energy training bases, microgrid teaching centers, and competition or assessment platforms.",
+      "bestForAr": "المدارس التي تبني مختبرات كهربائية وقواعد تدريب للطاقة الجديدة ومراكز تعليم الشبكات المصغرة ومنصات للمسابقات أو التقييم.",
       "deliverables": [
         "Smart microgrid training platform",
         "Virtual power plant simulation system",
@@ -147,23 +205,42 @@
         "Energy efficiency management and monitoring systems",
         "Training base layout and demonstration route support"
       ],
+      "deliverablesAr": [
+        "منصة تدريب الشبكات المصغرة الذكية",
+        "نظام محاكاة محطة طاقة افتراضية",
+        "أجهزة تدريب كهربائية للجهد العالي والمنخفض",
+        "معدات محاكاة وتشغيل للطاقة الجديدة",
+        "أنظمة إدارة ومراقبة كفاءة الطاقة",
+        "دعم تخطيط قاعدة التدريب ومسار العرض"
+      ],
       "outcomes": [
         "Training hardware directly supports curriculum promotion",
         "Students practice system operation instead of only component theory",
         "Labs can support teaching, assessment, competition, and science projects"
       ],
+      "outcomesAr": [
+        "تدعم أجهزة التدريب تطوير المناهج مباشرة",
+        "يمارس الطلاب تشغيل الأنظمة بدلاً من دراسة المكونات نظرياً فقط",
+        "يمكن للمختبرات دعم التعليم والتقييم والمسابقات والمشروعات العلمية"
+      ],
       "cards": [
         {
           "title": "Modular Equipment",
+          "titleAr": "معدات وحداتية",
           "text": "Platforms can be configured by major, course, skill certificate, or training base level."
+          ,"textAr": "يمكن تكوين المنصات حسب التخصص أو المقرر أو شهادة المهارة أو مستوى قاعدة التدريب."
         },
         {
           "title": "Industrial Logic",
+          "titleAr": "منطق صناعي",
           "text": "Training devices mirror power distribution, control, operation, maintenance, and energy management workflows."
+          ,"textAr": "تعكس أجهزة التدريب سير عمل توزيع الطاقة والتحكم والتشغيل والصيانة وإدارة الطاقة."
         },
         {
           "title": "Visible Teaching Assets",
+          "titleAr": "أصول تعليمية مرئية",
           "text": "Equipment doubles as a showroom for enrollment, inspection, competition, and partner visits."
+          ,"textAr": "تعمل المعدات أيضاً كمساحة عرض للتسجيل والزيارات والمسابقات وزيارات الشركاء."
         }
       ]
     },
@@ -171,13 +248,20 @@
       "id": "research-global",
       "modeNumber": "04",
       "title": "Industry-Research & International Cooperation",
-      "titleAr": "",
+      "titleAr": "التعاون بين الصناعة والبحث والتعاون الدولي",
       "tagline": "Connect research, standards, equipment, and overseas talent training.",
+      "taglineAr": "ربط البحث والمعايير والمعدات وتدريب المواهب في الخارج.",
       "summary": "Longxiang integrates university and research institute resources to support technical innovation, achievement transformation, and international industry-education cooperation.",
+      "summaryAr": "تدمج Longxiang موارد الجامعات ومعاهد البحث لدعم الابتكار التقني وتحويل النتائج والتعاون الدولي بين الصناعة والتعليم.",
       "body": [
         "Longxiang maintains strategic cooperation with more than 20 universities and research institutes including Xi'an Jiaotong University, Zhengzhou University, and China Electric Power Research Institute.",
         "The cooperation focuses on smart microgrids, new energy, green charging stations, and advanced power equipment technologies.",
         "Through Longxiang Education, the company promotes Belt and Road power talent training, overseas Longxiang Power International College planning, Chinese standards, technology, equipment, and Chinese plus vocational skills education."
+      ],
+      "bodyAr": [
+        "تحافظ Longxiang على تعاون استراتيجي مع أكثر من 20 جامعة ومعهداً بحثياً، بما في ذلك جامعة شيآن جياوتونغ وجامعة تشنغتشو ومعهد الصين لأبحاث الطاقة الكهربائية.",
+        "يركز التعاون على الشبكات المصغرة الذكية والطاقة الجديدة ومحطات الشحن الخضراء وتقنيات معدات الطاقة المتقدمة.",
+        "من خلال Longxiang Education، تعزز الشركة تدريب مواهب الطاقة ضمن مبادرة الحزام والطريق، وتخطيط كليات Longxiang الدولية للطاقة في الخارج، وتصدير المعايير والتقنيات والمعدات الصينية والتعليم المهني مع اللغة الصينية."
       ],
       "image": "assets/education/images/international-cooperation-leadership.jpeg",
       "images": [
@@ -188,6 +272,7 @@
         "assets/education/images/outdoor-team-field-visit.jpeg"
       ],
       "bestFor": "Universities, research institutes, international colleges, overseas training centers, and energy organizations building joint innovation or talent programs.",
+      "bestForAr": "الجامعات ومعاهد البحث والكليات الدولية ومراكز التدريب الخارجية ومنظمات الطاقة التي تبني برامج ابتكار أو مواهب مشتركة.",
       "deliverables": [
         "Joint technical research and project demonstration",
         "Smart microgrid, new energy, and green charging station topic cooperation",
@@ -195,33 +280,57 @@
         "Chinese standards, technology, and equipment output",
         "Chinese plus vocational skills course cooperation"
       ],
+      "deliverablesAr": [
+        "بحث فني مشترك وعروض تطبيقية للمشروعات",
+        "تعاون في موضوعات الشبكات المصغرة الذكية والطاقة الجديدة ومحطات الشحن الخضراء",
+        "تخطيط الكليات الدولية وبرامج التدريب الخارجية",
+        "نقل المعايير والتقنيات والمعدات الصينية",
+        "تعاون في مقررات اللغة الصينية مع المهارات المهنية"
+      ],
       "outcomes": [
         "Research topics connect with equipment manufacturing and application",
         "International partners gain localized power talent training capability",
         "Colleges can package research, training, and equipment into a stronger cooperation brand"
       ],
+      "outcomesAr": [
+        "ترتبط موضوعات البحث بتصنيع المعدات وسيناريوهات التطبيق",
+        "يحصل الشركاء الدوليون على قدرة محلية لتدريب مواهب الطاقة",
+        "يمكن للكليات دمج البحث والتدريب والمعدات في علامة تعاون أقوى"
+      ],
       "cards": [
         {
           "title": "Research Partnership",
+          "titleAr": "شراكة بحثية",
           "text": "Joint work with leading universities and institutes on new power system technologies."
+          ,"textAr": "عمل مشترك مع جامعات ومعاهد رائدة في تقنيات أنظمة الطاقة الجديدة."
         },
         {
           "title": "Overseas Education Output",
+          "titleAr": "تصدير التعليم إلى الخارج",
           "text": "International power talent training with Chinese standards, equipment, and vocational skills."
+          ,"textAr": "تدريب دولي لمواهب الطاقة بالمعايير والمعدات والمهارات المهنية الصينية."
         },
         {
           "title": "Innovation Commercialization",
+          "titleAr": "تحويل الابتكار إلى تطبيق تجاري",
           "text": "Research topics are tied to equipment, project scenarios, and market adoption."
+          ,"textAr": "ترتبط موضوعات البحث بالمعدات وسيناريوهات المشروعات واعتماد السوق."
         }
       ]
     },
     {
       "id": "cooperation-philosophy",
       "title": "Cooperation Philosophy",
+      "titleAr": "فلسفة التعاون",
       "summary": "Industry empowers education, education feeds industry, and innovation drives upgrading.",
+      "summaryAr": "الصناعة تمكّن التعليم، والتعليم يغذي الصناعة، والابتكار يقود التطوير.",
       "body": [
         "Longxiang deepens industry-education integration and science-education collaboration to build a power and new energy talent platform with domestic leadership and international connectivity.",
         "The cooperation system supports new power system construction, energy industry upgrading, and high-quality talent supply."
+      ],
+      "bodyAr": [
+        "تعمق Longxiang التكامل بين الصناعة والتعليم والتعاون بين العلم والتعليم لبناء منصة مواهب في الطاقة والطاقة الجديدة ذات ريادة محلية واتصال دولي.",
+        "يدعم نظام التعاون بناء أنظمة الطاقة الجديدة وترقية صناعة الطاقة وتوفير مواهب عالية الجودة."
       ],
       "image": "assets/education/images/vocational-education-demo-plaque.jpeg",
       "images": [
@@ -233,7 +342,9 @@
     {
       "id": "gallery",
       "title": "Proof in Real Scenarios",
+      "titleAr": "دليل من سيناريوهات حقيقية",
       "summary": "A visual record of Longxiang's campuses, training rooms, field practice, factory visits, and cooperation platforms.",
+      "summaryAr": "سجل بصري لحرم Longxiang وغرف التدريب والممارسة الميدانية وزيارات المصنع ومنصات التعاون.",
       "images": [
         "assets/education/images/international-cooperation-leadership.jpeg",
         "assets/education/images/student-group-photo.jpeg",
@@ -248,8 +359,11 @@
   ],
   "cta": {
     "title": "Start a Cooperation Plan for Your School or Training Organization",
+    "titleAr": "ابدأ خطة تعاون لمدرستك أو مؤسستك التدريبية",
     "text": "Tell us your major direction, training base goal, target learners, and preferred cooperation model. Longxiang will match curriculum, equipment, engineering scenarios, and implementation paths.",
+    "textAr": "أخبرنا باتجاه التخصص وهدف قاعدة التدريب والمتعلمين المستهدفين ونموذج التعاون المفضل. ستطابق Longxiang المناهج والمعدات والسيناريوهات الهندسية ومسارات التنفيذ.",
     "buttonText": "Discuss Cooperation",
+    "buttonTextAr": "مناقشة التعاون",
     "href": "contact.html"
   }
 }
