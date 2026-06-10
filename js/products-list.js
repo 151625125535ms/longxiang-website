@@ -383,9 +383,15 @@
         if (!selectedCompare.length) {
             bar.classList.remove('show');
             bar.innerHTML = '';
+            bar.hidden = true;
+            bar.style.display = 'none';
+            bar.setAttribute('aria-hidden', 'true');
             return;
         }
 
+        bar.hidden = false;
+        bar.style.display = '';
+        bar.setAttribute('aria-hidden', 'false');
         bar.innerHTML =
             '<div><strong>' + selectedCompare.length + '/3</strong> ' + (isArabic ? 'منتجات محددة للمقارنة' : 'products selected for comparison') + '</div>' +
             '<div class="compare-bar-actions">' +
