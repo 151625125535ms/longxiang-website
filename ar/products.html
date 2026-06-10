@@ -61,27 +61,58 @@
         </div>
     </section>
     <main>
-        <section class="section bg-light">
-            <div class="container">
-                <div class="product-catalog-layout">
-                    <aside class="product-tree fade-in" aria-label="فئات المنتجات">
+        <section class="section bg-light product-directory-section">
+            <div class="container product-directory-container">
+                <button type="button" class="product-category-toggle" aria-controls="product-category-tree" aria-expanded="false">
+                    كل الفئات
+                </button>
+                <div class="product-catalog-layout product-directory-layout">
+                    <aside class="product-tree product-directory-tree fade-in" id="product-category-tree" aria-label="فئات المنتجات">
                         <div class="product-tree-title">فئات المنتجات</div>
-                        <button type="button" class="tree-parent active" data-product-filter data-group="transformer">المحولات</button>
-                        <button type="button" class="tree-child" data-product-filter data-group="transformer" data-sub="oil-immersed">محول مغمور بالزيت</button>
-                        <button type="button" class="tree-child" data-product-filter data-group="transformer" data-sub="dry-type">محول جاف</button>
-                        <button type="button" class="tree-parent" data-product-filter data-group="ev-charger">شواحن المركبات الكهربائية</button>
-                        <button type="button" class="tree-child" data-product-filter data-group="ev-charger" data-sub="ac">محطة شحن تيار متردد</button>
-                        <button type="button" class="tree-child" data-product-filter data-group="ev-charger" data-sub="dc">محطة شحن تيار مستمر</button>
-                        <button type="button" class="tree-parent" data-product-filter data-group="switchgear">معدات المفاتيح</button>
-                        <button type="button" class="tree-child" data-product-filter data-group="switchgear" data-sub="high-voltage">معدات مفاتيح الجهد العالي</button>
-                        <button type="button" class="tree-child" data-product-filter data-group="switchgear" data-sub="medium-low-voltage">معدات مفاتيح الجهد المتوسط والمنخفض</button>
+                        <div class="product-tree-body">
+                            <div class="product-tree-group">
+                                <button type="button" class="tree-parent active" data-product-filter data-group="transformer">المحولات</button>
+                                <div class="tree-children">
+                                    <button type="button" class="tree-child" data-product-filter data-group="transformer" data-sub="oil-immersed">محول مغمور بالزيت</button>
+                                    <button type="button" class="tree-child" data-product-filter data-group="transformer" data-sub="dry-type">محول جاف</button>
+                                    <button type="button" class="tree-child" data-product-filter data-group="transformer" data-sub="combined">محول مدمج</button>
+                                    <button type="button" class="tree-child" data-product-filter data-group="transformer" data-sub="special">محول خاص</button>
+                                </div>
+                            </div>
+                            <div class="product-tree-group">
+                                <button type="button" class="tree-parent" data-product-filter data-group="ev-charger">شواحن المركبات الكهربائية</button>
+                                <div class="tree-children">
+                                    <button type="button" class="tree-child" data-product-filter data-group="ev-charger" data-sub="ac">محطة شحن تيار متردد</button>
+                                    <button type="button" class="tree-child" data-product-filter data-group="ev-charger" data-sub="dc">محطة شحن تيار مستمر</button>
+                                </div>
+                            </div>
+                            <div class="product-tree-group">
+                                <button type="button" class="tree-parent" data-product-filter data-group="switchgear">معدات المفاتيح</button>
+                                <div class="tree-children">
+                                    <button type="button" class="tree-child" data-product-filter data-group="switchgear" data-sub="high-voltage">معدات مفاتيح الجهد العالي</button>
+                                    <button type="button" class="tree-child" data-product-filter data-group="switchgear" data-sub="medium-low-voltage">معدات مفاتيح الجهد المتوسط والمنخفض</button>
+                                </div>
+                            </div>
+                        </div>
                     </aside>
-                    <div class="catalog-content">
-                        <div class="catalog-toolbar fade-in">
-                            <div><h2 id="catalog-title">تصفح معدات الطاقة</h2><p id="catalog-summary">استعرض مجموعة معدات التوزيع والطاقة.</p></div>
-                            <input class="catalog-search" id="catalog-search" type="search" placeholder="ابحث عن المنتجات">
+                    <div class="catalog-content product-directory-content">
+                        <div class="catalog-toolbar product-directory-toolbar fade-in">
+                            <div class="catalog-heading">
+                                <h2 id="catalog-title">المحولات</h2>
+                                <p id="catalog-summary">تصفح مجموعة معدات توزيع الطاقة الكاملة.</p>
+                            </div>
+                            <div class="catalog-search-form" role="search">
+                                <input class="catalog-search" id="catalog-search" type="search" placeholder="ابحث باسم المنتج أو الموديل" aria-label="البحث في المنتجات">
+                                <button type="button" class="catalog-search-submit">بحث</button>
+                            </div>
+                        </div>
+                        <div class="catalog-filter-status fade-in" aria-live="polite" hidden>
+                            <span class="catalog-filter-label">التصفية الحالية:</span>
+                            <span id="catalog-current-filter">المحولات</span>
+                            <button type="button" class="catalog-clear-filters">مسح التصفية</button>
                         </div>
                         <div class="products-catalog-grid" data-stagger="100" id="products-container"></div>
+                        <nav class="catalog-pagination" aria-label="ترقيم صفحات المنتجات"></nav>
                     </div>
                 </div>
             </div>
@@ -143,6 +174,6 @@
     </footer>
     <button class="back-to-top" aria-label="العودة إلى الأعلى">&uarr;</button>
     <script src="../js/main.js?v=20260610-arfix"></script>
-    <script src="../js/products-list.js?v=20260610-arfix2"></script>
+    <script src="../js/products-list.js?v=20260610-arfix3"></script>
 </body>
 </html>
