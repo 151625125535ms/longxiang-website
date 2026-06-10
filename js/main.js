@@ -138,10 +138,10 @@
             ], ['products.html', 'product-detail.html']) +
             navItem('solutions.html', labels.solutions, [
                 { page: 'solutions.html', label: 'Engineering General Contracting', hash: '#engineering-epc' },
+                { page: 'solutions.html', label: 'Line Operation & Maintenance', hash: '#line-om' },
                 { page: 'solutions.html', label: labels.wind, hash: '#wind-pv-ess-ev' },
                 { page: 'solutions.html', label: labels.microgrid, hash: '#smart-microgrid' },
-                { page: 'solutions.html', label: labels.pv, hash: '#pv-solution' },
-                { page: 'solutions.html', label: 'Line Operation & Maintenance', hash: '#line-om' }
+                { page: 'solutions.html', label: labels.pv, hash: '#pv-solution' }
             ]) +
             navItem('education.html', labels.education) +
             navItem('about.html', labels.about, [
