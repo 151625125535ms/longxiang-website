@@ -9654,3 +9654,29 @@ p:last-child {
         line-height: 1.32;
     }
 }
+
+/* Arabic homepage hero: keep CTAs near the gold rule instead of drifting to the far right. */
+[dir="rtl"] .hero-hex-panel {
+    align-items: flex-start;
+    text-align: left;
+}
+
+[dir="rtl"] .hero-hex .hero-hex-title {
+    text-align: left;
+}
+
+[dir="rtl"] .hero-hex-actions {
+    align-self: flex-end;
+    justify-content: flex-end;
+    direction: rtl;
+    margin-inline-start: 0;
+    margin-inline-end: auto;
+}
+
+@media (min-width: 769px) {
+    [dir="rtl"] .hero-hex-actions {
+        width: auto;
+        max-width: min(540px, 100%);
+        transform: translateX(clamp(-360px, -27vw, -220px));
+    }
+}
