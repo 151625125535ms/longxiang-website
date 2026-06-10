@@ -35,6 +35,10 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15l-3.5 2 1-4-3-2.8 4-.3L12 6l1.5 3.9 4 .3-3 2.8 1 4z"/><path d="M5 21V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v17l-7-3z"/></svg>
                     证书管理
                 </a>
+                <a href="#" data-view="education">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg>
+                    Education
+                </a>
                 <a href="#" class="logout-link" id="nav-logout">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
                     退出登录
@@ -244,6 +248,27 @@
                             <tbody id="certifications-tbody"><tr><td colspan="5" class="table-empty"><p>加载中...</p></td></tr></tbody>
                         </table>
                     </div>
+                </section>
+
+                <section class="view-section" id="view-education">
+                    <div class="section-header-bar"><h2>Education Content</h2></div>
+                    <form class="company-form" id="education-form">
+                        <div class="form-group">
+                            <label>Education JSON</label>
+                            <textarea id="education-json" rows="24" spellcheck="false" style="font-family:Consolas,monospace;"></textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Upload image</label>
+                                <input type="file" id="education-image" accept="image/*">
+                            </div>
+                            <div class="form-group">
+                                <label>Uploaded path</label>
+                                <input type="text" id="education-upload-path" readonly>
+                            </div>
+                        </div>
+                        <div class="form-actions"><button type="submit" class="btn btn-primary" id="btn-save-education">Save Education Content</button></div>
+                    </form>
                 </section>
 
             </div>

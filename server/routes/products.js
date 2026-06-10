@@ -2,7 +2,7 @@ const express = require('express');
 const path = require('path');
 const multer = require('multer');
 const { authMiddleware } = require('../middleware/auth');
-const { ensureDirectory, readJson, resolveDataFile, resolveUploadDir, resolveUploadPublicPath, writeJsonAtomic } = require('../lib/fileStore');
+const { ensureDirectory, readJson, resolveDataFile, resolveUploadDir, resolveUploadPublicPath, updateJson } = require('../lib/fileStore');
 
 const router = express.Router();
 const FALLBACK_DATA_FILE = path.join(__dirname, '..', '..', 'data', 'products.json');
@@ -12,10 +12,6 @@ const UPLOAD_PUBLIC_PATH = resolveUploadPublicPath();
 
 function readProducts() {
     return readJson(DATA_FILE, [], FALLBACK_DATA_FILE);
-}
-
-function writeProducts(products) {
-    writeJsonAtomic(DATA_FILE, products, 'products');
 }
 
 function matchesProductId(product, id) {
@@ -82,49 +78,63 @@ router.get('/:id', (req, res) => {
 
 router.post('/', authMiddleware, (req, res) => {
     try {
-        const products = readProducts();
         const newProduct = req.body;
         if (!newProduct.id || !newProduct.name) {
             return res.status(400).json({ error: 'Product id and name are required.' });
         }
-        if (products.find(p => matchesProductId(p, newProduct.id))) {
-            return res.status(400).json({ error: 'Product id already exists.' });
-        }
-        products.push(newProduct);
-        writeProducts(products);
+        updateJson(DATA_FILE, [], FALLBACK_DATA_FILE, function (products) {
+            if (products.find(p => matchesProductId(p, newProduct.id))) {
+                const err = new Error('Product id already exists.');
+                err.statusCode = 400;
+                throw err;
+            }
+            products.push(newProduct);
+            return products;
+        }, 'products');
         res.status(201).json(newProduct);
     } catch (err) {
+        if (err.statusCode === 400) return res.status(400).json({ error: err.message });
         res.status(500).json({ error: 'Failed to create product.' });
     }
 });
 
 router.put('/:id', authMiddleware, (req, res) => {
     try {
-        const products = readProducts();
-        const index = products.findIndex(p => matchesProductId(p, req.params.id));
-        if (index === -1) {
-            return res.status(404).json({ error: 'Product not found.' });
-        }
-        const updatedProduct = { ...products[index], ...req.body, id: products[index].id };
-        products[index] = updatedProduct;
-        writeProducts(products);
+        let updatedProduct = null;
+        updateJson(DATA_FILE, [], FALLBACK_DATA_FILE, function (products) {
+            const index = products.findIndex(p => matchesProductId(p, req.params.id));
+            if (index === -1) {
+                const err = new Error('Product not found.');
+                err.statusCode = 404;
+                throw err;
+            }
+            updatedProduct = { ...products[index], ...req.body, id: products[index].id };
+            products[index] = updatedProduct;
+            return products;
+        }, 'products');
         res.json(updatedProduct);
     } catch (err) {
+        if (err.statusCode === 404) return res.status(404).json({ error: err.message });
         res.status(500).json({ error: 'Failed to update product.' });
     }
 });
 
 router.delete('/:id', authMiddleware, (req, res) => {
     try {
-        const products = readProducts();
-        const index = products.findIndex(p => matchesProductId(p, req.params.id));
-        if (index === -1) {
-            return res.status(404).json({ error: 'Product not found.' });
-        }
-        const deleted = products.splice(index, 1);
-        writeProducts(products);
-        res.json({ message: 'Product deleted.', product: deleted[0] });
+        let deleted = null;
+        updateJson(DATA_FILE, [], FALLBACK_DATA_FILE, function (products) {
+            const index = products.findIndex(p => matchesProductId(p, req.params.id));
+            if (index === -1) {
+                const err = new Error('Product not found.');
+                err.statusCode = 404;
+                throw err;
+            }
+            deleted = products.splice(index, 1)[0];
+            return products;
+        }, 'products');
+        res.json({ message: 'Product deleted.', product: deleted });
     } catch (err) {
+        if (err.statusCode === 404) return res.status(404).json({ error: err.message });
         res.status(500).json({ error: 'Failed to delete product.' });
     }
 });

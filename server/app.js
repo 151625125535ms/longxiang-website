@@ -9,6 +9,7 @@ const productsRoutes = require('./routes/products');
 const companyRoutes = require('./routes/company');
 const inquiriesRoutes = require('./routes/inquiries');
 const certificationsRoutes = require('./routes/certifications');
+const educationRoutes = require('./routes/education');
 const { ensureDirectory, resolveUploadDir } = require('./lib/fileStore');
 
 let compression = null;
@@ -51,6 +52,11 @@ app.use(cors({
 
 app.use(express.json());
 
+app.use('/api', function (req, res, next) {
+    res.setHeader('Cache-Control', 'no-store');
+    next();
+});
+
 if (rateLimit) {
     const loginLimiter = rateLimit({
         windowMs: 15 * 60 * 1000,
@@ -91,6 +97,16 @@ app.use('/api/products', productsRoutes);
 app.use('/api/company', companyRoutes);
 app.use('/api/inquiries', inquiriesRoutes);
 app.use('/api/certifications', certificationsRoutes);
+app.use('/api/education', educationRoutes);
+
+app.get('/api/health', function (req, res) {
+    res.json({
+        ok: true,
+        service: 'longxiang-website',
+        uptime: Math.round(process.uptime()),
+        timestamp: new Date().toISOString()
+    });
+});
 
 app.use('/api', function (req, res) {
     res.status(404).json({ error: 'API endpoint not found.' });

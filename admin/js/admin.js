@@ -209,6 +209,7 @@
         var products = [];
         var inquiries = [];
         var certifications = [];
+        var educationContent = null;
         var editingProductId = null;
         var uploadedImagePath = '';
         var editingInquiryId = null;
@@ -228,6 +229,7 @@
         bindInquiryEvents();
         bindCompanyEvents();
         bindCertificationEvents();
+        bindEducationEvents();
         switchView('dashboard');
 
         function bindNavigation() {
@@ -283,13 +285,14 @@
                 company: '公司信息',
                 certifications: '证书管理'
             };
-            document.getElementById('header-title').textContent = titles[view] || '';
+            document.getElementById('header-title').textContent = titles[view] || (view === 'education' ? 'Education Content' : '');
 
             if (view === 'dashboard') loadDashboard();
             if (view === 'products') loadProducts();
             if (view === 'inquiries') loadInquiries();
             if (view === 'company') loadCompany();
             if (view === 'certifications') loadCertifications();
+            if (view === 'education') loadEducation();
         }
 
         function loadDashboard() {
@@ -995,6 +998,73 @@
                     loadCertifications();
                 }).catch(function (err) { showToast('删除失败：' + err.message, 'error'); });
             });
+        }
+
+        function bindEducationEvents() {
+            var form = document.getElementById('education-form');
+            if (form) form.addEventListener('submit', saveEducation);
+            var imageInput = document.getElementById('education-image');
+            if (imageInput) imageInput.addEventListener('change', uploadEducationImage);
+        }
+
+        function loadEducation() {
+            var textarea = document.getElementById('education-json');
+            if (textarea) textarea.value = 'Loading...';
+            apiRequest('/education').then(function (data) {
+                educationContent = data;
+                if (textarea) textarea.value = JSON.stringify(data, null, 2);
+            }).catch(function (err) {
+                if (textarea) textarea.value = '';
+                showToast('Load education content failed: ' + err.message, 'error');
+            });
+        }
+
+        function saveEducation(e) {
+            e.preventDefault();
+            var textarea = document.getElementById('education-json');
+            var btn = document.getElementById('btn-save-education');
+            var payload;
+            try {
+                payload = JSON.parse(textarea.value || '{}');
+            } catch (err) {
+                showToast('Education JSON is invalid: ' + err.message, 'error');
+                return;
+            }
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = 'Saving...';
+            }
+            apiRequest('/education', { method: 'PUT', body: payload }).then(function (data) {
+                educationContent = data.education || payload;
+                textarea.value = JSON.stringify(educationContent, null, 2);
+                showToast('Education content saved');
+            }).catch(function (err) {
+                showToast('Save education content failed: ' + err.message, 'error');
+            }).finally(function () {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = 'Save Education Content';
+                }
+            });
+        }
+
+        function uploadEducationImage() {
+            var file = this.files[0];
+            if (!file) return;
+            var formData = new FormData();
+            formData.append('image', file);
+            fetch(API_BASE + '/education/upload', {
+                method: 'POST',
+                headers: { Authorization: 'Bearer ' + getToken() },
+                body: formData
+            }).then(function (res) { return res.json(); })
+                .then(function (data) {
+                    if (data.error) throw new Error(data.error);
+                    var pathInput = document.getElementById('education-upload-path');
+                    if (pathInput) pathInput.value = data.path;
+                    showToast('Education image uploaded');
+                })
+                .catch(function (err) { showToast('Education image upload failed: ' + err.message, 'error'); });
         }
 
         function bindModalClose(modalId, buttonIds) {

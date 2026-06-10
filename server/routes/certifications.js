@@ -9,7 +9,7 @@ const {
     resolveDataFile,
     resolveUploadDir,
     resolveUploadPublicPath,
-    writeJsonAtomic
+    updateJson
 } = require('../lib/fileStore');
 
 const router = express.Router();
@@ -45,10 +45,6 @@ function readCertifications() {
     return readJson(DATA_FILE, [], FALLBACK_DATA_FILE);
 }
 
-function writeCertifications(certifications) {
-    writeJsonAtomic(DATA_FILE, certifications, 'certifications');
-}
-
 router.get('/', (req, res) => {
     try {
         res.json(readCertifications());
@@ -62,7 +58,6 @@ router.post('/', authMiddleware, (req, res) => {
         const name = String(req.body.name || '').trim();
         if (!name) return res.status(400).json({ error: 'Certification name is required.' });
 
-        const certifications = readCertifications();
         const certification = {
             id: req.body.id || makeId('cert'),
             name,
@@ -71,8 +66,10 @@ router.post('/', authMiddleware, (req, res) => {
             image: String(req.body.image || '').trim(),
             description: String(req.body.description || '').trim()
         };
-        certifications.push(certification);
-        writeCertifications(certifications);
+        updateJson(DATA_FILE, [], FALLBACK_DATA_FILE, function (certifications) {
+            certifications.push(certification);
+            return certifications;
+        }, 'certifications');
         res.status(201).json(certification);
     } catch (err) {
         res.status(500).json({ error: 'Failed to create certification.' });
@@ -81,36 +78,50 @@ router.post('/', authMiddleware, (req, res) => {
 
 router.put('/:id', authMiddleware, (req, res) => {
     try {
-        const certifications = readCertifications();
-        const index = certifications.findIndex(item => item.id === req.params.id);
-        if (index === -1) return res.status(404).json({ error: 'Certification not found.' });
+        let updated = null;
+        updateJson(DATA_FILE, [], FALLBACK_DATA_FILE, function (certifications) {
+            const index = certifications.findIndex(item => item.id === req.params.id);
+            if (index === -1) {
+                const err = new Error('Certification not found.');
+                err.statusCode = 404;
+                throw err;
+            }
 
-        certifications[index] = {
-            ...certifications[index],
-            name: String(req.body.name || certifications[index].name || '').trim(),
-            issuer: String(req.body.issuer || '').trim(),
-            expiryDate: String(req.body.expiryDate || '').trim(),
-            image: String(req.body.image || '').trim(),
-            description: String(req.body.description || '').trim()
-        };
-
-        writeCertifications(certifications);
-        res.json(certifications[index]);
+            updated = {
+                ...certifications[index],
+                name: String(req.body.name || certifications[index].name || '').trim(),
+                issuer: String(req.body.issuer || '').trim(),
+                expiryDate: String(req.body.expiryDate || '').trim(),
+                image: String(req.body.image || '').trim(),
+                description: String(req.body.description || '').trim()
+            };
+            certifications[index] = updated;
+            return certifications;
+        }, 'certifications');
+        res.json(updated);
     } catch (err) {
+        if (err.statusCode === 404) return res.status(404).json({ error: err.message });
         res.status(500).json({ error: 'Failed to update certification.' });
     }
 });
 
 router.delete('/:id', authMiddleware, (req, res) => {
     try {
-        const certifications = readCertifications();
-        const index = certifications.findIndex(item => item.id === req.params.id);
-        if (index === -1) return res.status(404).json({ error: 'Certification not found.' });
+        let deleted = null;
+        updateJson(DATA_FILE, [], FALLBACK_DATA_FILE, function (certifications) {
+            const index = certifications.findIndex(item => item.id === req.params.id);
+            if (index === -1) {
+                const err = new Error('Certification not found.');
+                err.statusCode = 404;
+                throw err;
+            }
 
-        const deleted = certifications.splice(index, 1)[0];
-        writeCertifications(certifications);
+            deleted = certifications.splice(index, 1)[0];
+            return certifications;
+        }, 'certifications');
         res.json({ message: 'Certification deleted.', certification: deleted });
     } catch (err) {
+        if (err.statusCode === 404) return res.status(404).json({ error: err.message });
         res.status(500).json({ error: 'Failed to delete certification.' });
     }
 });

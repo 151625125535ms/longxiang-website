@@ -83,6 +83,13 @@ function writeJson(filePath, data, backupName) {
     writeJsonAtomic(filePath, data, backupName);
 }
 
+function updateJson(filePath, fallback, seedPath, updater, backupName) {
+    const current = readJson(filePath, fallback, seedPath);
+    const next = updater(current);
+    writeJsonAtomic(filePath, next, backupName);
+    return next;
+}
+
 function makeId(prefix) {
     return prefix + '-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
 }
@@ -98,5 +105,6 @@ module.exports = {
     readJson,
     writeJson,
     writeJsonAtomic,
+    updateJson,
     makeId
 };

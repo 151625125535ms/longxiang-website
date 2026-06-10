@@ -1,7 +1,7 @@
 const express = require('express');
 const path = require('path');
 const { authMiddleware } = require('../middleware/auth');
-const { makeId, readJson, resolveDataFile, writeJsonAtomic } = require('../lib/fileStore');
+const { makeId, readJson, resolveDataFile, updateJson } = require('../lib/fileStore');
 
 let nodemailer = null;
 try {
@@ -20,10 +20,6 @@ const STATUS_PRIORITY = { new: 0, read: 1, replied: 2, closed: 3 };
 
 function readInquiries() {
     return readJson(DATA_FILE, [], FALLBACK_DATA_FILE);
-}
-
-function writeInquiries(inquiries) {
-    writeJsonAtomic(DATA_FILE, inquiries, 'inquiries');
 }
 
 function normalizeInquiry(body) {
@@ -117,7 +113,6 @@ router.post('/', async (req, res) => {
             return res.status(400).json({ error: errors.join(' ') });
         }
 
-        const inquiries = readInquiries();
         const inquiry = {
             id: makeId('inq'),
             ...normalized,
@@ -128,8 +123,10 @@ router.post('/', async (req, res) => {
             notes: ''
         };
 
-        inquiries.unshift(inquiry);
-        writeInquiries(inquiries);
+        updateJson(DATA_FILE, [], FALLBACK_DATA_FILE, function (inquiries) {
+            inquiries.unshift(inquiry);
+            return inquiries;
+        }, 'inquiries');
 
         let notification = { sent: false, reason: 'not_attempted' };
         try {
@@ -201,7 +198,9 @@ router.put('/:id', authMiddleware, (req, res) => {
             repliedAt: nextStatus === 'replied' && !inquiries[index].repliedAt ? new Date().toISOString() : inquiries[index].repliedAt
         };
 
-        writeInquiries(inquiries);
+        updateJson(DATA_FILE, [], FALLBACK_DATA_FILE, function () {
+            return inquiries;
+        }, 'inquiries');
         res.json(inquiries[index]);
     } catch (err) {
         res.status(500).json({ error: 'Failed to update inquiry.' });
@@ -215,7 +214,9 @@ router.delete('/:id', authMiddleware, (req, res) => {
         if (index === -1) return res.status(404).json({ error: 'Inquiry not found.' });
 
         const deleted = inquiries.splice(index, 1)[0];
-        writeInquiries(inquiries);
+        updateJson(DATA_FILE, [], FALLBACK_DATA_FILE, function () {
+            return inquiries;
+        }, 'inquiries');
         res.json({ message: 'Inquiry deleted.', inquiry: deleted });
     } catch (err) {
         res.status(500).json({ error: 'Failed to delete inquiry.' });
