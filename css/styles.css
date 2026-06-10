@@ -8966,20 +8966,35 @@ p:last-child {
 
     .footer-conversion {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        align-items: center;
-        gap: 12px;
+        grid-template-columns: 1fr;
+        align-items: stretch;
+        gap: 10px;
         padding-top: 14px;
         margin-top: 0;
     }
 
     .footer-conversion h4 {
-        margin: 0;
+        display: none;
     }
 
     .footer-conversion-text,
     .footer-conversion .footer-social-links {
         display: none;
+    }
+
+    .footer-quote-form {
+        width: 100%;
+        max-width: none;
+        gap: 10px;
+    }
+
+    .footer-quote-form textarea {
+        min-height: 96px;
+    }
+
+    .footer-quote-form input,
+    .footer-quote-form button {
+        min-height: 46px;
     }
 
     .footer-quote-button {
@@ -9005,7 +9020,6 @@ p:last-child {
     }
 
     .footer-conversion {
-        grid-template-columns: 1fr;
         gap: 10px;
     }
 
