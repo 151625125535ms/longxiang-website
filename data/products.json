@@ -159,7 +159,7 @@
         "Energy-efficient distribution"
       ]
     ],
-    "featured": false,
+    "featured": true,
     "categoryLabelAr": "محولات مغمورة بالزيت",
     "nameAr": "محول توزيع بقلب من السبيكة غير المتبلورة S(B)H21",
     "shortDescAr": "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق.",
@@ -318,7 +318,7 @@
         "Distribution networks"
       ]
     ],
-    "featured": true,
+    "featured": false,
     "categoryLabelAr": "محولات مغمورة بالزيت",
     "nameAr": "محول توزيع بقلب ملفوف ثلاثي الأبعاد S13",
     "shortDescAr": "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق.",
@@ -1156,7 +1156,7 @@
         "Noise-sensitive installations"
       ]
     ],
-    "featured": false,
+    "featured": true,
     "categoryLabelAr": "محولات جافة",
     "nameAr": "محول جاف ثلاثي الطور بخمسة أعمدة من السبيكة غير المتبلورة",
     "shortDescAr": "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق.",
@@ -1231,7 +1231,7 @@
         "High efficiency, low noise"
       ]
     ],
-    "featured": true,
+    "featured": false,
     "categoryLabelAr": "محولات خاصة",
     "nameAr": "محول فرن جاف بسبيكة غير متبلورة سلسلة DGH",
     "shortDescAr": "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق.",
@@ -1302,7 +1302,7 @@
         "Mining, hazardous environments"
       ]
     ],
-    "featured": true,
+    "featured": false,
     "categoryLabelAr": "محولات خاصة",
     "nameAr": "محول جر وتعدين مقاوم للانفجار",
     "shortDescAr": "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق.",
@@ -1845,7 +1845,7 @@
         "Input over-voltage protection, output over-voltage protection and related protections"
       ]
     ],
-    "featured": false
+    "featured": true
   },
   {
     "id": "LXDC-120-400kW",
@@ -1941,7 +1941,7 @@
         "Input over-voltage, input under-voltage, output over-voltage, output short-circuit, over-temperature and communication protection"
       ]
     ],
-    "featured": false
+    "featured": true
   },
   {
     "id": "LXDC480-1280kW",
@@ -3646,7 +3646,7 @@
         "IEC 298, GB 3906, DL/T 404"
       ]
     ],
-    "featured": false
+    "featured": true
   },
   {
     "id": "KYN-12",
@@ -3727,7 +3727,7 @@
         "Free from fire, explosion hazard, severe pollution, chemical corrosion and violent vibration"
       ]
     ],
-    "featured": false
+    "featured": true
   },
   {
     "id": "LXWZ",
