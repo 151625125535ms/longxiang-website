@@ -6670,6 +6670,17 @@ p:last-child {
     border: 1px solid var(--color-gray-200);
 }
 
+.solution-image-led-grid .solution-diagram-card {
+    padding: var(--spacing-lg);
+}
+
+.solution-image-led-grid .solution-diagram-card img {
+    height: clamp(320px, 28vw, 420px);
+    padding: 0;
+    object-fit: cover;
+    background: var(--color-gray-100);
+}
+
 .solution-diagram-card h3 {
     margin: var(--spacing-lg) 0 var(--spacing-sm);
     font-family: var(--font-body);
