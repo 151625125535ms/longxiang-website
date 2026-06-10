@@ -8838,3 +8838,132 @@ p:last-child {
         font-size: 0.94rem;
     }
 }
+
+/* Mobile compact footer: keep conversion paths visible without making the page bottom overly long. */
+@media (max-width: 768px) {
+    .footer {
+        padding-top: 22px;
+    }
+
+    .footer .container {
+        width: min(92%, 430px);
+    }
+
+    .footer-grid {
+        gap: 18px;
+        padding-bottom: 20px;
+    }
+
+    .footer-brand .nav-logo {
+        margin-bottom: 10px;
+    }
+
+    .footer-brand p {
+        display: none;
+    }
+
+    .footer-contact-item {
+        gap: 8px;
+        margin-bottom: 8px;
+        font-size: 0.82rem;
+        line-height: 1.35;
+    }
+
+    .footer-contact-item .icon {
+        min-width: 16px;
+        margin-top: 1px;
+    }
+
+    .footer-company > .messenger-links {
+        margin-top: 10px;
+    }
+
+    .messenger-links {
+        gap: 8px;
+    }
+
+    .messenger-link {
+        min-height: 34px;
+        padding: 0 11px;
+        border-radius: 4px;
+        font-size: 0.78rem;
+    }
+
+    .communication-qr,
+    .wechat-placeholder {
+        display: none;
+    }
+
+    .footer-navigation {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+        padding-top: 16px;
+        margin-top: 0;
+    }
+
+    .footer-column h4 {
+        margin-bottom: 8px;
+        font-size: 0.78rem;
+        line-height: 1.2;
+        letter-spacing: 0.05em;
+    }
+
+    .footer-links {
+        gap: 2px;
+    }
+
+    .footer-links a {
+        padding: 3px 0;
+        font-size: 0.8rem;
+        line-height: 1.25;
+    }
+
+    .footer-conversion {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 12px;
+        padding-top: 14px;
+        margin-top: 0;
+    }
+
+    .footer-conversion h4 {
+        margin: 0;
+    }
+
+    .footer-conversion-text,
+    .footer-conversion .footer-social-links {
+        display: none;
+    }
+
+    .footer-quote-button {
+        min-height: 36px;
+        margin-top: 0;
+        padding: 0 14px;
+        border-radius: 4px;
+        font-size: 0.78rem;
+        white-space: nowrap;
+    }
+
+    .footer-bottom {
+        padding: 12px 0 16px;
+        gap: 0;
+        font-size: 0.72rem;
+        line-height: 1.35;
+    }
+}
+
+@media (max-width: 380px) {
+    .footer-navigation {
+        gap: 12px;
+    }
+
+    .footer-conversion {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .footer-quote-button {
+        width: 100%;
+    }
+}
