@@ -194,26 +194,6 @@ html {
     line-height: 1.55;
 }
 
-.about-video-fallback {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 40px;
-    margin-top: 14px;
-    padding: 0 16px;
-    border: 1px solid rgba(255, 255, 255, 0.28);
-    border-radius: 4px;
-    background: rgba(255, 255, 255, 0.08);
-    color: var(--color-white-pure);
-    font-weight: 800;
-}
-
-.about-video-fallback:hover {
-    border-color: rgba(255, 255, 255, 0.55);
-    background: rgba(255, 255, 255, 0.14);
-    color: var(--color-white-pure);
-}
-
 .about-media-note {
     position: absolute;
     right: 18px;

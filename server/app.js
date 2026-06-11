@@ -38,7 +38,10 @@ const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
     : null;
 
 if (compression) app.use(compression());
-if (helmet) app.use(helmet({ contentSecurityPolicy: false }));
+if (helmet) app.use(helmet({
+    contentSecurityPolicy: false,
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' }
+}));
 if (morgan) app.use(morgan('combined'));
 
 app.use(cors({
