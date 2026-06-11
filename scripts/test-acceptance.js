@@ -3,6 +3,7 @@ const http = require('http');
 const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
+require('dotenv').config({ path: path.join(ROOT, '.env') });
 const PORT = Number(process.env.PORT || 3000);
 const BASE_URL = 'http://127.0.0.1:' + PORT;
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
