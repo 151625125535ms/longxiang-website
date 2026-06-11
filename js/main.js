@@ -1400,33 +1400,252 @@
         var container = document.getElementById('certifications-container');
         if (!container) return;
 
-        function render(data) {
-            if (!data.length) {
-                container.innerHTML = '<div class="empty-state">Certification files will be updated soon.</div>';
+        var tabsContainer = document.getElementById('certification-tabs');
+        var searchInput = document.getElementById('certification-search');
+        var resultCount = document.getElementById('certifications-result-count');
+        var loadMore = document.getElementById('certifications-load-more');
+        var pageSize = 24;
+        var visibleCount = pageSize;
+        var activeCategory = 'all';
+        var certifications = [];
+        var filtered = [];
+
+        var labels = isArabic ? {
+            all: 'الكل',
+            loadMore: 'تحميل المزيد',
+            noResults: 'لا توجد سجلات مطابقة.',
+            showing: 'عرض {shown} من {total} سجل',
+            imageAlt: 'معاينة الشهادة',
+            close: 'إغلاق',
+            sourceImage: 'صورة',
+            sourcePdf: 'غلاف PDF',
+            pages: '{count} صفحات',
+            onePage: 'صفحة واحدة',
+            total: 'إجمالي السجلات',
+            reports: 'تقارير اختبار',
+            patents: 'براءات اختراع',
+            qualifications: 'مؤهلات مؤسسية'
+        } : {
+            all: 'All',
+            loadMore: 'Load More',
+            noResults: 'No matching records.',
+            showing: 'Showing {shown} of {total} records',
+            imageAlt: 'Certificate preview',
+            close: 'Close',
+            sourceImage: 'Image',
+            sourcePdf: 'PDF cover',
+            pages: '{count} pages',
+            onePage: '1 page',
+            total: 'Total Records',
+            reports: 'Test Reports',
+            patents: 'Patents',
+            qualifications: 'Enterprise Qualifications'
+        };
+
+        var categoryOrder = ['test-reports', 'test-reports-extra', 'honors', 'qualifications', 'patents'];
+
+        function categoryLabel(category, data) {
+            var match = data.find(function (item) { return item.category === category; });
+            if (!match) return category;
+            return isArabic ? (match.categoryLabelAr || match.categoryLabel || category) : (match.categoryLabel || category);
+        }
+
+        function certName(cert) {
+            return isArabic ? (cert.nameAr || cert.name || '') : (cert.name || '');
+        }
+
+        function certDescription(cert) {
+            return isArabic ? (cert.descriptionAr || cert.description || '') : (cert.description || '');
+        }
+
+        function sourceLabel(cert) {
+            if ((cert.sourceType || '').toLowerCase() === 'pdf') return labels.sourcePdf;
+            return labels.sourceImage;
+        }
+
+        function pagesLabel(cert) {
+            var pages = Number(cert.pages || 1);
+            if (pages <= 1) return labels.onePage;
+            return labels.pages.replace('{count}', pages);
+        }
+
+        function updateStats(data) {
+            var totals = data.reduce(function (acc, item) {
+                acc.total += 1;
+                if (item.category === 'test-reports' || item.category === 'test-reports-extra') acc.reports += 1;
+                if (item.category === 'patents') acc.patents += 1;
+                if (item.category === 'qualifications') acc.qualifications += 1;
+                return acc;
+            }, { total: 0, reports: 0, patents: 0, qualifications: 0 });
+
+            Object.keys(totals).forEach(function (key) {
+                var el = document.querySelector('[data-cert-stat="' + key + '"]');
+                if (el) el.textContent = totals[key];
+            });
+        }
+
+        function renderTabs(data) {
+            if (!tabsContainer) return;
+            var counts = data.reduce(function (acc, item) {
+                acc[item.category] = (acc[item.category] || 0) + 1;
+                return acc;
+            }, {});
+            var buttons = ['all'].concat(categoryOrder.filter(function (category) { return counts[category]; }));
+            tabsContainer.innerHTML = buttons.map(function (category) {
+                var count = category === 'all' ? data.length : counts[category];
+                var label = category === 'all' ? labels.all : categoryLabel(category, data);
+                var active = category === activeCategory ? ' active' : '';
+                return '<button type="button" class="cert-tab' + active + '" data-cert-category="' + escapeHtml(category) + '">' +
+                    '<span>' + escapeHtml(label) + '</span><strong>' + count + '</strong>' +
+                '</button>';
+            }).join('');
+        }
+
+        function applyFilters() {
+            var query = searchInput ? searchInput.value.trim().toLowerCase() : '';
+            filtered = certifications.filter(function (cert) {
+                var categoryMatch = activeCategory === 'all' || cert.category === activeCategory;
+                if (!categoryMatch) return false;
+                if (!query) return true;
+                return [
+                    cert.name,
+                    cert.nameAr,
+                    cert.categoryLabel,
+                    cert.categoryLabelAr,
+                    cert.description,
+                    cert.descriptionAr
+                ].join(' ').toLowerCase().indexOf(query) !== -1;
+            });
+            visibleCount = pageSize;
+            renderCards();
+        }
+
+        function renderCards() {
+            if (!filtered.length) {
+                container.innerHTML = '<div class="empty-state">' + labels.noResults + '</div>';
+                if (resultCount) resultCount.textContent = labels.showing.replace('{shown}', 0).replace('{total}', 0);
+                if (loadMore) loadMore.hidden = true;
                 return;
             }
 
-            container.innerHTML = data.map(function (cert) {
-                var file = cert.image || '';
-                var image = file
-                    ? (/\.pdf($|\?)/i.test(file)
-                        ? '<a class="cert-placeholder cert-file-link" href="' + escapeHtml(resolveAssetPath(file)) + '" target="_blank" rel="noopener">PDF</a>'
-                        : '<img src="' + escapeHtml(resolveAssetPath(file)) + '" alt="' + escapeHtml(cert.name) + '">')
-                    : '<div class="cert-placeholder">CERT</div>';
-                return '<article class="cert-card fade-in">' +
-                    '<div class="cert-media">' + image + '</div>' +
-                    '<div class="cert-body">' +
-                        '<h4>' + escapeHtml(cert.name) + '</h4>' +
-                        '<p>' + escapeHtml(cert.description || '') + '</p>' +
-                        '<span>' + escapeHtml(cert.issuer || 'Issuer to be updated') + '</span>' +
-                    '</div>' +
-                '</article>';
+            var visible = filtered.slice(0, visibleCount);
+            container.innerHTML = visible.map(function (cert) {
+                var image = cert.image ? resolveAssetPath(cert.image) : '';
+                var name = certName(cert);
+                var description = certDescription(cert);
+                var category = isArabic ? (cert.categoryLabelAr || cert.categoryLabel || '') : (cert.categoryLabel || '');
+                var meta = sourceLabel(cert) + (cert.category && cert.category.indexOf('test-reports') === 0 ? ' · ' + pagesLabel(cert) : '');
+                return '<button type="button" class="cert-card fade-in" data-cert-id="' + escapeHtml(cert.id) + '">' +
+                    '<span class="cert-media">' +
+                        (image ? '<img src="' + escapeHtml(image) + '" alt="' + escapeHtml(name) + '" loading="lazy" width="' + escapeHtml(cert.width || 800) + '" height="' + escapeHtml(cert.height || 1100) + '">' : '<span class="cert-placeholder">CERT</span>') +
+                    '</span>' +
+                    '<span class="cert-body">' +
+                        '<span class="cert-category">' + escapeHtml(category) + '</span>' +
+                        '<span class="cert-title">' + escapeHtml(name) + '</span>' +
+                        '<span class="cert-description">' + escapeHtml(description) + '</span>' +
+                        '<span class="cert-meta">' + escapeHtml(meta) + '</span>' +
+                    '</span>' +
+                '</button>';
             }).join('');
+
+            if (resultCount) {
+                resultCount.textContent = labels.showing
+                    .replace('{shown}', Math.min(visibleCount, filtered.length))
+                    .replace('{total}', filtered.length);
+            }
+            if (loadMore) {
+                loadMore.hidden = visibleCount >= filtered.length;
+                loadMore.textContent = labels.loadMore;
+            }
             initScrollAnimations();
         }
 
-        fetchJson('/api/certifications', assetPrefix + 'data/certifications.json').then(render).catch(function () {
+        function ensurePreviewModal() {
+            var modal = document.getElementById('certification-preview-modal');
+            if (modal) return modal;
+            modal = document.createElement('div');
+            modal.id = 'certification-preview-modal';
+            modal.className = 'cert-preview-modal';
+            modal.innerHTML =
+                '<div class="cert-preview-dialog" role="dialog" aria-modal="true" aria-labelledby="cert-preview-title">' +
+                    '<button type="button" class="cert-preview-close" aria-label="' + escapeHtml(labels.close) + '">×</button>' +
+                    '<div class="cert-preview-image-wrap"><img src="" alt="' + escapeHtml(labels.imageAlt) + '"></div>' +
+                    '<div class="cert-preview-info">' +
+                        '<span class="cert-category"></span>' +
+                        '<h3 id="cert-preview-title"></h3>' +
+                        '<p></p>' +
+                    '</div>' +
+                '</div>';
+            document.body.appendChild(modal);
+            modal.addEventListener('click', function (event) {
+                if (event.target === modal || event.target.classList.contains('cert-preview-close')) closePreviewModal();
+            });
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape') closePreviewModal();
+            });
+            return modal;
+        }
+
+        function openPreview(cert) {
+            if (!cert || !cert.image) return;
+            var modal = ensurePreviewModal();
+            var image = modal.querySelector('img');
+            var title = modal.querySelector('h3');
+            var description = modal.querySelector('p');
+            var category = modal.querySelector('.cert-preview-info .cert-category');
+            var name = certName(cert);
+            image.src = resolveAssetPath(cert.image);
+            image.alt = name || labels.imageAlt;
+            title.textContent = name;
+            description.textContent = sourceLabel(cert) + ' · ' + pagesLabel(cert);
+            category.textContent = isArabic ? (cert.categoryLabelAr || cert.categoryLabel || '') : (cert.categoryLabel || '');
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closePreviewModal() {
+            var modal = document.getElementById('certification-preview-modal');
+            if (!modal || !modal.classList.contains('show')) return;
+            modal.classList.remove('show');
+            document.body.style.overflow = '';
+        }
+
+        if (tabsContainer) {
+            tabsContainer.addEventListener('click', function (event) {
+                var button = event.target.closest('[data-cert-category]');
+                if (!button) return;
+                activeCategory = button.getAttribute('data-cert-category') || 'all';
+                renderTabs(certifications);
+                applyFilters();
+            });
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener('input', applyFilters);
+        }
+
+        if (loadMore) {
+            loadMore.addEventListener('click', function () {
+                visibleCount += pageSize;
+                renderCards();
+            });
+        }
+
+        container.addEventListener('click', function (event) {
+            var card = event.target.closest('[data-cert-id]');
+            if (!card) return;
+            var cert = certifications.find(function (item) { return item.id === card.getAttribute('data-cert-id'); });
+            openPreview(cert);
+        });
+
+        fetchJson('/api/certifications', assetPrefix + 'data/certifications.json').then(function (data) {
+            certifications = Array.isArray(data) ? data : [];
+            updateStats(certifications);
+            renderTabs(certifications);
+            applyFilters();
+        }).catch(function () {
             container.innerHTML = '<div class="empty-state">Certification files will be updated soon.</div>';
+            if (loadMore) loadMore.hidden = true;
         });
     }
 

@@ -52,19 +52,44 @@
     <div class="mobile-menu-overlay"></div>
 
 
-    <section class="page-hero" style="background-image: url('5、厂区厂貌/厂区1.JPG'); background-size: cover; background-position: center;">
+    <section class="page-hero certifications-page-hero" style="background-image: url('5、厂区厂貌/厂区1.JPG'); background-size: cover; background-position: center;">
         <div class="page-hero-pattern"></div>
         <div class="container">
             <div class="breadcrumb"><a href="index.html">Home</a><span class="separator">/</span><a href="about.html">About Us</a><span class="separator">/</span><span class="current">Certificates</span></div>
-            <h1>Certificates</h1>
-            <p>Quality, compliance, and qualification credentials for power equipment projects.</p>
+            <h1>Certificates & Qualification Archive</h1>
+            <p>Verified test reports, enterprise qualifications, honors, patent certificates, and compliance materials for power equipment supplier review.</p>
         </div>
     </section>
     <main>
-        <section class="section bg-white">
+        <section class="section bg-white certifications-page">
             <div class="container">
-                <div class="section-header"><h2>Certificates</h2><p>Quality, compliance, and qualification credentials for power equipment projects.</p></div>
+                <div class="certifications-intro">
+                    <div>
+                        <span class="certifications-kicker">Documented credibility</span>
+                        <h2>Qualification materials for procurement and technical due diligence</h2>
+                    </div>
+                    <p>Browse Longxiang's certification archive by document type, search by certificate name, and open each record for a larger preview.</p>
+                </div>
+                <div class="certifications-stats" aria-label="Certificate archive summary">
+                    <div class="cert-stat"><strong data-cert-stat="total">455</strong><span>Total Records</span></div>
+                    <div class="cert-stat"><strong data-cert-stat="reports">317</strong><span>Test Reports</span></div>
+                    <div class="cert-stat"><strong data-cert-stat="patents">89</strong><span>Patent Certificates</span></div>
+                    <div class="cert-stat"><strong data-cert-stat="qualifications">9</strong><span>Enterprise Qualifications</span></div>
+                </div>
+                <div class="certifications-toolbar" aria-label="Certificate filters">
+                    <div class="cert-tabs" id="certification-tabs"></div>
+                    <label class="cert-search">
+                        <span>Search</span>
+                        <input id="certification-search" type="search" placeholder="Search by certificate name">
+                    </label>
+                </div>
+                <div class="certifications-result-row">
+                    <p id="certifications-result-count">Loading certificate records...</p>
+                </div>
                 <div class="certifications-grid" id="certifications-container"></div>
+                <div class="certifications-actions">
+                    <button type="button" class="cert-load-more" id="certifications-load-more">Load More</button>
+                </div>
             </div>
         </section>
     </main>

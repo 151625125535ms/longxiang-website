@@ -52,19 +52,44 @@
     <div class="mobile-menu-overlay"></div>
 
 
-    <section class="page-hero" style="background-image: url('../5、厂区厂貌/厂区1.JPG'); background-size: cover; background-position: center;">
+    <section class="page-hero certifications-page-hero" style="background-image: url('../5、厂区厂貌/厂区1.JPG'); background-size: cover; background-position: center;">
         <div class="page-hero-pattern"></div>
         <div class="container">
             <div class="breadcrumb"><a href="index.html">الرئيسية</a><span class="separator">/</span><a href="about.html">من نحن</a><span class="separator">/</span><span class="current">الشهادات</span></div>
-            <h1>الشهادات</h1>
-            <p>شهادات الجودة والامتثال لمشروعات معدات الطاقة.</p>
+            <h1>أرشيف الشهادات والمؤهلات</h1>
+            <p>تقارير اختبار موثقة، ومؤهلات مؤسسية، وتكريمات، وشهادات براءات اختراع، ومواد امتثال لمراجعة موردي معدات الطاقة.</p>
         </div>
     </section>
     <main>
-        <section class="section bg-white">
+        <section class="section bg-white certifications-page">
             <div class="container">
-                <div class="section-header"><h2>الشهادات</h2><p>شهادات الجودة والامتثال لمشروعات معدات الطاقة.</p></div>
+                <div class="certifications-intro">
+                    <div>
+                        <span class="certifications-kicker">موثوقية مدعومة بالوثائق</span>
+                        <h2>مواد تأهيل للمشتريات والمراجعة الفنية</h2>
+                    </div>
+                    <p>تصفح أرشيف شهادات Longxiang حسب نوع الوثيقة، وابحث باسم الشهادة، وافتح كل سجل لمعاينة أكبر.</p>
+                </div>
+                <div class="certifications-stats" aria-label="ملخص أرشيف الشهادات">
+                    <div class="cert-stat"><strong data-cert-stat="total">455</strong><span>إجمالي السجلات</span></div>
+                    <div class="cert-stat"><strong data-cert-stat="reports">317</strong><span>تقارير اختبار</span></div>
+                    <div class="cert-stat"><strong data-cert-stat="patents">89</strong><span>شهادات براءات اختراع</span></div>
+                    <div class="cert-stat"><strong data-cert-stat="qualifications">9</strong><span>مؤهلات مؤسسية</span></div>
+                </div>
+                <div class="certifications-toolbar" aria-label="مرشحات الشهادات">
+                    <div class="cert-tabs" id="certification-tabs"></div>
+                    <label class="cert-search">
+                        <span>بحث</span>
+                        <input id="certification-search" type="search" placeholder="ابحث باسم الشهادة">
+                    </label>
+                </div>
+                <div class="certifications-result-row">
+                    <p id="certifications-result-count">جاري تحميل سجلات الشهادات...</p>
+                </div>
                 <div class="certifications-grid" id="certifications-container"></div>
+                <div class="certifications-actions">
+                    <button type="button" class="cert-load-more" id="certifications-load-more">تحميل المزيد</button>
+                </div>
             </div>
         </section>
     </main>
