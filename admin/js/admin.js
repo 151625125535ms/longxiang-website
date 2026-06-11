@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    var API_BASE = '../api';
+    var API_BASE = '/api';
     var CATEGORIES = [
         { value: 'oil-immersed', group: 'transformer', subCategory: 'oil-immersed', label: 'Oil Immersed Transformer', labelAr: 'محول مغمور بالزيت' },
         { value: 'dry-type', group: 'transformer', subCategory: 'dry-type', label: 'Dry Type Transformer', labelAr: 'محول جاف' },
@@ -69,10 +69,29 @@
 
             return res.text().then(function (text) {
                 var data = text ? JSON.parse(text) : {};
-                if (!res.ok) throw new Error(data.message || data.error || '请求失败');
+                if (!res.ok) {
+                    var message = data.message || (data.error && data.error.message) || data.error || '请求失败';
+                    var err = new Error(message);
+                    err.status = res.status;
+                    err.code = data.error && data.error.code;
+                    throw err;
+                }
                 return data;
             });
         });
+    }
+
+    function unwrapDataResponse(response) {
+        if (response && response.ok && response.data !== undefined) return response.data;
+        return response;
+    }
+
+    function unwrapListResponse(response) {
+        if (response && response.ok && response.data && response.data.items) return response.data.items;
+        if (response && response.ok && Array.isArray(response.data)) return response.data;
+        if (response && response.items) return response.items;
+        if (Array.isArray(response)) return response;
+        return [];
     }
 
     function showToast(message, type) {
@@ -209,14 +228,27 @@
         var products = [];
         var inquiries = [];
         var certifications = [];
+        var certificationCategoryMap = {};
+        var certificationViewRows = {};
+        var certsByView = {};
+        var contentBlockCache = {};
+        var trashedProducts = [];
+        var trashedCerts = [];
         var educationContent = null;
         var editingProductId = null;
+        var editingProductVersion = null;
         var uploadedImagePath = '';
+        var productCategories = [];
+        var productSearchTimer = null;
         var editingInquiryId = null;
         var openedInquiry = null;
         var editingCertificationId = null;
         var uploadedCertificationPath = '';
         var currentView = 'dashboard';
+        var auditLogPage = 1;
+        var auditLogMeta = { page: 1, pageSize: 20, total: 0 };
+        var assetPage = 1;
+        var assetMeta = { page: 1, pageSize: 20, total: 0 };
 
         var usernameEl = document.getElementById('sidebar-username');
         var avatarEl = document.getElementById('sidebar-avatar');
@@ -229,7 +261,14 @@
         bindInquiryEvents();
         bindCompanyEvents();
         bindCertificationEvents();
+        bindCategoryEvents();
         bindEducationEvents();
+        bindContentBlockEvents();
+        bindSystemSettingsEvents();
+        bindTrashEvents();
+        bindAssetsEvents();
+        loadProductCategories();
+        loadCertificationCategories();
         switchView('dashboard');
 
         function bindNavigation() {
@@ -283,49 +322,80 @@
                 products: '产品管理',
                 inquiries: '询盘管理',
                 company: '公司信息',
-                certifications: '证书管理'
+                certifications: '证书管理',
+                categories: '分类管理',
+                'content-company-overview': '企业概况',
+                'content-contact': '联系我们',
+                'content-about': '关于我们',
+                'content-technology': '科技创新',
+                'content-industries': '应用行业',
+                'content-education': '教育合作',
+                'content-page-blocks': '页面区块',
+                'cert-qualifications': '企业资质',
+                'cert-patents': '专利证书',
+                'cert-software': '软著',
+                'cert-test-reports': '检测报告',
+                trash: '回收站',
+                assets: '资源库',
+                'system-status': '系统状态',
+                'settings-modules': '模块开关',
+                'audit-logs': '审计日志'
             };
             document.getElementById('header-title').textContent = titles[view] || (view === 'education' ? '教育合作内容管理' : '');
 
             if (view === 'dashboard') loadDashboard();
             if (view === 'products') loadProducts();
+            if (view === 'categories') loadProductCategoriesView();
             if (view === 'inquiries') loadInquiries();
-            if (view === 'company') loadCompany();
-            if (view === 'certifications') loadCertifications();
-            if (view === 'education') loadEducation();
+            if (view === 'cert-qualifications') loadCertView(view);
+            if (view === 'cert-patents') loadCertView(view);
+            if (view === 'cert-software') loadCertView(view);
+            if (view === 'cert-test-reports') loadCertView(view);
+            if (view === 'content-company-overview') loadContentBlock(view);
+            if (view === 'content-contact') loadContentBlock(view);
+            if (view === 'content-about') loadContentBlock(view);
+            if (view === 'content-technology') loadContentBlock(view);
+            if (view === 'content-industries') loadContentBlock(view);
+            if (view === 'content-education') loadContentBlock(view);
+            if (view === 'content-page-blocks') loadContentBlock(view);
+            if (view === 'trash') loadTrash();
+            if (view === 'assets') {
+                assetPage = 1;
+                loadAssets();
+            }
+            if (view === 'system-status') loadSystemStatus();
+            if (view === 'settings-modules') loadModuleSettings();
+            if (view === 'audit-logs') {
+                auditLogPage = 1;
+                loadAuditLogs();
+            }
         }
 
         function loadDashboard() {
             ['stat-total', 'stat-featured', 'stat-categories', 'stat-inquiries', 'stat-new-inquiries'].forEach(function (id) { setText(id, '—'); });
-            Promise.all([
-                apiRequest('/products'),
-                apiRequest('/inquiries?pageSize=200')
-            ]).then(function (results) {
-                products = results[0];
-                inquiries = results[1].items || [];
-                renderDashboard();
+            apiRequest('/admin/dashboard').then(function (response) {
+                var data = unwrapDataResponse(response) || {};
+                inquiries = data.recentInquiries || [];
+                renderDashboard(data);
             }).catch(function (err) {
                 showToast('加载控制台失败：' + err.message, 'error');
             });
         }
 
-        function renderDashboard() {
-            var featured = products.filter(function (p) { return p.featured; });
-            var categoryMap = {};
-            products.forEach(function (p) { categoryMap[p.category] = p.categoryLabel; });
+        function renderDashboard(data) {
+            data = data || {};
+            var productStats = data.products || {};
+            var inquiryStats = data.inquiries || {};
 
-            setText('stat-total', products.length);
-            setText('stat-featured', featured.length);
-            setText('stat-categories', Object.keys(categoryMap).length);
-            setText('stat-inquiries', inquiries.length);
-            setText('stat-new-inquiries', inquiries.filter(function (item) { return item.status === 'new'; }).length);
+            setText('stat-total', productStats.total || 0);
+            setText('stat-featured', '—');
+            setText('stat-categories', '—');
+            setText('stat-inquiries', inquiryStats.total || 0);
+            setText('stat-new-inquiries', inquiryStats.new || 0);
 
             var catGrid = document.getElementById('category-stats');
             if (catGrid) {
-                catGrid.innerHTML = Object.keys(categoryMap).map(function (key) {
-                    var count = products.filter(function (p) { return p.category === key; }).length;
-                    return '<div class="category-stat-card"><span class="badge badge-blue">' + count + '</span><div><div class="category-stat-count">' + count + '</div><div class="category-stat-label">' + escapeHtml(categoryMap[key]) + '</div></div></div>';
-                }).join('');
+                catGrid.innerHTML = '<div class="category-stat-card"><span class="badge badge-navy">—</span><div><div class="category-stat-count">—</div><div class="category-stat-label">分类统计待接入</div></div></div>';
             }
 
             renderRecentInquiries();
@@ -336,7 +406,7 @@
             if (!container) return;
 
             var sorted = inquiries.slice().sort(function (a, b) {
-                return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+                return new Date(b.created_at || b.createdAt || 0) - new Date(a.created_at || a.createdAt || 0);
             }).slice(0, 6);
 
             if (!sorted.length) {
@@ -348,12 +418,14 @@
                 var isNew = item.status === 'new';
                 var name = escapeHtml(item.name || '—');
                 var subject = escapeHtml(item.subject || item.product || '（无主题）');
-                var date = item.createdAt ? new Date(item.createdAt).toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' }) : '';
+                var createdAt = item.created_at || item.createdAt;
+                var date = createdAt ? new Date(createdAt).toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' }) : '';
+                var status = escapeHtml(STATUS_LABELS[item.status] || item.status || '');
                 return '<div class="recent-inquiry-item" data-id="' + escapeHtml(item.id) + '" role="button" tabindex="0" aria-label="查看询盘：' + name + '">' +
                     '<div class="recent-inquiry-dot' + (isNew ? ' new' : '') + '"></div>' +
                     '<div class="recent-inquiry-info">' +
                         '<div class="recent-inquiry-name">' + name + '</div>' +
-                        '<div class="recent-inquiry-subject">' + subject + '</div>' +
+                        '<div class="recent-inquiry-subject">' + subject + (status ? ' · ' + status : '') + '</div>' +
                     '</div>' +
                     '<div class="recent-inquiry-time">' + date + '</div>' +
                     '</div>';
@@ -385,7 +457,7 @@
                     } else if (action === 'view-products') {
                         switchView('products');
                     } else if (action === 'view-company') {
-                        switchView('company');
+                        switchView('content-company-overview');
                     }
                 });
                 el.addEventListener('keydown', function (e) {
@@ -413,12 +485,19 @@
         }
 
         function loadProducts() {
-            document.getElementById('products-tbody').innerHTML = skeletonRows(5, 5);
-            apiRequest('/products').then(function (data) {
-                products = data;
+            document.getElementById('products-tbody').innerHTML = skeletonRows(6, 5);
+            updateProductBatchBar();
+            var searchVal = ((document.getElementById('product-search') || {}).value || '').trim();
+            var catVal = (document.getElementById('product-category-filter') || {}).value || '';
+            var url = '/admin/products?page=1&pageSize=100';
+            if (searchVal) url += '&q=' + encodeURIComponent(searchVal);
+            if (catVal) url += '&category=' + encodeURIComponent(catVal);
+
+            apiRequest(url).then(function (response) {
+                products = unwrapListResponse(response);
                 renderProductsTable();
             }).catch(function (err) {
-                document.getElementById('products-tbody').innerHTML = '<tr><td colspan="5" class="table-empty"><p>加载失败，请刷新重试</p></td></tr>';
+                document.getElementById('products-tbody').innerHTML = '<tr><td colspan="6" class="table-empty"><p>加载失败，请刷新重试</p></td></tr>';
                 showToast('加载产品失败：' + err.message, 'error');
             });
         }
@@ -427,30 +506,31 @@
             var tbody = document.getElementById('products-tbody');
             if (!tbody) return;
 
-            var searchVal = ((document.getElementById('product-search') || {}).value || '').trim().toLowerCase();
-            var catVal = (document.getElementById('product-category-filter') || {}).value || '';
-            var filtered = products.filter(function (p) {
-                var matchSearch = !searchVal ||
-                    (p.name || '').toLowerCase().indexOf(searchVal) !== -1 ||
-                    (p.id || '').toLowerCase().indexOf(searchVal) !== -1;
-                var matchCat = !catVal || p.category === catVal || p.subCategory === catVal || p.group === catVal;
-                return matchSearch && matchCat;
-            }).sort(function (a, b) {
-                return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);
-            });
-
-            if (!filtered.length) {
-                tbody.innerHTML = '<tr><td colspan="5" class="table-empty"><p>' + (products.length ? '无匹配产品' : '暂无产品') + '</p></td></tr>';
+            if (!products.length) {
+                tbody.innerHTML = '<tr><td colspan="6" class="table-empty"><p>' + (products.length ? '无匹配产品' : '暂无产品') + '</p></td></tr>';
+                updateProductBatchBar();
                 return;
             }
 
-            tbody.innerHTML = filtered.map(function (product) {
+            tbody.innerHTML = products.map(function (product) {
+                var productId = product.id;
+                var displayId = product.legacy_id || product.slug || product.id;
+                var name = product.name_en || product.name || '';
+                var categoryName = product.category_name_en || product.category || '—';
+                var status = product.status || 'draft';
+                var statusClass = status === 'published' ? 'badge-green' : (status === 'deleted' ? 'badge-navy' : 'badge-gold');
+                var statusLabel = status === 'published' ? '已发布' : (status === 'deleted' ? '已删除' : '草稿');
+                var cover = product.cover_image || product.image || '';
+                var thumb = cover
+                    ? '<img class="product-thumb" src="../' + escapeHtml(cover) + '" alt="">'
+                    : '<div class="product-thumb" style="background:#eef1f5;border:1px solid #d8dee8;"></div>';
                 return '<tr>' +
-                    '<td><div class="product-name-cell"><img class="product-thumb" src="../' + escapeHtml(product.image || '') + '" alt=""><div><div class="product-name-text">' + escapeHtml(product.name) + '</div><div class="product-id-text">' + escapeHtml(product.id) + '</div></div></div></td>' +
-                    '<td><span class="badge badge-blue">' + escapeHtml(product.categoryLabel || product.category) + '</span></td>' +
-                    '<td><span class="badge badge-toggle ' + (product.featured ? 'badge-gold' : 'badge-navy') + '" role="button" tabindex="0" aria-label="' + (product.featured ? '取消首页推荐' : '设为首页推荐') + '" data-toggle-featured="' + escapeHtml(product.id) + '">' + (product.featured ? '首页推荐' : '普通') + '</span></td>' +
-                    '<td class="cell-muted">' + escapeHtml(product.shortDesc || '') + '</td>' +
-                    '<td><div class="actions-cell"><button class="btn btn-icon btn-icon-edit" aria-label="编辑产品" data-edit-product="' + escapeHtml(product.id) + '">' + ICON_EDIT + '</button><button class="btn btn-icon btn-icon-delete" aria-label="删除产品" data-delete-product="' + escapeHtml(product.id) + '">' + ICON_DELETE + '</button></div></td>' +
+                    '<td><input type="checkbox" class="product-row-check" data-id="' + escapeHtml(productId) + '" data-version="' + escapeHtml(product.version) + '"></td>' +
+                    '<td><div class="product-name-cell">' + thumb + '<div><div class="product-name-text">' + escapeHtml(name) + '</div><div class="product-id-text">' + escapeHtml(displayId) + '</div></div></div></td>' +
+                    '<td><span class="badge badge-blue">' + escapeHtml(categoryName) + '</span></td>' +
+                    '<td><span class="badge ' + statusClass + '">' + statusLabel + '</span></td>' +
+                    '<td class="cell-muted">' + escapeHtml(product.short_desc_en || product.shortDesc || '') + '</td>' +
+                    '<td><div class="actions-cell"><button class="btn btn-icon btn-icon-edit" aria-label="编辑产品" data-edit-product="' + escapeHtml(productId) + '">' + ICON_EDIT + '</button><button class="btn btn-icon btn-icon-delete" aria-label="删除产品" data-delete-product="' + escapeHtml(productId) + '">' + ICON_DELETE + '</button></div></td>' +
                     '</tr>';
             }).join('');
 
@@ -460,10 +540,305 @@
             tbody.querySelectorAll('[data-delete-product]').forEach(function (btn) {
                 btn.addEventListener('click', function () { deleteProduct(btn.getAttribute('data-delete-product')); });
             });
-            tbody.querySelectorAll('[data-toggle-featured]').forEach(function (badge) {
-                badge.addEventListener('click', function () { toggleFeatured(badge.getAttribute('data-toggle-featured')); });
-                badge.addEventListener('keydown', function (e) {
-                    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleFeatured(badge.getAttribute('data-toggle-featured')); }
+            tbody.querySelectorAll('.product-row-check').forEach(function (checkbox) {
+                checkbox.addEventListener('change', updateProductBatchBar);
+            });
+            updateProductBatchBar();
+        }
+
+        function findProductById(productId) {
+            for (var i = 0; i < products.length; i++) {
+                if (String(products[i].id) === String(productId)) return products[i];
+            }
+            return null;
+        }
+
+        function buildVersionMap(ids, list) {
+            var versionMap = {};
+            ids.forEach(function (id) {
+                for (var i = 0; i < list.length; i++) {
+                    if (String(list[i].id) === String(id)) {
+                        versionMap[String(id)] = list[i].version;
+                        break;
+                    }
+                }
+            });
+            return versionMap;
+        }
+
+        function runBatchAction(endpoint, action, ids, versionMap, requireConfirm, confirmMessage) {
+            function request() {
+                var body = {
+                    action: action,
+                    ids: ids,
+                    versionMap: versionMap
+                };
+                if (requireConfirm) body.payload = { confirm: true };
+                return apiRequest(endpoint, { method: 'POST', body: body }).catch(function (err) {
+                    if (err.status === 409 || err.code === 'BATCH_FAILED') {
+                        showToast('部分数据版本已变更，请刷新后重试', 'error');
+                        return Promise.reject(err);
+                    }
+                    showToast('批量操作失败：' + err.message, 'error');
+                    return Promise.reject(err);
+                });
+            }
+
+            if (requireConfirm) {
+                return showConfirm('确认批量操作', confirmMessage || '确定执行这个批量操作吗？').then(function (ok) {
+                    if (!ok) return Promise.reject(new Error('cancelled'));
+                    return request();
+                });
+            }
+            return request();
+        }
+
+        function batchActionLabel(action) {
+            var labels = {
+                publish: '发布',
+                draft: '下架',
+                soft_delete: '删除',
+                hard_delete: '永久删除'
+            };
+            return labels[action] || action;
+        }
+
+        function bindProductBatchButton(id, action) {
+            var btn = document.getElementById(id);
+            if (btn) btn.addEventListener('click', function () { batchProductAction(action); });
+        }
+
+        function getSelectedProductIds() {
+            var ids = [];
+            document.querySelectorAll('.product-row-check:checked').forEach(function (checkbox) {
+                var id = parseInt(checkbox.getAttribute('data-id'), 10);
+                if (!isNaN(id)) ids.push(id);
+            });
+            return ids;
+        }
+
+        function updateProductBatchBar() {
+            var selected = document.querySelectorAll('.product-row-check:checked');
+            var all = document.querySelectorAll('.product-row-check');
+            var bar = document.getElementById('product-batch-bar');
+            var count = document.getElementById('product-batch-count');
+            var selectAll = document.getElementById('product-select-all');
+            if (count) count.textContent = '已选 ' + selected.length + ' 条';
+            if (bar) bar.style.display = selected.length ? '' : 'none';
+            if (selectAll) {
+                selectAll.checked = all.length > 0 && selected.length === all.length;
+                selectAll.indeterminate = selected.length > 0 && selected.length < all.length;
+            }
+        }
+
+        function batchProductAction(action) {
+            var ids = getSelectedProductIds();
+            if (!ids.length) {
+                showToast('请先选择产品', 'error');
+                return;
+            }
+            var requireConfirm = action === 'hard_delete';
+            var message = '确定永久删除这 ' + ids.length + ' 条产品吗？此操作不可恢复，将同时删除规格和媒体数据。';
+            runBatchAction('/admin/products/batch', action, ids, buildVersionMap(ids, products), requireConfirm, message).then(function () {
+                showToast('已对 ' + ids.length + ' 条产品执行：' + batchActionLabel(action));
+                loadProducts();
+                var bar = document.getElementById('product-batch-bar');
+                if (bar) bar.style.display = 'none';
+            }).catch(function (err) {
+                if (err && err.message === 'cancelled') return;
+            });
+        }
+
+        function loadProductCategories(callback) {
+            apiRequest('/admin/categories?type=product').then(function (response) {
+                productCategories = unwrapListResponse(response);
+                populateProductCategorySelects();
+                if (callback) callback();
+            }).catch(function (err) {
+                productCategories = [];
+                populateProductCategorySelects();
+                if (callback) callback(err);
+            });
+        }
+
+        function populateProductCategorySelects() {
+            var filter = document.getElementById('product-category-filter');
+            var field = document.getElementById('field-category');
+            var filterValue = filter ? filter.value : '';
+            var fieldValue = field ? field.value : '';
+            var filterOptions = '<option value="">全部分类</option>';
+            var fieldOptions = '<option value="">选择分类</option>';
+
+            productCategories.forEach(function (category) {
+                var value = category.id;
+                var label = category.name_en || category.slug || ('#' + category.id);
+                var option = '<option value="' + escapeHtml(value) + '">' + escapeHtml(label) + '</option>';
+                filterOptions += option;
+                fieldOptions += option;
+            });
+
+            if (filter) {
+                filter.innerHTML = filterOptions;
+                filter.value = filterValue;
+            }
+            if (field) {
+                field.innerHTML = fieldOptions;
+                field.value = fieldValue;
+            }
+        }
+
+        function loadProductCategoriesView() {
+            var tbody = document.getElementById('categories-tbody');
+            if (!tbody) return;
+            tbody.innerHTML = skeletonRows(5, 4);
+            loadProductCategories(function (err) {
+                if (err) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="table-empty"><p>加载失败，请刷新重试</p></td></tr>';
+                    showToast('加载分类失败：' + err.message, 'error');
+                    return;
+                }
+                renderProductCategoriesTable();
+            });
+        }
+
+        function renderProductCategoriesTable() {
+            var tbody = document.getElementById('categories-tbody');
+            if (!tbody) return;
+            if (!productCategories.length) {
+                tbody.innerHTML = '<tr><td colspan="5" class="table-empty"><p>暂无分类</p></td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = productCategories.map(function (category) {
+                var active = category.is_active !== 0;
+                return '<tr>' +
+                    '<td>' + escapeHtml(category.name_en || '—') + '</td>' +
+                    '<td class="cell-muted">' + escapeHtml(category.slug || '') + '</td>' +
+                    '<td>' + escapeHtml(category.sort_order || 0) + '</td>' +
+                    '<td><span class="badge ' + (active ? 'badge-green' : 'badge-navy') + '">' + (active ? '启用' : '停用') + '</span></td>' +
+                    '<td><div class="actions-cell"><button class="btn btn-icon btn-icon-edit" aria-label="编辑分类" data-edit-category="' + escapeHtml(category.id) + '">' + ICON_EDIT + '</button><button class="btn btn-icon btn-icon-delete" aria-label="删除分类" data-delete-category="' + escapeHtml(category.id) + '">' + ICON_DELETE + '</button></div></td>' +
+                    '</tr>';
+            }).join('');
+
+            tbody.querySelectorAll('[data-edit-category]').forEach(function (btn) {
+                btn.addEventListener('click', function () { openCategoryModal(btn.getAttribute('data-edit-category')); });
+            });
+            tbody.querySelectorAll('[data-delete-category]').forEach(function (btn) {
+                btn.addEventListener('click', function () { deleteCategory(btn.getAttribute('data-delete-category')); });
+            });
+        }
+
+        function bindCategoryEvents() {
+            var addBtn = document.getElementById('btn-add-category');
+            if (addBtn) addBtn.addEventListener('click', function () { openCategoryModal(null); });
+            bindModalClose('category-modal', ['category-modal-close', 'category-modal-cancel']);
+            var submitBtn = document.getElementById('category-modal-submit');
+            if (submitBtn) submitBtn.addEventListener('click', saveCategoryModal);
+            var form = document.getElementById('category-form');
+            if (form) {
+                form.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    saveCategoryModal();
+                });
+            }
+        }
+
+        function findProductCategory(id) {
+            for (var i = 0; i < productCategories.length; i++) {
+                if (String(productCategories[i].id) === String(id)) return productCategories[i];
+            }
+            return null;
+        }
+
+        function openCategoryModal(id) {
+            var form = document.getElementById('category-form');
+            var title = document.getElementById('category-modal-title');
+            var slug = document.getElementById('cat-slug');
+            var activeGroup = document.getElementById('cat-active-group');
+            form.reset();
+            document.getElementById('cat-editing-id').value = id || '';
+            document.getElementById('cat-sort-order').value = '0';
+            slug.disabled = !!id;
+
+            if (id) {
+                var category = findProductCategory(id);
+                title.textContent = '编辑分类';
+                activeGroup.style.display = '';
+                if (category) {
+                    slug.value = category.slug || '';
+                    document.getElementById('cat-name-en').value = category.name_en || '';
+                    document.getElementById('cat-name-ar').value = category.name_ar || '';
+                    document.getElementById('cat-sort-order').value = category.sort_order || 0;
+                    document.getElementById('cat-is-active').checked = category.is_active !== 0;
+                }
+            } else {
+                title.textContent = '新增分类';
+                activeGroup.style.display = 'none';
+                document.getElementById('cat-is-active').checked = true;
+            }
+            document.getElementById('category-modal').classList.add('show');
+        }
+
+        function saveCategoryModal() {
+            var id = document.getElementById('cat-editing-id').value;
+            var slug = document.getElementById('cat-slug').value.trim();
+            var nameEn = document.getElementById('cat-name-en').value.trim();
+            var nameAr = document.getElementById('cat-name-ar').value.trim();
+            var sortOrder = parseInt(document.getElementById('cat-sort-order').value, 10);
+            if (!nameEn) {
+                showToast('请填写英文名称', 'error');
+                return;
+            }
+            if (!id && !slug) {
+                showToast('请填写 Slug', 'error');
+                return;
+            }
+            if (isNaN(sortOrder)) sortOrder = 0;
+
+            var payload = id ? {
+                name_en: nameEn,
+                name_ar: nameAr,
+                sort_order: sortOrder,
+                is_active: document.getElementById('cat-is-active').checked
+            } : {
+                type: 'product',
+                slug: slug,
+                name_en: nameEn,
+                name_ar: nameAr,
+                sort_order: sortOrder
+            };
+
+            var request = id
+                ? apiRequest('/admin/categories/' + encodeURIComponent(id), { method: 'PUT', body: payload })
+                : apiRequest('/admin/categories', { method: 'POST', body: payload });
+
+            request.then(function () {
+                showToast('分类已保存');
+                closeModal('category-modal');
+                loadProductCategoriesView();
+                loadProductCategories();
+            }).catch(function (err) {
+                if (err.status === 422) {
+                    showToast('Slug 已存在，请换一个', 'error');
+                    return;
+                }
+                showToast('保存分类失败：' + err.message, 'error');
+            });
+        }
+
+        function deleteCategory(id) {
+            showConfirm('删除分类', '确定删除这个分类吗？分类下不能有产品。').then(function (ok) {
+                if (!ok) return;
+                apiRequest('/admin/categories/' + encodeURIComponent(id), { method: 'DELETE' }).then(function () {
+                    showToast('分类已删除');
+                    loadProductCategoriesView();
+                    loadProductCategories();
+                }).catch(function (err) {
+                    if (err.status === 409 || err.code === 'BATCH_FAILED') {
+                        showToast('该分类下还有产品，无法删除', 'error');
+                        return;
+                    }
+                    showToast('删除分类失败：' + err.message, 'error');
                 });
             });
         }
@@ -473,21 +848,28 @@
             if (btnAddProduct) btnAddProduct.addEventListener('click', function () { openProductModal(null); });
 
             var productSearch = document.getElementById('product-search');
-            if (productSearch) productSearch.addEventListener('input', renderProductsTable);
+            if (productSearch) productSearch.addEventListener('input', function () {
+                clearTimeout(productSearchTimer);
+                productSearchTimer = setTimeout(loadProducts, 250);
+            });
             var productCatFilter = document.getElementById('product-category-filter');
-            if (productCatFilter) productCatFilter.addEventListener('change', renderProductsTable);
+            if (productCatFilter) productCatFilter.addEventListener('change', loadProducts);
 
-            bindModalClose('product-modal', ['modal-close', 'modal-cancel']);
-
-            var category = document.getElementById('field-category');
-            if (category) {
-                category.addEventListener('change', function () {
-                    var match = CATEGORIES.find(function (item) { return item.value === category.value; });
-                    if (!match) return;
-                    if (!document.getElementById('field-categoryLabel').value) document.getElementById('field-categoryLabel').value = match.label;
-                    if (!document.getElementById('field-categoryLabelAr').value) document.getElementById('field-categoryLabelAr').value = match.labelAr;
+            var productSelectAll = document.getElementById('product-select-all');
+            if (productSelectAll) {
+                productSelectAll.addEventListener('change', function () {
+                    document.querySelectorAll('.product-row-check').forEach(function (checkbox) {
+                        checkbox.checked = productSelectAll.checked;
+                    });
+                    updateProductBatchBar();
                 });
             }
+            bindProductBatchButton('btn-batch-publish-products', 'publish');
+            bindProductBatchButton('btn-batch-draft-products', 'draft');
+            bindProductBatchButton('btn-batch-delete-products', 'soft_delete');
+            bindProductBatchButton('btn-batch-hard-delete-products', 'hard_delete');
+
+            bindModalClose('product-modal', ['modal-close', 'modal-cancel']);
 
             var imageInput = document.getElementById('field-image');
             if (imageInput) imageInput.addEventListener('change', uploadProductImage);
@@ -498,7 +880,7 @@
             var form = document.getElementById('product-form');
             if (form) form.addEventListener('submit', saveProduct);
 
-            [['field-id','input'],['field-name','input'],['field-categoryLabel','input'],['field-category','change']].forEach(function (pair) {
+            [['field-id','input'],['field-name','input'],['field-category','change']].forEach(function (pair) {
                 var el = document.getElementById(pair[0]);
                 if (el) el.addEventListener(pair[1], function () { clearFieldError(pair[0]); });
             });
@@ -506,51 +888,52 @@
 
         function openProductModal(productId) {
             editingProductId = productId;
+            editingProductVersion = null;
             uploadedImagePath = '';
             var modal = document.getElementById('product-modal');
             var title = document.getElementById('modal-title');
             var form = document.getElementById('product-form');
             form.reset();
-            document.getElementById('specs-list').innerHTML = '';
             document.getElementById('image-preview').style.display = 'none';
             document.getElementById('image-preview').innerHTML = '';
             document.getElementById('upload-area').style.display = '';
             document.getElementById('field-id').disabled = !!productId;
+            populateProductCategorySelects();
 
             if (productId) {
                 title.textContent = '编辑产品';
-                apiRequest('/products/' + encodeURIComponent(productId)).then(function (product) {
+                var listed = findProductById(productId);
+                editingProductVersion = listed ? listed.version : null;
+                apiRequest('/admin/products/' + encodeURIComponent(productId)).then(function (response) {
+                    var product = unwrapDataResponse(response) || {};
+                    if (editingProductVersion == null) editingProductVersion = product.version;
                     fillProductForm(product);
                 }).catch(function (err) { showToast('加载产品失败：' + err.message, 'error'); });
             } else {
                 title.textContent = '新增产品';
-                addSpecRow('', '');
             }
             modal.classList.add('show');
         }
 
         function fillProductForm(product) {
-            ['id', 'name', 'nameAr', 'categoryLabel', 'categoryLabelAr', 'shortDesc', 'shortDescAr', 'description', 'descriptionAr'].forEach(function (key) {
-                var field = document.getElementById('field-' + key);
-                if (field) field.value = product[key] || '';
+            var fields = {
+                'field-id': product.legacy_id || product.slug || product.id || '',
+                'field-name': product.name_en || '',
+                'field-nameAr': product.name_ar || '',
+                'field-shortDesc': product.short_desc_en || '',
+                'field-shortDescAr': product.short_desc_ar || '',
+                'field-description': product.description_en || '',
+                'field-descriptionAr': product.description_ar || ''
+            };
+            Object.keys(fields).forEach(function (id) {
+                var field = document.getElementById(id);
+                if (field) field.value = fields[id];
             });
             var categoryField = document.getElementById('field-category');
-            if (categoryField) {
-                if (product.group === 'ev-charger' || product.group === 'switchgear') {
-                    categoryField.value = product.subCategory || product.category || '';
-                } else if (product.category === 'switchgear') {
-                    categoryField.value = product.subCategory || 'medium-low-voltage';
-                } else {
-                    categoryField.value = product.subCategory || product.category || '';
-                }
-            }
-            document.getElementById('field-capacities').value = (product.capacities || []).join(', ');
-            document.getElementById('field-voltages').value = (product.voltages || []).join(', ');
+            if (categoryField) categoryField.value = product.category_id || '';
             document.getElementById('field-featured').checked = !!product.featured;
-            uploadedImagePath = product.image || '';
+            uploadedImagePath = product.cover_image || '';
             if (uploadedImagePath) showImagePreview('../' + uploadedImagePath);
-            (product.specs || []).forEach(function (spec) { addSpecRow(spec[0], spec[1]); });
-            if (!(product.specs || []).length) addSpecRow('', '');
         }
 
         function uploadProductImage() {
@@ -635,46 +1018,43 @@
             var id = document.getElementById('field-id').value.trim();
             var name = document.getElementById('field-name').value.trim();
             var category = document.getElementById('field-category').value;
-            var categoryLabel = document.getElementById('field-categoryLabel').value.trim();
-            var categoryMeta = CATEGORIES.find(function (item) { return item.value === category; }) || {};
 
-            ['field-id', 'field-name', 'field-category', 'field-categoryLabel'].forEach(clearFieldError);
+            ['field-id', 'field-name', 'field-category'].forEach(clearFieldError);
             var valid = true;
             if (!id) { showFieldError('field-id', '请填写产品 ID'); valid = false; }
             if (!name) { showFieldError('field-name', '请填写英文名称'); valid = false; }
             if (!category) { showFieldError('field-category', '请选择分类'); valid = false; }
-            if (!categoryLabel) { showFieldError('field-categoryLabel', '请填写英文分类名'); valid = false; }
             if (!valid) return;
 
             var payload = {
-                id: id,
-                name: name,
-                nameAr: document.getElementById('field-nameAr').value.trim(),
-                image: uploadedImagePath,
-                category: category,
-                group: categoryMeta.group || (category === 'switchgear' ? 'switchgear' : 'transformer'),
-                subCategory: categoryMeta.subCategory || category,
-                categoryLabel: categoryLabel,
-                categoryLabelAr: document.getElementById('field-categoryLabelAr').value.trim(),
-                shortDesc: document.getElementById('field-shortDesc').value.trim(),
-                shortDescAr: document.getElementById('field-shortDescAr').value.trim(),
-                description: document.getElementById('field-description').value.trim(),
-                descriptionAr: document.getElementById('field-descriptionAr').value.trim(),
-                capacities: splitList(document.getElementById('field-capacities').value),
-                voltages: splitList(document.getElementById('field-voltages').value),
-                specs: getSpecsFromForm(),
+                legacy_id: id,
+                name_en: name,
+                name_ar: document.getElementById('field-nameAr').value.trim(),
+                category_id: parseInt(category, 10),
+                short_desc_en: document.getElementById('field-shortDesc').value.trim(),
+                short_desc_ar: document.getElementById('field-shortDescAr').value.trim(),
+                description_en: document.getElementById('field-description').value.trim(),
+                description_ar: document.getElementById('field-descriptionAr').value.trim(),
                 featured: document.getElementById('field-featured').checked
             };
+            if (editingProductId) payload.version = editingProductVersion;
 
+            var wasEditing = !!editingProductId;
             var request = editingProductId
-                ? apiRequest('/products/' + encodeURIComponent(editingProductId), { method: 'PUT', body: payload })
-                : apiRequest('/products', { method: 'POST', body: payload });
+                ? apiRequest('/admin/products/' + encodeURIComponent(editingProductId), { method: 'PUT', body: payload })
+                : apiRequest('/admin/products', { method: 'POST', body: payload });
 
-            request.then(function () {
-                showToast(editingProductId ? '产品已更新' : '产品已新增');
+            request.then(function (response) {
+                var saved = unwrapDataResponse(response) || {};
+                if (!editingProductId && saved.id) editingProductId = saved.id;
+                showToast(wasEditing ? '产品已更新' : '产品已新增');
                 closeModal('product-modal');
                 loadProducts();
             }).catch(function (err) {
+                if (err.status === 409 || err.code === 'VERSION_CONFLICT') {
+                    showToast('数据已被其他操作修改，请刷新后重试', 'error');
+                    return;
+                }
                 showToast('保存产品失败：' + err.message, 'error');
             });
         }
@@ -684,42 +1064,23 @@
         }
 
         function deleteProduct(productId) {
-            var product = products.find(function (item) { return item.id === productId; });
-            showConfirm('删除产品', '确定删除 "' + (product ? product.name : productId) + '" 吗？').then(function (ok) {
+            var product = findProductById(productId);
+            showConfirm('删除产品', '确定删除 "' + (product ? (product.name_en || product.name || productId) : productId) + '" 吗？').then(function (ok) {
                 if (!ok) return;
-                apiRequest('/products/' + encodeURIComponent(productId), { method: 'DELETE' }).then(function () {
+                apiRequest('/admin/products/' + encodeURIComponent(productId), { method: 'DELETE' }).then(function () {
                     showToast('产品已删除');
                     loadProducts();
                 }).catch(function (err) { showToast('删除失败：' + err.message, 'error'); });
             });
         }
 
-        function toggleFeatured(productId) {
-            var product = products.find(function (p) { return p.id === productId; });
-            if (!product) return;
-            var badge = document.querySelector('[data-toggle-featured="' + productId + '"]');
-            if (badge) badge.style.pointerEvents = 'none';
-            var newFeatured = !product.featured;
-            apiRequest('/products/' + encodeURIComponent(productId), {
-                method: 'PUT',
-                body: Object.assign({}, product, { featured: newFeatured })
-            }).then(function (updated) {
-                product.featured = updated.featured;
-                renderProductsTable();
-                setText('stat-featured', products.filter(function (p) { return p.featured; }).length);
-                showToast(updated.featured ? '已加入首页推荐' : '已取消首页推荐');
-            }).catch(function (err) {
-                if (badge) badge.style.pointerEvents = '';
-                showToast('操作失败：' + err.message, 'error');
-            });
-        }
-
         function loadInquiries() {
             document.getElementById('inquiries-tbody').innerHTML = skeletonRows(6, 5);
             var status = document.getElementById('inquiry-status-filter').value;
-            var url = '/inquiries?pageSize=200' + (status ? '&status=' + encodeURIComponent(status) : '');
-            apiRequest(url).then(function (data) {
-                inquiries = data.items || [];
+            var url = '/admin/inquiries?page=1&pageSize=100';
+            if (status) url += '&status=' + encodeURIComponent(status);
+            apiRequest(url).then(function (response) {
+                inquiries = unwrapListResponse(response);
                 renderInquiriesTable();
             }).catch(function (err) {
                 document.getElementById('inquiries-tbody').innerHTML = '<tr><td colspan="6" class="table-empty"><p>加载失败，请刷新重试</p></td></tr>';
@@ -734,11 +1095,12 @@
                 return;
             }
             tbody.innerHTML = inquiries.map(function (item) {
-                return '<tr>' +
+                var rowClass = item.is_read === 0 ? ' class="row-unread"' : '';
+                return '<tr' + rowClass + '>' +
                     '<td><div class="product-name-text">' + escapeHtml(item.name) + '</div><div class="product-id-text">' + escapeHtml(item.email) + '</div></td>' +
                     '<td>' + escapeHtml(item.company || '-') + '</td>' +
                     '<td>' + escapeHtml(item.subject || '-') + '</td>' +
-                    '<td>' + formatDate(item.createdAt) + '</td>' +
+                    '<td>' + formatDate(item.created_at) + '</td>' +
                     '<td><span class="badge ' + (STATUS_BADGES[item.status] || 'badge-blue') + '">' + (STATUS_LABELS[item.status] || item.status) + '</span></td>' +
                     '<td><div class="actions-cell"><button class="btn btn-icon btn-icon-view" aria-label="查看询盘" data-view-inquiry="' + escapeHtml(item.id) + '">' + ICON_VIEW + '</button><button class="btn btn-icon btn-icon-delete" aria-label="删除询盘" data-delete-inquiry="' + escapeHtml(item.id) + '">' + ICON_DELETE + '</button></div></td>' +
                     '</tr>';
@@ -773,9 +1135,9 @@
             );
             if (openedInquiry.status !== 'replied' && openedInquiry.status !== 'closed') {
                 var currentNotes = document.getElementById('inquiry-notes').value;
-                apiRequest('/inquiries/' + encodeURIComponent(openedInquiry.id), {
+                apiRequest('/admin/inquiries/' + encodeURIComponent(openedInquiry.id), {
                     method: 'PUT',
-                    body: { status: 'replied', notes: currentNotes }
+                    body: { status: 'replied', is_read: 1, notes: currentNotes }
                 }).then(function () {
                     openedInquiry.status = 'replied';
                     document.getElementById('inquiry-status').value = 'replied';
@@ -788,7 +1150,8 @@
         function openInquiryModal(id) {
             editingInquiryId = id;
             openedInquiry = null;
-            apiRequest('/inquiries/' + encodeURIComponent(id)).then(function (item) {
+            apiRequest('/admin/inquiries/' + encodeURIComponent(id)).then(function (response) {
+                var item = unwrapDataResponse(response) || {};
                 openedInquiry = item;
                 document.getElementById('inquiry-detail').innerHTML =
                     detailItem('客户姓名', item.name) +
@@ -796,29 +1159,13 @@
                     detailItem('公司', item.company || '-') +
                     detailItem('电话', item.phone || '-') +
                     detailItem('主题', item.subject || '-') +
-                    detailItem('提交时间', formatDate(item.createdAt)) +
+                    detailItem('产品上下文', item.product_context || '-') +
+                    detailItem('提交时间', formatDate(item.created_at)) +
                     detailItem('IP 地址', item.ip || '-') +
                     '<div class="detail-item detail-full"><strong>消息内容</strong><p>' + escapeHtml(item.message || '') + '</p></div>';
                 document.getElementById('inquiry-status').value = item.status || 'new';
                 document.getElementById('inquiry-notes').value = item.notes || '';
-                if (item.productContext) {
-                    document.getElementById('inquiry-detail').insertAdjacentHTML('beforeend', detailItem('Product', item.productContext));
-                }
                 document.getElementById('inquiry-modal').classList.add('show');
-
-                if (item.status === 'new') {
-                    openedInquiry.status = 'read';
-                    apiRequest('/inquiries/' + encodeURIComponent(id), { method: 'PUT', body: { status: 'read', notes: item.notes || '' } })
-                        .then(function () {
-                            document.getElementById('inquiry-status').value = 'read';
-                            if (currentView === 'inquiries') {
-                                loadInquiries();
-                            } else {
-                                renderRecentInquiries();
-                            }
-                        })
-                        .catch(function (err) { showToast('标记已读失败：' + err.message, 'error'); });
-                }
             }).catch(function (err) { showToast('加载询盘详情失败：' + err.message, 'error'); });
         }
 
@@ -828,23 +1175,30 @@
 
         function saveInquiryStatus() {
             if (!editingInquiryId) return;
-            apiRequest('/inquiries/' + encodeURIComponent(editingInquiryId), {
+            apiRequest('/admin/inquiries/' + encodeURIComponent(editingInquiryId), {
                 method: 'PUT',
                 body: {
                     status: document.getElementById('inquiry-status').value,
+                    is_read: 1,
                     notes: document.getElementById('inquiry-notes').value
                 }
             }).then(function () {
                 showToast('询盘状态已保存');
                 closeModal('inquiry-modal');
                 loadInquiries();
-            }).catch(function (err) { showToast('保存失败：' + err.message, 'error'); });
+            }).catch(function (err) {
+                if (err.status === 422) {
+                    showToast('状态不能降级', 'error');
+                    return;
+                }
+                showToast('保存失败：' + err.message, 'error');
+            });
         }
 
         function deleteInquiry(id) {
             showConfirm('删除询盘', '确定删除这条询盘吗？').then(function (ok) {
                 if (!ok) return;
-                apiRequest('/inquiries/' + encodeURIComponent(id), { method: 'DELETE' }).then(function () {
+                apiRequest('/admin/inquiries/' + encodeURIComponent(id), { method: 'DELETE' }).then(function () {
                     showToast('询盘已删除');
                     loadInquiries();
                 }).catch(function (err) { showToast('删除失败：' + err.message, 'error'); });
@@ -894,56 +1248,232 @@
         }
 
         function bindCertificationEvents() {
-            var addBtn = document.getElementById('btn-add-certification');
-            if (addBtn) addBtn.addEventListener('click', function () { openCertificationModal(null); });
+            bindCertAddButton('cert-qualifications');
+            bindCertAddButton('cert-patents');
+            bindCertAddButton('cert-software');
+            bindCertAddButton('cert-test-reports');
+            bindCertBatchEvents('cert-qualifications');
+            bindCertBatchEvents('cert-patents');
+            bindCertBatchEvents('cert-software');
+            bindCertBatchEvents('cert-test-reports');
             bindModalClose('certification-modal', ['certification-modal-close', 'certification-cancel']);
             var form = document.getElementById('certification-form');
             if (form) form.addEventListener('submit', saveCertification);
-            var certFile = document.getElementById('cert-file');
-            if (certFile) certFile.addEventListener('change', uploadCertificationFile);
+        }
+
+        function bindCertAddButton(viewName) {
+            var suffix = certViewSuffix(viewName);
+            var btn = document.getElementById('btn-add-cert-' + suffix);
+            if (btn) btn.addEventListener('click', function () { openCertificationModal(null, viewName); });
+        }
+
+        function bindCertBatchEvents(viewName) {
+            var suffix = certViewSuffix(viewName);
+            var selectAll = document.querySelector('.cert-select-all[data-view="' + viewName + '"]');
+            if (selectAll) {
+                selectAll.addEventListener('change', function () {
+                    document.querySelectorAll('.cert-row-check[data-view="' + viewName + '"]').forEach(function (checkbox) {
+                        checkbox.checked = selectAll.checked;
+                    });
+                    updateCertBatchBar(viewName);
+                });
+            }
+            bindCertBatchButton('btn-batch-publish-cert-' + suffix, viewName, 'publish');
+            bindCertBatchButton('btn-batch-delete-cert-' + suffix, viewName, 'soft_delete');
+            bindCertBatchButton('btn-batch-hard-delete-cert-' + suffix, viewName, 'hard_delete');
+        }
+
+        function bindCertBatchButton(id, viewName, action) {
+            var btn = document.getElementById(id);
+            if (btn) btn.addEventListener('click', function () { batchCertAction(viewName, action); });
+        }
+
+        function getSelectedCertIds(viewName) {
+            var ids = [];
+            document.querySelectorAll('.cert-row-check[data-view="' + viewName + '"]:checked').forEach(function (checkbox) {
+                var id = parseInt(checkbox.getAttribute('data-id'), 10);
+                if (!isNaN(id)) ids.push(id);
+            });
+            return ids;
+        }
+
+        function updateCertBatchBar(viewName) {
+            var suffix = certViewSuffix(viewName);
+            var selected = document.querySelectorAll('.cert-row-check[data-view="' + viewName + '"]:checked');
+            var all = document.querySelectorAll('.cert-row-check[data-view="' + viewName + '"]');
+            var bar = document.getElementById('cert-batch-bar-' + suffix);
+            var count = document.getElementById('cert-batch-count-' + suffix);
+            var selectAll = document.querySelector('.cert-select-all[data-view="' + viewName + '"]');
+            if (count) count.textContent = '已选 ' + selected.length + ' 条';
+            if (bar) bar.style.display = selected.length ? '' : 'none';
+            if (selectAll) {
+                selectAll.checked = all.length > 0 && selected.length === all.length;
+                selectAll.indeterminate = selected.length > 0 && selected.length < all.length;
+            }
+        }
+
+        function batchCertAction(viewName, action) {
+            var ids = getSelectedCertIds(viewName);
+            if (!ids.length) {
+                showToast('请先选择证书', 'error');
+                return;
+            }
+            var requireConfirm = action === 'hard_delete';
+            var message = '确定永久删除这 ' + ids.length + ' 条证书吗？此操作不可恢复。';
+            runBatchAction('/admin/certifications/batch', action, ids, buildVersionMap(ids, certsByView[viewName] || []), requireConfirm, message).then(function () {
+                showToast('已对 ' + ids.length + ' 条证书执行：' + batchActionLabel(action));
+                loadCertView(viewName);
+            }).catch(function (err) {
+                if (err && err.message === 'cancelled') return;
+            });
+        }
+
+        function loadCertificationCategories() {
+            apiRequest('/admin/categories?type=certification').then(function (response) {
+                var rows = unwrapListResponse(response);
+                certificationCategoryMap = {};
+                rows.forEach(function (category) {
+                    certificationCategoryMap[category.slug] = category.id;
+                });
+            }).catch(function (err) {
+                certificationCategoryMap = {};
+                showToast('加载证书分类失败：' + err.message, 'error');
+            });
+        }
+
+        function certViewSlug(viewName) {
+            var map = {
+                'cert-qualifications': 'qualifications',
+                'cert-patents': 'patents',
+                'cert-software': 'software-copyrights',
+                'cert-test-reports': 'test-reports-extra'
+            };
+            return map[viewName] || '';
+        }
+
+        function certViewSuffix(viewName) {
+            var map = {
+                'cert-qualifications': 'qualifications',
+                'cert-patents': 'patents',
+                'cert-software': 'software',
+                'cert-test-reports': 'test-reports'
+            };
+            return map[viewName] || '';
+        }
+
+        function loadCertView(viewName) {
+            var suffix = certViewSuffix(viewName);
+            var slug = certViewSlug(viewName);
+            var tbody = document.getElementById('cert-tbody-' + suffix);
+            if (!tbody) return;
+            tbody.innerHTML = skeletonRows(6, 4);
+            updateCertBatchBar(viewName);
+
+            function requestRows() {
+                var categoryId = certificationCategoryMap[slug];
+                if (!categoryId) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="table-empty"><p>未找到证书分类</p></td></tr>';
+                    return;
+                }
+                apiRequest('/admin/certifications?page=1&pageSize=100&category=' + encodeURIComponent(categoryId)).then(function (response) {
+                    var rows = unwrapListResponse(response);
+                    certificationViewRows[viewName] = rows;
+                    certifications = rows;
+                    renderCertificationsTable(viewName, rows);
+                }).catch(function (err) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="table-empty"><p>加载失败，请刷新重试</p></td></tr>';
+                    showToast('加载证书失败：' + err.message, 'error');
+                });
+            }
+
+            if (certificationCategoryMap[slug]) {
+                requestRows();
+            } else {
+                apiRequest('/admin/categories?type=certification').then(function (response) {
+                    var rows = unwrapListResponse(response);
+                    certificationCategoryMap = {};
+                    rows.forEach(function (category) {
+                        certificationCategoryMap[category.slug] = category.id;
+                    });
+                    requestRows();
+                }).catch(function (err) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="table-empty"><p>加载失败，请刷新重试</p></td></tr>';
+                    showToast('加载证书分类失败：' + err.message, 'error');
+                });
+            }
         }
 
         function loadCertifications() {
-            document.getElementById('certifications-tbody').innerHTML = skeletonRows(5, 4);
-            apiRequest('/certifications').then(function (data) {
-                certifications = data;
-                renderCertificationsTable();
-            }).catch(function (err) {
-                document.getElementById('certifications-tbody').innerHTML = '<tr><td colspan="5" class="table-empty"><p>加载失败，请刷新重试</p></td></tr>';
-                showToast('加载证书失败：' + err.message, 'error');
-            });
+            loadCertView(currentView);
         }
 
-        function renderCertificationsTable() {
-            var tbody = document.getElementById('certifications-tbody');
-            if (!certifications.length) {
-                tbody.innerHTML = '<tr><td colspan="5" class="table-empty"><p>暂无证书</p></td></tr>';
+        function renderCertificationsTable(viewName, rows) {
+            var suffix = certViewSuffix(viewName);
+            var tbody = document.getElementById('cert-tbody-' + suffix);
+            if (!tbody) return;
+            rows = rows || [];
+            certsByView[viewName] = rows;
+            certificationViewRows[viewName] = rows;
+            if (!rows.length) {
+                tbody.innerHTML = '<tr><td colspan="6" class="table-empty"><p>暂无证书</p></td></tr>';
+                updateCertBatchBar(viewName);
                 return;
             }
-            tbody.innerHTML = certifications.map(function (item) {
-                return '<tr><td>' + escapeHtml(item.name) + '</td><td>' + escapeHtml(item.issuer || '-') + '</td><td>' + escapeHtml(item.expiryDate || '-') + '</td><td class="cell-muted">' + escapeHtml(item.image || '未设置') + '</td><td><div class="actions-cell"><button class="btn btn-icon btn-icon-edit" aria-label="编辑证书" data-edit-cert="' + escapeHtml(item.id) + '">' + ICON_EDIT + '</button><button class="btn btn-icon btn-icon-delete" aria-label="删除证书" data-delete-cert="' + escapeHtml(item.id) + '">' + ICON_DELETE + '</button></div></td></tr>';
+            tbody.innerHTML = rows.map(function (item) {
+                var status = item.status || 'draft';
+                var statusClass = status === 'published' ? 'badge-green' : (status === 'deleted' ? 'badge-navy' : 'badge-gold');
+                var statusLabel = status === 'published' ? '已发布' : (status === 'deleted' ? '已删除' : '草稿');
+                return '<tr><td><input type="checkbox" class="cert-row-check" data-id="' + escapeHtml(item.id) + '" data-version="' + escapeHtml(item.version) + '" data-view="' + escapeHtml(viewName) + '"></td><td>' + escapeHtml(item.name_en || '') + '</td><td>' + escapeHtml(item.category_name_en || '-') + '</td><td class="cell-muted">' + escapeHtml(item.image_path || '未设置') + '</td><td><span class="badge ' + statusClass + '">' + statusLabel + '</span></td><td><div class="actions-cell"><button class="btn btn-icon btn-icon-edit" aria-label="编辑证书" data-cert-view="' + escapeHtml(viewName) + '" data-edit-cert="' + escapeHtml(item.id) + '">' + ICON_EDIT + '</button><button class="btn btn-icon btn-icon-delete" aria-label="删除证书" data-cert-view="' + escapeHtml(viewName) + '" data-delete-cert="' + escapeHtml(item.id) + '">' + ICON_DELETE + '</button></div></td></tr>';
             }).join('');
             tbody.querySelectorAll('[data-edit-cert]').forEach(function (btn) {
-                btn.addEventListener('click', function () { openCertificationModal(btn.getAttribute('data-edit-cert')); });
+                btn.addEventListener('click', function () { openCertificationModal(btn.getAttribute('data-edit-cert'), btn.getAttribute('data-cert-view')); });
             });
             tbody.querySelectorAll('[data-delete-cert]').forEach(function (btn) {
-                btn.addEventListener('click', function () { deleteCertification(btn.getAttribute('data-delete-cert')); });
+                btn.addEventListener('click', function () { deleteCertification(btn.getAttribute('data-delete-cert'), btn.getAttribute('data-cert-view')); });
             });
+            tbody.querySelectorAll('.cert-row-check').forEach(function (checkbox) {
+                checkbox.addEventListener('change', function () { updateCertBatchBar(viewName); });
+            });
+            updateCertBatchBar(viewName);
         }
 
-        function openCertificationModal(id) {
+        function findCertificationInView(id, viewName) {
+            var rows = certificationViewRows[viewName] || [];
+            for (var i = 0; i < rows.length; i++) {
+                if (String(rows[i].id) === String(id)) return rows[i];
+            }
+            return null;
+        }
+
+        function openCertificationModal(id, viewName) {
+            viewName = viewName || currentView;
             editingCertificationId = id;
             uploadedCertificationPath = '';
             document.getElementById('certification-form').reset();
+            document.getElementById('cert-editing-id').value = id || '';
+            document.getElementById('cert-editing-version').value = '';
+            document.getElementById('cert-category-id').value = certificationCategoryMap[certViewSlug(viewName)] || '';
             document.getElementById('certification-modal-title').textContent = id ? '编辑证书' : '新增证书';
             if (id) {
-                var item = certifications.find(function (cert) { return cert.id === id; });
+                var item = findCertificationInView(id, viewName);
                 if (item) {
-                    ['name', 'issuer', 'expiryDate', 'image', 'description'].forEach(function (key) {
-                        document.getElementById('cert-' + key).value = item[key] || '';
-                    });
-                    uploadedCertificationPath = item.image || '';
+                    document.getElementById('cert-name').value = item.name_en || '';
+                    document.getElementById('cert-image').value = item.image_path || '';
+                    document.getElementById('cert-editing-version').value = item.version || '';
+                    uploadedCertificationPath = item.image_path || '';
                 }
+                apiRequest('/admin/certifications/' + encodeURIComponent(id)).then(function (response) {
+                    var detail = unwrapDataResponse(response) || {};
+                    document.getElementById('cert-name').value = detail.name_en || '';
+                    document.getElementById('cert-issuer').value = detail.issuer_en || '';
+                    document.getElementById('cert-expiryDate').value = detail.expiry_date || '';
+                    document.getElementById('cert-image').value = detail.image_path || '';
+                    document.getElementById('cert-description').value = detail.description_en || '';
+                    if (!document.getElementById('cert-editing-version').value) {
+                        document.getElementById('cert-editing-version').value = detail.version || '';
+                    }
+                    uploadedCertificationPath = detail.image_path || '';
+                }).catch(function (err) { showToast('加载证书详情失败：' + err.message, 'error'); });
             }
             document.getElementById('certification-modal').classList.add('show');
         }
@@ -970,34 +1500,704 @@
         function saveCertification(e) {
             e.preventDefault();
             var payload = {
-                name: document.getElementById('cert-name').value.trim(),
-                issuer: document.getElementById('cert-issuer').value.trim(),
-                expiryDate: document.getElementById('cert-expiryDate').value.trim(),
-                image: document.getElementById('cert-image').value.trim() || uploadedCertificationPath,
-                description: document.getElementById('cert-description').value.trim()
+                name_en: document.getElementById('cert-name').value.trim(),
+                issuer_en: document.getElementById('cert-issuer').value.trim(),
+                expiry_date: document.getElementById('cert-expiryDate').value.trim(),
+                image_path: document.getElementById('cert-image').value.trim() || uploadedCertificationPath,
+                description_en: document.getElementById('cert-description').value.trim(),
+                category_id: parseInt(document.getElementById('cert-category-id').value, 10),
+                status: 'published'
             };
-            if (!payload.name) {
+            if (!payload.name_en) {
                 showToast('请填写证书名称', 'error');
                 return;
             }
+            if (editingCertificationId) payload.version = document.getElementById('cert-editing-version').value;
             var request = editingCertificationId
-                ? apiRequest('/certifications/' + encodeURIComponent(editingCertificationId), { method: 'PUT', body: payload })
-                : apiRequest('/certifications', { method: 'POST', body: payload });
+                ? apiRequest('/admin/certifications/' + encodeURIComponent(editingCertificationId), { method: 'PUT', body: payload })
+                : apiRequest('/admin/certifications', { method: 'POST', body: payload });
             request.then(function () {
                 showToast('证书已保存');
                 closeModal('certification-modal');
-                loadCertifications();
-            }).catch(function (err) { showToast('保存证书失败：' + err.message, 'error'); });
+                loadCertView(currentView);
+            }).catch(function (err) {
+                if (err.status === 409 || err.code === 'VERSION_CONFLICT') {
+                    showToast('数据已被其他操作修改，请刷新后重试', 'error');
+                    return;
+                }
+                showToast('保存证书失败：' + err.message, 'error');
+            });
         }
 
-        function deleteCertification(id) {
+        function deleteCertification(id, viewName) {
             showConfirm('删除证书', '确定删除这个证书吗？').then(function (ok) {
                 if (!ok) return;
-                apiRequest('/certifications/' + encodeURIComponent(id), { method: 'DELETE' }).then(function () {
+                apiRequest('/admin/certifications/' + encodeURIComponent(id), { method: 'DELETE' }).then(function () {
                     showToast('证书已删除');
-                    loadCertifications();
+                    loadCertView(viewName || currentView);
                 }).catch(function (err) { showToast('删除失败：' + err.message, 'error'); });
             });
+        }
+
+        function contentBlockSlug(viewName) {
+            var map = {
+                'content-company-overview': 'company-overview',
+                'content-contact': 'contact',
+                'content-about': 'about-us',
+                'content-technology': 'innovation',
+                'content-industries': 'applications',
+                'content-education': 'education',
+                'content-page-blocks': 'page-blocks'
+            };
+            return map[viewName] || '';
+        }
+
+        function isContentBlockView(viewName) {
+            return !!contentBlockSlug(viewName);
+        }
+
+        function bindContentBlockEvents() {
+            var views = [
+                'content-company-overview',
+                'content-contact',
+                'content-about',
+                'content-technology',
+                'content-industries',
+                'content-education',
+                'content-page-blocks'
+            ];
+            views.forEach(function (viewName) {
+                var form = document.getElementById('form-' + viewName);
+                if (form) {
+                    form.addEventListener('submit', function (e) {
+                        e.preventDefault();
+                        saveContentBlock(viewName);
+                    });
+                }
+            });
+        }
+
+        function loadContentBlock(viewName) {
+            var slug = contentBlockSlug(viewName);
+            if (!slug) return;
+            var statusEl = document.getElementById(viewName + '-status');
+            if (statusEl) statusEl.textContent = '加载中...';
+            apiRequest('/admin/content-blocks/' + encodeURIComponent(slug)).then(function (response) {
+                var block = unwrapDataResponse(response) || {};
+                contentBlockCache[viewName] = block;
+                var titleEl = document.getElementById(viewName + '-title-en');
+                var bodyEl = document.getElementById(viewName + '-body-json');
+                if (titleEl) titleEl.value = block.title_en || '';
+                if (bodyEl) bodyEl.value = JSON.stringify(block.body_json || {}, null, 2);
+                if (statusEl) statusEl.textContent = block.updated_at ? ('已加载：' + formatDate(block.updated_at)) : '已加载';
+            }).catch(function (err) {
+                if (statusEl) statusEl.textContent = '加载失败';
+                showToast('加载内容块失败：' + err.message, 'error');
+            });
+        }
+
+        function saveContentBlock(viewName) {
+            var slug = contentBlockSlug(viewName);
+            if (!slug) return;
+            var cached = contentBlockCache[viewName] || {};
+            var titleEl = document.getElementById(viewName + '-title-en');
+            var bodyEl = document.getElementById(viewName + '-body-json');
+            var statusEl = document.getElementById(viewName + '-status');
+            var parsed = null;
+
+            try {
+                parsed = JSON.parse(bodyEl ? bodyEl.value : '{}');
+            } catch (err) {
+                showToast('body_json 格式无效', 'error');
+                return;
+            }
+
+            if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+                showToast('body_json 格式无效', 'error');
+                return;
+            }
+
+            if (statusEl) statusEl.textContent = '保存中...';
+            apiRequest('/admin/content-blocks/' + encodeURIComponent(slug), {
+                method: 'PUT',
+                body: {
+                    title_en: titleEl ? titleEl.value.trim() : '',
+                    body_json: parsed,
+                    version: cached.version
+                }
+            }).then(function (response) {
+                var block = unwrapDataResponse(response) || {};
+                contentBlockCache[viewName] = block;
+                if (statusEl) statusEl.textContent = '已保存：' + formatDate(block.updated_at);
+                showToast('内容已保存');
+            }).catch(function (err) {
+                if (err.status === 409 || err.code === 'VERSION_CONFLICT') {
+                    showToast('内容已被其他操作修改，请刷新后重试', 'error');
+                    if (statusEl) statusEl.textContent = '版本冲突';
+                    return;
+                }
+                if (statusEl) statusEl.textContent = '保存失败';
+                showToast('保存内容失败：' + err.message, 'error');
+            });
+        }
+
+        function bindSystemSettingsEvents() {
+            var refreshSystem = document.getElementById('btn-refresh-system-status');
+            if (refreshSystem) refreshSystem.addEventListener('click', loadSystemStatus);
+
+            var moduleForm = document.getElementById('module-settings-form');
+            if (moduleForm) {
+                moduleForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    saveModuleSettings();
+                });
+            }
+
+            var auditFilter = document.getElementById('audit-entity-filter');
+            if (auditFilter) {
+                auditFilter.addEventListener('change', function () {
+                    auditLogPage = 1;
+                    loadAuditLogs();
+                });
+            }
+            var auditFilterBtn = document.getElementById('btn-filter-audit-logs');
+            if (auditFilterBtn) {
+                auditFilterBtn.addEventListener('click', function () {
+                    auditLogPage = 1;
+                    loadAuditLogs();
+                });
+            }
+            var auditPrev = document.getElementById('btn-audit-prev');
+            if (auditPrev) {
+                auditPrev.addEventListener('click', function () {
+                    if (auditLogPage <= 1) return;
+                    auditLogPage -= 1;
+                    loadAuditLogs();
+                });
+            }
+            var auditNext = document.getElementById('btn-audit-next');
+            if (auditNext) {
+                auditNext.addEventListener('click', function () {
+                    var totalPages = Math.max(1, Math.ceil((auditLogMeta.total || 0) / (auditLogMeta.pageSize || 20)));
+                    if (auditLogPage >= totalPages) return;
+                    auditLogPage += 1;
+                    loadAuditLogs();
+                });
+            }
+        }
+
+        function bindTrashEvents() {
+            var refreshBtn = document.getElementById('btn-refresh-trash');
+            if (refreshBtn) refreshBtn.addEventListener('click', loadTrash);
+
+            var trashProductSelectAll = document.getElementById('trash-product-select-all');
+            if (trashProductSelectAll) {
+                trashProductSelectAll.addEventListener('change', function () {
+                    document.querySelectorAll('.trash-product-check').forEach(function (cb) {
+                        cb.checked = trashProductSelectAll.checked;
+                    });
+                    updateTrashProductBatchBar();
+                });
+            }
+
+            var trashCertSelectAll = document.getElementById('trash-cert-select-all');
+            if (trashCertSelectAll) {
+                trashCertSelectAll.addEventListener('change', function () {
+                    document.querySelectorAll('.trash-cert-check').forEach(function (cb) {
+                        cb.checked = trashCertSelectAll.checked;
+                    });
+                    updateTrashCertBatchBar();
+                });
+            }
+
+            var restoreProductsBtn = document.getElementById('btn-trash-restore-products');
+            if (restoreProductsBtn) restoreProductsBtn.addEventListener('click', function () { trashBatchProducts('publish'); });
+            var hardDeleteProductsBtn = document.getElementById('btn-trash-hard-delete-products');
+            if (hardDeleteProductsBtn) hardDeleteProductsBtn.addEventListener('click', function () { trashBatchProducts('hard_delete'); });
+            var restoreCertsBtn = document.getElementById('btn-trash-restore-certs');
+            if (restoreCertsBtn) restoreCertsBtn.addEventListener('click', function () { trashBatchCerts('publish'); });
+            var hardDeleteCertsBtn = document.getElementById('btn-trash-hard-delete-certs');
+            if (hardDeleteCertsBtn) hardDeleteCertsBtn.addEventListener('click', function () { trashBatchCerts('hard_delete'); });
+        }
+
+        function bindAssetsEvents() {
+            var refreshBtn = document.getElementById('btn-refresh-assets');
+            if (refreshBtn) refreshBtn.addEventListener('click', function () {
+                assetPage = 1;
+                loadAssets();
+            });
+
+            var prevBtn = document.getElementById('btn-assets-prev');
+            if (prevBtn) prevBtn.addEventListener('click', function () {
+                if (assetPage <= 1) return;
+                assetPage -= 1;
+                loadAssets();
+            });
+
+            var nextBtn = document.getElementById('btn-assets-next');
+            if (nextBtn) nextBtn.addEventListener('click', function () {
+                var totalPages = Math.max(1, Math.ceil((assetMeta.total || 0) / (assetMeta.pageSize || 20)));
+                if (assetPage >= totalPages) return;
+                assetPage += 1;
+                loadAssets();
+            });
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes == null || isNaN(bytes)) return '—';
+            if (bytes === 0) return '0 B';
+
+            var units = ['B', 'KB', 'MB', 'GB'];
+            var i = 0;
+            var size = Number(bytes);
+            while (size >= 1024 && i < units.length - 1) {
+                size /= 1024;
+                i++;
+            }
+            return (i === 0 ? size : size.toFixed(1)) + ' ' + units[i];
+        }
+
+        function loadAssets() {
+            var tbody = document.getElementById('assets-tbody');
+            if (!tbody) return;
+
+            tbody.innerHTML = skeletonRows(7, 5);
+            var pagination = document.getElementById('assets-pagination');
+            if (pagination) pagination.style.display = 'none';
+
+            apiRequest('/admin/assets?page=' + encodeURIComponent(assetPage) + '&pageSize=20').then(function (response) {
+                var rows = unwrapListResponse(response);
+                assetMeta = response && response.meta ? response.meta : { page: assetPage, pageSize: 20, total: rows.length };
+                renderAssetsTable(rows);
+            }).catch(function (err) {
+                tbody.innerHTML = '<tr><td colspan="7" class="table-empty"><p>加载失败，请刷新重试</p></td></tr>';
+                showToast('加载资源库失败：' + err.message, 'error');
+            });
+        }
+
+        function renderAssetsTable(rows) {
+            var tbody = document.getElementById('assets-tbody');
+            if (!tbody) return;
+
+            if (!rows.length) {
+                tbody.innerHTML = '<tr><td colspan="7" class="table-empty"><p>暂无资源记录</p></td></tr>';
+                renderAssetsPagination();
+                return;
+            }
+
+            tbody.innerHTML = rows.map(function (asset) {
+                var name = escapeHtml(asset.original_name || asset.filename || '—');
+                var path = escapeHtml(asset.path || '—');
+                var mime = escapeHtml(asset.mime_type || '—');
+                var size = formatFileSize(asset.file_size);
+                var source = asset.module ? escapeHtml(asset.module + (asset.entity_type ? '/' + asset.entity_type : '')) : '—';
+                var time = formatDate(asset.created_at);
+
+                return '<tr>' +
+                    '<td class="product-name-text">' + name + '</td>' +
+                    '<td class="cell-muted" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + path + '">' + path + '</td>' +
+                    '<td class="cell-muted">' + mime + '</td>' +
+                    '<td class="cell-muted">' + escapeHtml(size) + '</td>' +
+                    '<td class="cell-muted">' + source + '</td>' +
+                    '<td class="cell-muted">' + escapeHtml(time) + '</td>' +
+                    '<td><button class="btn btn-icon btn-icon-delete" aria-label="删除资源" data-delete-asset="' + escapeHtml(asset.id) + '">' + ICON_DELETE + '</button></td>' +
+                    '</tr>';
+            }).join('');
+
+            tbody.querySelectorAll('[data-delete-asset]').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    deleteAsset(btn.getAttribute('data-delete-asset'));
+                });
+            });
+            renderAssetsPagination();
+        }
+
+        function renderAssetsPagination() {
+            var pagination = document.getElementById('assets-pagination');
+            var pageInfo = document.getElementById('assets-page-info');
+            var prevBtn = document.getElementById('btn-assets-prev');
+            var nextBtn = document.getElementById('btn-assets-next');
+            var total = assetMeta.total || 0;
+            var pageSize = assetMeta.pageSize || 20;
+            var totalPages = Math.max(1, Math.ceil(total / pageSize));
+
+            if (assetPage > totalPages) assetPage = totalPages;
+            if (pagination) pagination.style.display = total > pageSize ? '' : 'none';
+            if (pageInfo) pageInfo.textContent = '第 ' + assetPage + ' 页，共 ' + total + ' 条';
+            if (prevBtn) prevBtn.disabled = assetPage <= 1;
+            if (nextBtn) nextBtn.disabled = assetPage >= totalPages;
+        }
+
+        function deleteAsset(id) {
+            showConfirm('删除资源', '确定删除这条资源记录吗？文件本身不会从服务器删除，仅移出资源库。').then(function (ok) {
+                if (!ok) return;
+
+                apiRequest('/admin/assets/' + encodeURIComponent(id), { method: 'DELETE' }).then(function () {
+                    showToast('资源已移出资源库');
+                    loadAssets();
+                }).catch(function (err) {
+                    showToast('删除失败：' + err.message, 'error');
+                });
+            });
+        }
+
+        function loadTrash() {
+            var productsTbody = document.getElementById('trash-products-tbody');
+            var certsTbody = document.getElementById('trash-certs-tbody');
+            if (productsTbody) productsTbody.innerHTML = skeletonRows(5, 4);
+            if (certsTbody) certsTbody.innerHTML = skeletonRows(5, 4);
+            updateTrashProductBatchBar();
+            updateTrashCertBatchBar();
+
+            apiRequest('/admin/products?status=deleted&page=1&pageSize=100').then(function (response) {
+                trashedProducts = unwrapListResponse(response);
+                renderTrashProductsTable();
+            }).catch(function (err) {
+                if (productsTbody) productsTbody.innerHTML = '<tr><td colspan="5" class="table-empty"><p>加载失败，请刷新重试</p></td></tr>';
+                showToast('加载已删除产品失败：' + err.message, 'error');
+            });
+
+            apiRequest('/admin/certifications?status=deleted&page=1&pageSize=100').then(function (response) {
+                trashedCerts = unwrapListResponse(response);
+                renderTrashCertsTable();
+            }).catch(function (err) {
+                if (certsTbody) certsTbody.innerHTML = '<tr><td colspan="5" class="table-empty"><p>加载失败，请刷新重试</p></td></tr>';
+                showToast('加载已删除证书失败：' + err.message, 'error');
+            });
+        }
+
+        function restoreSingleProduct(id, version) {
+            var versionMap = {};
+            versionMap[String(id)] = version;
+            apiRequest('/admin/products/batch', {
+                method: 'POST',
+                body: { action: 'publish', ids: [id], versionMap: versionMap }
+            }).then(function () {
+                showToast('产品已恢复');
+                loadTrash();
+            }).catch(function (err) {
+                if (err.status === 409 || err.code === 'BATCH_FAILED') {
+                    showToast('部分数据版本已变更，请刷新后重试', 'error');
+                    return;
+                }
+                showToast('恢复失败：' + err.message, 'error');
+            });
+        }
+
+        function restoreSingleCert(id, version) {
+            var versionMap = {};
+            versionMap[String(id)] = version;
+            apiRequest('/admin/certifications/batch', {
+                method: 'POST',
+                body: { action: 'publish', ids: [id], versionMap: versionMap }
+            }).then(function () {
+                showToast('证书已恢复');
+                loadTrash();
+            }).catch(function (err) {
+                if (err.status === 409 || err.code === 'BATCH_FAILED') {
+                    showToast('部分数据版本已变更，请刷新后重试', 'error');
+                    return;
+                }
+                showToast('恢复失败：' + err.message, 'error');
+            });
+        }
+
+        function renderTrashProductsTable() {
+            var tbody = document.getElementById('trash-products-tbody');
+            if (!tbody) return;
+            if (!trashedProducts.length) {
+                tbody.innerHTML = '<tr><td colspan="5" class="table-empty"><p>回收站为空</p></td></tr>';
+                updateTrashProductBatchBar();
+                return;
+            }
+
+            tbody.innerHTML = trashedProducts.map(function (product) {
+                var name = product.name_en || product.name || '';
+                var categoryName = product.category_name_en || product.category || '—';
+                var cover = product.cover_image || product.image || '';
+                var thumb = cover
+                    ? '<img class="product-thumb" src="../' + escapeHtml(cover) + '" alt="">'
+                    : '<div class="product-thumb" style="background:#eef1f5;border:1px solid #d8dee8;"></div>';
+                return '<tr>' +
+                    '<td><input type="checkbox" class="trash-product-check" data-id="' + escapeHtml(product.id) + '" data-version="' + escapeHtml(product.version) + '"></td>' +
+                    '<td><div class="product-name-cell">' + thumb + '<div><div class="product-name-text">' + escapeHtml(name) + '</div><div class="product-id-text">' + escapeHtml(product.legacy_id || product.slug || product.id) + '</div></div></div></td>' +
+                    '<td><span class="badge badge-blue">' + escapeHtml(categoryName) + '</span></td>' +
+                    '<td><span class="badge badge-navy">已删除</span></td>' +
+                    '<td><button class="btn btn-secondary btn-sm" data-trash-restore-product="' + escapeHtml(product.id) + '" data-version="' + escapeHtml(product.version) + '">恢复</button></td>' +
+                    '</tr>';
+            }).join('');
+
+            tbody.querySelectorAll('[data-trash-restore-product]').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var id = parseInt(btn.getAttribute('data-trash-restore-product'), 10);
+                    var version = parseInt(btn.getAttribute('data-version'), 10);
+                    restoreSingleProduct(id, version);
+                });
+            });
+            tbody.querySelectorAll('.trash-product-check').forEach(function (cb) {
+                cb.addEventListener('change', updateTrashProductBatchBar);
+            });
+            updateTrashProductBatchBar();
+        }
+
+        function renderTrashCertsTable() {
+            var tbody = document.getElementById('trash-certs-tbody');
+            if (!tbody) return;
+            if (!trashedCerts.length) {
+                tbody.innerHTML = '<tr><td colspan="5" class="table-empty"><p>回收站为空</p></td></tr>';
+                updateTrashCertBatchBar();
+                return;
+            }
+
+            tbody.innerHTML = trashedCerts.map(function (item) {
+                return '<tr>' +
+                    '<td><input type="checkbox" class="trash-cert-check" data-id="' + escapeHtml(item.id) + '" data-version="' + escapeHtml(item.version) + '"></td>' +
+                    '<td>' + escapeHtml(item.name_en || '') + '</td>' +
+                    '<td><span class="badge badge-blue">' + escapeHtml(item.category_name_en || '—') + '</span></td>' +
+                    '<td><span class="badge badge-navy">已删除</span></td>' +
+                    '<td><button class="btn btn-secondary btn-sm" data-trash-restore-cert="' + escapeHtml(item.id) + '" data-version="' + escapeHtml(item.version) + '">恢复</button></td>' +
+                    '</tr>';
+            }).join('');
+
+            tbody.querySelectorAll('[data-trash-restore-cert]').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var id = parseInt(btn.getAttribute('data-trash-restore-cert'), 10);
+                    var version = parseInt(btn.getAttribute('data-version'), 10);
+                    restoreSingleCert(id, version);
+                });
+            });
+            tbody.querySelectorAll('.trash-cert-check').forEach(function (cb) {
+                cb.addEventListener('change', updateTrashCertBatchBar);
+            });
+            updateTrashCertBatchBar();
+        }
+
+        function updateTrashProductBatchBar() {
+            var selected = document.querySelectorAll('.trash-product-check:checked');
+            var all = document.querySelectorAll('.trash-product-check');
+            var bar = document.getElementById('trash-product-batch-bar');
+            var count = document.getElementById('trash-product-batch-count');
+            var selectAll = document.getElementById('trash-product-select-all');
+            if (count) count.textContent = '已选 ' + selected.length + ' 条';
+            if (bar) bar.style.display = selected.length ? '' : 'none';
+            if (selectAll) {
+                selectAll.checked = all.length > 0 && selected.length === all.length;
+                selectAll.indeterminate = selected.length > 0 && selected.length < all.length;
+            }
+        }
+
+        function updateTrashCertBatchBar() {
+            var selected = document.querySelectorAll('.trash-cert-check:checked');
+            var all = document.querySelectorAll('.trash-cert-check');
+            var bar = document.getElementById('trash-cert-batch-bar');
+            var count = document.getElementById('trash-cert-batch-count');
+            var selectAll = document.getElementById('trash-cert-select-all');
+            if (count) count.textContent = '已选 ' + selected.length + ' 条';
+            if (bar) bar.style.display = selected.length ? '' : 'none';
+            if (selectAll) {
+                selectAll.checked = all.length > 0 && selected.length === all.length;
+                selectAll.indeterminate = selected.length > 0 && selected.length < all.length;
+            }
+        }
+
+        function selectedTrashIds(selector) {
+            var ids = [];
+            document.querySelectorAll(selector).forEach(function (cb) {
+                var id = parseInt(cb.getAttribute('data-id'), 10);
+                if (!isNaN(id)) ids.push(id);
+            });
+            return ids;
+        }
+
+        function trashBatchProducts(action) {
+            var ids = selectedTrashIds('.trash-product-check:checked');
+            if (!ids.length) {
+                showToast('请先选择产品', 'error');
+                return;
+            }
+            var requireConfirm = action === 'hard_delete';
+            var message = '确定永久删除这 ' + ids.length + ' 条产品吗？此操作不可恢复。';
+            var label = action === 'publish' ? '恢复' : '永久删除';
+            runBatchAction('/admin/products/batch', action, ids, buildVersionMap(ids, trashedProducts), requireConfirm, message).then(function () {
+                showToast('已对 ' + ids.length + ' 条产品执行：' + label);
+                loadTrash();
+            }).catch(function (err) {
+                if (err && err.message === 'cancelled') return;
+            });
+        }
+
+        function trashBatchCerts(action) {
+            var ids = selectedTrashIds('.trash-cert-check:checked');
+            if (!ids.length) {
+                showToast('请先选择证书', 'error');
+                return;
+            }
+            var requireConfirm = action === 'hard_delete';
+            var message = '确定永久删除这 ' + ids.length + ' 条证书吗？此操作不可恢复。';
+            var label = action === 'publish' ? '恢复' : '永久删除';
+            runBatchAction('/admin/certifications/batch', action, ids, buildVersionMap(ids, trashedCerts), requireConfirm, message).then(function () {
+                showToast('已对 ' + ids.length + ' 条证书执行：' + label);
+                loadTrash();
+            }).catch(function (err) {
+                if (err && err.message === 'cancelled') return;
+            });
+        }
+
+        function yesNo(value) {
+            return value ? '是' : '否';
+        }
+
+        function loadSystemStatus() {
+            var ids = [
+                'system-sqlite-enabled',
+                'system-sqlite-available',
+                'system-schema-version',
+                'system-public-source',
+                'system-count-products',
+                'system-count-certifications',
+                'system-count-inquiries',
+                'system-count-content-blocks',
+                'system-count-assets',
+                'system-env-node',
+                'system-env-port'
+            ];
+            ids.forEach(function (id) { setText(id, '—'); });
+            apiRequest('/admin/system/status').then(function (response) {
+                var data = unwrapDataResponse(response) || {};
+                var sqlite = data.sqlite || {};
+                var counts = data.counts || {};
+                var env = data.env || {};
+                setText('system-sqlite-enabled', yesNo(sqlite.enabled));
+                setText('system-sqlite-available', yesNo(sqlite.available));
+                setText('system-schema-version', sqlite.schemaVersion == null ? '—' : sqlite.schemaVersion);
+                setText('system-public-source', data.publicApiSource || '—');
+                setText('system-count-products', counts.products == null ? 0 : counts.products);
+                setText('system-count-certifications', counts.certifications == null ? 0 : counts.certifications);
+                setText('system-count-inquiries', counts.inquiries == null ? 0 : counts.inquiries);
+                setText('system-count-content-blocks', counts.contentBlocks == null ? 0 : counts.contentBlocks);
+                setText('system-count-assets', counts.assets == null ? 0 : counts.assets);
+                setText('system-env-node', env.nodeEnv || '—');
+                setText('system-env-port', env.port || '—');
+
+                var sourceEl = document.getElementById('system-public-source');
+                if (sourceEl) {
+                    sourceEl.style.color = data.publicApiSource === 'json' ? '#b42318' : '';
+                }
+            }).catch(function (err) {
+                showToast('加载系统状态失败：' + err.message, 'error');
+            });
+        }
+
+        function moduleKeys() {
+            return ['dashboard', 'website', 'products', 'content', 'certifications', 'inquiries', 'assets', 'settings'];
+        }
+
+        function loadModuleSettings() {
+            var statusEl = document.getElementById('module-settings-status');
+            if (statusEl) statusEl.textContent = '加载中...';
+            apiRequest('/admin/settings/modules').then(function (response) {
+                var data = unwrapDataResponse(response) || {};
+                moduleKeys().forEach(function (key) {
+                    var input = document.getElementById('module-' + key);
+                    if (input) input.checked = !!data[key];
+                });
+                if (statusEl) statusEl.textContent = '已加载';
+            }).catch(function (err) {
+                if (statusEl) statusEl.textContent = '加载失败';
+                showToast('加载模块设置失败：' + err.message, 'error');
+            });
+        }
+
+        function saveModuleSettings() {
+            var body = {};
+            var statusEl = document.getElementById('module-settings-status');
+            moduleKeys().forEach(function (key) {
+                var input = document.getElementById('module-' + key);
+                if (input) body[key] = !!input.checked;
+            });
+            if (statusEl) statusEl.textContent = '保存中...';
+            apiRequest('/admin/settings/modules', {
+                method: 'PUT',
+                body: body
+            }).then(function (response) {
+                var data = unwrapDataResponse(response) || {};
+                moduleKeys().forEach(function (key) {
+                    var input = document.getElementById('module-' + key);
+                    if (input) input.checked = !!data[key];
+                });
+                if (statusEl) statusEl.textContent = '已保存';
+                showToast('模块设置已保存');
+            }).catch(function (err) {
+                if (statusEl) statusEl.textContent = '保存失败';
+                showToast('保存模块设置失败：' + err.message, 'error');
+            });
+        }
+
+        function auditActionLabel(action) {
+            var labels = {
+                create: '新增',
+                update: '修改',
+                delete: '删除',
+                soft_delete: '软删除',
+                hard_delete: '永久删除',
+                publish: '发布',
+                unpublish: '取消发布',
+                mark_read: '标记已读',
+                close: '关闭'
+            };
+            return labels[action] || action || '—';
+        }
+
+        function loadAuditLogs() {
+            var tbody = document.getElementById('audit-logs-tbody');
+            if (!tbody) return;
+            tbody.innerHTML = skeletonRows(6, 5);
+            var entityFilter = document.getElementById('audit-entity-filter');
+            var entityType = entityFilter ? entityFilter.value : '';
+            var url = '/admin/audit-logs?page=' + encodeURIComponent(auditLogPage) + '&pageSize=20';
+            if (entityType) url += '&entity_type=' + encodeURIComponent(entityType);
+
+            apiRequest(url).then(function (response) {
+                var rows = unwrapListResponse(response);
+                auditLogMeta = response && response.meta ? response.meta : { page: auditLogPage, pageSize: 20, total: rows.length };
+                renderAuditLogs(rows);
+            }).catch(function (err) {
+                tbody.innerHTML = '<tr><td colspan="6" class="table-empty"><p>加载失败，请刷新重试</p></td></tr>';
+                showToast('加载审计日志失败：' + err.message, 'error');
+            });
+        }
+
+        function renderAuditLogs(rows) {
+            var tbody = document.getElementById('audit-logs-tbody');
+            if (!tbody) return;
+            if (!rows.length) {
+                tbody.innerHTML = '<tr><td colspan="6" class="table-empty"><p>暂无审计日志</p></td></tr>';
+            } else {
+                tbody.innerHTML = rows.map(function (row) {
+                    return '<tr>' +
+                        '<td>' + escapeHtml(formatDate(row.created_at)) + '</td>' +
+                        '<td>' + escapeHtml(row.entity_type || '—') + '</td>' +
+                        '<td>' + escapeHtml(row.entity_id || '—') + '</td>' +
+                        '<td><span class="badge badge-blue">' + escapeHtml(auditActionLabel(row.action)) + '</span></td>' +
+                        '<td>' + escapeHtml(row.performed_by || '—') + '</td>' +
+                        '<td class="cell-muted">' + escapeHtml(row.ip || '—') + '</td>' +
+                        '</tr>';
+                }).join('');
+            }
+            renderAuditPagination();
+        }
+
+        function renderAuditPagination() {
+            var pageInfo = document.getElementById('audit-page-info');
+            var prev = document.getElementById('btn-audit-prev');
+            var next = document.getElementById('btn-audit-next');
+            var total = auditLogMeta.total || 0;
+            var pageSize = auditLogMeta.pageSize || 20;
+            var totalPages = Math.max(1, Math.ceil(total / pageSize));
+            if (auditLogPage > totalPages) auditLogPage = totalPages;
+            if (pageInfo) pageInfo.textContent = '第 ' + auditLogPage + ' 页，共 ' + total + ' 条';
+            if (prev) prev.disabled = auditLogPage <= 1;
+            if (next) next.disabled = auditLogPage >= totalPages;
         }
 
         function bindEducationEvents() {

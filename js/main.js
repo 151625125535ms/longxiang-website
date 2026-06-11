@@ -1638,7 +1638,7 @@
             openPreview(cert);
         });
 
-        fetchJson(assetPrefix + 'data/certifications.json', '/api/certifications').then(function (data) {
+        fetchJson('/api/certifications', assetPrefix + 'data/certifications.json').then(function (data) {
             certifications = Array.isArray(data) ? data : [];
             updateStats(certifications);
             renderTabs(certifications);
