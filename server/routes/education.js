@@ -11,6 +11,7 @@ const {
     updateJson,
     writeJsonAtomic
 } = require('../lib/fileStore');
+const { getDb, isUseSqlite } = require('../lib/db');
 
 const router = express.Router();
 const FALLBACK_DATA_FILE = path.join(__dirname, '..', '..', 'data', 'education.json');
@@ -182,6 +183,15 @@ const upload = multer({
 
 router.get('/', (req, res) => {
     try {
+        if (isUseSqlite()) {
+            const row = getDb()
+                .prepare("SELECT body_json FROM content_blocks WHERE slug = 'education'")
+                .get();
+            if (row) {
+                return res.json(JSON.parse(row.body_json));
+            }
+        }
+
         res.json(readEducation());
     } catch (err) {
         res.status(500).json({ error: 'Failed to read education content.' });

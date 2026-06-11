@@ -11,6 +11,7 @@ const {
     resolveUploadPublicPath,
     updateJson
 } = require('../lib/fileStore');
+const { getDb, isUseSqlite } = require('../lib/db');
 
 const router = express.Router();
 const FALLBACK_DATA_FILE = path.join(__dirname, '..', '..', 'data', 'certifications.json');
@@ -47,6 +48,27 @@ function readCertifications() {
 
 router.get('/', (req, res) => {
     try {
+        if (isUseSqlite()) {
+            const certifications = getDb().prepare(`
+                SELECT * FROM certifications
+                WHERE status = 'published'
+                ORDER BY sort_order, id
+            `).all().map(function (certification) {
+                return {
+                    id: certification.legacy_id,
+                    name: certification.name_en || '',
+                    nameAr: certification.name_ar || '',
+                    category: certification.legacy_category || '',
+                    image: certification.image_path || '',
+                    type: certification.source_type || '',
+                    pages: certification.pages || 1,
+                    width: certification.width,
+                    height: certification.height
+                };
+            });
+            return res.json(certifications);
+        }
+
         res.json(readCertifications());
     } catch (err) {
         res.status(500).json({ error: 'Failed to read certifications.' });

@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const { authMiddleware } = require('../middleware/auth');
 const { makeId, readJson, resolveDataFile, updateJson } = require('../lib/fileStore');
+const { getDb, isUseSqlite } = require('../lib/db');
 
 let nodemailer = null;
 try {
@@ -119,6 +120,50 @@ router.post('/', async (req, res) => {
         const errors = validateInquiry(normalized);
         if (errors.length) {
             return res.status(400).json({ error: errors.join(' ') });
+        }
+
+        if (isUseSqlite()) {
+            const now = Date.now();
+            const ip = req.ip || getClientIp(req);
+            const userAgent = String(req.headers['user-agent'] || '');
+            const result = getDb().prepare(`
+                INSERT INTO inquiries
+                    (
+                        legacy_id, name, email, company, phone, subject, message,
+                        product_context, status, is_read, notes, ip, user_agent,
+                        replied_at, deleted_at, created_at, updated_at
+                    )
+                VALUES
+                    (
+                        NULL, @name, @email, @company, @phone, @subject, @message,
+                        @product_context, 'new', 0, '', @ip, @user_agent,
+                        NULL, NULL, @created_at, @updated_at
+                    )
+            `).run({
+                name: normalized.name,
+                email: normalized.email,
+                company: normalized.company,
+                phone: normalized.phone,
+                subject: normalized.subject,
+                message: normalized.message,
+                product_context: normalized.productContext,
+                ip,
+                user_agent: userAgent,
+                created_at: now,
+                updated_at: now
+            });
+
+            const inquiry = {
+                id: String(result.lastInsertRowid),
+                createdAt: new Date(now).toISOString(),
+                status: 'new'
+            };
+
+            return res.status(201).json({
+                message: 'Inquiry submitted successfully.',
+                inquiry,
+                notification: { sent: false, reason: 'sqlite_mode' }
+            });
         }
 
         const inquiry = {

@@ -4,11 +4,16 @@
   "description": "Henan Longxiang Electrical Co., Ltd. Official Website",
   "main": "server/app.js",
   "scripts": {
+    "db:init": "node server/db/init.js",
+    "db:backup": "node server/db/backup.js",
+    "db:migrate": "node server/db/migrate.js",
+    "db:status": "node server/db/status.js",
     "products:import": "node scripts/import-products.js",
     "start": "node server/app.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^12.10.0",
     "compression": "^1.8.1",
     "cors": "^2.8.5",
     "dotenv": "^17.4.2",

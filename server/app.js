@@ -11,6 +11,7 @@ const inquiriesRoutes = require('./routes/inquiries');
 const certificationsRoutes = require('./routes/certifications');
 const educationRoutes = require('./routes/education');
 const { ensureDirectory, resolveUploadDir } = require('./lib/fileStore');
+const { getDb, isUseSqlite } = require('./lib/db');
 
 let compression = null;
 try { compression = require('compression'); } catch (err) { compression = null; }
@@ -103,11 +104,31 @@ app.use('/api/certifications', certificationsRoutes);
 app.use('/api/education', educationRoutes);
 
 app.get('/api/health', function (req, res) {
+    const sqlite = {
+        enabled: isUseSqlite(),
+        available: false,
+        schemaVersion: null
+    };
+
+    if (sqlite.enabled) {
+        try {
+            const row = getDb()
+                .prepare('SELECT version FROM schema_migrations ORDER BY version DESC LIMIT 1')
+                .get();
+            sqlite.available = true;
+            sqlite.schemaVersion = row ? row.version : null;
+        } catch (err) {
+            sqlite.available = false;
+            sqlite.schemaVersion = null;
+        }
+    }
+
     res.json({
         ok: true,
         service: 'longxiang-website',
         uptime: Math.round(process.uptime()),
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        sqlite
     });
 });
 

@@ -3,6 +3,7 @@ const path = require('path');
 const multer = require('multer');
 const { authMiddleware } = require('../middleware/auth');
 const { ensureDirectory, readJson, resolveDataFile, resolveUploadDir, resolveUploadPublicPath, updateJson } = require('../lib/fileStore');
+const { getDb, isUseSqlite } = require('../lib/db');
 
 const router = express.Router();
 const FALLBACK_DATA_FILE = path.join(__dirname, '..', '..', 'data', 'products.json');
@@ -17,6 +18,86 @@ function readProducts() {
 function matchesProductId(product, id) {
     if (product.id === id) return true;
     return Array.isArray(product.aliases) && product.aliases.indexOf(id) !== -1;
+}
+
+function parseJsonArray(value) {
+    try {
+        const parsed = JSON.parse(value || '[]');
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (err) {
+        return [];
+    }
+}
+
+function mapSqliteProduct(row, specsByProduct, coverByProduct) {
+    const specs = specsByProduct[row.id] || [];
+    return {
+        id: row.legacy_id,
+        name: row.name_en,
+        nameAr: row.name_ar || '',
+        image: coverByProduct[row.id] || '',
+        category: row.category_slug || '',
+        categoryLabel: row.category_label || '',
+        categoryLabelAr: row.category_label_ar || '',
+        group: row.product_group || '',
+        subCategory: row.sub_category || '',
+        shortDesc: row.short_desc_en || '',
+        shortDescAr: row.short_desc_ar || '',
+        description: row.description_en || '',
+        descriptionAr: row.description_ar || '',
+        capacities: specs.filter(item => item.spec_group === 'capacity').map(item => item.spec_value),
+        voltages: specs.filter(item => item.spec_group === 'voltage').map(item => item.spec_value),
+        specs: specs.filter(item => item.spec_group === 'technical').map(item => [item.spec_key, item.spec_value]),
+        featured: row.featured === 1,
+        aliases: parseJsonArray(row.aliases_json),
+        seoTitle: row.seo_title || '',
+        seoDescription: row.seo_description || '',
+        seoKeywords: row.seo_keywords || ''
+    };
+}
+
+function readSqliteProducts(id) {
+    const db = getDb();
+    const params = id ? [id] : [];
+    const products = db.prepare(`
+        SELECT
+            p.*,
+            c.slug AS category_slug,
+            c.name_en AS category_label,
+            c.name_ar AS category_label_ar
+        FROM products p
+        LEFT JOIN categories c ON c.id = p.category_id
+        WHERE p.status = 'published' ${id ? 'AND p.legacy_id = ?' : ''}
+        ORDER BY p.sort_order, p.id
+    `).all(params);
+
+    if (!products.length) return [];
+
+    const ids = products.map(product => product.id);
+    const placeholders = ids.map(() => '?').join(',');
+    const specRows = db.prepare(`
+        SELECT * FROM product_specs
+        WHERE product_id IN (${placeholders})
+        ORDER BY spec_group, sort_order, id
+    `).all(ids);
+    const mediaRows = db.prepare(`
+        SELECT * FROM product_media
+        WHERE product_id IN (${placeholders}) AND is_cover = 1
+        ORDER BY sort_order, id
+    `).all(ids);
+
+    const specsByProduct = {};
+    specRows.forEach(function (spec) {
+        if (!specsByProduct[spec.product_id]) specsByProduct[spec.product_id] = [];
+        specsByProduct[spec.product_id].push(spec);
+    });
+
+    const coverByProduct = {};
+    mediaRows.forEach(function (media) {
+        if (!coverByProduct[media.product_id]) coverByProduct[media.product_id] = media.path || '';
+    });
+
+    return products.map(product => mapSqliteProduct(product, specsByProduct, coverByProduct));
 }
 
 const storage = multer.diskStorage({
@@ -48,6 +129,18 @@ const upload = multer({
 
 router.get('/', (req, res) => {
     try {
+        if (isUseSqlite()) {
+            let result = readSqliteProducts();
+            const { category, featured } = req.query;
+            if (category) {
+                result = result.filter(p => p.category === category);
+            }
+            if (featured === 'true') {
+                result = result.filter(p => p.featured);
+            }
+            return res.json(result);
+        }
+
         const products = readProducts();
         const { category, featured } = req.query;
         let result = products;
@@ -65,6 +158,14 @@ router.get('/', (req, res) => {
 
 router.get('/:id', (req, res) => {
     try {
+        if (isUseSqlite()) {
+            const product = readSqliteProducts(req.params.id)[0];
+            if (!product) {
+                return res.status(404).json({ error: 'Product not found.' });
+            }
+            return res.json(product);
+        }
+
         const products = readProducts();
         const product = products.find(p => matchesProductId(p, req.params.id));
         if (!product) {

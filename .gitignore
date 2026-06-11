@@ -4,6 +4,8 @@ node_modules/
 .trae/
 .agents/
 backups/
+data/*.db
+data/*.db.bak*
 
 *.log
 npm-debug.log*
