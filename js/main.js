@@ -1442,7 +1442,7 @@
             qualifications: 'Enterprise Qualifications'
         };
 
-        var categoryOrder = ['test-reports', 'test-reports-extra', 'honors', 'qualifications', 'patents'];
+        var categoryOrder = ['test-reports', 'test-reports-extra', 'honors', 'qualifications', 'patents', 'software-copyrights'];
 
         function categoryLabel(category, data) {
             var match = data.find(function (item) { return item.category === category; });
