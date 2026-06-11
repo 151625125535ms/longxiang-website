@@ -318,7 +318,12 @@
         renderProducts(productsCache);
     }
 
-    function closeCategoryPanel() {
+    function closeCategoryPanel(event) {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+
         var tree = document.getElementById('product-category-tree');
         var toggle = document.querySelector('.product-category-toggle');
         var backdrop = document.querySelector('.product-category-backdrop');
@@ -354,37 +359,44 @@
         var tree = document.getElementById('product-category-tree');
         var closeButton = document.querySelector('.product-category-close');
         if (toggle && tree) {
+            tree.classList.remove('fade-in', 'visible');
+
             var backdrop = document.querySelector('.product-category-backdrop');
             if (!backdrop) {
                 backdrop = document.createElement('div');
                 backdrop.className = 'product-category-backdrop';
                 backdrop.setAttribute('aria-hidden', 'true');
-                tree.parentElement.insertBefore(backdrop, tree);
+            }
+            if (backdrop.parentElement !== document.body) {
+                document.body.appendChild(backdrop);
             }
 
-            toggle.addEventListener('click', function () {
-                var open = !tree.classList.contains('is-open');
+            function setCategoryPanel(open) {
                 tree.classList.toggle('is-open', open);
                 toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
                 backdrop.classList.toggle('is-open', open);
                 document.body.classList.toggle('product-category-panel-open', open);
+            }
+
+            toggle.addEventListener('click', function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                setCategoryPanel(!tree.classList.contains('is-open'));
             });
             if (closeButton) {
                 closeButton.addEventListener('click', closeCategoryPanel);
-                closeButton.addEventListener('touchstart', function (event) {
-                    event.preventDefault();
-                    closeCategoryPanel();
-                }, { passive: false });
+                closeButton.addEventListener('pointerup', closeCategoryPanel);
+                closeButton.addEventListener('touchstart', closeCategoryPanel, { passive: false });
             }
             backdrop.addEventListener('click', closeCategoryPanel);
-            backdrop.addEventListener('touchstart', closeCategoryPanel, { passive: true });
+            backdrop.addEventListener('pointerup', closeCategoryPanel);
             document.addEventListener('click', function (event) {
                 if (!tree.classList.contains('is-open')) return;
                 if (tree.contains(event.target) || toggle.contains(event.target)) return;
-                closeCategoryPanel();
-            });
+                closeCategoryPanel(event);
+            }, true);
             document.addEventListener('keydown', function (event) {
-                if (event.key === 'Escape') closeCategoryPanel();
+                if (event.key === 'Escape') closeCategoryPanel(event);
             });
         }
 
