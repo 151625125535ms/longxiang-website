@@ -122,13 +122,20 @@
 - 错误兜底展示
 - 不改前台视觉、不改公开 API 响应结构
 
-## Phase 6 ⏳ 未开始
+## Phase 6 🔄 进行中
 
 部署、回退演练与验收
 
-- 本地验收通过后提交 git
-- 服务器安装依赖（Node/npm、PM2、Python3、build-essential 用于 better-sqlite3）
-- 运行 `npm run db:migrate` 迁移数据
-- PM2 reload，`USE_SQLITE=true` 验证
-- 验证 `USE_SQLITE=false` 公开前台回退 JSON
-- 性能指标确认
+- [x] 本地验收测试通过（scripts/test-acceptance.js，22/22，0.8s）
+  - 公开 API：products 39、certifications 76、company、education ✓
+  - 后台认证、CRUD、批量、系统状态、模块设置、审计日志 ✓
+  - USE_SQLITE=false JSON 回退验证 ✓
+- [x] git commit 完成（branch: feature/admin-backend）
+- [ ] 服务器安装依赖（Node/npm、PM2、Python3、build-essential）
+- [ ] git push + 服务器 pull
+- [ ] 服务器执行 `npm install`（编译 better-sqlite3 原生模块）
+- [ ] 运行 `npm run db:migrate` 迁移数据
+- [ ] 配置服务器 .env（USE_SQLITE=true、JWT_SECRET 生产密钥）
+- [ ] PM2 reload，验证 USE_SQLITE=true 线上正常
+- [ ] 验证 USE_SQLITE=false 回退可用
+- [ ] 线上运行 scripts/test-acceptance.js 确认 22/22
