@@ -2910,6 +2910,34 @@
                 payload.sections.push(section);
             });
             if (!payload.hero.title) throw new Error('请填写主标题，否则页面顶部会缺少标题。');
+            if (payload.gallery) {
+                payload.sections.push({
+                    id: 'gallery',
+                    title: payload.gallery.title || '',
+                    titleAr: payload.gallery.titleAr || '',
+                    summary: payload.gallery.summary || '',
+                    summaryAr: payload.gallery.summaryAr || '',
+                    images: Array.isArray(payload.gallery.images) ? payload.gallery.images : [],
+                    body: [],
+                    bodyAr: [],
+                    cards: []
+                });
+                delete payload.gallery;
+            }
+            if (payload.philosophy) {
+                payload.sections.push({
+                    id: 'cooperation-philosophy',
+                    title: payload.philosophy.title || '',
+                    titleAr: payload.philosophy.titleAr || '',
+                    summary: payload.philosophy.summary || '',
+                    summaryAr: payload.philosophy.summaryAr || '',
+                    body: Array.isArray(payload.philosophy.body) ? payload.philosophy.body : [],
+                    bodyAr: Array.isArray(payload.philosophy.bodyAr) ? payload.philosophy.bodyAr : [],
+                    images: [],
+                    cards: []
+                });
+                delete payload.philosophy;
+            }
             return payload;
         }
 
