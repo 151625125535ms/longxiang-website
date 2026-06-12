@@ -35,10 +35,16 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15l-3.5 2 1-4-3-2.8 4-.3L12 6l1.5 3.9 4 .3-3 2.8 1 4z"/><path d="M5 21V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v17l-7-3z"/></svg>
                     证书管理
                 </a>
-                <a href="#" data-view="education">
+                <a href="#" data-view="content-company-overview">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg>
-                    教育合作
+                    企业概况
                 </a>
+                <a href="#" data-view="content-contact">联系我们</a>
+                <a href="#" data-view="content-about-us">关于我们</a>
+                <a href="#" data-view="content-innovation">科技创新</a>
+                <a href="#" data-view="content-applications">应用行业</a>
+                <a href="#" data-view="content-education">教育合作</a>
+                <a href="#" data-view="content-page-blocks">页面区块</a>
                 <a href="#" class="logout-link" id="nav-logout">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
                     退出登录
@@ -250,34 +256,80 @@
                     </div>
                 </section>
 
-                <section class="view-section" id="view-education">
-                    <div class="section-header-bar"><h2>教育合作内容管理</h2></div>
-                    <form class="company-form" id="education-form">
-                        <div id="education-editor" class="education-editor"></div>
-                        <div class="education-upload-panel">
-                            <div class="education-upload-copy">
-                                <strong>上传图片并选择用途</strong>
-                                <span>上传成功后会自动填入对应位置，不需要手动复制路径。</span>
-                            </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>上传图片</label>
-                                <input type="file" id="education-image" accept="image/*">
-                            </div>
-                            <div class="form-group">
-                                <label>图片用途</label>
-                                <select id="education-upload-target">
-                                    <option value="hero.backgroundImage">设为页面顶部背景图</option>
-                                    <option value="gallery.images">加入图片资料</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>上传后的图片路径</label>
-                                <input type="text" id="education-upload-path" readonly>
-                            </div>
-                        </div>
-                        </div>
-                        <div class="education-sticky-save"><button type="submit" class="btn btn-primary" id="btn-save-education">保存修改</button></div>
+                <section class="view-section" id="view-content-company-overview" data-content-view="content-company-overview">
+                    <div class="section-header-bar"><h2>企业概况</h2></div>
+                    <form class="company-form content-block-form" id="form-content-company-overview">
+                        <div class="form-row"><div class="form-group"><label>英文标题</label><input type="text" id="content-company-overview-title-en"></div><div class="form-group"><label>阿拉伯语标题</label><input type="text" id="content-company-overview-title-ar" dir="rtl"></div></div>
+                        <div id="content-company-overview-summary" class="content-summary"></div>
+                        <div id="content-company-overview-editor" class="content-editor"></div>
+                        <details class="content-raw-json"><summary>查看原始 JSON（只读）</summary><pre id="content-company-overview-raw-json"></pre></details>
+                        <div class="form-actions"><button type="submit" class="btn btn-primary">保存</button><span class="form-help-text" id="content-company-overview-status"></span></div>
+                    </form>
+                </section>
+
+                <section class="view-section" id="view-content-contact" data-content-view="content-contact">
+                    <div class="section-header-bar"><h2>联系我们</h2></div>
+                    <form class="company-form content-block-form" id="form-content-contact">
+                        <div class="form-row"><div class="form-group"><label>英文标题</label><input type="text" id="content-contact-title-en"></div><div class="form-group"><label>阿拉伯语标题</label><input type="text" id="content-contact-title-ar" dir="rtl"></div></div>
+                        <div id="content-contact-summary" class="content-summary"></div>
+                        <div id="content-contact-editor" class="content-editor"></div>
+                        <details class="content-raw-json"><summary>查看原始 JSON（只读）</summary><pre id="content-contact-raw-json"></pre></details>
+                        <div class="form-actions"><button type="submit" class="btn btn-primary">保存</button><span class="form-help-text" id="content-contact-status"></span></div>
+                    </form>
+                </section>
+
+                <section class="view-section" id="view-content-about-us" data-content-view="content-about-us">
+                    <div class="section-header-bar"><h2>关于我们</h2></div>
+                    <form class="company-form content-block-form" id="form-content-about-us">
+                        <div class="form-row"><div class="form-group"><label>英文标题</label><input type="text" id="content-about-us-title-en"></div><div class="form-group"><label>阿拉伯语标题</label><input type="text" id="content-about-us-title-ar" dir="rtl"></div></div>
+                        <div id="content-about-us-summary" class="content-summary"></div>
+                        <div id="content-about-us-editor" class="content-editor"></div>
+                        <details class="content-raw-json"><summary>查看原始 JSON（只读）</summary><pre id="content-about-us-raw-json"></pre></details>
+                        <div class="form-actions"><button type="submit" class="btn btn-primary">保存</button><span class="form-help-text" id="content-about-us-status"></span></div>
+                    </form>
+                </section>
+
+                <section class="view-section" id="view-content-innovation" data-content-view="content-innovation">
+                    <div class="section-header-bar"><h2>科技创新</h2></div>
+                    <form class="company-form content-block-form" id="form-content-innovation">
+                        <div class="form-row"><div class="form-group"><label>英文标题</label><input type="text" id="content-innovation-title-en"></div><div class="form-group"><label>阿拉伯语标题</label><input type="text" id="content-innovation-title-ar" dir="rtl"></div></div>
+                        <div id="content-innovation-summary" class="content-summary"></div>
+                        <div id="content-innovation-editor" class="content-editor"></div>
+                        <details class="content-raw-json"><summary>查看原始 JSON（只读）</summary><pre id="content-innovation-raw-json"></pre></details>
+                        <div class="form-actions"><button type="submit" class="btn btn-primary">保存</button><span class="form-help-text" id="content-innovation-status"></span></div>
+                    </form>
+                </section>
+
+                <section class="view-section" id="view-content-applications" data-content-view="content-applications">
+                    <div class="section-header-bar"><h2>应用行业</h2></div>
+                    <form class="company-form content-block-form" id="form-content-applications">
+                        <div class="form-row"><div class="form-group"><label>英文标题</label><input type="text" id="content-applications-title-en"></div><div class="form-group"><label>阿拉伯语标题</label><input type="text" id="content-applications-title-ar" dir="rtl"></div></div>
+                        <div id="content-applications-summary" class="content-summary"></div>
+                        <div id="content-applications-editor" class="content-editor"></div>
+                        <details class="content-raw-json"><summary>查看原始 JSON（只读）</summary><pre id="content-applications-raw-json"></pre></details>
+                        <div class="form-actions"><button type="submit" class="btn btn-primary">保存</button><span class="form-help-text" id="content-applications-status"></span></div>
+                    </form>
+                </section>
+
+                <section class="view-section" id="view-content-education" data-content-view="content-education">
+                    <div class="section-header-bar"><h2>教育合作</h2></div>
+                    <form class="company-form content-block-form" id="form-content-education">
+                        <div class="form-row"><div class="form-group"><label>英文标题</label><input type="text" id="content-education-title-en"></div><div class="form-group"><label>阿拉伯语标题</label><input type="text" id="content-education-title-ar" dir="rtl"></div></div>
+                        <div id="content-education-summary" class="content-summary"></div>
+                        <div id="content-education-editor" class="content-editor"></div>
+                        <details class="content-raw-json"><summary>查看原始 JSON（只读）</summary><pre id="content-education-raw-json"></pre></details>
+                        <div class="form-actions"><button type="submit" class="btn btn-primary">保存</button><span class="form-help-text" id="content-education-status"></span></div>
+                    </form>
+                </section>
+
+                <section class="view-section" id="view-content-page-blocks" data-content-view="content-page-blocks">
+                    <div class="section-header-bar"><h2>页面区块</h2></div>
+                    <form class="company-form content-block-form" id="form-content-page-blocks">
+                        <div class="form-row"><div class="form-group"><label>英文标题</label><input type="text" id="content-page-blocks-title-en"></div><div class="form-group"><label>阿拉伯语标题</label><input type="text" id="content-page-blocks-title-ar" dir="rtl"></div></div>
+                        <div id="content-page-blocks-summary" class="content-summary"></div>
+                        <div id="content-page-blocks-editor" class="content-editor"></div>
+                        <details class="content-raw-json"><summary>查看原始 JSON（只读）</summary><pre id="content-page-blocks-raw-json"></pre></details>
+                        <div class="form-actions"><button type="submit" class="btn btn-primary">保存</button><span class="form-help-text" id="content-page-blocks-status"></span></div>
                     </form>
                 </section>
 
@@ -386,5 +438,6 @@
         <div class="toast-container" id="toast-container"></div>
     </div>
     <script src="js/admin.js?v=2"></script>
+    <script src="js/content-editor.js?v=1"></script>
 </body>
 </html>
