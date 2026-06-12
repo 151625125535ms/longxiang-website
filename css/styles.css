@@ -2170,12 +2170,13 @@ p:last-child {
     z-index: 2;
 }
 
-.page-hero h1 {
+.page-hero h1,
+.page-hero .page-hero-title {
     color: var(--color-white-pure);
     margin-bottom: var(--spacing-md);
 }
 
-.page-hero p {
+.page-hero p:not(.page-hero-title) {
     color: rgba(255, 255, 255, 0.65);
     font-size: 1.1rem;
     max-width: 600px;
@@ -9810,9 +9811,12 @@ p:last-child {
 }
 
 /* Inner page top typography: keep homepage as the only oversized brand hero. */
-.page-hero h1 {
+.page-hero h1,
+.page-hero .page-hero-title {
     max-width: 760px;
     font-size: clamp(2rem, 3vw, 3rem);
+    font-family: var(--font-heading);
+    font-weight: 800;
     line-height: 1.12;
 }
 
@@ -9825,13 +9829,14 @@ p:last-child {
 
 .about-hero-content p,
 .solutions-hero p,
-.page-hero > .container > p {
+.page-hero > .container > p:not(.page-hero-title) {
     max-width: 720px;
     font-size: clamp(1rem, 1.2vw, 1.14rem);
     line-height: 1.68;
 }
 
 [dir="rtl"] .page-hero h1,
+[dir="rtl"] .page-hero .page-hero-title,
 [dir="rtl"] .about-hero-content h1,
 [dir="rtl"] .solutions-hero h1 {
     max-width: 740px;
@@ -9841,7 +9846,7 @@ p:last-child {
 
 [dir="rtl"] .about-hero-content p,
 [dir="rtl"] .solutions-hero p,
-[dir="rtl"] .page-hero > .container > p {
+[dir="rtl"] .page-hero > .container > p:not(.page-hero-title) {
     max-width: 740px;
     font-size: clamp(0.98rem, 1.15vw, 1.08rem);
     line-height: 1.86;
@@ -9849,6 +9854,7 @@ p:last-child {
 
 @media (max-width: 640px) {
     .page-hero h1,
+    .page-hero .page-hero-title,
     .about-hero-content h1,
     .solutions-hero h1 {
         max-width: min(100%, 370px);
@@ -9857,6 +9863,7 @@ p:last-child {
     }
 
     [dir="rtl"] .page-hero h1,
+    [dir="rtl"] .page-hero .page-hero-title,
     [dir="rtl"] .about-hero-content h1,
     [dir="rtl"] .solutions-hero h1 {
         font-size: clamp(1.65rem, 7vw, 2.15rem);
