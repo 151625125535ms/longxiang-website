@@ -157,7 +157,7 @@ router.get('/', function (req, res, next) {
             LEFT JOIN product_media cover ON cover.product_id = p.id AND cover.is_cover = 1
             ${built.whereSql}
             GROUP BY p.id
-            ORDER BY p.sort_order, p.id
+            ORDER BY p.featured DESC, p.sort_order, p.id
             LIMIT @limit OFFSET @offset
         `).all({ ...built.params, limit: pageSize, offset });
 
