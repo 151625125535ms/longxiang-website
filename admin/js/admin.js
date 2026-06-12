@@ -1556,6 +1556,296 @@
             return !!contentBlockSlug(viewName);
         }
 
+        var CONTENT_BLOCK_FORMS = {
+            'content-company-overview': {
+                fields: [
+                    ['name', '公司名称'], ['nameAr', '公司名称（阿语）'], ['nameCN', '公司名称（中文）'],
+                    ['founded', '成立时间'], ['stockCode', '股票代码'], ['registeredCapital', '注册资本'],
+                    ['registeredCapitalAr', '注册资本（阿语）'], ['factoryArea', '厂区面积'], ['factoryAreaAr', '厂区面积（阿语）'],
+                    ['patents', '专利数量'], ['researchPartners', '科研伙伴'], ['cover_image', '封面图路径']
+                ],
+                textareas: [
+                    ['description', '简介'], ['descriptionAr', '简介（阿语）'],
+                    ['aboutIntro', '关于简介'], ['aboutIntroAr', '关于简介（阿语）'],
+                    ['aboutDetail', '关于详情'], ['aboutDetailAr', '关于详情（阿语）']
+                ],
+                arrays: [
+                    { key: 'stats', label: '统计数据', fields: [['value', '数值'], ['label', '标签'], ['labelAr', '标签（阿语）']] }
+                ],
+                seo: true
+            },
+            'content-contact': {
+                fields: [
+                    ['address', '地址'], ['addressAr', '地址（阿语）'], ['headquarters', '总部'], ['headquartersAr', '总部（阿语）'],
+                    ['phone', '电话'], ['email', '邮箱'], ['officeHours', '办公时间'], ['officeHoursAr', '办公时间（阿语）'],
+                    ['huaiyangBase', '淮阳基地'], ['huaiyangBaseAr', '淮阳基地（阿语）'],
+                    ['whatsapp', 'WhatsApp'], ['whatsappQr', 'WhatsApp 二维码'], ['wechat', '微信'], ['wechatQr', '微信二维码'],
+                    ['skype', 'Skype'], ['line', 'Line'], ['lineQr', 'Line 二维码'], ['tiktok', 'TikTok'],
+                    ['instagram', 'Instagram'], ['youtube', 'YouTube'], ['googleMapsUrl', 'Google Maps URL'],
+                    ['googleMapsEmbedUrl', 'Google Maps Embed URL'], ['googleMyMapsEmbedUrl', 'Google My Maps Embed URL'],
+                    ['openStreetMapUrl', 'OpenStreetMap URL'], ['mapQr', '地图二维码']
+                ],
+                jsonTextareas: [['mapLocations', '地图位置 JSON']],
+                seo: true
+            },
+            'content-education': {
+                groups: [
+                    { key: 'hero', label: 'Hero', fields: [['eyebrow', 'Eyebrow'], ['title', '标题'], ['titleAr', '标题（阿语）'], ['subtitle', '副标题'], ['subtitleAr', '副标题（阿语）'], ['backgroundImage', '背景图']] },
+                    { key: 'cta', label: 'CTA', fields: [['title', '标题'], ['titleAr', '标题（阿语）'], ['text', '正文'], ['textAr', '正文（阿语）'], ['buttonText', '按钮'], ['buttonTextAr', '按钮（阿语）'], ['href', '链接']] }
+                ],
+                arrays: [
+                    { key: 'stats', label: '统计数据', fields: [['value', '数值'], ['label', '标签'], ['labelAr', '标签（阿语）']] },
+                    { key: 'sections', label: '合作板块', fields: [['id', 'ID'], ['modeNumber', '序号'], ['title', '标题'], ['titleAr', '标题（阿语）'], ['tagline', '标语'], ['taglineAr', '标语（阿语）'], ['summary', '摘要'], ['summaryAr', '摘要（阿语）'], ['image', '图片'], ['bestFor', '适合对象'], ['bestForAr', '适合对象（阿语）']] }
+                ]
+            },
+            'content-page-blocks': {
+                blocks: [
+                    { key: 'footer', label: '页脚', fields: [['footerText', '页脚文本'], ['footerTextAr', '页脚文本（阿语）'], ['is_active', '启用']] },
+                    { key: 'home-cta', label: '首页 CTA', fields: [['title_en', '标题（英文）'], ['title_ar', '标题（阿语）'], ['title_cn', '标题（中文）'], ['text_en', '正文（英文）'], ['text_ar', '正文（阿语）'], ['text_cn', '正文（中文）'], ['image', '图片'], ['href', '链接'], ['is_active', '启用']] }
+                ]
+            },
+            'content-about': {
+                groups: [
+                    { key: 'hero', label: 'Hero', fields: [['title_en', '标题（英文）'], ['title_ar', '标题（阿语）'], ['title_cn', '标题（中文）'], ['subtitle_en', '副标题（英文）'], ['subtitle_ar', '副标题（阿语）'], ['subtitle_cn', '副标题（中文）'], ['image', '图片']] }
+                ],
+                arrays: [
+                    { key: 'sections', label: '内容段落', fields: [['title_en', '标题（英文）'], ['title_ar', '标题（阿语）'], ['title_cn', '标题（中文）'], ['body_en', '正文（英文）'], ['body_ar', '正文（阿语）'], ['body_cn', '正文（中文）'], ['image', '图片'], ['layout', '布局']] },
+                    { key: 'milestones', label: '里程碑', fields: [['year', '年份'], ['title_en', '标题（英文）'], ['title_ar', '标题（阿语）'], ['title_cn', '标题（中文）'], ['description_en', '描述（英文）'], ['description_ar', '描述（阿语）'], ['description_cn', '描述（中文）']] }
+                ],
+                seo: true
+            },
+            'content-industries': {
+                groups: [
+                    { key: 'hero', label: 'Hero', fields: [['title_en', '标题（英文）'], ['title_ar', '标题（阿语）'], ['title_cn', '标题（中文）'], ['subtitle_en', '副标题（英文）'], ['subtitle_ar', '副标题（阿语）'], ['subtitle_cn', '副标题（中文）'], ['image', '图片']] }
+                ],
+                arrays: [
+                    { key: 'industries', label: '行业', fields: [['name_en', '名称（英文）'], ['name_ar', '名称（阿语）'], ['name_cn', '名称（中文）'], ['summary_en', '摘要（英文）'], ['summary_ar', '摘要（阿语）'], ['summary_cn', '摘要（中文）'], ['image', '图片'], ['related_product_ids', '关联产品 ID（逗号分隔）']] }
+                ],
+                seo: true
+            },
+            'content-technology': {
+                groups: [
+                    { key: 'hero', label: 'Hero', fields: [['title_en', '标题（英文）'], ['title_ar', '标题（阿语）'], ['title_cn', '标题（中文）'], ['subtitle_en', '副标题（英文）'], ['subtitle_ar', '副标题（阿语）'], ['subtitle_cn', '副标题（中文）'], ['image', '图片']] }
+                ],
+                arrays: [
+                    { key: 'sections', label: '技术板块', fields: [['title_en', '标题（英文）'], ['title_ar', '标题（阿语）'], ['title_cn', '标题（中文）'], ['body_en', '正文（英文）'], ['body_ar', '正文（阿语）'], ['body_cn', '正文（中文）'], ['image', '图片']] },
+                    { key: 'highlights', label: '亮点指标', fields: [['label_en', '标签（英文）'], ['label_ar', '标签（阿语）'], ['label_cn', '标签（中文）'], ['value', '数值']] }
+                ],
+                fields: [['related_certification_ids', '关联证书 ID（逗号分隔）']],
+                seo: true
+            }
+        };
+
+        function getPathValue(obj, path) {
+            return path.split('.').reduce(function (current, key) {
+                return current && current[key] !== undefined ? current[key] : '';
+            }, obj || {});
+        }
+
+        function setPathValue(obj, path, value) {
+            var parts = path.split('.');
+            var current = obj;
+            parts.forEach(function (key, index) {
+                if (index === parts.length - 1) {
+                    current[key] = value;
+                    return;
+                }
+                if (!current[key] || typeof current[key] !== 'object' || Array.isArray(current[key])) current[key] = {};
+                current = current[key];
+            });
+        }
+
+        function normalizeStructuredValue(path, value) {
+            if (/related_(product|certification)_ids$/.test(path)) {
+                var invalidItems = [];
+                var ids = String(value || '').split(',').map(function (item) {
+                    var raw = item.trim();
+                    if (!raw) return null;
+                    var parsed = parseInt(raw, 10);
+                    if (!Number.isFinite(parsed)) invalidItems.push(raw);
+                    return Number.isFinite(parsed) ? parsed : null;
+                }).filter(function (item) { return item != null; });
+                if (invalidItems.length) {
+                    showToast('关联 ID 已忽略非数字项：' + invalidItems.join(', '), 'error');
+                }
+                return ids;
+            }
+            if (path === 'is_active' || /\.is_active$/.test(path)) {
+                return value === true || value === 'true' || value === '1';
+            }
+            return String(value == null ? '' : value).trim();
+        }
+
+        function renderField(path, label, value, textarea) {
+            var id = 'cms-field-' + path.replace(/[^a-zA-Z0-9_-]/g, '-');
+            var tag = textarea ? 'textarea' : 'input';
+            var valueText = Array.isArray(value) ? value.join(', ') : (value == null ? '' : String(value));
+            if (path === 'is_active' || /\.is_active$/.test(path)) {
+                return '<label class="form-group cms-field"><span>' + escapeHtml(label) + '</span><select data-cms-field="' + escapeHtml(path) + '"><option value="true"' + (value !== false ? ' selected' : '') + '>启用</option><option value="false"' + (value === false ? ' selected' : '') + '>停用</option></select></label>';
+            }
+            if (textarea) {
+                return '<label class="form-group cms-field"><span>' + escapeHtml(label) + '</span><textarea id="' + escapeHtml(id) + '" data-cms-field="' + escapeHtml(path) + '" rows="4">' + escapeHtml(valueText) + '</textarea></label>';
+            }
+            return '<label class="form-group cms-field"><span>' + escapeHtml(label) + '</span><input id="' + escapeHtml(id) + '" data-cms-field="' + escapeHtml(path) + '" type="text" value="' + escapeHtml(valueText) + '"></label>';
+        }
+
+        function renderGroup(group, body) {
+            return '<fieldset class="cms-fieldset"><legend>' + escapeHtml(group.label) + '</legend>' +
+                group.fields.map(function (field) {
+                    return renderField(group.key + '.' + field[0], field[1], getPathValue(body, group.key + '.' + field[0]), /body|summary|subtitle|text/.test(field[0]));
+                }).join('') + '</fieldset>';
+        }
+
+        function renderArrayEditor(arrayConfig, body) {
+            var items = Array.isArray(body[arrayConfig.key]) ? body[arrayConfig.key] : [];
+            return '<fieldset class="cms-fieldset" data-cms-array="' + escapeHtml(arrayConfig.key) + '"><legend>' + escapeHtml(arrayConfig.label) + '</legend>' +
+                '<div class="cms-array-items">' + items.map(function (item, index) {
+                    return '<div class="cms-array-item" data-cms-array-item="' + index + '">' +
+                        '<div class="cms-array-actions"><button type="button" class="btn btn-secondary btn-sm cms-move-up">上移</button><button type="button" class="btn btn-secondary btn-sm cms-move-down">下移</button><button type="button" class="btn btn-danger btn-sm cms-remove-item">删除</button></div>' +
+                        arrayConfig.fields.map(function (field) {
+                            return renderField(arrayConfig.key + '.' + index + '.' + field[0], field[1], item ? item[field[0]] : '', /body|summary|description|text/.test(field[0]));
+                        }).join('') + '</div>';
+                }).join('') + '</div><button type="button" class="btn btn-secondary cms-add-item" data-cms-add="' + escapeHtml(arrayConfig.key) + '">新增</button></fieldset>';
+        }
+
+        function renderContentBlockForm(viewName, block) {
+            var config = CONTENT_BLOCK_FORMS[viewName] || {};
+            var form = document.getElementById('form-' + viewName);
+            if (!form) return;
+            var body = block.body_json || {};
+            var html = '<div class="form-group"><label>标题（英文）</label><input type="text" id="' + escapeHtml(viewName) + '-title-en" value="' + escapeHtml(block.title_en || '') + '"></div>';
+            (config.fields || []).forEach(function (field) {
+                html += renderField(field[0], field[1], getPathValue(body, field[0]), false);
+            });
+            (config.textareas || []).forEach(function (field) {
+                html += renderField(field[0], field[1], getPathValue(body, field[0]), true);
+            });
+            (config.jsonTextareas || []).forEach(function (field) {
+                html += renderField(field[0], field[1], JSON.stringify(getPathValue(body, field[0]) || {}, null, 2), true);
+            });
+            (config.groups || []).forEach(function (group) { html += renderGroup(group, body); });
+            (config.arrays || []).forEach(function (arrayConfig) { html += renderArrayEditor(arrayConfig, body); });
+            if (config.blocks) html += renderReservedBlocks(config.blocks, body);
+            if (config.seo) {
+                html += '<fieldset class="cms-fieldset"><legend>SEO</legend>' +
+                    renderField('seo.title', 'SEO 标题', getPathValue(body, 'seo.title'), false) +
+                    renderField('seo.description', 'SEO 描述', getPathValue(body, 'seo.description'), true) +
+                    renderField('seo.keywords', 'SEO 关键词', getPathValue(body, 'seo.keywords'), false) +
+                    '</fieldset>';
+            }
+            html += '<details class="cms-advanced"><summary>高级 JSON</summary><textarea id="' + escapeHtml(viewName) + '-body-json" rows="12">' + escapeHtml(JSON.stringify(body, null, 2)) + '</textarea></details>';
+            html += '<div class="form-actions"><button type="submit" class="btn btn-primary">保存</button><button type="button" class="btn btn-secondary cms-reload">重新加载</button><span class="form-status" id="' + escapeHtml(viewName) + '-status">' + (block.updated_at ? '已加载：' + formatDate(block.updated_at) : '已加载') + '</span></div>';
+            form.innerHTML = html;
+        }
+
+        function renderReservedBlocks(blockConfigs, body) {
+            var blocks = Array.isArray(body.blocks) ? body.blocks : [];
+            return '<fieldset class="cms-fieldset"><legend>系统区块</legend>' + blockConfigs.map(function (blockConfig) {
+                var item = blocks.filter(function (block) { return block.key === blockConfig.key; })[0] || { key: blockConfig.key };
+                return '<div class="cms-array-item" data-cms-block="' + escapeHtml(blockConfig.key) + '"><h4>' + escapeHtml(blockConfig.label) + '</h4>' + blockConfig.fields.map(function (field) {
+                    return renderField('blocks.' + blockConfig.key + '.' + field[0], field[1], item[field[0]], /text|title/.test(field[0]));
+                }).join('') + '</div>';
+            }).join('') + '</fieldset>';
+        }
+
+        function collectContentBlockBody(viewName) {
+            var cached = contentBlockCache[viewName] || {};
+            var bodyEl = document.getElementById(viewName + '-body-json');
+            var body = {};
+            try {
+                body = bodyEl ? JSON.parse(bodyEl.value || '{}') : { ...(cached.body_json || {}) };
+            } catch (err) {
+                throw new Error('高级 JSON 格式无效');
+            }
+            if (!body || typeof body !== 'object' || Array.isArray(body)) throw new Error('高级 JSON 格式无效');
+
+            var form = document.getElementById('form-' + viewName);
+            if (!form) return body;
+
+            form.querySelectorAll('[data-cms-field]').forEach(function (field) {
+                var path = field.getAttribute('data-cms-field');
+                if (/^blocks\.[^.]+\./.test(path)) return;
+                if (/^[^.]+\.\d+\./.test(path)) return;
+                setPathValue(body, path, normalizeStructuredValue(path, field.value));
+            });
+
+            form.querySelectorAll('[data-cms-array]').forEach(function (arrayEl) {
+                var key = arrayEl.getAttribute('data-cms-array');
+                var items = [];
+                arrayEl.querySelectorAll('[data-cms-array-item]').forEach(function (itemEl, index) {
+                    var item = {};
+                    itemEl.querySelectorAll('[data-cms-field]').forEach(function (field) {
+                        var parts = field.getAttribute('data-cms-field').split('.');
+                        item[parts.slice(2).join('.')] = normalizeStructuredValue(parts.slice(2).join('.'), field.value);
+                    });
+                    item.sort_order = index;
+                    if (Object.keys(item).some(function (keyName) { return keyName === 'sort_order' ? false : item[keyName] !== '' && !(Array.isArray(item[keyName]) && !item[keyName].length); })) {
+                        items.push(item);
+                    }
+                });
+                body[key] = items;
+            });
+
+            var blockEls = form.querySelectorAll('[data-cms-block]');
+            if (blockEls.length) {
+                var existingBlocks = Array.isArray(body.blocks) ? body.blocks : [];
+                var nextBlocks = existingBlocks.filter(function (block) {
+                    return block && block.key && block.key !== 'footer' && block.key !== 'home-cta';
+                });
+                blockEls.forEach(function (blockEl, index) {
+                    var item = { key: blockEl.getAttribute('data-cms-block'), sort_order: index };
+                    blockEl.querySelectorAll('[data-cms-field]').forEach(function (field) {
+                        var parts = field.getAttribute('data-cms-field').split('.');
+                        var key = parts.slice(2).join('.');
+                        item[key] = normalizeStructuredValue(key, field.value);
+                    });
+                    nextBlocks.push(item);
+                });
+                body.blocks = nextBlocks;
+            }
+
+            return body;
+        }
+
+        function warnMissingCertificationIds(slug, body) {
+            if (slug !== 'innovation' || !Array.isArray(body.related_certification_ids) || !body.related_certification_ids.length) {
+                return Promise.resolve();
+            }
+            return apiRequest('/admin/certifications?page=1&pageSize=100').then(function (response) {
+                var rows = unwrapListResponse(response);
+                var existing = {};
+                rows.forEach(function (row) { existing[row.id] = true; });
+                var missing = body.related_certification_ids.filter(function (id) { return !existing[id]; });
+                if (missing.length) {
+                    showToast('以下证书 ID 暂未找到：' + missing.join(', '), 'error');
+                }
+            }).catch(function () {
+                showToast('证书 ID 存在性检查失败，已继续保存', 'error');
+            });
+        }
+
+        function mutateContentArray(viewName, arrayKey, action, index) {
+            var block = contentBlockCache[viewName];
+            if (!block) return;
+            var body = block.body_json || {};
+            var items = Array.isArray(body[arrayKey]) ? body[arrayKey].slice() : [];
+            if (action === 'add') items.push({});
+            if (action === 'remove') items.splice(index, 1);
+            if (action === 'up' && index > 0) {
+                var prev = items[index - 1];
+                items[index - 1] = items[index];
+                items[index] = prev;
+            }
+            if (action === 'down' && index < items.length - 1) {
+                var next = items[index + 1];
+                items[index + 1] = items[index];
+                items[index] = next;
+            }
+            body[arrayKey] = items;
+            block.body_json = body;
+            renderContentBlockForm(viewName, block);
+        }
+
         function bindContentBlockEvents() {
             var views = [
                 'content-company-overview',
@@ -1573,6 +1863,25 @@
                         e.preventDefault();
                         saveContentBlock(viewName);
                     });
+                    form.addEventListener('click', function (e) {
+                        var target = e.target;
+                        if (target.classList.contains('cms-reload')) {
+                            loadContentBlock(viewName);
+                            return;
+                        }
+                        if (target.classList.contains('cms-add-item')) {
+                            mutateContentArray(viewName, target.getAttribute('data-cms-add'), 'add', 0);
+                            return;
+                        }
+                        var itemEl = target.closest('[data-cms-array-item]');
+                        var arrayEl = target.closest('[data-cms-array]');
+                        if (!itemEl || !arrayEl) return;
+                        var index = parseInt(itemEl.getAttribute('data-cms-array-item'), 10);
+                        var arrayKey = arrayEl.getAttribute('data-cms-array');
+                        if (target.classList.contains('cms-remove-item')) mutateContentArray(viewName, arrayKey, 'remove', index);
+                        if (target.classList.contains('cms-move-up')) mutateContentArray(viewName, arrayKey, 'up', index);
+                        if (target.classList.contains('cms-move-down')) mutateContentArray(viewName, arrayKey, 'down', index);
+                    });
                 }
             });
         }
@@ -1589,6 +1898,7 @@
                 var bodyEl = document.getElementById(viewName + '-body-json');
                 if (titleEl) titleEl.value = block.title_en || '';
                 if (bodyEl) bodyEl.value = JSON.stringify(block.body_json || {}, null, 2);
+                renderContentBlockForm(viewName, block);
                 if (statusEl) statusEl.textContent = block.updated_at ? ('已加载：' + formatDate(block.updated_at)) : '已加载';
             }).catch(function (err) {
                 if (statusEl) statusEl.textContent = '加载失败';
@@ -1601,14 +1911,13 @@
             if (!slug) return;
             var cached = contentBlockCache[viewName] || {};
             var titleEl = document.getElementById(viewName + '-title-en');
-            var bodyEl = document.getElementById(viewName + '-body-json');
             var statusEl = document.getElementById(viewName + '-status');
             var parsed = null;
 
             try {
-                parsed = JSON.parse(bodyEl ? bodyEl.value : '{}');
+                parsed = collectContentBlockBody(viewName);
             } catch (err) {
-                showToast('body_json 格式无效', 'error');
+                showToast(err.message || 'body_json 格式无效', 'error');
                 return;
             }
 
@@ -1618,13 +1927,15 @@
             }
 
             if (statusEl) statusEl.textContent = '保存中...';
-            apiRequest('/admin/content-blocks/' + encodeURIComponent(slug), {
+            warnMissingCertificationIds(slug, parsed).then(function () {
+                return apiRequest('/admin/content-blocks/' + encodeURIComponent(slug), {
                 method: 'PUT',
                 body: {
                     title_en: titleEl ? titleEl.value.trim() : '',
                     body_json: parsed,
                     version: cached.version
                 }
+                });
             }).then(function (response) {
                 var block = unwrapDataResponse(response) || {};
                 contentBlockCache[viewName] = block;
@@ -2241,8 +2552,19 @@
                 btn.disabled = true;
                 btn.textContent = '正在保存...';
             }
-            apiRequest('/education/editor', { method: 'PUT', body: payload }).then(function (data) {
-                educationContent = data.education || payload;
+            apiRequest('/admin/content-blocks/education').then(function (response) {
+                var block = unwrapDataResponse(response) || {};
+                return apiRequest('/admin/content-blocks/education', {
+                    method: 'PUT',
+                    body: {
+                        title_en: block.title_en || '',
+                        body_json: payload,
+                        version: block.version
+                    }
+                });
+            }).then(function (response) {
+                var block = unwrapDataResponse(response) || {};
+                educationContent = block.body_json || payload;
                 renderEducationEditor(educationContent);
                 showToast('已保存，可刷新前台页面查看效果');
             }).catch(function (err) {

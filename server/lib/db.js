@@ -33,6 +33,7 @@ function getDb() {
     fs.mkdirSync(path.dirname(dbPath), { recursive: true });
 
     dbInstance = new Database(dbPath);
+    dbInstance.pragma('journal_mode = WAL');
     dbInstance.pragma('foreign_keys = ON');
     return dbInstance;
 }

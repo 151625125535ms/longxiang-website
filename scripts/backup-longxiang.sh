@@ -14,6 +14,11 @@ if compgen -G "${DATA_DIR}/*.json" > /dev/null; then
     cp "${DATA_DIR}"/*.json "${WORK_DIR}/"
 fi
 
+if [ -f "${DATA_DIR}/longxiang.db" ]; then
+    sqlite3 "${DATA_DIR}/longxiang.db" "PRAGMA wal_checkpoint(TRUNCATE);" 2>/dev/null || true
+    cp "${DATA_DIR}/longxiang.db" "${WORK_DIR}/longxiang.db"
+fi
+
 if [ -d "${UPLOAD_DIR}" ]; then
     mkdir -p "${WORK_DIR}/uploads"
     cp -a "${UPLOAD_DIR}/." "${WORK_DIR}/uploads/"

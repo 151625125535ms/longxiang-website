@@ -23,6 +23,13 @@ function readEducation() {
     return readJson(DATA_FILE, {}, FALLBACK_DATA_FILE);
 }
 
+function sendGone(res) {
+    return res.status(410).json({
+        ok: false,
+        error: { code: 'GONE', message: 'Use /api/admin/content-blocks/education instead.' }
+    });
+}
+
 function validateEducation(data) {
     const errors = [];
     if (!data || typeof data !== 'object' || Array.isArray(data)) {
@@ -206,15 +213,23 @@ router.put('/', authMiddleware, (req, res) => {
             return res.status(400).json({ error: errors.join(' ') });
         }
 
+        if (isUseSqlite()) {
+            const education = writeSqliteEducation(req, content, 'legacy_update', false);
+            return res.json({ message: 'Education content updated.', education });
+        }
+
         writeJsonAtomic(DATA_FILE, content, 'education');
         res.json({ message: 'Education content updated.', education: content });
     } catch (err) {
+        if (err.statusCode) return res.status(err.statusCode).json({ error: err.message });
         res.status(500).json({ error: 'Failed to update education content.' });
     }
 });
 
 router.put('/editor', authMiddleware, (req, res) => {
     try {
+        if (isUseSqlite()) return sendGone(res);
+
         const content = normalizeEditorPayload(req.body || {});
         const errors = validateEducation(content);
         if (errors.length) {
@@ -230,6 +245,8 @@ router.put('/editor', authMiddleware, (req, res) => {
 
 router.patch('/', authMiddleware, (req, res) => {
     try {
+        if (isUseSqlite()) return sendGone(res);
+
         const updated = updateJson(DATA_FILE, {}, FALLBACK_DATA_FILE, function (current) {
             const next = { ...current, ...req.body, updatedAt: new Date().toISOString() };
             const errors = validateEducation(next);

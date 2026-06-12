@@ -4,6 +4,31 @@ const { sendError, insertAuditLog } = require('./helpers');
 
 const router = express.Router();
 const BATCH_ACTIONS = ['publish', 'unpublish'];
+const STATUSES = ['published', 'draft'];
+const CONTENT_BLOCK_SLUGS = [
+    'company-overview',
+    'about-us',
+    'contact',
+    'applications',
+    'innovation',
+    'education',
+    'page-blocks'
+];
+const SCHEMAS = {
+    'company-overview': { stats: 'array', seo: 'object' },
+    'contact': { mapLocations: 'object', seo: 'object' },
+    'about-us': { hero: 'object', sections: 'array', milestones: 'array', seo: 'object' },
+    'applications': { hero: 'object', industries: 'array', seo: 'object' },
+    'innovation': { hero: 'object', sections: 'array', highlights: 'array', related_certification_ids: 'array', seo: 'object' },
+    education: { hero: 'object', stats: 'array', sections: 'array', cta: 'object', seo: 'object' },
+    'page-blocks': { blocks: 'array' }
+};
+
+function parsePositiveInt(value, defaultValue, maxValue) {
+    const parsed = parseInt(value, 10);
+    const normalized = Number.isFinite(parsed) && parsed > 0 ? parsed : defaultValue;
+    return maxValue ? Math.min(normalized, maxValue) : normalized;
+}
 
 function parseBodyJson(value) {
     try {
@@ -23,6 +48,45 @@ function normalizeRow(row) {
 
 function isPlainObject(value) {
     return value != null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function isValidSlug(slug) {
+    return CONTENT_BLOCK_SLUGS.indexOf(String(slug || '').trim()) !== -1;
+}
+
+function normalizeStatus(value, defaultValue) {
+    const status = String(value || '').trim();
+    if (!status) return defaultValue;
+    return STATUSES.indexOf(status) !== -1 ? status : null;
+}
+
+function validateBodyJson(slug, bodyJson) {
+    const schema = SCHEMAS[slug];
+    const errors = [];
+    if (!schema) return ['Unknown content block slug.'];
+    if (!isPlainObject(bodyJson)) return ['body_json must be an object.'];
+
+    Object.keys(schema).forEach(function (key) {
+        const expected = schema[key];
+        const value = bodyJson[key];
+        if (value == null) return;
+        if (expected === 'array' && !Array.isArray(value)) {
+            errors.push(key + ' must be an array.');
+        }
+        if (expected === 'object' && !isPlainObject(value)) {
+            errors.push(key + ' must be an object.');
+        }
+    });
+
+    if (slug === 'education' && bodyJson.hero) {
+        ['title_en', 'title_ar', 'subtitle_en', 'subtitle_ar'].forEach(function (key) {
+            if (Object.prototype.hasOwnProperty.call(bodyJson.hero, key)) {
+                errors.push('education must keep legacy hero fields.');
+            }
+        });
+    }
+
+    return errors;
 }
 
 function getContentBlockBySlug(db, slug) {
@@ -45,13 +109,53 @@ function getContentBlockById(db, id) {
 
 router.get('/', function (req, res, next) {
     try {
-        const rows = getDb().prepare(`
+        const page = parsePositiveInt(req.query.page, 1);
+        const pageSize = parsePositiveInt(req.query.pageSize, 20, 100);
+        const offset = (page - 1) * pageSize;
+        const where = [];
+        const params = {};
+
+        const status = String(req.query.status || '').trim();
+        if (status) {
+            if (STATUSES.indexOf(status) === -1) return sendError(res, 422, 'VALIDATION_ERROR', 'Invalid status.');
+            where.push('status = @status');
+            params.status = status;
+        }
+
+        const slug = String(req.query.slug || '').trim();
+        if (slug) {
+            if (!isValidSlug(slug)) return sendError(res, 422, 'VALIDATION_ERROR', 'Invalid content block slug.');
+            where.push('slug = @slug');
+            params.slug = slug;
+        }
+
+        const q = String(req.query.q || '').trim();
+        if (q) {
+            where.push('(slug LIKE @q OR title_en LIKE @q OR title_ar LIKE @q)');
+            params.q = '%' + q + '%';
+        }
+
+        const whereSql = where.length ? 'WHERE ' + where.join(' AND ') : '';
+        const db = getDb();
+        const totalRow = db.prepare(`
+            SELECT COUNT(*) AS total
+            FROM content_blocks
+            ${whereSql}
+        `).get(params);
+
+        const rows = db.prepare(`
             SELECT id, slug, title_en, title_ar, body_json, status, sort_order, version, created_at, updated_at
             FROM content_blocks
+            ${whereSql}
             ORDER BY sort_order, id
-        `).all().map(normalizeRow);
+            LIMIT @limit OFFSET @offset
+        `).all({ ...params, limit: pageSize, offset }).map(normalizeRow);
 
-        res.json({ ok: true, data: rows });
+        res.json({
+            ok: true,
+            data: rows,
+            meta: { page, pageSize, total: totalRow ? totalRow.total : 0 }
+        });
     } catch (err) {
         next(err);
     }
@@ -59,6 +163,7 @@ router.get('/', function (req, res, next) {
 
 router.get('/:slug', function (req, res, next) {
     try {
+        if (!isValidSlug(req.params.slug)) return sendError(res, 404, 'NOT_FOUND', 'Content block not found.');
         const block = getContentBlockBySlug(getDb(), req.params.slug);
         if (!block) return sendError(res, 404, 'NOT_FOUND', 'Content block not found.');
         res.json({ ok: true, data: block });
@@ -69,11 +174,14 @@ router.get('/:slug', function (req, res, next) {
 
 router.put('/:slug', function (req, res, next) {
     try {
+        if (!isValidSlug(req.params.slug)) return sendError(res, 404, 'NOT_FOUND', 'Content block not found.');
         const body = req.body || {};
         if (body.version == null) return sendError(res, 422, 'VALIDATION_ERROR', 'version is required.');
         if (body.body_json !== undefined && !isPlainObject(body.body_json)) {
             return sendError(res, 422, 'VALIDATION_ERROR', 'body_json must be an object.');
         }
+        const status = normalizeStatus(body.status, null);
+        if (body.status != null && !status) return sendError(res, 422, 'VALIDATION_ERROR', 'Invalid status.');
 
         const db = getDb();
         const before = getContentBlockBySlug(db, req.params.slug);
@@ -82,6 +190,30 @@ router.put('/:slug', function (req, res, next) {
         const requestVersion = parseInt(body.version, 10);
         if (!Number.isFinite(requestVersion) || requestVersion !== before.version) {
             return sendError(res, 409, 'VERSION_CONFLICT', 'Content block version conflict.');
+        }
+
+        const nextBodyJson = body.body_json === undefined ? before.body_json : body.body_json;
+        let incomingBodyJson = nextBodyJson;
+        if (before.body_json.extra !== undefined && incomingBodyJson.extra === undefined) {
+            incomingBodyJson = { ...incomingBodyJson, extra: before.body_json.extra };
+        }
+
+        const schemaErrors = validateBodyJson(before.slug, incomingBodyJson);
+        if (schemaErrors.length) return sendError(res, 422, 'VALIDATION_ERROR', schemaErrors.join(' '));
+
+        if (before.slug === 'page-blocks' && body.body_json !== undefined) {
+            const blocks = incomingBodyJson.blocks;
+            if (Array.isArray(blocks)) {
+                const reservedKeys = ['footer', 'home-cta'];
+                const missingKey = reservedKeys.find(function (key) {
+                    return !blocks.some(function (block) {
+                        return block && block.key === key;
+                    });
+                });
+                if (missingKey) {
+                    return sendError(res, 422, 'VALIDATION_ERROR', 'Block key "' + missingKey + '" is required and cannot be removed.');
+                }
+            }
         }
 
         const updateBlock = db.transaction(function () {
@@ -99,8 +231,8 @@ router.put('/:slug', function (req, res, next) {
                 slug: before.slug,
                 title_en: body.title_en == null ? before.title_en : String(body.title_en).trim(),
                 title_ar: body.title_ar == null ? before.title_ar : String(body.title_ar).trim(),
-                body_json: JSON.stringify(body.body_json === undefined ? before.body_json : body.body_json),
-                status: body.status == null ? before.status : String(body.status).trim(),
+                body_json: JSON.stringify(incomingBodyJson),
+                status: status || before.status,
                 updated_at: Date.now()
             });
 

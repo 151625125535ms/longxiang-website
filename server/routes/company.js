@@ -64,6 +64,16 @@ router.get('/', (req, res) => {
 
 router.put('/', authMiddleware, (req, res) => {
     try {
+        if (isUseSqlite()) {
+            return res.status(405).json({
+                ok: false,
+                error: {
+                    code: 'METHOD_NOT_ALLOWED',
+                    message: 'Use /api/admin/content-blocks/company-overview instead.'
+                }
+            });
+        }
+
         const patch = normalizeCompanyPatch(req.body);
         const updatedCompany = updateJson(DATA_FILE, {}, FALLBACK_DATA_FILE, function (current) {
             return { ...current, ...patch };
