@@ -38,7 +38,9 @@
 
 | 编号 | 任务 | 说明 |
 |------|------|------|
-| TEST | 安装 Playwright Firefox/WebKit | `npm install --save-dev @playwright/test && npx playwright install` |
+| CSP-enforce | CSP 从 Report-Only 切换为强制模式 | 观察服务器日志无违规后执行，改 `reportOnly: false` |
+| STYLE-inline | 内联 `<style>` 迁入 CSS | 将 `index.html`/`ar/index.html` 内联样式移入 `styles.css`，之后可去掉 CSP `unsafe-inline` |
+| COMPAT-install | 安装 Playwright Firefox/WebKit | 域名上线前可先安装，配合 COMPAT 任务使用 |
 
 ---
 
@@ -72,3 +74,4 @@
 - **Codex** 负责：执行任务、提交代码、部署服务器、写 `plan2.md` 给 Claude
 - **plan.md / plan2.md**：桌面交换文件，顶部必须是"给对方的 Prompts"，每轮覆写
 - **此文件**：项目内持久文件，随 git 保存，每轮完成后同步更新状态
+- **域名任务交接文档**：`DOMAIN_READY_BRIEFING.md`（同目录），包含域名到位后的完整执行指南和冷启动提示词
