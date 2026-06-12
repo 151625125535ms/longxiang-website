@@ -23,9 +23,9 @@
   - 验证：soft_delete 返回 422
   - 完成时间：2026-06-12 22:53:45 +08:00
 
-- [ ] Day 1 commit + push
+- [x] Day 1 commit + push
   - commit message：`feat: enable WAL, add pagination/meta/slug-whitelist to content-blocks API`
-  - 完成时间：___
+  - 完成时间：2026-06-12 23:08:00 +08:00（合并为最终实现提交：3075111）
 
 ---
 
@@ -51,9 +51,9 @@
   - 验证：两个接口均返回 410
   - 完成时间：2026-06-12 22:57:45 +08:00
 
-- [ ] Day 2 commit + push
+- [x] Day 2 commit + push
   - commit message：`feat: add schema validation, page-blocks key guard, deprecate old write routes`
-  - 完成时间：___
+  - 完成时间：2026-06-12 23:08:00 +08:00（合并为最终实现提交：3075111）
 
 ---
 
@@ -76,9 +76,9 @@
   - 验证：删除 footer 保存被拒绝；修改 footer 文本保存成功
   - 完成时间：2026-06-12 23:03:25 +08:00
 
-- [ ] Day 3 commit + push
+- [x] Day 3 commit + push
   - commit message：`feat: structured forms for company-overview, contact, education, page-blocks`
-  - 完成时间：___
+  - 完成时间：2026-06-12 23:08:00 +08:00（合并为最终实现提交：3075111）
 
 ---
 
@@ -93,9 +93,9 @@
 - [x] Step 4.3 — 科技创新结构化表单（sections/highlights 增删排序 + 证书 ID 提示）
   - 完成时间：2026-06-12 23:04:56 +08:00
 
-- [ ] Day 4 commit + push
+- [x] Day 4 commit + push
   - commit message：`feat: structured forms for about-us, applications, innovation`
-  - 完成时间：___
+  - 完成时间：2026-06-12 23:08:00 +08:00（合并为最终实现提交：3075111）
 
 ---
 
@@ -107,13 +107,13 @@
 - [x] Step 5.2 — 所有 API 验收命令通过
   - 完成时间：2026-06-12 23:06:38 +08:00
 
-- [ ] Step 5.3 — 服务器备份 + 部署 + PM2 验证
-  - 完成时间：___
+- [x] Step 5.3 — 服务器备份 + 部署 + PM2 验证
+  - 完成时间：2026-06-12 23:10:14 +08:00
 
-- [ ] Step 5.4 — 前台回归：教育合作页正常、阿语页 titleAr 正常、页脚正常
-  - 完成时间：___
+- [x] Step 5.4 — 前台回归：教育合作页正常、阿语页 titleAr 正常、页脚正常
+  - 完成时间：2026-06-12 23:10:14 +08:00
 
-- [ ] 最终验收通过，任务完成
+- [x] 最终验收通过，任务完成
 
 ---
 
