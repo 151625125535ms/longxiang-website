@@ -40,10 +40,62 @@ const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
     : null;
 
 if (compression) app.use(compression());
-if (helmet) app.use(helmet({
-    contentSecurityPolicy: false,
-    referrerPolicy: { policy: 'strict-origin-when-cross-origin' }
-}));
+if (helmet) {
+    const cspDirectives = {
+        defaultSrc: ["'self'"],
+        baseUri: ["'self'"],
+        objectSrc: ["'none'"],
+        frameAncestors: ["'self'"],
+        scriptSrc: [
+            "'self'",
+            'https://www.googletagmanager.com'
+        ],
+        styleSrc: [
+            "'self'",
+            "'unsafe-inline'",
+            'https://fonts.googleapis.com'
+        ],
+        fontSrc: [
+            "'self'",
+            'https://fonts.gstatic.com',
+            'data:'
+        ],
+        imgSrc: [
+            "'self'",
+            'data:',
+            'blob:',
+            'https://www.google.com',
+            'https://maps.gstatic.com',
+            'https://*.googleusercontent.com',
+            'https://www.google-analytics.com'
+        ],
+        connectSrc: [
+            "'self'",
+            'https://www.google-analytics.com',
+            'https://region1.google-analytics.com',
+            'https://stats.g.doubleclick.net'
+        ],
+        frameSrc: [
+            "'self'",
+            'https://www.youtube.com',
+            'https://www.google.com'
+        ],
+        formAction: ["'self'"]
+    };
+
+    if (process.env.NODE_ENV === 'production') {
+        cspDirectives.upgradeInsecureRequests = [];
+    }
+
+    app.use(helmet({
+        contentSecurityPolicy: {
+            useDefaults: false,
+            reportOnly: true,
+            directives: cspDirectives
+        },
+        referrerPolicy: { policy: 'strict-origin-when-cross-origin' }
+    }));
+}
 if (morgan) app.use(morgan('combined'));
 
 app.use(cors({
