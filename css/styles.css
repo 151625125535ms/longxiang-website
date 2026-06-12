@@ -5598,8 +5598,10 @@ p:last-child {
 
     .hamburger {
         display: flex;
-        flex: 0 0 28px;
-        width: 28px;
+        flex: 0 0 44px;
+        width: 44px;
+        height: 44px;
+        padding: 7px;
     }
 
     .footer .container {
@@ -8802,10 +8804,21 @@ p:last-child {
 
     .nav-links .nav-item > a,
     .nav-links .nav-item.has-dropdown > a {
+        min-height: 44px;
         justify-content: flex-start;
         width: 100%;
         padding-left: 6px;
+        padding-top: 10px;
+        padding-bottom: 10px;
         text-align: left;
+    }
+
+    .nav-links .nav-dropdown a {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        padding-top: 10px;
+        padding-bottom: 10px;
     }
 
     .nav-links .nav-dropdown {
@@ -9493,6 +9506,9 @@ p:last-child {
         padding: 3px 0;
         font-size: 0.8rem;
         line-height: 1.25;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
     }
 
     .footer-conversion {
