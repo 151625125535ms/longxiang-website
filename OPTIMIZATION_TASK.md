@@ -21,6 +21,8 @@
 | K-1-impl | CSP Report-Only 模式启用 | `0775926`，服务器首页响应头 `Content-Security-Policy-Report-Only` 验证通过 |
 | P2-C | 缓存策略确认（CSS/JS 版本参数检查） | 报告输出至 `plan2.md`；站点主 CSS 均带版本参数，后台登录 CSS 无版本；英文多页 JS 无版本但服务端仅缓存 5 分钟 |
 | DOCS | OPTIMIZATION_TASK.md 纳入 git 版本控制 | `docs: add optimization task tracking file`，仅提交本文件 |
+| P2-C-fix | 版本参数补全（admin/login.html + 英文前台 JS） | `69bedc8`，9 个 HTML 文件版本参数补全 |
+| TEST | Playwright Chromium 冒烟测试安装与运行 | `0dcd652`，4 条 smoke 用例全部通过 |
 
 ---
 
