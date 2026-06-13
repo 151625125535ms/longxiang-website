@@ -56,6 +56,22 @@ function buildQuery(query) {
         params.is_active = active;
     }
 
+    const q = String(query.q || '').trim();
+    if (q) {
+        where.push('(filename LIKE @q OR original_name LIKE @q OR path LIKE @q)');
+        params.q = '%' + q + '%';
+    }
+
+    const type = String(query.type || '').trim();
+    if (type) {
+        if (type !== 'image' && type !== 'file') return { error: 'Invalid type value.' };
+        if (type === 'image') {
+            where.push("mime_type LIKE 'image/%'");
+        } else {
+            where.push("(mime_type NOT LIKE 'image/%' OR mime_type IS NULL OR mime_type = '')");
+        }
+    }
+
     return {
         whereSql: where.length ? 'WHERE ' + where.join(' AND ') : '',
         params

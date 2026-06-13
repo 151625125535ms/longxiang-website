@@ -20,6 +20,13 @@ router.get('/', function (req, res, next) {
             LIMIT 5
         `).all();
 
+        const recentContent = db.prepare(`
+            SELECT id, slug, title_en, updated_at
+            FROM content_blocks
+            ORDER BY updated_at DESC, id DESC
+            LIMIT 1
+        `).get();
+
         res.json({
             ok: true,
             data: {
@@ -39,7 +46,8 @@ router.get('/', function (req, res, next) {
                 contentBlocks: {
                     total: getCount(db, 'SELECT COUNT(*) AS total FROM content_blocks')
                 },
-                recentInquiries
+                recentInquiries,
+                recentContent: recentContent || null
             }
         });
     } catch (err) {

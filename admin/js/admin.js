@@ -308,6 +308,8 @@
         var auditLogMeta = { page: 1, pageSize: 20, total: 0 };
         var assetPage = 1;
         var assetMeta = { page: 1, pageSize: 20, total: 0 };
+        var assetSearchTimer = null;
+        var activeTrashTab = 'trash-products';
         var formDirty = false;
         var dirtyMessage = '当前有未保存的修改，是否确认离开？离开后修改将丢失。';
         var activeModalTrigger = null;
@@ -500,6 +502,80 @@
             showToast(message, 'error');
         }
 
+        function draftKey(type, idOrView) {
+            if (type === 'content') return 'draft-' + idOrView;
+            return 'draft-' + type + '-' + (idOrView || 'new');
+        }
+
+        function safeSessionSet(key, value) {
+            try {
+                sessionStorage.setItem(key, JSON.stringify(value));
+            } catch (err) {
+                showToast('浏览器未能保存本地草稿', 'error');
+            }
+        }
+
+        function safeSessionGet(key) {
+            try {
+                var raw = sessionStorage.getItem(key);
+                return raw ? JSON.parse(raw) : null;
+            } catch (err) {
+                return null;
+            }
+        }
+
+        function safeSessionRemove(key) {
+            try {
+                sessionStorage.removeItem(key);
+            } catch (err) {}
+        }
+
+        function collectFormDraft(formId) {
+            var form = document.getElementById(formId);
+            var draft = {};
+            if (!form) return draft;
+            form.querySelectorAll('input, textarea, select').forEach(function (field) {
+                if (!field.id || field.type === 'file') return;
+                draft[field.id] = field.type === 'checkbox' ? field.checked : field.value;
+            });
+            return draft;
+        }
+
+        function restoreFormDraft(formId, draft) {
+            var form = document.getElementById(formId);
+            if (!form || !draft) return;
+            Object.keys(draft).forEach(function (id) {
+                var field = document.getElementById(id);
+                if (!field) return;
+                if (field.type === 'checkbox') field.checked = !!draft[id];
+                else field.value = draft[id] == null ? '' : draft[id];
+            });
+            if (formId === 'product-form') uploadedImagePath = (draft['field-image'] || uploadedImagePath || '');
+            if (formId === 'certification-form') uploadedCertificationPath = (draft['cert-image'] || uploadedCertificationPath || '');
+            markFormDirty();
+        }
+
+        function showDraftRecovery(host, key, restoreFn) {
+            var draft = safeSessionGet(key);
+            if (!host || !draft) return;
+            var existing = host.querySelector('.draft-recovery-banner');
+            if (existing) existing.parentNode.removeChild(existing);
+            var banner = document.createElement('div');
+            banner.className = 'draft-recovery-banner';
+            banner.innerHTML = '<span>发现未保存草稿，是否恢复？</span><div class="draft-recovery-actions"><button type="button" class="btn btn-primary btn-sm" data-draft-restore>恢复</button><button type="button" class="btn btn-secondary btn-sm" data-draft-ignore>忽略</button></div>';
+            banner.querySelector('[data-draft-restore]').addEventListener('click', function () {
+                restoreFn(draft);
+                safeSessionRemove(key);
+                banner.remove();
+                showToast('草稿已恢复');
+            });
+            banner.querySelector('[data-draft-ignore]').addEventListener('click', function () {
+                safeSessionRemove(key);
+                banner.remove();
+            });
+            host.insertBefore(banner, host.firstChild);
+        }
+
         function reloadCurrentView() {
             var view = currentView;
             if (view === 'dashboard') loadDashboard();
@@ -634,12 +710,15 @@
 
         function loadDashboard() {
             ['stat-total', 'stat-featured', 'stat-categories', 'stat-inquiries', 'stat-new-inquiries'].forEach(function (id) { setText(id, '—'); });
+            renderDashboardPendingLoading();
             apiRequest('/admin/dashboard').then(function (response) {
                 var data = unwrapDataResponse(response) || {};
                 inquiries = data.recentInquiries || [];
                 renderDashboard(data);
+                loadDashboardPending(data);
             }).catch(function (err) {
                 showToast('加载控制台失败：' + err.message, 'error');
+                renderDashboardPending(null, null, null, null);
             });
         }
 
@@ -660,6 +739,101 @@
             }
 
             renderRecentInquiries();
+        }
+
+        function renderDashboardPendingLoading() {
+            var container = document.getElementById('dashboard-pending-cards');
+            if (!container) return;
+            container.innerHTML = [0, 1, 2, 3].map(function () {
+                return '<button class="pending-card pending-card-loading" type="button" disabled><span>加载中...</span></button>';
+            }).join('');
+        }
+
+        function loadDashboardPending(dashboardData) {
+            var recentContent = dashboardData && dashboardData.recentContent ? dashboardData.recentContent : null;
+            Promise.all([
+                apiRequest('/admin/inquiries?unread=true&page=1&pageSize=1').catch(function () { return null; }),
+                apiRequest('/admin/products?status=draft&page=1&pageSize=1').catch(function () { return null; }),
+                apiRequest('/admin/assets?page=1&pageSize=1').catch(function () { return null; })
+            ]).then(function (responses) {
+                var unreadTotal = responses[0] && responses[0].meta ? responses[0].meta.total : null;
+                var draftTotal = responses[1] && responses[1].meta ? responses[1].meta.total : null;
+                var assetRows = responses[2] ? unwrapListResponse(responses[2]) : [];
+                renderDashboardPending(unreadTotal, draftTotal, recentContent, assetRows[0] || null);
+            });
+        }
+
+        function contentViewFromSlug(slug) {
+            var map = {
+                'company-overview': 'content-company-overview',
+                contact: 'content-contact',
+                'about-us': 'content-about',
+                innovation: 'content-technology',
+                applications: 'content-industries',
+                education: 'content-education',
+                'page-blocks': 'content-page-blocks'
+            };
+            return map[slug] || 'content-page-blocks';
+        }
+
+        function renderDashboardPending(unreadTotal, draftTotal, recentContent, recentAsset) {
+            var container = document.getElementById('dashboard-pending-cards');
+            if (!container) return;
+            var contentView = recentContent ? contentViewFromSlug(recentContent.slug) : '';
+            var cards = [
+                {
+                    label: '新询盘',
+                    value: unreadTotal == null ? '—' : unreadTotal + ' 条',
+                    meta: '筛选未读询盘',
+                    action: 'pending-inquiries'
+                },
+                {
+                    label: '草稿产品',
+                    value: draftTotal == null ? '—' : draftTotal + ' 件',
+                    meta: '筛选草稿状态',
+                    action: 'pending-drafts'
+                },
+                {
+                    label: '最近修改内容',
+                    value: recentContent ? (VIEW_META[contentView] ? VIEW_META[contentView].title : recentContent.slug) : '暂无记录',
+                    meta: recentContent && recentContent.updated_at ? formatDate(recentContent.updated_at) : '无最近修改',
+                    action: contentView ? 'pending-content' : '',
+                    view: contentView
+                },
+                {
+                    label: '最近上传资源',
+                    value: recentAsset ? (recentAsset.original_name || recentAsset.filename || '未命名资源') : '暂无资源',
+                    meta: recentAsset && recentAsset.created_at ? formatDate(recentAsset.created_at) : '无最近上传',
+                    action: 'pending-assets'
+                }
+            ];
+
+            container.innerHTML = cards.map(function (card) {
+                var attrs = card.action ? ' data-pending-action="' + escapeHtml(card.action) + '"' : ' disabled';
+                if (card.view) attrs += ' data-target-view="' + escapeHtml(card.view) + '"';
+                return '<button class="pending-card" type="button"' + attrs + '>' +
+                    '<span class="pending-card-label">' + escapeHtml(card.label) + '</span>' +
+                    '<span class="pending-card-value">' + escapeHtml(card.value) + '</span>' +
+                    '<span class="pending-card-meta">' + escapeHtml(card.meta) + '</span>' +
+                    '</button>';
+            }).join('');
+
+            container.querySelectorAll('[data-pending-action]').forEach(function (card) {
+                card.addEventListener('click', function () {
+                    var action = card.getAttribute('data-pending-action');
+                    if (action === 'pending-inquiries') {
+                        if (!switchView('inquiries')) return;
+                        setInquiryUnreadFilter(true);
+                    } else if (action === 'pending-drafts') {
+                        if (!switchView('products')) return;
+                        setProductStatusFilter('draft');
+                    } else if (action === 'pending-content') {
+                        switchView(card.getAttribute('data-target-view'));
+                    } else if (action === 'pending-assets') {
+                        switchView('assets');
+                    }
+                });
+            });
         }
 
         function renderRecentInquiries() {
@@ -790,6 +964,13 @@
                 (document.getElementById('product-featured-filter') || {}).value || ''
             ].some(Boolean);
             btn.style.display = hasFilters ? '' : 'none';
+        }
+
+        function setProductStatusFilter(status) {
+            var statusFilter = document.getElementById('product-status-filter');
+            if (statusFilter) statusFilter.value = status || '';
+            productPage = 1;
+            loadProducts();
         }
 
         function renderProductsTable() {
@@ -1224,11 +1405,19 @@
                     var product = unwrapDataResponse(response) || {};
                     if (editingProductVersion == null) editingProductVersion = product.version;
                     fillProductForm(product);
+                    showDraftRecovery(document.querySelector('#product-modal .modal-body'), draftKey('product', productId), function (draft) {
+                        restoreFormDraft('product-form', draft);
+                    });
                 }).catch(function (err) { showToast('加载产品失败：' + err.message, 'error'); });
             } else {
                 title.textContent = '新增产品';
             }
             showModal('product-modal');
+            if (!productId) {
+                showDraftRecovery(document.querySelector('#product-modal .modal-body'), draftKey('product', 'new'), function (draft) {
+                    restoreFormDraft('product-form', draft);
+                });
+            }
         }
 
         function fillProductForm(product) {
@@ -1363,12 +1552,15 @@
             request.then(function (response) {
                 var saved = unwrapDataResponse(response) || {};
                 if (!editingProductId && saved.id) editingProductId = saved.id;
+                safeSessionRemove(draftKey('product', editingProductId || 'new'));
+                if (!wasEditing) safeSessionRemove(draftKey('product', 'new'));
                 showToast(wasEditing ? '产品已更新' : '产品已新增');
                 resetFormDirty();
                 closeModal('product-modal', true);
                 loadProducts();
             }).catch(function (err) {
                 if (err.status === 409 || err.code === 'VERSION_CONFLICT') {
+                    safeSessionSet(draftKey('product', editingProductId || 'new'), collectFormDraft('product-form'));
                     showConflictNotice('内容已被他人修改，请重新加载后再编辑', loadProducts);
                     return;
                 }
@@ -1981,9 +2173,17 @@
                         document.getElementById('cert-editing-version').value = detail.version || '';
                     }
                     uploadedCertificationPath = detail.image_path || '';
+                    showDraftRecovery(document.querySelector('#certification-modal .modal-body'), draftKey('cert', id), function (draft) {
+                        restoreFormDraft('certification-form', draft);
+                    });
                 }).catch(function (err) { showToast('加载证书详情失败：' + err.message, 'error'); });
             }
             showModal('certification-modal');
+            if (!id) {
+                showDraftRecovery(document.querySelector('#certification-modal .modal-body'), draftKey('cert', 'new'), function (draft) {
+                    restoreFormDraft('certification-form', draft);
+                });
+            }
         }
 
         function uploadCertificationFile() {
@@ -2027,10 +2227,12 @@
             request.then(function () {
                 showToast('证书已保存');
                 resetFormDirty();
+                safeSessionRemove(draftKey('cert', editingCertificationId || 'new'));
                 closeModal('certification-modal', true);
                 loadCertView(currentView);
             }).catch(function (err) {
                 if (err.status === 409 || err.code === 'VERSION_CONFLICT') {
+                    safeSessionSet(draftKey('cert', editingCertificationId || 'new'), collectFormDraft('certification-form'));
                     showConflictNotice('内容已被他人修改，请重新加载后再编辑', function () { loadCertView(currentView); });
                     return;
                 }
@@ -2499,11 +2701,21 @@
                 if (titleEl) titleEl.value = block.title_en || '';
                 if (bodyEl) bodyEl.value = JSON.stringify(block.body_json || {}, null, 2);
                 renderContentBlockForm(viewName, block);
+                showDraftRecovery(document.getElementById('view-' + viewName), draftKey('content', viewName), function (draft) {
+                    block.body_json = draft;
+                    contentBlockCache[viewName] = block;
+                    renderContentBlockForm(viewName, block);
+                    markFormDirty();
+                });
                 if (statusEl) statusEl.textContent = block.updated_at ? ('已加载：' + formatDate(block.updated_at)) : '已加载';
             }).catch(function (err) {
                 if (statusEl) statusEl.textContent = '加载失败';
                 showToast('加载内容块失败：' + err.message, 'error');
             });
+        }
+
+        function collectContentBlockBodyRaw(viewName) {
+            return collectContentBlockBody(viewName);
         }
 
         function saveContentBlock(viewName) {
@@ -2540,10 +2752,14 @@
                 var block = unwrapDataResponse(response) || {};
                 contentBlockCache[viewName] = block;
                 if (statusEl) statusEl.textContent = '已保存：' + formatDate(block.updated_at);
+                safeSessionRemove(draftKey('content', viewName));
                 resetFormDirty();
                 showToast('内容已保存');
             }).catch(function (err) {
                 if (err.status === 409 || err.code === 'VERSION_CONFLICT') {
+                    try {
+                        safeSessionSet(draftKey('content', viewName), collectContentBlockBodyRaw(viewName));
+                    } catch (draftErr) {}
                     showConflictNotice('内容已被他人修改，请重新加载后再编辑', function () { loadContentBlock(viewName); });
                     if (statusEl) statusEl.textContent = '版本冲突';
                     return;
@@ -2602,6 +2818,12 @@
             var refreshBtn = document.getElementById('btn-refresh-trash');
             if (refreshBtn) refreshBtn.addEventListener('click', loadTrash);
 
+            document.querySelectorAll('[data-trash-tab]').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    setTrashTab(btn.getAttribute('data-trash-tab'));
+                });
+            });
+
             var trashProductSelectAll = document.getElementById('trash-product-select-all');
             if (trashProductSelectAll) {
                 trashProductSelectAll.addEventListener('change', function () {
@@ -2632,12 +2854,57 @@
             if (hardDeleteCertsBtn) hardDeleteCertsBtn.addEventListener('click', function () { trashBatchCerts('hard_delete'); });
         }
 
+        function setTrashTab(tabId) {
+            activeTrashTab = tabId === 'trash-certs' ? 'trash-certs' : 'trash-products';
+            document.querySelectorAll('[data-trash-tab]').forEach(function (btn) {
+                var isActive = btn.getAttribute('data-trash-tab') === activeTrashTab;
+                btn.classList.toggle('active', isActive);
+                btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+            });
+            ['trash-products', 'trash-certs'].forEach(function (id) {
+                var panel = document.getElementById(id);
+                if (panel) panel.classList.toggle('active', id === activeTrashTab);
+            });
+        }
+
         function bindAssetsEvents() {
             var refreshBtn = document.getElementById('btn-refresh-assets');
             if (refreshBtn) refreshBtn.addEventListener('click', function () {
                 assetPage = 1;
                 loadAssets();
             });
+
+            var assetSearch = document.getElementById('asset-search');
+            if (assetSearch) {
+                assetSearch.addEventListener('input', function () {
+                    clearTimeout(assetSearchTimer);
+                    assetSearchTimer = setTimeout(function () {
+                        assetPage = 1;
+                        loadAssets();
+                    }, 250);
+                    updateAssetClearFilters();
+                });
+            }
+
+            var assetType = document.getElementById('asset-type-filter');
+            if (assetType) {
+                assetType.addEventListener('change', function () {
+                    assetPage = 1;
+                    updateAssetClearFilters();
+                    loadAssets();
+                });
+            }
+
+            var clearAssetFilters = document.getElementById('btn-clear-asset-filters');
+            if (clearAssetFilters) {
+                clearAssetFilters.addEventListener('click', function () {
+                    if (assetSearch) assetSearch.value = '';
+                    if (assetType) assetType.value = '';
+                    assetPage = 1;
+                    updateAssetClearFilters();
+                    loadAssets();
+                });
+            }
 
             var prevBtn = document.getElementById('btn-assets-prev');
             if (prevBtn) prevBtn.addEventListener('click', function () {
@@ -2653,6 +2920,14 @@
                 assetPage += 1;
                 loadAssets();
             });
+        }
+
+        function updateAssetClearFilters() {
+            var btn = document.getElementById('btn-clear-asset-filters');
+            if (!btn) return;
+            var searchVal = ((document.getElementById('asset-search') || {}).value || '').trim();
+            var typeVal = (document.getElementById('asset-type-filter') || {}).value || '';
+            btn.style.display = searchVal || typeVal ? '' : 'none';
         }
 
         function formatFileSize(bytes) {
@@ -2676,8 +2951,14 @@
             tbody.innerHTML = skeletonRows(7, 5);
             var pagination = document.getElementById('assets-pagination');
             if (pagination) pagination.style.display = 'none';
+            var searchVal = ((document.getElementById('asset-search') || {}).value || '').trim();
+            var typeVal = (document.getElementById('asset-type-filter') || {}).value || '';
+            var url = '/admin/assets?page=' + encodeURIComponent(assetPage) + '&pageSize=20';
+            if (searchVal) url += '&q=' + encodeURIComponent(searchVal);
+            if (typeVal) url += '&type=' + encodeURIComponent(typeVal);
+            updateAssetClearFilters();
 
-            apiRequest('/admin/assets?page=' + encodeURIComponent(assetPage) + '&pageSize=20').then(function (response) {
+            apiRequest(url).then(function (response) {
                 var rows = unwrapListResponse(response);
                 assetMeta = response && response.meta ? response.meta : { page: assetPage, pageSize: 20, total: rows.length };
                 renderAssetsTable(rows);
@@ -2699,7 +2980,8 @@
 
             tbody.innerHTML = rows.map(function (asset) {
                 var name = escapeHtml(asset.original_name || asset.filename || '—');
-                var path = escapeHtml(asset.path || '—');
+                var rawPath = asset.path || '';
+                var path = escapeHtml(rawPath || '—');
                 var mime = escapeHtml(asset.mime_type || '—');
                 var size = formatFileSize(asset.file_size);
                 var source = asset.module ? escapeHtml(asset.module + (asset.entity_type ? '/' + asset.entity_type : '')) : '—';
@@ -2712,16 +2994,34 @@
                     '<td class="cell-muted">' + escapeHtml(size) + '</td>' +
                     '<td class="cell-muted">' + source + '</td>' +
                     '<td class="cell-muted">' + escapeHtml(time) + '</td>' +
-                    '<td><button class="btn btn-icon btn-icon-delete" aria-label="删除资源" data-delete-asset="' + escapeHtml(asset.id) + '">' + ICON_DELETE + '</button></td>' +
+                    '<td><div class="asset-actions"><button class="btn btn-secondary btn-sm" data-copy-asset="' + escapeHtml(rawPath) + '">复制路径</button><button class="btn btn-icon btn-icon-delete" aria-label="删除资源" data-delete-asset="' + escapeHtml(asset.id) + '">' + ICON_DELETE + '</button></div></td>' +
                     '</tr>';
             }).join('');
 
+            tbody.querySelectorAll('[data-copy-asset]').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    copyAssetPath(btn.getAttribute('data-copy-asset') || '');
+                });
+            });
             tbody.querySelectorAll('[data-delete-asset]').forEach(function (btn) {
                 btn.addEventListener('click', function () {
                     deleteAsset(btn.getAttribute('data-delete-asset'));
                 });
             });
             renderAssetsPagination();
+        }
+
+        function copyAssetPath(assetUrl) {
+            if (!assetUrl) return;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(assetUrl).then(function () {
+                    showToast('路径已复制');
+                }).catch(function () {
+                    window.prompt('复制资源路径', assetUrl);
+                });
+            } else {
+                window.prompt('复制资源路径', assetUrl);
+            }
         }
 
         function renderAssetsPagination() {
@@ -2754,6 +3054,7 @@
         }
 
         function loadTrash() {
+            setTrashTab(activeTrashTab);
             var productsTbody = document.getElementById('trash-products-tbody');
             var certsTbody = document.getElementById('trash-certs-tbody');
             if (productsTbody) productsTbody.innerHTML = skeletonRows(5, 4);

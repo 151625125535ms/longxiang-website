@@ -153,6 +153,18 @@
                         <div class="stat-card"><div class="stat-card-icon navy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><div class="stat-card-value" id="stat-inquiries">0</div><div class="stat-card-label">询盘总数</div></div>
                         <div class="stat-card"><div class="stat-card-icon gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div><div class="stat-card-value" id="stat-new-inquiries">0</div><div class="stat-card-label">新询盘</div></div>
                     </div>
+                    <div class="dashboard-pending-panel">
+                        <div class="dashboard-panel-header">
+                            <h3>待处理事项</h3>
+                            <span class="dashboard-panel-hint">点击卡片可进入对应模块</span>
+                        </div>
+                        <div class="pending-cards-grid" id="dashboard-pending-cards">
+                            <button class="pending-card pending-card-loading" type="button" disabled><span>加载中...</span></button>
+                            <button class="pending-card pending-card-loading" type="button" disabled><span>加载中...</span></button>
+                            <button class="pending-card pending-card-loading" type="button" disabled><span>加载中...</span></button>
+                            <button class="pending-card pending-card-loading" type="button" disabled><span>加载中...</span></button>
+                        </div>
+                    </div>
                     <div class="section-header-bar"><h2>产品分类统计</h2></div>
                     <div class="category-stats-grid" id="category-stats"></div>
 
@@ -391,6 +403,11 @@
                         <h2>已删除产品</h2>
                         <button class="btn btn-secondary btn-sm" id="btn-refresh-trash">刷新</button>
                     </div>
+                    <div class="trash-tabs" role="tablist" aria-label="回收站分类">
+                        <button type="button" role="tab" class="tab-btn active" id="tab-trash-products" data-trash-tab="trash-products" aria-controls="trash-products" aria-selected="true">产品</button>
+                        <button type="button" role="tab" class="tab-btn" id="tab-trash-certs" data-trash-tab="trash-certs" aria-controls="trash-certs" aria-selected="false">证书</button>
+                    </div>
+                    <div id="trash-products" class="tab-panel active" role="tabpanel" aria-labelledby="tab-trash-products">
                     <div class="data-table-wrapper">
                         <table class="data-table">
                             <thead><tr><th><input type="checkbox" id="trash-product-select-all"></th><th>产品</th><th>分类</th><th>状态</th><th>操作</th></tr></thead>
@@ -403,7 +420,10 @@
                         <button class="btn btn-danger btn-sm" id="btn-trash-hard-delete-products">永久删除</button>
                     </div>
 
-                    <div class="section-header-bar" style="margin-top:32px;">
+                    </div>
+
+                    <div id="trash-certs" class="tab-panel" role="tabpanel" aria-labelledby="tab-trash-certs">
+                    <div class="section-header-bar" style="margin-top:16px;">
                         <h2>已删除证书</h2>
                     </div>
                     <div class="data-table-wrapper">
@@ -417,12 +437,25 @@
                         <button class="btn btn-secondary btn-sm" id="btn-trash-restore-certs">恢复</button>
                         <button class="btn btn-danger btn-sm" id="btn-trash-hard-delete-certs">永久删除</button>
                     </div>
+                    </div>
                 </section>
 
                 <section class="view-section" id="view-assets">
                     <div class="section-header-bar">
                         <h2>资源库</h2>
                         <button class="btn btn-secondary btn-sm" id="btn-refresh-assets">刷新</button>
+                    </div>
+                    <div class="table-toolbar assets-toolbar">
+                        <div class="search-input-wrap">
+                            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                            <input type="text" id="asset-search" class="search-input" placeholder="搜索文件名或路径">
+                        </div>
+                        <select id="asset-type-filter" class="toolbar-select" aria-label="资源类型筛选">
+                            <option value="">全部类型</option>
+                            <option value="image">图片</option>
+                            <option value="file">文档</option>
+                        </select>
+                        <button type="button" class="btn btn-secondary btn-sm btn-clear-filters" id="btn-clear-asset-filters" style="display:none;">清空筛选</button>
                     </div>
                     <div class="data-table-wrapper">
                         <table class="data-table">
