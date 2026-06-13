@@ -1508,6 +1508,109 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: 0 0 0 3px rgba(0, 163, 224, 0.12);
 }
 
+.segmented-control {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px;
+    border: 1px solid var(--color-gray-300);
+    border-radius: var(--radius-md);
+    background: var(--color-gray-100);
+}
+
+.segmented-btn {
+    min-height: 34px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-gray-600);
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.segmented-btn.active {
+    background: var(--color-white-pure);
+    color: var(--color-blue-dark);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-clear-filters {
+    white-space: nowrap;
+}
+
+.admin-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 16px;
+    padding: 12px 14px;
+    background: var(--color-white-pure);
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--radius-md);
+}
+
+.pagination-summary {
+    color: var(--color-gray-500);
+    font-size: 0.85rem;
+}
+
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.pagination-btn {
+    min-width: 36px;
+    min-height: 36px;
+    padding: 0 10px;
+    border: 1px solid var(--color-gray-300);
+    border-radius: var(--radius-sm);
+    background: var(--color-white-pure);
+    color: var(--color-gray-700);
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: border-color var(--transition-fast), background var(--transition-fast), color var(--transition-fast);
+}
+
+.pagination-btn:hover:not(:disabled),
+.pagination-btn.active {
+    border-color: var(--color-blue);
+    background: rgba(0, 163, 224, 0.1);
+    color: var(--color-blue-dark);
+}
+
+.pagination-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+}
+
+.pagination-ellipsis {
+    min-width: 24px;
+    text-align: center;
+    color: var(--color-gray-400);
+}
+
+.batch-actions-bar {
+    display: flex;
+    position: sticky;
+    bottom: 0;
+    z-index: 30;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+    padding: 12px 14px;
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--radius-md);
+    box-shadow: 0 -8px 24px rgba(10, 22, 40, 0.08);
+    backdrop-filter: blur(10px);
+}
+
 /* Company Form Tabs */
 .form-tabs {
     display: flex;

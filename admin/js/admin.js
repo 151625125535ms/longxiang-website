@@ -245,6 +245,15 @@
         var editingCertificationId = null;
         var uploadedCertificationPath = '';
         var currentView = 'dashboard';
+        var productPage = 1;
+        var productMeta = { page: 1, pageSize: 20, total: 0 };
+        var inquiryPage = 1;
+        var inquiryMeta = { page: 1, pageSize: 20, total: 0 };
+        var inquirySearchTimer = null;
+        var inquiryUnreadOnly = false;
+        var certPageByView = {};
+        var certMetaByView = {};
+        var certSearchTimers = {};
         var auditLogPage = 1;
         var auditLogMeta = { page: 1, pageSize: 20, total: 0 };
         var assetPage = 1;
@@ -489,17 +498,46 @@
             updateProductBatchBar();
             var searchVal = ((document.getElementById('product-search') || {}).value || '').trim();
             var catVal = (document.getElementById('product-category-filter') || {}).value || '';
-            var url = '/admin/products?page=1&pageSize=100';
+            var statusVal = (document.getElementById('product-status-filter') || {}).value || '';
+            var featuredVal = (document.getElementById('product-featured-filter') || {}).value || '';
+            var url = '/admin/products?page=' + encodeURIComponent(productPage) + '&pageSize=' + encodeURIComponent(productMeta.pageSize || 20);
             if (searchVal) url += '&q=' + encodeURIComponent(searchVal);
             if (catVal) url += '&category=' + encodeURIComponent(catVal);
+            if (statusVal) url += '&status=' + encodeURIComponent(statusVal);
+            if (featuredVal !== '') url += '&featured=' + encodeURIComponent(featuredVal);
+            updateProductClearFilters();
 
             apiRequest(url).then(function (response) {
                 products = unwrapListResponse(response);
+                productMeta = response && response.meta ? response.meta : { page: productPage, pageSize: productMeta.pageSize || 20, total: products.length };
                 renderProductsTable();
+                renderProductsPagination();
             }).catch(function (err) {
                 document.getElementById('products-tbody').innerHTML = '<tr><td colspan="6" class="table-empty"><p>加载失败，请刷新重试</p></td></tr>';
+                renderProductsPagination({ page: 1, pageSize: productMeta.pageSize || 20, total: 0 });
                 showToast('加载产品失败：' + err.message, 'error');
             });
+        }
+
+        function renderProductsPagination(metaOverride) {
+            var pagination = document.getElementById('products-pagination');
+            if (!window.renderPagination || !pagination) return;
+            window.renderPagination(pagination, metaOverride || productMeta, function (nextPage) {
+                productPage = nextPage;
+                loadProducts();
+            });
+        }
+
+        function updateProductClearFilters() {
+            var btn = document.getElementById('product-clear-filters');
+            if (!btn) return;
+            var hasFilters = [
+                ((document.getElementById('product-search') || {}).value || '').trim(),
+                (document.getElementById('product-category-filter') || {}).value || '',
+                (document.getElementById('product-status-filter') || {}).value || '',
+                (document.getElementById('product-featured-filter') || {}).value || ''
+            ].some(Boolean);
+            btn.style.display = hasFilters ? '' : 'none';
         }
 
         function renderProductsTable() {
@@ -850,10 +888,31 @@
             var productSearch = document.getElementById('product-search');
             if (productSearch) productSearch.addEventListener('input', function () {
                 clearTimeout(productSearchTimer);
-                productSearchTimer = setTimeout(loadProducts, 250);
+                productSearchTimer = setTimeout(function () {
+                    productPage = 1;
+                    loadProducts();
+                }, 250);
             });
-            var productCatFilter = document.getElementById('product-category-filter');
-            if (productCatFilter) productCatFilter.addEventListener('change', loadProducts);
+            ['product-category-filter', 'product-status-filter', 'product-featured-filter'].forEach(function (id) {
+                var filter = document.getElementById(id);
+                if (filter) {
+                    filter.addEventListener('change', function () {
+                        productPage = 1;
+                        loadProducts();
+                    });
+                }
+            });
+            var clearProductFilters = document.getElementById('product-clear-filters');
+            if (clearProductFilters) {
+                clearProductFilters.addEventListener('click', function () {
+                    ['product-search', 'product-category-filter', 'product-status-filter', 'product-featured-filter'].forEach(function (id) {
+                        var field = document.getElementById(id);
+                        if (field) field.value = '';
+                    });
+                    productPage = 1;
+                    loadProducts();
+                });
+            }
 
             var productSelectAll = document.getElementById('product-select-all');
             if (productSelectAll) {
@@ -1075,28 +1134,46 @@
         }
 
         function loadInquiries() {
-            document.getElementById('inquiries-tbody').innerHTML = skeletonRows(6, 5);
+            document.getElementById('inquiries-tbody').innerHTML = skeletonRows(7, 5);
+            updateInquiryBatchBar();
             var status = document.getElementById('inquiry-status-filter').value;
-            var url = '/admin/inquiries?page=1&pageSize=100';
+            var searchVal = ((document.getElementById('inquiry-search') || {}).value || '').trim();
+            var url = '/admin/inquiries?page=' + encodeURIComponent(inquiryPage) + '&pageSize=' + encodeURIComponent(inquiryMeta.pageSize || 20);
             if (status) url += '&status=' + encodeURIComponent(status);
+            if (searchVal) url += '&q=' + encodeURIComponent(searchVal);
+            if (inquiryUnreadOnly) url += '&unread=true';
             apiRequest(url).then(function (response) {
                 inquiries = unwrapListResponse(response);
+                inquiryMeta = response && response.meta ? response.meta : { page: inquiryPage, pageSize: inquiryMeta.pageSize || 20, total: inquiries.length };
                 renderInquiriesTable();
+                renderInquiriesPagination();
             }).catch(function (err) {
-                document.getElementById('inquiries-tbody').innerHTML = '<tr><td colspan="6" class="table-empty"><p>加载失败，请刷新重试</p></td></tr>';
+                document.getElementById('inquiries-tbody').innerHTML = '<tr><td colspan="7" class="table-empty"><p>加载失败，请刷新重试</p></td></tr>';
+                renderInquiriesPagination({ page: 1, pageSize: inquiryMeta.pageSize || 20, total: 0 });
                 showToast('加载询盘失败：' + err.message, 'error');
+            });
+        }
+
+        function renderInquiriesPagination(metaOverride) {
+            var pagination = document.getElementById('inquiries-pagination');
+            if (!window.renderPagination || !pagination) return;
+            window.renderPagination(pagination, metaOverride || inquiryMeta, function (nextPage) {
+                inquiryPage = nextPage;
+                loadInquiries();
             });
         }
 
         function renderInquiriesTable() {
             var tbody = document.getElementById('inquiries-tbody');
             if (!inquiries.length) {
-                tbody.innerHTML = '<tr><td colspan="6" class="table-empty"><p>暂无询盘</p></td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" class="table-empty"><p>暂无询盘</p></td></tr>';
+                updateInquiryBatchBar();
                 return;
             }
             tbody.innerHTML = inquiries.map(function (item) {
                 var rowClass = item.is_read === 0 ? ' class="row-unread"' : '';
                 return '<tr' + rowClass + '>' +
+                    '<td><input type="checkbox" class="inquiry-select" data-id="' + escapeHtml(item.id) + '"></td>' +
                     '<td><div class="product-name-text">' + escapeHtml(item.name) + '</div><div class="product-id-text">' + escapeHtml(item.email) + '</div></td>' +
                     '<td>' + escapeHtml(item.company || '-') + '</td>' +
                     '<td>' + escapeHtml(item.subject || '-') + '</td>' +
@@ -1111,16 +1188,119 @@
             tbody.querySelectorAll('[data-delete-inquiry]').forEach(function (btn) {
                 btn.addEventListener('click', function () { deleteInquiry(btn.getAttribute('data-delete-inquiry')); });
             });
+            tbody.querySelectorAll('.inquiry-select').forEach(function (checkbox) {
+                checkbox.addEventListener('change', updateInquiryBatchBar);
+            });
+            updateInquiryBatchBar();
         }
 
         function bindInquiryEvents() {
             var filter = document.getElementById('inquiry-status-filter');
-            if (filter) filter.addEventListener('change', loadInquiries);
+            if (filter) filter.addEventListener('change', function () {
+                inquiryPage = 1;
+                loadInquiries();
+            });
+            var search = document.getElementById('inquiry-search');
+            if (search) search.addEventListener('input', function () {
+                clearTimeout(inquirySearchTimer);
+                inquirySearchTimer = setTimeout(function () {
+                    inquiryPage = 1;
+                    loadInquiries();
+                }, 250);
+            });
+            var unreadFilter = document.getElementById('inquiry-unread-filter');
+            if (unreadFilter) {
+                unreadFilter.querySelectorAll('[data-unread]').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        unreadFilter.querySelectorAll('[data-unread]').forEach(function (item) { item.classList.remove('active'); });
+                        btn.classList.add('active');
+                        inquiryUnreadOnly = btn.getAttribute('data-unread') === 'true';
+                        inquiryPage = 1;
+                        loadInquiries();
+                    });
+                });
+            }
+            var selectAll = document.getElementById('inquiry-select-all');
+            if (selectAll) {
+                selectAll.addEventListener('change', function () {
+                    document.querySelectorAll('.inquiry-select').forEach(function (checkbox) {
+                        checkbox.checked = selectAll.checked;
+                    });
+                    updateInquiryBatchBar();
+                });
+            }
+            bindInquiryBatchButton('btn-batch-read-inquiries', 'mark_read');
+            bindInquiryBatchButton('btn-batch-close-inquiries', 'close');
+            bindInquiryBatchButton('btn-batch-delete-inquiries', 'soft_delete');
+            var clearSelection = document.getElementById('btn-clear-inquiry-selection');
+            if (clearSelection) clearSelection.addEventListener('click', clearInquirySelection);
             bindModalClose('inquiry-modal', ['inquiry-modal-close', 'inquiry-cancel']);
             var save = document.getElementById('inquiry-save');
             if (save) save.addEventListener('click', saveInquiryStatus);
             var reply = document.getElementById('inquiry-reply');
             if (reply) reply.addEventListener('click', replyByEmail);
+        }
+
+        function bindInquiryBatchButton(id, action) {
+            var btn = document.getElementById(id);
+            if (btn) btn.addEventListener('click', function () { batchInquiryAction(action); });
+        }
+
+        function getSelectedInquiryIds() {
+            var ids = [];
+            document.querySelectorAll('.inquiry-select:checked').forEach(function (checkbox) {
+                var id = parseInt(checkbox.getAttribute('data-id'), 10);
+                if (!isNaN(id)) ids.push(id);
+            });
+            return ids;
+        }
+
+        function updateInquiryBatchBar() {
+            var selected = document.querySelectorAll('.inquiry-select:checked');
+            var all = document.querySelectorAll('.inquiry-select');
+            var bar = document.getElementById('inquiry-batch-bar');
+            var count = document.getElementById('inquiry-batch-count');
+            var selectAll = document.getElementById('inquiry-select-all');
+            if (count) count.textContent = '已选 ' + selected.length + ' 条';
+            if (bar) bar.style.display = selected.length ? '' : 'none';
+            if (selectAll) {
+                selectAll.checked = all.length > 0 && selected.length === all.length;
+                selectAll.indeterminate = selected.length > 0 && selected.length < all.length;
+            }
+        }
+
+        function clearInquirySelection() {
+            document.querySelectorAll('.inquiry-select').forEach(function (checkbox) {
+                checkbox.checked = false;
+            });
+            updateInquiryBatchBar();
+        }
+
+        function inquiryBatchLabel(action) {
+            var labels = {
+                mark_read: '标记已读',
+                close: '关闭',
+                soft_delete: '删除'
+            };
+            return labels[action] || action;
+        }
+
+        function batchInquiryAction(action) {
+            var ids = getSelectedInquiryIds();
+            if (!ids.length) {
+                showToast('请先选择询盘', 'error');
+                return;
+            }
+            apiRequest('/admin/inquiries/batch', {
+                method: 'POST',
+                body: { ids: ids, action: action }
+            }).then(function () {
+                showToast('已' + inquiryBatchLabel(action) + ' ' + ids.length + ' 条询盘');
+                clearInquirySelection();
+                loadInquiries();
+            }).catch(function (err) {
+                showToast('批量操作失败：' + err.message, 'error');
+            });
         }
 
         function replyByEmail() {
@@ -1256,6 +1436,10 @@
             bindCertBatchEvents('cert-patents');
             bindCertBatchEvents('cert-software');
             bindCertBatchEvents('cert-test-reports');
+            bindCertFilterEvents('cert-qualifications');
+            bindCertFilterEvents('cert-patents');
+            bindCertFilterEvents('cert-software');
+            bindCertFilterEvents('cert-test-reports');
             bindModalClose('certification-modal', ['certification-modal-close', 'certification-cancel']);
             var form = document.getElementById('certification-form');
             if (form) form.addEventListener('submit', saveCertification);
@@ -1286,6 +1470,27 @@
         function bindCertBatchButton(id, viewName, action) {
             var btn = document.getElementById(id);
             if (btn) btn.addEventListener('click', function () { batchCertAction(viewName, action); });
+        }
+
+        function bindCertFilterEvents(viewName) {
+            var suffix = certViewSuffix(viewName);
+            var search = document.getElementById('cert-search-' + suffix);
+            var status = document.getElementById('cert-status-filter-' + suffix);
+            if (search) {
+                search.addEventListener('input', function () {
+                    clearTimeout(certSearchTimers[viewName]);
+                    certSearchTimers[viewName] = setTimeout(function () {
+                        certPageByView[viewName] = 1;
+                        loadCertView(viewName);
+                    }, 250);
+                });
+            }
+            if (status) {
+                status.addEventListener('change', function () {
+                    certPageByView[viewName] = 1;
+                    loadCertView(viewName);
+                });
+            }
         }
 
         function getSelectedCertIds(viewName) {
@@ -1368,20 +1573,34 @@
             if (!tbody) return;
             tbody.innerHTML = skeletonRows(6, 4);
             updateCertBatchBar(viewName);
+            if (!certPageByView[viewName]) certPageByView[viewName] = 1;
+            if (!certMetaByView[viewName]) certMetaByView[viewName] = { page: certPageByView[viewName], pageSize: 20, total: 0 };
 
             function requestRows() {
                 var categoryId = certificationCategoryMap[slug];
                 if (!categoryId) {
                     tbody.innerHTML = '<tr><td colspan="6" class="table-empty"><p>未找到证书分类</p></td></tr>';
+                    renderCertPagination(viewName, { page: 1, pageSize: 20, total: 0 });
                     return;
                 }
-                apiRequest('/admin/certifications?page=1&pageSize=100&category=' + encodeURIComponent(categoryId)).then(function (response) {
+                var searchVal = ((document.getElementById('cert-search-' + suffix) || {}).value || '').trim();
+                var statusVal = (document.getElementById('cert-status-filter-' + suffix) || {}).value || '';
+                var meta = certMetaByView[viewName] || { pageSize: 20 };
+                var url = '/admin/certifications?page=' + encodeURIComponent(certPageByView[viewName] || 1) +
+                    '&pageSize=' + encodeURIComponent(meta.pageSize || 20) +
+                    '&category=' + encodeURIComponent(categoryId);
+                if (searchVal) url += '&q=' + encodeURIComponent(searchVal);
+                if (statusVal) url += '&status=' + encodeURIComponent(statusVal);
+                apiRequest(url).then(function (response) {
                     var rows = unwrapListResponse(response);
+                    certMetaByView[viewName] = response && response.meta ? response.meta : { page: certPageByView[viewName] || 1, pageSize: meta.pageSize || 20, total: rows.length };
                     certificationViewRows[viewName] = rows;
                     certifications = rows;
                     renderCertificationsTable(viewName, rows);
+                    renderCertPagination(viewName);
                 }).catch(function (err) {
                     tbody.innerHTML = '<tr><td colspan="6" class="table-empty"><p>加载失败，请刷新重试</p></td></tr>';
+                    renderCertPagination(viewName, { page: 1, pageSize: meta.pageSize || 20, total: 0 });
                     showToast('加载证书失败：' + err.message, 'error');
                 });
             }
@@ -1398,9 +1617,20 @@
                     requestRows();
                 }).catch(function (err) {
                     tbody.innerHTML = '<tr><td colspan="6" class="table-empty"><p>加载失败，请刷新重试</p></td></tr>';
+                    renderCertPagination(viewName, { page: 1, pageSize: 20, total: 0 });
                     showToast('加载证书分类失败：' + err.message, 'error');
                 });
             }
+        }
+
+        function renderCertPagination(viewName, metaOverride) {
+            var suffix = certViewSuffix(viewName);
+            var pagination = document.getElementById('cert-pagination-' + suffix);
+            if (!window.renderPagination || !pagination) return;
+            window.renderPagination(pagination, metaOverride || certMetaByView[viewName], function (nextPage) {
+                certPageByView[viewName] = nextPage;
+                loadCertView(viewName);
+            });
         }
 
         function loadCertifications() {

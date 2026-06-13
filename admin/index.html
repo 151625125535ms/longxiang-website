@@ -147,6 +147,17 @@
                         <select id="product-category-filter" class="toolbar-select">
                             <option value="">全部分类</option>
                         </select>
+                        <select id="product-status-filter" class="toolbar-select">
+                            <option value="">全部状态</option>
+                            <option value="published">已发布</option>
+                            <option value="draft">草稿</option>
+                        </select>
+                        <select id="product-featured-filter" class="toolbar-select">
+                            <option value="">全部推荐</option>
+                            <option value="1">是</option>
+                            <option value="0">否</option>
+                        </select>
+                        <button class="btn btn-secondary btn-sm btn-clear-filters" id="product-clear-filters" type="button" style="display:none;">清空筛选</button>
                     </div>
                     <div class="data-table-wrapper">
                         <table class="data-table">
@@ -161,6 +172,7 @@
                         <button class="btn btn-secondary btn-sm" id="btn-batch-delete-products">批量删除</button>
                         <button class="btn btn-danger btn-sm" id="btn-batch-hard-delete-products">永久删除</button>
                     </div>
+                    <div class="pagination-bar admin-pagination" id="products-pagination" style="display:none;"></div>
                 </section>
 
                 <section class="view-section" id="view-inquiries">
@@ -174,12 +186,30 @@
                             <option value="closed">已关闭</option>
                         </select>
                     </div>
+                    <div class="table-toolbar">
+                        <div class="search-input-wrap">
+                            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                            <input type="text" id="inquiry-search" class="search-input" placeholder="搜索客户、邮箱或主题…">
+                        </div>
+                        <div class="segmented-control" id="inquiry-unread-filter" role="group" aria-label="询盘未读筛选">
+                            <button type="button" class="segmented-btn active" data-unread="">全部</button>
+                            <button type="button" class="segmented-btn" data-unread="true">仅未读</button>
+                        </div>
+                    </div>
                     <div class="data-table-wrapper">
                         <table class="data-table">
-                            <thead><tr><th>客户</th><th>公司</th><th>主题</th><th>提交时间</th><th>状态</th><th>操作</th></tr></thead>
-                            <tbody id="inquiries-tbody"><tr><td colspan="6" class="table-empty"><p>加载中...</p></td></tr></tbody>
+                            <thead><tr><th><input type="checkbox" id="inquiry-select-all"></th><th>客户</th><th>公司</th><th>主题</th><th>提交时间</th><th>状态</th><th>操作</th></tr></thead>
+                            <tbody id="inquiries-tbody"><tr><td colspan="7" class="table-empty"><p>加载中...</p></td></tr></tbody>
                         </table>
                     </div>
+                    <div class="batch-actions-bar" id="inquiry-batch-bar" style="display:none;">
+                        <span id="inquiry-batch-count">已选 0 条</span>
+                        <button class="btn btn-secondary btn-sm" id="btn-batch-read-inquiries">标记已读</button>
+                        <button class="btn btn-secondary btn-sm" id="btn-batch-close-inquiries">关闭</button>
+                        <button class="btn btn-secondary btn-sm" id="btn-batch-delete-inquiries">删除</button>
+                        <button class="btn btn-secondary btn-sm" id="btn-clear-inquiry-selection">取消选择</button>
+                    </div>
+                    <div class="pagination-bar admin-pagination" id="inquiries-pagination" style="display:none;"></div>
                 </section>
 
                 <section class="view-section" id="view-categories">
@@ -257,26 +287,46 @@
 
                 <section class="view-section" id="view-cert-qualifications">
                     <div class="section-header-bar"><h2>企业资质</h2><button class="btn btn-primary" id="btn-add-cert-qualifications">新增证书</button></div>
+                    <div class="table-toolbar">
+                        <div class="search-input-wrap"><svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="cert-search-qualifications" class="search-input" placeholder="搜索证书名称…"></div>
+                        <select id="cert-status-filter-qualifications" class="toolbar-select"><option value="">全部状态</option><option value="published">已发布</option><option value="draft">草稿</option></select>
+                    </div>
                     <div class="data-table-wrapper"><table class="data-table"><thead><tr><th><input type="checkbox" class="cert-select-all" data-view="cert-qualifications"></th><th>证书名称</th><th>分类</th><th>图片路径</th><th>状态</th><th>操作</th></tr></thead><tbody id="cert-tbody-qualifications"><tr><td colspan="6" class="table-empty"><p>加载中...</p></td></tr></tbody></table></div>
                     <div class="batch-actions-bar" id="cert-batch-bar-qualifications" style="display:none;"><span id="cert-batch-count-qualifications">已选 0 条</span><button class="btn btn-secondary btn-sm" id="btn-batch-publish-cert-qualifications" data-view="cert-qualifications">批量发布</button><button class="btn btn-secondary btn-sm" id="btn-batch-delete-cert-qualifications" data-view="cert-qualifications">批量删除</button><button class="btn btn-danger btn-sm" id="btn-batch-hard-delete-cert-qualifications" data-view="cert-qualifications">永久删除</button></div>
+                    <div class="pagination-bar admin-pagination" id="cert-pagination-qualifications" style="display:none;"></div>
                 </section>
 
                 <section class="view-section" id="view-cert-patents">
                     <div class="section-header-bar"><h2>专利证书</h2><button class="btn btn-primary" id="btn-add-cert-patents">新增证书</button></div>
+                    <div class="table-toolbar">
+                        <div class="search-input-wrap"><svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="cert-search-patents" class="search-input" placeholder="搜索证书名称…"></div>
+                        <select id="cert-status-filter-patents" class="toolbar-select"><option value="">全部状态</option><option value="published">已发布</option><option value="draft">草稿</option></select>
+                    </div>
                     <div class="data-table-wrapper"><table class="data-table"><thead><tr><th><input type="checkbox" class="cert-select-all" data-view="cert-patents"></th><th>证书名称</th><th>分类</th><th>图片路径</th><th>状态</th><th>操作</th></tr></thead><tbody id="cert-tbody-patents"><tr><td colspan="6" class="table-empty"><p>加载中...</p></td></tr></tbody></table></div>
                     <div class="batch-actions-bar" id="cert-batch-bar-patents" style="display:none;"><span id="cert-batch-count-patents">已选 0 条</span><button class="btn btn-secondary btn-sm" id="btn-batch-publish-cert-patents" data-view="cert-patents">批量发布</button><button class="btn btn-secondary btn-sm" id="btn-batch-delete-cert-patents" data-view="cert-patents">批量删除</button><button class="btn btn-danger btn-sm" id="btn-batch-hard-delete-cert-patents" data-view="cert-patents">永久删除</button></div>
+                    <div class="pagination-bar admin-pagination" id="cert-pagination-patents" style="display:none;"></div>
                 </section>
 
                 <section class="view-section" id="view-cert-software">
                     <div class="section-header-bar"><h2>软著</h2><button class="btn btn-primary" id="btn-add-cert-software">新增证书</button></div>
+                    <div class="table-toolbar">
+                        <div class="search-input-wrap"><svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="cert-search-software" class="search-input" placeholder="搜索证书名称…"></div>
+                        <select id="cert-status-filter-software" class="toolbar-select"><option value="">全部状态</option><option value="published">已发布</option><option value="draft">草稿</option></select>
+                    </div>
                     <div class="data-table-wrapper"><table class="data-table"><thead><tr><th><input type="checkbox" class="cert-select-all" data-view="cert-software"></th><th>证书名称</th><th>分类</th><th>图片路径</th><th>状态</th><th>操作</th></tr></thead><tbody id="cert-tbody-software"><tr><td colspan="6" class="table-empty"><p>加载中...</p></td></tr></tbody></table></div>
                     <div class="batch-actions-bar" id="cert-batch-bar-software" style="display:none;"><span id="cert-batch-count-software">已选 0 条</span><button class="btn btn-secondary btn-sm" id="btn-batch-publish-cert-software" data-view="cert-software">批量发布</button><button class="btn btn-secondary btn-sm" id="btn-batch-delete-cert-software" data-view="cert-software">批量删除</button><button class="btn btn-danger btn-sm" id="btn-batch-hard-delete-cert-software" data-view="cert-software">永久删除</button></div>
+                    <div class="pagination-bar admin-pagination" id="cert-pagination-software" style="display:none;"></div>
                 </section>
 
                 <section class="view-section" id="view-cert-test-reports">
                     <div class="section-header-bar"><h2>检测报告</h2><button class="btn btn-primary" id="btn-add-cert-test-reports">新增证书</button></div>
+                    <div class="table-toolbar">
+                        <div class="search-input-wrap"><svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="cert-search-test-reports" class="search-input" placeholder="搜索证书名称…"></div>
+                        <select id="cert-status-filter-test-reports" class="toolbar-select"><option value="">全部状态</option><option value="published">已发布</option><option value="draft">草稿</option></select>
+                    </div>
                     <div class="data-table-wrapper"><table class="data-table"><thead><tr><th><input type="checkbox" class="cert-select-all" data-view="cert-test-reports"></th><th>证书名称</th><th>分类</th><th>图片路径</th><th>状态</th><th>操作</th></tr></thead><tbody id="cert-tbody-test-reports"><tr><td colspan="6" class="table-empty"><p>加载中...</p></td></tr></tbody></table></div>
                     <div class="batch-actions-bar" id="cert-batch-bar-test-reports" style="display:none;"><span id="cert-batch-count-test-reports">已选 0 条</span><button class="btn btn-secondary btn-sm" id="btn-batch-publish-cert-test-reports" data-view="cert-test-reports">批量发布</button><button class="btn btn-secondary btn-sm" id="btn-batch-delete-cert-test-reports" data-view="cert-test-reports">批量删除</button><button class="btn btn-danger btn-sm" id="btn-batch-hard-delete-cert-test-reports" data-view="cert-test-reports">永久删除</button></div>
+                    <div class="pagination-bar admin-pagination" id="cert-pagination-test-reports" style="display:none;"></div>
                 </section>
 
                 <section class="view-section" id="view-trash">
@@ -525,6 +575,7 @@
 
         <div class="toast-container" id="toast-container"></div>
     </div>
+    <script src="js/pagination.js"></script>
     <script src="js/admin.js?v=2"></script>
 </body>
 </html>
