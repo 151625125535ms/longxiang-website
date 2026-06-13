@@ -134,5 +134,74 @@ None.
 - [x] `node --check admin/js/admin.js`
 - [x] `npx playwright test tests/smoke.spec.js --reporter=line` 通过
 
+---
+
+## Batch 7A: 设计 Token + 表格视觉基础 + 证书缩略图
+
+状态：已完成
+
+### 7A-1 CSS 设计 token 层追加
+
+- [x] 在 `admin/css/admin.css` 追加语义 token（品牌色/表面色/文字色/状态色/间距/字型/圆角/阴影/动效）
+- [x] 不删除、不修改现有变量，只追加
+
+### 7A-2 表格视觉基础样式
+
+- [x] 表头：`--surface-subtle` 背景，字重 600，`--text-secondary`
+- [x] 数据行行高 56px，`--border-subtle` 分隔线
+- [x] hover 行：浅蓝背景（accent-500 低透明度）
+- [x] selected 行：左侧 3px `--accent-500` rail
+- [x] badge 统一：`.badge-published` / `.badge-draft` / `.badge-deleted` / `.badge-unread` / `.badge-read` / `.badge-closed`
+- [x] 操作按钮样式：`.btn-icon`（32×32，带 `title` tooltip）
+
+### 7A-3 证书缩略图
+
+- [x] 移除证书表格"图片路径"列（`<th>` 和对应 `<td>`）
+- [x] 增加预览列（`.table-cell-thumb`，48×36，无图显示占位图标）
+- [x] 证书名称列第二行加辅助小字（ID 或编号）
+
+### 7A-4 操作按钮图标化
+
+- [x] 产品列表操作列改为 `.btn-icon` 图标按钮（编辑 / 删除 SVG 图标）
+- [x] 证书列表同上
+- [x] 询盘列表同上
+- [x] 所有按钮有 `title` 属性
+
+### 7A-5 验收
+
+- [x] `node --check admin/js/admin.js`
+- [x] `node --check admin/index.html` 不适用：Node 24 对 `.html` 返回 `ERR_UNKNOWN_FILE_EXTENSION`
+- [x] `git diff --check`
+- [x] `npx playwright test tests/smoke.spec.js --reporter=line`
+- [x] 截图 1440px（证书列表、产品列表）
+- [x] 截图 390px（同上）
+
+---
+
+## Batch 7B: 内容模块位置 Banner + 字段说明文案
+
+状态：已完成
+
+### 7B-1 位置说明 Banner
+
+- [x] 新增 `CONTENT_BLOCK_BANNERS`，覆盖 7 个内容模块
+- [x] 在 `renderContentBlockForm()` 的内容卡片顶部插入位置说明 banner
+- [x] `content-about` / `content-technology` 显示前台暂未接入提示
+- [x] `content-education` banner 包含 `hero.title` / `hero.titleAr` 不可改名提醒
+
+### 7B-2 字段说明 Hint
+
+- [x] 新增 `fieldKey()` / `fieldLabel()` / `fieldHint()` helper
+- [x] 为图片路径、营销文案、关联 ID、地图 URL、JSON、SEO、布局、启用开关等高困惑字段提供 hint
+- [x] `renderField()` / `renderJsonField()` 支持可选 hint
+- [x] `renderGroup()` / `renderArrayEditor()` / `renderReservedBlocks()` / `renderContentBlockForm()` 传递 hint
+
+### 7B-3 验收
+
+- [x] `node --check admin/js/admin.js`
+- [x] `git diff --check`
+- [x] `npx playwright test tests/smoke.spec.js --reporter=line`
+- [x] 截图 1440px（company-overview、education、about）
+- [x] 截图 390px（company-overview、education、about）
 
 

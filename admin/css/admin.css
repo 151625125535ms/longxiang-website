@@ -32,6 +32,74 @@
     --transition-base: 0.3s ease;
 }
 
+/* ===== Batch 7A: Design Token Layer ===== */
+:root {
+    /* Brand */
+    --brand-900: #071522;
+    --brand-800: #0b2033;
+    --brand-700: #10324c;
+    --accent-600: #0097c7;
+    --accent-500: #00a3d7;
+    --accent-100: #e4f7fc;
+    --gold-600: #b98a20;
+    --gold-100: #fff5db;
+
+    /* Surface */
+    --surface-page: #f4f7fa;
+    --surface-panel: #ffffff;
+    --surface-subtle: #f8fafc;
+    --surface-raised: #ffffff;
+    --border-subtle: #e5ebf1;
+    --border-strong: #cbd6e2;
+
+    /* Text */
+    --text-primary: #0a1628;
+    --text-secondary: #475569;
+    --text-muted: #718096;
+    --text-inverse: #f8fafc;
+
+    /* Status colors */
+    --success-bg: #e8f7ef;
+    --success-text: #126b3a;
+    --warning-bg: #fff3d8;
+    --warning-text: #8a5b00;
+    --danger-bg: #fdecec;
+    --danger-text: #b42318;
+    --info-bg: #e8f5ff;
+    --info-text: #075985;
+
+    /* Spacing scale (4/8px grid) */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-10: 40px;
+
+    /* Typography scale */
+    --font-xs: 12px;
+    --font-sm: 14px;
+    --font-md: 16px;
+    --font-lg: 20px;
+    --font-xl: 24px;
+    --font-2xl: 32px;
+
+    /* Shape & elevation */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --shadow-flat: none;
+    --shadow-raised: 0 1px 2px rgba(15,23,42,.06), 0 8px 24px rgba(15,23,42,.06);
+    --shadow-floating: 0 12px 32px rgba(15,23,42,.14);
+    --shadow-overlay: 0 24px 60px rgba(15,23,42,.24);
+
+    /* Motion */
+    --motion-fast: 160ms ease-out;
+    --motion-base: 220ms ease-out;
+}
+
 *,
 *::before,
 *::after {
@@ -948,6 +1016,234 @@ h1, h2, h3, h4, h5, h6 {
 .badge-toggle:hover {
     opacity: 0.8;
     transform: scale(1.05);
+}
+
+/* ===== Batch 7A: Table Visual Base ===== */
+
+/* Table container */
+.admin-table,
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--surface-panel);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: var(--shadow-raised);
+}
+
+/* Table header */
+.admin-table thead th,
+.data-table thead th {
+    background: var(--surface-subtle);
+    border-bottom: 1px solid var(--border-strong);
+    padding: 12px 16px;
+    font-size: var(--font-sm);
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-align: left;
+    white-space: nowrap;
+}
+
+/* Table data rows */
+.admin-table tbody tr,
+.data-table tbody tr {
+    min-height: 56px;
+    border-bottom: 1px solid var(--border-subtle);
+    transition: background var(--motion-fast);
+}
+
+.admin-table tbody td,
+.data-table tbody td {
+    padding: 12px 16px;
+    font-size: var(--font-sm);
+    color: var(--text-primary);
+    vertical-align: middle;
+}
+
+/* Row hover */
+.admin-table tbody tr:hover,
+.data-table tbody tr:hover {
+    background: rgba(0, 163, 215, 0.05);
+}
+
+/* Row selected */
+.admin-table tbody tr.selected,
+.data-table tbody tr.selected {
+    background: rgba(0, 163, 215, 0.09);
+    box-shadow: inset 3px 0 0 var(--accent-500);
+}
+
+/* Thumbnail cell */
+.table-cell-thumb {
+    width: 64px;
+    padding: 8px 12px;
+    vertical-align: middle;
+}
+
+.table-thumb {
+    width: 48px;
+    height: 36px;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-subtle);
+    display: block;
+}
+
+.thumb-placeholder {
+    width: 48px;
+    height: 36px;
+    background: var(--surface-subtle);
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 18px;
+}
+
+/* Status badge */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-xs);
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.badge-published {
+    background: var(--success-bg);
+    color: var(--success-text);
+    border: 1px solid transparent;
+}
+
+.badge-draft {
+    background: var(--warning-bg);
+    color: var(--warning-text);
+    border: 1px dashed var(--warning-text);
+}
+
+.badge-deleted {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+    border: 1px solid transparent;
+}
+
+.badge-unread {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+}
+
+.badge-read {
+    background: var(--surface-subtle);
+    color: var(--text-muted);
+    border: 1px solid var(--border-subtle);
+}
+
+.badge-closed {
+    background: var(--surface-subtle);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-subtle);
+}
+
+/* Icon-only action buttons */
+.btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    background: var(--surface-panel);
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 15px;
+    transition: all var(--motion-fast);
+    padding: 0;
+}
+
+.btn-icon:hover {
+    border-color: var(--border-strong);
+    background: var(--surface-subtle);
+    color: var(--text-primary);
+}
+
+.btn-icon.btn-icon-danger {
+    color: var(--danger-text);
+}
+
+.btn-icon.btn-icon-danger:hover {
+    background: var(--danger-bg);
+    border-color: var(--danger-text);
+}
+
+.btn-icon + .btn-icon {
+    margin-left: var(--space-1);
+}
+
+/* ===== Batch 7B: Content Location Banner ===== */
+
+.content-location-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    margin-bottom: var(--space-4);
+    background: var(--info-bg);
+    border: 1px solid var(--border-subtle);
+    border-left: 3px solid var(--accent-500);
+    border-radius: var(--radius-md);
+}
+
+.content-location-banner__body {
+    flex: 1;
+    min-width: 0;
+}
+
+.content-location-banner__eyebrow {
+    font-size: var(--font-xs);
+    font-weight: 600;
+    color: var(--info-text);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 2px;
+}
+
+.content-location-banner__title {
+    font-size: var(--font-sm);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--space-1);
+}
+
+.content-location-banner__desc {
+    font-size: var(--font-xs);
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.5;
+}
+
+.content-location-banner__unwired {
+    font-size: var(--font-xs);
+    color: var(--warning-text);
+    background: var(--warning-bg);
+    border-radius: var(--radius-sm);
+    padding: 2px 6px;
+    margin-top: var(--space-1);
+    display: inline-block;
+}
+
+/* ===== Batch 7B: Field Hint ===== */
+
+.field-hint {
+    font-size: var(--font-xs);
+    color: var(--text-muted);
+    margin: 4px 0 0;
+    line-height: 1.5;
 }
 
 .btn-reply {
