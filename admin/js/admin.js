@@ -14,7 +14,7 @@
         { value: 'energy-storage', group: 'energy-storage', subCategory: 'energy-storage', label: 'Energy Storage System', labelAr: 'نظام تخزين الطاقة' }
     ];
     var STATUS_LABELS = { new: '新询盘', read: '已读', replied: '已回复', closed: '已关闭' };
-    var STATUS_BADGES = { new: 'badge-unread', read: 'badge-read', replied: 'badge-published', closed: 'badge-closed' };
+    var STATUS_BADGES = { new: 'badge-gold', read: 'badge-blue', replied: 'badge-green', closed: 'badge-navy' };
     var ICON_EDIT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
     var ICON_DELETE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>';
     var ICON_VIEW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
@@ -46,13 +46,6 @@
             .replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#039;');
-    }
-
-    function adminAssetSrc(path) {
-        path = String(path || '').trim();
-        if (!path) return '';
-        if (/^(https?:)?\/\//i.test(path) || path.charAt(0) === '/' || path.indexOf('../') === 0) return path;
-        return '../' + path;
     }
 
     function apiRequest(url, options) {
@@ -1057,7 +1050,7 @@
                 var name = product.name_en || product.name || '';
                 var categoryName = product.category_name_en || product.category || '—';
                 var status = product.status || 'draft';
-                var statusClass = status === 'published' ? 'badge-published' : (status === 'deleted' ? 'badge-deleted' : 'badge-draft');
+                var statusClass = status === 'published' ? 'badge-green' : (status === 'deleted' ? 'badge-navy' : 'badge-gold');
                 var statusLabel = status === 'published' ? '已发布' : (status === 'deleted' ? '已删除' : '草稿');
                 var cover = product.cover_image || product.image || '';
                 var thumb = cover
@@ -1066,10 +1059,10 @@
                 return '<tr>' +
                     '<td><input type="checkbox" class="product-row-check" data-id="' + escapeHtml(productId) + '" data-version="' + escapeHtml(product.version) + '"></td>' +
                     '<td><div class="product-name-cell">' + thumb + '<div><div class="product-name-text">' + escapeHtml(name) + '</div><div class="product-id-text">' + escapeHtml(displayId) + '</div></div></div></td>' +
-                    '<td><span class="badge badge-read">' + escapeHtml(categoryName) + '</span></td>' +
+                    '<td><span class="badge badge-blue">' + escapeHtml(categoryName) + '</span></td>' +
                     '<td><span class="badge ' + statusClass + '">' + statusLabel + '</span></td>' +
                     '<td class="cell-muted">' + escapeHtml(product.short_desc_en || product.shortDesc || '') + '</td>' +
-                    '<td><div class="actions-cell"><button class="btn-icon" title="编辑" aria-label="编辑产品" data-edit-product="' + escapeHtml(productId) + '">' + ICON_EDIT + '</button><button class="btn-icon btn-icon-danger" title="删除（移入回收站）" aria-label="删除产品" data-delete-product="' + escapeHtml(productId) + '">' + ICON_DELETE + '</button></div></td>' +
+                    '<td><div class="actions-cell"><button class="btn btn-icon btn-icon-edit" aria-label="编辑产品" data-edit-product="' + escapeHtml(productId) + '">' + ICON_EDIT + '</button><button class="btn btn-icon btn-icon-delete" aria-label="删除产品" data-delete-product="' + escapeHtml(productId) + '">' + ICON_DELETE + '</button></div></td>' +
                     '</tr>';
             }).join('');
 
@@ -1698,8 +1691,8 @@
                     '<td>' + escapeHtml(item.company || '-') + '</td>' +
                     '<td>' + escapeHtml(item.subject || '-') + '</td>' +
                     '<td>' + formatDate(item.created_at) + '</td>' +
-                    '<td><span class="badge ' + (STATUS_BADGES[item.status] || 'badge-read') + '">' + (STATUS_LABELS[item.status] || item.status) + '</span></td>' +
-                    '<td><div class="actions-cell"><button class="btn-icon" title="查看" aria-label="查看询盘" data-view-inquiry="' + escapeHtml(item.id) + '">' + ICON_VIEW + '</button><button class="btn-icon btn-icon-danger" title="删除（移入回收站）" aria-label="删除询盘" data-delete-inquiry="' + escapeHtml(item.id) + '">' + ICON_DELETE + '</button></div></td>' +
+                    '<td><span class="badge ' + (STATUS_BADGES[item.status] || 'badge-blue') + '">' + (STATUS_LABELS[item.status] || item.status) + '</span></td>' +
+                    '<td><div class="actions-cell"><button class="btn btn-icon btn-icon-view" aria-label="查看询盘" data-view-inquiry="' + escapeHtml(item.id) + '">' + ICON_VIEW + '</button><button class="btn btn-icon btn-icon-delete" aria-label="删除询盘" data-delete-inquiry="' + escapeHtml(item.id) + '">' + ICON_DELETE + '</button></div></td>' +
                     '</tr>';
             }).join('');
             tbody.querySelectorAll('[data-view-inquiry]').forEach(function (btn) {
@@ -2190,14 +2183,9 @@
             }
             tbody.innerHTML = rows.map(function (item) {
                 var status = item.status || 'draft';
-                var statusClass = status === 'published' ? 'badge-published' : (status === 'deleted' ? 'badge-deleted' : 'badge-draft');
+                var statusClass = status === 'published' ? 'badge-green' : (status === 'deleted' ? 'badge-navy' : 'badge-gold');
                 var statusLabel = status === 'published' ? '已发布' : (status === 'deleted' ? '已删除' : '草稿');
-                var imgSrc = item.image_url || item.image_path || item.file_path || '';
-                var thumbHtml = imgSrc
-                    ? '<img src="' + escapeHtml(adminAssetSrc(imgSrc)) + '" class="table-thumb" alt="" loading="lazy" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'"><div class="thumb-placeholder" style="display:none">📄</div>'
-                    : '<div class="thumb-placeholder">📄</div>';
-                var supportText = item.cert_no || item.id || '';
-                return '<tr><td><input type="checkbox" class="cert-row-check" data-id="' + escapeHtml(item.id) + '" data-version="' + escapeHtml(item.version) + '" data-view="' + escapeHtml(viewName) + '"></td><td class="table-cell-thumb">' + thumbHtml + '</td><td><div style="font-weight:500">' + escapeHtml(item.name_en || item.name || '') + '</div><div style="font-size:var(--font-xs); color:var(--text-muted); margin-top:2px">' + escapeHtml(supportText) + '</div></td><td>' + escapeHtml(item.category_name_en || '-') + '</td><td><span class="badge ' + statusClass + '">' + statusLabel + '</span></td><td><div class="actions-cell"><button class="btn-icon" title="编辑" aria-label="编辑证书" data-cert-view="' + escapeHtml(viewName) + '" data-edit-cert="' + escapeHtml(item.id) + '">' + ICON_EDIT + '</button><button class="btn-icon btn-icon-danger" title="删除（移入回收站）" aria-label="删除证书" data-cert-view="' + escapeHtml(viewName) + '" data-delete-cert="' + escapeHtml(item.id) + '">' + ICON_DELETE + '</button></div></td></tr>';
+                return '<tr><td><input type="checkbox" class="cert-row-check" data-id="' + escapeHtml(item.id) + '" data-version="' + escapeHtml(item.version) + '" data-view="' + escapeHtml(viewName) + '"></td><td>' + escapeHtml(item.name_en || '') + '</td><td>' + escapeHtml(item.category_name_en || '-') + '</td><td class="cell-muted">' + escapeHtml(item.image_path || '未设置') + '</td><td><span class="badge ' + statusClass + '">' + statusLabel + '</span></td><td><div class="actions-cell"><button class="btn btn-icon btn-icon-edit" aria-label="编辑证书" data-cert-view="' + escapeHtml(viewName) + '" data-edit-cert="' + escapeHtml(item.id) + '">' + ICON_EDIT + '</button><button class="btn btn-icon btn-icon-delete" aria-label="删除证书" data-cert-view="' + escapeHtml(viewName) + '" data-delete-cert="' + escapeHtml(item.id) + '">' + ICON_DELETE + '</button></div></td></tr>';
             }).join('');
             tbody.querySelectorAll('[data-edit-cert]').forEach(function (btn) {
                 btn.addEventListener('click', function () { openCertificationModal(btn.getAttribute('data-edit-cert'), btn.getAttribute('data-cert-view')); });
@@ -2339,63 +2327,6 @@
             return map[viewName] || '';
         }
 
-        var CONTENT_BLOCK_BANNERS = {
-            'content-company-overview': {
-                page: 'about.html',
-                area: '公司快照区 / 全站公司基础信息',
-                description: '维护企业名称、成立时间、股票代码、简介、统计数据等公司基础信息。修改后会影响“关于我们”页的公司介绍，同时通过 /api/company 影响全站可复用公司资料。',
-                wired: true
-            },
-            'content-contact': {
-                page: 'contact.html',
-                area: '联系方式 / 地图 / 社交入口 / 页脚联系信息',
-                description: '维护客户看到的联系方式、办公地点、地图嵌入地址和社交/即时通信入口。页脚中的邮箱和地址也来自这里。',
-                wired: true
-            },
-            'content-about': {
-                page: 'about.html',
-                area: 'Hero / 内容段落 / 里程碑 / SEO',
-                description: '维护“关于我们”页的主视觉、公司故事和发展历程。',
-                wired: false
-            },
-            'content-technology': {
-                page: 'about.html / solutions.html',
-                area: '技术创新 / 研发能力 / 亮点指标 / 关联证书',
-                description: '维护科技创新、研发能力、亮点指标和关联证书 ID，面向展示技术资质与研发平台。',
-                wired: false
-            },
-            'content-industries': {
-                page: 'solutions.html',
-                area: '应用行业 / 应用场景卡片',
-                description: '维护应用行业/场景卡片，包括名称、摘要、图片和关联产品 ID，面向客户说明产品适用场景。',
-                wired: true
-            },
-            'content-education': {
-                page: 'education.html',
-                area: '整页：Hero / 合作模式 / 统计数据 / gallery / CTA',
-                description: '维护教育合作页面全部核心内容，通过 /api/education 直接读取。注意：hero.title / hero.titleAr 字段名不能改名，否则前台标题会显示空白。',
-                wired: true
-            },
-            'content-page-blocks': {
-                page: 'index.html / 全站 footer',
-                area: '页脚文案（已接入）/ 首页 CTA（预留）',
-                description: '维护跨页面通用区块。页脚文案已接入全站可见；首页 CTA 为预留配置，尚未接入前台。',
-                wired: true
-            }
-        };
-
-        var HINT_IMAGE_PATH = '填写站内图片路径，例如 uploads/xxx.jpg；建议先在资源库上传后复制路径。';
-        var HINT_EYEBROW = '显示在主标题上方的短标签文字，例如品牌标语或栏目名称。';
-        var HINT_TAGLINE = '配合标题的简短说明句，通常显示在标题下方。';
-        var HINT_SUBTITLE = '副标题，显示在主标题下方，用于补充说明。';
-        var HINT_SUMMARY = '简短摘要，通常显示在卡片或列表中作为预览文字。';
-        var HINT_RELATED_IDS = '输入数字 ID，多个用英文逗号分隔，例如：9, 10, 12。ID 可在产品/证书列表中查看。';
-        var HINT_MAP_URL = '填写 Google Maps / 高德地图的分享链接（供用户点击跳转）。';
-        var HINT_MAP_EMBED_URL = '填写 Google Maps 嵌入链接（含 /embed...），用于页面内地图展示，与普通链接不同。';
-        var HINT_MAP_LOCATIONS = '多地点地图的 JSON 配置，格式复杂；不确定时请联系技术人员，避免直接修改。';
-        var HINT_LAYOUT = '控制内容段落的图文排列方式；请填写现有前台支持的布局值，如 image-left / image-right。';
-        var HINT_IS_ACTIVE = '控制该区块是否在前台显示；停用后不影响数据，仅隐藏展示。';
-
         function isContentBlockView(viewName) {
             return !!contentBlockSlug(viewName);
         }
@@ -2480,28 +2411,6 @@
             }
         };
 
-        function defaultFieldHint(key) {
-            if (key === 'seo.title') return '浏览器标签页和搜索结果中显示的页面标题，建议 30-60 字符。';
-            if (key === 'seo.description') return '搜索结果中显示的页面描述，建议 70-160 字符。';
-            if (key === 'seo.keywords') return '关键词列表，用英文逗号分隔；对现代搜索引擎影响有限，可填写 5-10 个。';
-            if (/^(cover_image|image|backgroundImage|whatsappQr|wechatQr|lineQr|mapQr)$/.test(key)) return HINT_IMAGE_PATH;
-            if (key === 'eyebrow') return HINT_EYEBROW;
-            if (/^tagline/.test(key)) return HINT_TAGLINE;
-            if (/^subtitle/.test(key)) return HINT_SUBTITLE;
-            if (/^summary/.test(key)) return HINT_SUMMARY;
-            if (/^related_(product|certification)_ids$/.test(key)) return HINT_RELATED_IDS;
-            if (key === 'googleMapsUrl' || key === 'openStreetMapUrl') return HINT_MAP_URL;
-            if (key === 'googleMapsEmbedUrl' || key === 'googleMyMapsEmbedUrl') return HINT_MAP_EMBED_URL;
-            if (key === 'mapLocations') return HINT_MAP_LOCATIONS;
-            if (key === 'layout') return HINT_LAYOUT;
-            if (key === 'is_active') return HINT_IS_ACTIVE;
-            return '';
-        }
-
-        function fieldKey(field) { return field[0]; }
-        function fieldLabel(field) { return field[1]; }
-        function fieldHint(field) { return field.length > 2 ? field[2] : defaultFieldHint(field[0]); }
-
         function getPathValue(obj, path) {
             return path.split('.').reduce(function (current, key) {
                 return current && current[key] !== undefined ? current[key] : '';
@@ -2542,48 +2451,28 @@
             return String(value == null ? '' : value).trim();
         }
 
-        function renderField(path, label, value, textarea, hint) {
+        function renderField(path, label, value, textarea) {
             var id = 'cms-field-' + path.replace(/[^a-zA-Z0-9_-]/g, '-');
+            var tag = textarea ? 'textarea' : 'input';
             var valueText = Array.isArray(value) ? value.join(', ') : (value == null ? '' : String(value));
-            var hintText = hint || defaultFieldHint(path);
-            var hintHtml = hintText ? '<p class="field-hint">' + escapeHtml(hintText) + '</p>' : '';
             if (path === 'is_active' || /\.is_active$/.test(path)) {
-                return '<label class="form-group cms-field"><span>' + escapeHtml(label) + '</span><select data-cms-field="' + escapeHtml(path) + '"><option value="true"' + (value !== false ? ' selected' : '') + '>启用</option><option value="false"' + (value === false ? ' selected' : '') + '>停用</option></select>' + hintHtml + '</label>';
+                return '<label class="form-group cms-field"><span>' + escapeHtml(label) + '</span><select data-cms-field="' + escapeHtml(path) + '"><option value="true"' + (value !== false ? ' selected' : '') + '>启用</option><option value="false"' + (value === false ? ' selected' : '') + '>停用</option></select></label>';
             }
             if (textarea) {
-                return '<label class="form-group cms-field"><span>' + escapeHtml(label) + '</span><textarea id="' + escapeHtml(id) + '" data-cms-field="' + escapeHtml(path) + '" rows="4">' + escapeHtml(valueText) + '</textarea>' + hintHtml + '</label>';
+                return '<label class="form-group cms-field"><span>' + escapeHtml(label) + '</span><textarea id="' + escapeHtml(id) + '" data-cms-field="' + escapeHtml(path) + '" rows="4">' + escapeHtml(valueText) + '</textarea></label>';
             }
-            return '<label class="form-group cms-field"><span>' + escapeHtml(label) + '</span><input id="' + escapeHtml(id) + '" data-cms-field="' + escapeHtml(path) + '" type="text" value="' + escapeHtml(valueText) + '">' + hintHtml + '</label>';
+            return '<label class="form-group cms-field"><span>' + escapeHtml(label) + '</span><input id="' + escapeHtml(id) + '" data-cms-field="' + escapeHtml(path) + '" type="text" value="' + escapeHtml(valueText) + '"></label>';
         }
 
-        function renderJsonField(path, label, value, hint) {
+        function renderJsonField(path, label, value) {
             var id = 'cms-json-' + path.replace(/[^a-zA-Z0-9_-]/g, '-');
-            var hintText = hint || defaultFieldHint(path);
-            var hintHtml = hintText ? '<p class="field-hint">' + escapeHtml(hintText) + '</p>' : '';
-            return '<label class="form-group cms-field"><span>' + escapeHtml(label) + '</span><textarea id="' + escapeHtml(id) + '" class="json-field" data-cms-json="' + escapeHtml(path) + '" rows="6">' + escapeHtml(value) + '</textarea>' + hintHtml + '<p class="json-error" hidden></p></label>';
-        }
-
-        function renderContentLocationBanner(viewName) {
-            var info = CONTENT_BLOCK_BANNERS[viewName];
-            if (!info) return '';
-            var unwiredNote = info.wired === false
-                ? '<p class="content-location-banner__unwired">⚠ 前台暂未接入，编辑后不会立即影响公开页面</p>'
-                : '';
-            return '<aside class="content-location-banner" aria-label="前台位置说明">' +
-                '<div class="content-location-banner__body">' +
-                '<div class="content-location-banner__eyebrow">前台位置</div>' +
-                '<div class="content-location-banner__title">' + escapeHtml(info.page) + ' / ' + escapeHtml(info.area) + '</div>' +
-                '<p class="content-location-banner__desc">' + escapeHtml(info.description) + '</p>' +
-                unwiredNote +
-                '</div>' +
-                '</aside>';
+            return '<label class="form-group cms-field"><span>' + escapeHtml(label) + '</span><textarea id="' + escapeHtml(id) + '" class="json-field" data-cms-json="' + escapeHtml(path) + '" rows="6">' + escapeHtml(value) + '</textarea><p class="json-error" hidden></p></label>';
         }
 
         function renderGroup(group, body) {
             return '<fieldset class="cms-fieldset"><legend>' + escapeHtml(group.label) + '</legend>' +
                 group.fields.map(function (field) {
-                    var key = fieldKey(field);
-                    return renderField(group.key + '.' + key, fieldLabel(field), getPathValue(body, group.key + '.' + key), /body|summary|subtitle|text/.test(key), fieldHint(field));
+                    return renderField(group.key + '.' + field[0], field[1], getPathValue(body, group.key + '.' + field[0]), /body|summary|subtitle|text/.test(field[0]));
                 }).join('') + '</fieldset>';
         }
 
@@ -2594,8 +2483,7 @@
                     return '<div class="cms-array-item" data-cms-array-item="' + index + '">' +
                         '<div class="cms-array-actions"><button type="button" class="btn btn-secondary btn-sm cms-move-up">上移</button><button type="button" class="btn btn-secondary btn-sm cms-move-down">下移</button><button type="button" class="btn btn-danger btn-sm cms-remove-item">删除</button></div>' +
                         arrayConfig.fields.map(function (field) {
-                            var key = fieldKey(field);
-                            return renderField(arrayConfig.key + '.' + index + '.' + key, fieldLabel(field), item ? item[key] : '', /body|summary|description|text/.test(key), fieldHint(field));
+                            return renderField(arrayConfig.key + '.' + index + '.' + field[0], field[1], item ? item[field[0]] : '', /body|summary|description|text/.test(field[0]));
                         }).join('') + '</div>';
                 }).join('') + '</div><button type="button" class="btn btn-secondary cms-add-item" data-cms-add="' + escapeHtml(arrayConfig.key) + '">新增</button></fieldset>';
         }
@@ -2611,19 +2499,15 @@
                 '<span class="block-summary">' + escapeHtml(summary) + '</span>' +
                 '<svg class="card-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>' +
                 '</summary><div class="block-card-body">';
-            html += renderContentLocationBanner(viewName);
             html += '<div class="form-group"><label>标题（英文）</label><input type="text" id="' + escapeHtml(viewName) + '-title-en" value="' + escapeHtml(block.title_en || '') + '"></div>';
             (config.fields || []).forEach(function (field) {
-                var key = fieldKey(field);
-                html += renderField(key, fieldLabel(field), getPathValue(body, key), false, fieldHint(field));
+                html += renderField(field[0], field[1], getPathValue(body, field[0]), false);
             });
             (config.textareas || []).forEach(function (field) {
-                var key = fieldKey(field);
-                html += renderField(key, fieldLabel(field), getPathValue(body, key), true, fieldHint(field));
+                html += renderField(field[0], field[1], getPathValue(body, field[0]), true);
             });
             (config.jsonTextareas || []).forEach(function (field) {
-                var key = fieldKey(field);
-                html += renderJsonField(key, fieldLabel(field), JSON.stringify(getPathValue(body, key) || {}, null, 2), fieldHint(field));
+                html += renderJsonField(field[0], field[1], JSON.stringify(getPathValue(body, field[0]) || {}, null, 2));
             });
             (config.groups || []).forEach(function (group) { html += renderGroup(group, body); });
             (config.arrays || []).forEach(function (arrayConfig) { html += renderArrayEditor(arrayConfig, body); });
@@ -2665,8 +2549,7 @@
             return '<fieldset class="cms-fieldset"><legend>系统区块</legend>' + blockConfigs.map(function (blockConfig) {
                 var item = blocks.filter(function (block) { return block.key === blockConfig.key; })[0] || { key: blockConfig.key };
                 return '<div class="cms-array-item" data-cms-block="' + escapeHtml(blockConfig.key) + '"><h4>' + escapeHtml(blockConfig.label) + '</h4>' + blockConfig.fields.map(function (field) {
-                    var key = fieldKey(field);
-                    return renderField('blocks.' + blockConfig.key + '.' + key, fieldLabel(field), item[key], /text|title/.test(key), fieldHint(field));
+                    return renderField('blocks.' + blockConfig.key + '.' + field[0], field[1], item[field[0]], /text|title/.test(field[0]));
                 }).join('') + '</div>';
             }).join('') + '</fieldset>';
         }
@@ -3318,7 +3201,7 @@
                     '<td><input type="checkbox" class="trash-product-check" data-id="' + escapeHtml(product.id) + '" data-version="' + escapeHtml(product.version) + '"></td>' +
                     '<td><div class="product-name-cell">' + thumb + '<div><div class="product-name-text">' + escapeHtml(name) + '</div><div class="product-id-text">' + escapeHtml(product.legacy_id || product.slug || product.id) + '</div></div></div></td>' +
                     '<td><span class="badge badge-blue">' + escapeHtml(categoryName) + '</span></td>' +
-                    '<td><span class="badge badge-deleted">已删除</span></td>' +
+                    '<td><span class="badge badge-navy">已删除</span></td>' +
                     '<td><button class="btn btn-secondary btn-sm" data-trash-restore-product="' + escapeHtml(product.id) + '" data-version="' + escapeHtml(product.version) + '">恢复</button></td>' +
                     '</tr>';
             }).join('');
@@ -3348,7 +3231,7 @@
                     '<td><input type="checkbox" class="trash-cert-check" data-id="' + escapeHtml(item.id) + '" data-version="' + escapeHtml(item.version) + '"></td>' +
                     '<td>' + escapeHtml(item.name_en || '') + '</td>' +
                     '<td><span class="badge badge-blue">' + escapeHtml(item.category_name_en || '—') + '</span></td>' +
-                    '<td><span class="badge badge-deleted">已删除</span></td>' +
+                    '<td><span class="badge badge-navy">已删除</span></td>' +
                     '<td><button class="btn btn-secondary btn-sm" data-trash-restore-cert="' + escapeHtml(item.id) + '" data-version="' + escapeHtml(item.version) + '">恢复</button></td>' +
                     '</tr>';
             }).join('');
