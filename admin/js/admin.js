@@ -258,6 +258,29 @@
         var auditLogMeta = { page: 1, pageSize: 20, total: 0 };
         var assetPage = 1;
         var assetMeta = { page: 1, pageSize: 20, total: 0 };
+        var NAV_GROUP_STORAGE_KEY = 'admin-nav-groups';
+        var VIEW_META = {
+            dashboard: { title: '控制台', group: 'overview', groupLabel: '概况', breadcrumb: '概况 › 控制台', description: '查看网站后台关键数据与最近动态。' },
+            products: { title: '产品列表', group: 'products', groupLabel: '产品', breadcrumb: '产品 › 产品列表', description: '管理产品资料、状态、分类与首页推荐。' },
+            categories: { title: '分类管理', group: 'products', groupLabel: '产品', breadcrumb: '产品 › 分类管理', description: '维护产品分类名称、排序与展示状态。' },
+            inquiries: { title: '询盘列表', group: 'inquiries', groupLabel: '询盘', breadcrumb: '询盘 › 询盘列表', description: '查看客户询盘并进行状态跟进或批量处理。' },
+            'content-company-overview': { title: '企业概况', group: 'content', groupLabel: '内容', breadcrumb: '内容 › 企业概况', description: '维护公开网站企业概况内容块。' },
+            'content-contact': { title: '联系我们', group: 'content', groupLabel: '内容', breadcrumb: '内容 › 联系我们', description: '维护联系页展示内容与联系信息。' },
+            'content-about': { title: '关于我们', group: 'content', groupLabel: '内容', breadcrumb: '内容 › 关于我们', description: '维护关于我们页面的核心内容。' },
+            'content-technology': { title: '科技创新', group: 'content', groupLabel: '内容', breadcrumb: '内容 › 科技创新', description: '维护科技创新页面内容块。' },
+            'content-industries': { title: '应用行业', group: 'content', groupLabel: '内容', breadcrumb: '内容 › 应用行业', description: '维护应用行业页面内容块。' },
+            'content-education': { title: '教育合作', group: 'content', groupLabel: '内容', breadcrumb: '内容 › 教育合作', description: '维护教育合作页面内容块。' },
+            'content-page-blocks': { title: '页面区块', group: 'content', groupLabel: '内容', breadcrumb: '内容 › 页面区块', description: '维护公开网站页面级区块配置。' },
+            'cert-qualifications': { title: '企业资质', group: 'certificates', groupLabel: '证书', breadcrumb: '证书 › 企业资质', description: '管理企业资质证书资料与展示状态。' },
+            'cert-patents': { title: '专利证书', group: 'certificates', groupLabel: '证书', breadcrumb: '证书 › 专利证书', description: '管理专利证书资料与展示状态。' },
+            'cert-software': { title: '软著', group: 'certificates', groupLabel: '证书', breadcrumb: '证书 › 软著', description: '管理软件著作权资料与展示状态。' },
+            'cert-test-reports': { title: '检测报告', group: 'certificates', groupLabel: '证书', breadcrumb: '证书 › 检测报告', description: '管理检测报告资料与展示状态。' },
+            assets: { title: '资源库', group: 'resources', groupLabel: '资源', breadcrumb: '资源 › 资源库', description: '管理已上传图片和文件资源。' },
+            'audit-logs': { title: '审计日志', group: 'system', groupLabel: '系统', breadcrumb: '系统 › 审计日志', description: '查看后台关键操作记录。' },
+            'settings-modules': { title: '模块开关', group: 'system', groupLabel: '系统', breadcrumb: '系统 › 模块开关', description: '控制后台与网站模块的启用状态。' },
+            'system-status': { title: '系统状态', group: 'system', groupLabel: '系统', breadcrumb: '系统 › 系统状态', description: '查看服务、存储和运行状态。' },
+            trash: { title: '回收站', group: 'system', groupLabel: '系统', breadcrumb: '系统 › 回收站', description: '恢复或永久删除已移入回收站的内容。' }
+        };
 
         var usernameEl = document.getElementById('sidebar-username');
         var avatarEl = document.getElementById('sidebar-avatar');
@@ -265,6 +288,7 @@
         if (avatarEl) avatarEl.textContent = getUsername().charAt(0).toUpperCase();
 
         bindNavigation();
+        bindHeaderActions();
         bindDashboardActions();
         bindProductEvents();
         bindInquiryEvents();
@@ -281,6 +305,8 @@
         switchView('dashboard');
 
         function bindNavigation() {
+            initNavGroups();
+
             document.querySelectorAll('.sidebar-nav a[data-view]').forEach(function (link) {
                 link.addEventListener('click', function (e) {
                     e.preventDefault();
@@ -316,6 +342,98 @@
             }
         }
 
+        function bindHeaderActions() {
+            var addProduct = document.getElementById('header-add-product');
+            if (addProduct) {
+                addProduct.addEventListener('click', function () {
+                    switchView('products');
+                    setTimeout(function () { openProductModal(null); }, 50);
+                });
+            }
+
+            var newInquiries = document.getElementById('header-new-inquiries');
+            if (newInquiries) {
+                newInquiries.addEventListener('click', function () {
+                    switchView('inquiries');
+                    setInquiryUnreadFilter(true);
+                });
+            }
+
+            var assetsButton = document.getElementById('header-assets');
+            if (assetsButton) assetsButton.addEventListener('click', function () { switchView('assets'); });
+
+            var refreshButton = document.getElementById('header-refresh');
+            if (refreshButton) refreshButton.addEventListener('click', function () { window.location.reload(); });
+        }
+
+        function initNavGroups() {
+            var storedState = readNavGroupState();
+            var hasStoredState = storedState && Object.keys(storedState).length > 0;
+
+            document.querySelectorAll('.nav-group').forEach(function (groupEl) {
+                var group = groupEl.getAttribute('data-group');
+                var toggle = groupEl.querySelector('.nav-group-toggle');
+                if (!group || !toggle) return;
+
+                var expanded = hasStoredState ? storedState[group] !== false : groupContainsView(groupEl, currentView);
+                setNavGroupExpanded(groupEl, expanded, false);
+
+                toggle.addEventListener('click', function () {
+                    setNavGroupExpanded(groupEl, toggle.getAttribute('aria-expanded') !== 'true', true);
+                });
+            });
+
+            if (!hasStoredState) saveNavGroupState();
+        }
+
+        function groupContainsView(groupEl, view) {
+            return !!groupEl.querySelector('a[data-view="' + view + '"]');
+        }
+
+        function setNavGroupExpanded(groupEl, expanded, persist) {
+            var toggle = groupEl && groupEl.querySelector('.nav-group-toggle');
+            if (!toggle) return;
+            toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+            if (persist) saveNavGroupState();
+        }
+
+        function readNavGroupState() {
+            try {
+                return JSON.parse(localStorage.getItem(NAV_GROUP_STORAGE_KEY) || '{}') || {};
+            } catch (err) {
+                return {};
+            }
+        }
+
+        function saveNavGroupState() {
+            var state = {};
+            document.querySelectorAll('.nav-group').forEach(function (groupEl) {
+                var group = groupEl.getAttribute('data-group');
+                var toggle = groupEl.querySelector('.nav-group-toggle');
+                if (group && toggle) state[group] = toggle.getAttribute('aria-expanded') === 'true';
+            });
+            try {
+                localStorage.setItem(NAV_GROUP_STORAGE_KEY, JSON.stringify(state));
+            } catch (err) {}
+        }
+
+        function expandNavGroupForView(view) {
+            var meta = VIEW_META[view];
+            if (!meta || !meta.group) return;
+            var groupEl = document.querySelector('.nav-group[data-group="' + meta.group + '"]');
+            if (groupEl) setNavGroupExpanded(groupEl, true, true);
+        }
+
+        function updateHeaderMeta(view) {
+            var meta = VIEW_META[view] || { title: view || '', breadcrumb: view || '', description: '' };
+            var titleEl = document.getElementById('header-title');
+            var breadcrumbEl = document.getElementById('admin-breadcrumb-current');
+            var descriptionEl = document.getElementById('admin-header-description');
+            if (titleEl) titleEl.textContent = meta.title || '';
+            if (breadcrumbEl) breadcrumbEl.textContent = meta.breadcrumb || meta.title || '';
+            if (descriptionEl) descriptionEl.textContent = meta.description || '';
+        }
+
         function switchView(view) {
             currentView = view;
             document.querySelectorAll('.sidebar-nav a[data-view]').forEach(function (link) {
@@ -326,31 +444,8 @@
             var activeView = document.getElementById('view-' + view);
             if (activeView) activeView.classList.add('active');
 
-            var titles = {
-                dashboard: '控制台',
-                products: '产品管理',
-                inquiries: '询盘管理',
-                company: '公司信息',
-                certifications: '证书管理',
-                categories: '分类管理',
-                'content-company-overview': '企业概况',
-                'content-contact': '联系我们',
-                'content-about': '关于我们',
-                'content-technology': '科技创新',
-                'content-industries': '应用行业',
-                'content-education': '教育合作',
-                'content-page-blocks': '页面区块',
-                'cert-qualifications': '企业资质',
-                'cert-patents': '专利证书',
-                'cert-software': '软著',
-                'cert-test-reports': '检测报告',
-                trash: '回收站',
-                assets: '资源库',
-                'system-status': '系统状态',
-                'settings-modules': '模块开关',
-                'audit-logs': '审计日志'
-            };
-            document.getElementById('header-title').textContent = titles[view] || (view === 'education' ? '教育合作内容管理' : '');
+            expandNavGroupForView(view);
+            updateHeaderMeta(view);
 
             if (view === 'dashboard') loadDashboard();
             if (view === 'products') loadProducts();
@@ -1239,6 +1334,21 @@
             if (save) save.addEventListener('click', saveInquiryStatus);
             var reply = document.getElementById('inquiry-reply');
             if (reply) reply.addEventListener('click', replyByEmail);
+        }
+
+        function setInquiryUnreadFilter(unreadOnly) {
+            var unreadFilter = document.getElementById('inquiry-unread-filter');
+            inquiryUnreadOnly = !!unreadOnly;
+            inquiryPage = 1;
+
+            if (unreadFilter) {
+                unreadFilter.querySelectorAll('[data-unread]').forEach(function (btn) {
+                    var targetValue = inquiryUnreadOnly ? 'true' : '';
+                    btn.classList.toggle('active', btn.getAttribute('data-unread') === targetValue);
+                });
+            }
+
+            loadInquiries();
         }
 
         function bindInquiryBatchButton(id, action) {

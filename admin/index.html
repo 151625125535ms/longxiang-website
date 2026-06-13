@@ -15,54 +15,97 @@
                 <p>网站后台</p>
             </div>
             <nav class="sidebar-nav">
-                <div class="nav-group">概况</div>
-                <a href="#" data-view="dashboard" class="active">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-                    控制台
-                </a>
+                <div class="nav-group" data-group="overview">
+                    <button type="button" class="nav-group-toggle" aria-expanded="true">
+                        <span>概况</span>
+                        <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <ul class="nav-group-items">
+                        <li><a href="#" data-view="dashboard" class="active">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                            控制台
+                        </a></li>
+                    </ul>
+                </div>
 
-                <div class="nav-group">网站管理</div>
-                <div class="nav-item-group">产品管理</div>
-                <a href="#" data-view="products" class="nav-sub-item">产品列表</a>
-                <a href="#" data-view="categories" class="nav-sub-item">分类管理</a>
+                <div class="nav-group" data-group="products">
+                    <button type="button" class="nav-group-toggle" aria-expanded="false">
+                        <span>产品</span>
+                        <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <ul class="nav-group-items">
+                        <li><a href="#" data-view="products" class="nav-sub-item">产品列表</a></li>
+                        <li><a href="#" data-view="categories" class="nav-sub-item">分类管理</a></li>
+                    </ul>
+                </div>
 
-                <div class="nav-item-group">内容管理</div>
-                <a href="#" data-view="content-company-overview" class="nav-sub-item">企业概况</a>
-                <a href="#" data-view="content-contact" class="nav-sub-item">联系我们</a>
-                <a href="#" data-view="content-about" class="nav-sub-item">关于我们</a>
-                <a href="#" data-view="content-technology" class="nav-sub-item">科技创新</a>
-                <a href="#" data-view="content-industries" class="nav-sub-item">应用行业</a>
-                <a href="#" data-view="content-education" class="nav-sub-item">教育合作</a>
-                <a href="#" data-view="content-page-blocks" class="nav-sub-item">页面区块</a>
+                <div class="nav-group" data-group="content">
+                    <button type="button" class="nav-group-toggle" aria-expanded="false">
+                        <span>内容</span>
+                        <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <ul class="nav-group-items">
+                        <li><a href="#" data-view="content-company-overview" class="nav-sub-item">企业概况</a></li>
+                        <li><a href="#" data-view="content-contact" class="nav-sub-item">联系我们</a></li>
+                        <li><a href="#" data-view="content-about" class="nav-sub-item">关于我们</a></li>
+                        <li><a href="#" data-view="content-technology" class="nav-sub-item">科技创新</a></li>
+                        <li><a href="#" data-view="content-industries" class="nav-sub-item">应用行业</a></li>
+                        <li><a href="#" data-view="content-education" class="nav-sub-item">教育合作</a></li>
+                        <li><a href="#" data-view="content-page-blocks" class="nav-sub-item">页面区块</a></li>
+                    </ul>
+                </div>
 
-                <div class="nav-item-group">证书资质</div>
-                <a href="#" data-view="cert-qualifications" class="nav-sub-item">企业资质</a>
-                <a href="#" data-view="cert-patents" class="nav-sub-item">专利证书</a>
-                <a href="#" data-view="cert-software" class="nav-sub-item">软著</a>
-                <a href="#" data-view="cert-test-reports" class="nav-sub-item">检测报告</a>
+                <div class="nav-group" data-group="certificates">
+                    <button type="button" class="nav-group-toggle" aria-expanded="false">
+                        <span>证书</span>
+                        <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <ul class="nav-group-items">
+                        <li><a href="#" data-view="cert-qualifications" class="nav-sub-item">企业资质</a></li>
+                        <li><a href="#" data-view="cert-patents" class="nav-sub-item">专利证书</a></li>
+                        <li><a href="#" data-view="cert-software" class="nav-sub-item">软著</a></li>
+                        <li><a href="#" data-view="cert-test-reports" class="nav-sub-item">检测报告</a></li>
+                    </ul>
+                </div>
 
-                <a href="#" data-view="inquiries">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a4 4 0 0 1-4 4H7l-4 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/></svg>
-                    询盘管理
-                </a>
-                <a href="#" data-view="trash">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="3 6 5 6 21 6"/>
-                        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-                        <path d="M10 11v6"/><path d="M14 11v6"/>
-                        <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
-                    </svg>
-                    回收站
-                </a>
-                <a href="#" data-view="assets">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
-                    资源库
-                </a>
+                <div class="nav-group" data-group="inquiries">
+                    <button type="button" class="nav-group-toggle" aria-expanded="false">
+                        <span>询盘</span>
+                        <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <ul class="nav-group-items">
+                        <li><a href="#" data-view="inquiries">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a4 4 0 0 1-4 4H7l-4 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/></svg>
+                            询盘列表
+                        </a></li>
+                    </ul>
+                </div>
 
-                <div class="nav-group">设置</div>
-                <a href="#" data-view="system-status" class="nav-sub-item">系统状态</a>
-                <a href="#" data-view="settings-modules" class="nav-sub-item">模块开关</a>
-                <a href="#" data-view="audit-logs" class="nav-sub-item">审计日志</a>
+                <div class="nav-group" data-group="resources">
+                    <button type="button" class="nav-group-toggle" aria-expanded="false">
+                        <span>资源</span>
+                        <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <ul class="nav-group-items">
+                        <li><a href="#" data-view="assets">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                            资源库
+                        </a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-group" data-group="system">
+                    <button type="button" class="nav-group-toggle" aria-expanded="false">
+                        <span>系统</span>
+                        <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <ul class="nav-group-items">
+                        <li><a href="#" data-view="audit-logs" class="nav-sub-item">审计日志</a></li>
+                        <li><a href="#" data-view="settings-modules" class="nav-sub-item">模块开关</a></li>
+                        <li><a href="#" data-view="system-status" class="nav-sub-item">系统状态</a></li>
+                        <li><a href="#" data-view="trash" class="nav-sub-item">回收站</a></li>
+                    </ul>
+                </div>
                 <a href="#" class="logout-link" id="nav-logout">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
                     退出登录
@@ -78,11 +121,25 @@
 
         <main class="main-content">
             <header class="content-header">
-                <div style="display:flex;align-items:center;gap:12px;">
+                <div class="admin-header-main">
                     <button class="mobile-menu-btn" id="mobile-menu-btn">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
                     </button>
-                    <h1 id="header-title">控制台</h1>
+                    <div>
+                        <div class="admin-header-breadcrumb">
+                            <span class="breadcrumb-home">后台管理</span>
+                            <span class="breadcrumb-sep">›</span>
+                            <span class="breadcrumb-current" id="admin-breadcrumb-current">概况 › 控制台</span>
+                        </div>
+                        <h1 id="header-title">控制台</h1>
+                        <p class="admin-header-description" id="admin-header-description">查看网站后台关键数据与最近动态。</p>
+                    </div>
+                </div>
+                <div class="admin-header-actions">
+                    <button type="button" class="btn btn-primary btn-sm" id="header-add-product">新增产品</button>
+                    <button type="button" class="btn btn-secondary btn-sm" id="header-new-inquiries">新询盘</button>
+                    <button type="button" class="btn btn-secondary btn-sm" id="header-assets">资源库</button>
+                    <button type="button" class="btn btn-secondary btn-sm" id="header-refresh">刷新</button>
                 </div>
             </header>
 
