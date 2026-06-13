@@ -906,21 +906,81 @@
             if (el) el.textContent = value;
         }
 
+        var EMPTY_STATE_ICON = '<svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M8 9h8M8 13h5"/></svg>';
+
+        function emptyRow(colspan, message) {
+            return '<tr class="table-empty-row"><td colspan="' + colspan + '"><div class="empty-state">' + EMPTY_STATE_ICON + '<p>' + escapeHtml(message || '暂无数据') + '</p></div></td></tr>';
+        }
+
         function skeletonRows(cols, count) {
-            var widths = ['70%', '50%', '45%', '60%', '35%', '55%'];
-            var cells = '';
-            for (var i = 0; i < cols; i++) {
-                cells += '<td><div class="skeleton" style="width:' + widths[i % widths.length] + '"></div></td>';
-            }
             var result = '';
-            for (var j = 0; j < count; j++) {
-                result += '<tr class="skeleton-row">' + cells + '</tr>';
+            for (var j = 0; j < (count || 3); j++) {
+                result += '<tr class="skeleton-row"><td colspan="' + cols + '"><div class="skeleton-line"></div></td></tr>';
             }
             return result;
         }
 
+        function clearErrorBanner(viewId) {
+            var view = document.getElementById(viewId);
+            if (!view) return;
+            var existing = view.querySelector('.error-banner');
+            if (existing) existing.remove();
+        }
+
+        function showErrorBanner(viewId, message, retryFn) {
+            var view = document.getElementById(viewId);
+            if (!view) return;
+            clearErrorBanner(viewId);
+            var banner = document.createElement('div');
+            banner.className = 'error-banner';
+            banner.setAttribute('role', 'alert');
+            banner.innerHTML = '<span>' + escapeHtml(message || '数据加载失败，请稍后重试') + '</span><button type="button" class="btn btn-secondary btn-sm">重试</button>';
+            banner.querySelector('button').addEventListener('click', function () {
+                clearErrorBanner(viewId);
+                if (retryFn) retryFn();
+            });
+            var toolbar = view.querySelector('.table-toolbar');
+            if (toolbar && toolbar.parentNode) toolbar.parentNode.insertBefore(banner, toolbar.nextSibling);
+            else view.insertBefore(banner, view.firstChild);
+        }
+
+        function bindRangeCheckboxes(selector, updateFn) {
+            var checkboxes = Array.prototype.slice.call(document.querySelectorAll(selector));
+            var lastCheckedIndex = -1;
+            checkboxes.forEach(function (checkbox, index) {
+                checkbox.addEventListener('click', function (e) {
+                    if (e.shiftKey && lastCheckedIndex >= 0) {
+                        var from = Math.min(lastCheckedIndex, index);
+                        var to = Math.max(lastCheckedIndex, index);
+                        for (var i = from; i <= to; i++) checkboxes[i].checked = checkbox.checked;
+                    }
+                    lastCheckedIndex = index;
+                    if (updateFn) updateFn();
+                });
+                checkbox.addEventListener('change', function () {
+                    if (updateFn) updateFn();
+                });
+            });
+        }
+
+        function syncBatchBarFocus(bar, selectedCount, fallbackSelector) {
+            if (!bar) return;
+            var wasVisible = bar.dataset.visible === 'true';
+            bar.style.display = selectedCount ? '' : 'none';
+            bar.dataset.visible = selectedCount ? 'true' : 'false';
+            if (selectedCount && !wasVisible) {
+                var firstButton = bar.querySelector('button');
+                if (firstButton) firstButton.focus();
+            }
+            if (!selectedCount && wasVisible && fallbackSelector) {
+                var fallback = document.querySelector(fallbackSelector);
+                if (fallback) fallback.focus();
+            }
+        }
+
         function loadProducts() {
             document.getElementById('products-tbody').innerHTML = skeletonRows(6, 5);
+            clearErrorBanner('view-products');
             updateProductBatchBar();
             var searchVal = ((document.getElementById('product-search') || {}).value || '').trim();
             var catVal = (document.getElementById('product-category-filter') || {}).value || '';
@@ -939,7 +999,8 @@
                 renderProductsTable();
                 renderProductsPagination();
             }).catch(function (err) {
-                document.getElementById('products-tbody').innerHTML = '<tr><td colspan="6" class="table-empty"><p>加载失败，请刷新重试</p></td></tr>';
+                document.getElementById('products-tbody').innerHTML = emptyRow(6, '加载失败，请刷新重试');
+                showErrorBanner('view-products', '产品数据加载失败，请稍后重试', loadProducts);
                 renderProductsPagination({ page: 1, pageSize: productMeta.pageSize || 20, total: 0 });
                 showToast('加载产品失败：' + err.message, 'error');
             });
@@ -978,7 +1039,7 @@
             if (!tbody) return;
 
             if (!products.length) {
-                tbody.innerHTML = '<tr><td colspan="6" class="table-empty"><p>' + (products.length ? '无匹配产品' : '暂无产品') + '</p></td></tr>';
+                tbody.innerHTML = emptyRow(6, '暂无产品');
                 updateProductBatchBar();
                 return;
             }
@@ -1585,6 +1646,7 @@
 
         function loadInquiries() {
             document.getElementById('inquiries-tbody').innerHTML = skeletonRows(7, 5);
+            clearErrorBanner('view-inquiries');
             updateInquiryBatchBar();
             var status = document.getElementById('inquiry-status-filter').value;
             var searchVal = ((document.getElementById('inquiry-search') || {}).value || '').trim();
@@ -1598,7 +1660,8 @@
                 renderInquiriesTable();
                 renderInquiriesPagination();
             }).catch(function (err) {
-                document.getElementById('inquiries-tbody').innerHTML = '<tr><td colspan="7" class="table-empty"><p>加载失败，请刷新重试</p></td></tr>';
+                document.getElementById('inquiries-tbody').innerHTML = emptyRow(7, '加载失败，请刷新重试');
+                showErrorBanner('view-inquiries', '询盘数据加载失败，请稍后重试', loadInquiries);
                 renderInquiriesPagination({ page: 1, pageSize: inquiryMeta.pageSize || 20, total: 0 });
                 showToast('加载询盘失败：' + err.message, 'error');
             });
@@ -1616,7 +1679,7 @@
         function renderInquiriesTable() {
             var tbody = document.getElementById('inquiries-tbody');
             if (!inquiries.length) {
-                tbody.innerHTML = '<tr><td colspan="7" class="table-empty"><p>暂无询盘</p></td></tr>';
+                tbody.innerHTML = emptyRow(7, '暂无询盘');
                 updateInquiryBatchBar();
                 return;
             }
@@ -1638,9 +1701,7 @@
             tbody.querySelectorAll('[data-delete-inquiry]').forEach(function (btn) {
                 btn.addEventListener('click', function () { deleteInquiry(btn.getAttribute('data-delete-inquiry')); });
             });
-            tbody.querySelectorAll('.inquiry-select').forEach(function (checkbox) {
-                checkbox.addEventListener('change', updateInquiryBatchBar);
-            });
+            bindRangeCheckboxes('.inquiry-select', updateInquiryBatchBar);
             updateInquiryBatchBar();
         }
 
@@ -1727,7 +1788,7 @@
             var count = document.getElementById('inquiry-batch-count');
             var selectAll = document.getElementById('inquiry-select-all');
             if (count) count.textContent = '已选 ' + selected.length + ' 条';
-            if (bar) bar.style.display = selected.length ? '' : 'none';
+            syncBatchBarFocus(bar, selected.length, '.inquiry-select');
             if (selectAll) {
                 selectAll.checked = all.length > 0 && selected.length === all.length;
                 selectAll.indeterminate = selected.length > 0 && selected.length < all.length;
@@ -2040,6 +2101,7 @@
             var tbody = document.getElementById('cert-tbody-' + suffix);
             if (!tbody) return;
             tbody.innerHTML = skeletonRows(6, 4);
+            clearErrorBanner('view-' + viewName);
             updateCertBatchBar(viewName);
             if (!certPageByView[viewName]) certPageByView[viewName] = 1;
             if (!certMetaByView[viewName]) certMetaByView[viewName] = { page: certPageByView[viewName], pageSize: 20, total: 0 };
@@ -2047,7 +2109,7 @@
             function requestRows() {
                 var categoryId = certificationCategoryMap[slug];
                 if (!categoryId) {
-                    tbody.innerHTML = '<tr><td colspan="6" class="table-empty"><p>未找到证书分类</p></td></tr>';
+                    tbody.innerHTML = emptyRow(6, '未找到证书分类');
                     renderCertPagination(viewName, { page: 1, pageSize: 20, total: 0 });
                     return;
                 }
@@ -2067,7 +2129,8 @@
                     renderCertificationsTable(viewName, rows);
                     renderCertPagination(viewName);
                 }).catch(function (err) {
-                    tbody.innerHTML = '<tr><td colspan="6" class="table-empty"><p>加载失败，请刷新重试</p></td></tr>';
+                    tbody.innerHTML = emptyRow(6, '加载失败，请刷新重试');
+                    showErrorBanner('view-' + viewName, '证书数据加载失败，请稍后重试', function () { loadCertView(viewName); });
                     renderCertPagination(viewName, { page: 1, pageSize: meta.pageSize || 20, total: 0 });
                     showToast('加载证书失败：' + err.message, 'error');
                 });
@@ -2084,7 +2147,8 @@
                     });
                     requestRows();
                 }).catch(function (err) {
-                    tbody.innerHTML = '<tr><td colspan="6" class="table-empty"><p>加载失败，请刷新重试</p></td></tr>';
+                    tbody.innerHTML = emptyRow(6, '加载失败，请刷新重试');
+                    showErrorBanner('view-' + viewName, '证书分类加载失败，请稍后重试', function () { loadCertView(viewName); });
                     renderCertPagination(viewName, { page: 1, pageSize: 20, total: 0 });
                     showToast('加载证书分类失败：' + err.message, 'error');
                 });
@@ -2113,7 +2177,7 @@
             certsByView[viewName] = rows;
             certificationViewRows[viewName] = rows;
             if (!rows.length) {
-                tbody.innerHTML = '<tr><td colspan="6" class="table-empty"><p>暂无证书</p></td></tr>';
+                tbody.innerHTML = emptyRow(6, '暂无证书');
                 updateCertBatchBar(viewName);
                 return;
             }
@@ -2949,6 +3013,7 @@
             if (!tbody) return;
 
             tbody.innerHTML = skeletonRows(7, 5);
+            clearErrorBanner('view-assets');
             var pagination = document.getElementById('assets-pagination');
             if (pagination) pagination.style.display = 'none';
             var searchVal = ((document.getElementById('asset-search') || {}).value || '').trim();
@@ -2963,7 +3028,8 @@
                 assetMeta = response && response.meta ? response.meta : { page: assetPage, pageSize: 20, total: rows.length };
                 renderAssetsTable(rows);
             }).catch(function (err) {
-                tbody.innerHTML = '<tr><td colspan="7" class="table-empty"><p>加载失败，请刷新重试</p></td></tr>';
+                tbody.innerHTML = emptyRow(7, '加载失败，请刷新重试');
+                showErrorBanner('view-assets', '资源库数据加载失败，请稍后重试', loadAssets);
                 showToast('加载资源库失败：' + err.message, 'error');
             });
         }
@@ -2973,7 +3039,7 @@
             if (!tbody) return;
 
             if (!rows.length) {
-                tbody.innerHTML = '<tr><td colspan="7" class="table-empty"><p>暂无资源记录</p></td></tr>';
+                tbody.innerHTML = emptyRow(7, '暂无资源记录');
                 renderAssetsPagination();
                 return;
             }
@@ -3066,7 +3132,7 @@
                 trashedProducts = unwrapListResponse(response);
                 renderTrashProductsTable();
             }).catch(function (err) {
-                if (productsTbody) productsTbody.innerHTML = '<tr><td colspan="5" class="table-empty"><p>加载失败，请刷新重试</p></td></tr>';
+                if (productsTbody) productsTbody.innerHTML = emptyRow(5, '加载失败，请刷新重试');
                 showToast('加载已删除产品失败：' + err.message, 'error');
             });
 
@@ -3074,7 +3140,7 @@
                 trashedCerts = unwrapListResponse(response);
                 renderTrashCertsTable();
             }).catch(function (err) {
-                if (certsTbody) certsTbody.innerHTML = '<tr><td colspan="5" class="table-empty"><p>加载失败，请刷新重试</p></td></tr>';
+                if (certsTbody) certsTbody.innerHTML = emptyRow(5, '加载失败，请刷新重试');
                 showToast('加载已删除证书失败：' + err.message, 'error');
             });
         }
@@ -3119,7 +3185,7 @@
             var tbody = document.getElementById('trash-products-tbody');
             if (!tbody) return;
             if (!trashedProducts.length) {
-                tbody.innerHTML = '<tr><td colspan="5" class="table-empty"><p>回收站为空</p></td></tr>';
+                tbody.innerHTML = emptyRow(5, '回收站为空');
                 updateTrashProductBatchBar();
                 return;
             }
@@ -3147,9 +3213,7 @@
                     restoreSingleProduct(id, version);
                 });
             });
-            tbody.querySelectorAll('.trash-product-check').forEach(function (cb) {
-                cb.addEventListener('change', updateTrashProductBatchBar);
-            });
+            bindRangeCheckboxes('.trash-product-check', updateTrashProductBatchBar);
             updateTrashProductBatchBar();
         }
 
@@ -3157,7 +3221,7 @@
             var tbody = document.getElementById('trash-certs-tbody');
             if (!tbody) return;
             if (!trashedCerts.length) {
-                tbody.innerHTML = '<tr><td colspan="5" class="table-empty"><p>回收站为空</p></td></tr>';
+                tbody.innerHTML = emptyRow(5, '回收站为空');
                 updateTrashCertBatchBar();
                 return;
             }
@@ -3179,9 +3243,7 @@
                     restoreSingleCert(id, version);
                 });
             });
-            tbody.querySelectorAll('.trash-cert-check').forEach(function (cb) {
-                cb.addEventListener('change', updateTrashCertBatchBar);
-            });
+            bindRangeCheckboxes('.trash-cert-check', updateTrashCertBatchBar);
             updateTrashCertBatchBar();
         }
 
@@ -3192,7 +3254,7 @@
             var count = document.getElementById('trash-product-batch-count');
             var selectAll = document.getElementById('trash-product-select-all');
             if (count) count.textContent = '已选 ' + selected.length + ' 条';
-            if (bar) bar.style.display = selected.length ? '' : 'none';
+            syncBatchBarFocus(bar, selected.length, '.trash-product-check');
             if (selectAll) {
                 selectAll.checked = all.length > 0 && selected.length === all.length;
                 selectAll.indeterminate = selected.length > 0 && selected.length < all.length;
@@ -3206,7 +3268,7 @@
             var count = document.getElementById('trash-cert-batch-count');
             var selectAll = document.getElementById('trash-cert-select-all');
             if (count) count.textContent = '已选 ' + selected.length + ' 条';
-            if (bar) bar.style.display = selected.length ? '' : 'none';
+            syncBatchBarFocus(bar, selected.length, '.trash-cert-check');
             if (selectAll) {
                 selectAll.checked = all.length > 0 && selected.length === all.length;
                 selectAll.indeterminate = selected.length > 0 && selected.length < all.length;
@@ -3375,7 +3437,7 @@
                 auditLogMeta = response && response.meta ? response.meta : { page: auditLogPage, pageSize: 20, total: rows.length };
                 renderAuditLogs(rows);
             }).catch(function (err) {
-                tbody.innerHTML = '<tr><td colspan="6" class="table-empty"><p>加载失败，请刷新重试</p></td></tr>';
+                tbody.innerHTML = emptyRow(6, '加载失败，请刷新重试');
                 showToast('加载审计日志失败：' + err.message, 'error');
             });
         }
@@ -3384,7 +3446,7 @@
             var tbody = document.getElementById('audit-logs-tbody');
             if (!tbody) return;
             if (!rows.length) {
-                tbody.innerHTML = '<tr><td colspan="6" class="table-empty"><p>暂无审计日志</p></td></tr>';
+                tbody.innerHTML = emptyRow(6, '暂无审计日志');
             } else {
                 tbody.innerHTML = rows.map(function (row) {
                     return '<tr>' +
@@ -3904,52 +3966,6 @@
             if (!modal) return;
             modal.classList.add('show');
             trapFocus(modal, function () { closeModal(modalId); });
-        }
-
-        function trapFocus(modalEl, onEscape) {
-            if (!modalEl) return;
-            releaseFocusTrap(modalEl);
-            var selector = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
-
-            function getFocusable() {
-                return Array.prototype.slice.call(modalEl.querySelectorAll(selector)).filter(function (el) {
-                    return !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length);
-                });
-            }
-
-            function onKeydown(e) {
-                if (e.key === 'Escape') {
-                    e.preventDefault();
-                    if (onEscape) onEscape();
-                    return;
-                }
-                if (e.key !== 'Tab') return;
-                var focusable = getFocusable();
-                if (!focusable.length) return;
-                var first = focusable[0];
-                var last = focusable[focusable.length - 1];
-                if (e.shiftKey && document.activeElement === first) {
-                    e.preventDefault();
-                    last.focus();
-                } else if (!e.shiftKey && document.activeElement === last) {
-                    e.preventDefault();
-                    first.focus();
-                }
-            }
-
-            modalEl.__focusTrapHandler = onKeydown;
-            modalEl.addEventListener('keydown', onKeydown);
-            setTimeout(function () {
-                var focusable = getFocusable();
-                if (focusable.length) focusable[0].focus();
-            }, 0);
-        }
-
-        function releaseFocusTrap(modalEl) {
-            if (modalEl && modalEl.__focusTrapHandler) {
-                modalEl.removeEventListener('keydown', modalEl.__focusTrapHandler);
-                modalEl.__focusTrapHandler = null;
-            }
         }
 
         function closeModal(modalId, force) {
