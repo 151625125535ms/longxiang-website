@@ -9747,6 +9747,14 @@ p:last-child {
     color: var(--color-gray-600);
 }
 
+.footer-brand .nav-logo-text {
+    color: var(--color-navy);
+}
+
+.footer-brand .nav-logo-text span {
+    color: #9C6A12;
+}
+
 .footer-brand p {
     margin-bottom: var(--spacing-lg);
 }
