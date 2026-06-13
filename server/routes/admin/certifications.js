@@ -48,6 +48,9 @@ function buildListQuery(query) {
         if (STATUSES.indexOf(status) === -1) return { error: 'Invalid status.' };
         where.push('cert.status = @status');
         params.status = status;
+    } else {
+        where.push('cert.status != @default_exclude');
+        params.default_exclude = 'deleted';
     }
 
     if (query.category != null && String(query.category).trim() !== '') {

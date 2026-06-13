@@ -96,26 +96,43 @@ None.
 
 ## Batch 4: Dashboard + Resource Library + Recycle Bin
 
-状态：未开始
+状态：已完成
 
-- [ ] Dashboard 待处理区：新询盘数、草稿产品数、最近修改内容、最近上传资源
-- [ ] 常用卡片带筛选跳转（如新询盘 → `#inquiries?status=new`）
-- [ ] 资源库：先核查 `/admin/assets` 是否已有 `q`/`type` 参数；有则直接用，无则新增
-- [ ] 资源路径复制按钮 + 成功 toast
-- [ ] 回收站：产品/证书 tab 分离
-- [ ] `npx playwright test tests/smoke.spec.js --reporter=line` 通过
+- [x] Dashboard 待处理区：新询盘数、草稿产品数、最近修改内容、最近上传资源
+- [x] 常用卡片带筛选跳转（新询盘 → 询盘未读筛选；草稿产品 → 产品 draft 筛选）
+- [x] 资源库：已核查 `/admin/assets` 原本不支持 `q`/`type`，本批兼容新增
+- [x] 资源路径复制按钮 + 成功 toast
+- [x] 回收站：产品/证书 tab 分离
+- [x] sessionStorage 草稿保留：产品 / 证书 / 内容块 409 后保存并提示恢复
+- [x] `npx playwright test tests/smoke.spec.js --reporter=line` 通过
 
 ---
 
 ## Batch 5: Visual Standards + Accessibility
 
-状态：未开始
+状态：已完成
 
-- [ ] 行高 ≥ 44px、按钮触控区 ≥ 44px（移动端）
-- [ ] 统一空状态、加载骨架、错误状态、toast 样式
-- [ ] 减少大面积深色块，仅侧栏使用深色
-- [ ] 批量选择和表格操作键盘可访问
-- [ ] `npx playwright test tests/smoke.spec.js --reporter=line` 通过
+- [x] 行高 ≥ 44px、按钮触控区 ≥ 44px（移动端）
+- [x] 统一空状态、加载骨架、错误状态、toast 样式
+- [x] 减少大面积深色块，仅侧栏使用深色
+- [x] 批量选择和表格操作键盘可访问
+- [x] 遗留清理：合并重复 trapFocus、回收站标题修复、hash 初始化 active 回归验证
+- [x] `npx playwright test tests/smoke.spec.js --reporter=line` 通过
+
+---
+
+## Batch 6: Deleted Data Filtering + Pagination Summary
+
+状态：已完成
+
+- [x] 产品列表默认排除 `deleted`，显式 `status=deleted` 仍用于回收站
+- [x] 证书列表默认排除 `deleted`，四个证书视图统一生效
+- [x] 分页组件单页/多页均显示条数摘要
+- [x] `node --check server/routes/admin/products.js`
+- [x] `node --check server/routes/admin/certifications.js`
+- [x] `node --check admin/js/pagination.js`
+- [x] `node --check admin/js/admin.js`
+- [x] `npx playwright test tests/smoke.spec.js --reporter=line` 通过
 
 
 

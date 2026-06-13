@@ -48,15 +48,21 @@
         if (!container) return;
 
         var normalized = normalizeMeta(meta);
+        var currentPageCount = Math.min(
+            normalized.pageSize,
+            Math.max(0, normalized.total - (normalized.page - 1) * normalized.pageSize)
+        );
+
         if (!normalized.total || normalized.total <= normalized.pageSize) {
-            container.innerHTML = '';
-            container.style.display = 'none';
+            container.style.display = '';
+            container.innerHTML =
+                '<div class="pagination-summary">共 ' + normalized.total + ' 条，本页 ' + currentPageCount + ' 条</div>';
             return;
         }
 
         container.style.display = '';
         container.innerHTML =
-            '<div class="pagination-summary">第 ' + normalized.page + ' 页，共 ' + normalized.total + ' 条</div>' +
+            '<div class="pagination-summary">第 ' + normalized.page + ' 页，共 ' + normalized.total + ' 条，本页 ' + currentPageCount + ' 条</div>' +
             '<div class="pagination-controls">' +
                 button('上一页', Math.max(1, normalized.page - 1), normalized.page <= 1, 'pagination-prev') +
                 pageButtons(normalized) +
