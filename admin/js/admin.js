@@ -112,6 +112,52 @@
         }, 3000);
     }
 
+    function trapFocus(modalEl, onEscape) {
+        if (!modalEl) return;
+        releaseFocusTrap(modalEl);
+        var selector = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+        function getFocusable() {
+            return Array.prototype.slice.call(modalEl.querySelectorAll(selector)).filter(function (el) {
+                return !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length);
+            });
+        }
+
+        function onKeydown(e) {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                if (onEscape) onEscape();
+                return;
+            }
+            if (e.key !== 'Tab') return;
+            var focusable = getFocusable();
+            if (!focusable.length) return;
+            var first = focusable[0];
+            var last = focusable[focusable.length - 1];
+            if (e.shiftKey && document.activeElement === first) {
+                e.preventDefault();
+                last.focus();
+            } else if (!e.shiftKey && document.activeElement === last) {
+                e.preventDefault();
+                first.focus();
+            }
+        }
+
+        modalEl.__focusTrapHandler = onKeydown;
+        modalEl.addEventListener('keydown', onKeydown);
+        setTimeout(function () {
+            var focusable = getFocusable();
+            if (focusable.length) focusable[0].focus();
+        }, 0);
+    }
+
+    function releaseFocusTrap(modalEl) {
+        if (modalEl && modalEl.__focusTrapHandler) {
+            modalEl.removeEventListener('keydown', modalEl.__focusTrapHandler);
+            modalEl.__focusTrapHandler = null;
+        }
+    }
+
     function showConfirm(title, message) {
         return new Promise(function (resolve) {
             var overlay = document.getElementById('confirm-overlay');
@@ -119,15 +165,19 @@
             var msgEl = document.getElementById('confirm-message');
             var btnOk = document.getElementById('confirm-ok');
             var btnCancel = document.getElementById('confirm-cancel');
+            var triggerEl = document.activeElement;
 
             titleEl.textContent = title;
             msgEl.textContent = message;
             overlay.classList.add('show');
+            trapFocus(overlay, onCancel);
 
             function cleanup() {
                 overlay.classList.remove('show');
+                releaseFocusTrap(overlay);
                 btnOk.removeEventListener('click', onOk);
                 btnCancel.removeEventListener('click', onCancel);
+                if (triggerEl && triggerEl.focus) triggerEl.focus();
             }
 
             function onOk() {
@@ -258,6 +308,10 @@
         var auditLogMeta = { page: 1, pageSize: 20, total: 0 };
         var assetPage = 1;
         var assetMeta = { page: 1, pageSize: 20, total: 0 };
+        var formDirty = false;
+        var dirtyMessage = '当前有未保存的修改，是否确认离开？离开后修改将丢失。';
+        var activeModalTrigger = null;
+        var suppressHashChange = false;
         var NAV_GROUP_STORAGE_KEY = 'admin-nav-groups';
         var VIEW_META = {
             dashboard: { title: '控制台', group: 'overview', groupLabel: '概况', breadcrumb: '概况 › 控制台', description: '查看网站后台关键数据与最近动态。' },
@@ -289,6 +343,7 @@
 
         bindNavigation();
         bindHeaderActions();
+        bindDirtyTracking();
         bindDashboardActions();
         bindProductEvents();
         bindInquiryEvents();
@@ -302,7 +357,8 @@
         bindAssetsEvents();
         loadProductCategories();
         loadCertificationCategories();
-        switchView('dashboard');
+        bindHashRouting();
+        switchView(initialViewFromHash(), { skipDirtyCheck: true });
 
         function bindNavigation() {
             initNavGroups();
@@ -310,8 +366,7 @@
             document.querySelectorAll('.sidebar-nav a[data-view]').forEach(function (link) {
                 link.addEventListener('click', function (e) {
                     e.preventDefault();
-                    switchView(link.getAttribute('data-view'));
-                    closeMobileSidebar();
+                    if (switchView(link.getAttribute('data-view'))) closeMobileSidebar();
                 });
             });
 
@@ -346,7 +401,7 @@
             var addProduct = document.getElementById('header-add-product');
             if (addProduct) {
                 addProduct.addEventListener('click', function () {
-                    switchView('products');
+                    if (!switchView('products')) return;
                     setTimeout(function () { openProductModal(null); }, 50);
                 });
             }
@@ -354,7 +409,7 @@
             var newInquiries = document.getElementById('header-new-inquiries');
             if (newInquiries) {
                 newInquiries.addEventListener('click', function () {
-                    switchView('inquiries');
+                    if (!switchView('inquiries')) return;
                     setInquiryUnreadFilter(true);
                 });
             }
@@ -364,6 +419,102 @@
 
             var refreshButton = document.getElementById('header-refresh');
             if (refreshButton) refreshButton.addEventListener('click', function () { window.location.reload(); });
+        }
+
+        function bindDirtyTracking() {
+            document.addEventListener('input', function (e) {
+                if (isDirtyTrackedField(e.target)) markFormDirty();
+            });
+            document.addEventListener('change', function (e) {
+                if (isDirtyTrackedField(e.target)) markFormDirty();
+            });
+            window.addEventListener('beforeunload', function (e) {
+                if (!formDirty) return;
+                e.preventDefault();
+                e.returnValue = dirtyMessage;
+                return dirtyMessage;
+            });
+        }
+
+        function bindHashRouting() {
+            window.addEventListener('hashchange', function () {
+                if (suppressHashChange) {
+                    suppressHashChange = false;
+                    return;
+                }
+                var view = initialViewFromHash();
+                if (view === currentView) return;
+                if (formDirty && !window.confirm(dirtyMessage)) {
+                    suppressHashChange = true;
+                    history.pushState(null, '', '#' + currentView);
+                    return;
+                }
+                resetFormDirty();
+                switchView(view, { skipDirtyCheck: true, skipHash: true });
+            });
+        }
+
+        function initialViewFromHash() {
+            var raw = (window.location.hash || '').replace(/^#/, '').split('?')[0];
+            return VIEW_META[raw] ? raw : 'dashboard';
+        }
+
+        function isDirtyTrackedField(target) {
+            if (!target || !target.matches || !target.matches('input, textarea, select')) return false;
+            return !!target.closest('.modal-overlay, .content-block-form, #company-form, #module-settings-form');
+        }
+
+        function markFormDirty() {
+            formDirty = true;
+        }
+
+        function resetFormDirty() {
+            formDirty = false;
+        }
+
+        function confirmDiscardChanges() {
+            if (!formDirty) return true;
+            if (!window.confirm(dirtyMessage)) return false;
+            resetFormDirty();
+            return true;
+        }
+
+        function showConflictNotice(message, reloadFn) {
+            var host = document.querySelector('.modal-overlay.show .modal-body') || document.querySelector('.view-section.active');
+            if (!host) {
+                showToast(message, 'error');
+                return;
+            }
+            var existing = host.querySelector('.conflict-banner');
+            if (existing) existing.parentNode.removeChild(existing);
+            var banner = document.createElement('div');
+            banner.className = 'conflict-banner';
+            banner.setAttribute('role', 'alert');
+            banner.innerHTML = '<span>' + escapeHtml(message) + '</span><button type="button" class="btn btn-secondary btn-sm">重新加载</button>';
+            banner.querySelector('button').addEventListener('click', function () {
+                resetFormDirty();
+                if (reloadFn) reloadFn();
+                else reloadCurrentView();
+            });
+            host.insertBefore(banner, host.firstChild);
+            showToast(message, 'error');
+        }
+
+        function reloadCurrentView() {
+            var view = currentView;
+            if (view === 'dashboard') loadDashboard();
+            else if (view === 'products') loadProducts();
+            else if (view === 'categories') {
+                loadProductCategoriesView();
+                loadProductCategories();
+            } else if (view === 'inquiries') loadInquiries();
+            else if (view === 'cert-qualifications' || view === 'cert-patents' || view === 'cert-software' || view === 'cert-test-reports') loadCertView(view);
+            else if (isContentBlockView(view)) loadContentBlock(view);
+            else if (view === 'trash') loadTrash();
+            else if (view === 'assets') loadAssets();
+            else if (view === 'system-status') loadSystemStatus();
+            else if (view === 'settings-modules') loadModuleSettings();
+            else if (view === 'audit-logs') loadAuditLogs();
         }
 
         function initNavGroups() {
@@ -434,7 +585,9 @@
             if (descriptionEl) descriptionEl.textContent = meta.description || '';
         }
 
-        function switchView(view) {
+        function switchView(view, options) {
+            options = options || {};
+            if (view !== currentView && !options.skipDirtyCheck && !confirmDiscardChanges()) return false;
             currentView = view;
             document.querySelectorAll('.sidebar-nav a[data-view]').forEach(function (link) {
                 link.classList.toggle('active', link.getAttribute('data-view') === view);
@@ -473,6 +626,10 @@
                 auditLogPage = 1;
                 loadAuditLogs();
             }
+            if (!options.skipHash && window.location.hash !== '#' + view) {
+                history.pushState(null, '', '#' + view);
+            }
+            return true;
         }
 
         function loadDashboard() {
@@ -551,7 +708,7 @@
                 el.addEventListener('click', function () {
                     var action = el.getAttribute('data-action');
                     if (action === 'add-product') {
-                        switchView('products');
+                        if (!switchView('products')) return;
                         setTimeout(function () {
                             var btn = document.getElementById('btn-add-product');
                             if (btn) btn.click();
@@ -884,6 +1041,8 @@
         }
 
         function openCategoryModal(id) {
+            activeModalTrigger = document.activeElement;
+            resetFormDirty();
             var form = document.getElementById('category-form');
             var title = document.getElementById('category-modal-title');
             var slug = document.getElementById('cat-slug');
@@ -909,7 +1068,7 @@
                 activeGroup.style.display = 'none';
                 document.getElementById('cat-is-active').checked = true;
             }
-            document.getElementById('category-modal').classList.add('show');
+            showModal('category-modal');
         }
 
         function saveCategoryModal() {
@@ -947,7 +1106,8 @@
 
             request.then(function () {
                 showToast('分类已保存');
-                closeModal('category-modal');
+                resetFormDirty();
+                closeModal('category-modal', true);
                 loadProductCategoriesView();
                 loadProductCategories();
             }).catch(function (err) {
@@ -1041,6 +1201,8 @@
         }
 
         function openProductModal(productId) {
+            activeModalTrigger = document.activeElement;
+            resetFormDirty();
             editingProductId = productId;
             editingProductVersion = null;
             uploadedImagePath = '';
@@ -1066,7 +1228,7 @@
             } else {
                 title.textContent = '新增产品';
             }
-            modal.classList.add('show');
+            showModal('product-modal');
         }
 
         function fillProductForm(product) {
@@ -1202,11 +1364,12 @@
                 var saved = unwrapDataResponse(response) || {};
                 if (!editingProductId && saved.id) editingProductId = saved.id;
                 showToast(wasEditing ? '产品已更新' : '产品已新增');
-                closeModal('product-modal');
+                resetFormDirty();
+                closeModal('product-modal', true);
                 loadProducts();
             }).catch(function (err) {
                 if (err.status === 409 || err.code === 'VERSION_CONFLICT') {
-                    showToast('数据已被其他操作修改，请刷新后重试', 'error');
+                    showConflictNotice('内容已被他人修改，请重新加载后再编辑', loadProducts);
                     return;
                 }
                 showToast('保存产品失败：' + err.message, 'error');
@@ -1438,6 +1601,8 @@
         }
 
         function openInquiryModal(id) {
+            activeModalTrigger = document.activeElement;
+            resetFormDirty();
             editingInquiryId = id;
             openedInquiry = null;
             apiRequest('/admin/inquiries/' + encodeURIComponent(id)).then(function (response) {
@@ -1455,7 +1620,7 @@
                     '<div class="detail-item detail-full"><strong>消息内容</strong><p>' + escapeHtml(item.message || '') + '</p></div>';
                 document.getElementById('inquiry-status').value = item.status || 'new';
                 document.getElementById('inquiry-notes').value = item.notes || '';
-                document.getElementById('inquiry-modal').classList.add('show');
+            showModal('inquiry-modal');
             }).catch(function (err) { showToast('加载询盘详情失败：' + err.message, 'error'); });
         }
 
@@ -1474,7 +1639,8 @@
                 }
             }).then(function () {
                 showToast('询盘状态已保存');
-                closeModal('inquiry-modal');
+                resetFormDirty();
+                closeModal('inquiry-modal', true);
                 loadInquiries();
             }).catch(function (err) {
                 if (err.status === 422) {
@@ -1786,6 +1952,8 @@
         }
 
         function openCertificationModal(id, viewName) {
+            activeModalTrigger = document.activeElement;
+            resetFormDirty();
             viewName = viewName || currentView;
             editingCertificationId = id;
             uploadedCertificationPath = '';
@@ -1815,7 +1983,7 @@
                     uploadedCertificationPath = detail.image_path || '';
                 }).catch(function (err) { showToast('加载证书详情失败：' + err.message, 'error'); });
             }
-            document.getElementById('certification-modal').classList.add('show');
+            showModal('certification-modal');
         }
 
         function uploadCertificationFile() {
@@ -1858,11 +2026,12 @@
                 : apiRequest('/admin/certifications', { method: 'POST', body: payload });
             request.then(function () {
                 showToast('证书已保存');
-                closeModal('certification-modal');
+                resetFormDirty();
+                closeModal('certification-modal', true);
                 loadCertView(currentView);
             }).catch(function (err) {
                 if (err.status === 409 || err.code === 'VERSION_CONFLICT') {
-                    showToast('数据已被其他操作修改，请刷新后重试', 'error');
+                    showConflictNotice('内容已被他人修改，请重新加载后再编辑', function () { loadCertView(currentView); });
                     return;
                 }
                 showToast('保存证书失败：' + err.message, 'error');
@@ -2029,6 +2198,11 @@
             return '<label class="form-group cms-field"><span>' + escapeHtml(label) + '</span><input id="' + escapeHtml(id) + '" data-cms-field="' + escapeHtml(path) + '" type="text" value="' + escapeHtml(valueText) + '"></label>';
         }
 
+        function renderJsonField(path, label, value) {
+            var id = 'cms-json-' + path.replace(/[^a-zA-Z0-9_-]/g, '-');
+            return '<label class="form-group cms-field"><span>' + escapeHtml(label) + '</span><textarea id="' + escapeHtml(id) + '" class="json-field" data-cms-json="' + escapeHtml(path) + '" rows="6">' + escapeHtml(value) + '</textarea><p class="json-error" hidden></p></label>';
+        }
+
         function renderGroup(group, body) {
             return '<fieldset class="cms-fieldset"><legend>' + escapeHtml(group.label) + '</legend>' +
                 group.fields.map(function (field) {
@@ -2053,7 +2227,13 @@
             var form = document.getElementById('form-' + viewName);
             if (!form) return;
             var body = block.body_json || {};
-            var html = '<div class="form-group"><label>标题（英文）</label><input type="text" id="' + escapeHtml(viewName) + '-title-en" value="' + escapeHtml(block.title_en || '') + '"></div>';
+            var summary = contentBlockSummary(block);
+            var html = '<details class="content-block-card" open><summary class="block-card-header">' +
+                '<span class="block-type-label">内容块</span>' +
+                '<span class="block-summary">' + escapeHtml(summary) + '</span>' +
+                '<svg class="card-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>' +
+                '</summary><div class="block-card-body">';
+            html += '<div class="form-group"><label>标题（英文）</label><input type="text" id="' + escapeHtml(viewName) + '-title-en" value="' + escapeHtml(block.title_en || '') + '"></div>';
             (config.fields || []).forEach(function (field) {
                 html += renderField(field[0], field[1], getPathValue(body, field[0]), false);
             });
@@ -2061,7 +2241,7 @@
                 html += renderField(field[0], field[1], getPathValue(body, field[0]), true);
             });
             (config.jsonTextareas || []).forEach(function (field) {
-                html += renderField(field[0], field[1], JSON.stringify(getPathValue(body, field[0]) || {}, null, 2), true);
+                html += renderJsonField(field[0], field[1], JSON.stringify(getPathValue(body, field[0]) || {}, null, 2));
             });
             (config.groups || []).forEach(function (group) { html += renderGroup(group, body); });
             (config.arrays || []).forEach(function (arrayConfig) { html += renderArrayEditor(arrayConfig, body); });
@@ -2073,9 +2253,29 @@
                     renderField('seo.keywords', 'SEO 关键词', getPathValue(body, 'seo.keywords'), false) +
                     '</fieldset>';
             }
-            html += '<details class="cms-advanced"><summary>高级 JSON</summary><textarea id="' + escapeHtml(viewName) + '-body-json" rows="12">' + escapeHtml(JSON.stringify(body, null, 2)) + '</textarea></details>';
+            html += '<details class="advanced-json"><summary>高级 JSON（点击展开）</summary><textarea id="' + escapeHtml(viewName) + '-body-json" class="json-field" rows="12">' + escapeHtml(JSON.stringify(body, null, 2)) + '</textarea><p class="json-error" hidden></p></details>';
+            html += '</div></details>';
             html += '<div class="form-actions"><button type="submit" class="btn btn-primary">保存</button><button type="button" class="btn btn-secondary cms-reload">重新加载</button><span class="form-status" id="' + escapeHtml(viewName) + '-status">' + (block.updated_at ? '已加载：' + formatDate(block.updated_at) : '已加载') + '</span></div>';
             form.innerHTML = html;
+        }
+
+        function contentBlockSummary(block) {
+            var body = (block && block.body_json) || {};
+            var candidates = [
+                body.title_zh,
+                body.title_cn,
+                body.title,
+                body.content_zh,
+                body.content_cn,
+                body.description,
+                body.hero && (body.hero.title || body.hero.title_cn),
+                block && block.title_en
+            ];
+            for (var i = 0; i < candidates.length; i++) {
+                var value = String(candidates[i] == null ? '' : candidates[i]).trim();
+                if (value) return value.slice(0, 40);
+            }
+            return '—';
         }
 
         function renderReservedBlocks(blockConfigs, body) {
@@ -2090,17 +2290,26 @@
 
         function collectContentBlockBody(viewName) {
             var cached = contentBlockCache[viewName] || {};
+            var form = document.getElementById('form-' + viewName);
+            if (form && !validateJsonFields(form)) {
+                throw new Error('JSON 格式无效，请检查红色提示');
+            }
             var bodyEl = document.getElementById(viewName + '-body-json');
             var body = {};
             try {
                 body = bodyEl ? JSON.parse(bodyEl.value || '{}') : { ...(cached.body_json || {}) };
             } catch (err) {
+                setJsonFieldError(bodyEl, err);
                 throw new Error('高级 JSON 格式无效');
             }
             if (!body || typeof body !== 'object' || Array.isArray(body)) throw new Error('高级 JSON 格式无效');
 
-            var form = document.getElementById('form-' + viewName);
             if (!form) return body;
+
+            form.querySelectorAll('[data-cms-json]').forEach(function (field) {
+                var path = field.getAttribute('data-cms-json');
+                setPathValue(body, path, JSON.parse(field.value || '{}'));
+            });
 
             form.querySelectorAll('[data-cms-field]').forEach(function (field) {
                 var path = field.getAttribute('data-cms-field');
@@ -2147,6 +2356,55 @@
             return body;
         }
 
+        function validateJsonFields(root) {
+            var valid = true;
+            root.querySelectorAll('textarea.json-field').forEach(function (field) {
+                clearJsonFieldError(field);
+                try {
+                    var parsed = JSON.parse(field.value || '{}');
+                    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+                        throw new Error('JSON 必须是对象');
+                    }
+                } catch (err) {
+                    setJsonFieldError(field, err);
+                    valid = false;
+                }
+            });
+            if (!valid) {
+                var first = root.querySelector('textarea.json-field[aria-invalid="true"]');
+                if (first) {
+                    var parentDetails = first.closest('details');
+                    while (parentDetails) {
+                        parentDetails.open = true;
+                        parentDetails = parentDetails.parentElement ? parentDetails.parentElement.closest('details') : null;
+                    }
+                    first.focus();
+                }
+            }
+            return valid;
+        }
+
+        function setJsonFieldError(field, err) {
+            if (!field) return;
+            field.classList.add('input-error');
+            field.setAttribute('aria-invalid', 'true');
+            var msg = field.parentNode.querySelector('.json-error');
+            if (!msg) return;
+            msg.hidden = false;
+            msg.textContent = 'JSON 解析失败：' + (err && err.message ? err.message : '格式无效');
+        }
+
+        function clearJsonFieldError(field) {
+            if (!field) return;
+            field.classList.remove('input-error');
+            field.removeAttribute('aria-invalid');
+            var msg = field.parentNode.querySelector('.json-error');
+            if (msg) {
+                msg.hidden = true;
+                msg.textContent = '';
+            }
+        }
+
         function warnMissingCertificationIds(slug, body) {
             if (slug !== 'innovation' || !Array.isArray(body.related_certification_ids) || !body.related_certification_ids.length) {
                 return Promise.resolve();
@@ -2167,6 +2425,7 @@
         function mutateContentArray(viewName, arrayKey, action, index) {
             var block = contentBlockCache[viewName];
             if (!block) return;
+            markFormDirty();
             var body = block.body_json || {};
             var items = Array.isArray(body[arrayKey]) ? body[arrayKey].slice() : [];
             if (action === 'add') items.push({});
@@ -2206,6 +2465,7 @@
                     form.addEventListener('click', function (e) {
                         var target = e.target;
                         if (target.classList.contains('cms-reload')) {
+                            if (!confirmDiscardChanges()) return;
                             loadContentBlock(viewName);
                             return;
                         }
@@ -2280,10 +2540,11 @@
                 var block = unwrapDataResponse(response) || {};
                 contentBlockCache[viewName] = block;
                 if (statusEl) statusEl.textContent = '已保存：' + formatDate(block.updated_at);
+                resetFormDirty();
                 showToast('内容已保存');
             }).catch(function (err) {
                 if (err.status === 409 || err.code === 'VERSION_CONFLICT') {
-                    showToast('内容已被其他操作修改，请刷新后重试', 'error');
+                    showConflictNotice('内容已被他人修改，请重新加载后再编辑', function () { loadContentBlock(viewName); });
                     if (statusEl) statusEl.textContent = '版本冲突';
                     return;
                 }
@@ -3337,12 +3598,72 @@
             }
         }
 
-        function closeModal(modalId) {
+        function showModal(modalId) {
             var modal = document.getElementById(modalId);
-            if (modal) modal.classList.remove('show');
+            if (!modal) return;
+            modal.classList.add('show');
+            trapFocus(modal, function () { closeModal(modalId); });
+        }
+
+        function trapFocus(modalEl, onEscape) {
+            if (!modalEl) return;
+            releaseFocusTrap(modalEl);
+            var selector = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+            function getFocusable() {
+                return Array.prototype.slice.call(modalEl.querySelectorAll(selector)).filter(function (el) {
+                    return !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length);
+                });
+            }
+
+            function onKeydown(e) {
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    if (onEscape) onEscape();
+                    return;
+                }
+                if (e.key !== 'Tab') return;
+                var focusable = getFocusable();
+                if (!focusable.length) return;
+                var first = focusable[0];
+                var last = focusable[focusable.length - 1];
+                if (e.shiftKey && document.activeElement === first) {
+                    e.preventDefault();
+                    last.focus();
+                } else if (!e.shiftKey && document.activeElement === last) {
+                    e.preventDefault();
+                    first.focus();
+                }
+            }
+
+            modalEl.__focusTrapHandler = onKeydown;
+            modalEl.addEventListener('keydown', onKeydown);
+            setTimeout(function () {
+                var focusable = getFocusable();
+                if (focusable.length) focusable[0].focus();
+            }, 0);
+        }
+
+        function releaseFocusTrap(modalEl) {
+            if (modalEl && modalEl.__focusTrapHandler) {
+                modalEl.removeEventListener('keydown', modalEl.__focusTrapHandler);
+                modalEl.__focusTrapHandler = null;
+            }
+        }
+
+        function closeModal(modalId, force) {
+            if (!force && !confirmDiscardChanges()) return false;
+            var modal = document.getElementById(modalId);
+            if (modal) {
+                releaseFocusTrap(modal);
+                modal.classList.remove('show');
+            }
             if (modalId === 'product-modal') editingProductId = null;
             if (modalId === 'certification-modal') editingCertificationId = null;
             if (modalId === 'inquiry-modal') { editingInquiryId = null; openedInquiry = null; }
+            if (activeModalTrigger && activeModalTrigger.focus) activeModalTrigger.focus();
+            activeModalTrigger = null;
+            return true;
         }
 
         function formatDate(value) {

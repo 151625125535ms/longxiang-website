@@ -514,33 +514,39 @@
                 <div class="modal-header"><h3 id="modal-title">新增产品</h3><button class="modal-close" id="modal-close">×</button></div>
                 <div class="modal-body">
                     <form id="product-form">
-                        <div class="form-row">
-                            <div class="form-group"><label>产品 ID <span class="required">*</span></label><input type="text" id="field-id" placeholder="例如 sbh15"></div>
-                            <div class="form-group"><label>英文名称 <span class="required">*</span></label><input type="text" id="field-name"></div>
-                        </div>
-                        <div class="form-group"><label>阿拉伯语名称</label><input type="text" id="field-nameAr" dir="rtl"></div>
-                        <div class="form-group">
-                            <label>产品图片</label>
-                            <div class="image-upload-area" id="upload-area">
-                                <input type="file" id="field-image" accept="image/*" disabled>
-                                <div class="upload-placeholder"><p>图片管理暂未开放</p></div>
+                        <section class="form-section">
+                            <h3 class="form-section-title">基础信息</h3>
+                            <div class="form-row">
+                                <div class="form-group"><label>产品 ID <span class="required">*</span></label><input type="text" id="field-id" placeholder="例如 sbh15"></div>
+                                <div class="form-group"><label>英文名称 <span class="required">*</span></label><input type="text" id="field-name"></div>
                             </div>
-                            <div class="image-preview-container" id="image-preview" style="display:none;"></div>
-                            <p class="form-help-text">图片管理将在后续版本开放。</p>
-                        </div>
-                        <div class="form-row">
+                            <div class="form-group"><label>阿拉伯语名称</label><input type="text" id="field-nameAr" dir="rtl"></div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>分类 <span class="required">*</span></label>
+                                    <select id="field-category">
+                                        <option value="">选择分类</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group"><label class="checkbox-label"><input type="checkbox" id="field-featured"> 首页推荐产品</label></div>
+                        </section>
+                        <section class="form-section">
+                            <h3 class="form-section-title">展示内容</h3>
+                            <div class="form-group"><label>英文短描述</label><input type="text" id="field-shortDesc"></div>
+                            <div class="form-group"><label>阿拉伯语短描述</label><input type="text" id="field-shortDescAr" dir="rtl"></div>
+                            <div class="form-group"><label>英文详情</label><textarea id="field-description" rows="3"></textarea></div>
+                            <div class="form-group"><label>阿拉伯语详情</label><textarea id="field-descriptionAr" rows="3" dir="rtl"></textarea></div>
                             <div class="form-group">
-                                <label>分类 <span class="required">*</span></label>
-                                <select id="field-category">
-                                    <option value="">选择分类</option>
-                                </select>
+                                <label>产品图片</label>
+                                <div class="image-upload-area" id="upload-area">
+                                    <input type="file" id="field-image" accept="image/*" disabled>
+                                    <div class="upload-placeholder"><p>图片管理暂未开放</p></div>
+                                </div>
+                                <div class="image-preview-container" id="image-preview" style="display:none;"></div>
+                                <p class="form-help-text">图片管理将在后续版本开放。</p>
                             </div>
-                        </div>
-                        <div class="form-group"><label>英文短描述</label><input type="text" id="field-shortDesc"></div>
-                        <div class="form-group"><label>阿拉伯语短描述</label><input type="text" id="field-shortDescAr" dir="rtl"></div>
-                        <div class="form-group"><label>英文详情</label><textarea id="field-description" rows="3"></textarea></div>
-                        <div class="form-group"><label>阿拉伯语详情</label><textarea id="field-descriptionAr" rows="3" dir="rtl"></textarea></div>
-                        <div class="form-group"><label class="checkbox-label"><input type="checkbox" id="field-featured"> 首页推荐产品</label></div>
+                        </section>
                     </form>
                 </div>
                 <div class="modal-footer"><button class="btn btn-secondary" id="modal-cancel">取消</button><button class="btn btn-primary" id="modal-submit" type="submit" form="product-form">保存</button></div>
@@ -567,14 +573,20 @@
                         <input type="hidden" id="cert-category-id">
                         <input type="hidden" id="cert-editing-id">
                         <input type="hidden" id="cert-editing-version">
-                        <div class="form-group"><label>证书名称 <span class="required">*</span></label><input type="text" id="cert-name"></div>
-                        <div class="form-row">
-                            <div class="form-group"><label>发证机构</label><input type="text" id="cert-issuer"></div>
-                            <div class="form-group"><label>有效期</label><input type="text" id="cert-expiryDate"></div>
-                        </div>
-                        <p class="form-help-text">文件上传将在后续版本开放。</p>
-                        <div class="form-group"><label>图片/文件路径</label><input type="text" id="cert-image" placeholder="例如 uploads/certification-xxx.jpg"></div>
-                        <div class="form-group"><label>说明</label><textarea id="cert-description" rows="3"></textarea></div>
+                        <section class="form-section">
+                            <h3 class="form-section-title">基础信息</h3>
+                            <div class="form-group"><label>证书名称 <span class="required">*</span></label><input type="text" id="cert-name"></div>
+                            <div class="form-row">
+                                <div class="form-group"><label>发证机构</label><input type="text" id="cert-issuer"></div>
+                                <div class="form-group"><label>有效期</label><input type="text" id="cert-expiryDate"></div>
+                            </div>
+                        </section>
+                        <section class="form-section">
+                            <h3 class="form-section-title">展示内容</h3>
+                            <p class="form-help-text">文件上传将在后续版本开放。</p>
+                            <div class="form-group"><label>图片/文件路径</label><input type="text" id="cert-image" placeholder="例如 uploads/certification-xxx.jpg"></div>
+                            <div class="form-group"><label>说明</label><textarea id="cert-description" rows="3"></textarea></div>
+                        </section>
                     </form>
                 </div>
                 <div class="modal-footer"><button class="btn btn-secondary" id="certification-cancel">取消</button><button class="btn btn-primary" type="submit" form="certification-form">保存</button></div>

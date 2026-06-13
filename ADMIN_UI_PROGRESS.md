@@ -81,16 +81,16 @@ None.
 
 ## Batch 3: Forms + Content Block Collapse + Focus Trap + Hash Routing
 
-状态：未开始
+状态：已完成
 
-- [ ] 产品/证书/分类 modal 改为分区表单（基础信息/展示内容/多语言/SEO），底部保存 sticky
-- [ ] 全部内容块（含 education）折叠卡片列表，卡片标题显示关键字段摘要
-- [ ] 高级 JSON 默认在 `<details>` 中收起，保存前校验错误位置提示
-- [ ] 未保存变更提醒（切换菜单/关闭 modal/重新加载前确认）
-- [ ] 版本冲突：提示 + 重新加载按钮（不做草稿保留）
-- [ ] Focus trap（Tab 焦点不逃出 modal）+ Esc 关闭 + 焦点回触发按钮
-- [ ] Hash 路由：视图切换写 hash，`hashchange` 加载视图（此为本批最后实现）
-- [ ] `npx playwright test tests/smoke.spec.js --reporter=line` 通过
+- [x] 产品/证书/分类 modal 改为分区表单（基础信息/展示内容/多语言/SEO），底部保存 sticky
+- [x] 全部内容块（含 education）折叠卡片列表，卡片标题显示关键字段摘要
+- [x] 高级 JSON 默认在 `<details>` 中收起，保存前校验错误位置提示
+- [x] 未保存变更提醒（切换菜单/关闭 modal/重新加载前确认）
+- [x] 版本冲突：提示 + 重新加载按钮（不做草稿保留）
+- [x] Focus trap（Tab 焦点不逃出 modal）+ Esc 关闭 + 焦点回触发按钮
+- [x] Hash 路由：视图切换写 hash，`hashchange` 加载视图（此为本批最后实现）
+- [x] `npx playwright test tests/smoke.spec.js --reporter=line` 通过
 
 ---
 
