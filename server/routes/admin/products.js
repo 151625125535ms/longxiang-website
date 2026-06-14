@@ -16,6 +16,7 @@ const IMAGE_EXTENSIONS = {
     'image/webp': '.webp',
     'image/gif': '.gif'
 };
+const COVER_IMAGE_PATH_EXTENSIONS = /\.(?:jpe?g|png|gif|webp|svg)$/i;
 const uploadDir = resolveUploadDir();
 ensureDirectory(uploadDir);
 
@@ -129,9 +130,9 @@ function normalizeCoverPath(value) {
     if (value == null) return null;
     const coverPath = String(value).trim().replace(/\\/g, '/').replace(/^\/+/, '');
     if (!coverPath) return '';
-    const publicRoot = resolveUploadPublicPath() + '/';
-    if (!coverPath.startsWith(publicRoot)) return null;
+    if (/^(?:https?:)?\/\//i.test(coverPath)) return null;
     if (coverPath.indexOf('..') !== -1) return null;
+    if (!COVER_IMAGE_PATH_EXTENSIONS.test(coverPath)) return null;
     return coverPath;
 }
 
