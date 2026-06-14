@@ -36,8 +36,8 @@
 
 - [BASE_WORKFLOW.md](docs/protocol/BASE_WORKFLOW.md) — 三方职责与标准流程
 - [CODE_BOUNDARIES.md](docs/protocol/CODE_BOUNDARIES.md) — 全局禁区
-- [HANDOFF_TEMPLATE.md](docs/protocol/HANDOFF_TEMPLATE.md) — 任务规格模板
-- [REVIEW_TEMPLATE.md](docs/protocol/REVIEW_TEMPLATE.md) — 实现报告模板
+- [HANDOFF_TEMPLATE.md](docs/protocol/HANDOFF_TEMPLATE.md) — 方案审核请求模板
+- [REVIEW_TEMPLATE.md](docs/protocol/REVIEW_TEMPLATE.md) — 方案审核意见模板
 
 临时任务文档见 `docs/tasks/`，命名约定：`{task-id}-spec.md`。
 
