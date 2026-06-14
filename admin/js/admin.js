@@ -341,6 +341,7 @@
         var editingProductId = null;
         var editingProductVersion = null;
         var uploadedImagePath = '';
+        var productImageUploading = false;
         var productCategories = [];
         var productSearchTimer = null;
         var editingInquiryId = null;
@@ -624,6 +625,11 @@
             path = String(path).trim().replace(/\\/g, '/');
             path = path.replace(/^https?:\/\/[^/]+\//i, '');
             return path.replace(/^\/+/, '');
+        }
+
+        function setProductSubmitDisabled(disabled) {
+            var submit = document.getElementById('modal-submit');
+            if (submit) submit.disabled = !!disabled;
         }
 
         function showDraftRecovery(host, key, restoreFn) {
@@ -1519,6 +1525,8 @@
             resetFormDirty();
             editingProductId = productId;
             editingProductVersion = null;
+            productImageUploading = false;
+            setProductSubmitDisabled(false);
             setProductCoverPath('');
             var modal = document.getElementById('product-modal');
             var title = document.getElementById('modal-title');
@@ -1578,6 +1586,8 @@
             var file = this.files[0];
             if (!file) return;
             showImagePreview(URL.createObjectURL(file));
+            productImageUploading = true;
+            setProductSubmitDisabled(true);
 
             var formData = new FormData();
             formData.append('image', file);
@@ -1601,7 +1611,11 @@
                     markFormDirty();
                     showToast('图片上传成功');
                 })
-                .catch(function (err) { showToast('图片上传失败：' + err.message, 'error'); });
+                .catch(function (err) { showToast('图片上传失败：' + err.message, 'error'); })
+                .finally(function () {
+                    productImageUploading = false;
+                    setProductSubmitDisabled(false);
+                });
         }
 
         function showImagePreview(src) {
@@ -1664,6 +1678,10 @@
 
         function saveProduct(e) {
             e.preventDefault();
+            if (productImageUploading) {
+                showToast('图片仍在上传，请上传完成后再保存。', 'error');
+                return;
+            }
             var id = document.getElementById('field-id').value.trim();
             var name = document.getElementById('field-name').value.trim();
             var category = document.getElementById('field-category').value;
