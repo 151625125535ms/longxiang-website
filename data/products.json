@@ -222,6 +222,232 @@
     "descriptionAr": "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق."
   },
   {
+    "id": "single-phase-dry",
+    "name": "Single-Phase Dry-Type Amorphous Alloy Transformer",
+    "image": "成品区/单相干式非晶合金铁心配电变压器.jpg",
+    "category": "dry-type",
+    "categoryLabel": "Dry-Type",
+    "group": "transformer",
+    "subCategory": "dry-type",
+    "shortDesc": "Compact single-phase dry-type transformer using amorphous alloy core for maximum energy efficiency.",
+    "description": "Compact single-phase dry-type transformer using amorphous alloy core for maximum energy efficiency in single-phase distribution applications.",
+    "capacities": [
+      "5",
+      "10",
+      "15",
+      "25",
+      "30",
+      "50",
+      "63",
+      "80",
+      "100",
+      "125",
+      "160"
+    ],
+    "voltages": [
+      "10/0.22kV",
+      "10/0.24kV"
+    ],
+    "specs": [
+      [
+        "Product Model",
+        "SCBH15 Series (Single Phase)"
+      ],
+      [
+        "Core Type",
+        "Amorphous Alloy"
+      ],
+      [
+        "Phase",
+        "Single Phase"
+      ],
+      [
+        "Frequency",
+        "50 Hz"
+      ],
+      [
+        "Insulation Class",
+        "F (155°C)"
+      ],
+      [
+        "Cooling Method",
+        "AN"
+      ],
+      [
+        "No-load Loss",
+        "Ultra-low"
+      ],
+      [
+        "Standard",
+        "GB/T 10228 / IEC 60076-11"
+      ],
+      [
+        "Application",
+        "Single-phase distribution"
+      ]
+    ],
+    "featured": false,
+    "categoryLabelAr": "محولات جافة",
+    "nameAr": "محول جاف أحادي الطور بسبيكة غير متبلورة",
+    "shortDescAr": "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق.",
+    "descriptionAr": "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق."
+  },
+  {
+    "id": "3phase-3limb",
+    "name": "Three-Phase Three-Limb Amorphous Alloy Dry-Type Transformer",
+    "image": "成品区/干式非晶三相三柱 .png",
+    "category": "dry-type",
+    "categoryLabel": "Dry-Type",
+    "group": "transformer",
+    "subCategory": "dry-type",
+    "shortDesc": "Three-limb design dry-type transformer with reduced harmonics and improved efficiency.",
+    "description": "Three-limb design dry-type transformer with reduced harmonics and improved efficiency using amorphous alloy core technology.",
+    "capacities": [
+      "30",
+      "50",
+      "80",
+      "100",
+      "160",
+      "200",
+      "315",
+      "400",
+      "500",
+      "630",
+      "800",
+      "1000",
+      "1250",
+      "1600",
+      "2000"
+    ],
+    "voltages": [
+      "10/0.4kV",
+      "6/0.4kV"
+    ],
+    "specs": [
+      [
+        "Product Model",
+        "SCBH15 Series (Three-Limb)"
+      ],
+      [
+        "Core Type",
+        "Amorphous Alloy"
+      ],
+      [
+        "Core Structure",
+        "Three-Limb"
+      ],
+      [
+        "Phase",
+        "Three Phase"
+      ],
+      [
+        "Frequency",
+        "50 Hz"
+      ],
+      [
+        "Insulation Class",
+        "F (155°C) / H (180°C)"
+      ],
+      [
+        "Cooling Method",
+        "AN / AF"
+      ],
+      [
+        "Standard",
+        "GB/T 10228 / IEC 60076-11"
+      ],
+      [
+        "Application",
+        "Commercial & industrial distribution"
+      ]
+    ],
+    "featured": false,
+    "categoryLabelAr": "محولات جافة",
+    "nameAr": "محول جاف ثلاثي الطور بثلاثة أعمدة من السبيكة غير المتبلورة",
+    "shortDescAr": "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق.",
+    "descriptionAr": "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق."
+  },
+  {
+    "id": "3phase-5limb",
+    "name": "Three-Phase Five-Limb Amorphous Alloy Dry-Type Transformer",
+    "image": "成品区/干式非晶三相五柱.png",
+    "category": "dry-type",
+    "categoryLabel": "Dry-Type",
+    "group": "transformer",
+    "subCategory": "dry-type",
+    "shortDesc": "Five-limb structure providing superior magnetic flux distribution and lower noise operation.",
+    "description": "Five-limb structure providing superior magnetic flux distribution and lower noise operation for noise-sensitive environments.",
+    "capacities": [
+      "30",
+      "50",
+      "80",
+      "100",
+      "160",
+      "200",
+      "315",
+      "400",
+      "500",
+      "630",
+      "800",
+      "1000",
+      "1250",
+      "1600",
+      "2000",
+      "2500"
+    ],
+    "voltages": [
+      "10/0.4kV",
+      "35/0.4kV"
+    ],
+    "specs": [
+      [
+        "Product Model",
+        "SCBH15 Series (Five-Limb)"
+      ],
+      [
+        "Core Type",
+        "Amorphous Alloy"
+      ],
+      [
+        "Core Structure",
+        "Five-Limb"
+      ],
+      [
+        "Phase",
+        "Three Phase"
+      ],
+      [
+        "Frequency",
+        "50 Hz"
+      ],
+      [
+        "Insulation Class",
+        "F (155°C) / H (180°C)"
+      ],
+      [
+        "Cooling Method",
+        "AN / AF"
+      ],
+      [
+        "Noise Level",
+        "Low"
+      ],
+      [
+        "Standard",
+        "GB/T 10228 / IEC 60076-11"
+      ],
+      [
+        "Application",
+        "Noise-sensitive installations"
+      ]
+    ],
+    "featured": true,
+    "categoryLabelAr": "محولات جافة",
+    "nameAr": "محول جاف ثلاثي الطور بخمسة أعمدة من السبيكة غير المتبلورة",
+    "shortDescAr": "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق.",
+    "descriptionAr": "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق."
+  },
+  {
     "id": "traction",
     "name": "Traction Mining Explosion-Proof Transformer",
     "image": "成品区/牵引矿用防爆.png",

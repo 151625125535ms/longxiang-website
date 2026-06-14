@@ -15,10 +15,7 @@ const DEPRECATED_LEGACY_IDS = [
   'dgh',
   'SCBH15',
   'SBH21-M-RL',
-  'SCB13',
-  'single-phase-dry',
-  '3phase-3limb',
-  '3phase-5limb'
+  'SCB13'
 ];
 
 function parseArgs(argv) {

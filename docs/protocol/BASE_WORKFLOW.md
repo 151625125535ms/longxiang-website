@@ -8,82 +8,7 @@ This document defines the reusable collaboration workflow for the user, Codex, a
 - Codex: reads project context, writes executable plans/specifications, revises them from Claude's review feedback, and executes only after the plan is approved or the user explicitly asks Codex to proceed.
 - Claude: reviews Codex plans/specifications, identifies risks, contradictions, missing details, and implementation concerns, then writes structured feedback for Codex. Claude does not implement, edit files, run data migrations, or execute tasks.
 
-## Task Tiers
-
-Use task tiers to avoid running the full Claude review loop for every small
-change.
-
-### Small Tasks
-
-Examples: one-off text edits, small config changes, local password changes,
-minor documentation edits, narrow bug fixes with low blast radius.
-
-Default flow:
-
-```text
-User task -> Codex executes -> Codex runs focused verification -> brief result
-```
-
-Rules:
-
-- Codex may execute directly without creating `claude_check.md`.
-- No persistent task spec is required unless the user asks for one.
-- Claude review is skipped unless the user explicitly requests it.
-- Verification should be proportional and short.
-
-### Medium Tasks
-
-Examples: several related files, data cleanup, route behavior changes, admin UI
-changes, or content changes with compatibility concerns.
-
-Default flow:
-
-```text
-User task -> Codex short plan -> Codex executes -> optional Claude review
-```
-
-Rules:
-
-- Codex may execute after a short plan when the risk is clear and bounded.
-- Claude review is used when compatibility, data integrity, language versions,
-  or deployment risk needs a second pass.
-- A persistent task spec is required only if the task spans multiple rounds or
-  would be hard to reconstruct from chat.
-
-### Large Tasks
-
-Examples: product/catalog restructuring, multi-page UI redesigns, migrations,
-public API behavior changes, security-sensitive changes, or work expected to
-span multiple review/execution rounds.
-
-Default flow:
-
-```text
-User task -> Codex persistent spec -> Claude review -> Codex revision/execution
-```
-
-Rules:
-
-- Codex must write `docs/tasks/{task-id}-spec.md` before external review.
-- Codex writes `C:\Users\hnlxd\Desktop\claude_check.md` for Claude review.
-- Claude remains review-only and writes feedback to
-  `C:\Users\hnlxd\Desktop\codex_check.md`.
-
-### Deployment Tasks
-
-Deployment is a separate tier regardless of task size.
-
-Rules:
-
-- Local changes should be committed and pushed before server deployment.
-- Server deployment is done by Codex only after user approval or a reviewed
-  deployment instruction.
-- Deployment should use git pull/sync/restart on the server copy, not hand edits
-  on the server.
-
-## Review Loop
-
-Use this loop for medium tasks that need Claude review and for all large tasks.
+## Standard Loop
 
 1. User publishes a task to Codex.
 2. Codex reads the relevant project files and writes an executable plan or task
@@ -117,7 +42,7 @@ Each handoff file should start with either "给 Codex 的提示词" or "给 Clau
 
 ## Execution Branches
 
-For reviewed medium and large tasks, the default branch is:
+The default branch is:
 
 ```text
 User task -> Codex plan -> Claude review -> Codex revision or execution
@@ -128,8 +53,6 @@ Codex executes code/data changes when:
 - Claude has reviewed and approved the plan; or
 - Claude's feedback has been incorporated and the user asks Codex to proceed; or
 - the user explicitly asks Codex to skip Claude review for a simple task.
-- the task is classified as a small task and Codex has enough local context to
-  execute it safely with focused verification.
 
 Claude remains review-only in all branches. Do not route implementation work to
 Claude.

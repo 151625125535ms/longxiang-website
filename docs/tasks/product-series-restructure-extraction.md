@@ -71,11 +71,3 @@ physical pages.
   such as `30-2500 kVA` and `6-10kV distribution class` where the rendered table
   detail was too small for reliable transcription.
 - No PDF source files or rendered temporary images were added to git.
-
-## Retained / Merged Legacy Products
-
-- `single-phase-dry`, `3phase-3limb`, and `3phase-5limb` were merged into
-  `amorphous-scbh-dry`. Their old URLs are retained through aliases, and the
-  SQLite sync script marks the old standalone rows as deleted.
-- `anti-short-amorphous`, `amorphous-veg-oil`, and `aluminum` are outside the
-  two PDF catalog scope for this restructure and remain independent products.
