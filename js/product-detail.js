@@ -25,6 +25,30 @@
         return product[field] || '';
     }
 
+    function normalizeImagePath(path) {
+        path = String(path || '').trim().replace(/\\/g, '/');
+        if (!path) return '';
+        if (/^(https?:)?\/\//i.test(path) || /^data:/i.test(path) || /^blob:/i.test(path)) return path;
+        path = path.replace(/^\/+/, '');
+        return assetPrefix + path;
+    }
+
+    function absoluteImageUrl(path) {
+        path = String(path || '').trim().replace(/\\/g, '/');
+        if (!path) return '';
+        if (/^https?:\/\//i.test(path)) return path;
+        if (/^\/\//.test(path)) return window.location.protocol + path;
+        if (/^data:/i.test(path) || /^blob:/i.test(path)) return path;
+        return window.location.origin + '/' + path.replace(/^\/+/, '');
+    }
+
+    function markStaticProductFallback() {
+        document.documentElement.setAttribute('data-products-source', 'static-fallback');
+        if (window.console && console.warn) {
+            console.warn('Product detail loaded from static fallback data/products.json.');
+        }
+    }
+
     function setText(id, value) {
         var el = document.getElementById(id);
         if (el) el.textContent = value;
@@ -65,7 +89,7 @@
             '@type': 'Product',
             name: name,
             description: desc,
-            image: window.location.origin + '/' + product.image,
+            image: absoluteImageUrl(product.image),
             brand: {
                 '@type': 'Brand',
                 name: 'Henan Longxiang Electrical Co., Ltd.'
@@ -97,9 +121,15 @@
 
         var mainImage = document.getElementById('main-product-image');
         if (mainImage) {
-            mainImage.src = assetPrefix + product.image;
+            var imagePath = normalizeImagePath(product.image);
             mainImage.alt = name;
-            mainImage.style.display = '';
+            if (imagePath) {
+                mainImage.src = imagePath;
+                mainImage.style.display = '';
+            } else {
+                mainImage.removeAttribute('src');
+                mainImage.style.display = 'none';
+            }
         }
 
         setText('product-title', name);
@@ -150,6 +180,7 @@
                         return res.json();
                     })
                     .then(function (products) {
+                        markStaticProductFallback();
                         var product = products.find(function (item) {
                             return item.id === productId || (Array.isArray(item.aliases) && item.aliases.indexOf(productId) !== -1);
                         });

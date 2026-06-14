@@ -24,6 +24,21 @@
         return product[field] || '';
     }
 
+    function normalizeImagePath(path) {
+        path = String(path || '').trim().replace(/\\/g, '/');
+        if (!path) return '';
+        if (/^(https?:)?\/\//i.test(path) || /^data:/i.test(path) || /^blob:/i.test(path)) return path;
+        path = path.replace(/^\/+/, '');
+        return assetPrefix + path;
+    }
+
+    function markStaticProductFallback() {
+        document.documentElement.setAttribute('data-products-source', 'static-fallback');
+        if (window.console && console.warn) {
+            console.warn('Comparison products loaded from static fallback data/products.json.');
+        }
+    }
+
     function getIds() {
         var value = new URLSearchParams(window.location.search).get('ids') || '';
         return value.split(',').map(function (item) { return item.trim(); }).filter(Boolean).slice(0, 3);
@@ -38,6 +53,7 @@
             .catch(function () {
                 return fetch(assetPrefix + 'data/products.json').then(function (res) {
                     if (!res.ok) throw new Error('Fallback request failed');
+                    markStaticProductFallback();
                     return res.json();
                 });
             });
@@ -75,7 +91,7 @@
         });
 
         var rows = [
-            { label: isArabic ? 'الصورة' : 'Image', html: function (p) { return '<img src="' + assetPrefix + escapeHtml(p.image || '') + '" alt="' + escapeHtml(localize(p, 'name')) + '" style="width:120px;height:86px;object-fit:cover;border-radius:8px;">'; } },
+            { label: isArabic ? 'الصورة' : 'Image', html: function (p) { var imagePath = normalizeImagePath(p.image); return imagePath ? '<img src="' + escapeHtml(imagePath) + '" alt="' + escapeHtml(localize(p, 'name')) + '" style="width:120px;height:86px;object-fit:cover;border-radius:8px;">' : '-'; } },
             { label: isArabic ? 'الفئة' : 'Category', html: function (p) { return escapeHtml(isArabic ? (p.categoryLabelAr || p.categoryLabel) : (p.categoryLabel || p.category)); } },
             { label: isArabic ? 'السعات' : 'Capacities', html: function (p) { return valueList(p.capacities); } },
             { label: isArabic ? 'الجهود' : 'Voltages', html: function (p) { return valueList(p.voltages); } },

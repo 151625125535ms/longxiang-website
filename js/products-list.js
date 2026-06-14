@@ -81,6 +81,21 @@
         return product[field] || '';
     }
 
+    function normalizeImagePath(path) {
+        path = String(path || '').trim().replace(/\\/g, '/');
+        if (!path) return '';
+        if (/^(https?:)?\/\//i.test(path) || /^data:/i.test(path) || /^blob:/i.test(path)) return path;
+        path = path.replace(/^\/+/, '');
+        return assetPrefix + path;
+    }
+
+    function markStaticProductFallback() {
+        document.documentElement.setAttribute('data-products-source', 'static-fallback');
+        if (window.console && console.warn) {
+            console.warn('Products loaded from static fallback data/products.json.');
+        }
+    }
+
     function normalizeProduct(product) {
         var category = product.category || '';
         var group = product.group || (category === 'switchgear' ? 'switchgear' : 'transformer');
@@ -126,11 +141,12 @@
         var name = localize(product, 'name');
         var desc = localize(product, 'shortDesc');
         var href = detailHref(product);
+        var imagePath = normalizeImagePath(product.image);
 
         card.innerHTML =
             '<a class="product-card-clickarea" href="' + href + '">' +
                 '<div class="product-card-image">' +
-                    '<img src="' + assetPrefix + escapeHtml(product.image) + '" alt="' + escapeHtml(name) + '" loading="lazy">' +
+                    (imagePath ? '<img src="' + escapeHtml(imagePath) + '" alt="' + escapeHtml(name) + '" loading="lazy">' : '') +
                 '</div>' +
                 '<div class="product-card-body">' +
                     '<h4>' + escapeHtml(name) + '</h4>' +
@@ -484,6 +500,7 @@
                         return res.json();
                     })
                     .then(function (products) {
+                        markStaticProductFallback();
                         productsCache = products.map(normalizeProduct);
                         initProductTree();
                         renderProducts(productsCache);

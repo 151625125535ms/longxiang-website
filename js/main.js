@@ -26,6 +26,12 @@
             })
             .catch(function () {
                 if (!fallbackUrl) throw new Error('No fallback available');
+                if (fallbackUrl.indexOf('data/products.json') !== -1) {
+                    document.documentElement.setAttribute('data-products-source', 'static-fallback');
+                    if (window.console && console.warn) {
+                        console.warn('Products loaded from static fallback data/products.json.');
+                    }
+                }
                 return fetch(fallbackUrl).then(function (res) {
                     if (!res.ok) throw new Error('Fallback request failed');
                     return res.json();
@@ -1341,9 +1347,9 @@
                 link.innerHTML =
                     '<span class="home-product-category-image">' +
                         (category.icon
-                            ? '<img src="' + assetPrefix + escapeHtml(category.icon) + '" alt="' + escapeHtml(label) + '" loading="lazy">'
+                            ? '<img src="' + escapeHtml(resolveAssetPath(category.icon)) + '" alt="' + escapeHtml(label) + '" loading="lazy">'
                             : sample && sample.image
-                                ? '<img src="' + assetPrefix + escapeHtml(sample.image) + '" alt="' + escapeHtml(label) + '" loading="lazy">'
+                                ? '<img src="' + escapeHtml(resolveAssetPath(sample.image)) + '" alt="' + escapeHtml(label) + '" loading="lazy">'
                             : '<span class="home-product-category-fallback">' + escapeHtml(label.charAt(0)) + '</span>') +
                     '</span>' +
                     '<span class="home-product-category-title">' + escapeHtml(label) + '</span>';
@@ -1358,10 +1364,11 @@
             var name = isArabic ? (product.nameAr || product.name) : product.name;
             var desc = isArabic ? (product.shortDescAr || product.shortDesc || '') : (product.shortDesc || '');
             var detail = (isArabic ? 'product-detail.html' : 'product-detail.html') + '?id=' + encodeURIComponent(product.id);
+            var imagePath = resolveAssetPath(product.image);
             card.innerHTML =
                 '<a class="product-card-clickarea" href="' + detail + '">' +
                     '<div class="product-card-image">' +
-                        '<img src="' + assetPrefix + escapeHtml(product.image) + '" alt="' + escapeHtml(name) + '" loading="lazy">' +
+                        (imagePath ? '<img src="' + escapeHtml(imagePath) + '" alt="' + escapeHtml(name) + '" loading="lazy">' : '') +
                     '</div>' +
                     '<div class="product-card-body">' +
                         '<h4>' + escapeHtml(name) + '</h4>' +

@@ -1688,6 +1688,7 @@
                 cover_image: document.getElementById('field-cover-image').value.trim() || uploadedImagePath
             };
             if (editingProductId) payload.version = editingProductVersion;
+            var submittedCoverImage = payload.cover_image || '';
 
             var wasEditing = !!editingProductId;
             var request = editingProductId
@@ -1696,6 +1697,13 @@
 
             request.then(function (response) {
                 var saved = unwrapDataResponse(response) || {};
+                if (Object.prototype.hasOwnProperty.call(saved, 'cover_image')) {
+                    var savedCoverImage = saved.cover_image == null ? '' : String(saved.cover_image).trim();
+                    if (savedCoverImage !== submittedCoverImage) {
+                        showToast('产品图片保存校验失败：后端返回路径与提交路径不一致，请刷新后重试。', 'error');
+                        return;
+                    }
+                }
                 if (!editingProductId && saved.id) editingProductId = saved.id;
                 safeSessionRemove(draftKey('product', editingProductId || 'new'));
                 if (!wasEditing) safeSessionRemove(draftKey('product', 'new'));
