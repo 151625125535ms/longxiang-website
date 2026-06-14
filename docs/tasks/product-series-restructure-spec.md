@@ -188,6 +188,17 @@ Get-ChildItem -LiteralPath 'D:\LX\产品册' -File
 
 4. 确认两本 PDF 存在。
 5. 如果 PDF 不存在，停止并写回 `C:\Users\hnlxd\Desktop\codex_check.md`。
+6. 在开始渲染前预检本地 PDF 渲染和 OCR 工具，确认至少一个渲染工具可用，并确认 OCR/识图路径可用：
+
+```powershell
+python -c "import fitz; print('PyMuPDF ok')" 2>$null
+python -c "import pypdfium2; print('pypdfium2 ok')" 2>$null
+python -c "import pdf2image; print('pdf2image ok')" 2>$null
+python -c "import pytesseract; print('pytesseract ok')" 2>$null
+python -c "import paddleocr; print('paddleocr ok')" 2>$null
+```
+
+如果渲染工具和 OCR/识图路径都不可用，停止并向用户说明缺少哪个包或组件，请用户安装后再继续。
 
 ### 2. 提取 PDF 内容
 
@@ -210,7 +221,15 @@ D:\tmp\longxiang-product-series-ocr\
 3. `pdf2image` + Poppler 渲染目标页为 PNG。
 4. 如果上述组件不可用，使用本地可用的 PDF 渲染/截图组件生成图片。
 
-渲染范围不能只渲染用户写的目录页数字。必须先建立目录页码和 PDF 物理页码的对应关系，然后渲染目标页。若无法确定偏移，先渲染每本 PDF 的前 8 页做目录/页码识别，再确定偏移。
+渲染范围不能只渲染用户写的目录页数字。必须先建立目录页码和 PDF 物理页码的对应关系，然后渲染目标页。
+
+页码偏移确认步骤：
+
+1. 先渲染每本 PDF 的物理第 1-5 页为图片。
+2. OCR/识图这 5 页，找出页面内印刷页码与 PDF 物理页码的差值。
+3. 将偏移量记录到 `docs/tasks/product-series-restructure-extraction.md`。
+4. 用 `物理页 = 目录页 + 偏移量` 推算所有目标页的物理页码，再渲染目标页。
+5. 如果前 1-5 页无法确认偏移，继续渲染前 8 页；仍无法确认时停止并针对页码偏移向用户提问。
 
 #### 2.2 OCR / 识图
 
@@ -218,7 +237,7 @@ OCR/识图可用方案按优先级：
 
 1. 本地 Tesseract OCR（如可用，优先使用中文 `chi_sim` + 英文 `eng`）。
 2. 本地 PaddleOCR 或其他已安装 OCR 组件。
-3. 将渲染出的页面图片作为视觉输入，由可识图模型读取图片中的型号、表格和技术参数。
+3. 如果当前 Codex 运行环境支持对本地图片进行视觉识别，可使用渲染出的页面图片读取型号、表格和技术参数；否则不得使用此方案。
 4. 若 OCR 对表格不稳定，保留图片并人工核对关键字段，不得凭空补参数。
 
 OCR 结果必须落地到：
