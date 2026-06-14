@@ -1276,14 +1276,9 @@ p:last-child {
 }
 
 .fade-in {
-    opacity: 1;
-    transform: translateY(0);
-    transition: opacity 0.7s ease, transform 0.7s ease;
-}
-
-.js-enabled .is-observable.fade-in {
     opacity: 0;
     transform: translateY(40px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
 }
 
 .fade-in.visible {
@@ -1292,14 +1287,9 @@ p:last-child {
 }
 
 .fade-in-left {
-    opacity: 1;
-    transform: translateX(0);
-    transition: opacity 0.7s ease, transform 0.7s ease;
-}
-
-.js-enabled .is-observable.fade-in-left {
     opacity: 0;
     transform: translateX(-40px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
 }
 
 .fade-in-left.visible {
@@ -1308,14 +1298,9 @@ p:last-child {
 }
 
 .fade-in-right {
-    opacity: 1;
-    transform: translateX(0);
-    transition: opacity 0.7s ease, transform 0.7s ease;
-}
-
-.js-enabled .is-observable.fade-in-right {
     opacity: 0;
     transform: translateX(40px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
 }
 
 .fade-in-right.visible {
@@ -1324,47 +1309,14 @@ p:last-child {
 }
 
 .fade-in-scale {
-    opacity: 1;
-    transform: scale(1);
-    transition: opacity 0.7s ease, transform 0.7s ease;
-}
-
-.js-enabled .is-observable.fade-in-scale {
     opacity: 0;
     transform: scale(0.9);
+    transition: opacity 0.7s ease, transform 0.7s ease;
 }
 
 .fade-in-scale.visible {
     opacity: 1;
     transform: scale(1);
-}
-
-@media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        scroll-behavior: auto !important;
-        transition-duration: 0.01ms !important;
-    }
-
-    .js-enabled .is-observable.fade-in,
-    .js-enabled .is-observable.fade-in-left,
-    .js-enabled .is-observable.fade-in-right,
-    .js-enabled .is-observable.fade-in-scale,
-    .fade-in,
-    .fade-in-left,
-    .fade-in-right,
-    .fade-in-scale {
-        opacity: 1 !important;
-        transform: none !important;
-    }
-
-    .hero-bg {
-        animation: none !important;
-        transform: none !important;
-    }
 }
 
 .about-intro {
@@ -4420,7 +4372,7 @@ p:last-child {
     position: fixed;
     right: 24px;
     bottom: 24px;
-    z-index: 1130;
+    z-index: 1000;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -5748,6 +5700,12 @@ p:last-child {
         font-size: 0.9rem;
     }
 
+    .products-showcase-redesign .product-card-v2.fade-in {
+        opacity: 1;
+        transform: none;
+        transition: box-shadow var(--transition-base), transform var(--transition-base);
+    }
+
     .floating-inquiry {
         right: 12px;
         bottom: max(16px, env(safe-area-inset-bottom));
@@ -6558,6 +6516,14 @@ p:last-child {
     background:
         linear-gradient(90deg, rgba(6, 21, 35, 0.92), rgba(6, 21, 35, 0.74)),
         url('../assets/education/images/international-cooperation-leadership.jpeg') center/cover;
+}
+
+#education-content .fade-in,
+#education-content .fade-in-left,
+#education-content .fade-in-right,
+#education-content .fade-in-scale {
+    opacity: 1;
+    transform: none;
 }
 
 @media (max-width: 1180px) {
@@ -9196,6 +9162,11 @@ p:last-child {
         min-width: 0;
     }
 
+    [dir="rtl"] .products-catalog-grid .product-card-v2.fade-in {
+        opacity: 1;
+        transform: none;
+    }
+
     [dir="rtl"] .products-catalog-grid .product-card-v2 .product-card-footer,
     [dir="rtl"] .products-catalog-grid .product-compare-control {
         display: none;
@@ -10508,21 +10479,21 @@ p:last-child {
 
 .cookie-consent-banner {
     position: fixed;
-    right: auto;
-    bottom: 16px;
+    right: clamp(1rem, 3vw, 2rem);
+    bottom: clamp(1rem, 3vw, 2rem);
     left: clamp(1rem, 3vw, 2rem);
-    z-index: 1100;
+    z-index: 1200;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 1rem;
-    width: min(760px, calc(100vw - 420px));
-    margin: 0;
-    padding: 0.75rem 0.85rem;
+    gap: 1.25rem;
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 1rem;
     border: 1px solid rgba(17, 24, 39, 0.12);
     border-radius: 8px;
     background: rgba(255, 255, 255, 0.98);
-    box-shadow: 0 16px 42px rgba(10, 22, 40, 0.16);
+    box-shadow: 0 18px 54px rgba(10, 22, 40, 0.18);
 }
 
 .cookie-consent-banner[hidden],
@@ -10535,20 +10506,20 @@ p:last-child {
 .cookie-consent-dialog h2 {
     margin: 0 0 0.35rem;
     color: var(--color-navy);
-    font-size: 1rem;
+    font-size: 1.05rem;
 }
 
 .cookie-consent-banner p,
 .cookie-consent-dialog p {
     margin: 0;
     color: var(--color-gray-600);
-    line-height: 1.45;
+    line-height: 1.55;
 }
 
 .cookie-consent-actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.55rem;
+    gap: 0.65rem;
     justify-content: flex-end;
 }
 
@@ -10556,8 +10527,7 @@ p:last-child {
 .consent-embed-placeholder button {
     border: 1px solid var(--color-navy);
     border-radius: 6px;
-    min-height: 44px;
-    padding: 0.58rem 0.9rem;
+    padding: 0.68rem 0.95rem;
     background: var(--color-navy);
     color: var(--color-white-pure);
     font-weight: 700;
@@ -10573,7 +10543,7 @@ p:last-child {
 .cookie-consent-modal {
     position: fixed;
     inset: 0;
-    z-index: 1140;
+    z-index: 1210;
     display: grid;
     place-items: center;
     padding: 1rem;
@@ -10744,35 +10714,15 @@ p:last-child {
 @media (max-width: 768px) {
     .cookie-consent-banner {
         align-items: stretch;
-        right: 0;
-        bottom: 0;
-        left: 0;
         flex-direction: column;
-        width: 100%;
-        max-height: 42vh;
-        max-height: 42dvh;
-        padding: 1rem 1rem calc(1rem + env(safe-area-inset-bottom));
-        transform: none;
-        border-right: 0;
-        border-bottom: 0;
-        border-left: 0;
-        border-radius: 12px 12px 0 0;
-        overflow: auto;
     }
 
     .cookie-consent-actions {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
         justify-content: stretch;
     }
 
     .cookie-consent-actions button {
-        width: 100%;
-        min-width: 0;
-    }
-
-    .cookie-consent-actions button:nth-child(3) {
-        grid-column: 1 / -1;
+        flex: 1 1 140px;
     }
 
     .export-support-grid {
