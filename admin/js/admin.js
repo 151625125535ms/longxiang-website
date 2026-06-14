@@ -603,9 +603,27 @@
                 if (field.type === 'checkbox') field.checked = !!draft[id];
                 else field.value = draft[id] == null ? '' : draft[id];
             });
-            if (formId === 'product-form') uploadedImagePath = (draft['field-image'] || uploadedImagePath || '');
+            if (formId === 'product-form') {
+                setProductCoverPath(draft['field-cover-image'] || uploadedImagePath || '');
+                if (uploadedImagePath) showImagePreview('../' + uploadedImagePath);
+            }
             if (formId === 'certification-form') uploadedCertificationPath = (draft['cert-image'] || uploadedCertificationPath || '');
             markFormDirty();
+        }
+
+        function setProductCoverPath(path) {
+            uploadedImagePath = path || '';
+            var coverField = document.getElementById('field-cover-image');
+            if (coverField) coverField.value = uploadedImagePath;
+        }
+
+        function getProductUploadPath(response) {
+            var uploaded = response && (response.data || response);
+            var path = uploaded && (uploaded.path || uploaded.public_path || uploaded.url || uploaded.location);
+            if (!path) return '';
+            path = String(path).trim().replace(/\\/g, '/');
+            path = path.replace(/^https?:\/\/[^/]+\//i, '');
+            return path.replace(/^\/+/, '');
         }
 
         function showDraftRecovery(host, key, restoreFn) {
@@ -1501,7 +1519,7 @@
             resetFormDirty();
             editingProductId = productId;
             editingProductVersion = null;
-            uploadedImagePath = '';
+            setProductCoverPath('');
             var modal = document.getElementById('product-modal');
             var title = document.getElementById('modal-title');
             var form = document.getElementById('product-form');
@@ -1552,7 +1570,7 @@
             var categoryField = document.getElementById('field-category');
             if (categoryField) categoryField.value = product.category_id || '';
             document.getElementById('field-featured').checked = !!product.featured;
-            uploadedImagePath = product.cover_image || '';
+            setProductCoverPath(product.cover_image || '');
             if (uploadedImagePath) showImagePreview('../' + uploadedImagePath);
         }
 
@@ -1567,11 +1585,18 @@
                 method: 'POST',
                 headers: { Authorization: 'Bearer ' + getToken() },
                 body: formData
-            }).then(function (res) { return res.json(); })
+            }).then(function (res) {
+                return res.json().then(function (data) {
+                    if (!res.ok) {
+                        var message = data.message || (data.error && data.error.message) || data.error || 'Upload failed';
+                        throw new Error(message);
+                    }
+                    return data;
+                });
+            })
                 .then(function (data) {
                     if (data.error) throw new Error(data.error);
-                    var uploaded = data.data || data;
-                    uploadedImagePath = uploaded.path;
+                    setProductCoverPath(getProductUploadPath(data));
                     if (!uploadedImagePath) throw new Error('上传接口未返回图片路径');
                     markFormDirty();
                     showToast('图片上传成功');
@@ -1586,7 +1611,7 @@
             preview.style.display = '';
             preview.innerHTML = '<img src="' + src + '" alt="Preview"><span class="remove-image" id="remove-image">&times;</span>';
             document.getElementById('remove-image').addEventListener('click', function () {
-                uploadedImagePath = '';
+                setProductCoverPath('');
                 preview.innerHTML = '';
                 preview.style.display = 'none';
                 uploadArea.style.display = '';
@@ -1660,7 +1685,7 @@
                 description_en: document.getElementById('field-description').value.trim(),
                 description_ar: document.getElementById('field-descriptionAr').value.trim(),
                 featured: document.getElementById('field-featured').checked,
-                cover_image: uploadedImagePath
+                cover_image: document.getElementById('field-cover-image').value.trim() || uploadedImagePath
             };
             if (editingProductId) payload.version = editingProductVersion;
 
