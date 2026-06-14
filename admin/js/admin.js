@@ -15,6 +15,47 @@
     ];
     var STATUS_LABELS = { new: '新询盘', read: '已读', replied: '已回复', closed: '已关闭' };
     var STATUS_BADGES = { new: 'badge-gold', read: 'badge-blue', replied: 'badge-green', closed: 'badge-navy' };
+    var ADMIN_PRODUCT_NAME_CN = {
+        'anti-short-amorphous': '抗短路油浸式非晶合金铁芯配电变压器',
+        'amorphous-veg-oil': '非晶合金（植物油）高过载配电变压器',
+        'aluminum': '油浸式电力变压器（铝）',
+        'single-phase-dry': '单相干式非晶合金铁心配电变压器',
+        '3phase-3limb': '三相三柱干式非晶合金变压器',
+        '3phase-5limb': '三相五柱干式非晶合金变压器',
+        'traction': '牵引矿用隔爆型变压器',
+        'wind-power': 'ZGSBH15 风力发电用组合式变压器（植物油）',
+        'pv-combined': 'ZGS13 光伏发电用组合式变压器',
+        'gcs': 'GCS 低压抽出式开关柜',
+        'LXAC-7kW': '7kW 交流充电桩（无屏版）',
+        'LXAC-7kW-display': '7kW 交流充电桩（带屏版）',
+        'LXAC-14kW': '14kW 双枪交流充电桩',
+        'LXDC-20-30-40kW': '20kW / 30kW / 40kW 小功率直流充电桩',
+        'LXDC-120-400kW': '120kW-400kW 直流充电桩',
+        'LXDC480-1280kW': '480kW-1280kW 直流充电堆',
+        'portable-storage-1kw-3kwh': '1kW / 3kWh 便携式储能系统',
+        'portable-storage-3kw-5kwh': '3kW / 5kWh 便携式储能系统',
+        'TS-MES-115K12L': '高倍率液冷储能柜',
+        'TS-LES-920K100L': '高倍率液冷储能集装箱',
+        'ZGSBH15-PV': 'ZGSBH15 光伏用非晶合金组合式变压器',
+        'ZGS13-WIND': 'ZGS13 风力发电用组合式变压器',
+        'compact-cooling-box': '节能散热紧凑型箱式变压器',
+        'box-type-substation': '箱式变电站',
+        'GGD': 'GGD 低压固定式成套开关柜',
+        'KYN28-12': 'KYN28-12 户内金属铠装移开式开关柜',
+        'KYN-12': 'KYN-12 户内干燥空气金属铠装移开式开关柜',
+        'LXWZ': 'LXWZ 高压无功补偿成套装置',
+        'silicon-scb-dry': 'SC(B)13 / SC(B)14 / SC(B)18 硅钢叠片干式变压器',
+        'silicon-smrl-wound-core': 'S13 / S20 / S22-M.RL 油浸式立体卷铁芯配电变压器',
+        'silicon-smrl-anti-short': 'S13 / S20 / S22-M.RL 抗短路立体卷铁芯变压器',
+        'silicon-sm-oil-power': 'S13 / S20 / S22-M 油浸式电力变压器',
+        'silicon-s13-vegetable-oil-high-overload': 'S13-M 植物油高过载配电变压器',
+        'amorphous-scbh-dry': 'SC(B)H15 / SC(B)H17 / SC(B)H19 干式非晶合金铁芯变压器',
+        'amorphous-dgh-furnace': 'DGH 系列干式非晶合金电炉变压器',
+        'amorphous-sbh-mrl-wound-core': 'S(B)H21-M.RL 油浸式非晶合金立体卷铁芯变压器',
+        'amorphous-sbh15-m': 'S(B)H15-M 油浸式非晶合金配电变压器',
+        'amorphous-sbh21-m': 'S(B)H21-M 油浸式非晶合金配电变压器',
+        'amorphous-sbh25-m': 'S(B)H25-M 油浸式非晶合金配电变压器'
+    };
     var ICON_EDIT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
     var ICON_DELETE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>';
     var ICON_VIEW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
@@ -46,6 +87,18 @@
             .replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#039;');
+    }
+
+    function adminProductNameCn(product) {
+        if (!product) return '';
+        var keys = [product.legacy_id, product.slug, product.id];
+        for (var i = 0; i < keys.length; i++) {
+            var key = keys[i] == null ? '' : String(keys[i]);
+            if (Object.prototype.hasOwnProperty.call(ADMIN_PRODUCT_NAME_CN, key)) {
+                return ADMIN_PRODUCT_NAME_CN[key];
+            }
+        }
+        return '';
     }
 
     function apiRequest(url, options) {
@@ -1047,6 +1100,7 @@
             tbody.innerHTML = products.map(function (product) {
                 var productId = product.id;
                 var displayId = product.legacy_id || product.slug || product.id;
+                var chineseName = adminProductNameCn(product);
                 var name = product.name_en || product.name || '';
                 var categoryName = product.category_name_en || product.category || '—';
                 var status = product.status || 'draft';
@@ -1058,10 +1112,10 @@
                     : '<div class="product-thumb" style="background:#eef1f5;border:1px solid #d8dee8;"></div>';
                 return '<tr>' +
                     '<td><input type="checkbox" class="product-row-check" data-id="' + escapeHtml(productId) + '" data-version="' + escapeHtml(product.version) + '"></td>' +
+                    '<td class="cell-muted product-cn-name">' + escapeHtml(chineseName || '-') + '</td>' +
                     '<td><div class="product-name-cell">' + thumb + '<div><div class="product-name-text">' + escapeHtml(name) + '</div><div class="product-id-text">' + escapeHtml(displayId) + '</div></div></div></td>' +
                     '<td><span class="badge badge-blue">' + escapeHtml(categoryName) + '</span></td>' +
                     '<td><span class="badge ' + statusClass + '">' + statusLabel + '</span></td>' +
-                    '<td class="cell-muted">' + escapeHtml(product.short_desc_en || product.shortDesc || '') + '</td>' +
                     '<td><div class="actions-cell"><button class="btn btn-icon btn-icon-edit" aria-label="编辑产品" data-edit-product="' + escapeHtml(productId) + '">' + ICON_EDIT + '</button><button class="btn btn-icon btn-icon-delete" aria-label="删除产品" data-delete-product="' + escapeHtml(productId) + '">' + ICON_DELETE + '</button></div></td>' +
                     '</tr>';
             }).join('');
