@@ -265,7 +265,11 @@ router.delete('/:id', authMiddleware, (req, res) => {
     }
 });
 
+// Deprecated compatibility endpoint. Admin UI must use /api/admin/products/upload.
 router.post('/upload', authMiddleware, upload.single('image'), (req, res) => {
+    res.setHeader('Deprecation', 'true');
+    res.setHeader('Link', '</api/admin/products/upload>; rel="successor-version"');
+    res.setHeader('Warning', '299 - "Deprecated endpoint; use /api/admin/products/upload"');
     if (!req.file) {
         return res.status(400).json({ error: 'No file uploaded.' });
     }
