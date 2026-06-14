@@ -201,8 +201,8 @@ curl http://localhost:3000/api/education | node -e "process.stdin.resume();let d
 **当域名确认后，向 Claude 发送以下内容（替换 `<域名>` 后使用）：**
 
 ```
-请读取项目文件 D:\Projects\longxiang-website\DOMAIN_READY_BRIEFING.md
-和 D:\Projects\longxiang-website\OPTIMIZATION_TASK.md，
+请读取项目文件 D:\Projects\longxiang-website\docs\ops\DOMAIN_READY_BRIEFING.md
+和 D:\Projects\longxiang-website\docs\ops\OPTIMIZATION_TASK.md，
 了解前后端优化任务的全部背景和当前状态。
 
 域名已确认为：https://www.<域名>

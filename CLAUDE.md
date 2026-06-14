@@ -6,7 +6,7 @@
 
 ## 工作流规则
 
-详见 [WORKFLOW.md](WORKFLOW.md)。核心规则：
+详见 [WORKFLOW.md](docs/ops/WORKFLOW.md)。核心规则：
 
 - 本机开发目录：`D:\Projects\longxiang-website`
 - 服务器路径：`/home/ubuntu/longxiang-website`（别名 `longxiang`）
@@ -35,10 +35,10 @@
 内容管理系统 7 个子模块优化（CMS Optimization）。
 
 详见：
-- [CMS_TASK.md](CMS_TASK.md) — 逐步执行单
-- [CMS_PROGRESS.md](CMS_PROGRESS.md) — 进度追踪
-- [CMS_INVARIANTS.md](CMS_INVARIANTS.md) — 绝对禁止清单（每次写代码前必读）
-- [CMS_GROUND_TRUTH.md](CMS_GROUND_TRUTH.md) — SSH 核查固化事实（不允许重新推断）
+- [CMS_TASK.md](docs/cms/CMS_TASK.md) — 逐步执行单
+- [CMS_PROGRESS.md](docs/cms/CMS_PROGRESS.md) — 进度追踪
+- [CMS_INVARIANTS.md](docs/cms/CMS_INVARIANTS.md) — 绝对禁止清单（每次写代码前必读）
+- [CMS_GROUND_TRUTH.md](docs/cms/CMS_GROUND_TRUTH.md) — SSH 核查固化事实（不允许重新推断）
 
 ## 静态检查命令（每次 commit 前必须全部通过）
 

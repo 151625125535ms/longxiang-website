@@ -4,7 +4,7 @@
 
 所有自然语言均使用中文。
 
-Before working in this repository, read and follow [WORKFLOW.md](WORKFLOW.md).
+Before working in this repository, read and follow [WORKFLOW.md](docs/ops/WORKFLOW.md).
 
 Key rules:
 
