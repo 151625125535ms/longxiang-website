@@ -19,3 +19,6 @@ yarn-error.log*
 !.env.example
 
 /uploads/*
+
+screenshots/
+test-results/

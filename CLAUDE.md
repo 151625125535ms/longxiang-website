@@ -30,15 +30,26 @@
 - USE_SQLITE / ADMIN_SQLITE_REQUIRED 环境开关
 - 产品/证书/询盘/资源/审计/模块开关/系统状态后台 API
 
+## 协作协议
+
+三方（用户 / Codex / Claude）协作规则见 `docs/protocol/`：
+
+- [BASE_WORKFLOW.md](docs/protocol/BASE_WORKFLOW.md) — 三方职责与标准流程
+- [CODE_BOUNDARIES.md](docs/protocol/CODE_BOUNDARIES.md) — 全局禁区
+- [HANDOFF_TEMPLATE.md](docs/protocol/HANDOFF_TEMPLATE.md) — 任务规格模板
+- [REVIEW_TEMPLATE.md](docs/protocol/REVIEW_TEMPLATE.md) — 实现报告模板
+
+临时任务文档见 `docs/tasks/`，命名约定：`{task-id}-spec.md`。
+
 ## 当前任务
 
-内容管理系统 7 个子模块优化（CMS Optimization）。
+Admin UI 视觉美化 + 内容管理重设计（Batch 7）。
 
 详见：
-- [CMS_TASK.md](docs/cms/CMS_TASK.md) — 逐步执行单
-- [CMS_PROGRESS.md](docs/cms/CMS_PROGRESS.md) — 进度追踪
+
+- [BATCH7_DESIGN_SPEC.md](docs/admin-ui/BATCH7_DESIGN_SPEC.md) — 核心设计决策与代码片段
+- [ADMIN_UI_WORKFLOW.md](docs/admin-ui/ADMIN_UI_WORKFLOW.md) — Admin UI 专项工作流
 - [CMS_INVARIANTS.md](docs/cms/CMS_INVARIANTS.md) — 绝对禁止清单（每次写代码前必读）
-- [CMS_GROUND_TRUTH.md](docs/cms/CMS_GROUND_TRUTH.md) — SSH 核查固化事实（不允许重新推断）
 
 ## 静态检查命令（每次 commit 前必须全部通过）
 
