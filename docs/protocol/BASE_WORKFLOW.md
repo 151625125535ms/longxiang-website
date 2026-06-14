@@ -6,7 +6,7 @@ This document defines the reusable collaboration workflow for the user, Codex, a
 
 - User: publishes tasks, passes Markdown files between Codex and Claude, and decides whether to continue, pause, or change direction.
 - Codex: reads project context, writes executable plans/specifications, revises them from Claude's review feedback, and executes only after the plan is approved or the user explicitly asks Codex to proceed.
-- Claude: reviews Codex plans/specifications, identifies risks, contradictions, missing details, and implementation concerns, then writes structured feedback for Codex. Claude implements only when the user explicitly chooses that branch.
+- Claude: reviews Codex plans/specifications, identifies risks, contradictions, missing details, and implementation concerns, then writes structured feedback for Codex. Claude does not implement, edit files, run data migrations, or execute tasks.
 
 ## Standard Loop
 
@@ -48,14 +48,14 @@ The default branch is:
 User task -> Codex plan -> Claude review -> Codex revision or execution
 ```
 
-Codex may execute code/data changes when:
+Codex executes code/data changes when:
 
 - Claude has reviewed and approved the plan; or
 - Claude's feedback has been incorporated and the user asks Codex to proceed; or
 - the user explicitly asks Codex to skip Claude review for a simple task.
 
-Claude may implement only when the user explicitly chooses a Claude
-implementation branch for that task.
+Claude remains review-only in all branches. Do not route implementation work to
+Claude.
 
 ## Moving To The Next Round
 

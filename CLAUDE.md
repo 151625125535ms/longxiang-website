@@ -34,6 +34,7 @@
 
 三方（用户 / Codex / Claude）协作规则见 `docs/protocol/`：
 
+- 固定分工：Codex 设计并执行，Claude 只审查方案，不执行任务、不修改文件。
 - [BASE_WORKFLOW.md](docs/protocol/BASE_WORKFLOW.md) — 三方职责与标准流程
 - [CODE_BOUNDARIES.md](docs/protocol/CODE_BOUNDARIES.md) — 全局禁区
 - [HANDOFF_TEMPLATE.md](docs/protocol/HANDOFF_TEMPLATE.md) — 方案审核请求模板
