@@ -56,9 +56,34 @@ function mapSqliteProduct(row, specsByProduct, coverByProduct) {
     };
 }
 
+function findSqliteProductByAlias(db, id) {
+    const rows = db.prepare(`
+        SELECT id, aliases_json
+        FROM products
+        WHERE status = 'published' AND aliases_json IS NOT NULL AND aliases_json != ''
+    `).all();
+    for (const row of rows) {
+        if (parseJsonArray(row.aliases_json).indexOf(id) !== -1) return row.id;
+    }
+    return null;
+}
+
 function readSqliteProducts(id) {
     const db = getDb();
-    const params = id ? [id] : [];
+    let params = [];
+    let idWhere = '';
+    if (id) {
+        const direct = db.prepare(`
+            SELECT id
+            FROM products
+            WHERE status = 'published' AND legacy_id = ?
+            LIMIT 1
+        `).get(id);
+        const internalId = direct ? direct.id : findSqliteProductByAlias(db, id);
+        if (!internalId) return [];
+        params = [internalId];
+        idWhere = 'AND p.id = ?';
+    }
     const products = db.prepare(`
         SELECT
             p.*,
@@ -67,7 +92,7 @@ function readSqliteProducts(id) {
             c.name_ar AS category_label_ar
         FROM products p
         LEFT JOIN categories c ON c.id = p.category_id
-        WHERE p.status = 'published' ${id ? 'AND p.legacy_id = ?' : ''}
+        WHERE p.status = 'published' ${idWhere}
         ORDER BY p.sort_order, p.id
     `).all(params);
 

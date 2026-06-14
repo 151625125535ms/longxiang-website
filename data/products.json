@@ -1,380 +1,5 @@
 [
   {
-    "id": "sbh15",
-    "name": "S(B)H15 / S(B)H21 / S(B)H25 Amorphous Alloy Core Distribution Transformer",
-    "image": "成品区/油式非晶S(B)H15.png",
-    "category": "oil-immersed",
-    "categoryLabel": "Oil-Immersed",
-    "group": "transformer",
-    "subCategory": "oil-immersed",
-    "shortDesc": "One amorphous alloy oil-immersed distribution transformer family covering S(B)H15, S(B)H21 and S(B)H25 energy-efficiency variants.",
-    "description": "This amorphous alloy core oil-immersed distribution transformer family uses the same product platform across S(B)H15, S(B)H21 and S(B)H25 variants. The different model numbers represent energy-efficiency and loss-performance levels, while the application, installation mode and product structure remain aligned for distribution networks.",
-    "capacities": [
-      "30",
-      "50",
-      "63",
-      "80",
-      "100",
-      "125",
-      "160",
-      "200",
-      "250",
-      "315",
-      "400",
-      "500",
-      "630",
-      "800",
-      "1000",
-      "1250",
-      "1600",
-      "2000",
-      "2500"
-    ],
-    "voltages": [
-      "10/0.4kV",
-      "6/0.4kV",
-      "35/0.4kV"
-    ],
-    "specs": [
-      [
-        "Product Model",
-        "S(B)H15 / S(B)H21 / S(B)H25 Series"
-      ],
-      [
-        "Core Type",
-        "Amorphous Alloy"
-      ],
-      [
-        "Phase",
-        "Three Phase"
-      ],
-      [
-        "Frequency",
-        "50 Hz"
-      ],
-      [
-        "Cooling Method",
-        "ONAN"
-      ],
-      [
-        "Insulation Level",
-        "AC 35kV / LI 75kV"
-      ],
-      [
-        "Temperature Rise",
-        "65K"
-      ],
-      [
-        "No-load Loss",
-        "Significantly reduced vs conventional"
-      ],
-      [
-        "Standard",
-        "GB 20052 / IEC 60076"
-      ],
-      [
-        "Application",
-        "Power distribution networks"
-      ],
-      [
-        "Efficiency Variants",
-        "S(B)H15, S(B)H21, S(B)H25"
-      ],
-      [
-        "Transformer Type",
-        "Oil-immersed amorphous alloy core distribution transformer"
-      ]
-    ],
-    "featured": true,
-    "categoryLabelAr": "محولات مغمورة بالزيت",
-    "nameAr": "محول توزيع مغمور بالزيت بقلب من سبيكة غير متبلورة S(B)H15 / S(B)H21 / S(B)H25",
-    "shortDescAr": "سلسلة محولات مغمورة بالزيت ذات قلب من السبيكة غير المتبلورة، تغطي مستويات الكفاءة S(B)H15 و S(B)H21 و S(B)H25.",
-    "descriptionAr": "تعتمد هذه السلسلة على قلب من السبيكة غير المتبلورة لتقليل الفاقد في التشغيل وتحسين كفاءة شبكات التوزيع. تتوفر النماذج S(B)H15 و S(B)H21 و S(B)H25 لتلبية متطلبات مختلفة للكفاءة والطاقة، مع بنية مغمورة بالزيت مناسبة لمحطات التوزيع والمشروعات الصناعية.",
-    "aliases": [
-      "sbh21",
-      "sbh25"
-    ]
-  },
-  {
-    "id": "s13",
-    "name": "S13-M.RL / S22-M.RL Oil-Immersed 3D Wound Core Distribution Transformer",
-    "image": "成品区/硅钢立体卷S13图片.png",
-    "category": "oil-immersed",
-    "categoryLabel": "Oil-Immersed",
-    "group": "transformer",
-    "subCategory": "oil-immersed",
-    "shortDesc": "Oil-immersed 3D wound core distribution transformer family with model variants for different energy-efficiency levels.",
-    "description": "The S13-M.RL and S22-M.RL records are consolidated as one oil-immersed 3D wound core distribution transformer family. Both use a triangular wound core structure for low no-load loss, compact magnetic circuit and reliable distribution-network operation; the model number represents the efficiency level and detailed loss table selection.",
-    "capacities": [
-      "30",
-      "50",
-      "63",
-      "80",
-      "100",
-      "125",
-      "160",
-      "200",
-      "250",
-      "315",
-      "400",
-      "500",
-      "630",
-      "800",
-      "1000",
-      "1250",
-      "1600",
-      "2000",
-      "2500"
-    ],
-    "voltages": [
-      "10/0.4kV",
-      "6/0.4kV",
-      "11/0.4kV",
-      "10.5/0.4kV",
-      "6.3/0.4kV"
-    ],
-    "specs": [
-      [
-        "Product Model",
-        "S13-M.RL / S22-M.RL"
-      ],
-      [
-        "Core Type",
-        "3D Wound Core (Silicon Steel)"
-      ],
-      [
-        "Phase",
-        "Three Phase"
-      ],
-      [
-        "Frequency",
-        "50 Hz"
-      ],
-      [
-        "Cooling Method",
-        "ONAN"
-      ],
-      [
-        "Insulation Level",
-        "AC 35kV / LI 75kV"
-      ],
-      [
-        "Temperature Rise",
-        "65K"
-      ],
-      [
-        "Core Structure",
-        "Triangular wound core"
-      ],
-      [
-        "Standard",
-        "GB 20052 / IEC 60076"
-      ],
-      [
-        "Application",
-        "Distribution networks"
-      ],
-      [
-        "Efficiency Variants",
-        "S13-M.RL, S22-M.RL"
-      ],
-      [
-        "Transformer Type",
-        "Oil-immersed 3D wound core distribution transformer"
-      ],
-      [
-        "Rated Capacity Range",
-        "30-2500kVA"
-      ]
-    ],
-    "featured": false,
-    "categoryLabelAr": "محولات مغمورة بالزيت",
-    "nameAr": "محول توزيع مغمور بالزيت بقلب ملفوف ثلاثي الأبعاد S13-M.RL / S22-M.RL",
-    "shortDescAr": "عائلة محولات توزيع مغمورة بالزيت ذات قلب ملفوف ثلاثي الأبعاد، مع نماذج تلائم مستويات كفاءة مختلفة.",
-    "descriptionAr": "تجمع سلسلة S13-M.RL و S22-M.RL بين بنية القلب الملفوف ثلاثي الأبعاد والتصميم المغمور بالزيت لتقليل الضوضاء والفواقد وتحسين موثوقية التشغيل. تناسب شبكات التوزيع والمرافق الصناعية التي تحتاج إلى محول مستقر وسهل الاختيار ضمن نطاقات قدرة متعددة.",
-    "aliases": [
-      "S22-M-RL"
-    ]
-  },
-  {
-    "id": "s20",
-    "name": "S20-M / S22-M Oil-Immersed Power Transformer",
-    "image": "产品图片(1)/S20-M.RL-30～160010油浸式电力变压器.jpg",
-    "category": "oil-immersed",
-    "categoryLabel": "Oil-Immersed",
-    "group": "transformer",
-    "subCategory": "oil-immersed",
-    "shortDesc": "Oil-immersed power transformer family presented by model and energy-efficiency variants instead of duplicate product cards.",
-    "description": "The S20-M and S22-M records are consolidated into one oil-immersed power transformer family for power distribution applications. The variants share the same product category and selection workflow, with the model number indicating the corresponding energy-efficiency and loss-performance level.",
-    "capacities": [
-      "30",
-      "50",
-      "80",
-      "100",
-      "160",
-      "200",
-      "315",
-      "400",
-      "500",
-      "630",
-      "800",
-      "1000",
-      "1250",
-      "1600",
-      "2000",
-      "2500",
-      "3150",
-      "4000",
-      "5000",
-      "6300",
-      "63",
-      "125",
-      "250"
-    ],
-    "voltages": [
-      "10/0.4kV",
-      "35/10kV",
-      "10/6.3kV",
-      "6/0.4kV",
-      "35/0.4kV"
-    ],
-    "specs": [
-      [
-        "Product Model",
-        "S20-M / S22-M"
-      ],
-      [
-        "Core Type",
-        "Silicon Steel Wound Core"
-      ],
-      [
-        "Phase",
-        "Three Phase"
-      ],
-      [
-        "Frequency",
-        "50 Hz"
-      ],
-      [
-        "Cooling Method",
-        "ONAN / ONAF"
-      ],
-      [
-        "Insulation Level",
-        "AC 35kV / LI 75kV ~ AC 85kV / LI 200kV"
-      ],
-      [
-        "Temperature Rise",
-        "65K"
-      ],
-      [
-        "Energy Standard",
-        "GB 20052 Level 1"
-      ],
-      [
-        "Standard",
-        "GB/T 6451 / IEC 60076"
-      ],
-      [
-        "Application",
-        "Power transmission & distribution"
-      ],
-      [
-        "Efficiency Variants",
-        "S20-M, S22-M"
-      ],
-      [
-        "Transformer Type",
-        "Oil-immersed power transformer"
-      ]
-    ],
-    "featured": false,
-    "categoryLabelAr": "محولات مغمورة بالزيت",
-    "nameAr": "محول قدرة مغمور بالزيت S20-M / S22-M",
-    "shortDescAr": "محول قدرة مغمور بالزيت مصمم للتوزيع الكهربائي المستقر وكفاءة الطاقة في الشبكات والمنشآت الصناعية.",
-    "descriptionAr": "تستخدم سلسلة S20-M و S22-M منصة محولات قدرة مغمورة بالزيت للتطبيقات التي تتطلب اعتمادية عالية وفواقد منخفضة. يوفر التصميم أداءً مستقراً في ظروف تشغيل متعددة، مع خيارات قدرة وجهد مناسبة لمشروعات التوزيع والطاقة.",
-    "aliases": [
-      "S22-M"
-    ]
-  },
-  {
-    "id": "high-overload",
-    "name": "High Overload Distribution Transformer (Vegetable Oil)",
-    "image": "产品图片(1)/油浸式（植物油）高过载配电变压器.jpg",
-    "category": "oil-immersed",
-    "categoryLabel": "Oil-Immersed",
-    "group": "transformer",
-    "subCategory": "oil-immersed",
-    "shortDesc": "Eco-friendly vegetable oil insulated transformer with high overload capacity for demanding applications.",
-    "description": "Eco-friendly vegetable oil insulated transformer with high overload capacity for demanding applications. The natural ester fluid provides superior fire safety and environmental protection.",
-    "capacities": [
-      "30",
-      "50",
-      "63",
-      "80",
-      "100",
-      "125",
-      "160",
-      "200",
-      "250",
-      "315",
-      "400",
-      "500",
-      "630"
-    ],
-    "voltages": [
-      "10/0.4kV",
-      "6/0.4kV"
-    ],
-    "specs": [
-      [
-        "Product Model",
-        "S13-M.RL (Vegetable Oil)"
-      ],
-      [
-        "Core Type",
-        "Silicon Steel / Amorphous Alloy"
-      ],
-      [
-        "Phase",
-        "Three Phase"
-      ],
-      [
-        "Frequency",
-        "50 Hz"
-      ],
-      [
-        "Cooling Method",
-        "ONAN"
-      ],
-      [
-        "Insulating Fluid",
-        "Natural Ester (Vegetable Oil)"
-      ],
-      [
-        "Fire Point",
-        ">300°C"
-      ],
-      [
-        "Overload Capacity",
-        "Up to 150% rated load"
-      ],
-      [
-        "Standard",
-        "GB/T 6451 / IEC 60076"
-      ],
-      [
-        "Application",
-        "High overload distribution"
-      ]
-    ],
-    "featured": false,
-    "categoryLabelAr": "محولات مغمورة بالزيت",
-    "nameAr": "محول توزيع عالي التحميل بزيت نباتي",
-    "shortDescAr": "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق.",
-    "descriptionAr": "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق."
-  },
-  {
     "id": "anti-short-amorphous",
     "name": "Anti-Short-Circuit Amorphous Alloy Distribution Transformer",
     "image": "产品图片(1)/抗短路油浸式非晶合金铁芯配电变压器.jpg",
@@ -521,80 +146,6 @@
     "descriptionAr": "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق."
   },
   {
-    "id": "wound-core-oil",
-    "name": "3D Wound Core Oil-Immersed Distribution Transformer",
-    "image": "产品图片(1)/立体卷铁芯油浸式配电变压器.jpg",
-    "category": "oil-immersed",
-    "categoryLabel": "Oil-Immersed",
-    "group": "transformer",
-    "subCategory": "oil-immersed",
-    "shortDesc": "Triangular wound core design for optimal magnetic circuit performance and energy efficiency.",
-    "description": "Triangular wound core design for optimal magnetic circuit performance and energy efficiency. The unique core geometry reduces material usage while improving performance.",
-    "capacities": [
-      "30",
-      "50",
-      "63",
-      "80",
-      "100",
-      "125",
-      "160",
-      "200",
-      "250",
-      "315",
-      "400",
-      "500",
-      "630",
-      "800"
-    ],
-    "voltages": [
-      "10/0.4kV",
-      "6/0.4kV"
-    ],
-    "specs": [
-      [
-        "Product Model",
-        "S13-M.RL Series"
-      ],
-      [
-        "Core Type",
-        "3D Wound Core (Silicon Steel)"
-      ],
-      [
-        "Phase",
-        "Three Phase"
-      ],
-      [
-        "Frequency",
-        "50 Hz"
-      ],
-      [
-        "Cooling Method",
-        "ONAN"
-      ],
-      [
-        "Core Structure",
-        "Triangular wound core"
-      ],
-      [
-        "Insulation Level",
-        "AC 35kV / LI 75kV"
-      ],
-      [
-        "Standard",
-        "GB 20052 / IEC 60076"
-      ],
-      [
-        "Application",
-        "Energy-efficient distribution"
-      ]
-    ],
-    "featured": false,
-    "categoryLabelAr": "محولات مغمورة بالزيت",
-    "nameAr": "محول توزيع مغمور بالزيت بقلب ملفوف ثلاثي الأبعاد",
-    "shortDescAr": "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق.",
-    "descriptionAr": "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق."
-  },
-  {
     "id": "aluminum",
     "name": "Oil-Immersed Power Transformer (Aluminum)",
     "image": "产品图片(1)/油浸式电力变压器（铝）.jpg",
@@ -667,160 +218,6 @@
     "featured": false,
     "categoryLabelAr": "محولات مغمورة بالزيت",
     "nameAr": "محول قدرة مغمور بالزيت من الألومنيوم",
-    "shortDescAr": "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق.",
-    "descriptionAr": "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق."
-  },
-  {
-    "id": "anti-short-3d",
-    "name": "Anti-Short-Circuit 3D Wound Core Distribution Transformer",
-    "image": "产品图片(1)/抗短路油浸式立体卷铁芯配电变压器.jpg",
-    "category": "oil-immersed",
-    "categoryLabel": "Oil-Immersed",
-    "group": "transformer",
-    "subCategory": "oil-immersed",
-    "shortDesc": "Robust short-circuit resistant design utilizing advanced 3D wound core technology.",
-    "description": "Robust short-circuit resistant design utilizing advanced 3D wound core technology for maximum reliability in demanding grid conditions.",
-    "capacities": [
-      "30",
-      "50",
-      "80",
-      "100",
-      "160",
-      "200",
-      "315",
-      "400",
-      "500",
-      "630",
-      "800",
-      "1000"
-    ],
-    "voltages": [
-      "10/0.4kV",
-      "6/0.4kV"
-    ],
-    "specs": [
-      [
-        "Product Model",
-        "S13-M.RL Series (Anti-Short-Circuit)"
-      ],
-      [
-        "Core Type",
-        "3D Wound Core"
-      ],
-      [
-        "Phase",
-        "Three Phase"
-      ],
-      [
-        "Frequency",
-        "50 Hz"
-      ],
-      [
-        "Cooling Method",
-        "ONAN"
-      ],
-      [
-        "Short-Circuit Withstand",
-        "Enhanced design"
-      ],
-      [
-        "Core Structure",
-        "Triangular wound core"
-      ],
-      [
-        "Standard",
-        "GB 20052 / IEC 60076"
-      ],
-      [
-        "Application",
-        "High reliability distribution"
-      ]
-    ],
-    "featured": false,
-    "categoryLabelAr": "محولات مغمورة بالزيت",
-    "nameAr": "محول توزيع بقلب ملفوف ثلاثي الأبعاد مقاوم للقصر",
-    "shortDescAr": "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق.",
-    "descriptionAr": "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق."
-  },
-  {
-    "id": "scb14",
-    "name": "SCB14 Dry-Type Cast Resin Transformer",
-    "image": "成品区/SCB14图片.png",
-    "category": "dry-type",
-    "categoryLabel": "Dry-Type",
-    "group": "transformer",
-    "subCategory": "dry-type",
-    "shortDesc": "Epoxy resin insulated dry-type transformer with safe, reliable performance and simple maintenance.",
-    "description": "Epoxy resin insulated dry-type transformer with safe, reliable performance and simple maintenance. Ideal for indoor installations where fire safety is paramount.",
-    "capacities": [
-      "30",
-      "50",
-      "80",
-      "100",
-      "125",
-      "160",
-      "200",
-      "250",
-      "315",
-      "400",
-      "500",
-      "630",
-      "800",
-      "1000",
-      "1250",
-      "1600",
-      "2000",
-      "2500"
-    ],
-    "voltages": [
-      "10/0.4kV",
-      "6/0.4kV"
-    ],
-    "specs": [
-      [
-        "Product Model",
-        "SCB14 Series"
-      ],
-      [
-        "Core Type",
-        "Silicon Steel"
-      ],
-      [
-        "Phase",
-        "Three Phase"
-      ],
-      [
-        "Frequency",
-        "50 Hz"
-      ],
-      [
-        "Insulation Class",
-        "F (155°C) / H (180°C)"
-      ],
-      [
-        "Enclosure",
-        "IP00 / IP20 / IP23 optional"
-      ],
-      [
-        "Cooling Method",
-        "AN / AF"
-      ],
-      [
-        "Insulation Level",
-        "AC 35kV / LI 75kV"
-      ],
-      [
-        "Standard",
-        "GB/T 10228 / IEC 60076-11"
-      ],
-      [
-        "Application",
-        "Indoor substations, commercial buildings"
-      ]
-    ],
-    "featured": true,
-    "categoryLabelAr": "محولات جافة",
-    "nameAr": "محول جاف مصبوب بالراتنج SCB14",
     "shortDescAr": "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق.",
     "descriptionAr": "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق."
   },
@@ -1047,81 +444,6 @@
     "featured": true,
     "categoryLabelAr": "محولات جافة",
     "nameAr": "محول جاف ثلاثي الطور بخمسة أعمدة من السبيكة غير المتبلورة",
-    "shortDescAr": "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق.",
-    "descriptionAr": "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق."
-  },
-  {
-    "id": "dgh",
-    "name": "DGH Series Dry-Type Amorphous Alloy Furnace Transformer",
-    "image": "成品区/电炉变图片.png",
-    "category": "special",
-    "categoryLabel": "Special",
-    "group": "transformer",
-    "subCategory": "special",
-    "shortDesc": "Purpose-built furnace transformer with higher efficiency, lower noise and better safety features compared to conventional designs.",
-    "description": "Purpose-built furnace transformer with higher efficiency, lower noise and better safety features compared to conventional designs for industrial furnace applications.",
-    "capacities": [
-      "100",
-      "200",
-      "315",
-      "500",
-      "630",
-      "800",
-      "1000",
-      "1250",
-      "1600",
-      "2000",
-      "2500",
-      "3150",
-      "4000",
-      "5000"
-    ],
-    "voltages": [
-      "10kV",
-      "35kV",
-      "6kV"
-    ],
-    "specs": [
-      [
-        "Product Model",
-        "DGH Series"
-      ],
-      [
-        "Core Type",
-        "Amorphous Alloy"
-      ],
-      [
-        "Phase",
-        "Three Phase"
-      ],
-      [
-        "Frequency",
-        "50 Hz"
-      ],
-      [
-        "Insulation Class",
-        "F (155°C) / H (180°C)"
-      ],
-      [
-        "Cooling Method",
-        "AN / AF"
-      ],
-      [
-        "Application",
-        "Electric arc furnace, induction furnace"
-      ],
-      [
-        "Standard",
-        "GB/T 10228 / IEC 60076-11"
-      ],
-      [
-        "Features",
-        "High efficiency, low noise"
-      ]
-    ],
-    "featured": false,
-    "categoryLabelAr": "محولات خاصة",
-    "nameAr": "محول فرن جاف بسبيكة غير متبلورة سلسلة DGH",
     "shortDescAr": "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق.",
     "descriptionAr": "حل موثوق لمشاريع توزيع الطاقة مع كفاءة عالية وتصميم مناسب للتطبيقات الصناعية والمرافق."
   },
@@ -2292,308 +1614,6 @@
     "featured": false
   },
   {
-    "id": "SCBH15",
-    "name": "SC(B)H15 / SC(B)H17 / SC(B)H19 Dry-Type Amorphous Alloy Core Distribution Transformer",
-    "nameAr": "محول توزيع جاف بقلب من سبيكة غير متبلورة SC(B)H15 / SC(B)H17 / SC(B)H19",
-    "image": "uploads/product-scbh15-dry-amorphous.png",
-    "category": "dry-type",
-    "group": "transformer",
-    "subCategory": "dry-type",
-    "categoryLabel": "Dry Type Transformer",
-    "categoryLabelAr": "محول جاف",
-    "shortDesc": "One dry-type amorphous alloy transformer family covering Level 3, Level 2 and Level 1 energy-efficiency variants.",
-    "shortDescAr": "عائلة محولات جافة من السبيكة غير المتبلورة تغطي مستويات كفاءة الطاقة 3 و2 و1.",
-    "description": "The SC(B)H15, SC(B)H17 and SC(B)H19 products are consolidated as one dry-type amorphous alloy core distribution transformer family. The model suffix identifies the energy-efficiency level; capacity range, voltage platform, installation environment and core product structure are presented together for selection.",
-    "descriptionAr": "تقدم نماذج SC(B)H15 و SC(B)H17 و SC(B)H19 كعائلة واحدة من محولات التوزيع الجافة ذات القلب من السبيكة غير المتبلورة. يوضح لاحق النموذج مستوى كفاءة الطاقة، بينما تجمع صفحة المنتج معلومات القدرة والجهد وبيئة التركيب وبنية المنتج لتسهيل الاختيار.",
-    "capacities": [
-      "30",
-      "50",
-      "80",
-      "100",
-      "125",
-      "160",
-      "200",
-      "250",
-      "315",
-      "400",
-      "500",
-      "630",
-      "800",
-      "1000",
-      "1250",
-      "1600",
-      "2000",
-      "2500"
-    ],
-    "voltages": [
-      "11/0.4kV",
-      "10.5/0.4kV",
-      "10/0.4kV",
-      "6.3/0.4kV",
-      "6/0.4kV"
-    ],
-    "specs": [
-      [
-        "Product Model",
-        "SC(B)H15 / SC(B)H17 / SC(B)H19"
-      ],
-      [
-        "Efficiency Level",
-        "Level 3"
-      ],
-      [
-        "Transformer Type",
-        "Dry-type amorphous alloy core distribution transformer"
-      ],
-      [
-        "Rated Capacity Range",
-        "30-2500kVA"
-      ],
-      [
-        "High Voltage",
-        "11kV, 10.5kV, 10kV, 6.3kV, 6kV"
-      ],
-      [
-        "Low Voltage",
-        "0.4kV"
-      ],
-      [
-        "High-Voltage Tapping Range",
-        "±5% or ±2 x 2.5%"
-      ],
-      [
-        "Connection Symbol",
-        "Dyn11"
-      ],
-      [
-        "Short-Circuit Impedance",
-        "4.0%, 6%, 8% depending on capacity"
-      ],
-      [
-        "Installation",
-        "Indoor or outdoor"
-      ],
-      [
-        "Altitude",
-        "≤1000m"
-      ],
-      [
-        "Ambient Temperature",
-        "Maximum +40°C; maximum daily average +30°C; maximum annual average +20°C; minimum -25°C"
-      ],
-      [
-        "Standards",
-        "GB 1094.1, GB 1094.3, GB 1094.5, GB 1094.11, GB/T 22072, GB 20052, JB/T 3837"
-      ],
-      [
-        "Efficiency Variants",
-        "SC(B)H15 Level 3; SC(B)H17 Level 2; SC(B)H19 Level 1"
-      ]
-    ],
-    "featured": false,
-    "aliases": [
-      "SCBH17",
-      "SCBH19"
-    ]
-  },
-  {
-    "id": "SBH21-M-RL",
-    "name": "S(B)H21-M.RL Oil-Immersed Amorphous Alloy 3D Wound Core Distribution Transformer",
-    "nameAr": "محول توزيع مغمور بالزيت بقلب ملفوف ثلاثي الأبعاد من السبيكة غير المتبلورة S(B)H21-M.RL",
-    "image": "uploads/product-sbh21-m-rl-amorphous-wound-core.png",
-    "category": "oil-immersed",
-    "group": "transformer",
-    "subCategory": "oil-immersed",
-    "categoryLabel": "Oil Immersed Transformer",
-    "categoryLabelAr": "محول مغمور بالزيت",
-    "shortDesc": "An oil-immersed amorphous alloy 3D wound core distribution transformer with energy-efficiency level 2 performance and strong short-circuit resistance.",
-    "shortDescAr": "محول توزيع مغمور بالزيت بقلب ملفوف ثلاثي الأبعاد من السبيكة غير المتبلورة بمستوى كفاءة 2 ومقاومة قوية للقصر.",
-    "description": "The S(B)H21-M.RL oil-immersed amorphous alloy 3D wound core transformer combines amorphous alloy material and 3D wound core structure. It provides low no-load loss, strong short-circuit resistance, low noise, compact structure and improved operating efficiency for distribution networks.",
-    "descriptionAr": "يجمع محول S(B)H21-M.RL بين مادة السبيكة غير المتبلورة وبنية القلب الملفوف ثلاثي الأبعاد. يوفر خسائر لا حمل منخفضة ومقاومة قوية للقصر وضجيجا منخفضا وهيكلا مدمجا وكفاءة تشغيل أفضل لشبكات التوزيع.",
-    "capacities": [
-      "30",
-      "50",
-      "80",
-      "100",
-      "125",
-      "160",
-      "200",
-      "250",
-      "315",
-      "400",
-      "500",
-      "630",
-      "800",
-      "1000",
-      "1250",
-      "1600",
-      "2000",
-      "2500"
-    ],
-    "voltages": [
-      "11/0.4kV",
-      "10.5/0.4kV",
-      "10/0.4kV",
-      "6.3/0.4kV",
-      "6/0.4kV"
-    ],
-    "specs": [
-      [
-        "Product Model",
-        "S(B)H21-M.RL"
-      ],
-      [
-        "Efficiency Level",
-        "Level 2"
-      ],
-      [
-        "Transformer Type",
-        "Oil-immersed amorphous alloy 3D wound core distribution transformer"
-      ],
-      [
-        "Core Type",
-        "Amorphous alloy 3D wound core"
-      ],
-      [
-        "Rated Capacity Range",
-        "30-2500kVA"
-      ],
-      [
-        "High Voltage",
-        "11kV, 10.5kV, 10kV, 6.3kV, 6kV"
-      ],
-      [
-        "Low Voltage",
-        "0.4kV"
-      ],
-      [
-        "Connection Symbol",
-        "Dyn11"
-      ],
-      [
-        "Installation",
-        "Indoor or outdoor"
-      ],
-      [
-        "Altitude",
-        "≤1000m"
-      ],
-      [
-        "Ambient Temperature",
-        "Maximum +40°C; maximum daily average +30°C; maximum annual average +20°C; minimum -25°C"
-      ],
-      [
-        "Standards",
-        "GB 1094.1, GB 1094.2, GB 1094.3, GB 1094.5, GB/T 25446, T/CEEIA 287, GB 20052, JB/T 3837"
-      ]
-    ],
-    "featured": false
-  },
-  {
-    "id": "SCB13",
-    "name": "SC(B)13 / SC(B)18 Silicon Steel Laminated Dry-Type Power Transformer",
-    "nameAr": "محول قدرة جاف بشرائح فولاذ السيليكون SC(B)13 / SC(B)18",
-    "image": "uploads/product-scb13-silicon-dry.png",
-    "category": "dry-type",
-    "group": "transformer",
-    "subCategory": "dry-type",
-    "categoryLabel": "Dry Type Transformer",
-    "categoryLabelAr": "محول جاف",
-    "shortDesc": "One silicon-steel dry-type transformer family covering standard and high-efficiency model variants.",
-    "shortDescAr": "عائلة محولات جافة بفولاذ السيليكون تغطي النماذج القياسية وعالية الكفاءة.",
-    "description": "The SC(B)13 and SC(B)18 products use the same silicon steel laminated dry-type transformer platform. They are now presented as one product family with model variants for different energy-efficiency requirements, keeping voltage, capacity and installation information together.",
-    "descriptionAr": "تستخدم نماذج SC(B)13 و SC(B)18 منصة واحدة لمحولات القدرة الجافة بشرائح فولاذ السيليكون. تعرض كعائلة منتج واحدة مع خيارات كفاءة مختلفة، مع الحفاظ على معلومات الجهد والقدرة والتركيب في مكان واحد لاختيار أوضح.",
-    "capacities": [
-      "30",
-      "50",
-      "80",
-      "100",
-      "125",
-      "160",
-      "200",
-      "250",
-      "315",
-      "400",
-      "500",
-      "630",
-      "800",
-      "1000",
-      "1250",
-      "1600",
-      "2000",
-      "2500"
-    ],
-    "voltages": [
-      "11/0.4kV",
-      "10.5/0.4kV",
-      "10/0.4kV",
-      "6.3/0.4kV",
-      "6/0.4kV"
-    ],
-    "specs": [
-      [
-        "Product Model",
-        "SC(B)13 / SC(B)18"
-      ],
-      [
-        "Efficiency Level",
-        "Level 3"
-      ],
-      [
-        "Transformer Type",
-        "Silicon steel laminated dry-type power transformer"
-      ],
-      [
-        "Rated Capacity Range",
-        "30-2500kVA"
-      ],
-      [
-        "High Voltage",
-        "11kV, 10.5kV, 10kV, 6.3kV, 6kV"
-      ],
-      [
-        "Low Voltage",
-        "0.4kV"
-      ],
-      [
-        "High-Voltage Tapping Range",
-        "±5% or ±2 x 2.5%"
-      ],
-      [
-        "Connection Symbol",
-        "Dyn11"
-      ],
-      [
-        "Short-Circuit Impedance",
-        "4.0% or 6% depending on capacity"
-      ],
-      [
-        "Installation",
-        "Indoor"
-      ],
-      [
-        "Altitude",
-        "≤1000m"
-      ],
-      [
-        "Ambient Temperature",
-        "Maximum +40°C; maximum daily average +30°C; maximum annual average +20°C; minimum -25°C"
-      ],
-      [
-        "Standards",
-        "GB 1094.1, GB 1094.3, GB 1094.5, GB 1094.11, GB/T 10228, GB 20052, JB/T 3837"
-      ],
-      [
-        "Efficiency Variants",
-        "SC(B)13 Level 3; SC(B)18 Level 1"
-      ]
-    ],
-    "featured": false,
-    "aliases": [
-      "SCB18"
-    ]
-  },
-  {
     "id": "ZGSBH15-PV",
     "name": "ZGSBH15 Photovoltaic Combined Amorphous Alloy Transformer",
     "nameAr": "محول مدمج للطاقة الكهروضوئية بقلب من سبيكة غير متبلورة ZGSBH15",
@@ -3245,5 +2265,622 @@
       ]
     ],
     "featured": false
+  },
+  {
+    "group": "transformer",
+    "featured": false,
+    "seoKeywords": "transformer, distribution transformer, Longxiang",
+    "id": "silicon-scb-dry",
+    "name": "SC(B)13 / SC(B)14 / SC(B)18 Silicon Steel Laminated Dry-Type Transformer",
+    "nameAr": "محول جاف من صفائح الفولاذ السيليكوني SC(B)13 / SC(B)14 / SC(B)18",
+    "image": "uploads/product-scb13-silicon-dry.png",
+    "category": "dry-type",
+    "subCategory": "dry-type",
+    "categoryLabel": "Dry Type Transformer",
+    "categoryLabelAr": "محول جاف",
+    "shortDesc": "Consolidated SC(B) silicon steel dry-type transformer family covering SC(B)13, SC(B)14 and SC(B)18 efficiency variants.",
+    "shortDescAr": "عائلة محولات جافة من الفولاذ السيليكوني تشمل مستويات الكفاءة SC(B)13 وSC(B)14 وSC(B)18.",
+    "description": "This product module combines the SC(B)13, SC(B)14 and SC(B)18 laminated silicon steel dry-type power transformers from the silicon steel product manual. The variants share a cast-resin dry-type platform and differ mainly by efficiency and loss-performance level.",
+    "descriptionAr": "يجمع هذا المنتج محولات القدرة الجافة من الفولاذ السيليكوني SC(B)13 وSC(B)14 وSC(B)18 الواردة في كتالوج الفولاذ السيليكوني. تعتمد النماذج على منصة عزل جافة مصبوبة، مع اختلافات رئيسية في مستوى الكفاءة والفواقد.",
+    "capacities": [
+      "30-2500 kVA"
+    ],
+    "voltages": [
+      "10kV class",
+      "6kV class"
+    ],
+    "aliases": [
+      "scb14",
+      "SCB13",
+      "SCB14",
+      "SCB18"
+    ],
+    "specs": [
+      [
+        "Product Model",
+        "SC(B)13 / SC(B)14 / SC(B)18 Series"
+      ],
+      [
+        "Transformer Type",
+        "Dry-type cast-resin power transformer"
+      ],
+      [
+        "Core Type",
+        "Silicon steel laminated core"
+      ],
+      [
+        "Cooling Method",
+        "AN / AF optional"
+      ],
+      [
+        "Capacity Range",
+        "30-2500 kVA"
+      ],
+      [
+        "Voltage Class",
+        "6-10kV distribution class"
+      ],
+      [
+        "Series / Variants",
+        "SC(B)13, SC(B)14, SC(B)18"
+      ]
+    ]
+  },
+  {
+    "group": "transformer",
+    "featured": false,
+    "seoKeywords": "transformer, distribution transformer, Longxiang",
+    "id": "silicon-smrl-wound-core",
+    "name": "S13 / S20 / S22-M.RL Oil-Immersed 3D Wound Core Distribution Transformer",
+    "nameAr": "محول توزيع مغمور بالزيت بقلب ملفوف ثلاثي الأبعاد S13 / S20 / S22-M.RL",
+    "image": "成品区/硅钢立体卷S13图片.png",
+    "category": "oil-immersed",
+    "subCategory": "oil-immersed",
+    "categoryLabel": "Oil Immersed Transformer",
+    "categoryLabelAr": "محول مغمور بالزيت",
+    "shortDesc": "S-M.RL silicon steel 3D wound core distribution transformer family covering S13, S20 and S22 efficiency variants.",
+    "shortDescAr": "عائلة محولات توزيع مغمورة بالزيت بقلب ملفوف ثلاثي الأبعاد من الفولاذ السيليكوني، تشمل S13 وS20 وS22.",
+    "description": "This module consolidates the first S-M.RL group in the silicon steel manual: S13, S20 and S22 oil-immersed 3D wound core distribution transformers. The triangular wound core structure is intended for compact magnetic circuits, lower no-load loss and reliable distribution-network operation.",
+    "descriptionAr": "يجمع هذا المنتج المجموعة الأولى من سلسلة S-M.RL في كتالوج الفولاذ السيليكوني: محولات S13 وS20 وS22 المغمورة بالزيت ذات القلب الملفوف ثلاثي الأبعاد. يساعد القلب المثلث الملفوف على تقليل فواقد اللاحمل وتحسين الاعتمادية في شبكات التوزيع.",
+    "capacities": [
+      "30-2500 kVA"
+    ],
+    "voltages": [
+      "10kV class",
+      "6kV class"
+    ],
+    "aliases": [
+      "s13",
+      "wound-core-oil",
+      "S13-M-RL",
+      "S20-M-RL",
+      "S22-M-RL"
+    ],
+    "specs": [
+      [
+        "Product Model",
+        "S13 / S20 / S22-M.RL Series"
+      ],
+      [
+        "Transformer Type",
+        "Oil-immersed distribution transformer"
+      ],
+      [
+        "Core Type",
+        "Silicon steel 3D wound core"
+      ],
+      [
+        "Cooling Method",
+        "ONAN"
+      ],
+      [
+        "Capacity Range",
+        "30-2500 kVA"
+      ],
+      [
+        "Voltage Class",
+        "6-10kV distribution class"
+      ],
+      [
+        "Series / Variants",
+        "S13-M.RL, S20-M.RL, S22-M.RL"
+      ]
+    ]
+  },
+  {
+    "group": "transformer",
+    "featured": false,
+    "seoKeywords": "transformer, distribution transformer, Longxiang",
+    "id": "silicon-smrl-anti-short",
+    "name": "S13 / S20 / S22-M.RL Anti-Short-Circuit 3D Wound Core Transformer",
+    "nameAr": "محول S13 / S20 / S22-M.RL بقلب ملفوف ثلاثي الأبعاد مقاوم لقصر الدائرة",
+    "image": "产品图片(1)/抗短路油浸式立体卷铁芯配电变压器.jpg",
+    "category": "oil-immersed",
+    "subCategory": "oil-immersed",
+    "categoryLabel": "Oil Immersed Transformer",
+    "categoryLabelAr": "محول مغمور بالزيت",
+    "shortDesc": "Anti-short-circuit S-M.RL silicon steel 3D wound core transformer family covering S13, S20 and S22 variants.",
+    "shortDescAr": "عائلة محولات S-M.RL من الفولاذ السيليكوني بقلب ملفوف ثلاثي الأبعاد ومقاومة محسنة لقصر الدائرة.",
+    "description": "This module corresponds to the anti-short-circuit S-M.RL group in the silicon steel manual. It keeps the 3D wound core platform while emphasizing improved short-circuit withstand capability for demanding distribution applications.",
+    "descriptionAr": "يمثل هذا المنتج مجموعة S-M.RL المقاومة لقصر الدائرة في كتالوج الفولاذ السيليكوني، مع الحفاظ على منصة القلب الملفوف ثلاثي الأبعاد وتعزيز تحمل القصر في تطبيقات التوزيع الأكثر تطلبا.",
+    "capacities": [
+      "30-2500 kVA"
+    ],
+    "voltages": [
+      "10kV class",
+      "6kV class"
+    ],
+    "aliases": [
+      "anti-short-3d",
+      "S13-M-RL-anti-short",
+      "S20-M-RL-anti-short",
+      "S22-M-RL-anti-short"
+    ],
+    "specs": [
+      [
+        "Product Model",
+        "S13 / S20 / S22-M.RL Anti-Short-Circuit Series"
+      ],
+      [
+        "Transformer Type",
+        "Oil-immersed distribution transformer"
+      ],
+      [
+        "Core Type",
+        "Silicon steel 3D wound core"
+      ],
+      [
+        "Cooling Method",
+        "ONAN"
+      ],
+      [
+        "Capacity Range",
+        "30-2500 kVA"
+      ],
+      [
+        "Key Feature",
+        "Enhanced short-circuit withstand design"
+      ],
+      [
+        "Series / Variants",
+        "S13-M.RL, S20-M.RL, S22-M.RL anti-short-circuit variants"
+      ]
+    ]
+  },
+  {
+    "group": "transformer",
+    "featured": false,
+    "seoKeywords": "transformer, distribution transformer, Longxiang",
+    "id": "silicon-sm-oil-power",
+    "name": "S13 / S20 / S22-M Oil-Immersed Power Transformer",
+    "nameAr": "محول قدرة مغمور بالزيت S13 / S20 / S22-M",
+    "image": "产品图片(1)/S20-M.RL-30～160010油浸式电力变压器.jpg",
+    "category": "oil-immersed",
+    "subCategory": "oil-immersed",
+    "categoryLabel": "Oil Immersed Transformer",
+    "categoryLabelAr": "محول مغمور بالزيت",
+    "shortDesc": "Conventional S-M oil-immersed silicon steel power transformer family covering S13, S20 and S22 variants.",
+    "shortDescAr": "عائلة محولات قدرة مغمورة بالزيت من سلسلة S-M تشمل S13 وS20 وS22.",
+    "description": "This product module consolidates the S13, S20 and S22 oil-immersed power transformer group from the silicon steel manual. The models share the same oil-immersed transformer platform and differ by efficiency and loss class.",
+    "descriptionAr": "يجمع هذا المنتج مجموعة محولات القدرة المغمورة بالزيت S13 وS20 وS22 من كتالوج الفولاذ السيليكوني. تشترك النماذج في منصة محول مغمور بالزيت وتختلف حسب مستوى الكفاءة والفواقد.",
+    "capacities": [
+      "30-2500 kVA"
+    ],
+    "voltages": [
+      "10kV class",
+      "35kV class optional"
+    ],
+    "aliases": [
+      "s20",
+      "S13-M",
+      "S20-M",
+      "S22-M"
+    ],
+    "specs": [
+      [
+        "Product Model",
+        "S13 / S20 / S22-M Series"
+      ],
+      [
+        "Transformer Type",
+        "Oil-immersed power transformer"
+      ],
+      [
+        "Core Type",
+        "Silicon steel laminated core"
+      ],
+      [
+        "Cooling Method",
+        "ONAN"
+      ],
+      [
+        "Capacity Range",
+        "30-2500 kVA"
+      ],
+      [
+        "Voltage Class",
+        "10kV distribution class, 35kV optional"
+      ],
+      [
+        "Series / Variants",
+        "S13-M, S20-M, S22-M"
+      ]
+    ]
+  },
+  {
+    "group": "transformer",
+    "featured": false,
+    "seoKeywords": "transformer, distribution transformer, Longxiang",
+    "id": "silicon-s13-vegetable-oil-high-overload",
+    "name": "S13-M Vegetable Oil High-Overload Distribution Transformer",
+    "nameAr": "محول توزيع S13-M بزيت نباتي وقدرة تحمل حمل زائد عالية",
+    "image": "产品图片(1)/油浸式（植物油）高过载配电变压器.jpg",
+    "category": "oil-immersed",
+    "subCategory": "oil-immersed",
+    "categoryLabel": "Oil Immersed Transformer",
+    "categoryLabelAr": "محول مغمور بالزيت",
+    "shortDesc": "S13-M vegetable-oil high-overload distribution transformer from the silicon steel manual.",
+    "shortDescAr": "محول توزيع S13-M بزيت نباتي مع قدرة تحمل عالية للأحمال الزائدة.",
+    "description": "This module corresponds to the S13-M vegetable-oil high-overload distribution transformer in the silicon steel catalog. It is intended for distribution scenarios requiring higher overload capability and environmentally oriented insulating oil selection.",
+    "descriptionAr": "يمثل هذا المنتج محول التوزيع S13-M بزيت نباتي وقدرة تحمل عالية للحمل الزائد في كتالوج الفولاذ السيليكوني، وهو مناسب لتطبيقات التوزيع التي تتطلب قدرة أعلى على تحمل الأحمال واختيار زيت عزل أكثر ملاءمة بيئيا.",
+    "capacities": [
+      "30-2500 kVA"
+    ],
+    "voltages": [
+      "10kV class"
+    ],
+    "aliases": [
+      "high-overload",
+      "S13-M-vegetable-oil"
+    ],
+    "specs": [
+      [
+        "Product Model",
+        "S13-M Vegetable Oil High-Overload Series"
+      ],
+      [
+        "Transformer Type",
+        "Oil-immersed distribution transformer"
+      ],
+      [
+        "Insulating Oil",
+        "Vegetable oil"
+      ],
+      [
+        "Cooling Method",
+        "ONAN"
+      ],
+      [
+        "Capacity Range",
+        "30-2500 kVA"
+      ],
+      [
+        "Key Feature",
+        "High-overload distribution application"
+      ]
+    ]
+  },
+  {
+    "group": "transformer",
+    "featured": false,
+    "seoKeywords": "transformer, distribution transformer, Longxiang",
+    "id": "amorphous-scbh-dry",
+    "name": "SC(B)H15 / SC(B)H17 / SC(B)H19 Dry-Type Amorphous Alloy Core Transformer",
+    "nameAr": "محول جاف بقلب من سبيكة غير متبلورة SC(B)H15 / SC(B)H17 / SC(B)H19",
+    "image": "uploads/product-scbh15-dry-amorphous.png",
+    "category": "dry-type",
+    "subCategory": "dry-type",
+    "categoryLabel": "Dry Type Transformer",
+    "categoryLabelAr": "محول جاف",
+    "shortDesc": "Dry-type amorphous alloy core transformer family covering SC(B)H15, SC(B)H17 and SC(B)H19 variants.",
+    "shortDescAr": "عائلة محولات جافة بقلب من سبيكة غير متبلورة تشمل SC(B)H15 وSC(B)H17 وSC(B)H19.",
+    "description": "This product module consolidates the SC(B)H15, SC(B)H17 and SC(B)H19 dry-type amorphous alloy core transformers from the amorphous alloy catalog. The models focus on reduced no-load loss and dry-type safety for indoor distribution environments.",
+    "descriptionAr": "يجمع هذا المنتج محولات SC(B)H15 وSC(B)H17 وSC(B)H19 الجافة ذات القلب من السبيكة غير المتبلورة من كتالوج المحولات غير المتبلورة، مع التركيز على تقليل فواقد اللاحمل وتحسين الأمان في بيئات التوزيع الداخلية.",
+    "capacities": [
+      "30-2500 kVA"
+    ],
+    "voltages": [
+      "10kV class",
+      "6kV class"
+    ],
+    "aliases": [
+      "SCBH15",
+      "SCBH17",
+      "SCBH19",
+      "single-phase-dry",
+      "3phase-3limb",
+      "3phase-5limb"
+    ],
+    "specs": [
+      [
+        "Product Model",
+        "SC(B)H15 / SC(B)H17 / SC(B)H19 Series"
+      ],
+      [
+        "Transformer Type",
+        "Dry-type amorphous alloy transformer"
+      ],
+      [
+        "Core Type",
+        "Amorphous alloy core"
+      ],
+      [
+        "Cooling Method",
+        "AN / AF optional"
+      ],
+      [
+        "Capacity Range",
+        "30-2500 kVA"
+      ],
+      [
+        "Voltage Class",
+        "6-10kV distribution class"
+      ],
+      [
+        "Series / Variants",
+        "SC(B)H15, SC(B)H17, SC(B)H19"
+      ]
+    ]
+  },
+  {
+    "group": "transformer",
+    "featured": false,
+    "seoKeywords": "transformer, distribution transformer, Longxiang",
+    "id": "amorphous-dgh-furnace",
+    "name": "DGH Series Dry-Type Amorphous Alloy Furnace Transformer",
+    "nameAr": "محول فرن جاف من السبيكة غير المتبلورة سلسلة DGH",
+    "image": "成品区/电炉变图片.png",
+    "category": "special",
+    "subCategory": "special",
+    "categoryLabel": "Special Transformer",
+    "categoryLabelAr": "محول خاص",
+    "shortDesc": "DGH dry-type amorphous alloy furnace transformer for specialized industrial applications.",
+    "shortDescAr": "محول فرن جاف من السبيكة غير المتبلورة سلسلة DGH للتطبيقات الصناعية الخاصة.",
+    "description": "The DGH series is a dry-type amorphous alloy furnace transformer module from the amorphous alloy catalog. It is separated from standard distribution transformers because furnace transformer duty and application conditions are different.",
+    "descriptionAr": "تمثل سلسلة DGH محول فرن جافا بقلب من السبيكة غير المتبلورة من كتالوج المحولات غير المتبلورة. يتم فصله عن محولات التوزيع القياسية لاختلاف طبيعة الحمل وظروف التطبيق.",
+    "capacities": [
+      "Project-specific"
+    ],
+    "voltages": [
+      "Customized voltage class"
+    ],
+    "aliases": [
+      "dgh",
+      "DGH"
+    ],
+    "specs": [
+      [
+        "Product Model",
+        "DGH Series"
+      ],
+      [
+        "Transformer Type",
+        "Dry-type furnace transformer"
+      ],
+      [
+        "Core Type",
+        "Amorphous alloy core"
+      ],
+      [
+        "Application",
+        "Industrial furnace power supply"
+      ],
+      [
+        "Configuration",
+        "Project-specific design"
+      ]
+    ]
+  },
+  {
+    "group": "transformer",
+    "featured": false,
+    "seoKeywords": "transformer, distribution transformer, Longxiang",
+    "id": "amorphous-sbh-mrl-wound-core",
+    "name": "S(B)H21-M.RL Oil-Immersed Amorphous Alloy 3D Wound Core Transformer",
+    "nameAr": "محول مغمور بالزيت بقلب ملفوف ثلاثي الأبعاد من السبيكة غير المتبلورة S(B)H21-M.RL",
+    "image": "uploads/product-sbh21-m-rl-amorphous-wound-core.png",
+    "category": "oil-immersed",
+    "subCategory": "oil-immersed",
+    "categoryLabel": "Oil Immersed Transformer",
+    "categoryLabelAr": "محول مغمور بالزيت",
+    "shortDesc": "S(B)H21-M.RL amorphous alloy oil-immersed 3D wound core transformer module.",
+    "shortDescAr": "محول S(B)H21-M.RL مغمور بالزيت بقلب ملفوف ثلاثي الأبعاد من السبيكة غير المتبلورة.",
+    "description": "This module corresponds to the S(B)H21-M.RL oil-immersed amorphous alloy 3D wound core transformer in the amorphous alloy catalog, combining low-loss amorphous core material with a wound-core structure.",
+    "descriptionAr": "يمثل هذا المنتج محول S(B)H21-M.RL المغمور بالزيت بقلب ملفوف ثلاثي الأبعاد من السبيكة غير المتبلورة، ويجمع بين مادة قلب منخفضة الفواقد وبنية القلب الملفوف.",
+    "capacities": [
+      "30-2500 kVA"
+    ],
+    "voltages": [
+      "10kV class"
+    ],
+    "aliases": [
+      "SBH21-M-RL",
+      "S(B)H21-M.RL"
+    ],
+    "specs": [
+      [
+        "Product Model",
+        "S(B)H21-M.RL Series"
+      ],
+      [
+        "Transformer Type",
+        "Oil-immersed amorphous alloy transformer"
+      ],
+      [
+        "Core Type",
+        "Amorphous alloy 3D wound core"
+      ],
+      [
+        "Cooling Method",
+        "ONAN"
+      ],
+      [
+        "Capacity Range",
+        "30-2500 kVA"
+      ],
+      [
+        "Series / Variants",
+        "S(B)H21-M.RL"
+      ]
+    ]
+  },
+  {
+    "group": "transformer",
+    "featured": false,
+    "seoKeywords": "transformer, distribution transformer, Longxiang",
+    "id": "amorphous-sbh15-m",
+    "name": "S(B)H15-M Oil-Immersed Amorphous Alloy Distribution Transformer",
+    "nameAr": "محول توزيع مغمور بالزيت بقلب غير متبلور S(B)H15-M",
+    "image": "成品区/油式非晶S(B)H15.png",
+    "category": "oil-immersed",
+    "subCategory": "oil-immersed",
+    "categoryLabel": "Oil Immersed Transformer",
+    "categoryLabelAr": "محول مغمور بالزيت",
+    "shortDesc": "S(B)H15-M oil-immersed amorphous alloy distribution transformer module.",
+    "shortDescAr": "محول توزيع S(B)H15-M مغمور بالزيت بقلب من السبيكة غير المتبلورة.",
+    "description": "This product module represents the S(B)H15-M oil-immersed amorphous alloy distribution transformer group in the amorphous alloy catalog. It is kept separate from S(B)H21-M and S(B)H25-M because the catalog treats them as distinct product groups.",
+    "descriptionAr": "يمثل هذا المنتج مجموعة محولات التوزيع S(B)H15-M المغمورة بالزيت بقلب من السبيكة غير المتبلورة. ويتم فصلها عن S(B)H21-M وS(B)H25-M لأن الكتالوج يعرضها كمجموعات منتجات مستقلة.",
+    "capacities": [
+      "30-2500 kVA"
+    ],
+    "voltages": [
+      "10kV class"
+    ],
+    "aliases": [
+      "sbh15",
+      "S(B)H15-M"
+    ],
+    "specs": [
+      [
+        "Product Model",
+        "S(B)H15-M Series"
+      ],
+      [
+        "Transformer Type",
+        "Oil-immersed amorphous alloy distribution transformer"
+      ],
+      [
+        "Core Type",
+        "Amorphous alloy core"
+      ],
+      [
+        "Cooling Method",
+        "ONAN"
+      ],
+      [
+        "Capacity Range",
+        "30-2500 kVA"
+      ],
+      [
+        "Series / Variants",
+        "S(B)H15-M"
+      ]
+    ]
+  },
+  {
+    "group": "transformer",
+    "featured": false,
+    "seoKeywords": "transformer, distribution transformer, Longxiang",
+    "id": "amorphous-sbh21-m",
+    "name": "S(B)H21-M Oil-Immersed Amorphous Alloy Distribution Transformer",
+    "nameAr": "محول توزيع مغمور بالزيت بقلب غير متبلور S(B)H21-M",
+    "image": "成品区/油式非晶S(B)H15.png",
+    "category": "oil-immersed",
+    "subCategory": "oil-immersed",
+    "categoryLabel": "Oil Immersed Transformer",
+    "categoryLabelAr": "محول مغمور بالزيت",
+    "shortDesc": "S(B)H21-M oil-immersed amorphous alloy distribution transformer module.",
+    "shortDescAr": "محول توزيع S(B)H21-M مغمور بالزيت بقلب من السبيكة غير المتبلورة.",
+    "description": "This module represents the S(B)H21-M oil-immersed amorphous alloy distribution transformer group. It is managed separately from the S(B)H15-M and S(B)H25-M groups to preserve the catalog product structure.",
+    "descriptionAr": "يمثل هذا المنتج مجموعة محولات التوزيع S(B)H21-M المغمورة بالزيت بقلب من السبيكة غير المتبلورة، ويتم إدارتها بشكل منفصل عن S(B)H15-M وS(B)H25-M للحفاظ على بنية الكتالوج.",
+    "capacities": [
+      "30-2500 kVA"
+    ],
+    "voltages": [
+      "10kV class"
+    ],
+    "aliases": [
+      "sbh21",
+      "S(B)H21-M"
+    ],
+    "specs": [
+      [
+        "Product Model",
+        "S(B)H21-M Series"
+      ],
+      [
+        "Transformer Type",
+        "Oil-immersed amorphous alloy distribution transformer"
+      ],
+      [
+        "Core Type",
+        "Amorphous alloy core"
+      ],
+      [
+        "Cooling Method",
+        "ONAN"
+      ],
+      [
+        "Capacity Range",
+        "30-2500 kVA"
+      ],
+      [
+        "Series / Variants",
+        "S(B)H21-M"
+      ]
+    ]
+  },
+  {
+    "group": "transformer",
+    "featured": false,
+    "seoKeywords": "transformer, distribution transformer, Longxiang",
+    "id": "amorphous-sbh25-m",
+    "name": "S(B)H25-M Oil-Immersed Amorphous Alloy Distribution Transformer",
+    "nameAr": "محول توزيع مغمور بالزيت بقلب غير متبلور S(B)H25-M",
+    "image": "产品图片(1)/非晶合金（植物油）高过载配电变压器.jpg",
+    "category": "oil-immersed",
+    "subCategory": "oil-immersed",
+    "categoryLabel": "Oil Immersed Transformer",
+    "categoryLabelAr": "محول مغمور بالزيت",
+    "shortDesc": "S(B)H25-M oil-immersed amorphous alloy distribution transformer module.",
+    "shortDescAr": "محول توزيع S(B)H25-M مغمور بالزيت بقلب من السبيكة غير المتبلورة.",
+    "description": "This module represents the S(B)H25-M oil-immersed amorphous alloy distribution transformer group from the amorphous alloy catalog. It remains a separate product module because the catalog lists it as a distinct product group.",
+    "descriptionAr": "يمثل هذا المنتج مجموعة محولات التوزيع S(B)H25-M المغمورة بالزيت بقلب من السبيكة غير المتبلورة، ويبقى كمنتج مستقل لأن الكتالوج يعرضه كمجموعة منفصلة.",
+    "capacities": [
+      "30-2500 kVA"
+    ],
+    "voltages": [
+      "10kV class"
+    ],
+    "aliases": [
+      "sbh25",
+      "S(B)H25-M"
+    ],
+    "specs": [
+      [
+        "Product Model",
+        "S(B)H25-M Series"
+      ],
+      [
+        "Transformer Type",
+        "Oil-immersed amorphous alloy distribution transformer"
+      ],
+      [
+        "Core Type",
+        "Amorphous alloy core"
+      ],
+      [
+        "Cooling Method",
+        "ONAN"
+      ],
+      [
+        "Capacity Range",
+        "30-2500 kVA"
+      ],
+      [
+        "Series / Variants",
+        "S(B)H25-M"
+      ]
+    ]
   }
 ]
