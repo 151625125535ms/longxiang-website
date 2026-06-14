@@ -1509,14 +1509,17 @@
 
             var formData = new FormData();
             formData.append('image', file);
-            fetch(API_BASE + '/products/upload', {
+            fetch(API_BASE + '/admin/products/upload', {
                 method: 'POST',
                 headers: { Authorization: 'Bearer ' + getToken() },
                 body: formData
             }).then(function (res) { return res.json(); })
                 .then(function (data) {
                     if (data.error) throw new Error(data.error);
-                    uploadedImagePath = data.path;
+                    var uploaded = data.data || data;
+                    uploadedImagePath = uploaded.path;
+                    if (!uploadedImagePath) throw new Error('上传接口未返回图片路径');
+                    markFormDirty();
                     showToast('图片上传成功');
                 })
                 .catch(function (err) { showToast('图片上传失败：' + err.message, 'error'); });
@@ -1534,6 +1537,7 @@
                 preview.style.display = 'none';
                 uploadArea.style.display = '';
                 document.getElementById('field-image').value = '';
+                markFormDirty();
             });
         }
 
@@ -1601,7 +1605,8 @@
                 short_desc_ar: document.getElementById('field-shortDescAr').value.trim(),
                 description_en: document.getElementById('field-description').value.trim(),
                 description_ar: document.getElementById('field-descriptionAr').value.trim(),
-                featured: document.getElementById('field-featured').checked
+                featured: document.getElementById('field-featured').checked,
+                cover_image: uploadedImagePath
             };
             if (editingProductId) payload.version = editingProductVersion;
 

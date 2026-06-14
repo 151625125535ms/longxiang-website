@@ -1,10 +1,42 @@
 const express = require('express');
+const crypto = require('crypto');
+const path = require('path');
+const multer = require('multer');
 const { getDb } = require('../../lib/db');
+const { ensureDirectory, resolveUploadDir, resolveUploadPublicPath } = require('../../lib/fileStore');
 const { sendError, insertAuditLog } = require('./helpers');
 
 const router = express.Router();
 const STATUSES = ['published', 'draft', 'deleted'];
 const BATCH_ACTIONS = ['soft_delete', 'publish', 'draft', 'hard_delete'];
+const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
+const IMAGE_EXTENSIONS = {
+    'image/jpeg': '.jpg',
+    'image/png': '.png',
+    'image/webp': '.webp',
+    'image/gif': '.gif'
+};
+const uploadDir = resolveUploadDir();
+ensureDirectory(uploadDir);
+
+const upload = multer({
+    storage: multer.diskStorage({
+        destination: function (req, file, cb) {
+            cb(null, uploadDir);
+        },
+        filename: function (req, file, cb) {
+            const ext = IMAGE_EXTENSIONS[file.mimetype] || path.extname(file.originalname).toLowerCase();
+            cb(null, 'product-' + Date.now() + '-' + crypto.randomBytes(6).toString('hex') + ext);
+        }
+    }),
+    limits: { fileSize: 8 * 1024 * 1024 },
+    fileFilter: function (req, file, cb) {
+        if (!ALLOWED_IMAGE_TYPES.has(file.mimetype)) {
+            return cb(new Error('Only jpeg, png, webp, or gif images are allowed.'));
+        }
+        cb(null, true);
+    }
+});
 
 function parsePositiveInt(value, defaultValue, maxValue) {
     const parsed = parseInt(value, 10);
@@ -91,6 +123,28 @@ function getAuditProduct(db, id) {
     const product = getProductBase(db, id);
     if (!product) return null;
     return product;
+}
+
+function normalizeCoverPath(value) {
+    if (value == null) return null;
+    const coverPath = String(value).trim().replace(/\\/g, '/').replace(/^\/+/, '');
+    if (!coverPath) return '';
+    const publicRoot = resolveUploadPublicPath() + '/';
+    if (!coverPath.startsWith(publicRoot)) return null;
+    if (coverPath.indexOf('..') !== -1) return null;
+    return coverPath;
+}
+
+function replaceCoverImage(db, productId, coverPath, timestamp) {
+    if (coverPath == null) return;
+    db.prepare('DELETE FROM product_media WHERE product_id = ? AND is_cover = 1').run(productId);
+    if (!coverPath) return;
+    db.prepare(`
+        INSERT INTO product_media
+            (product_id, asset_id, media_type, path, is_cover, sort_order, created_at)
+        VALUES
+            (?, NULL, 'image', ?, 1, 1, ?)
+    `).run(productId, coverPath, timestamp);
 }
 
 function buildListQuery(query) {
@@ -184,6 +238,61 @@ router.get('/:id', function (req, res, next) {
     }
 });
 
+router.post('/upload', function (req, res, next) {
+    upload.single('image')(req, res, function (err) {
+        if (err) {
+            const message = err.code === 'LIMIT_FILE_SIZE'
+                ? 'Image must be 8MB or smaller.'
+                : err.message;
+            return sendError(res, 422, 'VALIDATION_ERROR', message);
+        }
+
+        try {
+            if (!req.file) return sendError(res, 422, 'VALIDATION_ERROR', 'No file uploaded.');
+
+            const publicPath = resolveUploadPublicPath() + '/' + req.file.filename;
+            const db = getDb();
+            const createdAt = Date.now();
+            const createAsset = db.transaction(function () {
+                const result = db.prepare(`
+                    INSERT INTO assets
+                        (
+                            path, filename, original_name, mime_type, file_size,
+                            checksum, module, entity_type, entity_id, is_active, created_at
+                        )
+                    VALUES
+                        (
+                            @path, @filename, @original_name, @mime_type, @file_size,
+                            @checksum, 'products', 'product', NULL, 1, @created_at
+                        )
+                `).run({
+                    path: publicPath,
+                    filename: req.file.filename,
+                    original_name: req.file.originalname || '',
+                    mime_type: req.file.mimetype || '',
+                    file_size: req.file.size || 0,
+                    checksum: '',
+                    created_at: createdAt
+                });
+
+                return {
+                    id: result.lastInsertRowid,
+                    path: publicPath,
+                    filename: req.file.filename,
+                    original_name: req.file.originalname || '',
+                    mime_type: req.file.mimetype || '',
+                    file_size: req.file.size || 0
+                };
+            });
+
+            const asset = createAsset();
+            res.status(201).json({ ok: true, data: asset, path: asset.path });
+        } catch (uploadErr) {
+            next(uploadErr);
+        }
+    });
+});
+
 router.post('/', function (req, res, next) {
     try {
         const body = req.body || {};
@@ -195,6 +304,10 @@ router.post('/', function (req, res, next) {
 
         const aliasesJson = validateJsonString(body.aliases_json);
         if (aliasesJson == null) return sendError(res, 422, 'VALIDATION_ERROR', 'aliases_json must be a JSON string.');
+        const coverPath = normalizeCoverPath(body.cover_image);
+        if (coverPath == null && body.cover_image != null) {
+            return sendError(res, 422, 'VALIDATION_ERROR', 'Invalid cover_image path.');
+        }
 
         const db = getDb();
         const now = Date.now();
@@ -240,8 +353,9 @@ router.post('/', function (req, res, next) {
             });
 
             const product = getFullProduct(db, result.lastInsertRowid);
+            replaceCoverImage(db, product.id, coverPath, now);
             insertAuditLog(db, req, 'product', product.id, 'create', null, product);
-            return product;
+            return getFullProduct(db, product.id);
         });
 
         const product = createProduct();
@@ -273,8 +387,13 @@ router.put('/:id', function (req, res, next) {
 
         const aliasesJson = body.aliases_json == null ? before.aliases_json : validateJsonString(body.aliases_json);
         if (aliasesJson == null) return sendError(res, 422, 'VALIDATION_ERROR', 'aliases_json must be a JSON string.');
+        const coverPath = body.cover_image === undefined ? undefined : normalizeCoverPath(body.cover_image);
+        if (coverPath == null && body.cover_image !== undefined) {
+            return sendError(res, 422, 'VALIDATION_ERROR', 'Invalid cover_image path.');
+        }
 
         const updateProduct = db.transaction(function () {
+            const timestamp = Date.now();
             db.prepare(`
                 UPDATE products
                 SET
@@ -292,9 +411,9 @@ router.put('/:id', function (req, res, next) {
                     description_en = @description_en,
                     description_ar = @description_ar,
                     seo_title = @seo_title,
-                    seo_description = @seo_description,
-                    seo_keywords = @seo_keywords,
-                    version = version + 1,
+                seo_description = @seo_description,
+                seo_keywords = @seo_keywords,
+                version = version + 1,
                     updated_at = @updated_at
                 WHERE id = @id
             `).run({
@@ -315,9 +434,10 @@ router.put('/:id', function (req, res, next) {
                 seo_title: body.seo_title == null ? before.seo_title : String(body.seo_title).trim(),
                 seo_description: body.seo_description == null ? before.seo_description : String(body.seo_description).trim(),
                 seo_keywords: body.seo_keywords == null ? before.seo_keywords : String(body.seo_keywords).trim(),
-                updated_at: Date.now()
+                updated_at: timestamp
             });
 
+            replaceCoverImage(db, before.id, coverPath, timestamp);
             const afterAudit = getAuditProduct(db, before.id);
             insertAuditLog(db, req, 'product', before.id, 'update', before, afterAudit);
             return getFullProduct(db, before.id);
