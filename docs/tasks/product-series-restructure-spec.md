@@ -4,6 +4,8 @@
 
 整理前台 Products 页面中的变压器产品数据，将两本产品册中的同一产品下不同规格型号合并为一个产品模块，减少重复产品卡片，让英文页面和阿拉伯语页面的数据展示都更规范。
 
+本文件是 Codex 方案规格。按当前协作流程，Claude 先审核本方案并输出意见；除非用户明确要求，否则 Claude 不直接实现。
+
 本任务需要同时保证：
 
 - 英文产品列表页 `products.html` 正常展示。
@@ -43,7 +45,9 @@ D:\LX\产品册\变压器画册版式-2硅钢.pdf
 D:\LX\产品册\变压器画册版式-1非晶.pdf
 ```
 
-Claude 开始实现前必须先确认这两个 PDF 可以读取。如果路径不同或 PDF 不存在，按 `Spec Issue Escalation` 停止并写回 Codex，不要凭记忆补数据。
+执行前必须先确认这两个 PDF 可以读取。如果路径不同或 PDF 不存在，按 `Spec Issue Escalation` 停止并写回 Codex，不要凭记忆补数据。
+
+已知情况：这两本 PDF 很可能是图片扫描型 PDF，不能依赖 `pdfplumber`、`pypdf`、`pdfminer` 直接抽取文字。实施方案必须先将目标页渲染成图片，再进行 OCR 或图像识别。
 
 ## 产品合并规则
 
@@ -76,9 +80,9 @@ Claude 开始实现前必须先确认这两个 PDF 可以读取。如果路径�
 
 ## 本轮范围
 
-本轮允许 Claude 做以下事情：
+执行阶段允许做以下事情：
 
-1. 从两本 PDF 中提取上述页码对应的产品名称、型号、技术参数、容量范围、电压等级、产品特点。
+1. 从两本 PDF 中通过渲染图片 + OCR/识图提取上述页码对应的产品名称、型号、技术参数、容量范围、电压等级、产品特点。
 2. 对现有 transformer 产品数据进行盘点，识别重复或拆分过细的记录。
 3. 将目标硅钢和非晶变压器整理为 11 个产品模块。
 4. 同步整理英文和阿拉伯语字段：
@@ -109,17 +113,21 @@ Claude 开始实现前必须先确认这两个 PDF 可以读取。如果路径�
 - 不改 CMS content block schema。
 - 不改后台一级模块结构。
 - 不把 PDF 原文件提交进 git。
+- 不把 PDF 渲染出的临时图片提交进 git。
 - 不提交 `data/longxiang.db`。
 - 不提交 `screenshots/` 或 `test-results/`。
 - 不只改英文而漏掉阿拉伯语。
 
 ## 允许修改的文件
 
-Claude 可根据实际实现选择修改以下范围：
+执行者可根据实际实现选择修改以下范围：
 
 ```text
 data/products.json
 scripts/
+scripts/render-product-pdf-pages.js
+scripts/ocr-product-pdf-pages.js
+scripts/sync-products-to-sqlite.js
 server/routes/admin/products.js
 server/routes/products.js
 js/products-list.js
@@ -129,6 +137,7 @@ product-detail.html
 ar/products.html
 ar/product-detail.html
 docs/tasks/product-series-restructure-report.md
+docs/tasks/product-series-restructure-extraction.md
 ```
 
 如果只需要数据整理，优先只改：
@@ -185,6 +194,55 @@ Get-ChildItem -LiteralPath 'D:\LX\产品册' -File
 从两本 PDF 中只提取用户指定目录页对应的内容。
 
 注意目录页码可能不是 PDF 物理页码。Claude 需要先确认 PDF 内部目录页与物理页的偏移关系，不要直接假设第 2 页就是目录页 `02`。
+
+#### 2.1 渲染 PDF 到图片
+
+由于 PDF 可能是图片扫描件，必须先将目标页渲染为图片。推荐输出到临时目录，不提交：
+
+```text
+D:\tmp\longxiang-product-series-ocr\
+```
+
+可用方案按优先级：
+
+1. Python `PyMuPDF` / `fitz` 渲染目标页为 200-300 DPI PNG。
+2. Python `pypdfium2` 渲染目标页为 PNG。
+3. `pdf2image` + Poppler 渲染目标页为 PNG。
+4. 如果上述组件不可用，使用本地可用的 PDF 渲染/截图组件生成图片。
+
+渲染范围不能只渲染用户写的目录页数字。必须先建立目录页码和 PDF 物理页码的对应关系，然后渲染目标页。若无法确定偏移，先渲染每本 PDF 的前 8 页做目录/页码识别，再确定偏移。
+
+#### 2.2 OCR / 识图
+
+OCR/识图可用方案按优先级：
+
+1. 本地 Tesseract OCR（如可用，优先使用中文 `chi_sim` + 英文 `eng`）。
+2. 本地 PaddleOCR 或其他已安装 OCR 组件。
+3. 将渲染出的页面图片作为视觉输入，由可识图模型读取图片中的型号、表格和技术参数。
+4. 若 OCR 对表格不稳定，保留图片并人工核对关键字段，不得凭空补参数。
+
+OCR 结果必须落地到：
+
+```text
+docs/tasks/product-series-restructure-extraction.md
+```
+
+该文件至少记录：
+
+```text
+source_pdf
+catalog_page
+physical_page
+module_id
+series_name
+model_variants
+capacity_range
+voltage_range
+key_specs
+ocr_confidence_or_notes
+```
+
+如果某页 OCR/识图仍无法确认关键字段，只针对缺失字段向用户提问，不要要求用户重新手工提供全部 11 个模块数据。
 
 建议输出一个临时盘点表，至少包含：
 
@@ -244,22 +302,73 @@ SCB13
 dgh
 ```
 
-Claude 不能简单追加 11 个新产品导致公开页重复。必须选择一种可审查策略：
+不能简单追加 11 个新产品导致公开页重复。必须选择一种可审查策略：
 
 1. 推荐：更新/合并现有记录，保留核心旧 `legacy_id`，将被合并的旧 ID 写入 `aliases`。
-2. 如果必须新增新 ID，则旧重复记录应改为 `draft` 或从 `data/products.json` 中移除，并在报告中列出原因。
+2. 如果旧 ID 到新模块的映射无法可靠判断，采用用户确认的“目录范围产品重建”策略：
+   - 将这两本 PDF 范围内的旧拆分产品从公开产品中下线。
+   - `data/products.json` 中移除这些旧拆分项。
+   - SQLite 中对应旧产品改为 `deleted` 或 `draft`，优先使用 `deleted` 以避免公开页显示。
+   - 按 PDF 重新创建 11 个产品模块。
+   - 将明确属于旧链接的 ID 写入新模块 `aliases`，并在报告中列出。
+   - 与两本 PDF 无关的产品必须保留不动。
 
 无论采用哪种策略，公开 Products 页面最终不应同时显示同一产品的旧拆分卡片和新合并卡片。
+
+目录范围产品重建的候选旧 ID 包括但不限于：
+
+```text
+scb14
+SCB13
+s13
+wound-core-oil
+anti-short-3d
+s20
+aluminum
+high-overload
+SCBH15
+sbh15
+SBH21-M-RL
+anti-short-amorphous
+amorphous-veg-oil
+dgh
+single-phase-dry
+3phase-3limb
+3phase-5limb
+```
+
+注意：以上只是候选列表，不是全部必须删除。实施时需根据 PDF OCR/识图结果判断哪些确实属于这两本 PDF；如判断不准，宁可在报告中列为“待确认”，不要误删明显属于其他产品册或其他业务线的产品。
+
+### 4.1 旧链接兼容
+
+当前 SQLite 公开详情接口 `GET /api/products/:id` 只按 `legacy_id` 查询，不按 `aliases_json` 查询；fallback JSON 才支持 `aliases`。
+
+如果采用“旧 ID 写入 aliases”的策略，必须同步修改 SQLite 公开查询逻辑，使 `GET /api/products/:id` 支持：
+
+- `legacy_id` 精确匹配；
+- `aliases_json` 中包含该旧 ID。
+
+不得改变 API 响应结构。
 
 ### 5. 同步 JSON 与 SQLite
 
 `data/products.json` 是 git 跟踪文件，必须保持为可用 fallback。
 
-`data/longxiang.db` 不被 git 跟踪，不能提交。若需要同步 SQLite，必须提供可复用方式，例如：
+`data/longxiang.db` 不被 git 跟踪，不能提交。SQLite 同步方式固定为可重复脚本：
 
-- 新增或更新一个脚本，把整理后的 JSON 应用到 SQLite。
-- 或通过后台 API 批量更新产品。
-- 或在报告中写明本地执行了哪些 SQL/API 操作，以及线上如何重复执行。
+```text
+scripts/sync-products-to-sqlite.js
+```
+
+脚本要求：
+
+- 读取 `data/products.json`。
+- Upsert 整理后的产品到 SQLite `products` / `product_specs` / `product_media`。
+- 自动匹配或创建需要的 product category（不得新增 schema）。
+- 对目录范围内旧拆分产品执行 `deleted` 或 `draft` 下线策略。
+- 保持 `version` 递增或合理初始化。
+- 可在本地和服务器重复运行。
+- 输出变更摘要：新增、更新、下线、跳过的产品 ID。
 
 不要只改 `data/products.json` 后宣称完成，因为当前服务在 `USE_SQLITE=true` 时公开 API 优先读取 SQLite。
 
@@ -288,6 +397,7 @@ node --check server/routes/products.js
 node --check server/routes/admin/products.js
 node --check js/products-list.js
 node --check js/product-detail.js
+node --check scripts/sync-products-to-sqlite.js
 git diff --check
 ```
 
@@ -296,6 +406,13 @@ git diff --check
 ```powershell
 node -e "const p=require('./data/products.json'); console.log(p.filter(x=>x.group==='transformer').map(x=>[x.id,x.name,x.nameAr,x.category,x.subCategory]).length)"
 node -e "const p=require('./data/products.json'); const bad=p.filter(x=>x.group==='transformer'&&(!x.nameAr||!x.shortDescAr||!x.descriptionAr)); console.log(bad.map(x=>x.id)); if(bad.length) process.exit(1)"
+```
+
+SQLite 同步检查：
+
+```powershell
+node scripts/sync-products-to-sqlite.js --dry-run
+node scripts/sync-products-to-sqlite.js --apply
 ```
 
 服务验证：
@@ -329,7 +446,7 @@ npx playwright test tests/smoke.spec.js --reporter=line
 
 ## 截图要求
 
-如 Claude 实现本任务，完成后至少提供以下截图路径：
+执行本任务后，完成报告至少提供以下截图路径：
 
 - 英文 `products.html?group=transformer` 桌面 1440px。
 - 阿拉伯语 `ar/products.html?group=transformer` 桌面 1440px。
@@ -340,7 +457,7 @@ npx playwright test tests/smoke.spec.js --reporter=line
 
 ## 完成后请回填
 
-Claude 完成后必须写入：
+执行完成后必须写入：
 
 ```text
 C:\Users\hnlxd\Desktop\codex_check.md
@@ -352,6 +469,7 @@ C:\Users\hnlxd\Desktop\codex_check.md
 - 是否完全按规格实现。
 - PDF 实际读取路径。
 - PDF 页码偏移关系说明。
+- OCR/识图使用的组件、渲染图片目录、无法识别字段清单。
 - 11 个最终产品模块清单。
 - 被合并、下线或保留的旧产品 ID 清单。
 - JSON 与 SQLite 如何同步。
