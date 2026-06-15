@@ -4,6 +4,7 @@ const multer = require('multer');
 const { authMiddleware } = require('../middleware/auth');
 const { ensureDirectory, readJson, resolveDataFile, resolveUploadDir, resolveUploadPublicPath, updateJson } = require('../lib/fileStore');
 const { getDb, isUseSqlite } = require('../lib/db');
+const { VALID_GROUPS, getCategoryMapping } = require('../lib/category-helper');
 
 const router = express.Router();
 const FALLBACK_DATA_FILE = path.join(__dirname, '..', '..', 'data', 'products.json');
@@ -31,6 +32,16 @@ function parseJsonArray(value) {
 
 function mapSqliteProduct(row, specsByProduct, coverByProduct) {
     const specs = specsByProduct[row.id] || [];
+    let group = row.product_group || '';
+    let subCategory = row.sub_category || '';
+
+    if (!group || !VALID_GROUPS.has(group)) {
+        const mapping = getCategoryMapping(row.category_slug);
+        if (!mapping) return null;
+        group = mapping.group;
+        subCategory = mapping.subCategory;
+    }
+
     return {
         id: row.legacy_id,
         name: row.name_en,
@@ -39,8 +50,8 @@ function mapSqliteProduct(row, specsByProduct, coverByProduct) {
         category: row.category_slug || '',
         categoryLabel: row.category_label || '',
         categoryLabelAr: row.category_label_ar || '',
-        group: row.product_group || '',
-        subCategory: row.sub_category || '',
+        group: group,
+        subCategory: subCategory,
         shortDesc: row.short_desc_en || '',
         shortDescAr: row.short_desc_ar || '',
         description: row.description_en || '',
@@ -92,7 +103,11 @@ function readSqliteProducts(id) {
             c.name_ar AS category_label_ar
         FROM products p
         LEFT JOIN categories c ON c.id = p.category_id
-        WHERE p.status = 'published' ${idWhere}
+        WHERE p.status = 'published'
+            AND p.category_id IS NOT NULL
+            AND c.id IS NOT NULL
+            AND c.is_active = 1
+            ${idWhere}
         ORDER BY p.sort_order, p.id
     `).all(params);
 
@@ -122,7 +137,9 @@ function readSqliteProducts(id) {
         if (!coverByProduct[media.product_id]) coverByProduct[media.product_id] = media.path || '';
     });
 
-    return products.map(product => mapSqliteProduct(product, specsByProduct, coverByProduct));
+    return products
+        .map(product => mapSqliteProduct(product, specsByProduct, coverByProduct))
+        .filter(Boolean);
 }
 
 const storage = multer.diskStorage({

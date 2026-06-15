@@ -362,7 +362,10 @@
             home: 'الرئيسية',
             products: 'المنتجات',
             transformer: 'المحولات',
-            ev: 'شواحن المركبات الكهربائية',
+            newEnergy: 'معدات الطاقة الجديدة',
+            energyStorage: 'أنظمة تخزين الطاقة',
+            acEv: 'محطة شحن تيار متردد',
+            dcEv: 'محطة شحن تيار مستمر',
             switchgear: 'معدات المفاتيح',
             solutions: 'الحلول',
             epc: 'المقاولات العامة للمشاريع الكهربائية',
@@ -379,7 +382,10 @@
             home: 'Home',
             products: 'Products',
             transformer: 'Transformer',
-            ev: 'EV charger',
+            newEnergy: 'New Energy Equipment',
+            energyStorage: 'Energy Storage',
+            acEv: 'AC EV Charging Station',
+            dcEv: 'DC EV Charging Station',
             switchgear: 'Switchgear',
             solutions: 'Solutions',
             epc: 'Engineering General Contracting',
@@ -398,7 +404,10 @@
             navItem('index.html', labels.home) +
             navItem('products.html', labels.products, [
                 { page: 'products.html', label: labels.transformer, hash: '?group=transformer' },
-                { page: 'products.html', label: labels.ev, hash: '?group=ev-charger' },
+                { page: 'products.html', label: labels.newEnergy, hash: '?group=new-energy-equipment' },
+                { page: 'products.html', label: labels.energyStorage, hash: '?group=new-energy-equipment&sub=energy-storage' },
+                { page: 'products.html', label: labels.acEv, hash: '?group=new-energy-equipment&sub=ac' },
+                { page: 'products.html', label: labels.dcEv, hash: '?group=new-energy-equipment&sub=dc' },
                 { page: 'products.html', label: labels.switchgear, hash: '?group=switchgear' }
             ], ['products.html', 'product-detail.html']) +
             navItem('solutions.html', labels.solutions, [
@@ -981,7 +990,10 @@
                     '<h4>' + (isArabic ? 'المنتجات' : 'Products') + '</h4>' +
                     '<div class="footer-links">' +
                         navLink('products.html', isArabic ? 'المحولات' : 'Transformer', '', '?group=transformer') +
-                        navLink('products.html', isArabic ? 'شواحن المركبات الكهربائية' : 'EV charger', '', '?group=ev-charger') +
+                        navLink('products.html', isArabic ? 'معدات الطاقة الجديدة' : 'New Energy Equipment', '', '?group=new-energy-equipment') +
+                        navLink('products.html', isArabic ? 'أنظمة تخزين الطاقة' : 'Energy Storage', '', '?group=new-energy-equipment&sub=energy-storage') +
+                        navLink('products.html', isArabic ? 'محطة شحن تيار متردد' : 'AC EV Charging Station', '', '?group=new-energy-equipment&sub=ac') +
+                        navLink('products.html', isArabic ? 'محطة شحن تيار مستمر' : 'DC EV Charging Station', '', '?group=new-energy-equipment&sub=dc') +
                         navLink('products.html', isArabic ? 'معدات المفاتيح' : 'Switchgear', '', '?group=switchgear') +
                     '</div>' +
                 '</div>' +
@@ -1092,7 +1104,7 @@
     function updateFooterProductLinks() {
         var groups = [
             { match: ['Transformer', 'المحولات'], group: 'transformer' },
-            { match: ['EV charger', 'شواحن المركبات الكهربائية'], group: 'ev-charger' },
+            { match: ['New Energy Equipment', 'معدات الطاقة الجديدة'], group: 'new-energy-equipment' },
             { match: ['Switchgear', 'معدات المفاتيح'], group: 'switchgear' }
         ];
 
@@ -1326,7 +1338,7 @@
         var categoryContainer = document.getElementById('featured-product-categories');
         var homeCategories = [
             { group: 'transformer', label: 'Transformer', labelAr: 'المحولات', href: 'products.html?group=transformer', icon: '首页矢量图/变压器.png' },
-            { group: 'ev-charger', label: 'EV Charger', labelAr: 'شواحن المركبات الكهربائية', href: 'products.html?group=ev-charger', icon: '首页矢量图/充电桩.png' },
+            { group: 'new-energy-equipment', label: 'New Energy Equipment', labelAr: 'معدات الطاقة الجديدة', href: 'products.html?group=new-energy-equipment', icon: '首页矢量图/充电桩.png' },
             { group: 'switchgear', label: 'Switchgear', labelAr: 'معدات المفاتيح', href: 'products.html?group=switchgear', icon: '首页矢量图/成套电气.png' }
         ];
 

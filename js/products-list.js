@@ -10,7 +10,7 @@
     var productsCache = [];
     var pageSize = 9;
 
-    var taxonomy = [
+    var FALLBACK_TAXONOMY = [
         {
             group: 'transformer',
             label: 'Transformer',
@@ -23,10 +23,11 @@
             ]
         },
         {
-            group: 'ev-charger',
-            label: 'EV charger',
-            labelAr: 'شواحن المركبات الكهربائية',
+            group: 'new-energy-equipment',
+            label: 'New Energy Equipment',
+            labelAr: 'معدات الطاقة الجديدة',
             children: [
+                { sub: 'energy-storage', label: 'Energy Storage', labelAr: 'أنظمة تخزين الطاقة' },
                 { sub: 'ac', label: 'AC EV Charging Station', labelAr: 'محطة شحن تيار متردد' },
                 { sub: 'dc', label: 'DC EV Charging Station', labelAr: 'محطة شحن تيار مستمر' }
             ]
@@ -39,16 +40,9 @@
                 { sub: 'high-voltage', label: 'High-Voltage Switchgear', labelAr: 'معدات مفاتيح الجهد العالي' },
                 { sub: 'medium-low-voltage', label: 'Medium&Low Voltage Switchgear', labelAr: 'معدات مفاتيح الجهد المتوسط والمنخفض' }
             ]
-        },
-        {
-            group: 'energy-storage',
-            label: 'Energy Storage',
-            labelAr: 'أنظمة تخزين الطاقة',
-            children: [
-                { sub: 'energy-storage', label: 'Energy Storage System', labelAr: 'نظام تخزين الطاقة' }
-            ]
         }
     ];
+    var taxonomy = FALLBACK_TAXONOMY.slice();
 
     function escapeHtml(value) {
         return String(value == null ? '' : value)
@@ -89,21 +83,10 @@
         return assetPrefix + path;
     }
 
-    function markStaticProductFallback() {
-        document.documentElement.setAttribute('data-products-source', 'static-fallback');
-        if (window.console && console.warn) {
-            console.warn('Products loaded from static fallback data/products.json.');
-        }
-    }
-
     function normalizeProduct(product) {
-        var category = product.category || '';
-        var group = product.group || (category === 'switchgear' ? 'switchgear' : 'transformer');
-        var sub = product.subCategory || category;
-        if (group === 'switchgear' && !product.subCategory) sub = 'medium-low-voltage';
         return Object.assign({}, product, {
-            group: group,
-            subCategory: sub
+            group: product.group || '',
+            subCategory: product.subCategory || ''
         });
     }
 
@@ -175,8 +158,43 @@
         };
     }
 
+    function findTaxonomyGroup(group) {
+        return taxonomy.find(function (item) { return item.group === group; }) || null;
+    }
+
+    function filterExists(group, sub) {
+        var parent = findTaxonomyGroup(group);
+        if (!parent) return false;
+        if (!sub) return true;
+        return parent.children.some(function (child) { return child.sub === sub; });
+    }
+
+    function firstGroupWithProducts(products) {
+        for (var i = 0; i < taxonomy.length; i += 1) {
+            var group = taxonomy[i].group;
+            if (products.some(function (product) { return product.group === group; })) return group;
+        }
+        return '';
+    }
+
+    function firstTaxonomyGroup() {
+        return taxonomy.length ? taxonomy[0].group : 'transformer';
+    }
+
+    function resolveFilter(filter, products) {
+        if (filterExists(filter.group, filter.sub)) return filter;
+        var fallbackGroup = firstGroupWithProducts(products) || firstTaxonomyGroup();
+        var next = Object.assign({}, filter, {
+            group: fallbackGroup,
+            sub: '',
+            page: 1
+        });
+        setQueryParams({ group: next.group, sub: '', page: '' });
+        return next;
+    }
+
     function taxonomyLabel(group, sub) {
-        var parent = taxonomy.find(function (item) { return item.group === group; }) || taxonomy[0];
+        var parent = findTaxonomyGroup(group) || taxonomy[0] || FALLBACK_TAXONOMY[0];
         if (!sub) return isArabic ? (parent.labelAr || parent.label) : parent.label;
         var child = parent.children.find(function (item) { return item.sub === sub; });
         return child ? (isArabic ? (child.labelAr || child.label) : child.label) : (isArabic ? (parent.labelAr || parent.label) : parent.label);
@@ -256,7 +274,7 @@
     }
 
     function renderProducts(products) {
-        var filter = selectedFilter();
+        var filter = resolveFilter(selectedFilter(), products);
         var keywordEl = document.getElementById('catalog-search');
         if (keywordEl && keywordEl.value !== filter.search) keywordEl.value = filter.search;
         var list = filterProducts(products, filter.group, filter.sub, filter.search);
@@ -330,7 +348,7 @@
     }
 
     function clearFilters() {
-        setQueryParams({ group: 'transformer', sub: '', search: '', page: '' });
+        setQueryParams({ group: firstTaxonomyGroup(), sub: '', search: '', page: '' });
         renderProducts(productsCache);
     }
 
@@ -349,11 +367,47 @@
         document.body.classList.remove('product-category-panel-open');
     }
 
+    function renderProductTree() {
+        var body = document.querySelector('.product-tree-body');
+        if (!body) return;
+        body.innerHTML = '';
+        taxonomy.forEach(function (parent) {
+            var groupEl = document.createElement('div');
+            groupEl.className = 'product-tree-group';
+
+            var parentButton = document.createElement('button');
+            parentButton.type = 'button';
+            parentButton.className = 'tree-parent';
+            parentButton.setAttribute('data-product-filter', '');
+            parentButton.setAttribute('data-group', parent.group);
+            parentButton.textContent = taxonomyLabel(parent.group, '');
+            groupEl.appendChild(parentButton);
+
+            if (parent.children && parent.children.length) {
+                var childrenEl = document.createElement('div');
+                childrenEl.className = 'tree-children';
+                parent.children.forEach(function (child) {
+                    var childButton = document.createElement('button');
+                    childButton.type = 'button';
+                    childButton.className = 'tree-child';
+                    childButton.setAttribute('data-product-filter', '');
+                    childButton.setAttribute('data-group', parent.group);
+                    childButton.setAttribute('data-sub', child.sub);
+                    childButton.textContent = taxonomyLabel(parent.group, child.sub);
+                    childrenEl.appendChild(childButton);
+                });
+                groupEl.appendChild(childrenEl);
+            }
+
+            body.appendChild(groupEl);
+        });
+    }
+
     function initProductTree() {
+        renderProductTree();
         document.querySelectorAll('[data-product-filter]').forEach(function (button) {
-            button.textContent = taxonomyLabel(button.getAttribute('data-group') || 'transformer', button.getAttribute('data-sub') || '');
             button.addEventListener('click', function () {
-                updateFilter(button.getAttribute('data-group') || 'transformer', button.getAttribute('data-sub') || '');
+                updateFilter(button.getAttribute('data-group') || firstTaxonomyGroup(), button.getAttribute('data-sub') || '');
             });
         });
 
@@ -482,36 +536,66 @@
         });
     }
 
-    function loadProducts() {
-        fetch('/api/products')
+    function normalizeTaxonomyResponse(payload) {
+        var data = payload && payload.ok === true ? payload.data : payload;
+        if (!Array.isArray(data) || !data.length) throw new Error('Invalid product categories response');
+        return data.map(function (parent) {
+            return {
+                group: parent.group || '',
+                label: parent.label || parent.group || '',
+                labelAr: parent.labelAr || parent.label || parent.group || '',
+                children: Array.isArray(parent.children) ? parent.children.map(function (child) {
+                    return {
+                        sub: child.sub || '',
+                        label: child.label || child.sub || '',
+                        labelAr: child.labelAr || child.label || child.sub || ''
+                    };
+                }).filter(function (child) { return child.sub; }) : []
+            };
+        }).filter(function (parent) { return parent.group; });
+    }
+
+    function loadCategories() {
+        return fetch('/api/product-categories')
             .then(function (res) {
-                if (!res.ok) throw new Error('API request failed');
+                if (!res.ok) throw new Error('Category API request failed');
                 return res.json();
             })
-            .then(function (products) {
-                productsCache = products.map(normalizeProduct);
-                initProductTree();
-                renderProducts(productsCache);
-            })
-            .catch(function () {
-                fetch(assetPrefix + 'data/products.json')
-                    .then(function (res) {
-                        if (!res.ok) throw new Error('Fallback request failed');
-                        return res.json();
-                    })
-                    .then(function (products) {
-                        markStaticProductFallback();
-                        productsCache = products.map(normalizeProduct);
-                        initProductTree();
-                        renderProducts(productsCache);
-                    })
-                    .catch(showError);
+            .then(normalizeTaxonomyResponse)
+            .catch(function (err) {
+                if (window.console && console.warn) {
+                    console.warn('Product categories API unavailable; using fallback taxonomy.', err);
+                }
+                return FALLBACK_TAXONOMY.slice();
             });
     }
 
+    function loadProducts() {
+        return fetch('/api/products')
+            .then(function (res) {
+                if (!res.ok) throw new Error('Products API request failed');
+                return res.json();
+            })
+            .then(function (products) {
+                if (!Array.isArray(products)) throw new Error('Invalid products response');
+                return products;
+            });
+    }
+
+    function initCatalog() {
+        Promise.all([loadCategories(), loadProducts()])
+            .then(function (results) {
+                taxonomy = results[0];
+                productsCache = results[1].map(normalizeProduct);
+                initProductTree();
+                renderProducts(productsCache);
+            })
+            .catch(showError);
+    }
+
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', loadProducts);
+        document.addEventListener('DOMContentLoaded', initCatalog);
     } else {
-        loadProducts();
+        initCatalog();
     }
 })();

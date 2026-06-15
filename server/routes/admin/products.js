@@ -4,6 +4,7 @@ const path = require('path');
 const multer = require('multer');
 const { getDb } = require('../../lib/db');
 const { ensureDirectory, resolveUploadDir, resolveUploadPublicPath } = require('../../lib/fileStore');
+const { getCategoryMapping } = require('../../lib/category-helper');
 const { sendError, insertAuditLog } = require('./helpers');
 
 const router = express.Router();
@@ -71,6 +72,34 @@ function normalizeStatus(value, defaultValue) {
     const status = String(value || '').trim();
     if (!status) return defaultValue;
     return STATUSES.indexOf(status) !== -1 ? status : null;
+}
+
+function resolveProductCategoryMapping(db, categoryIdValue) {
+    const categoryId = parseInteger(categoryIdValue, null);
+    if (!categoryId) {
+        return { error: '所选分类不存在或已停用' };
+    }
+
+    const category = db.prepare(`
+        SELECT id, slug
+        FROM categories
+        WHERE id = ? AND type = 'product' AND is_active = 1
+    `).get(categoryId);
+
+    if (!category) {
+        return { error: '所选分类不存在或已停用' };
+    }
+
+    const mapping = getCategoryMapping(category.slug);
+    if (!mapping) {
+        return { error: '分类映射未定义，请联系管理员' };
+    }
+
+    return {
+        categoryId: category.id,
+        productGroup: mapping.group,
+        subCategory: mapping.subCategory
+    };
 }
 
 function validateJsonString(value) {
@@ -311,6 +340,11 @@ router.post('/', function (req, res, next) {
         }
 
         const db = getDb();
+        const categoryMapping = resolveProductCategoryMapping(db, body.category_id);
+        if (categoryMapping.error) {
+            return sendError(res, 422, 'VALIDATION_ERROR', categoryMapping.error);
+        }
+
         const now = Date.now();
         const createProduct = db.transaction(function () {
             const result = db.prepare(`
@@ -333,9 +367,9 @@ router.post('/', function (req, res, next) {
             `).run({
                 legacy_id: body.legacy_id ? String(body.legacy_id).trim() : null,
                 slug: body.slug ? String(body.slug).trim() : makeSlug(nameEn),
-                category_id: body.category_id == null || body.category_id === '' ? null : parseInteger(body.category_id, null),
-                product_group: body.product_group ? String(body.product_group).trim() : '',
-                sub_category: body.sub_category ? String(body.sub_category).trim() : '',
+                category_id: categoryMapping.categoryId,
+                product_group: categoryMapping.productGroup,
+                sub_category: categoryMapping.subCategory,
                 aliases_json: aliasesJson,
                 status,
                 sort_order: parseInteger(body.sort_order, 0),
@@ -393,6 +427,14 @@ router.put('/:id', function (req, res, next) {
             return sendError(res, 422, 'VALIDATION_ERROR', 'Invalid cover_image path.');
         }
 
+        let categoryMapping = null;
+        if (body.category_id !== undefined) {
+            categoryMapping = resolveProductCategoryMapping(db, body.category_id);
+            if (categoryMapping.error) {
+                return sendError(res, 422, 'VALIDATION_ERROR', categoryMapping.error);
+            }
+        }
+
         const updateProduct = db.transaction(function () {
             const timestamp = Date.now();
             db.prepare(`
@@ -419,9 +461,9 @@ router.put('/:id', function (req, res, next) {
                 WHERE id = @id
             `).run({
                 id: before.id,
-                category_id: body.category_id === undefined ? before.category_id : (body.category_id == null || body.category_id === '' ? null : parseInteger(body.category_id, null)),
-                product_group: body.product_group == null ? before.product_group : String(body.product_group).trim(),
-                sub_category: body.sub_category == null ? before.sub_category : String(body.sub_category).trim(),
+                category_id: categoryMapping ? categoryMapping.categoryId : before.category_id,
+                product_group: categoryMapping ? categoryMapping.productGroup : before.product_group,
+                sub_category: categoryMapping ? categoryMapping.subCategory : before.sub_category,
                 aliases_json: aliasesJson,
                 status,
                 sort_order: body.sort_order == null ? before.sort_order : parseInteger(body.sort_order, before.sort_order),

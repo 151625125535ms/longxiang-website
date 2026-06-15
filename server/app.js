@@ -6,6 +6,7 @@ const path = require('path');
 const { authMiddleware } = require('./middleware/auth');
 const authRoutes = require('./routes/auth');
 const productsRoutes = require('./routes/products');
+const productCategoriesRoutes = require('./routes/product-categories');
 const companyRoutes = require('./routes/company');
 const inquiriesRoutes = require('./routes/inquiries');
 const certificationsRoutes = require('./routes/certifications');
@@ -159,6 +160,7 @@ app.use(express.static(path.join(__dirname, '..'), {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productsRoutes);
+app.use('/api/product-categories', productCategoriesRoutes);
 app.use('/api/company', companyRoutes);
 app.use('/api/inquiries', inquiriesRoutes);
 app.use('/api/certifications', certificationsRoutes);

@@ -44,22 +44,22 @@
 
 ## 当前任务
 
-Admin UI 视觉美化 + 内容管理重设计（Batch 7）。
+产品分类与前台产品展示一致性优化。
 
 详见：
 
-- [BATCH7_DESIGN_SPEC.md](docs/admin-ui/BATCH7_DESIGN_SPEC.md) — 核心设计决策与代码片段
-- [ADMIN_UI_WORKFLOW.md](docs/admin-ui/ADMIN_UI_WORKFLOW.md) — Admin UI 专项工作流
-- [CMS_INVARIANTS.md](docs/cms/CMS_INVARIANTS.md) — 绝对禁止清单（每次写代码前必读）
+- [product-category-sync-optimization-plan.md](docs/tasks/product-category-sync-optimization-plan.md) — 方案文档
+- [product-category-sync-execution-steps.md](docs/tasks/product-category-sync-execution-steps.md) — 分步执行清单
+- [PROGRESS.md](PROGRESS.md) — 当前进度（Step 1 已完成，从 Step 2 继续）
 
 ## 静态检查命令（每次 commit 前必须全部通过）
 
 ```powershell
 node --check server/app.js
-node --check server/routes/company.js
-node --check server/routes/education.js
-node --check server/routes/admin/content-blocks.js
-node --check admin/js/admin.js
+node --check server/routes/products.js
+node --check server/lib/category-helper.js
+node --check js/products-list.js
+node --check js/main.js
 git diff --check
 ```
 
@@ -69,9 +69,9 @@ git diff --check
 # 本地开发服务器
 $env:USE_SQLITE="true"; npm start
 
-# 内容块列表
-curl http://localhost:3000/api/admin/content-blocks?page=1^&pageSize=20
+# 产品分类接口（Step 2 完成后可用）
+curl http://localhost:3000/api/product-categories
 
-# education 字段验证
-curl http://localhost:3000/api/education | node -e "process.stdin.resume();let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{const b=JSON.parse(d);console.log(b.hero&&b.hero.title?'OK_OLD_SCHEMA':'FAIL_NEW_SCHEMA');})"
+# 公开产品接口（检查 group 字段）
+curl http://localhost:3000/api/products
 ```
