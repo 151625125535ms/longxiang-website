@@ -719,9 +719,9 @@
 
     function injectFavicons() {
         var icons = [
-            { rel: 'icon', type: 'image/png', sizes: '32x32', href: assetPrefix + 'favicon-32x32.png' },
-            { rel: 'icon', type: 'image/png', sizes: '16x16', href: assetPrefix + 'favicon-16x16.png' },
-            { rel: 'apple-touch-icon', sizes: '180x180', href: assetPrefix + 'apple-touch-icon.png' }
+            { rel: 'icon', type: 'image/png', sizes: '32x32', href: assetPrefix + 'favicon-32x32.png?v=20260615-lxdq' },
+            { rel: 'icon', type: 'image/png', sizes: '16x16', href: assetPrefix + 'favicon-16x16.png?v=20260615-lxdq' },
+            { rel: 'apple-touch-icon', sizes: '180x180', href: assetPrefix + 'apple-touch-icon.png?v=20260615-lxdq' }
         ];
 
         icons.forEach(function (icon) {
