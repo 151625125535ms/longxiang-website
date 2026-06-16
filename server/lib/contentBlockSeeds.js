@@ -1,0 +1,497 @@
+const CONTENT_BLOCK_SEEDS = [
+    {
+        slug: 'home',
+        title_en: 'Home',
+        sort_order: 10,
+        body_json: {
+            hero: {
+                title: 'Henan Longxiang Electrical',
+                subtitle: 'Energy-saving power equipment for industrial, utility, and renewable energy projects.',
+                backgroundImage: 'longxiang-factory-gate.jpg',
+                logo: 'longxiang-logo-symbol.png',
+                logoAlt: 'Longxiang Electrical logo',
+                actions: [
+                    { label: 'View Products', href: 'products.html', className: 'hero-hex-btn primary' },
+                    { label: 'Contact Us', href: 'contact.html', className: 'hero-hex-btn' }
+                ]
+            },
+            proof: [
+                { value: '40+', label: 'years of electrical equipment experience' },
+                { value: '30+', label: 'patents and technical achievements' },
+                { value: '100+', label: 'project applications' }
+            ],
+            products: {
+                title: 'Products',
+                text: 'Explore transformers, switchgear, and integrated power distribution solutions.',
+                allProductsLabel: 'All Products',
+                allProductsHref: 'products.html'
+            },
+            applications: {
+                enabled: true,
+                title: 'Application Industries',
+                text: 'Longxiang equipment supports industrial power distribution, grid upgrades, renewable energy, and infrastructure projects.',
+                button: { label: 'View Solutions', href: 'solutions.html' },
+                cards: [
+                    { title: 'Industrial Power', text: 'Stable transformer and switchgear support for factories and parks.' },
+                    { title: 'Renewable Energy', text: 'Equipment support for photovoltaic, wind, and storage scenarios.' },
+                    { title: 'Infrastructure', text: 'Power distribution solutions for public and commercial projects.' }
+                ]
+            },
+            news: {
+                enabled: true,
+                title: 'News & Updates',
+                text: 'Follow Longxiang project updates, technical progress, and company news.',
+                button: { label: 'Contact for Updates', href: 'contact.html' },
+                cards: [
+                    { date: '2026', title: 'Manufacturing Capability Upgrade', text: 'Longxiang continues to improve power equipment production and quality control.' },
+                    { date: '2026', title: 'Energy-Saving Equipment Focus', text: 'Product solutions remain focused on reliable, low-loss operation.' },
+                    { date: '2026', title: 'Project Support', text: 'The team supports model selection for industrial and energy scenarios.' }
+                ]
+            },
+            trust: {
+                title: 'Trusted Manufacturing Capability',
+                text: 'Longxiang combines manufacturing, quality control, and project delivery experience.',
+                chips: [],
+                cards: []
+            },
+            features: [
+                { title: 'Energy Efficiency', text: 'Focused on low-loss, reliable power equipment.' },
+                { title: 'Project Support', text: 'Suitable for industrial, grid, and renewable energy scenarios.' },
+                { title: 'Quality Control', text: 'Standardized production and inspection processes.' }
+            ],
+            stats: [
+                { value: '40+', count: 40, label: 'Years Experience' },
+                { value: '30+', count: 30, label: 'Patents' },
+                { value: '100+', count: 100, label: 'Projects' }
+            ],
+            cta: {
+                title: 'Need a power distribution solution?',
+                text: 'Tell us your voltage, capacity, and project scenario. Our team will help match the right equipment.',
+                button: { label: 'Send Inquiry', href: 'contact.html' }
+            },
+            seo: {
+                title: 'Henan Longxiang Electrical | Power Equipment Manufacturer',
+                description: 'Longxiang Electrical manufactures energy-saving transformers, switchgear, and power distribution equipment.'
+            }
+        }
+    },
+    {
+        slug: 'solutions',
+        title_en: 'Solutions',
+        sort_order: 20,
+        body_json: {
+            hero: {
+                title: 'Solutions',
+                subtitle: 'Power equipment solutions for industry, infrastructure, and new energy.'
+            },
+            anchors: [],
+            overview: { title: 'Application-Oriented Solutions', text: 'Select equipment and service support by project scenario.', cards: [] },
+            marketFit: { title: 'Project Fit', text: 'Designed for stable operation and practical deployment.', items: [] },
+            sections: [],
+            scenarios: { title: 'Scenarios', items: [] },
+            credentials: { title: 'Credentials', text: '' },
+            cta: { title: 'Discuss Your Project', text: 'Share your project requirements with us.', button: { label: 'Contact Us', href: 'contact.html' } },
+            seo: { title: 'Solutions | Longxiang Electrical', description: 'Power equipment solutions from Longxiang Electrical.' }
+        }
+    },
+    {
+        slug: 'about-us',
+        title_en: 'About Us',
+        sort_order: 30,
+        body_json: {
+            hero: {
+                kicker: 'About Longxiang',
+                title: 'About Longxiang',
+                subtitle: 'Reliable power equipment manufacturing for industrial, grid, and energy projects.',
+                backgroundImage: 'longxiang-factory-gate.jpg',
+                actions: [
+                    { label: 'View Products', href: 'products.html' },
+                    { label: 'Contact Us', href: 'contact.html' }
+                ]
+            },
+            snapshot: {
+                kicker: 'Company Profile',
+                title: 'Power equipment manufacturing capability',
+                text: 'Longxiang focuses on transformers, switchgear, and supporting power distribution equipment.',
+                body: [
+                    'The company supports industrial, infrastructure, and energy project scenarios.',
+                    'Production and inspection processes are organized around reliable delivery and practical operation.'
+                ],
+                stats: [
+                    { value: '40+', label: 'Years of experience' },
+                    { value: '30+', label: 'Technical achievements' },
+                    { value: '100+', label: 'Project applications' }
+                ],
+                video: { caption: 'Longxiang manufacturing capability' }
+            },
+            history: {
+                kicker: 'Development',
+                title: 'Longxiang development history',
+                text: 'Review key stages of Longxiang manufacturing and project service capability.'
+            },
+            milestones: [
+                { date: '1980s', title: 'Manufacturing Foundation', text: 'Longxiang began building power equipment production capability.' },
+                { date: 'Today', title: 'Energy-Saving Equipment', text: 'The company continues to serve industrial and energy projects.' }
+            ],
+            quality: {
+                kicker: 'Quality Credentials',
+                title: 'Qualification and quality control',
+                text: 'Qualification materials, inspection routines, and production management support reliable delivery.',
+                items: ['Standardized production', 'Inspection process', 'Project support'],
+                certs: []
+            },
+            cta: {
+                title: 'Discuss Your Equipment Requirements',
+                text: 'Share your project scenario and our team will help match suitable products.',
+                button: { label: 'Contact Us', href: 'contact.html' }
+            },
+            seo: { title: 'About Longxiang Electrical', description: 'Learn about Henan Longxiang Electrical manufacturing capability.' }
+        }
+    },
+    {
+        slug: 'contact',
+        title_en: 'Contact',
+        sort_order: 40,
+        body_json: {
+            hero: {
+                title: 'Contact Us',
+                subtitle: 'Send your project requirements and our team will respond quickly.'
+            },
+            phone: '+86',
+            email: 'sales@example.com',
+            address: 'Henan, China',
+            headquarters: 'Henan, China',
+            officeHours: 'Monday to Friday',
+            googleMapsEmbedUrl: '',
+            openStreetMapUrl: '',
+            mapLocations: {},
+            contactPage: {
+                companyName: 'Henan Longxiang Electrical',
+                infoTitle: 'Contact Longxiang',
+                officeLabel: 'Phone',
+                emailLabel: 'Email',
+                factoryAddressLabel: 'Address',
+                mapTitle: 'Longxiang Location',
+                socialTitle: 'Social Media',
+                form: {
+                    title: 'Send Inquiry',
+                    note: 'Leave your contact details and project requirements.',
+                    footerText: 'We will respond after receiving your message.',
+                    submitLabel: 'Submit Inquiry',
+                    fields: [
+                        { name: 'name', label: 'Name', type: 'text', required: true },
+                        { name: 'email', label: 'Email', type: 'email', required: true },
+                        { name: 'phone', label: 'Phone', type: 'text', column: 'right' },
+                        { name: 'message', label: 'Message', type: 'textarea', required: true, column: 'right' }
+                    ]
+                },
+                faq: {
+                    title: 'Common Questions',
+                    text: 'Contact us for model selection, quotation, and project support.',
+                    items: [
+                        { question: 'What information should I provide?', answer: 'Please share voltage level, capacity, quantity, application scenario, and destination if available.' },
+                        { question: 'Can Longxiang support model selection?', answer: 'Yes. Our team can provide product matching suggestions based on your project requirements.' }
+                    ]
+                }
+            },
+            seo: { title: 'Contact Longxiang Electrical', description: 'Contact Henan Longxiang Electrical for power equipment inquiries.' }
+        }
+    },
+    {
+        slug: 'product-pages',
+        title_en: 'Product Pages',
+        sort_order: 60,
+        body_json: {
+            productsHero: {
+                title: 'Products',
+                subtitle: 'Browse Longxiang transformers, switchgear, and power distribution equipment.'
+            },
+            detailHero: {
+                title: 'Product Details',
+                subtitle: 'Review product information and request a quotation.'
+            },
+            detailLabels: {
+                overview: 'Overview',
+                specifications: 'Specifications',
+                inquiry: 'Request a Quote',
+                relatedProducts: 'Related Products'
+            },
+            notFound: {
+                title: 'Product not found',
+                text: 'Please return to the product list and choose another item.',
+                button: { label: 'Back to Products', href: 'products.html' }
+            },
+            listingSupport: {
+                title: 'Product Support',
+                text: 'Filter by product category and contact us for model selection support.'
+            },
+            listingCta: {
+                title: 'Need model selection help?',
+                text: 'Send us your project parameters and application scenario.',
+                button: { label: 'Contact Us', href: 'contact.html' }
+            },
+            detailSupport: {
+                title: 'Technical Support',
+                text: 'Our team can help confirm parameters, voltage levels, and delivery requirements.'
+            },
+            detailFaq: [],
+            inquiryForm: {
+                title: 'Product Inquiry',
+                note: 'Leave your contact details and requirements.',
+                submitLabel: 'Submit Inquiry'
+            },
+            seo: { title: 'Products | Longxiang Electrical', description: 'Product list of Longxiang Electrical.' },
+            detailSeo: { title: 'Product Detail | Longxiang Electrical', description: 'Longxiang Electrical product details.' }
+        }
+    },
+    {
+        slug: 'global-shell',
+        title_en: 'Global Shell',
+        sort_order: 70,
+        body_json: {
+            navigation: {
+                quickTitle: 'Quick Links',
+                productsTitle: 'Products',
+                cookieSettingsLabel: 'Cookie Settings',
+                mainLinks: [
+                    { label: 'Home', href: 'index.html', activePages: ['index.html'] },
+                    { label: 'Products', href: 'products.html', activePages: ['products.html', 'product-detail.html'] },
+                    { label: 'Applications', href: 'solutions.html', activePages: ['solutions.html'] },
+                    { label: 'About Us', href: 'about.html', activePages: ['about.html'] },
+                    { label: 'Contact', href: 'contact.html', activePages: ['contact.html'] }
+                ],
+                quickLinks: [
+                    { label: 'About Us', href: 'about.html' },
+                    { label: 'Contact Us', href: 'contact.html' },
+                    { label: 'Certificates', href: 'certifications.html' }
+                ],
+                productLinks: [
+                    { label: 'All Products', href: 'products.html' }
+                ]
+            },
+            footer: {
+                text: 'Henan Longxiang Electrical manufactures power equipment for industrial and energy projects.',
+                copyright: '© Henan Longxiang Electrical Co., Ltd. All rights reserved.',
+                icp: ''
+            },
+            inquiry: {
+                title: 'Get a Quote',
+                text: 'Send us your requirements and our team will respond quickly.',
+                floatingLabel: 'Inquiry',
+                hiddenName: 'Website visitor',
+                productContext: 'General inquiry',
+                messagePlaceholder: 'Tell us your voltage, capacity, quantity, and project location.',
+                emailPlaceholder: 'Email',
+                phonePlaceholder: 'Phone / WhatsApp',
+                submitLabel: 'Submit',
+                modalTitle: 'Request a Quote',
+                modalText: 'Fill in your contact details and project requirements.',
+                modalSubmitLabel: 'Submit Inquiry',
+                generalInquiryLabel: 'General inquiry',
+                productMessageTemplate: 'I would like to request a quotation for {product}.',
+                productIdMessageTemplate: 'I would like to request a quotation for product ID {product}.',
+                modalFields: [
+                    { name: 'name', label: 'Name', type: 'text', required: true, row: 1 },
+                    { name: 'email', label: 'Email', type: 'email', required: true, row: 1 },
+                    { name: 'phone', label: 'Phone', type: 'text', row: 2 },
+                    { name: 'company', label: 'Company', type: 'text', row: 2 },
+                    { name: 'message', label: 'Message', type: 'textarea', required: true, rows: 5 }
+                ]
+            },
+            cookieConsent: {},
+            embedConsent: {},
+            seoDefaults: {
+                title: 'Henan Longxiang Electrical',
+                description: 'Power equipment manufacturer.'
+            }
+        }
+    },
+    {
+        slug: 'certifications',
+        title_en: 'Certifications',
+        sort_order: 80,
+        body_json: {
+            hero: { title: 'Certificates', subtitle: 'Quality, qualification, and technical certificates.' },
+            intro: { title: 'Quality Credentials', text: 'Review Longxiang qualification materials.' },
+            stats: [],
+            toolbar: { searchPlaceholder: 'Search certificates', allLabel: 'All' },
+            seo: { title: 'Certificates | Longxiang Electrical', description: 'Certificates and qualification materials.' }
+        }
+    },
+    {
+        slug: 'compare',
+        title_en: 'Compare',
+        sort_order: 90,
+        body_json: {
+            hero: { title: 'Product Comparison', subtitle: 'Compare selected products.' },
+            toolbar: { backLabel: 'Back', printLabel: 'Print' },
+            emptyState: { title: 'No products selected', text: 'Return to the product list and choose products to compare.' },
+            table: { productLabel: 'Product', categoryLabel: 'Category' },
+            seo: { title: 'Product Comparison | Longxiang Electrical', description: 'Compare Longxiang Electrical products.' }
+        }
+    },
+    {
+        slug: 'not-found',
+        title_en: 'Not Found',
+        sort_order: 100,
+        body_json: {
+            panel: {
+                title: 'Page Not Found',
+                text: 'The page you are looking for does not exist or has been moved.',
+                buttons: [
+                    { label: 'Back Home', href: 'index.html' },
+                    { label: 'View Products', href: 'products.html' }
+                ]
+            },
+            seo: { title: 'Page Not Found | Longxiang Electrical', description: 'The page was not found.' }
+        }
+    }
+];
+
+function isPlainObject(value) {
+    return value != null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function parseBodyJson(value) {
+    try {
+        const parsed = JSON.parse(value || '{}');
+        return isPlainObject(parsed) ? parsed : {};
+    } catch (err) {
+        return {};
+    }
+}
+
+function mergeMissingFields(target, defaults) {
+    const output = isPlainObject(target) ? { ...target } : {};
+    let changed = false;
+
+    Object.keys(defaults || {}).forEach(function (key) {
+        const defaultValue = defaults[key];
+        const currentValue = output[key];
+        if (currentValue === undefined) {
+            output[key] = defaultValue;
+            changed = true;
+            return;
+        }
+        if (isPlainObject(currentValue) && isPlainObject(defaultValue)) {
+            const merged = mergeMissingFields(currentValue, defaultValue);
+            if (merged.changed) {
+                output[key] = merged.value;
+                changed = true;
+            }
+        }
+    });
+
+    return { value: output, changed };
+}
+
+function hasMeaningfulValue(value) {
+    if (value == null) return false;
+    if (typeof value === 'string') return value.trim() !== '';
+    if (typeof value === 'number' || typeof value === 'boolean') return true;
+    if (Array.isArray(value)) return value.some(hasMeaningfulValue);
+    if (isPlainObject(value)) {
+        return Object.keys(value).some(function (key) {
+            return key !== 'sort_order' && hasMeaningfulValue(value[key]);
+        });
+    }
+    return false;
+}
+
+function getNestedValue(obj, path) {
+    return path.reduce(function (current, key) {
+        return current && current[key] !== undefined ? current[key] : undefined;
+    }, obj);
+}
+
+function setNestedValue(obj, path, value) {
+    let current = obj;
+    path.forEach(function (key, index) {
+        if (index === path.length - 1) {
+            current[key] = value;
+            return;
+        }
+        if (!isPlainObject(current[key])) current[key] = {};
+        current = current[key];
+    });
+}
+
+function fillBlankArrayFromDefaults(body, defaults, path) {
+    const defaultValue = getNestedValue(defaults, path);
+    if (!Array.isArray(defaultValue) || !defaultValue.length) return false;
+    const currentValue = getNestedValue(body, path);
+    if (Array.isArray(currentValue) && hasMeaningfulValue(currentValue)) return false;
+    setNestedValue(body, path, defaultValue);
+    return true;
+}
+
+function mergeSeedBody(slug, target, defaults) {
+    const merged = mergeMissingFields(target, defaults);
+    let changed = merged.changed;
+    const body = merged.value;
+
+    if (slug === 'about-us') {
+        changed = fillBlankArrayFromDefaults(body, defaults, ['milestones']) || changed;
+    }
+    if (slug === 'contact') {
+        changed = fillBlankArrayFromDefaults(body, defaults, ['contactPage', 'faq', 'items']) || changed;
+    }
+
+    return { value: body, changed };
+}
+
+function ensureContentBlockSeeds(db) {
+    if (!db) return { inserted: 0, updated: 0, checked: 0 };
+    const now = Date.now();
+    const select = db.prepare('SELECT slug, body_json FROM content_blocks WHERE slug = ?');
+    const insert = db.prepare(`
+        INSERT OR IGNORE INTO content_blocks
+            (slug, title_en, title_ar, body_json, status, sort_order, version, created_at, updated_at)
+        VALUES
+            (@slug, @title_en, @title_ar, @body_json, 'published', @sort_order, 1, @created_at, @updated_at)
+    `);
+    const update = db.prepare(`
+        UPDATE content_blocks
+        SET body_json = @body_json, updated_at = @updated_at
+        WHERE slug = @slug
+    `);
+
+    let inserted = 0;
+    let updated = 0;
+    const run = db.transaction(function () {
+        CONTENT_BLOCK_SEEDS.forEach(function (seed) {
+            const existing = select.get(seed.slug);
+            if (existing) {
+                const merged = mergeSeedBody(seed.slug, parseBodyJson(existing.body_json), seed.body_json || {});
+                if (merged.changed) {
+                    update.run({
+                        slug: seed.slug,
+                        body_json: JSON.stringify(merged.value),
+                        updated_at: now
+                    });
+                    updated += 1;
+                }
+                return;
+            }
+
+            const result = insert.run({
+                slug: seed.slug,
+                title_en: seed.title_en,
+                title_ar: seed.title_ar || '',
+                body_json: JSON.stringify(seed.body_json || {}),
+                sort_order: seed.sort_order || 0,
+                created_at: now,
+                updated_at: now
+            });
+            inserted += result.changes;
+        });
+    });
+
+    run();
+    return { inserted, updated, checked: CONTENT_BLOCK_SEEDS.length };
+}
+
+module.exports = {
+    CONTENT_BLOCK_SEEDS,
+    ensureContentBlockSeeds
+};

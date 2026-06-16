@@ -385,7 +385,7 @@
             products: { title: '产品列表', group: 'products', groupLabel: '产品', breadcrumb: '产品 › 产品列表', description: '管理产品资料、状态、分类与首页推荐。' },
             categories: { title: '分类管理', group: 'products', groupLabel: '产品', breadcrumb: '产品 › 分类管理', description: '维护产品分类名称、排序与展示状态。' },
             inquiries: { title: '询盘列表', group: 'inquiries', groupLabel: '询盘', breadcrumb: '询盘 › 询盘列表', description: '查看客户询盘并进行状态跟进或批量处理。' },
-            'visual-builder': { title: '可视化管理', group: 'content', groupLabel: '内容', breadcrumb: '内容 › 可视化管理', description: '按页面和模块编辑前台文字、图片、按钮、显示状态和基础 SEO。' },
+            'visual-builder': { title: '可视化管理', group: 'visual', groupLabel: '可视化管理', breadcrumb: '可视化管理', description: '左侧预览真实前台页面，右侧按当前子模块编辑中文字段。' },
             'content-home': { title: '首页', group: 'content', groupLabel: '内容', breadcrumb: '内容 › 首页', description: '维护首页 Hero、统计、CTA 等内容块。' },
             'content-solutions': { title: '解决方案', group: 'content', groupLabel: '内容', breadcrumb: '内容 › 解决方案', description: '维护解决方案页面内容块。' },
             'content-company-overview': { title: '企业概况', group: 'content', groupLabel: '内容', breadcrumb: '内容 › 企业概况', description: '维护公开网站企业概况内容块。' },
@@ -424,53 +424,43 @@
                 slug: 'home',
                 previewUrl: '../index.html',
                 modules: [
-                    { key: 'hero', label: '首屏', path: 'hero', fields: [
+                    { key: 'hero', label: '首屏', path: 'hero', previewSelector: '.hero-hex', fields: [
                         { key: 'title', label: '主标题', type: 'text', required: true },
                         { key: 'subtitle', label: '副标题', type: 'textarea' },
                         { key: 'backgroundImage', label: '背景图', type: 'asset' },
                         { key: 'logo', label: '品牌图', type: 'asset' }
                     ] },
-                    { key: 'heroActions', label: '首屏按钮', path: 'hero.actions', array: true, itemLabel: '按钮', fields: [
+                    { key: 'heroActions', label: '首屏按钮', path: 'hero.actions', previewSelector: '.hero-hex-actions, .hero-hex-buttons, .hero-hex', array: true, itemLabel: '按钮', fields: [
                         { key: 'label', label: '按钮文字', type: 'text' },
                         { key: 'href', label: '按钮链接', type: 'url' },
                         { key: 'className', label: '按钮样式', type: 'text' }
                     ] },
-                    { key: 'advantages', label: '企业优势', path: 'features', array: true, itemLabel: '优势', fields: [
+                    { key: 'advantages', label: '企业优势', path: 'features', previewSelector: '[data-home-features], #why-choose', array: true, itemLabel: '优势', fields: [
                         { key: 'title', label: '标题', type: 'text' },
                         { key: 'text', label: '说明', type: 'textarea' },
                         { key: 'icon', label: '图标/符号', type: 'text' }
                     ] },
-                    { key: 'products', label: '产品推荐', path: 'products', fields: [
+                    { key: 'products', label: '产品推荐', path: 'products', previewSelector: '[data-home-products], #products', fields: [
                         { key: 'title', label: '模块标题', type: 'text' },
                         { key: 'text', label: '模块说明', type: 'textarea' },
                         { key: 'allProductsLabel', label: '按钮文字', type: 'text' },
                         { key: 'allProductsHref', label: '按钮链接', type: 'url' }
                     ] },
-                    { key: 'applications', label: '应用行业', path: 'applications', fields: [
+                    { key: 'applications', label: '应用行业', path: 'applications', previewSelector: '[data-home-applications], #applications', fields: [
                         { key: 'title', label: '模块标题', type: 'text' },
                         { key: 'text', label: '模块说明', type: 'textarea' },
                         { key: 'button.label', label: '按钮文字', type: 'text' },
                         { key: 'button.href', label: '按钮链接', type: 'url' },
                         { key: 'enabled', label: '前台显示', type: 'toggle' }
                     ] },
-                    { key: 'applicationCards', label: '应用行业条目', path: 'applications.cards', array: true, itemLabel: '行业', fields: [
-                        { key: 'title', label: '行业名称', type: 'text' },
-                        { key: 'text', label: '行业说明', type: 'textarea' }
-                    ] },
-                    { key: 'news', label: '新闻动态', path: 'news', fields: [
+                    { key: 'news', label: '新闻动态', path: 'news', previewSelector: '[data-home-news], #news', fields: [
                         { key: 'title', label: '模块标题', type: 'text' },
                         { key: 'text', label: '模块说明', type: 'textarea' },
                         { key: 'button.label', label: '按钮文字', type: 'text' },
                         { key: 'button.href', label: '按钮链接', type: 'url' },
                         { key: 'enabled', label: '前台显示', type: 'toggle' }
                     ] },
-                    { key: 'newsCards', label: '新闻条目', path: 'news.cards', array: true, itemLabel: '新闻', fields: [
-                        { key: 'date', label: '日期', type: 'text' },
-                        { key: 'title', label: '标题', type: 'text' },
-                        { key: 'text', label: '摘要', type: 'textarea' },
-                        { key: 'href', label: '链接', type: 'url' }
-                    ] },
-                    { key: 'cta', label: '底部 CTA', path: 'cta', fields: [
+                    { key: 'cta', label: '底部 CTA', path: 'cta', previewSelector: '[data-home-cta], .cta-section', fields: [
                         { key: 'title', label: '标题', type: 'text' },
                         { key: 'text', label: '说明', type: 'textarea' },
                         { key: 'button.label', label: '按钮文字', type: 'text' },
@@ -484,24 +474,25 @@
                 slug: 'about-us',
                 previewUrl: '../about.html',
                 modules: [
-                    { key: 'hero', label: '页面头图', path: 'hero', fields: [
+                    { key: 'hero', label: '页面头图', path: 'hero', previewSelector: '.about-page-hero, .page-hero', fields: [
+                        { key: 'kicker', label: '栏目小标题', type: 'text' },
                         { key: 'title', label: '页面标题', type: 'text' },
                         { key: 'subtitle', label: '页面说明', type: 'textarea' },
                         { key: 'image', label: '头图', type: 'asset' },
                         { key: 'backgroundImage', label: '背景图', type: 'asset' }
                     ] },
-                    { key: 'snapshot', label: '公司简介', path: 'snapshot', fields: [
+                    { key: 'snapshot', label: '公司简介', path: 'snapshot', previewSelector: '.about-snapshot-section', fields: [
                         { key: 'kicker', label: '小标题', type: 'text' },
                         { key: 'title', label: '标题', type: 'text' },
                         { key: 'text', label: '简介', type: 'textarea' },
                         { key: 'video.poster', label: '展示图', type: 'asset' }
                     ] },
-                    { key: 'history', label: '发展历程', path: 'milestones', array: true, itemLabel: '历程', fields: [
-                        { key: 'year', label: '年份', type: 'text' },
+                    { key: 'history', label: '发展历程', path: 'milestones', previewSelector: '.about-history-section', array: true, itemLabel: '历程', fields: [
+                        { key: 'date', label: '年份/日期', type: 'text' },
                         { key: 'title', label: '标题', type: 'text' },
-                        { key: 'description', label: '说明', type: 'textarea' }
+                        { key: 'text', label: '说明', type: 'textarea' }
                     ] },
-                    { key: 'honors', label: '荣誉资质', path: 'quality', fields: [
+                    { key: 'honors', label: '荣誉资质', path: 'quality', previewSelector: '.about-quality-section', fields: [
                         { key: 'kicker', label: '小标题', type: 'text' },
                         { key: 'title', label: '标题', type: 'text' },
                         { key: 'text', label: '说明', type: 'textarea' },
@@ -515,20 +506,29 @@
                 slug: 'product-pages',
                 previewUrl: '../products.html',
                 modules: [
-                    { key: 'hero', label: '页面标题', path: 'productsHero', fields: [
+                    { key: 'hero', label: '页面标题', path: 'productsHero', previewSelector: '.page-hero', fields: [
                         { key: 'title', label: '页面标题', type: 'text' },
                         { key: 'subtitle', label: '页面说明', type: 'textarea' },
                         { key: 'backgroundImage', label: '背景图', type: 'asset' }
                     ] },
-                    { key: 'intro', label: '说明文案', path: 'listingSupport', fields: [
+                    { key: 'intro', label: '说明文案', path: 'listingSupport', previewSelector: '[data-product-listing-support]', fields: [
                         { key: 'title', label: '标题', type: 'text' },
                         { key: 'text', label: '说明', type: 'textarea' }
                     ] },
-                    { key: 'settings', label: '列表展示设置', path: 'listingCta', fields: [
+                    { key: 'settings', label: '列表展示设置', path: 'listingCta', previewSelector: '[data-product-listing-cta]', fields: [
                         { key: 'title', label: '引导标题', type: 'text' },
                         { key: 'text', label: '引导说明', type: 'textarea' },
                         { key: 'button.label', label: '按钮文字', type: 'text' },
                         { key: 'button.href', label: '按钮链接', type: 'url' }
+                    ] },
+                    { key: 'detail', label: '详情页公共文案', path: '', previewUrl: '../product-detail.html', previewSelector: '.product-detail-section, [data-product-detail-support], [data-product-detail-inquiry]', fields: [
+                        { key: 'detailHero.title', label: '详情页标题', type: 'text' },
+                        { key: 'detailHero.subtitle', label: '详情页说明', type: 'textarea' },
+                        { key: 'detailSupport.title', label: '技术支持标题', type: 'text' },
+                        { key: 'detailSupport.text', label: '技术支持说明', type: 'textarea' },
+                        { key: 'inquiryForm.title', label: '询盘表单标题', type: 'text' },
+                        { key: 'inquiryForm.note', label: '询盘表单说明', type: 'textarea' },
+                        { key: 'inquiryForm.submitLabel', label: '提交按钮文字', type: 'text' }
                     ] }
                 ]
             },
@@ -538,20 +538,31 @@
                 slug: 'contact',
                 previewUrl: '../contact.html',
                 modules: [
-                    { key: 'contactInfo', label: '联系方式', path: '', fields: [
+                    { key: 'hero', label: '页面头图', path: 'hero', previewSelector: '.page-hero', fields: [
+                        { key: 'title', label: '页面标题', type: 'text' },
+                        { key: 'subtitle', label: '页面说明', type: 'textarea' },
+                        { key: 'backgroundImage', label: '背景图', type: 'asset' }
+                    ] },
+                    { key: 'contactInfo', label: '联系方式', path: '', previewSelector: '.contact-primary-section, .contact-info-card', fields: [
                         { key: 'phone', label: '电话', type: 'text' },
                         { key: 'email', label: '邮箱', type: 'email' },
                         { key: 'address', label: '地址', type: 'textarea' },
+                        { key: 'headquarters', label: '总部地址', type: 'textarea' },
                         { key: 'officeHours', label: '办公时间', type: 'text' }
                     ] },
-                    { key: 'map', label: '地图信息', path: '', fields: [
+                    { key: 'map', label: '地图信息', path: '', previewSelector: '.contact-location-panel, .contact-map-frame', fields: [
                         { key: 'googleMapsEmbedUrl', label: 'Google 地图嵌入链接', type: 'url' },
                         { key: 'openStreetMapUrl', label: 'OpenStreetMap 链接', type: 'url' },
                         { key: 'mapQr', label: '地图二维码', type: 'asset' }
                     ] },
-                    { key: 'form', label: '表单说明', path: 'contactPage.form', fields: [
+                    { key: 'form', label: '表单说明', path: 'contactPage.form', previewSelector: '.contact-form-section', fields: [
                         { key: 'title', label: '表单标题', type: 'text' },
-                        { key: 'note', label: '表单说明', type: 'textarea' }
+                        { key: 'note', label: '表单说明', type: 'textarea' },
+                        { key: 'submitLabel', label: '提交按钮文字', type: 'text' }
+                    ] },
+                    { key: 'faq', label: '常见问题', path: 'contactPage.faq', previewSelector: '.faq-block', fields: [
+                        { key: 'title', label: 'FAQ 标题', type: 'text' },
+                        { key: 'text', label: 'FAQ 说明', type: 'textarea' }
                     ] }
                 ]
             },
@@ -561,22 +572,26 @@
                 slug: 'global-shell',
                 previewUrl: '../index.html',
                 modules: [
-                    { key: 'navigation', label: '导航', path: 'navigation.mainLinks', array: true, itemLabel: '导航项', fields: [
+                    { key: 'navigation', label: '导航', path: 'navigation.mainLinks', previewSelector: '.navbar', array: true, itemLabel: '导航项', fields: [
                         { key: 'label', label: '显示名称', type: 'text' },
                         { key: 'href', label: '链接', type: 'url' }
                     ] },
-                    { key: 'footer', label: '底部信息', path: 'footer', fields: [
+                    { key: 'footer', label: '底部信息', path: 'footer', previewSelector: 'footer, .footer', fields: [
                         { key: 'text', label: '公司简介', type: 'textarea' },
                         { key: 'copyright', label: '版权信息', type: 'text' }
                     ] },
-                    { key: 'icp', label: '备案信息', path: 'footer', fields: [
+                    { key: 'icp', label: '备案信息', path: 'footer', previewSelector: '.footer-bottom, footer', fields: [
                         { key: 'icp', label: '备案号', type: 'text' }
                     ] },
-                    { key: 'floating', label: '浮动联系入口', path: 'inquiry', fields: [
+                    { key: 'floating', label: '浮动联系入口', path: 'inquiry', previewSelector: '.floating-inquiry, #inquiry-modal, footer', fields: [
                         { key: 'floatingLabel', label: '浮动按钮文字', type: 'text' },
                         { key: 'title', label: '询盘标题', type: 'text' },
                         { key: 'text', label: '询盘说明', type: 'textarea' },
                         { key: 'submitLabel', label: '提交按钮文字', type: 'text' }
+                    ] },
+                    { key: 'seo', label: 'SEO 默认值', path: 'seoDefaults', fields: [
+                        { key: 'title', label: '默认标题', type: 'text' },
+                        { key: 'description', label: '默认描述', type: 'textarea' }
                     ] }
                 ]
             }
@@ -613,7 +628,26 @@
             document.querySelectorAll('.sidebar-nav a[data-view]').forEach(function (link) {
                 link.addEventListener('click', function (e) {
                     e.preventDefault();
+                    if (link.getAttribute('data-visual-nav-page')) {
+                        if (!selectVisualModule(link.getAttribute('data-visual-nav-page'), link.getAttribute('data-visual-nav-module'))) return;
+                        if (switchView('visual-builder', { skipDirtyCheck: true })) closeMobileSidebar();
+                        return;
+                    }
                     if (switchView(link.getAttribute('data-view'))) closeMobileSidebar();
+                });
+            });
+
+            document.querySelectorAll('[data-visual-page-toggle]').forEach(function (button) {
+                button.addEventListener('click', function () {
+                    var pageEl = button.closest('.visual-nav-page');
+                    var wasExpanded = button.getAttribute('aria-expanded') === 'true';
+                    button.setAttribute('aria-expanded', wasExpanded ? 'false' : 'true');
+                    if (pageEl) pageEl.classList.toggle('is-collapsed', wasExpanded);
+                    if (!wasExpanded) {
+                        var page = visualPageByKey(button.getAttribute('data-visual-page-toggle'));
+                        var module = page && page.modules && page.modules[0];
+                        if (module && selectVisualModule(page.key, module.key)) switchView('visual-builder', { skipDirtyCheck: true });
+                    }
                 });
             });
 
@@ -935,7 +969,13 @@
             if (view !== currentView && !options.skipDirtyCheck && !confirmDiscardChanges()) return false;
             currentView = view;
             document.querySelectorAll('.sidebar-nav a[data-view]').forEach(function (link) {
-                link.classList.toggle('active', link.getAttribute('data-view') === view);
+                var isVisualLink = !!link.getAttribute('data-visual-nav-page');
+                var active = isVisualLink
+                    ? view === 'visual-builder' &&
+                        link.getAttribute('data-visual-nav-page') === visualBuilderState.activePage &&
+                        link.getAttribute('data-visual-nav-module') === visualBuilderState.activeModule
+                    : link.getAttribute('data-view') === view;
+                link.classList.toggle('active', active);
             });
             document.querySelectorAll('.view-section').forEach(function (section) { section.classList.remove('active'); });
 
@@ -944,6 +984,7 @@
 
             expandNavGroupForView(view);
             updateHeaderMeta(view);
+            syncVisualNavActive();
 
             if (view === 'dashboard') loadDashboard();
             if (view === 'products') loadProducts();
@@ -1260,6 +1301,7 @@
             document.getElementById('products-tbody').innerHTML = skeletonRows(9, 5);
             clearErrorBanner('view-products');
             updateProductBatchBar();
+            updateProductsResultCount(null);
             var searchVal = ((document.getElementById('product-search') || {}).value || '').trim();
             var catVal = (document.getElementById('product-category-filter') || {}).value || '';
             var statusVal = (document.getElementById('product-status-filter') || {}).value || '';
@@ -1278,6 +1320,7 @@
                 renderProductsPagination();
             }).catch(function (err) {
                 document.getElementById('products-tbody').innerHTML = emptyRow(9, '加载失败，请刷新重试');
+                updateProductsResultCount(0);
                 showErrorBanner('view-products', '产品数据加载失败，请稍后重试', loadProducts);
                 renderProductsPagination({ page: 1, pageSize: productMeta.pageSize || 20, total: 0 });
                 showToast('加载产品失败：' + err.message, 'error');
@@ -1305,9 +1348,29 @@
             btn.style.display = hasFilters ? '' : 'none';
         }
 
+        function updateProductsResultCount(totalOverride) {
+            var el = document.getElementById('products-result-count');
+            if (!el) return;
+            if (totalOverride == null) {
+                el.textContent = '正在加载产品...';
+                return;
+            }
+            el.textContent = '共 ' + totalOverride + ' 个产品';
+        }
+
+        function syncProductStatusTabs() {
+            var status = (document.getElementById('product-status-filter') || {}).value || '';
+            document.querySelectorAll('[data-product-status]').forEach(function (btn) {
+                var active = btn.getAttribute('data-product-status') === status;
+                btn.classList.toggle('active', active);
+                btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+            });
+        }
+
         function setProductStatusFilter(status) {
             var statusFilter = document.getElementById('product-status-filter');
             if (statusFilter) statusFilter.value = status || '';
+            syncProductStatusTabs();
             productPage = 1;
             loadProducts();
         }
@@ -1315,6 +1378,7 @@
         function renderProductsTable() {
             var tbody = document.getElementById('products-tbody');
             if (!tbody) return;
+            updateProductsResultCount(productMeta && productMeta.total != null ? productMeta.total : products.length);
 
             if (!products.length) {
                 tbody.innerHTML = emptyRow(9, '暂无产品');
@@ -1339,7 +1403,7 @@
                 var thumb = cover
                     ? '<img class="product-thumb" src="../' + escapeHtml(cover) + '" alt="">'
                     : '<div class="product-thumb" style="background:#eef1f5;border:1px solid #d8dee8;"></div>';
-                return '<tr>' +
+                return '<tr data-product-row="' + escapeHtml(productId) + '">' +
                     '<td><input type="checkbox" class="product-row-check" data-id="' + escapeHtml(productId) + '" data-version="' + escapeHtml(product.version) + '"></td>' +
                     '<td><div class="product-name-cell">' + thumb + '<div><div class="product-name-text">' + escapeHtml(chineseName || name || displayId) + '</div><div class="product-id-text">' + escapeHtml(name || displayId) + '</div></div></div></td>' +
                     '<td class="cell-muted product-model-cell">' + escapeHtml(model) + '</td>' +
@@ -1458,10 +1522,26 @@
             var selectAll = document.getElementById('product-select-all');
             if (count) count.textContent = '已选 ' + selected.length + ' 条';
             if (bar) bar.style.display = selected.length ? '' : 'none';
+            all.forEach(function (checkbox) {
+                var row = checkbox.closest ? checkbox.closest('tr') : null;
+                if (row) row.classList.toggle('row-selected', checkbox.checked);
+            });
             if (selectAll) {
                 selectAll.checked = all.length > 0 && selected.length === all.length;
                 selectAll.indeterminate = selected.length > 0 && selected.length < all.length;
             }
+        }
+
+        function clearProductSelection() {
+            document.querySelectorAll('.product-row-check').forEach(function (checkbox) {
+                checkbox.checked = false;
+            });
+            var selectAll = document.getElementById('product-select-all');
+            if (selectAll) {
+                selectAll.checked = false;
+                selectAll.indeterminate = false;
+            }
+            updateProductBatchBar();
         }
 
         function batchProductAction(action) {
@@ -1719,6 +1799,33 @@
             var btnAddProduct = document.getElementById('btn-add-product');
             if (btnAddProduct) btnAddProduct.addEventListener('click', function () { openProductModal(null); });
 
+            var btnRefreshProducts = document.getElementById('btn-refresh-products');
+            if (btnRefreshProducts) {
+                btnRefreshProducts.addEventListener('click', function () {
+                    productPage = 1;
+                    loadProductCategories();
+                    loadProducts();
+                });
+            }
+
+            var btnImportProducts = document.getElementById('btn-import-products');
+            if (btnImportProducts) {
+                btnImportProducts.addEventListener('click', function () {
+                    showToast('批量导入入口已预留，当前后端未提供导入接口', 'error');
+                });
+            }
+
+            document.querySelectorAll('[data-product-status]').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var statusFilter = document.getElementById('product-status-filter');
+                    if (statusFilter) statusFilter.value = btn.getAttribute('data-product-status') || '';
+                    syncProductStatusTabs();
+                    productPage = 1;
+                    loadProducts();
+                });
+            });
+            syncProductStatusTabs();
+
             var productSearch = document.getElementById('product-search');
             if (productSearch) productSearch.addEventListener('input', function () {
                 clearTimeout(productSearchTimer);
@@ -1743,6 +1850,7 @@
                         var field = document.getElementById(id);
                         if (field) field.value = '';
                     });
+                    syncProductStatusTabs();
                     productPage = 1;
                     loadProducts();
                 });
@@ -1761,6 +1869,10 @@
             bindProductBatchButton('btn-batch-draft-products', 'draft');
             bindProductBatchButton('btn-batch-delete-products', 'soft_delete');
             bindProductBatchButton('btn-batch-hard-delete-products', 'hard_delete');
+            var clearProductSelectionBtn = document.getElementById('btn-clear-product-selection');
+            if (clearProductSelectionBtn) clearProductSelectionBtn.addEventListener('click', clearProductSelection);
+            var closeProductBatchBtn = document.getElementById('btn-close-product-batch');
+            if (closeProductBatchBtn) closeProductBatchBtn.addEventListener('click', clearProductSelection);
 
             bindModalClose('product-modal', ['modal-close', 'modal-cancel']);
 
@@ -3883,6 +3995,37 @@
             return (page.modules || []).filter(function (module) { return module.key === moduleKey; })[0] || (page.modules || [])[0];
         }
 
+        function selectVisualModule(pageKey, moduleKey, options) {
+            options = options || {};
+            var page = visualPageByKey(pageKey);
+            var module = visualModuleByKey(page, moduleKey);
+            if (!page || !module) return false;
+            var sameTarget = visualBuilderState.activePage === page.key && visualBuilderState.activeModule === module.key;
+            if (!sameTarget && !options.skipDirtyCheck && !confirmDiscardChanges()) return false;
+            visualBuilderState.activePage = page.key;
+            visualBuilderState.activeModule = module.key;
+            syncVisualNavActive();
+            if (currentView === 'visual-builder') loadVisualBuilder();
+            return true;
+        }
+
+        function syncVisualNavActive() {
+            document.querySelectorAll('[data-visual-nav-page]').forEach(function (link) {
+                var active = link.getAttribute('data-visual-nav-page') === visualBuilderState.activePage &&
+                    link.getAttribute('data-visual-nav-module') === visualBuilderState.activeModule;
+                link.classList.toggle('active', active && currentView === 'visual-builder');
+            });
+            document.querySelectorAll('.visual-nav-page').forEach(function (pageEl) {
+                var pageKey = pageEl.querySelector('[data-visual-page-toggle]');
+                var activePage = pageKey && pageKey.getAttribute('data-visual-page-toggle') === visualBuilderState.activePage;
+                pageEl.classList.toggle('active', activePage && currentView === 'visual-builder');
+                if (activePage && currentView === 'visual-builder') {
+                    pageEl.classList.remove('is-collapsed');
+                    pageKey.setAttribute('aria-expanded', 'true');
+                }
+            });
+        }
+
         function visualPath(module, key) {
             if (!module || !module.path) return key;
             if (!key) return module.path;
@@ -3998,9 +4141,9 @@
             if (!root) return;
             root.innerHTML =
                 '<div class="visual-builder-shell">' +
-                    '<aside class="visual-tree-panel"><div class="visual-panel-title"><span>页面</span><strong>可视化管理</strong></div><div id="visual-page-tree" class="visual-page-tree">' + renderVisualTree() + '</div></aside>' +
                     '<main class="visual-preview-panel">' +
                         '<div class="visual-preview-toolbar"><div><strong id="visual-preview-title"></strong><span id="visual-preview-subtitle"></span></div><div class="visual-preview-actions"><button type="button" class="btn btn-secondary btn-sm" data-visual-refresh-preview>刷新预览</button></div></div>' +
+                        '<div class="visual-preview-note" id="visual-preview-note">选择左侧可视化模块后，预览会自动定位到对应区块。</div>' +
                         '<div class="visual-preview-frame-wrap"><iframe id="visual-preview-frame" title="前台页面预览"></iframe></div>' +
                     '</main>' +
                     '<aside class="visual-editor-panel"><div id="visual-editor-content" class="visual-editor-content"></div></aside>' +
@@ -4015,25 +4158,80 @@
             if (!module) return;
             visualBuilderState.activeModule = module.key;
             var block = visualBuilderState.blocks[page.slug];
-            var tree = document.getElementById('visual-page-tree');
             var editor = document.getElementById('visual-editor-content');
             var title = document.getElementById('visual-preview-title');
             var subtitle = document.getElementById('visual-preview-subtitle');
-            if (tree) tree.innerHTML = renderVisualTree();
             if (editor) editor.innerHTML = renderVisualModuleEditor(page, module, block);
             if (title) title.textContent = page.label + ' / ' + module.label;
             if (subtitle) subtitle.textContent = '修改会保存到 ' + page.slug + ' 内容块，并同步影响对应前台页面。';
+            syncVisualNavActive();
             refreshVisualPreview(false);
+        }
+
+        function visualPreviewUrl(page, module) {
+            return (module && module.previewUrl) || (page && page.previewUrl) || '../index.html';
+        }
+
+        function setVisualPreviewNote(message, tone) {
+            var note = document.getElementById('visual-preview-note');
+            if (!note) return;
+            note.textContent = message || '';
+            note.classList.toggle('warning', tone === 'warning');
         }
 
         function refreshVisualPreview(force) {
             var page = visualPageByKey(visualBuilderState.activePage);
+            var module = visualModuleByKey(page, visualBuilderState.activeModule);
             var frame = document.getElementById('visual-preview-frame');
             if (!frame || !page) return;
-            var src = page.previewUrl + (page.previewUrl.indexOf('?') === -1 ? '?' : '&') + 'visualPreview=' + Date.now();
-            if (force || frame.getAttribute('data-visual-page') !== page.key) {
+            var baseUrl = visualPreviewUrl(page, module);
+            var src = baseUrl + (baseUrl.indexOf('?') === -1 ? '?' : '&') + 'visualPreview=' + Date.now();
+            var currentUrl = frame.getAttribute('data-visual-url');
+            frame.onload = function () {
+                scrollVisualPreviewToModule(module);
+            };
+            if (force || currentUrl !== baseUrl) {
                 frame.setAttribute('data-visual-page', page.key);
+                frame.setAttribute('data-visual-url', baseUrl);
                 frame.setAttribute('src', src);
+            } else {
+                scrollVisualPreviewToModule(module);
+            }
+        }
+
+        function scrollVisualPreviewToModule(module) {
+            var frame = document.getElementById('visual-preview-frame');
+            if (!frame || !module) return;
+            if (!module.previewSelector) {
+                setVisualPreviewNote('当前模块没有可定位的前台区块，可直接在右侧编辑字段。');
+                return;
+            }
+            try {
+                var doc = frame.contentDocument || (frame.contentWindow && frame.contentWindow.document);
+                if (!doc) {
+                    setVisualPreviewNote('预览页面暂未加载完成。', 'warning');
+                    return;
+                }
+                var style = doc.getElementById('visual-preview-highlight-style');
+                if (!style) {
+                    style = doc.createElement('style');
+                    style.id = 'visual-preview-highlight-style';
+                    style.textContent = '.visual-preview-highlight{outline:3px solid #0b66d8!important;box-shadow:0 0 0 8px rgba(11,102,216,.16)!important;transition:outline .2s ease,box-shadow .2s ease;}';
+                    doc.head.appendChild(style);
+                }
+                var target = doc.querySelector(module.previewSelector);
+                if (!target) {
+                    setVisualPreviewNote('当前模块暂无可定位预览区域，字段仍可正常编辑。', 'warning');
+                    return;
+                }
+                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                target.classList.add('visual-preview-highlight');
+                setVisualPreviewNote('已定位到“' + module.label + '”对应的前台区块。');
+                setTimeout(function () {
+                    target.classList.remove('visual-preview-highlight');
+                }, 1800);
+            } catch (err) {
+                setVisualPreviewNote('预览页面无法定位该模块，字段仍可正常编辑。', 'warning');
             }
         }
 

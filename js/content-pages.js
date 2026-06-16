@@ -312,9 +312,11 @@
             '<div class="about-snapshot-copy">' +
             '<span class="section-kicker">' + escapeHtml(localized(snapshot, 'kicker')) + '</span>' +
             '<h2>' + escapeHtml(localized(snapshot, 'title')) + '</h2>' +
+            (localized(snapshot, 'text') ? '<p>' + escapeHtml(localized(snapshot, 'text')) + '</p>' : '') +
             (snapshot.body || []).map(function (item) {
                 var field = item.companyField ? ' data-company-field="' + escapeHtml(item.companyField) + '"' : '';
-                return '<p' + field + '>' + escapeHtml(localized(item, 'text')) + '</p>';
+                var text = typeof item === 'string' ? item : localized(item, 'text');
+                return '<p' + field + '>' + escapeHtml(text) + '</p>';
             }).join('') +
             '</div>' +
             '<div class="about-snapshot-media"><div class="about-inline-video">' +
@@ -364,9 +366,12 @@
             '<h2>' + escapeHtml(localized(history, 'title')) + '</h2>' +
             '<p>' + escapeHtml(localized(history, 'text')) + '</p></div>' +
             '<div class="about-history-rail">' + milestones.map(function (item) {
-                return '<article class="about-history-item"><time>' + escapeHtml(item.date || '') + '</time>' +
-                    '<h3>' + escapeHtml(localized(item, 'title')) + '</h3>' +
-                    '<p>' + escapeHtml(localized(item, 'text')) + '</p></article>';
+                var date = item.date || item.year || '';
+                var title = localized(item, 'title') || item.title_en || item.title_cn || '';
+                var text = localized(item, 'text') || item.description_en || item.description_cn || '';
+                return '<article class="about-history-item"><time>' + escapeHtml(date) + '</time>' +
+                    '<h3>' + escapeHtml(title) + '</h3>' +
+                    '<p>' + escapeHtml(text) + '</p></article>';
             }).join('') + '</div></div></section>';
     }
 
@@ -693,6 +698,50 @@
         }
     }
 
+    function renderHomeApplications(applications) {
+        var section = pageRoot.querySelector('[data-home-applications]');
+        if (!section || !applications || applications.enabled === false) {
+            if (section) section.hidden = true;
+            return;
+        }
+        section.hidden = false;
+        var cards = Array.isArray(applications.cards) ? applications.cards : [];
+        section.innerHTML = '<div class="container">' +
+            '<div class="section-header fade-in"><h2>' + escapeHtml(localized(applications, 'title')) + '</h2>' +
+            (localized(applications, 'text') ? '<p>' + escapeHtml(localized(applications, 'text')) + '</p>' : '') + '</div>' +
+            '<div class="home-applications-grid" data-stagger="120">' + cards.map(function (card) {
+                return '<article class="home-application-card fade-in">' +
+                    '<h3>' + escapeHtml(localized(card, 'title')) + '</h3>' +
+                    '<p>' + escapeHtml(localized(card, 'text')) + '</p>' +
+                '</article>';
+            }).join('') + '</div>' +
+            '<div class="text-center mt-4 fade-in">' + buttonHtml(applications.button, 'btn btn-secondary') + '</div>' +
+        '</div>';
+    }
+
+    function renderHomeNews(news) {
+        var section = pageRoot.querySelector('[data-home-news]');
+        if (!section || !news || news.enabled === false) {
+            if (section) section.hidden = true;
+            return;
+        }
+        section.hidden = false;
+        var cards = Array.isArray(news.cards) ? news.cards : [];
+        section.innerHTML = '<div class="container">' +
+            '<div class="section-header fade-in"><h2>' + escapeHtml(localized(news, 'title')) + '</h2>' +
+            (localized(news, 'text') ? '<p>' + escapeHtml(localized(news, 'text')) + '</p>' : '') + '</div>' +
+            '<div class="home-news-grid" data-stagger="120">' + cards.map(function (card) {
+                var inner = '<span>' + escapeHtml(card.date || '') + '</span>' +
+                    '<h3>' + escapeHtml(localized(card, 'title')) + '</h3>' +
+                    '<p>' + escapeHtml(localized(card, 'text')) + '</p>';
+                return card.href
+                    ? '<a class="home-news-card fade-in" href="' + escapeHtml(pageHref(card.href)) + '">' + inner + '</a>'
+                    : '<article class="home-news-card fade-in">' + inner + '</article>';
+            }).join('') + '</div>' +
+            '<div class="text-center mt-4 fade-in">' + buttonHtml(news.button, 'btn btn-secondary') + '</div>' +
+        '</div>';
+    }
+
     function renderHomeTrust(trust) {
         var section = pageRoot.querySelector('[data-home-trust]');
         if (!section || !trust) return;
@@ -751,6 +800,8 @@
         renderHomeHero(body);
         updateSeo(body.seo, body.hero);
         renderHomeProducts(body.products);
+        renderHomeApplications(body.applications);
+        renderHomeNews(body.news);
         renderHomeTrust(body.trust);
         renderHomeFeatures(body);
         renderHomeStats(body.stats);

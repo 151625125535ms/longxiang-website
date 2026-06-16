@@ -22,7 +22,7 @@ const CONTENT_BLOCK_SLUGS = [
     'page-blocks'
 ];
 const SCHEMAS = {
-    home: { hero: 'object', proof: 'array', products: 'object', trust: 'object', features: 'array', stats: 'array', cta: 'object', seo: 'object' },
+    home: { hero: 'object', proof: 'array', products: 'object', applications: 'object', news: 'object', trust: 'object', features: 'array', stats: 'array', cta: 'object', seo: 'object' },
     solutions: { hero: 'object', anchors: 'array', overview: 'object', marketFit: 'object', sections: 'array', scenarios: 'object', credentials: 'object', cta: 'object', seo: 'object' },
     'company-overview': { stats: 'array', seo: 'object' },
     'contact': { hero: 'object', contactPage: 'object', mapLocations: 'object', seo: 'object' },

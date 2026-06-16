@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { getDb } = require('../lib/db');
+const { ensureContentBlockSeeds } = require('../lib/contentBlockSeeds');
 
 const SCHEMA_VERSION = 1;
 const SCHEMA_NAME = 'initial_schema';
@@ -21,7 +22,10 @@ function init() {
             .run(SCHEMA_VERSION, SCHEMA_NAME, Date.now());
     }
 
+    const seedResult = ensureContentBlockSeeds(db);
+
     console.log('SQLite initialized, schema version: ' + SCHEMA_VERSION);
+    console.log('Content block seeds checked: ' + seedResult.checked + ', inserted: ' + seedResult.inserted + ', updated: ' + seedResult.updated);
 }
 
 if (require.main === module) {
