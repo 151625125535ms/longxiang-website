@@ -11,6 +11,7 @@ const companyRoutes = require('./routes/company');
 const inquiriesRoutes = require('./routes/inquiries');
 const certificationsRoutes = require('./routes/certifications');
 const educationRoutes = require('./routes/education');
+const contentBlocksRoutes = require('./routes/content-blocks');
 const adminRoutes = require('./routes/admin/index');
 const { ensureDirectory, resolveUploadDir } = require('./lib/fileStore');
 const { getDb } = require('./lib/db');
@@ -165,6 +166,7 @@ app.use('/api/company', companyRoutes);
 app.use('/api/inquiries', inquiriesRoutes);
 app.use('/api/certifications', certificationsRoutes);
 app.use('/api/education', educationRoutes);
+app.use('/api/content-blocks', contentBlocksRoutes);
 app.use('/api/admin', adminRoutes);
 
 app.get('/api/health', function (req, res) {

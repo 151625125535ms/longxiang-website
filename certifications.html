@@ -8,7 +8,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v=20260615-lxdq">
     <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v=20260615-lxdq">
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=20260615-lxdq">
-    <link rel="stylesheet" href="css/styles.css?v=20260606a">
+    <link rel="stylesheet" href="css/styles.css?v=20260616-shell7">
 </head>
 <body>
 
@@ -17,73 +17,42 @@
             <a href="index.html" class="nav-logo">
                 <span class="nav-logo-text">LONG<span>XIANG</span></span>
             </a>
-
-            <div class="nav-links">
-                <div class="nav-item"><a href="index.html" class="">Home</a></div>
-                <div class="nav-item has-dropdown">
-                    <a href="products.html" class="">Products</a>
-                    <div class="nav-dropdown">
-                        <a href="products.html?group=transformer">Transformer</a>
-                        <a href="products.html?group=new-energy-equipment">New Energy Equipment</a>
-                        <a href="products.html?group=new-energy-equipment&sub=energy-storage">Energy Storage</a>
-                        <a href="products.html?group=new-energy-equipment&sub=ac">AC EV Charging Station</a>
-                        <a href="products.html?group=new-energy-equipment&sub=dc">DC EV Charging Station</a>
-                        <a href="products.html?group=switchgear">Switchgear</a>
-                    </div>
-                </div>
-                <div class="nav-item has-dropdown">
-                    <a href="solutions.html" class="">Solutions</a>
-                    <div class="nav-dropdown">
-                        <a href="solutions.html#pv-solution">C&I PV Solution</a>
-                        <a href="solutions.html#wind-pv-ess-ev">C&I Wind+PV+ESS+EV Charging Solution</a>
-                        <a href="solutions.html#smart-microgrid">C&I Smart Microgrid Solution</a>
-                    </div>
-                </div>
-                <div class="nav-item"><a href="education.html" class="">Education</a></div>
-                <div class="nav-item has-dropdown">
-                    <a href="about.html" class="active">About Us</a>
-                    <div class="nav-dropdown">
-                        <a href="about.html">About LongXiang</a>
-                        <a href="certifications.html">Certificates</a>
-                    </div>
-                </div>
-                <div class="nav-item"><a href="contact.html" class="">Contact</a></div>
-            </div>
+            <div class="nav-links" aria-live="polite"></div>
             <div class="hamburger"><span></span><span></span><span></span></div>
         </div>
     </nav>
     <div class="mobile-menu-overlay"></div>
 
 
-    <section class="page-hero certifications-page-hero" style="background-image: url('5、厂区厂貌/厂区1.JPG'); background-size: cover; background-position: center;">
+    <section class="page-hero certifications-page-hero">
         <div class="page-hero-pattern"></div>
         <div class="container">
             <div class="breadcrumb"><a href="index.html">Home</a><span class="separator">/</span><a href="about.html">About Us</a><span class="separator">/</span><span class="current">Certificates</span></div>
-            <h1>Certificates & Qualification Archive</h1>
-            <p>Verified test reports, enterprise qualifications, honors, patent certificates, and compliance materials for power equipment supplier review.</p>
+            <h1>Certificates</h1>
+            <p>Loading certificate archive...</p>
         </div>
     </section>
-    <main>
+    <main data-content-page="certifications">
         <section class="section bg-white certifications-page">
             <div class="container">
                 <div class="certifications-intro">
                     <div>
-                        <span class="certifications-kicker">Documented credibility</span>
-                        <h2>Qualification materials for procurement and technical due diligence</h2>
+                        <span class="certifications-kicker">Certificates</span>
+                        <h2>Loading qualification materials...</h2>
                     </div>
-                    <p>Browse Longxiang's certification archive by document type, search by certificate name, and open each record for a larger preview.</p>
+                    <p>Loading certificate archive...</p>
                 </div>
                 <div class="certifications-stats" aria-label="Certificate archive summary">
-                    <div class="cert-stat"><strong data-cert-stat="total">455</strong><span>Total Records</span></div>
-                    <div class="cert-stat"><strong data-cert-stat="reports">317</strong><span>Test Reports</span></div>
-                    <div class="cert-stat"><strong data-cert-stat="patents">89</strong><span>Patent Certificates</span></div>
-                    <div class="cert-stat"><strong data-cert-stat="qualifications">9</strong><span>Enterprise Qualifications</span></div>
+                    <div class="cert-stat"><strong data-cert-stat="total">0</strong><span></span></div>
+                    <div class="cert-stat"><strong data-cert-stat="reports">0</strong><span></span></div>
+                    <div class="cert-stat"><strong data-cert-stat="patents">0</strong><span></span></div>
+                    <div class="cert-stat"><strong data-cert-stat="qualifications">0</strong><span></span></div>
                 </div>
                 <div class="certifications-toolbar" aria-label="Certificate filters">
                     <div class="cert-tabs" id="certification-tabs"></div>
                     <label class="cert-search">
-                        <span>Search</span>
-                        <input id="certification-search" type="search" placeholder="Search by certificate name">
+                        <span></span>
+                        <input id="certification-search" type="search" placeholder="">
                     </label>
                 </div>
                 <div class="certifications-result-row">
@@ -99,60 +68,12 @@
 
     <footer class="footer">
         <div class="container">
-            <div class="footer-grid">
-                <div class="footer-company">
-                    <div class="footer-brand">
-                        <a href="index.html" class="nav-logo"><span class="nav-logo-text">LONG<span>XIANG</span></span></a>
-                        <p>Providing intelligent, low-carbon power equipment and cultivating excellent professional electrical talent since 2003.</p>
-                    </div>
-                    <div class="footer-contact-item" data-company-contact="email"><span class="icon">&#9993;</span><span class="footer-contact-value">hnlxdq2003@163.com</span></div>
-                    <div class="footer-contact-item" data-company-contact="address"><span class="icon">&#8982;</span><span class="footer-contact-value">Longhu New District, Xinzheng, Zhengzhou, Henan, China</span></div>
-                    <div class="messenger-links" data-communication-links></div>
-                </div>
-                <div class="footer-navigation">
-                    <div class="footer-column">
-                        <h4>Quick Links</h4>
-                        <div class="footer-links">
-                            <a href="index.html">Home</a>
-                            <a href="products.html">Products</a>
-                            <a href="solutions.html">Solutions</a>
-                            <a href="education.html">Education</a>
-                            <a href="about.html">About Us</a>
-                            <a href="contact.html">Contact</a>
-                        </div>
-                    </div>
-                    <div class="footer-column">
-                        <h4>Products</h4>
-                        <div class="footer-links">
-                            <a href="products.html?group=transformer">Transformer</a>
-                            <a href="products.html?group=new-energy-equipment">New Energy Equipment</a>
-                        <a href="products.html?group=new-energy-equipment&sub=energy-storage">Energy Storage</a>
-                        <a href="products.html?group=new-energy-equipment&sub=ac">AC EV Charging Station</a>
-                        <a href="products.html?group=new-energy-equipment&sub=dc">DC EV Charging Station</a>
-                            <a href="products.html?group=switchgear">Switchgear</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="footer-conversion footer-column">
-                    <h4>Request Quote</h4>
-                    <p class="footer-conversion-text">Share your project requirements and our team will respond quickly.</p>
-                    <form class="footer-quote-form" data-inquiry-form>
-                        <input type="hidden" name="name" value="Footer Quote Visitor">
-                        <input type="hidden" name="subject" value="quote">
-                        <input type="hidden" name="productContext" value="Footer request quote">
-                        <textarea name="message" rows="4" placeholder="* Message" required></textarea>
-                        <div class="footer-quote-row">
-                            <input type="email" name="email" placeholder="* E-mail" required>
-                            <input type="text" name="phone" placeholder="WhatsApp / Phone">
-                        </div>
-                        <button type="submit">SUBMIT</button>
-                    </form>
-                </div>
-            </div>
-            <div class="footer-bottom"><p>&copy; 2026 Henan Longxiang Electrical Co., Ltd. All Rights Reserved.</p></div>
+            <div class="footer-grid" aria-live="polite"></div>
+            <div class="footer-bottom"><p></p></div>
         </div>
     </footer>
     <button class="back-to-top" aria-label="Back to top">&uarr;</button>
-    <script src="js/main.js?v=20260611-reports-extra"></script>
+    <script src="js/main.js?v=20260616-shell7"></script>
+    <script src="js/content-pages.js?v=20260616-shell7"></script>
 </body>
 </html>

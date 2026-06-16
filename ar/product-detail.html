@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Product details and technical parameters from Henan Longxiang Electrical.">
-    <title>تفاصيل المنتج | Henan Longxiang Electrical Co., Ltd.</title>
+    <meta name="description" content="">
+    <title>Longxiang</title>
     <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png?v=20260615-lxdq">
     <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png?v=20260615-lxdq">
     <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png?v=20260615-lxdq">
-    <link rel="stylesheet" href="../css/styles.css?v=20260614title">
+    <link rel="stylesheet" href="../css/styles.css?v=20260616-shell7">
 </head>
 <body>
 
@@ -17,83 +17,44 @@
             <a href="index.html" class="nav-logo">
                 <span class="nav-logo-text">LONG<span>XIANG</span></span>
             </a>
-
-            <div class="nav-links">
-                <div class="nav-item"><a href="index.html" class="">الرئيسية</a></div>
-                <div class="nav-item has-dropdown">
-                    <a href="products.html" class="active">المنتجات</a>
-                    <div class="nav-dropdown">
-                        <a href="products.html?group=transformer">المحولات</a>
-                        <a href="products.html?group=new-energy-equipment">معدات الطاقة الجديدة</a>
-                        <a href="products.html?group=new-energy-equipment&sub=energy-storage">أنظمة تخزين الطاقة</a>
-                        <a href="products.html?group=new-energy-equipment&sub=ac">محطة شحن تيار متردد</a>
-                        <a href="products.html?group=new-energy-equipment&sub=dc">محطة شحن تيار مستمر</a>
-                        <a href="products.html?group=switchgear">معدات المفاتيح</a>
-                    </div>
-                </div>
-                <div class="nav-item has-dropdown">
-                    <a href="solutions.html" class="">الحلول</a>
-                    <div class="nav-dropdown">
-                        <a href="solutions.html#pv-solution">حل الطاقة الشمسية التجارية والصناعية</a>
-                        <a href="solutions.html#wind-pv-ess-ev">حل الرياح والطاقة الشمسية والتخزين والشحن</a>
-                        <a href="solutions.html#smart-microgrid">حل الشبكة المصغرة الذكية</a>
-                    </div>
-                </div>
-                <div class="nav-item"><a href="education.html" class="">التعليم</a></div>
-                <div class="nav-item has-dropdown">
-                    <a href="about.html" class="">من نحن</a>
-                    <div class="nav-dropdown">
-                        <a href="about.html">عن LongXiang</a>
-                        <a href="certifications.html">الشهادات</a>
-                    </div>
-                </div>
-                <div class="nav-item"><a href="contact.html" class="">اتصل بنا</a></div>
-            </div>
+            <div class="nav-links" aria-live="polite"></div>
             <div class="hamburger"><span></span><span></span><span></span></div>
         </div>
     </nav>
     <div class="mobile-menu-overlay"></div>
 
 
-    <section class="page-hero" style="background-image: url('../assets/hero/product.webp'); background-size: cover; background-position: center;">
+    <section class="page-hero">
         <div class="page-hero-pattern"></div>
         <div class="container">
-            <div class="breadcrumb"><a href="index.html">الرئيسية</a><span class="separator">/</span><a href="products.html">المنتجات</a><span class="separator">/</span><span class="current">تفاصيل المنتج</span></div>
-            <p class="page-hero-title">تفاصيل المنتج</p>
-            <p>المواصفات ومعلومات الاستفسار</p>
+            <div class="breadcrumb" aria-live="polite"><span class="current" id="breadcrumb-product"></span></div>
+            <p class="page-hero-title" id="page-title"></p>
+            <p id="page-subtitle"></p>
         </div>
     </section>
-    <main>
+    <main data-content-page="product-pages" data-product-page-kind="detail">
         <section class="product-detail-section">
             <div class="container">
                 <div class="product-detail-layout product-detail-redesign">
                     <article class="product-detail-content-card">
-                        <div class="product-detail-main-image"><img id="main-product-image" src="" alt="Product Image"></div>
+                        <div class="product-detail-main-image"><img id="main-product-image" src="" alt=""></div>
                         <div class="product-section-block">
-                            <h1 id="product-title">جار التحميل...</h1>
+                            <h1 id="product-title"></h1>
                             <p class="product-detail-desc" id="product-desc"></p>
                         </div>
                         <div class="product-section-block product-detail-specs">
-                            <h2>معلمات المنتج</h2>
+                            <h2 data-product-specs-title></h2>
                             <table class="product-specs-table" id="specs-table"><tbody id="specs-body"></tbody></table>
                         </div>
+                        <div class="product-section-block export-support-block" data-product-detail-support>
+                            <div class="empty-state"></div>
+                        </div>
+                        <div class="product-section-block faq-block" data-product-detail-faq>
+                            <div class="empty-state"></div>
+                        </div>
                     </article>
-                    <aside class="product-detail-sidebar">
-                        <h3>إرسال استفسار</h3>
-                        <form class="inquiry-form" data-inquiry-form>
-                            <input type="hidden" name="productContext" data-product-context value="">
-                            <div class="form-group"><label for="detail-name">الاسم الكامل *</label><input type="text" id="detail-name" name="name" required></div>
-                            <div class="form-group"><label for="detail-email">البريد الإلكتروني *</label><input type="email" id="detail-email" name="email" required></div>
-                            <div class="form-group"><label for="detail-company">اسم الشركة</label><input type="text" id="detail-company" name="company"></div>
-                            <div class="form-group"><label for="detail-phone">رقم الهاتف</label><input type="tel" id="detail-phone" name="phone"></div>
-                            <div class="form-group"><label for="detail-country">الدولة</label><input type="text" id="detail-country" name="country"></div>
-                            <div class="form-group"><label for="detail-product-type">نوع المنتج</label><input type="text" id="detail-product-type" name="productType" placeholder="محول / مفاتيح / شاحن EV"></div>
-                            <div class="form-group"><label for="detail-quantity-scale">الكمية أو حجم المشروع</label><input type="text" id="detail-quantity-scale" name="quantityOrScale"></div>
-                            <div class="form-group"><label for="detail-voltage-capacity">الجهد أو السعة المطلوبة</label><input type="text" id="detail-voltage-capacity" name="requiredVoltageOrCapacity"></div>
-                            <div class="form-group"><label for="detail-subject">الموضوع *</label><select id="detail-subject" name="subject" required><option value="quote">طلب عرض سعر</option><option value="technical">استشارة فنية</option><option value="other">استفسار آخر</option></select></div>
-                            <div class="form-group"><label for="detail-message">الرسالة *</label><textarea id="detail-message" name="message" rows="5" required data-product-message></textarea></div>
-                            <button type="submit" class="btn btn-primary">إرسال</button>
-                        </form>
+                    <aside class="product-detail-sidebar" data-product-detail-inquiry>
+                        <div class="empty-state"></div>
                     </aside>
                 </div>
             </div>
@@ -102,61 +63,13 @@
 
     <footer class="footer">
         <div class="container">
-            <div class="footer-grid">
-                <div class="footer-company">
-                    <div class="footer-brand">
-                        <a href="index.html" class="nav-logo"><span class="nav-logo-text">LONG<span>XIANG</span></span></a>
-                        <p>نوفر معدات طاقة ذكية منخفضة الكربون ونساهم في تنمية الكفاءات الكهربائية المهنية منذ عام 2003.</p>
-                    </div>
-                    <div class="footer-contact-item" data-company-contact="email"><span class="icon">&#9993;</span><span class="footer-contact-value">hnlxdq2003@163.com</span></div>
-                    <div class="footer-contact-item" data-company-contact="address"><span class="icon">&#8982;</span><span class="footer-contact-value">منطقة لونغهو الجديدة، شينتشنغ، تشنغتشو، خنان، الصين</span></div>
-                    <div class="messenger-links" data-communication-links></div>
-                </div>
-                <div class="footer-navigation">
-                    <div class="footer-column">
-                        <h4>روابط سريعة</h4>
-                        <div class="footer-links">
-                            <a href="index.html">الرئيسية</a>
-                            <a href="products.html">المنتجات</a>
-                            <a href="solutions.html">الحلول</a>
-                            <a href="education.html">التعليم</a>
-                            <a href="about.html">من نحن</a>
-                            <a href="contact.html">اتصل بنا</a>
-                        </div>
-                    </div>
-                    <div class="footer-column">
-                        <h4>المنتجات</h4>
-                        <div class="footer-links">
-                            <a href="products.html?group=transformer">المحولات</a>
-                            <a href="products.html?group=new-energy-equipment">معدات الطاقة الجديدة</a>
-                        <a href="products.html?group=new-energy-equipment&sub=energy-storage">أنظمة تخزين الطاقة</a>
-                        <a href="products.html?group=new-energy-equipment&sub=ac">محطة شحن تيار متردد</a>
-                        <a href="products.html?group=new-energy-equipment&sub=dc">محطة شحن تيار مستمر</a>
-                            <a href="products.html?group=switchgear">معدات المفاتيح</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="footer-conversion footer-column">
-                    <h4>طلب عرض سعر</h4>
-                    <p class="footer-conversion-text">أرسل متطلبات مشروعك وسيتواصل فريقنا معك بسرعة.</p>
-                    <form class="footer-quote-form" data-inquiry-form>
-                        <input type="hidden" name="name" value="زائر طلب عرض سعر من التذييل">
-                        <input type="hidden" name="subject" value="quote">
-                        <input type="hidden" name="productContext" value="طلب عرض سعر من التذييل">
-                        <textarea name="message" rows="4" placeholder="* الرسالة" required></textarea>
-                        <div class="footer-quote-row">
-                            <input type="email" name="email" placeholder="* البريد الإلكتروني" required>
-                            <input type="text" name="phone" placeholder="واتساب / الهاتف">
-                        </div>
-                        <button type="submit">إرسال</button>
-                    </form>
-                </div>
-            </div>
-            <div class="footer-bottom"><p>&copy; 2026 Henan Longxiang Electrical Co., Ltd. جميع الحقوق محفوظة.</p></div>
+            <div class="footer-grid" aria-live="polite"></div>
+            <div class="footer-bottom"><p></p></div>
         </div>
     </footer>
     <button class="back-to-top" aria-label="العودة إلى الأعلى">&uarr;</button>
-    <script src="../js/main.js?v=20260610-arfix"></script>
-    <script src="../js/product-detail.js?v=20260610-arfix"></script>
+    <script src="../js/main.js?v=20260616-shell7"></script>
+    <script src="../js/content-pages.js?v=20260616-shell7"></script>
+    <script src="../js/product-detail.js?v=20260616-shell7"></script>
 </body>
 </html>

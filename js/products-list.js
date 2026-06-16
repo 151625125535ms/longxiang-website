@@ -10,39 +10,7 @@
     var productsCache = [];
     var pageSize = 9;
 
-    var FALLBACK_TAXONOMY = [
-        {
-            group: 'transformer',
-            label: 'Transformer',
-            labelAr: 'المحولات',
-            children: [
-                { sub: 'oil-immersed', label: 'Oil Immersed Transformer', labelAr: 'محول مغمور بالزيت' },
-                { sub: 'dry-type', label: 'Dry Type Transformer', labelAr: 'محول جاف' },
-                { sub: 'combined', label: 'Combined Transformer', labelAr: 'محول مدمج' },
-                { sub: 'special', label: 'Special Transformer', labelAr: 'محول خاص' }
-            ]
-        },
-        {
-            group: 'new-energy-equipment',
-            label: 'New Energy Equipment',
-            labelAr: 'معدات الطاقة الجديدة',
-            children: [
-                { sub: 'energy-storage', label: 'Energy Storage', labelAr: 'أنظمة تخزين الطاقة' },
-                { sub: 'ac', label: 'AC EV Charging Station', labelAr: 'محطة شحن تيار متردد' },
-                { sub: 'dc', label: 'DC EV Charging Station', labelAr: 'محطة شحن تيار مستمر' }
-            ]
-        },
-        {
-            group: 'switchgear',
-            label: 'Switchgear',
-            labelAr: 'معدات المفاتيح',
-            children: [
-                { sub: 'high-voltage', label: 'High-Voltage Switchgear', labelAr: 'معدات مفاتيح الجهد العالي' },
-                { sub: 'medium-low-voltage', label: 'Medium&Low Voltage Switchgear', labelAr: 'معدات مفاتيح الجهد المتوسط والمنخفض' }
-            ]
-        }
-    ];
-    var taxonomy = FALLBACK_TAXONOMY.slice();
+    var taxonomy = [];
 
     function escapeHtml(value) {
         return String(value == null ? '' : value)
@@ -178,7 +146,7 @@
     }
 
     function firstTaxonomyGroup() {
-        return taxonomy.length ? taxonomy[0].group : 'transformer';
+        return taxonomy.length ? taxonomy[0].group : '';
     }
 
     function resolveFilter(filter, products) {
@@ -194,7 +162,8 @@
     }
 
     function taxonomyLabel(group, sub) {
-        var parent = findTaxonomyGroup(group) || taxonomy[0] || FALLBACK_TAXONOMY[0];
+        var parent = findTaxonomyGroup(group) || taxonomy[0];
+        if (!parent) return sub || group || '';
         if (!sub) return isArabic ? (parent.labelAr || parent.label) : parent.label;
         var child = parent.children.find(function (item) { return item.sub === sub; });
         return child ? (isArabic ? (child.labelAr || child.label) : child.label) : (isArabic ? (parent.labelAr || parent.label) : parent.label);
@@ -564,10 +533,43 @@
             .then(normalizeTaxonomyResponse)
             .catch(function (err) {
                 if (window.console && console.warn) {
-                    console.warn('Product categories API unavailable; using fallback taxonomy.', err);
+                    console.warn('Product categories API unavailable; deriving categories from product data.', err);
                 }
-                return FALLBACK_TAXONOMY.slice();
+                return [];
             });
+    }
+
+    function deriveTaxonomyFromProducts(products) {
+        var groups = {};
+        products.forEach(function (product) {
+            var group = product.group || '';
+            if (!group) return;
+            if (!groups[group]) {
+                groups[group] = {
+                    group: group,
+                    label: product.groupLabel || group,
+                    labelAr: product.groupLabelAr || product.groupLabel || group,
+                    childrenMap: {}
+                };
+            }
+            var sub = product.subCategory || product.category || '';
+            if (sub && !groups[group].childrenMap[sub]) {
+                groups[group].childrenMap[sub] = {
+                    sub: sub,
+                    label: product.subCategoryLabel || product.categoryLabel || sub,
+                    labelAr: product.subCategoryLabelAr || product.categoryLabelAr || product.subCategoryLabel || product.categoryLabel || sub
+                };
+            }
+        });
+        return Object.keys(groups).map(function (group) {
+            var item = groups[group];
+            return {
+                group: item.group,
+                label: item.label,
+                labelAr: item.labelAr,
+                children: Object.keys(item.childrenMap).map(function (sub) { return item.childrenMap[sub]; })
+            };
+        });
     }
 
     function loadProducts() {
@@ -585,8 +587,8 @@
     function initCatalog() {
         Promise.all([loadCategories(), loadProducts()])
             .then(function (results) {
-                taxonomy = results[0];
                 productsCache = results[1].map(normalizeProduct);
+                taxonomy = results[0].length ? results[0] : deriveTaxonomyFromProducts(productsCache);
                 initProductTree();
                 renderProducts(productsCache);
             })

@@ -6,6 +6,7 @@
 
     var isArabic = /\/ar\//.test(window.location.pathname.replace(/\\/g, '/'));
     var assetPrefix = isArabic ? '../' : '';
+    var contentPromise = window.longxiangContentPagePromise || Promise.resolve(null);
 
     function escapeHtml(value) {
         return String(value == null ? '' : value)
@@ -32,11 +33,24 @@
         return assetPrefix + path;
     }
 
-    function markStaticProductFallback() {
-        document.documentElement.setAttribute('data-products-source', 'static-fallback');
-        if (window.console && console.warn) {
-            console.warn('Comparison products loaded from static fallback data/products.json.');
-        }
+    function localized(item, key) {
+        if (!item) return '';
+        if (isArabic && item[key + 'Ar']) return item[key + 'Ar'];
+        return item[key] || '';
+    }
+
+    function compareLabel(content, key, fallback) {
+        return localized(content && content.table, key) || fallback;
+    }
+
+    function getCompareContent() {
+        return contentPromise
+            .then(function (block) {
+                return block && block.body ? block.body : {};
+            })
+            .catch(function () {
+                return {};
+            });
     }
 
     function getIds() {
@@ -49,13 +63,6 @@
             .then(function (res) {
                 if (!res.ok) throw new Error('API request failed');
                 return res.json();
-            })
-            .catch(function () {
-                return fetch(assetPrefix + 'data/products.json').then(function (res) {
-                    if (!res.ok) throw new Error('Fallback request failed');
-                    markStaticProductFallback();
-                    return res.json();
-                });
             });
     }
 
@@ -72,14 +79,15 @@
         return result;
     }
 
-    function render(products) {
+    function render(products, content) {
         var ids = getIds();
         var selected = ids.map(function (id) {
             return products.find(function (product) { return product.id === id; });
         }).filter(Boolean);
 
         if (!selected.length) {
-            container.innerHTML = '<div class="empty-state">' + (isArabic ? 'اختر المنتجات من القائمة لمقارنة المواصفات.' : 'Select products from the catalog to compare their specifications.') + '</div>';
+            var emptyText = localized(content && content.emptyState, 'text') || (isArabic ? 'اختر المنتجات من القائمة لمقارنة المواصفات.' : 'Select products from the catalog to compare their specifications.');
+            container.innerHTML = '<div class="empty-state">' + escapeHtml(emptyText) + '</div>';
             return;
         }
 
@@ -91,11 +99,11 @@
         });
 
         var rows = [
-            { label: isArabic ? 'الصورة' : 'Image', html: function (p) { var imagePath = normalizeImagePath(p.image); return imagePath ? '<img src="' + escapeHtml(imagePath) + '" alt="' + escapeHtml(localize(p, 'name')) + '" style="width:120px;height:86px;object-fit:cover;border-radius:8px;">' : '-'; } },
-            { label: isArabic ? 'الفئة' : 'Category', html: function (p) { return escapeHtml(isArabic ? (p.categoryLabelAr || p.categoryLabel) : (p.categoryLabel || p.category)); } },
-            { label: isArabic ? 'السعات' : 'Capacities', html: function (p) { return valueList(p.capacities); } },
-            { label: isArabic ? 'الجهود' : 'Voltages', html: function (p) { return valueList(p.voltages); } },
-            { label: isArabic ? 'الوصف' : 'Description', html: function (p) { return escapeHtml(localize(p, 'shortDesc') || localize(p, 'description')); } }
+            { label: compareLabel(content, 'imageLabel', isArabic ? 'الصورة' : 'Image'), html: function (p) { var imagePath = normalizeImagePath(p.image); return imagePath ? '<img src="' + escapeHtml(imagePath) + '" alt="' + escapeHtml(localize(p, 'name')) + '" style="width:120px;height:86px;object-fit:cover;border-radius:8px;">' : '-'; } },
+            { label: compareLabel(content, 'categoryLabel', isArabic ? 'الفئة' : 'Category'), html: function (p) { return escapeHtml(isArabic ? (p.categoryLabelAr || p.categoryLabel) : (p.categoryLabel || p.category)); } },
+            { label: compareLabel(content, 'capacitiesLabel', isArabic ? 'السعات' : 'Capacities'), html: function (p) { return valueList(p.capacities); } },
+            { label: compareLabel(content, 'voltagesLabel', isArabic ? 'الجهود' : 'Voltages'), html: function (p) { return valueList(p.voltages); } },
+            { label: compareLabel(content, 'descriptionLabel', isArabic ? 'الوصف' : 'Description'), html: function (p) { return escapeHtml(localize(p, 'shortDesc') || localize(p, 'description')); } }
         ];
 
         specNames.forEach(function (name) {
@@ -110,7 +118,7 @@
         container.innerHTML =
             '<div class="comparison-table-wrapper">' +
                 '<table class="comparison-table">' +
-                    '<thead><tr><th>' + (isArabic ? 'المواصفة' : 'Specification') + '</th>' +
+                    '<thead><tr><th>' + escapeHtml(compareLabel(content, 'specificationLabel', isArabic ? 'المواصفة' : 'Specification')) + '</th>' +
                         selected.map(function (p) { return '<th>' + escapeHtml(localize(p, 'name')) + '</th>'; }).join('') +
                     '</tr></thead>' +
                     '<tbody>' +
@@ -129,7 +137,12 @@
         });
     }
 
-    fetchProducts().then(render).catch(function () {
-        container.innerHTML = '<div class="empty-state">' + (isArabic ? 'تعذر تحميل بيانات المقارنة.' : 'Unable to load comparison data.') + '</div>';
+    getCompareContent().then(function (content) {
+        fetchProducts().then(function (products) {
+            render(products, content);
+        }).catch(function () {
+            var errorText = localized(content && content.emptyState, 'errorText') || (isArabic ? 'تعذر تحميل بيانات المقارنة.' : 'Unable to load comparison data.');
+            container.innerHTML = '<div class="empty-state">' + escapeHtml(errorText) + '</div>';
+        });
     });
 })();

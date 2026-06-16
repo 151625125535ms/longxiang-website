@@ -48,9 +48,13 @@
                         <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
                     <ul class="nav-group-items">
+                        <li><a href="#" data-view="content-home" class="nav-sub-item">首页</a></li>
+                        <li><a href="#" data-view="content-solutions" class="nav-sub-item">解决方案</a></li>
                         <li><a href="#" data-view="content-company-overview" class="nav-sub-item">企业概况</a></li>
                         <li><a href="#" data-view="content-contact" class="nav-sub-item">联系我们</a></li>
                         <li><a href="#" data-view="content-about" class="nav-sub-item">关于我们</a></li>
+                        <li><a href="#" data-view="content-product-pages" class="nav-sub-item">产品页面</a></li>
+                        <li><a href="#" data-view="content-global-shell" class="nav-sub-item">全站壳层</a></li>
                         <li><a href="#" data-view="content-technology" class="nav-sub-item">科技创新</a></li>
                         <li><a href="#" data-view="content-industries" class="nav-sub-item">应用行业</a></li>
                         <li><a href="#" data-view="content-education" class="nav-sub-item">教育合作</a></li>
@@ -294,6 +298,24 @@
                     </div>
                 </section>
 
+                <section class="view-section" id="view-content-home">
+                    <div class="section-header-bar"><h2>首页</h2></div>
+                    <form class="company-form content-block-form" id="form-content-home">
+                        <div class="form-group"><label>标题（英文）</label><input type="text" id="content-home-title-en"></div>
+                        <div class="form-group"><label>内容 JSON</label><textarea id="content-home-body-json" rows="12" style="font-family:monospace;font-size:0.82rem;"></textarea><p class="form-help-text">JSON 格式，必须是 {} 对象。保存前请确认格式正确。</p></div>
+                        <div class="form-actions"><button type="submit" class="btn btn-primary">保存</button><span class="form-help-text" id="content-home-status"></span></div>
+                    </form>
+                </section>
+
+                <section class="view-section" id="view-content-solutions">
+                    <div class="section-header-bar"><h2>解决方案</h2></div>
+                    <form class="company-form content-block-form" id="form-content-solutions">
+                        <div class="form-group"><label>标题（英文）</label><input type="text" id="content-solutions-title-en"></div>
+                        <div class="form-group"><label>内容 JSON</label><textarea id="content-solutions-body-json" rows="12" style="font-family:monospace;font-size:0.82rem;"></textarea><p class="form-help-text">JSON 格式，必须是 {} 对象。保存前请确认格式正确。</p></div>
+                        <div class="form-actions"><button type="submit" class="btn btn-primary">保存</button><span class="form-help-text" id="content-solutions-status"></span></div>
+                    </form>
+                </section>
+
                 <section class="view-section" id="view-content-company-overview">
                     <div class="section-header-bar"><h2>企业概况</h2></div>
                     <form class="company-form content-block-form" id="form-content-company-overview">
@@ -318,6 +340,24 @@
                         <div class="form-group"><label>标题（英文）</label><input type="text" id="content-about-title-en"></div>
                         <div class="form-group"><label>内容 JSON</label><textarea id="content-about-body-json" rows="12" style="font-family:monospace;font-size:0.82rem;"></textarea><p class="form-help-text">JSON 格式，必须是 {} 对象。保存前请确认格式正确。</p></div>
                         <div class="form-actions"><button type="submit" class="btn btn-primary">保存</button><span class="form-help-text" id="content-about-status"></span></div>
+                    </form>
+                </section>
+
+                <section class="view-section" id="view-content-product-pages">
+                    <div class="section-header-bar"><h2>产品页面</h2></div>
+                    <form class="company-form content-block-form" id="form-content-product-pages">
+                        <div class="form-group"><label>标题（英文）</label><input type="text" id="content-product-pages-title-en"></div>
+                        <div class="form-group"><label>内容 JSON</label><textarea id="content-product-pages-body-json" rows="12" style="font-family:monospace;font-size:0.82rem;"></textarea><p class="form-help-text">JSON 格式，必须是 {} 对象。保存前请确认格式正确。</p></div>
+                        <div class="form-actions"><button type="submit" class="btn btn-primary">保存</button><span class="form-help-text" id="content-product-pages-status"></span></div>
+                    </form>
+                </section>
+
+                <section class="view-section" id="view-content-global-shell">
+                    <div class="section-header-bar"><h2>全站壳层</h2></div>
+                    <form class="company-form content-block-form" id="form-content-global-shell">
+                        <div class="form-group"><label>标题（英文）</label><input type="text" id="content-global-shell-title-en"></div>
+                        <div class="form-group"><label>内容 JSON</label><textarea id="content-global-shell-body-json" rows="12" style="font-family:monospace;font-size:0.82rem;"></textarea><p class="form-help-text">JSON 格式，必须是 {} 对象。保存前请确认格式正确。</p></div>
+                        <div class="form-actions"><button type="submit" class="btn btn-primary">保存</button><span class="form-help-text" id="content-global-shell-status"></span></div>
                     </form>
                 </section>
 

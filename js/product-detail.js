@@ -3,6 +3,7 @@
 
     var isArabic = /\/ar\//.test(window.location.pathname.replace(/\\/g, '/'));
     var assetPrefix = isArabic ? '../' : '';
+    var productPageContent = {};
 
     function getQueryParam(name) {
         return new URLSearchParams(window.location.search).get(name);
@@ -25,6 +26,20 @@
         return product[field] || '';
     }
 
+    function localizedContent(item, field) {
+        if (!item) return '';
+        if (isArabic && item[field + 'Ar']) return item[field + 'Ar'];
+        return item[field] || '';
+    }
+
+    function detailLabel(field, fallback) {
+        return localizedContent(productPageContent.detailLabels, field) || fallback || '';
+    }
+
+    function notFoundLabel(field, fallback) {
+        return localizedContent(productPageContent.notFound, field) || fallback || '';
+    }
+
     function normalizeImagePath(path) {
         path = String(path || '').trim().replace(/\\/g, '/');
         if (!path) return '';
@@ -42,34 +57,40 @@
         return window.location.origin + '/' + path.replace(/^\/+/, '');
     }
 
-    function markStaticProductFallback() {
-        document.documentElement.setAttribute('data-products-source', 'static-fallback');
-        if (window.console && console.warn) {
-            console.warn('Product detail loaded from static fallback data/products.json.');
-        }
+    function productMessage(product, name) {
+        var form = productPageContent.inquiryForm || {};
+        var template = localizedContent(form, 'productMessageTemplate');
+        if (!template) return '';
+        return template
+            .replace(/\{name\}/g, name || '')
+            .replace(/\{id\}/g, product.id || '');
     }
 
     function setText(id, value) {
         var el = document.getElementById(id);
+        if (!el && id === 'breadcrumb-product') {
+            el = document.querySelector('.page-hero .breadcrumb .current');
+        }
         if (el) el.textContent = value;
     }
 
     function setLoading() {
-        setText('product-title', isArabic ? 'جار تحميل المنتج...' : 'Loading product...');
-        setText('product-desc', isArabic ? 'يرجى الانتظار قليلاً.' : 'Please wait while we load the product details.');
+        setText('product-title', detailLabel('loadingTitle'));
+        setText('product-desc', detailLabel('loadingText'));
     }
 
     function showNotFound() {
-        document.title = isArabic ? 'المنتج غير موجود | Longxiang' : 'Product Not Found | Henan Longxiang Electrical Co., Ltd.';
-        setText('breadcrumb-product', isArabic ? 'غير موجود' : 'Not Found');
-        setText('page-title', isArabic ? 'المنتج غير موجود' : 'Product Not Found');
-        setText('page-subtitle', isArabic ? 'يرجى العودة إلى قائمة المنتجات' : 'Please return to the product catalog');
-        setText('product-title', isArabic ? 'لم يتم العثور على المنتج' : 'Product Not Found');
+        document.title = notFoundLabel('seoTitle') || document.title;
+        setText('breadcrumb-product', notFoundLabel('breadcrumbLabel'));
+        setText('page-title', notFoundLabel('title'));
+        setText('page-subtitle', notFoundLabel('subtitle'));
+        setText('product-title', notFoundLabel('heading'));
 
         var desc = document.getElementById('product-desc');
         if (desc) {
-            desc.innerHTML = (isArabic ? 'تعذر العثور على المنتج المطلوب.' : 'The requested product could not be found.') +
-                ' <a href="products.html">' + (isArabic ? 'العودة إلى قائمة المنتجات' : 'Back to product catalog') + '</a>';
+            desc.innerHTML = escapeHtml(notFoundLabel('text')) +
+                ' <a href="' + escapeHtml(productPageContent.notFound && productPageContent.notFound.backHref || 'products.html') + '">' +
+                escapeHtml(notFoundLabel('backLabel')) + '</a>';
         }
 
         var specs = document.querySelector('.product-detail-specs');
@@ -90,12 +111,15 @@
             name: name,
             description: desc,
             image: absoluteImageUrl(product.image),
-            brand: {
-                '@type': 'Brand',
-                name: 'Henan Longxiang Electrical Co., Ltd.'
-            },
             category: product.categoryLabel || product.category
         };
+        var brandName = detailLabel('schemaBrand');
+        if (brandName) {
+            schema.brand = {
+                '@type': 'Brand',
+                name: brandName
+            };
+        }
 
         var script = document.createElement('script');
         script.type = 'application/ld+json';
@@ -114,10 +138,11 @@
         var desc = localize(product, 'description') || localize(product, 'shortDesc');
         var categoryLabel = isArabic ? (product.categoryLabelAr || product.categoryLabel) : product.categoryLabel;
 
-        document.title = name + ' | Henan Longxiang Electrical Co., Ltd.';
+        var titleSuffix = detailLabel('titleSuffix');
+        document.title = titleSuffix ? name + ' | ' + titleSuffix : name;
         setText('breadcrumb-product', name);
         setText('page-title', name);
-        setText('page-subtitle', categoryLabel || (isArabic ? 'تفاصيل المنتج' : 'Product Details'));
+        setText('page-subtitle', categoryLabel || detailLabel('defaultSubtitle'));
 
         var mainImage = document.getElementById('main-product-image');
         if (mainImage) {
@@ -151,9 +176,7 @@
 
         document.querySelectorAll('[data-product-message]').forEach(function (textarea) {
             if (!textarea.value) {
-                textarea.value = isArabic
-                    ? 'أرغب في طلب السعر والتفاصيل الفنية لهذا المنتج: ' + name + ' (' + product.id + ').'
-                    : 'I would like to request pricing and technical details for: ' + name + ' (' + product.id + ').';
+                textarea.value = productMessage(product, name);
             }
         });
 
@@ -174,19 +197,7 @@
             })
             .then(renderProduct)
             .catch(function () {
-                fetch(assetPrefix + 'data/products.json')
-                    .then(function (res) {
-                        if (!res.ok) throw new Error('Fallback request failed');
-                        return res.json();
-                    })
-                    .then(function (products) {
-                        markStaticProductFallback();
-                        var product = products.find(function (item) {
-                            return item.id === productId || (Array.isArray(item.aliases) && item.aliases.indexOf(productId) !== -1);
-                        });
-                        renderProduct(product);
-                    })
-                    .catch(function () { renderProduct(null); });
+                renderProduct(null);
             });
     }
 
@@ -196,7 +207,12 @@
             window.location.replace('products.html');
             return;
         }
-        loadProduct(productId);
+        (window.longxiangContentPagePromise || Promise.resolve(null)).then(function (block) {
+            productPageContent = block && block.body ? block.body : {};
+            loadProduct(productId);
+        }).catch(function () {
+            loadProduct(productId);
+        });
     }
 
     if (document.readyState === 'loading') {
