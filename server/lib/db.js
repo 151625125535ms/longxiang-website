@@ -6,20 +6,6 @@ require('dotenv').config({ path: path.join(__dirname, '..', '..', '.env') });
 const PROJECT_ROOT = path.join(__dirname, '..', '..');
 let dbInstance = null;
 
-function envBool(name, defaultValue) {
-    const value = process.env[name];
-    if (value == null || value === '') return defaultValue;
-    return String(value).toLowerCase() === 'true';
-}
-
-function isUseSqlite() {
-    return envBool('USE_SQLITE', false);
-}
-
-function isAdminSqliteRequired() {
-    return envBool('ADMIN_SQLITE_REQUIRED', true);
-}
-
 function resolveDbPath() {
     const configured = process.env.DB_PATH || 'data/longxiang.db';
     return path.isAbsolute(configured) ? configured : path.join(PROJECT_ROOT, configured);
@@ -40,7 +26,5 @@ function getDb() {
 
 module.exports = {
     getDb,
-    isUseSqlite,
-    isAdminSqliteRequired,
     resolveDbPath
 };

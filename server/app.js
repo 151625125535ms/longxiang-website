@@ -13,7 +13,7 @@ const certificationsRoutes = require('./routes/certifications');
 const educationRoutes = require('./routes/education');
 const adminRoutes = require('./routes/admin/index');
 const { ensureDirectory, resolveUploadDir } = require('./lib/fileStore');
-const { getDb, isUseSqlite } = require('./lib/db');
+const { getDb } = require('./lib/db');
 
 let compression = null;
 try { compression = require('compression'); } catch (err) { compression = null; }
@@ -169,22 +169,20 @@ app.use('/api/admin', adminRoutes);
 
 app.get('/api/health', function (req, res) {
     const sqlite = {
-        enabled: isUseSqlite(),
+        enabled: true,
         available: false,
         schemaVersion: null
     };
 
-    if (sqlite.enabled) {
-        try {
-            const row = getDb()
-                .prepare('SELECT version FROM schema_migrations ORDER BY version DESC LIMIT 1')
-                .get();
-            sqlite.available = true;
-            sqlite.schemaVersion = row ? row.version : null;
-        } catch (err) {
-            sqlite.available = false;
-            sqlite.schemaVersion = null;
-        }
+    try {
+        const row = getDb()
+            .prepare('SELECT version FROM schema_migrations ORDER BY version DESC LIMIT 1')
+            .get();
+        sqlite.available = true;
+        sqlite.schemaVersion = row ? row.version : null;
+    } catch (err) {
+        sqlite.available = false;
+        sqlite.schemaVersion = null;
     }
 
     res.json({

@@ -1,25 +1,8 @@
 const express = require('express');
-const path = require('path');
-const multer = require('multer');
-const { authMiddleware } = require('../middleware/auth');
-const { ensureDirectory, readJson, resolveDataFile, resolveUploadDir, resolveUploadPublicPath, updateJson } = require('../lib/fileStore');
-const { getDb, isUseSqlite } = require('../lib/db');
+const { getDb } = require('../lib/db');
 const { VALID_GROUPS, getCategoryMapping } = require('../lib/category-helper');
 
 const router = express.Router();
-const FALLBACK_DATA_FILE = path.join(__dirname, '..', '..', 'data', 'products.json');
-const DATA_FILE = resolveDataFile('PRODUCTS_DATA_FILE', FALLBACK_DATA_FILE);
-const UPLOAD_DIR = resolveUploadDir();
-const UPLOAD_PUBLIC_PATH = resolveUploadPublicPath();
-
-function readProducts() {
-    return readJson(DATA_FILE, [], FALLBACK_DATA_FILE);
-}
-
-function matchesProductId(product, id) {
-    if (product.id === id) return true;
-    return Array.isArray(product.aliases) && product.aliases.indexOf(id) !== -1;
-}
 
 function parseJsonArray(value) {
     try {
@@ -28,6 +11,16 @@ function parseJsonArray(value) {
     } catch (err) {
         return [];
     }
+}
+
+function legacyGone(res) {
+    return res.status(410).json({
+        ok: false,
+        error: {
+            code: 'GONE',
+            message: 'Legacy JSON product writes are disabled. Use /api/admin/products.'
+        }
+    });
 }
 
 function mapSqliteProduct(row, specsByProduct, coverByProduct) {
@@ -50,8 +43,8 @@ function mapSqliteProduct(row, specsByProduct, coverByProduct) {
         category: row.category_slug || '',
         categoryLabel: row.category_label || '',
         categoryLabelAr: row.category_label_ar || '',
-        group: group,
-        subCategory: subCategory,
+        group,
+        subCategory,
         shortDesc: row.short_desc_en || '',
         shortDescAr: row.short_desc_ar || '',
         description: row.description_en || '',
@@ -95,6 +88,7 @@ function readSqliteProducts(id) {
         params = [internalId];
         idWhere = 'AND p.id = ?';
     }
+
     const products = db.prepare(`
         SELECT
             p.*,
@@ -142,50 +136,10 @@ function readSqliteProducts(id) {
         .filter(Boolean);
 }
 
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        ensureDirectory(UPLOAD_DIR);
-        cb(null, UPLOAD_DIR);
-    },
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        const ext = path.extname(file.originalname);
-        cb(null, 'product-' + uniqueSuffix + ext);
-    }
-});
-
-const upload = multer({
-    storage: storage,
-    limits: { fileSize: 10 * 1024 * 1024 },
-    fileFilter: function (req, file, cb) {
-        const allowedTypes = /jpeg|jpg|png|gif|webp/;
-        const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-        const mimetype = allowedTypes.test(file.mimetype);
-        if (extname && mimetype) {
-            cb(null, true);
-        } else {
-            cb(new Error('Only image files are allowed.'));
-        }
-    }
-});
-
-router.get('/', (req, res) => {
+router.get('/', function (req, res) {
     try {
-        if (isUseSqlite()) {
-            let result = readSqliteProducts();
-            const { category, featured } = req.query;
-            if (category) {
-                result = result.filter(p => p.category === category);
-            }
-            if (featured === 'true') {
-                result = result.filter(p => p.featured);
-            }
-            return res.json(result);
-        }
-
-        const products = readProducts();
+        let result = readSqliteProducts();
         const { category, featured } = req.query;
-        let result = products;
         if (category) {
             result = result.filter(p => p.category === category);
         }
@@ -198,18 +152,9 @@ router.get('/', (req, res) => {
     }
 });
 
-router.get('/:id', (req, res) => {
+router.get('/:id', function (req, res) {
     try {
-        if (isUseSqlite()) {
-            const product = readSqliteProducts(req.params.id)[0];
-            if (!product) {
-                return res.status(404).json({ error: 'Product not found.' });
-            }
-            return res.json(product);
-        }
-
-        const products = readProducts();
-        const product = products.find(p => matchesProductId(p, req.params.id));
+        const product = readSqliteProducts(req.params.id)[0];
         if (!product) {
             return res.status(404).json({ error: 'Product not found.' });
         }
@@ -219,81 +164,20 @@ router.get('/:id', (req, res) => {
     }
 });
 
-router.post('/', authMiddleware, (req, res) => {
-    try {
-        const newProduct = req.body;
-        if (!newProduct.id || !newProduct.name) {
-            return res.status(400).json({ error: 'Product id and name are required.' });
-        }
-        updateJson(DATA_FILE, [], FALLBACK_DATA_FILE, function (products) {
-            if (products.find(p => matchesProductId(p, newProduct.id))) {
-                const err = new Error('Product id already exists.');
-                err.statusCode = 400;
-                throw err;
-            }
-            products.push(newProduct);
-            return products;
-        }, 'products');
-        res.status(201).json(newProduct);
-    } catch (err) {
-        if (err.statusCode === 400) return res.status(400).json({ error: err.message });
-        res.status(500).json({ error: 'Failed to create product.' });
-    }
+router.post('/', function (req, res) {
+    return legacyGone(res);
 });
 
-router.put('/:id', authMiddleware, (req, res) => {
-    try {
-        let updatedProduct = null;
-        updateJson(DATA_FILE, [], FALLBACK_DATA_FILE, function (products) {
-            const index = products.findIndex(p => matchesProductId(p, req.params.id));
-            if (index === -1) {
-                const err = new Error('Product not found.');
-                err.statusCode = 404;
-                throw err;
-            }
-            updatedProduct = { ...products[index], ...req.body, id: products[index].id };
-            products[index] = updatedProduct;
-            return products;
-        }, 'products');
-        res.json(updatedProduct);
-    } catch (err) {
-        if (err.statusCode === 404) return res.status(404).json({ error: err.message });
-        res.status(500).json({ error: 'Failed to update product.' });
-    }
+router.put('/:id', function (req, res) {
+    return legacyGone(res);
 });
 
-router.delete('/:id', authMiddleware, (req, res) => {
-    try {
-        let deleted = null;
-        updateJson(DATA_FILE, [], FALLBACK_DATA_FILE, function (products) {
-            const index = products.findIndex(p => matchesProductId(p, req.params.id));
-            if (index === -1) {
-                const err = new Error('Product not found.');
-                err.statusCode = 404;
-                throw err;
-            }
-            deleted = products.splice(index, 1)[0];
-            return products;
-        }, 'products');
-        res.json({ message: 'Product deleted.', product: deleted });
-    } catch (err) {
-        if (err.statusCode === 404) return res.status(404).json({ error: err.message });
-        res.status(500).json({ error: 'Failed to delete product.' });
-    }
+router.delete('/:id', function (req, res) {
+    return legacyGone(res);
 });
 
-// Deprecated compatibility endpoint. Admin UI must use /api/admin/products/upload.
-router.post('/upload', function (req, res, next) {
-    res.setHeader('Deprecation', 'true');
-    res.setHeader('Link', '</api/admin/products/upload>; rel="successor-version"');
-    res.setHeader('Warning', '299 - "Deprecated endpoint; use /api/admin/products/upload"');
-    next();
-}, authMiddleware, upload.single('image'), (req, res) => {
-    if (!req.file) {
-        return res.status(400).json({ error: 'No file uploaded.' });
-    }
-    const imagePath = UPLOAD_PUBLIC_PATH + '/' + req.file.filename;
-    res.json({ path: imagePath, filename: req.file.filename });
+router.post('/upload', function (req, res) {
+    return legacyGone(res);
 });
 
 module.exports = router;

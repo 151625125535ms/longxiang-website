@@ -1,4 +1,5 @@
 const { spawn } = require('child_process');
+const fs = require('fs');
 const http = require('http');
 const path = require('path');
 
@@ -179,7 +180,7 @@ async function main() {
     let token = '';
 
     try {
-        await startServer({ USE_SQLITE: 'true' });
+        await startServer({});
 
         await runTest('T01', 'GET /api/health', async function () {
             const res = await request('GET', '/api/health');
@@ -309,7 +310,8 @@ async function main() {
             expectStatus(res, 200);
             const data = getPayload(res.body) || {};
             if (!data.sqlite || data.sqlite.enabled !== true) throw new Error('data.sqlite.enabled is not true');
-            return 'sqlite.enabled=true';
+            if (data.publicApiSource !== 'sqlite') throw new Error('publicApiSource is not sqlite');
+            return 'sqlite.enabled=true, publicApiSource=sqlite';
         });
 
         await runTest('T19', 'GET /api/admin/settings/modules', async function () {
@@ -335,15 +337,67 @@ async function main() {
             return 'items=' + list.length;
         });
 
-        await stopServer();
+        await runTest('T22', 'legacy product write is gone', async function () {
+            const res = await request('POST', '/api/products', { body: { id: 'legacy-test', name: 'Legacy Test' } });
+            expectStatus(res, 410);
+            return 'status=410';
+        });
 
-        await runTest('T22', 'USE_SQLITE=false GET /api/products fallback', async function () {
-            await startServer({ USE_SQLITE: 'false' });
-            const res = await request('GET', '/api/products');
-            expectStatus(res, 200);
-            const list = expectArray(res.body, false);
-            await stopServer();
-            return 'items=' + list.length;
+        await runTest('T23', 'legacy certification write is gone', async function () {
+            const res = await request('POST', '/api/certifications', { body: { name: 'Legacy Test' } });
+            expectStatus(res, 410);
+            return 'status=410';
+        });
+
+        await runTest('T24', 'legacy education write is gone', async function () {
+            const res = await request('PATCH', '/api/education', { body: { updatedAt: new Date().toISOString() } });
+            expectStatus(res, 410);
+            return 'status=410';
+        });
+
+        await runTest('T25', 'legacy inquiry management is gone', async function () {
+            const res = await request('GET', '/api/inquiries');
+            expectStatus(res, 410);
+            return 'status=410';
+        });
+
+        await runTest('T26', 'runtime has no JSON data source references', async function () {
+            const files = [];
+            function walk(dir) {
+                fs.readdirSync(dir, { withFileTypes: true }).forEach(function (entry) {
+                    const fullPath = path.join(dir, entry.name);
+                    if (entry.isDirectory()) return walk(fullPath);
+                    if (path.relative(ROOT, fullPath) === path.join('scripts', 'test-acceptance.js')) return;
+                    if (entry.isFile() && /\.(js|json|example)$/.test(entry.name)) files.push(fullPath);
+                });
+            }
+            [path.join(ROOT, 'server'), path.join(ROOT, 'scripts')].forEach(walk);
+            files.push(path.join(ROOT, 'package.json'), path.join(ROOT, '.env.example'));
+            const forbidden = [
+                'PRODUCTS_DATA_FILE',
+                'CERTIFICATIONS_DATA_FILE',
+                'COMPANY_DATA_FILE',
+                'INQUIRIES_DATA_FILE',
+                'EDUCATION_DATA_FILE',
+                'USE_SQLITE',
+                'readJson(',
+                'updateJson(',
+                'writeJsonAtomic(',
+                'data/products.json',
+                'data/company.json',
+                'data/certifications.json',
+                'data/education.json',
+                'data/inquiries.json'
+            ];
+            const hits = [];
+            files.forEach(function (file) {
+                const text = fs.readFileSync(file, 'utf8');
+                forbidden.forEach(function (needle) {
+                    if (text.indexOf(needle) !== -1) hits.push(path.relative(ROOT, file) + ': ' + needle);
+                });
+            });
+            if (hits.length) throw new Error(hits.join('; '));
+            return 'no runtime JSON source references';
         });
     } finally {
         await stopServer();

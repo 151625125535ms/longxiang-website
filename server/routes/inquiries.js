@@ -1,8 +1,5 @@
 const express = require('express');
-const path = require('path');
-const { authMiddleware } = require('../middleware/auth');
-const { makeId, readJson, resolveDataFile, updateJson } = require('../lib/fileStore');
-const { getDb, isUseSqlite } = require('../lib/db');
+const { getDb } = require('../lib/db');
 
 let nodemailer = null;
 try {
@@ -12,16 +9,6 @@ try {
 }
 
 const router = express.Router();
-const FALLBACK_DATA_FILE = path.join(__dirname, '..', '..', 'data', 'inquiries.json');
-const FALLBACK_COMPANY_FILE = path.join(__dirname, '..', '..', 'data', 'company.json');
-const DATA_FILE = resolveDataFile('INQUIRIES_DATA_FILE', FALLBACK_DATA_FILE);
-const COMPANY_FILE = resolveDataFile('COMPANY_DATA_FILE', FALLBACK_COMPANY_FILE);
-const STATUSES = ['new', 'read', 'replied', 'closed'];
-const STATUS_PRIORITY = { new: 0, read: 1, replied: 2, closed: 3 };
-
-function readInquiries() {
-    return readJson(DATA_FILE, [], FALLBACK_DATA_FILE);
-}
 
 function normalizeInquiry(body) {
     return {
@@ -55,11 +42,43 @@ function getClientIp(req) {
     return req.socket && req.socket.remoteAddress ? req.socket.remoteAddress : '';
 }
 
+function parseJson(value, fallback) {
+    try {
+        return JSON.parse(value || '');
+    } catch (err) {
+        return fallback;
+    }
+}
+
+function findEmail(value) {
+    if (!value || typeof value !== 'object') return '';
+    const candidates = [
+        value.email,
+        value.contactEmail,
+        value.inquiryEmail,
+        value.salesEmail
+    ];
+    for (const candidate of candidates) {
+        if (candidate) return String(candidate).trim();
+    }
+    if (Array.isArray(value.emails) && value.emails[0]) return String(value.emails[0]).trim();
+    if (Array.isArray(value.contacts)) {
+        for (const item of value.contacts) {
+            const email = findEmail(item);
+            if (email) return email;
+        }
+    }
+    return '';
+}
+
 function getNotifyTarget() {
     if (process.env.INQUIRY_NOTIFY_TO) return process.env.INQUIRY_NOTIFY_TO;
+
     try {
-        const company = readJson(COMPANY_FILE, {}, FALLBACK_COMPANY_FILE);
-        return company.email || '';
+        const row = getDb()
+            .prepare("SELECT body_json FROM content_blocks WHERE slug = 'contact'")
+            .get();
+        return row ? findEmail(parseJson(row.body_json, {})) : '';
     } catch (err) {
         return '';
     }
@@ -114,7 +133,17 @@ async function sendNotification(inquiry) {
     return { sent: true };
 }
 
-router.post('/', async (req, res) => {
+function sendGone(res) {
+    return res.status(410).json({
+        ok: false,
+        error: {
+            code: 'GONE',
+            message: 'Legacy JSON inquiry management is disabled. Use /api/admin/inquiries.'
+        }
+    });
+}
+
+router.post('/', async function (req, res) {
     try {
         const normalized = normalizeInquiry(req.body || {});
         const errors = validateInquiry(normalized);
@@ -122,75 +151,57 @@ router.post('/', async (req, res) => {
             return res.status(400).json({ error: errors.join(' ') });
         }
 
-        if (isUseSqlite()) {
-            const now = Date.now();
-            const ip = req.ip || getClientIp(req);
-            const userAgent = String(req.headers['user-agent'] || '');
-            const result = getDb().prepare(`
-                INSERT INTO inquiries
-                    (
-                        legacy_id, name, email, company, phone, subject, message,
-                        product_context, status, is_read, notes, ip, user_agent,
-                        replied_at, deleted_at, created_at, updated_at
-                    )
-                VALUES
-                    (
-                        NULL, @name, @email, @company, @phone, @subject, @message,
-                        @product_context, 'new', 0, '', @ip, @user_agent,
-                        NULL, NULL, @created_at, @updated_at
-                    )
-            `).run({
-                name: normalized.name,
-                email: normalized.email,
-                company: normalized.company,
-                phone: normalized.phone,
-                subject: normalized.subject,
-                message: normalized.message,
-                product_context: normalized.productContext,
-                ip,
-                user_agent: userAgent,
-                created_at: now,
-                updated_at: now
-            });
+        const now = Date.now();
+        const ip = req.ip || getClientIp(req);
+        const userAgent = String(req.headers['user-agent'] || '');
+        const result = getDb().prepare(`
+            INSERT INTO inquiries
+                (
+                    legacy_id, name, email, company, phone, subject, message,
+                    product_context, status, is_read, notes, ip, user_agent,
+                    replied_at, deleted_at, created_at, updated_at
+                )
+            VALUES
+                (
+                    NULL, @name, @email, @company, @phone, @subject, @message,
+                    @product_context, 'new', 0, '', @ip, @user_agent,
+                    NULL, NULL, @created_at, @updated_at
+                )
+        `).run({
+            name: normalized.name,
+            email: normalized.email,
+            company: normalized.company,
+            phone: normalized.phone,
+            subject: normalized.subject,
+            message: normalized.message,
+            product_context: normalized.productContext,
+            ip,
+            user_agent: userAgent,
+            created_at: now,
+            updated_at: now
+        });
 
-            const inquiry = {
-                id: String(result.lastInsertRowid),
-                createdAt: new Date(now).toISOString(),
-                status: 'new'
-            };
-
-            return res.status(201).json({
-                message: 'Inquiry submitted successfully.',
-                inquiry,
-                notification: { sent: false, reason: 'sqlite_mode' }
-            });
-        }
-
+        const createdAt = new Date(now).toISOString();
         const inquiry = {
-            id: makeId('inq'),
-            ...normalized,
-            ip: getClientIp(req),
-            createdAt: new Date().toISOString(),
-            status: 'new',
-            repliedAt: '',
-            notes: ''
+            id: String(result.lastInsertRowid),
+            createdAt,
+            status: 'new'
         };
-
-        updateJson(DATA_FILE, [], FALLBACK_DATA_FILE, function (inquiries) {
-            inquiries.unshift(inquiry);
-            return inquiries;
-        }, 'inquiries');
 
         let notification = { sent: false, reason: 'not_attempted' };
         try {
-            notification = await sendNotification(inquiry);
+            notification = await sendNotification({
+                ...normalized,
+                ip,
+                createdAt
+            });
         } catch (err) {
             notification = { sent: false, reason: err.message };
         }
 
         res.status(201).json({
             message: 'Inquiry submitted successfully.',
-            inquiry: { id: inquiry.id, createdAt: inquiry.createdAt, status: inquiry.status },
+            inquiry,
             notification
         });
     } catch (err) {
@@ -198,82 +209,20 @@ router.post('/', async (req, res) => {
     }
 });
 
-router.get('/', authMiddleware, (req, res) => {
-    try {
-        let inquiries = readInquiries();
-        const status = String(req.query.status || '').trim();
-        if (status && STATUSES.includes(status)) {
-            inquiries = inquiries.filter(item => item.status === status);
-        }
-
-        const page = Math.max(parseInt(req.query.page || '1', 10), 1);
-        const pageSize = Math.min(Math.max(parseInt(req.query.pageSize || '50', 10), 1), 200);
-        const total = inquiries.length;
-        const start = (page - 1) * pageSize;
-        const items = inquiries.slice(start, start + pageSize);
-
-        res.json({ items, total, page, pageSize });
-    } catch (err) {
-        res.status(500).json({ error: 'Failed to read inquiries.' });
-    }
+router.get('/', function (req, res) {
+    return sendGone(res);
 });
 
-router.get('/:id', authMiddleware, (req, res) => {
-    try {
-        const inquiry = readInquiries().find(item => item.id === req.params.id);
-        if (!inquiry) return res.status(404).json({ error: 'Inquiry not found.' });
-        res.json(inquiry);
-    } catch (err) {
-        res.status(500).json({ error: 'Failed to read inquiry.' });
-    }
+router.get('/:id', function (req, res) {
+    return sendGone(res);
 });
 
-router.put('/:id', authMiddleware, (req, res) => {
-    try {
-        const inquiries = readInquiries();
-        const index = inquiries.findIndex(item => item.id === req.params.id);
-        if (index === -1) return res.status(404).json({ error: 'Inquiry not found.' });
-
-        const nextStatus = String(req.body.status || inquiries[index].status).trim();
-        if (!STATUSES.includes(nextStatus)) {
-            return res.status(400).json({ error: 'Invalid inquiry status.' });
-        }
-
-        // Prevent race condition: silently reject status downgrade (e.g. replied → read)
-        if (STATUS_PRIORITY[nextStatus] < STATUS_PRIORITY[inquiries[index].status]) {
-            return res.json(inquiries[index]);
-        }
-
-        inquiries[index] = {
-            ...inquiries[index],
-            status: nextStatus,
-            notes: typeof req.body.notes === 'string' ? req.body.notes : inquiries[index].notes,
-            repliedAt: nextStatus === 'replied' && !inquiries[index].repliedAt ? new Date().toISOString() : inquiries[index].repliedAt
-        };
-
-        updateJson(DATA_FILE, [], FALLBACK_DATA_FILE, function () {
-            return inquiries;
-        }, 'inquiries');
-        res.json(inquiries[index]);
-    } catch (err) {
-        res.status(500).json({ error: 'Failed to update inquiry.' });
-    }
+router.put('/:id', function (req, res) {
+    return sendGone(res);
 });
 
-router.delete('/:id', authMiddleware, (req, res) => {
-    try {
-        const inquiries = readInquiries();
-        const index = inquiries.findIndex(item => item.id === req.params.id);
-        if (index === -1) return res.status(404).json({ error: 'Inquiry not found.' });
-
-        const deleted = inquiries.splice(index, 1)[0];
-        updateJson(DATA_FILE, [], FALLBACK_DATA_FILE, function () {
-            return inquiries;
-        }, 'inquiries');
-        res.json({ message: 'Inquiry deleted.', inquiry: deleted });
-    } catch (err) {
-        res.status(500).json({ error: 'Failed to delete inquiry.' });
-    }
+router.delete('/:id', function (req, res) {
+    return sendGone(res);
 });
 
 module.exports = router;

@@ -2,20 +2,10 @@ const express = require('express');
 const path = require('path');
 const multer = require('multer');
 const { authMiddleware } = require('../middleware/auth');
-const {
-    ensureDirectory,
-    makeId,
-    readJson,
-    resolveDataFile,
-    resolveUploadDir,
-    resolveUploadPublicPath,
-    updateJson
-} = require('../lib/fileStore');
-const { getDb, isUseSqlite } = require('../lib/db');
+const { ensureDirectory, resolveUploadDir, resolveUploadPublicPath } = require('../lib/fileStore');
+const { getDb } = require('../lib/db');
 
 const router = express.Router();
-const FALLBACK_DATA_FILE = path.join(__dirname, '..', '..', 'data', 'certifications.json');
-const DATA_FILE = resolveDataFile('CERTIFICATIONS_DATA_FILE', FALLBACK_DATA_FILE);
 const UPLOAD_DIR = resolveUploadDir();
 const UPLOAD_PUBLIC_PATH = resolveUploadPublicPath();
 
@@ -31,7 +21,7 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({
-    storage: storage,
+    storage,
     limits: { fileSize: 10 * 1024 * 1024 },
     fileFilter: function (req, file, cb) {
         const allowedTypes = /jpeg|jpg|png|gif|webp|pdf/;
@@ -42,117 +32,97 @@ const upload = multer({
     }
 });
 
-function readCertifications() {
-    return readJson(DATA_FILE, [], FALLBACK_DATA_FILE);
+function legacyGone(res) {
+    return res.status(410).json({
+        ok: false,
+        error: {
+            code: 'GONE',
+            message: 'Legacy JSON certification writes are disabled. Use /api/admin/certifications.'
+        }
+    });
 }
 
-router.get('/', (req, res) => {
-    try {
-        if (isUseSqlite()) {
-            const certifications = getDb().prepare(`
-                SELECT * FROM certifications
-                WHERE status = 'published'
-                ORDER BY sort_order, id
-            `).all().map(function (certification) {
-                return {
-                    id: certification.legacy_id,
-                    name: certification.name_en || '',
-                    nameAr: certification.name_ar || '',
-                    category: certification.legacy_category || '',
-                    image: certification.image_path || '',
-                    type: certification.source_type || '',
-                    pages: certification.pages || 1,
-                    width: certification.width,
-                    height: certification.height
-                };
-            });
-            return res.json(certifications);
-        }
+function registerAsset(file, publicPath) {
+    const db = getDb();
+    const now = Date.now();
+    db.prepare(`
+        INSERT OR IGNORE INTO assets
+            (
+                path, filename, original_name, mime_type, file_size,
+                checksum, module, entity_type, entity_id, is_active, created_at
+            )
+        VALUES
+            (
+                @path, @filename, @original_name, @mime_type, @file_size,
+                '', 'certifications', 'certification', NULL, 1, @created_at
+            )
+    `).run({
+        path: publicPath,
+        filename: file.filename,
+        original_name: file.originalname || '',
+        mime_type: file.mimetype || '',
+        file_size: file.size || 0,
+        created_at: now
+    });
+}
 
-        res.json(readCertifications());
+router.get('/', function (req, res) {
+    try {
+        const certifications = getDb().prepare(`
+            SELECT * FROM certifications
+            WHERE status = 'published'
+            ORDER BY sort_order, id
+        `).all().map(function (certification) {
+            return {
+                id: certification.legacy_id,
+                name: certification.name_en || '',
+                nameAr: certification.name_ar || '',
+                category: certification.legacy_category || '',
+                image: certification.image_path || '',
+                type: certification.source_type || '',
+                pages: certification.pages || 1,
+                width: certification.width,
+                height: certification.height
+            };
+        });
+        res.json(certifications);
     } catch (err) {
         res.status(500).json({ error: 'Failed to read certifications.' });
     }
 });
 
-router.post('/', authMiddleware, (req, res) => {
-    try {
-        const name = String(req.body.name || '').trim();
-        if (!name) return res.status(400).json({ error: 'Certification name is required.' });
-
-        const certification = {
-            id: req.body.id || makeId('cert'),
-            name,
-            issuer: String(req.body.issuer || '').trim(),
-            expiryDate: String(req.body.expiryDate || '').trim(),
-            image: String(req.body.image || '').trim(),
-            description: String(req.body.description || '').trim()
-        };
-        updateJson(DATA_FILE, [], FALLBACK_DATA_FILE, function (certifications) {
-            certifications.push(certification);
-            return certifications;
-        }, 'certifications');
-        res.status(201).json(certification);
-    } catch (err) {
-        res.status(500).json({ error: 'Failed to create certification.' });
-    }
+router.post('/', function (req, res) {
+    return legacyGone(res);
 });
 
-router.put('/:id', authMiddleware, (req, res) => {
-    try {
-        let updated = null;
-        updateJson(DATA_FILE, [], FALLBACK_DATA_FILE, function (certifications) {
-            const index = certifications.findIndex(item => item.id === req.params.id);
-            if (index === -1) {
-                const err = new Error('Certification not found.');
-                err.statusCode = 404;
-                throw err;
-            }
-
-            updated = {
-                ...certifications[index],
-                name: String(req.body.name || certifications[index].name || '').trim(),
-                issuer: String(req.body.issuer || '').trim(),
-                expiryDate: String(req.body.expiryDate || '').trim(),
-                image: String(req.body.image || '').trim(),
-                description: String(req.body.description || '').trim()
-            };
-            certifications[index] = updated;
-            return certifications;
-        }, 'certifications');
-        res.json(updated);
-    } catch (err) {
-        if (err.statusCode === 404) return res.status(404).json({ error: err.message });
-        res.status(500).json({ error: 'Failed to update certification.' });
-    }
+router.put('/:id', function (req, res) {
+    return legacyGone(res);
 });
 
-router.delete('/:id', authMiddleware, (req, res) => {
-    try {
-        let deleted = null;
-        updateJson(DATA_FILE, [], FALLBACK_DATA_FILE, function (certifications) {
-            const index = certifications.findIndex(item => item.id === req.params.id);
-            if (index === -1) {
-                const err = new Error('Certification not found.');
-                err.statusCode = 404;
-                throw err;
-            }
-
-            deleted = certifications.splice(index, 1)[0];
-            return certifications;
-        }, 'certifications');
-        res.json({ message: 'Certification deleted.', certification: deleted });
-    } catch (err) {
-        if (err.statusCode === 404) return res.status(404).json({ error: err.message });
-        res.status(500).json({ error: 'Failed to delete certification.' });
-    }
+router.delete('/:id', function (req, res) {
+    return legacyGone(res);
 });
 
-router.post('/upload', authMiddleware, upload.single('file'), (req, res) => {
-    if (!req.file) {
-        return res.status(400).json({ error: 'No file uploaded.' });
-    }
-    res.json({ path: UPLOAD_PUBLIC_PATH + '/' + req.file.filename, filename: req.file.filename });
+router.post('/upload', authMiddleware, function (req, res) {
+    upload.single('file')(req, res, function (err) {
+        if (err) {
+            const message = err.code === 'LIMIT_FILE_SIZE'
+                ? 'File must be 10MB or smaller.'
+                : err.message;
+            return res.status(422).json({ error: message });
+        }
+        if (!req.file) {
+            return res.status(400).json({ error: 'No file uploaded.' });
+        }
+
+        const publicPath = UPLOAD_PUBLIC_PATH + '/' + req.file.filename;
+        try {
+            registerAsset(req.file, publicPath);
+            res.json({ path: publicPath, filename: req.file.filename });
+        } catch (assetErr) {
+            res.status(500).json({ error: 'Failed to register uploaded file.' });
+        }
+    });
 });
 
 module.exports = router;

@@ -1,5 +1,5 @@
 const express = require('express');
-const { getDb, isUseSqlite } = require('../../lib/db');
+const { getDb } = require('../../lib/db');
 
 const router = express.Router();
 
@@ -19,11 +19,11 @@ router.get('/status', function (req, res, next) {
             ok: true,
             data: {
                 sqlite: {
-                    enabled: isUseSqlite(),
+                    enabled: true,
                     available: true,
                     schemaVersion: schemaRow ? schemaRow.version : null
                 },
-                publicApiSource: isUseSqlite() ? 'sqlite' : 'json',
+                publicApiSource: 'sqlite',
                 counts: {
                     products: countTable(db, 'products'),
                     certifications: countTable(db, 'certifications'),

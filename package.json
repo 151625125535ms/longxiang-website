@@ -6,10 +6,8 @@
   "scripts": {
     "db:init": "node server/db/init.js",
     "db:backup": "node server/db/backup.js",
-    "db:migrate": "node server/db/migrate.js",
     "db:status": "node server/db/status.js",
     "images:audit": "node scripts/audit-image-sync.js --dry-run",
-    "products:import": "node scripts/import-products.js",
     "start": "node server/app.js"
   },
   "dependencies": {
