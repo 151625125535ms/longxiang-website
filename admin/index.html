@@ -14,8 +14,8 @@
         <div class="sidebar-overlay" id="sidebar-overlay"></div>
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <h2>Long<span>xiang</span></h2>
-                <p>网站后台</p>
+                <h2>龙<span>翔</span></h2>
+                <p>河南龙翔电气股份有限公司</p>
             </div>
             <nav class="sidebar-nav">
                 <div class="nav-group" data-group="overview">
@@ -48,6 +48,7 @@
                         <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
                     <ul class="nav-group-items">
+                        <li><a href="#" data-view="visual-builder" class="nav-sub-item">可视化管理</a></li>
                         <li><a href="#" data-view="content-home" class="nav-sub-item">首页</a></li>
                         <li><a href="#" data-view="content-solutions" class="nav-sub-item">解决方案</a></li>
                         <li><a href="#" data-view="content-company-overview" class="nav-sub-item">企业概况</a></li>
@@ -210,6 +211,12 @@
                     </div>
                 </section>
 
+                <section class="view-section" id="view-visual-builder">
+                    <div class="visual-builder-root" id="visual-builder-root">
+                        <div class="content-editor-loading">正在加载可视化管理...</div>
+                    </div>
+                </section>
+
                 <section class="view-section" id="view-products">
                     <div class="section-header-bar">
                         <h2>产品管理</h2>
@@ -236,9 +243,9 @@
                         <button class="btn btn-secondary btn-sm btn-clear-filters" id="product-clear-filters" type="button" style="display:none;">清空筛选</button>
                     </div>
                     <div class="data-table-wrapper">
-                        <table class="data-table">
-                            <thead><tr><th><input type="checkbox" id="product-select-all"></th><th>产品中文名</th><th>产品</th><th>分类</th><th>状态</th><th>操作</th></tr></thead>
-                            <tbody id="products-tbody"><tr class="skeleton-row"><td colspan="6"><div class="skeleton-line"></div></td></tr><tr class="skeleton-row"><td colspan="6"><div class="skeleton-line"></div></td></tr><tr class="skeleton-row"><td colspan="6"><div class="skeleton-line"></div></td></tr></tbody>
+                        <table class="data-table product-table">
+                            <thead><tr><th><input type="checkbox" id="product-select-all"></th><th>产品</th><th>型号</th><th>分类</th><th>发布状态</th><th>推荐</th><th>简介</th><th>更新时间</th><th>操作</th></tr></thead>
+                            <tbody id="products-tbody"><tr class="skeleton-row"><td colspan="9"><div class="skeleton-line"></div></td></tr><tr class="skeleton-row"><td colspan="9"><div class="skeleton-line"></div></td></tr><tr class="skeleton-row"><td colspan="9"><div class="skeleton-line"></div></td></tr></tbody>
                         </table>
                     </div>
                     <div class="batch-actions-bar" id="product-batch-bar" style="display:none;">
@@ -272,11 +279,17 @@
                             <button type="button" class="segmented-btn" data-unread="true">仅未读</button>
                         </div>
                     </div>
-                    <div class="data-table-wrapper">
-                        <table class="data-table">
-                            <thead><tr><th><input type="checkbox" id="inquiry-select-all"></th><th>客户</th><th>公司</th><th>主题</th><th>提交时间</th><th>状态</th><th>操作</th></tr></thead>
-                            <tbody id="inquiries-tbody"><tr class="skeleton-row"><td colspan="7"><div class="skeleton-line"></div></td></tr><tr class="skeleton-row"><td colspan="7"><div class="skeleton-line"></div></td></tr><tr class="skeleton-row"><td colspan="7"><div class="skeleton-line"></div></td></tr></tbody>
-                        </table>
+                    <div class="inquiries-workspace">
+                        <div class="data-table-wrapper inquiries-table-panel">
+                            <table class="data-table inquiries-table">
+                                <thead><tr><th><input type="checkbox" id="inquiry-select-all"></th><th>客户</th><th>公司</th><th>主题</th><th>提交时间</th><th>状态</th><th>操作</th></tr></thead>
+                                <tbody id="inquiries-tbody"><tr class="skeleton-row"><td colspan="7"><div class="skeleton-line"></div></td></tr><tr class="skeleton-row"><td colspan="7"><div class="skeleton-line"></div></td></tr><tr class="skeleton-row"><td colspan="7"><div class="skeleton-line"></div></td></tr></tbody>
+                            </table>
+                        </div>
+                        <aside class="inquiry-detail-panel">
+                            <h3>询盘详情</h3>
+                            <div id="inquiry-side-detail" class="inquiry-side-empty">选择一条询盘查看详情</div>
+                        </aside>
                     </div>
                     <div class="batch-actions-bar" id="inquiry-batch-bar" style="display:none;">
                         <span id="inquiry-batch-count">已选 0 条</span>
@@ -290,155 +303,185 @@
 
                 <section class="view-section" id="view-categories">
                     <div class="section-header-bar"><h2>分类管理</h2><button class="btn btn-primary" id="btn-add-category">新增分类</button></div>
-                    <div class="data-table-wrapper">
-                        <table class="data-table">
-                            <thead><tr><th>分类名称</th><th>Slug</th><th>排序</th><th>状态</th><th>操作</th></tr></thead>
-                            <tbody id="categories-tbody"><tr><td colspan="5" class="table-empty"><p>加载中...</p></td></tr></tbody>
-                        </table>
+                    <div class="category-workspace">
+                        <div class="category-table-panel">
+                            <div class="data-table-wrapper">
+                                <table class="data-table category-table">
+                                    <thead><tr><th>分类名称</th><th>Slug</th><th>排序</th><th>状态</th><th>操作</th></tr></thead>
+                                    <tbody id="categories-tbody"><tr><td colspan="5" class="table-empty"><p>加载中...</p></td></tr></tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <aside class="category-detail-panel">
+                            <h3>分类详情</h3>
+                            <div id="category-detail" class="category-detail-empty">选择一个分类查看产品归属和展示状态</div>
+                        </aside>
                     </div>
                 </section>
 
                 <section class="view-section" id="view-content-home">
                     <div class="section-header-bar"><h2>首页</h2></div>
                     <form class="company-form content-block-form" id="form-content-home">
-                        <div class="form-group"><label>标题（英文）</label><input type="text" id="content-home-title-en"></div>
-                        <div class="form-group"><label>内容 JSON</label><textarea id="content-home-body-json" rows="12" style="font-family:monospace;font-size:0.82rem;"></textarea><p class="form-help-text">JSON 格式，必须是 {} 对象。保存前请确认格式正确。</p></div>
-                        <div class="form-actions"><button type="submit" class="btn btn-primary">保存</button><span class="form-help-text" id="content-home-status"></span></div>
+                        <div class="content-editor-loading">正在加载首页可视化编辑器...</div>
                     </form>
                 </section>
 
                 <section class="view-section" id="view-content-solutions">
                     <div class="section-header-bar"><h2>解决方案</h2></div>
                     <form class="company-form content-block-form" id="form-content-solutions">
-                        <div class="form-group"><label>标题（英文）</label><input type="text" id="content-solutions-title-en"></div>
-                        <div class="form-group"><label>内容 JSON</label><textarea id="content-solutions-body-json" rows="12" style="font-family:monospace;font-size:0.82rem;"></textarea><p class="form-help-text">JSON 格式，必须是 {} 对象。保存前请确认格式正确。</p></div>
-                        <div class="form-actions"><button type="submit" class="btn btn-primary">保存</button><span class="form-help-text" id="content-solutions-status"></span></div>
+                        <div class="content-editor-loading">正在加载解决方案可视化编辑器...</div>
                     </form>
                 </section>
 
                 <section class="view-section" id="view-content-company-overview">
                     <div class="section-header-bar"><h2>企业概况</h2></div>
                     <form class="company-form content-block-form" id="form-content-company-overview">
-                        <div class="form-group"><label>标题（英文）</label><input type="text" id="content-company-overview-title-en"></div>
-                        <div class="form-group"><label>内容 JSON</label><textarea id="content-company-overview-body-json" rows="12" style="font-family:monospace;font-size:0.82rem;"></textarea><p class="form-help-text">JSON 格式，必须是 {} 对象。保存前请确认格式正确。</p></div>
-                        <div class="form-actions"><button type="submit" class="btn btn-primary">保存</button><span class="form-help-text" id="content-company-overview-status"></span></div>
+                        <div class="content-editor-loading">正在加载企业概况可视化编辑器...</div>
                     </form>
                 </section>
 
                 <section class="view-section" id="view-content-contact">
                     <div class="section-header-bar"><h2>联系我们</h2></div>
                     <form class="company-form content-block-form" id="form-content-contact">
-                        <div class="form-group"><label>标题（英文）</label><input type="text" id="content-contact-title-en"></div>
-                        <div class="form-group"><label>内容 JSON</label><textarea id="content-contact-body-json" rows="12" style="font-family:monospace;font-size:0.82rem;"></textarea><p class="form-help-text">JSON 格式，必须是 {} 对象。保存前请确认格式正确。</p></div>
-                        <div class="form-actions"><button type="submit" class="btn btn-primary">保存</button><span class="form-help-text" id="content-contact-status"></span></div>
+                        <div class="content-editor-loading">正在加载联系我们可视化编辑器...</div>
                     </form>
                 </section>
 
                 <section class="view-section" id="view-content-about">
                     <div class="section-header-bar"><h2>关于我们</h2></div>
                     <form class="company-form content-block-form" id="form-content-about">
-                        <div class="form-group"><label>标题（英文）</label><input type="text" id="content-about-title-en"></div>
-                        <div class="form-group"><label>内容 JSON</label><textarea id="content-about-body-json" rows="12" style="font-family:monospace;font-size:0.82rem;"></textarea><p class="form-help-text">JSON 格式，必须是 {} 对象。保存前请确认格式正确。</p></div>
-                        <div class="form-actions"><button type="submit" class="btn btn-primary">保存</button><span class="form-help-text" id="content-about-status"></span></div>
+                        <div class="content-editor-loading">正在加载关于我们可视化编辑器...</div>
                     </form>
                 </section>
 
                 <section class="view-section" id="view-content-product-pages">
                     <div class="section-header-bar"><h2>产品页面</h2></div>
                     <form class="company-form content-block-form" id="form-content-product-pages">
-                        <div class="form-group"><label>标题（英文）</label><input type="text" id="content-product-pages-title-en"></div>
-                        <div class="form-group"><label>内容 JSON</label><textarea id="content-product-pages-body-json" rows="12" style="font-family:monospace;font-size:0.82rem;"></textarea><p class="form-help-text">JSON 格式，必须是 {} 对象。保存前请确认格式正确。</p></div>
-                        <div class="form-actions"><button type="submit" class="btn btn-primary">保存</button><span class="form-help-text" id="content-product-pages-status"></span></div>
+                        <div class="content-editor-loading">正在加载产品页面可视化编辑器...</div>
                     </form>
                 </section>
 
                 <section class="view-section" id="view-content-global-shell">
                     <div class="section-header-bar"><h2>全站壳层</h2></div>
                     <form class="company-form content-block-form" id="form-content-global-shell">
-                        <div class="form-group"><label>标题（英文）</label><input type="text" id="content-global-shell-title-en"></div>
-                        <div class="form-group"><label>内容 JSON</label><textarea id="content-global-shell-body-json" rows="12" style="font-family:monospace;font-size:0.82rem;"></textarea><p class="form-help-text">JSON 格式，必须是 {} 对象。保存前请确认格式正确。</p></div>
-                        <div class="form-actions"><button type="submit" class="btn btn-primary">保存</button><span class="form-help-text" id="content-global-shell-status"></span></div>
+                        <div class="content-editor-loading">正在加载全站壳层可视化编辑器...</div>
                     </form>
                 </section>
 
                 <section class="view-section" id="view-content-technology">
                     <div class="section-header-bar"><h2>科技创新</h2></div>
                     <form class="company-form content-block-form" id="form-content-technology">
-                        <div class="form-group"><label>标题（英文）</label><input type="text" id="content-technology-title-en"></div>
-                        <div class="form-group"><label>内容 JSON</label><textarea id="content-technology-body-json" rows="12" style="font-family:monospace;font-size:0.82rem;"></textarea><p class="form-help-text">JSON 格式，必须是 {} 对象。保存前请确认格式正确。</p></div>
-                        <div class="form-actions"><button type="submit" class="btn btn-primary">保存</button><span class="form-help-text" id="content-technology-status"></span></div>
+                        <div class="content-editor-loading">正在加载科技创新可视化编辑器...</div>
                     </form>
                 </section>
 
                 <section class="view-section" id="view-content-industries">
                     <div class="section-header-bar"><h2>应用行业</h2></div>
                     <form class="company-form content-block-form" id="form-content-industries">
-                        <div class="form-group"><label>标题（英文）</label><input type="text" id="content-industries-title-en"></div>
-                        <div class="form-group"><label>内容 JSON</label><textarea id="content-industries-body-json" rows="12" style="font-family:monospace;font-size:0.82rem;"></textarea><p class="form-help-text">JSON 格式，必须是 {} 对象。保存前请确认格式正确。</p></div>
-                        <div class="form-actions"><button type="submit" class="btn btn-primary">保存</button><span class="form-help-text" id="content-industries-status"></span></div>
+                        <div class="content-editor-loading">正在加载应用行业可视化编辑器...</div>
                     </form>
                 </section>
 
                 <section class="view-section" id="view-content-education">
                     <div class="section-header-bar"><h2>教育合作</h2></div>
                     <form class="company-form content-block-form" id="form-content-education">
-                        <div class="form-group"><label>标题（英文）</label><input type="text" id="content-education-title-en"></div>
-                        <div class="form-group"><label>内容 JSON</label><textarea id="content-education-body-json" rows="12" style="font-family:monospace;font-size:0.82rem;"></textarea><p class="form-help-text">JSON 格式，必须是 {} 对象。保存前请确认格式正确。</p></div>
-                        <div class="form-actions"><button type="submit" class="btn btn-primary">保存</button><span class="form-help-text" id="content-education-status"></span></div>
+                        <div class="content-editor-loading">正在加载教育合作可视化编辑器...</div>
                     </form>
                 </section>
 
                 <section class="view-section" id="view-content-page-blocks">
                     <div class="section-header-bar"><h2>页面区块</h2></div>
                     <form class="company-form content-block-form" id="form-content-page-blocks">
-                        <div class="form-group"><label>标题（英文）</label><input type="text" id="content-page-blocks-title-en"></div>
-                        <div class="form-group"><label>内容 JSON</label><textarea id="content-page-blocks-body-json" rows="12" style="font-family:monospace;font-size:0.82rem;"></textarea><p class="form-help-text">JSON 格式，必须是 {} 对象。保存前请确认格式正确。</p></div>
-                        <div class="form-actions"><button type="submit" class="btn btn-primary">保存</button><span class="form-help-text" id="content-page-blocks-status"></span></div>
+                        <div class="content-editor-loading">正在加载页面区块可视化编辑器...</div>
                     </form>
                 </section>
 
                 <section class="view-section" id="view-cert-qualifications">
                     <div class="section-header-bar"><h2>企业资质</h2><button class="btn btn-primary" id="btn-add-cert-qualifications">新增证书</button></div>
+                    <div class="cert-type-tabs" role="tablist" aria-label="证书类型">
+                        <button type="button" class="cert-type-tab active" data-cert-tab="cert-qualifications">企业资质</button>
+                        <button type="button" class="cert-type-tab" data-cert-tab="cert-patents">专利证书</button>
+                        <button type="button" class="cert-type-tab" data-cert-tab="cert-software">软著</button>
+                        <button type="button" class="cert-type-tab" data-cert-tab="cert-test-reports">检测报告</button>
+                    </div>
                     <div class="table-toolbar">
-                        <div class="search-input-wrap"><svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="cert-search-qualifications" class="search-input" placeholder="搜索证书名称…"></div>
+                        <div class="search-input-wrap"><svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="cert-search-qualifications" class="search-input" placeholder="搜索证书名称、机构或路径…"></div>
                         <select id="cert-status-filter-qualifications" class="toolbar-select"><option value="">全部状态</option><option value="published">已发布</option><option value="draft">草稿</option></select>
                     </div>
-                    <div class="data-table-wrapper"><table class="data-table"><thead><tr><th><input type="checkbox" class="cert-select-all" data-view="cert-qualifications"></th><th>证书名称</th><th>分类</th><th>图片路径</th><th>状态</th><th>操作</th></tr></thead><tbody id="cert-tbody-qualifications"><tr class="skeleton-row"><td colspan="6"><div class="skeleton-line"></div></td></tr><tr class="skeleton-row"><td colspan="6"><div class="skeleton-line"></div></td></tr><tr class="skeleton-row"><td colspan="6"><div class="skeleton-line"></div></td></tr></tbody></table></div>
-                    <div class="batch-actions-bar" id="cert-batch-bar-qualifications" style="display:none;"><span id="cert-batch-count-qualifications">已选 0 条</span><button class="btn btn-secondary btn-sm" id="btn-batch-publish-cert-qualifications" data-view="cert-qualifications">批量发布</button><button class="btn btn-secondary btn-sm" id="btn-batch-delete-cert-qualifications" data-view="cert-qualifications">批量删除</button><button class="btn btn-danger btn-sm" id="btn-batch-hard-delete-cert-qualifications" data-view="cert-qualifications">永久删除</button></div>
-                    <div class="pagination-bar admin-pagination" id="cert-pagination-qualifications" style="display:none;"></div>
+                    <div class="cert-workspace">
+                        <div class="cert-table-panel">
+                            <div class="data-table-wrapper"><table class="data-table cert-table"><thead><tr><th><input type="checkbox" class="cert-select-all" data-view="cert-qualifications"></th><th>证书</th><th>分类</th><th>文件</th><th>状态</th><th>操作</th></tr></thead><tbody id="cert-tbody-qualifications"><tr class="skeleton-row"><td colspan="6"><div class="skeleton-line"></div></td></tr><tr class="skeleton-row"><td colspan="6"><div class="skeleton-line"></div></td></tr><tr class="skeleton-row"><td colspan="6"><div class="skeleton-line"></div></td></tr></tbody></table></div>
+                            <div class="batch-actions-bar" id="cert-batch-bar-qualifications" style="display:none;"><span id="cert-batch-count-qualifications">已选 0 条</span><button class="btn btn-secondary btn-sm" id="btn-batch-publish-cert-qualifications" data-view="cert-qualifications">批量发布</button><button class="btn btn-secondary btn-sm" id="btn-batch-delete-cert-qualifications" data-view="cert-qualifications">批量删除</button><button class="btn btn-danger btn-sm" id="btn-batch-hard-delete-cert-qualifications" data-view="cert-qualifications">永久删除</button></div>
+                            <div class="pagination-bar admin-pagination" id="cert-pagination-qualifications" style="display:none;"></div>
+                        </div>
+                        <aside class="cert-detail-panel"><h3>证书详情</h3><div id="cert-detail-qualifications" class="cert-detail-empty">选择一条证书查看预览和发布信息</div></aside>
+                    </div>
                 </section>
 
                 <section class="view-section" id="view-cert-patents">
                     <div class="section-header-bar"><h2>专利证书</h2><button class="btn btn-primary" id="btn-add-cert-patents">新增证书</button></div>
+                    <div class="cert-type-tabs" role="tablist" aria-label="证书类型">
+                        <button type="button" class="cert-type-tab" data-cert-tab="cert-qualifications">企业资质</button>
+                        <button type="button" class="cert-type-tab active" data-cert-tab="cert-patents">专利证书</button>
+                        <button type="button" class="cert-type-tab" data-cert-tab="cert-software">软著</button>
+                        <button type="button" class="cert-type-tab" data-cert-tab="cert-test-reports">检测报告</button>
+                    </div>
                     <div class="table-toolbar">
-                        <div class="search-input-wrap"><svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="cert-search-patents" class="search-input" placeholder="搜索证书名称…"></div>
+                        <div class="search-input-wrap"><svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="cert-search-patents" class="search-input" placeholder="搜索证书名称、机构或路径…"></div>
                         <select id="cert-status-filter-patents" class="toolbar-select"><option value="">全部状态</option><option value="published">已发布</option><option value="draft">草稿</option></select>
                     </div>
-                    <div class="data-table-wrapper"><table class="data-table"><thead><tr><th><input type="checkbox" class="cert-select-all" data-view="cert-patents"></th><th>证书名称</th><th>分类</th><th>图片路径</th><th>状态</th><th>操作</th></tr></thead><tbody id="cert-tbody-patents"><tr class="skeleton-row"><td colspan="6"><div class="skeleton-line"></div></td></tr><tr class="skeleton-row"><td colspan="6"><div class="skeleton-line"></div></td></tr><tr class="skeleton-row"><td colspan="6"><div class="skeleton-line"></div></td></tr></tbody></table></div>
-                    <div class="batch-actions-bar" id="cert-batch-bar-patents" style="display:none;"><span id="cert-batch-count-patents">已选 0 条</span><button class="btn btn-secondary btn-sm" id="btn-batch-publish-cert-patents" data-view="cert-patents">批量发布</button><button class="btn btn-secondary btn-sm" id="btn-batch-delete-cert-patents" data-view="cert-patents">批量删除</button><button class="btn btn-danger btn-sm" id="btn-batch-hard-delete-cert-patents" data-view="cert-patents">永久删除</button></div>
-                    <div class="pagination-bar admin-pagination" id="cert-pagination-patents" style="display:none;"></div>
+                    <div class="cert-workspace">
+                        <div class="cert-table-panel">
+                            <div class="data-table-wrapper"><table class="data-table cert-table"><thead><tr><th><input type="checkbox" class="cert-select-all" data-view="cert-patents"></th><th>证书</th><th>分类</th><th>文件</th><th>状态</th><th>操作</th></tr></thead><tbody id="cert-tbody-patents"><tr class="skeleton-row"><td colspan="6"><div class="skeleton-line"></div></td></tr><tr class="skeleton-row"><td colspan="6"><div class="skeleton-line"></div></td></tr><tr class="skeleton-row"><td colspan="6"><div class="skeleton-line"></div></td></tr></tbody></table></div>
+                            <div class="batch-actions-bar" id="cert-batch-bar-patents" style="display:none;"><span id="cert-batch-count-patents">已选 0 条</span><button class="btn btn-secondary btn-sm" id="btn-batch-publish-cert-patents" data-view="cert-patents">批量发布</button><button class="btn btn-secondary btn-sm" id="btn-batch-delete-cert-patents" data-view="cert-patents">批量删除</button><button class="btn btn-danger btn-sm" id="btn-batch-hard-delete-cert-patents" data-view="cert-patents">永久删除</button></div>
+                            <div class="pagination-bar admin-pagination" id="cert-pagination-patents" style="display:none;"></div>
+                        </div>
+                        <aside class="cert-detail-panel"><h3>证书详情</h3><div id="cert-detail-patents" class="cert-detail-empty">选择一条证书查看预览和发布信息</div></aside>
+                    </div>
                 </section>
 
                 <section class="view-section" id="view-cert-software">
                     <div class="section-header-bar"><h2>软著</h2><button class="btn btn-primary" id="btn-add-cert-software">新增证书</button></div>
+                    <div class="cert-type-tabs" role="tablist" aria-label="证书类型">
+                        <button type="button" class="cert-type-tab" data-cert-tab="cert-qualifications">企业资质</button>
+                        <button type="button" class="cert-type-tab" data-cert-tab="cert-patents">专利证书</button>
+                        <button type="button" class="cert-type-tab active" data-cert-tab="cert-software">软著</button>
+                        <button type="button" class="cert-type-tab" data-cert-tab="cert-test-reports">检测报告</button>
+                    </div>
                     <div class="table-toolbar">
-                        <div class="search-input-wrap"><svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="cert-search-software" class="search-input" placeholder="搜索证书名称…"></div>
+                        <div class="search-input-wrap"><svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="cert-search-software" class="search-input" placeholder="搜索证书名称、机构或路径…"></div>
                         <select id="cert-status-filter-software" class="toolbar-select"><option value="">全部状态</option><option value="published">已发布</option><option value="draft">草稿</option></select>
                     </div>
-                    <div class="data-table-wrapper"><table class="data-table"><thead><tr><th><input type="checkbox" class="cert-select-all" data-view="cert-software"></th><th>证书名称</th><th>分类</th><th>图片路径</th><th>状态</th><th>操作</th></tr></thead><tbody id="cert-tbody-software"><tr class="skeleton-row"><td colspan="6"><div class="skeleton-line"></div></td></tr><tr class="skeleton-row"><td colspan="6"><div class="skeleton-line"></div></td></tr><tr class="skeleton-row"><td colspan="6"><div class="skeleton-line"></div></td></tr></tbody></table></div>
-                    <div class="batch-actions-bar" id="cert-batch-bar-software" style="display:none;"><span id="cert-batch-count-software">已选 0 条</span><button class="btn btn-secondary btn-sm" id="btn-batch-publish-cert-software" data-view="cert-software">批量发布</button><button class="btn btn-secondary btn-sm" id="btn-batch-delete-cert-software" data-view="cert-software">批量删除</button><button class="btn btn-danger btn-sm" id="btn-batch-hard-delete-cert-software" data-view="cert-software">永久删除</button></div>
-                    <div class="pagination-bar admin-pagination" id="cert-pagination-software" style="display:none;"></div>
+                    <div class="cert-workspace">
+                        <div class="cert-table-panel">
+                            <div class="data-table-wrapper"><table class="data-table cert-table"><thead><tr><th><input type="checkbox" class="cert-select-all" data-view="cert-software"></th><th>证书</th><th>分类</th><th>文件</th><th>状态</th><th>操作</th></tr></thead><tbody id="cert-tbody-software"><tr class="skeleton-row"><td colspan="6"><div class="skeleton-line"></div></td></tr><tr class="skeleton-row"><td colspan="6"><div class="skeleton-line"></div></td></tr><tr class="skeleton-row"><td colspan="6"><div class="skeleton-line"></div></td></tr></tbody></table></div>
+                            <div class="batch-actions-bar" id="cert-batch-bar-software" style="display:none;"><span id="cert-batch-count-software">已选 0 条</span><button class="btn btn-secondary btn-sm" id="btn-batch-publish-cert-software" data-view="cert-software">批量发布</button><button class="btn btn-secondary btn-sm" id="btn-batch-delete-cert-software" data-view="cert-software">批量删除</button><button class="btn btn-danger btn-sm" id="btn-batch-hard-delete-cert-software" data-view="cert-software">永久删除</button></div>
+                            <div class="pagination-bar admin-pagination" id="cert-pagination-software" style="display:none;"></div>
+                        </div>
+                        <aside class="cert-detail-panel"><h3>证书详情</h3><div id="cert-detail-software" class="cert-detail-empty">选择一条证书查看预览和发布信息</div></aside>
+                    </div>
                 </section>
 
                 <section class="view-section" id="view-cert-test-reports">
                     <div class="section-header-bar"><h2>检测报告</h2><button class="btn btn-primary" id="btn-add-cert-test-reports">新增证书</button></div>
+                    <div class="cert-type-tabs" role="tablist" aria-label="证书类型">
+                        <button type="button" class="cert-type-tab" data-cert-tab="cert-qualifications">企业资质</button>
+                        <button type="button" class="cert-type-tab" data-cert-tab="cert-patents">专利证书</button>
+                        <button type="button" class="cert-type-tab" data-cert-tab="cert-software">软著</button>
+                        <button type="button" class="cert-type-tab active" data-cert-tab="cert-test-reports">检测报告</button>
+                    </div>
                     <div class="table-toolbar">
-                        <div class="search-input-wrap"><svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="cert-search-test-reports" class="search-input" placeholder="搜索证书名称…"></div>
+                        <div class="search-input-wrap"><svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="cert-search-test-reports" class="search-input" placeholder="搜索证书名称、机构或路径…"></div>
                         <select id="cert-status-filter-test-reports" class="toolbar-select"><option value="">全部状态</option><option value="published">已发布</option><option value="draft">草稿</option></select>
                     </div>
-                    <div class="data-table-wrapper"><table class="data-table"><thead><tr><th><input type="checkbox" class="cert-select-all" data-view="cert-test-reports"></th><th>证书名称</th><th>分类</th><th>图片路径</th><th>状态</th><th>操作</th></tr></thead><tbody id="cert-tbody-test-reports"><tr class="skeleton-row"><td colspan="6"><div class="skeleton-line"></div></td></tr><tr class="skeleton-row"><td colspan="6"><div class="skeleton-line"></div></td></tr><tr class="skeleton-row"><td colspan="6"><div class="skeleton-line"></div></td></tr></tbody></table></div>
-                    <div class="batch-actions-bar" id="cert-batch-bar-test-reports" style="display:none;"><span id="cert-batch-count-test-reports">已选 0 条</span><button class="btn btn-secondary btn-sm" id="btn-batch-publish-cert-test-reports" data-view="cert-test-reports">批量发布</button><button class="btn btn-secondary btn-sm" id="btn-batch-delete-cert-test-reports" data-view="cert-test-reports">批量删除</button><button class="btn btn-danger btn-sm" id="btn-batch-hard-delete-cert-test-reports" data-view="cert-test-reports">永久删除</button></div>
-                    <div class="pagination-bar admin-pagination" id="cert-pagination-test-reports" style="display:none;"></div>
+                    <div class="cert-workspace">
+                        <div class="cert-table-panel">
+                            <div class="data-table-wrapper"><table class="data-table cert-table"><thead><tr><th><input type="checkbox" class="cert-select-all" data-view="cert-test-reports"></th><th>证书</th><th>分类</th><th>文件</th><th>状态</th><th>操作</th></tr></thead><tbody id="cert-tbody-test-reports"><tr class="skeleton-row"><td colspan="6"><div class="skeleton-line"></div></td></tr><tr class="skeleton-row"><td colspan="6"><div class="skeleton-line"></div></td></tr><tr class="skeleton-row"><td colspan="6"><div class="skeleton-line"></div></td></tr></tbody></table></div>
+                            <div class="batch-actions-bar" id="cert-batch-bar-test-reports" style="display:none;"><span id="cert-batch-count-test-reports">已选 0 条</span><button class="btn btn-secondary btn-sm" id="btn-batch-publish-cert-test-reports" data-view="cert-test-reports">批量发布</button><button class="btn btn-secondary btn-sm" id="btn-batch-delete-cert-test-reports" data-view="cert-test-reports">批量删除</button><button class="btn btn-danger btn-sm" id="btn-batch-hard-delete-cert-test-reports" data-view="cert-test-reports">永久删除</button></div>
+                            <div class="pagination-bar admin-pagination" id="cert-pagination-test-reports" style="display:none;"></div>
+                        </div>
+                        <aside class="cert-detail-panel"><h3>证书详情</h3><div id="cert-detail-test-reports" class="cert-detail-empty">选择一条证书查看预览和发布信息</div></aside>
+                    </div>
                 </section>
 
                 <section class="view-section" id="view-trash">
@@ -486,7 +529,10 @@
                 <section class="view-section" id="view-assets">
                     <div class="section-header-bar">
                         <h2>资源库</h2>
-                        <button class="btn btn-secondary btn-sm" id="btn-refresh-assets">刷新</button>
+                        <div class="section-actions">
+                            <button class="btn btn-primary btn-sm" id="btn-upload-assets" type="button">上传图片</button>
+                            <button class="btn btn-secondary btn-sm" id="btn-refresh-assets">刷新</button>
+                        </div>
                     </div>
                     <div class="table-toolbar assets-toolbar">
                         <div class="search-input-wrap">
@@ -499,28 +545,62 @@
                             <option value="file">文档</option>
                         </select>
                         <button type="button" class="btn btn-secondary btn-sm btn-clear-filters" id="btn-clear-asset-filters" style="display:none;">清空筛选</button>
+                        <div class="segmented-control assets-view-toggle" id="asset-view-mode" role="group" aria-label="资源视图">
+                            <button type="button" class="segmented-btn active" data-asset-view-mode="grid">网格</button>
+                            <button type="button" class="segmented-btn" data-asset-view-mode="list">列表</button>
+                        </div>
                     </div>
-                    <div class="data-table-wrapper">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>文件名</th>
-                                    <th>路径</th>
-                                    <th>类型</th>
-                                    <th>大小</th>
-                                    <th>来源</th>
-                                    <th>上传时间</th>
-                                    <th>操作</th>
-                                </tr>
-                            </thead>
-                            <tbody id="assets-tbody">
-                                <tr class="skeleton-row"><td colspan="7"><div class="skeleton-line"></div></td></tr>
-                                <tr class="skeleton-row"><td colspan="7"><div class="skeleton-line"></div></td></tr>
-                                <tr class="skeleton-row"><td colspan="7"><div class="skeleton-line"></div></td></tr>
-                            </tbody>
-                        </table>
+                    <div class="assets-workspace">
+                        <div class="assets-main-panel">
+                            <div class="asset-dropzone" id="asset-dropzone">
+                                <input type="file" id="asset-upload-input" accept="image/jpeg,image/png,image/webp,image/gif" multiple>
+                                <div class="asset-drop-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="m7 8 5-5 5 5"/><path d="M5 21h14"/></svg>
+                                </div>
+                                <div>
+                                    <strong>拖拽上传</strong>
+                                    <span>JPG / PNG / WebP / GIF，单图最大 8MB</span>
+                                </div>
+                            </div>
+                            <div class="assets-grid" id="assets-grid">
+                                <div class="asset-skeleton-card"></div>
+                                <div class="asset-skeleton-card"></div>
+                                <div class="asset-skeleton-card"></div>
+                            </div>
+                            <div class="data-table-wrapper assets-list-panel" id="assets-list-panel" style="display:none;">
+                                <table class="data-table assets-table">
+                                    <thead>
+                                        <tr>
+                                            <th><input type="checkbox" id="asset-select-all"></th>
+                                            <th>文件名</th>
+                                            <th>路径</th>
+                                            <th>类型</th>
+                                            <th>大小</th>
+                                            <th>来源</th>
+                                            <th>上传时间</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="assets-tbody">
+                                        <tr class="skeleton-row"><td colspan="8"><div class="skeleton-line"></div></td></tr>
+                                        <tr class="skeleton-row"><td colspan="8"><div class="skeleton-line"></div></td></tr>
+                                        <tr class="skeleton-row"><td colspan="8"><div class="skeleton-line"></div></td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <aside class="asset-detail-panel" id="asset-detail-panel">
+                            <h3>文件详情</h3>
+                            <div id="asset-detail" class="asset-detail-empty">选择一个资源查看详情</div>
+                        </aside>
                     </div>
-                    <div class="pagination-bar" id="assets-pagination" style="display:none;">
+                    <div class="batch-actions-bar asset-batch-bar" id="asset-batch-bar" style="display:none;">
+                        <span id="asset-batch-count">已选 0 个文件</span>
+                        <button class="btn btn-secondary btn-sm" id="btn-copy-selected-asset" type="button">复制路径</button>
+                        <button class="btn btn-secondary btn-sm" id="btn-clear-asset-selection" type="button">取消选择</button>
+                        <button class="btn btn-danger btn-sm" id="btn-delete-selected-assets" type="button">移出资源库</button>
+                    </div>
+                    <div class="pagination-bar admin-pagination" id="assets-pagination" style="display:none;">
                         <button class="btn btn-secondary btn-sm" id="btn-assets-prev">上一页</button>
                         <span id="assets-page-info">第 1 页</span>
                         <button class="btn btn-secondary btn-sm" id="btn-assets-next">下一页</button>
@@ -532,29 +612,78 @@
                         <h2>系统状态</h2>
                         <button class="btn btn-secondary" id="btn-refresh-system-status">刷新</button>
                     </div>
-                    <div class="dashboard-grid">
-                        <div class="stat-card"><div class="stat-card-label">SQLite 启用</div><div class="stat-card-value" id="system-sqlite-enabled">—</div></div>
-                        <div class="stat-card"><div class="stat-card-label">SQLite 可用</div><div class="stat-card-value" id="system-sqlite-available">—</div></div>
-                        <div class="stat-card"><div class="stat-card-label">Schema Version</div><div class="stat-card-value" id="system-schema-version">—</div></div>
-                        <div class="stat-card"><div class="stat-card-label">公开 API 来源</div><div class="stat-card-value" id="system-public-source">—</div></div>
-                        <div class="stat-card"><div class="stat-card-label">Products</div><div class="stat-card-value" id="system-count-products">—</div></div>
-                        <div class="stat-card"><div class="stat-card-label">Certifications</div><div class="stat-card-value" id="system-count-certifications">—</div></div>
-                        <div class="stat-card"><div class="stat-card-label">Inquiries</div><div class="stat-card-value" id="system-count-inquiries">—</div></div>
-                        <div class="stat-card"><div class="stat-card-label">Content Blocks</div><div class="stat-card-value" id="system-count-content-blocks">—</div></div>
-                        <div class="stat-card"><div class="stat-card-label">Assets</div><div class="stat-card-value" id="system-count-assets">—</div></div>
-                        <div class="stat-card"><div class="stat-card-label">Node Env</div><div class="stat-card-value" id="system-env-node">—</div></div>
-                        <div class="stat-card"><div class="stat-card-label">Port</div><div class="stat-card-value" id="system-env-port">—</div></div>
+                    <div class="system-status-shell">
+                        <div class="system-status-main">
+                            <div class="system-health-grid">
+                                <article class="system-health-card">
+                                    <span>数据库</span>
+                                    <strong id="system-sqlite-available">—</strong>
+                                    <small>SQLite：<b id="system-sqlite-enabled">—</b></small>
+                                </article>
+                                <article class="system-health-card">
+                                    <span>公开 API</span>
+                                    <strong id="system-public-source">—</strong>
+                                    <small id="system-api-state">等待检测</small>
+                                </article>
+                                <article class="system-health-card">
+                                    <span>Schema</span>
+                                    <strong id="system-schema-version">—</strong>
+                                    <small>当前迁移版本</small>
+                                </article>
+                                <article class="system-health-card">
+                                    <span>运行环境</span>
+                                    <strong id="system-env-node">—</strong>
+                                    <small>端口：<b id="system-env-port">—</b></small>
+                                </article>
+                            </div>
+                            <div class="system-section-panel">
+                                <div class="system-section-head">
+                                    <h3>数据规模</h3>
+                                    <span id="system-last-check">—</span>
+                                </div>
+                                <div class="system-count-grid">
+                                    <div><span>产品</span><strong id="system-count-products">—</strong></div>
+                                    <div><span>证书</span><strong id="system-count-certifications">—</strong></div>
+                                    <div><span>询盘</span><strong id="system-count-inquiries">—</strong></div>
+                                    <div><span>内容块</span><strong id="system-count-content-blocks">—</strong></div>
+                                    <div><span>资源</span><strong id="system-count-assets">—</strong></div>
+                                </div>
+                            </div>
+                        </div>
+                        <aside class="system-side-panel">
+                            <h3>诊断摘要</h3>
+                            <div class="system-diagnostic-list">
+                                <div><span>数据库连接</span><strong id="system-db-state">—</strong></div>
+                                <div><span>内容来源</span><strong id="system-source-state">—</strong></div>
+                                <div><span>运行模式</span><strong id="system-runtime-state">—</strong></div>
+                            </div>
+                            <div class="system-impact-note" id="system-status-summary">正在读取系统状态。</div>
+                        </aside>
                     </div>
                 </section>
 
                 <section class="view-section" id="view-settings-modules">
-                    <div class="section-header-bar"><h2>模块开关</h2></div>
-                    <form class="company-form" id="module-settings-form">
-                        <div class="form-row"><div class="form-group"><label class="checkbox-label"><input type="checkbox" id="module-dashboard" data-module-key="dashboard"> 控制台</label></div><div class="form-group"><label class="checkbox-label"><input type="checkbox" id="module-website" data-module-key="website"> 网站管理</label></div></div>
-                        <div class="form-row"><div class="form-group"><label class="checkbox-label"><input type="checkbox" id="module-products" data-module-key="products"> 产品管理</label></div><div class="form-group"><label class="checkbox-label"><input type="checkbox" id="module-content" data-module-key="content"> 内容管理</label></div></div>
-                        <div class="form-row"><div class="form-group"><label class="checkbox-label"><input type="checkbox" id="module-certifications" data-module-key="certifications"> 证书资质</label></div><div class="form-group"><label class="checkbox-label"><input type="checkbox" id="module-inquiries" data-module-key="inquiries"> 询盘管理</label></div></div>
-                        <div class="form-row"><div class="form-group"><label class="checkbox-label"><input type="checkbox" id="module-assets" data-module-key="assets"> 资源库</label></div><div class="form-group"><label class="checkbox-label"><input type="checkbox" id="module-settings" data-module-key="settings"> 系统设置</label></div></div>
-                        <div class="form-actions"><button type="submit" class="btn btn-primary" id="btn-save-module-settings">保存设置</button><span class="form-help-text" id="module-settings-status"></span></div>
+                    <div class="section-header-bar"><h2>模块开关</h2><button type="submit" form="module-settings-form" class="btn btn-primary" id="btn-save-module-settings">保存设置</button></div>
+                    <form class="module-settings-shell" id="module-settings-form">
+                        <div class="module-settings-main">
+                            <label class="module-toggle-card"><input type="checkbox" id="module-dashboard" data-module-key="dashboard"><span class="module-toggle-switch"></span><strong>控制台</strong><small>后台首页、经营指标和快捷入口。</small><em data-module-state="dashboard">等待加载</em></label>
+                            <label class="module-toggle-card"><input type="checkbox" id="module-website" data-module-key="website"><span class="module-toggle-switch"></span><strong>网站管理</strong><small>公司基础信息和公开网站配置。</small><em data-module-state="website">等待加载</em></label>
+                            <label class="module-toggle-card"><input type="checkbox" id="module-products" data-module-key="products"><span class="module-toggle-switch"></span><strong>产品管理</strong><small>产品列表、分类、图库和发布状态。</small><em data-module-state="products">等待加载</em></label>
+                            <label class="module-toggle-card"><input type="checkbox" id="module-content" data-module-key="content"><span class="module-toggle-switch"></span><strong>内容管理</strong><small>网站页面内容块和多语言展示。</small><em data-module-state="content">等待加载</em></label>
+                            <label class="module-toggle-card"><input type="checkbox" id="module-certifications" data-module-key="certifications"><span class="module-toggle-switch"></span><strong>证书资质</strong><small>企业资质、专利、软著和检测报告。</small><em data-module-state="certifications">等待加载</em></label>
+                            <label class="module-toggle-card"><input type="checkbox" id="module-inquiries" data-module-key="inquiries"><span class="module-toggle-switch"></span><strong>询盘管理</strong><small>客户询盘、未读提醒和处理记录。</small><em data-module-state="inquiries">等待加载</em></label>
+                            <label class="module-toggle-card"><input type="checkbox" id="module-assets" data-module-key="assets"><span class="module-toggle-switch"></span><strong>资源库</strong><small>图片上传、文件路径和资源清理。</small><em data-module-state="assets">等待加载</em></label>
+                            <label class="module-toggle-card"><input type="checkbox" id="module-settings" data-module-key="settings"><span class="module-toggle-switch"></span><strong>系统设置</strong><small>系统状态、审计日志和模块开关。</small><em data-module-state="settings">等待加载</em></label>
+                        </div>
+                        <aside class="module-settings-side">
+                            <h3>启用摘要</h3>
+                            <div class="module-summary-grid">
+                                <div><span>已启用</span><strong id="module-enabled-count">—</strong></div>
+                                <div><span>已停用</span><strong id="module-disabled-count">—</strong></div>
+                            </div>
+                            <p id="module-settings-status">正在读取模块状态...</p>
+                            <div class="system-impact-note">关闭模块会隐藏对应后台入口。保存前请确认当前团队仍有必要的系统入口。</div>
+                        </aside>
                     </form>
                 </section>
 
@@ -571,16 +700,24 @@
                         </select>
                         <button class="btn btn-secondary" id="btn-filter-audit-logs">筛选</button>
                     </div>
-                    <div class="data-table-wrapper">
-                        <table class="data-table">
-                            <thead><tr><th>时间</th><th>实体类型</th><th>实体ID</th><th>动作</th><th>操作人</th><th>IP</th></tr></thead>
-                            <tbody id="audit-logs-tbody"><tr class="skeleton-row"><td colspan="6"><div class="skeleton-line"></div></td></tr><tr class="skeleton-row"><td colspan="6"><div class="skeleton-line"></div></td></tr><tr class="skeleton-row"><td colspan="6"><div class="skeleton-line"></div></td></tr></tbody>
-                        </table>
-                    </div>
-                    <div class="form-actions">
-                        <button class="btn btn-secondary" id="btn-audit-prev">上一页</button>
-                        <span class="form-help-text" id="audit-page-info">第 1 页，共 0 条</span>
-                        <button class="btn btn-secondary" id="btn-audit-next">下一页</button>
+                    <div class="audit-workspace">
+                        <div class="audit-table-panel">
+                            <div class="data-table-wrapper">
+                                <table class="data-table audit-table">
+                                    <thead><tr><th>时间</th><th>实体类型</th><th>实体ID</th><th>动作</th><th>操作人</th><th>IP</th></tr></thead>
+                                    <tbody id="audit-logs-tbody"><tr class="skeleton-row"><td colspan="6"><div class="skeleton-line"></div></td></tr><tr class="skeleton-row"><td colspan="6"><div class="skeleton-line"></div></td></tr><tr class="skeleton-row"><td colspan="6"><div class="skeleton-line"></div></td></tr></tbody>
+                                </table>
+                            </div>
+                            <div class="form-actions">
+                                <button class="btn btn-secondary" id="btn-audit-prev">上一页</button>
+                                <span class="form-help-text" id="audit-page-info">第 1 页，共 0 条</span>
+                                <button class="btn btn-secondary" id="btn-audit-next">下一页</button>
+                            </div>
+                        </div>
+                        <aside class="audit-detail-panel">
+                            <h3>日志详情</h3>
+                            <div id="audit-log-detail" class="audit-detail-empty">选择一条日志查看变更内容</div>
+                        </aside>
                     </div>
                 </section>
 
@@ -588,44 +725,115 @@
         </main>
 
         <div class="modal-overlay" id="product-modal">
-            <div class="modal">
-                <div class="modal-header"><h3 id="modal-title">新增产品</h3><button class="modal-close" id="modal-close">×</button></div>
+            <div class="modal modal-wide product-editor-modal">
+                <div class="modal-header">
+                    <div>
+                        <h3 id="modal-title">新增产品</h3>
+                        <p class="modal-subtitle">基础信息、展示内容、封面图库与搜索信息统一维护。</p>
+                    </div>
+                    <button class="modal-close" id="modal-close">×</button>
+                </div>
                 <div class="modal-body">
                     <form id="product-form">
-                        <section class="form-section">
-                            <h3 class="form-section-title">基础信息</h3>
-                            <div class="form-row">
-                                <div class="form-group"><label>产品 ID</label><input type="text" id="field-id" placeholder="留空自动生成"></div>
-                                <div class="form-group"><label>英文名称 <span class="required">*</span></label><input type="text" id="field-name"></div>
+                        <div class="product-editor-grid">
+                            <div class="product-editor-main">
+                                <section class="form-section product-form-section">
+                                    <h3 class="form-section-title">基础信息</h3>
+                                    <div class="form-row">
+                                        <div class="form-group"><label>型号/产品编号</label><input type="text" id="field-id" placeholder="留空自动生成"></div>
+                                        <div class="form-group">
+                                            <label>分类 <span class="required">*</span></label>
+                                            <select id="field-category">
+                                                <option value="">选择分类</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>发布状态</label>
+                                            <select id="field-status">
+                                                <option value="published">已发布</option>
+                                                <option value="draft">草稿</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>推荐展示</label>
+                                            <label class="switch-field"><input type="checkbox" id="field-featured"><span></span><strong>首页推荐产品</strong></label>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section class="form-section product-form-section">
+                                    <h3 class="form-section-title">多语言名称</h3>
+                                    <div class="form-row">
+                                        <div class="form-group"><label>中文名称</label><input type="text" id="field-nameCn" placeholder="按产品编号自动匹配，可留空" readonly></div>
+                                        <div class="form-group"><label>英文名称 <span class="required">*</span></label><input type="text" id="field-name"></div>
+                                    </div>
+                                    <div class="form-group"><label>阿拉伯语名称</label><input type="text" id="field-nameAr" dir="rtl"></div>
+                                </section>
+
+                                <section class="form-section product-form-section">
+                                    <h3 class="form-section-title">简介与详情</h3>
+                                    <div class="form-row">
+                                        <div class="form-group"><label>英文短描述</label><input type="text" id="field-shortDesc"></div>
+                                        <div class="form-group"><label>阿拉伯语短描述</label><input type="text" id="field-shortDescAr" dir="rtl"></div>
+                                    </div>
+                                    <div class="form-group"><label>英文详情</label><textarea id="field-description" rows="4"></textarea></div>
+                                    <div class="form-group"><label>阿拉伯语详情</label><textarea id="field-descriptionAr" rows="4" dir="rtl"></textarea></div>
+                                </section>
+
+                                <section class="form-section product-form-section">
+                                    <div class="form-section-heading">
+                                        <h3 class="form-section-title">产品参数</h3>
+                                        <button class="btn btn-secondary btn-sm" type="button" id="btn-add-spec">新增参数</button>
+                                    </div>
+                                    <div class="specs-list" id="specs-list"></div>
+                                </section>
+
+                                <section class="form-section product-form-section">
+                                    <h3 class="form-section-title">SEO 信息</h3>
+                                    <div class="form-group"><label>SEO 标题</label><input type="text" id="field-seo-title"></div>
+                                    <div class="form-group"><label>SEO 描述</label><textarea id="field-seo-description" rows="3"></textarea></div>
+                                    <div class="form-group"><label>SEO 关键词</label><input type="text" id="field-seo-keywords" placeholder="多个关键词用逗号分隔"></div>
+                                </section>
                             </div>
-                            <div class="form-group"><label>阿拉伯语名称</label><input type="text" id="field-nameAr" dir="rtl"></div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>分类 <span class="required">*</span></label>
-                                    <select id="field-category">
-                                        <option value="">选择分类</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="form-group"><label class="checkbox-label"><input type="checkbox" id="field-featured"> 首页推荐产品</label></div>
-                        </section>
-                        <section class="form-section">
-                            <h3 class="form-section-title">展示内容</h3>
-                            <div class="form-group"><label>英文短描述</label><input type="text" id="field-shortDesc"></div>
-                            <div class="form-group"><label>阿拉伯语短描述</label><input type="text" id="field-shortDescAr" dir="rtl"></div>
-                            <div class="form-group"><label>英文详情</label><textarea id="field-description" rows="3"></textarea></div>
-                            <div class="form-group"><label>阿拉伯语详情</label><textarea id="field-descriptionAr" rows="3" dir="rtl"></textarea></div>
-                            <div class="form-group">
-                                <label>产品图片</label>
-                                <div class="image-upload-area" id="upload-area">
-                                    <input type="file" id="field-image" accept="image/jpeg,image/png,image/webp,image/gif">
-                                    <input type="hidden" id="field-cover-image">
-                                    <div class="upload-placeholder"><p>上传产品图片</p><small>支持 JPG / PNG / WebP / GIF，最大 8MB</small></div>
-                                </div>
-                                <div class="image-preview-container" id="image-preview" style="display:none;"></div>
-                                <p class="form-help-text">上传成功后点击保存，产品封面会替换为新图片。</p>
-                            </div>
-                        </section>
+
+                            <aside class="product-editor-side">
+                                <section class="form-section product-form-section">
+                                    <h3 class="form-section-title">封面图</h3>
+                                    <div class="image-upload-area" id="upload-area">
+                                        <input type="file" id="field-image" accept="image/jpeg,image/png,image/webp,image/gif">
+                                        <input type="hidden" id="field-cover-image">
+                                        <div class="upload-placeholder"><p>上传产品封面</p><small>JPG / PNG / WebP / GIF，最大 8MB</small></div>
+                                    </div>
+                                    <div class="image-preview-container" id="image-preview" style="display:none;"></div>
+                                    <p class="form-help-text">上传成功后点击保存，封面会替换为新图片。</p>
+                                </section>
+
+                                <section class="form-section product-form-section">
+                                    <h3 class="form-section-title">图库</h3>
+                                    <div class="gallery-preview-grid" id="product-gallery-preview">
+                                        <div class="gallery-empty">暂无图库图片</div>
+                                    </div>
+                                </section>
+
+                                <section class="form-section product-form-section">
+                                    <h3 class="form-section-title">关联证书</h3>
+                                    <div class="relation-picker" id="product-cert-selector">
+                                        <span>暂未关联证书</span>
+                                        <button class="btn btn-secondary btn-sm" type="button" data-action="view-cert-qualifications">打开证书库</button>
+                                    </div>
+                                </section>
+
+                                <section class="form-section product-form-section">
+                                    <h3 class="form-section-title">保存状态</h3>
+                                    <div class="editor-status-list">
+                                        <span>保存后同步产品列表和前台产品详情页。</span>
+                                        <span>图片、名称、简介会影响搜索结果展示。</span>
+                                    </div>
+                                </section>
+                            </aside>
+                        </div>
                     </form>
                 </div>
                 <div class="modal-footer"><button class="btn btn-secondary" id="modal-cancel">取消</button><button class="btn btn-primary" id="modal-submit" type="submit" form="product-form">保存</button></div>
@@ -645,27 +853,48 @@
         </div>
 
         <div class="modal-overlay" id="certification-modal">
-            <div class="modal">
-                <div class="modal-header"><h3 id="certification-modal-title">新增证书</h3><button class="modal-close" id="certification-modal-close">×</button></div>
+            <div class="modal modal-wide certification-editor-modal">
+                <div class="modal-header"><div><h3 id="certification-modal-title">新增证书</h3><p class="modal-subtitle" id="certification-modal-subtitle">上传证书图片并维护展示信息</p></div><button class="modal-close" id="certification-modal-close">×</button></div>
                 <div class="modal-body">
                     <form id="certification-form">
                         <input type="hidden" id="cert-category-id">
                         <input type="hidden" id="cert-editing-id">
                         <input type="hidden" id="cert-editing-version">
-                        <section class="form-section">
-                            <h3 class="form-section-title">基础信息</h3>
-                            <div class="form-group"><label>证书名称</label><input type="text" id="cert-name" placeholder="留空时使用上传文件名"></div>
-                            <div class="form-row">
-                                <div class="form-group"><label>发证机构</label><input type="text" id="cert-issuer"></div>
-                                <div class="form-group"><label>有效期</label><input type="text" id="cert-expiryDate"></div>
+                        <div class="cert-editor-grid">
+                            <div class="cert-editor-main">
+                                <section class="form-section cert-form-section">
+                                    <h3 class="form-section-title">基础信息</h3>
+                                    <div class="form-group"><label for="cert-name">证书名称</label><input type="text" id="cert-name" placeholder="留空时使用上传文件名"></div>
+                                    <div class="form-row">
+                                        <div class="form-group"><label for="cert-issuer">发证机构</label><input type="text" id="cert-issuer"></div>
+                                        <div class="form-group"><label for="cert-expiryDate">有效期</label><input type="text" id="cert-expiryDate" placeholder="长期有效或 2028-12-31"></div>
+                                    </div>
+                                </section>
+                                <section class="form-section cert-form-section">
+                                    <h3 class="form-section-title">展示内容</h3>
+                                    <div class="form-group"><label for="cert-image">图片/文件路径</label><input type="text" id="cert-image" placeholder="例如 uploads/certification-xxx.jpg"></div>
+                                    <div class="form-group"><label for="cert-description">说明</label><textarea id="cert-description" rows="5"></textarea></div>
+                                </section>
                             </div>
-                        </section>
-                        <section class="form-section">
-                            <h3 class="form-section-title">展示内容</h3>
-                            <p class="form-help-text">文件上传将在后续版本开放。</p>
-                            <div class="form-group"><label>图片/文件路径</label><input type="text" id="cert-image" placeholder="例如 uploads/certification-xxx.jpg"></div>
-                            <div class="form-group"><label>说明</label><textarea id="cert-description" rows="3"></textarea></div>
-                        </section>
+                            <aside class="cert-editor-side">
+                                <section class="form-section cert-form-section">
+                                    <h3 class="form-section-title">上传预览</h3>
+                                    <label class="cert-upload-drop" for="cert-file">
+                                        <input type="file" id="cert-file" accept="image/jpeg,image/png,image/webp,image/gif">
+                                        <span>选择证书图片</span>
+                                        <small>支持 JPG、PNG、WebP、GIF，上传后自动回填路径</small>
+                                    </label>
+                                    <div class="cert-upload-preview" id="cert-preview"><span>暂无预览</span></div>
+                                </section>
+                                <section class="form-section cert-form-section">
+                                    <h3 class="form-section-title">发布状态</h3>
+                                    <div class="cert-editor-status">
+                                        <span class="badge badge-green">保存后发布</span>
+                                        <p>证书保存后会进入当前类型列表，前台展示仍由发布状态和内容配置共同决定。</p>
+                                    </div>
+                                </section>
+                            </aside>
+                        </div>
                     </form>
                 </div>
                 <div class="modal-footer"><button class="btn btn-secondary" id="certification-cancel">取消</button><button class="btn btn-primary" type="submit" form="certification-form">保存</button></div>
