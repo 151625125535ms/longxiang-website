@@ -1,5 +1,6 @@
 const express = require('express');
 const { getDb } = require('../../lib/db');
+const { normalizeUploadedFilename } = require('../../lib/filenameEncoding');
 const { sendError } = require('./helpers');
 
 const router = express.Router();
@@ -137,7 +138,7 @@ router.post('/', function (req, res, next) {
             `).run({
                 path: assetPath,
                 filename,
-                original_name: body.original_name ? String(body.original_name).trim() : '',
+                original_name: body.original_name ? normalizeUploadedFilename(body.original_name) : '',
                 mime_type: body.mime_type ? String(body.mime_type).trim() : '',
                 file_size: body.file_size == null || body.file_size === '' ? null : parseInteger(body.file_size, null),
                 checksum: body.checksum ? String(body.checksum).trim() : '',

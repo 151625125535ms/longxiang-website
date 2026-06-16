@@ -4,6 +4,7 @@ const multer = require('multer');
 const { authMiddleware } = require('../middleware/auth');
 const { ensureDirectory, resolveUploadDir, resolveUploadPublicPath } = require('../lib/fileStore');
 const { getDb } = require('../lib/db');
+const { normalizeUploadedFilename } = require('../lib/filenameEncoding');
 
 const router = express.Router();
 const UPLOAD_DIR = path.join(resolveUploadDir(), 'education');
@@ -41,6 +42,7 @@ const upload = multer({
 
 function registerAsset(file, publicPath) {
     const db = getDb();
+    const originalName = normalizeUploadedFilename(file.originalname);
     db.prepare(`
         INSERT OR IGNORE INTO assets
             (
@@ -55,7 +57,7 @@ function registerAsset(file, publicPath) {
     `).run({
         path: publicPath,
         filename: file.filename,
-        original_name: file.originalname || '',
+        original_name: originalName,
         mime_type: file.mimetype || '',
         file_size: file.size || 0,
         created_at: Date.now()

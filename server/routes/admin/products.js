@@ -5,6 +5,7 @@ const multer = require('multer');
 const { getDb } = require('../../lib/db');
 const { ensureDirectory, resolveUploadDir, resolveUploadPublicPath } = require('../../lib/fileStore');
 const { getCategoryMapping } = require('../../lib/category-helper');
+const { normalizeUploadedFilename } = require('../../lib/filenameEncoding');
 const { sendError, insertAuditLog } = require('./helpers');
 
 const router = express.Router();
@@ -309,6 +310,7 @@ router.post('/upload', function (req, res, next) {
             if (!req.file) return sendError(res, 422, 'VALIDATION_ERROR', 'No file uploaded.');
 
             const publicPath = resolveUploadPublicPath() + '/' + req.file.filename;
+            const originalName = normalizeUploadedFilename(req.file.originalname);
             const db = getDb();
             const createdAt = Date.now();
             const createAsset = db.transaction(function () {
@@ -326,7 +328,7 @@ router.post('/upload', function (req, res, next) {
                 `).run({
                     path: publicPath,
                     filename: req.file.filename,
-                    original_name: req.file.originalname || '',
+                    original_name: originalName,
                     mime_type: req.file.mimetype || '',
                     file_size: req.file.size || 0,
                     checksum: '',
@@ -337,7 +339,7 @@ router.post('/upload', function (req, res, next) {
                     id: result.lastInsertRowid,
                     path: publicPath,
                     filename: req.file.filename,
-                    original_name: req.file.originalname || '',
+                    original_name: originalName,
                     mime_type: req.file.mimetype || '',
                     file_size: req.file.size || 0
                 };
