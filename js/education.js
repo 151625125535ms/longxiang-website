@@ -22,6 +22,11 @@
         return assetPrefix + path;
     }
 
+    function backgroundVariableStyle(name, path) {
+        path = resolveAsset(path);
+        return path ? ' style="--' + escapeHtml(name) + ': url(&quot;' + escapeHtml(path) + '&quot;);"' : '';
+    }
+
     function localized(item, key) {
         if (!item) return '';
         if (isArabic && item[key + 'Ar']) return item[key + 'Ar'];
@@ -245,7 +250,7 @@
 
     function renderCta(data) {
         var cta = data.cta || {};
-        return '<section class="cta-section education-cta" id="education-contact">' +
+        return '<section class="cta-section education-cta" id="education-contact"' + backgroundVariableStyle('education-cta-bg-image', cta.backgroundImage) + '>' +
             '<div class="container">' +
             '<h2 class="fade-in">' + escapeHtml(localized(cta, 'title')) + '</h2>' +
             '<p class="fade-in">' + escapeHtml(localized(cta, 'text')) + '</p>' +
@@ -281,7 +286,7 @@
         }
     }
 
-    fetchJson('/api/education', assetPrefix + 'data/education.json')
+    fetchJson('/api/education')
         .then(renderPage)
         .catch(function () {
             pageRoot.setAttribute('data-education-fallback', 'static');

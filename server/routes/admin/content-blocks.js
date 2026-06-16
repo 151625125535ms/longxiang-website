@@ -6,18 +6,32 @@ const router = express.Router();
 const BATCH_ACTIONS = ['publish', 'unpublish'];
 const STATUSES = ['published', 'draft'];
 const CONTENT_BLOCK_SLUGS = [
+    'home',
+    'solutions',
     'company-overview',
     'about-us',
     'contact',
+    'product-pages',
+    'global-shell',
+    'certifications',
+    'compare',
+    'not-found',
     'applications',
     'innovation',
     'education',
     'page-blocks'
 ];
 const SCHEMAS = {
+    home: { hero: 'object', proof: 'array', products: 'object', trust: 'object', features: 'array', stats: 'array', cta: 'object', seo: 'object' },
+    solutions: { hero: 'object', anchors: 'array', overview: 'object', marketFit: 'object', sections: 'array', scenarios: 'object', credentials: 'object', cta: 'object', seo: 'object' },
     'company-overview': { stats: 'array', seo: 'object' },
-    'contact': { mapLocations: 'object', seo: 'object' },
-    'about-us': { hero: 'object', sections: 'array', milestones: 'array', seo: 'object' },
+    'contact': { hero: 'object', contactPage: 'object', mapLocations: 'object', seo: 'object' },
+    'about-us': { hero: 'object', snapshot: 'object', values: 'array', quality: 'object', history: 'object', sections: 'array', milestones: 'array', capability: 'object', factory: 'object', markets: 'object', cta: 'object', seo: 'object' },
+    'product-pages': { productsHero: 'object', detailHero: 'object', detailLabels: 'object', notFound: 'object', listingSupport: 'object', listingCta: 'object', detailSupport: 'object', detailFaq: 'array', inquiryForm: 'object', seo: 'object', detailSeo: 'object' },
+    'global-shell': { navigation: 'object', footer: 'object', inquiry: 'object', cookieConsent: 'object', embedConsent: 'object', seoDefaults: 'object' },
+    'certifications': { hero: 'object', intro: 'object', stats: 'array', toolbar: 'object', seo: 'object' },
+    'compare': { hero: 'object', toolbar: 'object', emptyState: 'object', table: 'object', seo: 'object' },
+    'not-found': { panel: 'object', seo: 'object' },
     'applications': { hero: 'object', industries: 'array', seo: 'object' },
     'innovation': { hero: 'object', sections: 'array', highlights: 'array', related_certification_ids: 'array', seo: 'object' },
     education: { hero: 'object', stats: 'array', sections: 'array', cta: 'object', seo: 'object' },

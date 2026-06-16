@@ -374,9 +374,13 @@
             products: { title: '产品列表', group: 'products', groupLabel: '产品', breadcrumb: '产品 › 产品列表', description: '管理产品资料、状态、分类与首页推荐。' },
             categories: { title: '分类管理', group: 'products', groupLabel: '产品', breadcrumb: '产品 › 分类管理', description: '维护产品分类名称、排序与展示状态。' },
             inquiries: { title: '询盘列表', group: 'inquiries', groupLabel: '询盘', breadcrumb: '询盘 › 询盘列表', description: '查看客户询盘并进行状态跟进或批量处理。' },
+            'content-home': { title: '首页', group: 'content', groupLabel: '内容', breadcrumb: '内容 › 首页', description: '维护首页 Hero、统计、CTA 等内容块。' },
+            'content-solutions': { title: '解决方案', group: 'content', groupLabel: '内容', breadcrumb: '内容 › 解决方案', description: '维护解决方案页面内容块。' },
             'content-company-overview': { title: '企业概况', group: 'content', groupLabel: '内容', breadcrumb: '内容 › 企业概况', description: '维护公开网站企业概况内容块。' },
             'content-contact': { title: '联系我们', group: 'content', groupLabel: '内容', breadcrumb: '内容 › 联系我们', description: '维护联系页展示内容与联系信息。' },
             'content-about': { title: '关于我们', group: 'content', groupLabel: '内容', breadcrumb: '内容 › 关于我们', description: '维护关于我们页面的核心内容。' },
+            'content-product-pages': { title: '产品页面', group: 'content', groupLabel: '内容', breadcrumb: '内容 › 产品页面', description: '维护产品列表、产品详情、FAQ 与询盘表单文案。' },
+            'content-global-shell': { title: '全站壳层', group: 'content', groupLabel: '内容', breadcrumb: '内容 › 全站壳层', description: '维护导航、页脚、全站默认 SEO 和通用询盘文案。' },
             'content-technology': { title: '科技创新', group: 'content', groupLabel: '内容', breadcrumb: '内容 › 科技创新', description: '维护科技创新页面内容块。' },
             'content-industries': { title: '应用行业', group: 'content', groupLabel: '内容', breadcrumb: '内容 › 应用行业', description: '维护应用行业页面内容块。' },
             'content-education': { title: '教育合作', group: 'content', groupLabel: '内容', breadcrumb: '内容 › 教育合作', description: '维护教育合作页面内容块。' },
@@ -761,9 +765,13 @@
             if (view === 'cert-patents') loadCertView(view);
             if (view === 'cert-software') loadCertView(view);
             if (view === 'cert-test-reports') loadCertView(view);
+            if (view === 'content-home') loadContentBlock(view);
+            if (view === 'content-solutions') loadContentBlock(view);
             if (view === 'content-company-overview') loadContentBlock(view);
             if (view === 'content-contact') loadContentBlock(view);
             if (view === 'content-about') loadContentBlock(view);
+            if (view === 'content-product-pages') loadContentBlock(view);
+            if (view === 'content-global-shell') loadContentBlock(view);
             if (view === 'content-technology') loadContentBlock(view);
             if (view === 'content-industries') loadContentBlock(view);
             if (view === 'content-education') loadContentBlock(view);
@@ -842,9 +850,13 @@
 
         function contentViewFromSlug(slug) {
             var map = {
+                home: 'content-home',
+                solutions: 'content-solutions',
                 'company-overview': 'content-company-overview',
                 contact: 'content-contact',
                 'about-us': 'content-about',
+                'product-pages': 'content-product-pages',
+                'global-shell': 'content-global-shell',
                 innovation: 'content-technology',
                 applications: 'content-industries',
                 education: 'content-education',
@@ -2419,9 +2431,13 @@
 
         function contentBlockSlug(viewName) {
             var map = {
+                'content-home': 'home',
+                'content-solutions': 'solutions',
                 'content-company-overview': 'company-overview',
                 'content-contact': 'contact',
                 'content-about': 'about-us',
+                'content-product-pages': 'product-pages',
+                'content-global-shell': 'global-shell',
                 'content-technology': 'innovation',
                 'content-industries': 'applications',
                 'content-education': 'education',
@@ -2816,9 +2832,13 @@
 
         function bindContentBlockEvents() {
             var views = [
+                'content-home',
+                'content-solutions',
                 'content-company-overview',
                 'content-contact',
                 'content-about',
+                'content-product-pages',
+                'content-global-shell',
                 'content-technology',
                 'content-industries',
                 'content-education',

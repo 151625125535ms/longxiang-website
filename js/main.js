@@ -8,6 +8,8 @@
     var isArabic = /\/ar\//.test(window.location.pathname.replace(/\\/g, '/'));
     var assetPrefix = isArabic ? '../' : '';
     var companyCache = null;
+    var globalShellCache = null;
+    var consentDocumentClickBound = false;
 
     function escapeHtml(value) {
         return String(value == null ? '' : value)
@@ -18,24 +20,11 @@
             .replace(/'/g, '&#039;');
     }
 
-    function fetchJson(url, fallbackUrl) {
+    function fetchJson(url) {
         return fetch(url)
             .then(function (res) {
                 if (!res.ok) throw new Error('API request failed');
                 return res.json();
-            })
-            .catch(function () {
-                if (!fallbackUrl) throw new Error('No fallback available');
-                if (fallbackUrl.indexOf('data/products.json') !== -1) {
-                    document.documentElement.setAttribute('data-products-source', 'static-fallback');
-                    if (window.console && console.warn) {
-                        console.warn('Products loaded from static fallback data/products.json.');
-                    }
-                }
-                return fetch(fallbackUrl).then(function (res) {
-                    if (!res.ok) throw new Error('Fallback request failed');
-                    return res.json();
-                });
             });
     }
 
@@ -158,37 +147,71 @@
         });
     }
 
+    window.applyFunctionalEmbeds = applyFunctionalEmbeds;
+
     function getEmbedPlaceholder(el) {
         var parent = el && el.parentElement;
         return parent ? parent.querySelector(':scope > .consent-embed-placeholder') : null;
     }
 
-    function ensureEmbedPlaceholder(el) {
-        if (!el || !el.parentElement || getEmbedPlaceholder(el)) return;
-        var placeholder = document.createElement('div');
-        placeholder.className = 'consent-embed-placeholder';
+    function localizedSectionValue(sectionName, key, fallback) {
+        var section = shellSection(sectionName);
+        if (isArabic && section[key + 'Ar']) return section[key + 'Ar'];
+        if (section[key]) return section[key];
+        return fallback || '';
+    }
+
+    function embedConsentText() {
+        var fallback = isArabic ? {
+            title: 'يتطلب هذا المحتوى موافقة وظيفية',
+            intro: 'يتم حظر الخرائط والفيديو من أطراف خارجية حتى تسمح بملفات تعريف الارتباط الوظيفية.',
+            allow: 'السماح بملفات تعريف الارتباط الوظيفية'
+        } : {
+            title: 'Functional consent required',
+            intro: 'Maps and videos from third parties are blocked until you allow functional cookies.',
+            allow: 'Allow functional cookies'
+        };
+        return {
+            title: localizedSectionValue('embedConsent', 'title', fallback.title),
+            intro: localizedSectionValue('embedConsent', 'intro', fallback.intro),
+            allow: localizedSectionValue('embedConsent', 'allow', fallback.allow)
+        };
+    }
+
+    function renderEmbedPlaceholder(placeholder) {
+        var text = embedConsentText();
         placeholder.innerHTML =
             '<div>' +
-                '<strong>' + (isArabic ? 'يتطلب هذا المحتوى موافقة وظيفية' : 'Functional consent required') + '</strong>' +
-                '<p>' + (isArabic ? 'نحظر محتوى الخرائط والفيديو من أطراف ثالثة حتى تمنح الموافقة.' : 'Maps and videos from third parties are blocked until you allow functional cookies.') + '</p>' +
-                '<button type="button" data-allow-functional>' + (isArabic ? 'السماح بملفات تعريف الارتباط الوظيفية' : 'Allow functional cookies') + '</button>' +
+                '<strong>' + escapeHtml(text.title) + '</strong>' +
+                '<p>' + escapeHtml(text.intro) + '</p>' +
+                '<button type="button" data-allow-functional>' + escapeHtml(text.allow) + '</button>' +
             '</div>';
         placeholder.querySelector('[data-allow-functional]').addEventListener('click', function () {
             saveConsent(Object.assign(readConsent(), { functional: true }));
         });
-        el.parentElement.appendChild(placeholder);
+    }
+
+    function ensureEmbedPlaceholder(el) {
+        if (!el || !el.parentElement) return;
+        var placeholder = getEmbedPlaceholder(el);
+        if (!placeholder) {
+            placeholder = document.createElement('div');
+            placeholder.className = 'consent-embed-placeholder';
+            el.parentElement.appendChild(placeholder);
+        }
+        renderEmbedPlaceholder(placeholder);
     }
 
     function consentText() {
-        return isArabic ? {
+        var fallback = isArabic ? {
             title: 'إعدادات ملفات تعريف الارتباط',
-            intro: 'نستخدم التخزين الضروري لتشغيل الموقع. لن نحمل التحليلات أو الخرائط أو الفيديو بدون موافقتك.',
+            intro: 'نستخدم التخزين الضروري لتشغيل الموقع. لا يتم تحميل التحليلات أو الخرائط أو الفيديو إلا بعد موافقتك.',
             necessary: 'ضروري',
             necessaryDesc: 'مطلوب للغة والأمان ووظائف الموقع الأساسية.',
             analytics: 'التحليلات',
             analyticsDesc: 'يساعدنا Google Analytics على فهم استخدام الموقع.',
             functional: 'وظيفي',
-            functionalDesc: 'يسمح بتشغيل فيديو YouTube وخرائط Google.',
+            functionalDesc: 'يسمح بتحميل فيديوهات YouTube وخرائط Google.',
             accept: 'قبول الكل',
             reject: 'رفض الكل',
             customize: 'تخصيص',
@@ -209,66 +232,84 @@
             save: 'Save settings',
             close: 'Close'
         };
+        var text = {};
+        Object.keys(fallback).forEach(function (key) {
+            text[key] = localizedSectionValue('cookieConsent', key, fallback[key]);
+        });
+        return text;
     }
 
     function consentToggle(name, label, desc, checked, disabled) {
         return '<label class="cookie-consent-toggle">' +
-            '<span><strong>' + label + '</strong><small>' + desc + '</small></span>' +
+            '<span><strong>' + escapeHtml(label) + '</strong><small>' + escapeHtml(desc) + '</small></span>' +
             '<input type="checkbox" name="' + name + '"' + (checked ? ' checked' : '') + (disabled ? ' disabled' : '') + '>' +
             '</label>';
     }
 
-    function ensureConsentUi() {
-        if (document.getElementById('cookie-consent-root')) return;
+    function renderConsentUi(root) {
         var text = consentText();
-        var root = document.createElement('div');
-        root.id = 'cookie-consent-root';
         root.innerHTML =
-            '<section class="cookie-consent-banner" role="region" aria-label="' + text.title + '" hidden>' +
-                '<div><h2>' + text.title + '</h2><p>' + text.intro + '</p></div>' +
+            '<section class="cookie-consent-banner" role="region" aria-label="' + escapeHtml(text.title) + '" hidden>' +
+                '<div><h2>' + escapeHtml(text.title) + '</h2><p>' + escapeHtml(text.intro) + '</p></div>' +
                 '<div class="cookie-consent-actions">' +
-                    '<button type="button" data-consent-accept>' + text.accept + '</button>' +
-                    '<button type="button" data-consent-reject>' + text.reject + '</button>' +
-                    '<button type="button" data-consent-customize>' + text.customize + '</button>' +
+                    '<button type="button" data-consent-accept>' + escapeHtml(text.accept) + '</button>' +
+                    '<button type="button" data-consent-reject>' + escapeHtml(text.reject) + '</button>' +
+                    '<button type="button" data-consent-customize>' + escapeHtml(text.customize) + '</button>' +
                 '</div>' +
             '</section>' +
             '<div class="cookie-consent-modal" hidden>' +
                 '<div class="cookie-consent-dialog" role="dialog" aria-modal="true" aria-labelledby="cookie-consent-title">' +
-                    '<div class="cookie-consent-dialog-header"><h2 id="cookie-consent-title">' + text.title + '</h2><button type="button" data-consent-close aria-label="' + text.close + '">&times;</button></div>' +
-                    '<p>' + text.intro + '</p>' +
+                    '<div class="cookie-consent-dialog-header"><h2 id="cookie-consent-title">' + escapeHtml(text.title) + '</h2><button type="button" data-consent-close aria-label="' + escapeHtml(text.close) + '">&times;</button></div>' +
+                    '<p>' + escapeHtml(text.intro) + '</p>' +
                     '<form data-consent-form>' +
                         consentToggle('necessary', text.necessary, text.necessaryDesc, true, true) +
                         consentToggle('analytics', text.analytics, text.analyticsDesc, false, false) +
                         consentToggle('functional', text.functional, text.functionalDesc, false, false) +
-                        '<div class="cookie-consent-actions"><button type="submit">' + text.save + '</button><button type="button" data-consent-reject>' + text.reject + '</button><button type="button" data-consent-accept>' + text.accept + '</button></div>' +
+                        '<div class="cookie-consent-actions"><button type="submit">' + escapeHtml(text.save) + '</button><button type="button" data-consent-reject>' + escapeHtml(text.reject) + '</button><button type="button" data-consent-accept>' + escapeHtml(text.accept) + '</button></div>' +
                     '</form>' +
                 '</div>' +
             '</div>';
-        document.body.appendChild(root);
-
-        root.addEventListener('click', function (event) {
-            if (event.target.closest('[data-consent-accept]')) saveConsent({ analytics: true, functional: true });
-            if (event.target.closest('[data-consent-reject]')) saveConsent({ analytics: false, functional: false });
-            if (event.target.closest('[data-consent-customize]')) openConsentSettings();
-            if (event.target.closest('[data-consent-close]')) closeConsentSettings();
-        });
-        root.querySelector('[data-consent-form]').addEventListener('submit', function (event) {
-            event.preventDefault();
-            saveConsent({
-                analytics: event.target.elements.analytics.checked,
-                functional: event.target.elements.functional.checked
-            });
-        });
-        document.addEventListener('click', function (event) {
-            var trigger = event.target.closest('[data-cookie-settings]');
-            if (!trigger) return;
-            event.preventDefault();
-            openConsentSettings();
-        });
-        updateConsentUi(readConsent());
     }
 
-    function updateConsentUi(consent) {
+    function ensureConsentUi() {
+        var root = document.getElementById('cookie-consent-root');
+        var modal = root && root.querySelector('.cookie-consent-modal');
+        var modalWasOpen = modal && !modal.hidden;
+        if (!root) {
+            root = document.createElement('div');
+            root.id = 'cookie-consent-root';
+            document.body.appendChild(root);
+
+            root.addEventListener('click', function (event) {
+                if (event.target.closest('[data-consent-accept]')) saveConsent({ analytics: true, functional: true });
+                if (event.target.closest('[data-consent-reject]')) saveConsent({ analytics: false, functional: false });
+                if (event.target.closest('[data-consent-customize]')) openConsentSettings();
+                if (event.target.closest('[data-consent-close]')) closeConsentSettings();
+            });
+            root.addEventListener('submit', function (event) {
+                if (!event.target.closest('[data-consent-form]')) return;
+                event.preventDefault();
+                saveConsent({
+                    analytics: event.target.elements.analytics.checked,
+                    functional: event.target.elements.functional.checked
+                });
+            });
+        }
+
+        renderConsentUi(root);
+        if (!consentDocumentClickBound) {
+            consentDocumentClickBound = true;
+            document.addEventListener('click', function (event) {
+                var trigger = event.target.closest('[data-cookie-settings]');
+                if (!trigger) return;
+                event.preventDefault();
+                openConsentSettings();
+            });
+        }
+        updateConsentUi(readConsent(), { keepModalOpen: modalWasOpen });
+    }
+
+    function updateConsentUi(consent, options) {
         var root = document.getElementById('cookie-consent-root');
         if (!root) return;
         var banner = root.querySelector('.cookie-consent-banner');
@@ -279,7 +320,8 @@
             form.elements.functional.checked = consent.functional === true;
         }
         if (banner) banner.hidden = hasStoredConsent();
-        if (modal) modal.hidden = true;
+        if (modal && !(options && options.keepModalOpen)) modal.hidden = true;
+        if (modal && options && options.keepModalOpen) modal.hidden = false;
     }
 
     function openConsentSettings() {
@@ -294,10 +336,21 @@
         if (modal) modal.hidden = true;
     }
 
-    function initCookieConsent() {
+    function initCookieConsent(shellPromise) {
+        var showConsentUi = function () {
+            ensureConsentUi();
+            applyFunctionalEmbeds();
+        };
         initGoogleConsentMode();
-        ensureConsentUi();
         applyFunctionalEmbeds();
+        if (shellPromise && typeof shellPromise.then === 'function') {
+            shellPromise.then(showConsentUi, showConsentUi);
+            window.setTimeout(function () {
+                if (!document.getElementById('cookie-consent-root')) showConsentUi();
+            }, 1200);
+        } else {
+            showConsentUi();
+        }
     }
 
     function currentPageName() {
@@ -332,7 +385,7 @@
     }
 
     function navLink(page, label, extraClass, hash) {
-        return '<a href="' + pageHref(page, hash) + '"' + (extraClass ? ' class="' + extraClass + '"' : '') + '>' + label + '</a>';
+        return '<a href="' + pageHref(page, hash) + '"' + (extraClass ? ' class="' + extraClass + '"' : '') + '>' + escapeHtml(label) + '</a>';
     }
 
     function navItem(page, label, dropdown, activePages) {
@@ -357,72 +410,7 @@
             document.body.insertBefore(strip, document.body.firstChild);
         }
 
-        if (!navLinks) return;
-        var labels = isArabic ? {
-            home: 'الرئيسية',
-            products: 'المنتجات',
-            transformer: 'المحولات',
-            newEnergy: 'معدات الطاقة الجديدة',
-            energyStorage: 'أنظمة تخزين الطاقة',
-            acEv: 'محطة شحن تيار متردد',
-            dcEv: 'محطة شحن تيار مستمر',
-            switchgear: 'معدات المفاتيح',
-            solutions: 'الحلول',
-            epc: 'المقاولات العامة للمشاريع الكهربائية',
-            lineOm: 'تشغيل وصيانة الخطوط',
-            pv: 'حل الطاقة الشمسية التجارية والصناعية',
-            wind: 'حل الرياح والطاقة الشمسية والتخزين والشحن',
-            microgrid: 'حل الشبكة المصغرة الذكية',
-            education: 'التعليم',
-            about: 'من نحن',
-            aboutLongxiang: 'عن لونغشيانغ',
-            certs: 'الشهادات',
-            contact: 'اتصل بنا'
-        } : {
-            home: 'Home',
-            products: 'Products',
-            transformer: 'Transformer',
-            newEnergy: 'New Energy Equipment',
-            energyStorage: 'Energy Storage',
-            acEv: 'AC EV Charging Station',
-            dcEv: 'DC EV Charging Station',
-            switchgear: 'Switchgear',
-            solutions: 'Solutions',
-            epc: 'Engineering General Contracting',
-            lineOm: 'Line Operation & Maintenance',
-            pv: 'C&I PV Solution',
-            wind: 'C&I Wind+PV+ESS+EV Charging Solution',
-            microgrid: 'C&I Smart Microgrid Solution',
-            education: 'Education',
-            about: 'About Us',
-            aboutLongxiang: 'About LongXiang',
-            certs: 'Certificates',
-            contact: 'Contact'
-        };
-
-        navLinks.innerHTML =
-            navItem('index.html', labels.home) +
-            navItem('products.html', labels.products, [
-                { page: 'products.html', label: labels.transformer, hash: '?group=transformer' },
-                { page: 'products.html', label: labels.newEnergy, hash: '?group=new-energy-equipment' },
-                { page: 'products.html', label: labels.energyStorage, hash: '?group=new-energy-equipment&sub=energy-storage' },
-                { page: 'products.html', label: labels.acEv, hash: '?group=new-energy-equipment&sub=ac' },
-                { page: 'products.html', label: labels.dcEv, hash: '?group=new-energy-equipment&sub=dc' },
-                { page: 'products.html', label: labels.switchgear, hash: '?group=switchgear' }
-            ], ['products.html', 'product-detail.html']) +
-            navItem('solutions.html', labels.solutions, [
-                { page: 'solutions.html', label: labels.epc, hash: '#engineering-epc' },
-                { page: 'solutions.html', label: labels.lineOm, hash: '#line-om' },
-                { page: 'solutions.html', label: labels.wind, hash: '#wind-pv-ess-ev' },
-                { page: 'solutions.html', label: labels.microgrid, hash: '#smart-microgrid' },
-                { page: 'solutions.html', label: labels.pv, hash: '#pv-solution' }
-            ]) +
-            navItem('education.html', labels.education) +
-            navItem('about.html', labels.about, [
-                { page: 'about.html', label: labels.aboutLongxiang },
-                { page: 'certifications.html', label: labels.certs }
-            ], ['about.html', 'certifications.html']) +
-            navItem('contact.html', labels.contact);
+        updateMainNavigation();
     }
 
     function applyLanguagePreference() {
@@ -511,11 +499,12 @@
             document.body.style.overflow = isOpen ? 'hidden' : '';
         });
 
-        navLinks.querySelectorAll('.nav-item.has-dropdown > a').forEach(function (link) {
-            link.setAttribute('aria-expanded', 'false');
-            link.addEventListener('click', function (event) {
-                if (!window.matchMedia('(max-width: 768px)').matches) return;
+        navLinks.addEventListener('click', function (event) {
+            var link = event.target.closest('a');
+            if (!link || !navLinks.contains(link)) return;
+            var parentDropdown = link.parentElement && link.parentElement.classList.contains('has-dropdown');
 
+            if (window.matchMedia('(max-width: 768px)').matches && parentDropdown) {
                 event.preventDefault();
                 var item = link.closest('.nav-item');
                 var willOpen = item && !item.classList.contains('is-open');
@@ -530,19 +519,10 @@
 
                 if (item) item.classList.toggle('is-open', willOpen);
                 link.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
-            });
-        });
+                return;
+            }
 
-        navLinks.querySelectorAll('a').forEach(function (link) {
-            link.addEventListener('click', function (event) {
-                if (window.matchMedia('(max-width: 768px)').matches &&
-                    link.closest('.nav-item.has-dropdown') &&
-                    link.parentElement && link.parentElement.classList.contains('has-dropdown')) {
-                    return;
-                }
-
-                closeMobileMenu();
-            });
+            closeMobileMenu();
         });
 
         if (mobileOverlay) {
@@ -754,6 +734,19 @@
         meta.setAttribute('content', content);
     }
 
+    function absoluteAssetUrl(path) {
+        path = resolveAssetPath(path || '');
+        if (!path) return '';
+        if (/^(https?:)?\/\//.test(path)) return path;
+        path = path.replace(/^\.\.\//, '').replace(/^\/+/, '');
+        return window.location.origin + '/' + encodeURI(path);
+    }
+
+    function seoDefaultImage(company) {
+        var defaults = shellSection('seoDefaults');
+        return absoluteAssetUrl(defaults.image || defaults.ogImage || company.ogImage || company.seoImage || company.logo || '');
+    }
+
     function initSeoMeta(company) {
         var title = document.title || company.name;
         var descriptionMeta = document.querySelector('meta[name="description"]');
@@ -764,7 +757,7 @@
         injectMeta('', 'og:type', 'website');
         injectMeta('', 'og:url', url);
         injectAlternateSeoLinks(url);
-        injectMeta('', 'og:image', window.location.origin + '/' + encodeURI('5、厂区厂貌/龙翔公司正门.jpg'));
+        injectMeta('', 'og:image', seoDefaultImage(company));
 
         var path = window.location.pathname;
         var schema = null;
@@ -868,7 +861,7 @@
             setCompanyText('[data-company-field="' + key + '"]', companyValue(company, key));
         });
 
-        setCompanyText('.footer-brand p', companyValue(company, 'footerText'));
+        setCompanyText('.footer-brand p', shellValue('footer', 'text', companyValue(company, 'footerText')));
         setCompanyText('[data-company-contact="email"] .footer-contact-value', company.email);
         setCompanyText('[data-company-contact="address"] .footer-contact-value', companyValue(company, 'address'));
         setCompanyHref('[data-company-email-link]', 'mailto:' + company.email);
@@ -961,59 +954,117 @@
         syncMapInfo(activeLocation);
     }
 
+    function shellSection(name) {
+        return globalShellCache && globalShellCache[name] ? globalShellCache[name] : {};
+    }
+
+    function shellValue(sectionName, key, fallback) {
+        var section = shellSection(sectionName);
+        var arKey = key + 'Ar';
+        if (isArabic && section[arKey]) return section[arKey];
+        return section[key] || fallback || '';
+    }
+
+    function shellLabel(item, fallback) {
+        if (!item) return fallback || '';
+        if (isArabic && item.labelAr) return item.labelAr;
+        return item.label || fallback || '';
+    }
+
+    function renderShellLinks(items, fallbackItems) {
+        var links = Array.isArray(items) && items.length ? items : (fallbackItems || []);
+        return links.map(function (item) {
+            return navLink(item.href || 'index.html', shellLabel(item), '', item.search || '');
+        }).join('');
+    }
+
+    function shellLinkPage(item) {
+        var href = String((item && item.href) || 'index.html').split('#')[0].split('?')[0];
+        return href.split('/').pop() || 'index.html';
+    }
+
+    function isActiveShellNavItem(item) {
+        var current = currentPageName();
+        var activePages = Array.isArray(item.activePages) ? item.activePages : [shellLinkPage(item)];
+        if (activePages.indexOf(current) !== -1) return true;
+        return Array.isArray(item.children) && item.children.some(function (child) {
+            return isActiveShellNavItem(child);
+        });
+    }
+
+    function renderMainNavItem(item) {
+        var label = shellLabel(item);
+        if (!label) return '';
+        var children = Array.isArray(item.children) ? item.children : [];
+        var hasDropdown = children.length > 0;
+        var activeClass = isActiveShellNavItem(item) ? 'active' : '';
+        var html = '<div class="nav-item' + (hasDropdown ? ' has-dropdown' : '') + '">' +
+            navLink(item.href || 'index.html', label, activeClass, item.search || item.hash || '');
+        if (hasDropdown) {
+            html += '<div class="nav-dropdown">' + children.map(function (child) {
+                return navLink(child.href || 'index.html', shellLabel(child), '', child.search || child.hash || '');
+            }).join('') + '</div>';
+        }
+        return html + '</div>';
+    }
+
+    function updateMainNavigation() {
+        var links = document.querySelector('.navbar .nav-links');
+        if (!links) return;
+        var mainLinks = shellSection('navigation').mainLinks;
+        links.innerHTML = Array.isArray(mainLinks) ? mainLinks.map(renderMainNavItem).join('') : '';
+        links.querySelectorAll('.nav-item.has-dropdown > a').forEach(function (link) {
+            link.setAttribute('aria-expanded', 'false');
+        });
+    }
+
     function updateFooterNavigation() {
+        var navigation = shellSection('navigation');
         document.querySelectorAll('.footer-grid').forEach(function (grid) {
             grid.innerHTML =
                 '<div class="footer-company">' +
                     '<div class="footer-brand">' +
                         '<a href="' + pageHref('index.html') + '" class="nav-logo"><span class="nav-logo-text">LONG<span>XIANG</span></span></a>' +
-                        '<p>' + (isArabic ? 'نوفر معدات طاقة ذكية منخفضة الكربون ونساهم في تنمية الكفاءات الكهربائية المهنية منذ عام 2003.' : 'Providing intelligent, low-carbon power equipment and cultivating excellent professional electrical talent since 2003.') + '</p>' +
+                        '<p>' + shellValue('footer', 'text', '') + '</p>' +
                     '</div>' +
-                    '<div class="footer-contact-item" data-company-contact="email"><span class="icon">&#9993;</span><span class="footer-contact-value">hnlxdq2003@163.com</span></div>' +
-                    '<div class="footer-contact-item" data-company-contact="address"><span class="icon">&#8982;</span><span class="footer-contact-value">Longhu New District, Xinzheng, Zhengzhou, Henan, China</span></div>' +
+                    '<div class="footer-contact-item" data-company-contact="email"><span class="icon">&#9993;</span><span class="footer-contact-value"></span></div>' +
+                    '<div class="footer-contact-item" data-company-contact="address"><span class="icon">&#8982;</span><span class="footer-contact-value"></span></div>' +
                     '<div class="messenger-links" data-communication-links></div>' +
                 '</div>' +
                 '<div class="footer-navigation">' +
                 '<div class="footer-column">' +
-                    '<h4>' + (isArabic ? 'روابط سريعة' : 'Quick Links') + '</h4>' +
+                    '<h4>' + shellValue('navigation', 'quickTitle', '') + '</h4>' +
                     '<div class="footer-links">' +
-                        navLink('index.html', isArabic ? 'الرئيسية' : 'Home') +
-                        navLink('products.html', isArabic ? 'المنتجات' : 'Products') +
-                        navLink('solutions.html', isArabic ? 'الحلول' : 'Solutions') +
-                        navLink('education.html', isArabic ? 'التعليم' : 'Education') +
-                        navLink('about.html', isArabic ? 'من نحن' : 'About Us') +
-                        navLink('contact.html', isArabic ? 'اتصل بنا' : 'Contact') +
-                        '<button type="button" class="footer-cookie-settings" data-cookie-settings>' + (isArabic ? 'إعدادات ملفات تعريف الارتباط' : 'Cookie Settings') + '</button>' +
+                        renderShellLinks(navigation.quickLinks) +
+                        '<button type="button" class="footer-cookie-settings" data-cookie-settings>' + shellValue('navigation', 'cookieSettingsLabel', '') + '</button>' +
                     '</div>' +
                 '</div>' +
                 '<div class="footer-column">' +
-                    '<h4>' + (isArabic ? 'المنتجات' : 'Products') + '</h4>' +
+                    '<h4>' + shellValue('navigation', 'productsTitle', '') + '</h4>' +
                     '<div class="footer-links">' +
-                        navLink('products.html', isArabic ? 'المحولات' : 'Transformer', '', '?group=transformer') +
-                        navLink('products.html', isArabic ? 'معدات الطاقة الجديدة' : 'New Energy Equipment', '', '?group=new-energy-equipment') +
-                        navLink('products.html', isArabic ? 'أنظمة تخزين الطاقة' : 'Energy Storage', '', '?group=new-energy-equipment&sub=energy-storage') +
-                        navLink('products.html', isArabic ? 'محطة شحن تيار متردد' : 'AC EV Charging Station', '', '?group=new-energy-equipment&sub=ac') +
-                        navLink('products.html', isArabic ? 'محطة شحن تيار مستمر' : 'DC EV Charging Station', '', '?group=new-energy-equipment&sub=dc') +
-                        navLink('products.html', isArabic ? 'معدات المفاتيح' : 'Switchgear', '', '?group=switchgear') +
+                        renderShellLinks(navigation.productLinks) +
                     '</div>' +
                 '</div>' +
                 '</div>' +
                 '<div class="footer-conversion footer-column">' +
-                    '<h4>' + (isArabic ? 'طلب عرض سعر' : 'Request Quote') + '</h4>' +
-                    '<p class="footer-conversion-text">' + (isArabic ? 'أرسل متطلبات مشروعك وسيتواصل فريقنا معك بسرعة.' : 'Share your project requirements and our team will respond quickly.') + '</p>' +
+                    '<h4>' + shellValue('inquiry', 'title', '') + '</h4>' +
+                    '<p class="footer-conversion-text">' + shellValue('inquiry', 'text', '') + '</p>' +
                     '<form class="footer-quote-form" data-inquiry-form>' +
-                        '<input type="hidden" name="name" value="' + (isArabic ? 'زائر طلب عرض سعر من التذييل' : 'Footer Quote Visitor') + '">' +
+                        '<input type="hidden" name="name" value="' + shellValue('inquiry', 'hiddenName', '') + '">' +
                         '<input type="hidden" name="subject" value="quote">' +
-                        '<input type="hidden" name="productContext" value="' + (isArabic ? 'طلب عرض سعر من التذييل' : 'Footer request quote') + '">' +
-                        '<textarea name="message" rows="4" placeholder="' + (isArabic ? '* الرسالة' : '* Message') + '" required></textarea>' +
+                        '<input type="hidden" name="productContext" value="' + shellValue('inquiry', 'productContext', '') + '">' +
+                        '<textarea name="message" rows="4" placeholder="' + shellValue('inquiry', 'messagePlaceholder', '') + '" required></textarea>' +
                         '<div class="footer-quote-row">' +
-                            '<input type="email" name="email" placeholder="' + (isArabic ? '* البريد الإلكتروني' : '* E-mail') + '" required>' +
-                            '<input type="text" name="phone" placeholder="' + (isArabic ? 'واتساب / الهاتف' : 'WhatsApp / Phone') + '">' +
+                            '<input type="email" name="email" placeholder="' + shellValue('inquiry', 'emailPlaceholder', '') + '" required>' +
+                            '<input type="text" name="phone" placeholder="' + shellValue('inquiry', 'phonePlaceholder', '') + '">' +
                         '</div>' +
-                        '<button type="submit">' + (isArabic ? 'إرسال' : 'SUBMIT') + '</button>' +
+                        '<button type="submit">' + shellValue('inquiry', 'submitLabel', '') + '</button>' +
                         '<div class="form-status" aria-live="polite"></div>' +
                     '</form>' +
                 '</div>';
+        });
+        document.querySelectorAll('.footer-bottom p').forEach(function (item) {
+            item.textContent = shellValue('footer', 'copyright', '');
         });
     }
 
@@ -1102,24 +1153,10 @@
     }
 
     function updateFooterProductLinks() {
-        var groups = [
-            { match: ['Transformer', 'المحولات'], group: 'transformer' },
-            { match: ['New Energy Equipment', 'معدات الطاقة الجديدة'], group: 'new-energy-equipment' },
-            { match: ['Switchgear', 'معدات المفاتيح'], group: 'switchgear' }
-        ];
-
-        document.querySelectorAll('.footer-links a').forEach(function (link) {
-            var text = link.textContent || '';
-            groups.forEach(function (item) {
-                if (item.match.some(function (word) { return text.indexOf(word) !== -1; })) {
-                    link.href = pageHref('products.html', '?group=' + item.group);
-                }
-            });
-        });
     }
 
     function initCompanyInfo() {
-        fetchJson('/api/company', assetPrefix + 'data/company.json')
+        fetchJson('/api/company')
             .then(function (company) {
                 companyCache = company;
                 updateCompanyDom(company);
@@ -1128,6 +1165,29 @@
                 gaTrackingId = company.ga4TrackingId || '';
                 loadGaIfAllowed();
                 initSeoMeta(company);
+            })
+            .catch(function () {});
+    }
+
+    function initGlobalShellContent() {
+        return fetchJson('/api/content-blocks/global-shell')
+            .then(function (block) {
+                globalShellCache = block && block.body ? block.body : {};
+                ensureConsentUi();
+                applyFunctionalEmbeds();
+                updateMainNavigation();
+                updateFooterNavigation();
+                initActiveNavLink();
+                if (companyCache) {
+                    updateCompanyDom(companyCache);
+                    renderCommunicationWidgets(companyCache);
+                    initSeoMeta(companyCache);
+                }
+                var modal = document.getElementById('inquiry-modal');
+                if (modal) modal.remove();
+                var floating = document.querySelector('.floating-inquiry');
+                if (floating) floating.textContent = shellValue('inquiry', 'floatingLabel', '');
+                initContactForm();
             })
             .catch(function () {});
     }
@@ -1143,29 +1203,76 @@
         status.className = 'form-status ' + (type || '');
     }
 
+    function modalFieldId(name) {
+        return 'modal-' + String(name || '').replace(/([A-Z])/g, '-$1').toLowerCase();
+    }
+
+    function renderInquiryField(field) {
+        var id = modalFieldId(field.name);
+        var label = shellLabel(field) + (field.required ? ' *' : '');
+        var required = field.required ? ' required' : '';
+        var readonly = field.readonly ? ' readonly' : '';
+        var attrs = ' id="' + escapeHtml(id) + '" name="' + escapeHtml(field.name || '') + '"' + required + readonly;
+        var placeholder = isArabic && field.placeholderAr ? field.placeholderAr : (field.placeholder || '');
+        if (field.type === 'textarea') {
+            return '<div class="form-group"><label for="' + escapeHtml(id) + '">' + escapeHtml(label) + '</label><textarea' + attrs + ' rows="' + escapeHtml(field.rows || 5) + '"></textarea></div>';
+        }
+        if (field.type === 'select') {
+            return '<div class="form-group"><label for="' + escapeHtml(id) + '">' + escapeHtml(label) + '</label><select' + attrs + '>' +
+                (field.options || []).map(function (option) {
+                    return '<option value="' + escapeHtml(option.value || '') + '">' + escapeHtml(shellLabel(option)) + '</option>';
+                }).join('') +
+                '</select></div>';
+        }
+        return '<div class="form-group"><label for="' + escapeHtml(id) + '">' + escapeHtml(label) + '</label><input type="' + escapeHtml(field.type || 'text') + '"' + attrs + (placeholder ? ' placeholder="' + escapeHtml(placeholder) + '"' : '') + '></div>';
+    }
+
+    function renderInquiryFields(fields) {
+        var html = '';
+        var index = 0;
+        while (index < fields.length) {
+            var field = fields[index];
+            if (field.row) {
+                var row = field.row;
+                var rowFields = [];
+                while (index < fields.length && fields[index].row === row) {
+                    rowFields.push(fields[index]);
+                    index += 1;
+                }
+                html += '<div class="form-row">' + rowFields.map(renderInquiryField).join('') + '</div>';
+            } else {
+                html += renderInquiryField(field);
+                index += 1;
+            }
+        }
+        return html;
+    }
+
+    function inquiryTemplate(key, product) {
+        var template = shellValue('inquiry', key, '');
+        return template ? template.replace(/\{product\}/g, product || '') : '';
+    }
+
     function ensureInquiryModal(company) {
         if (document.getElementById('inquiry-modal')) return;
+        var inquiry = shellSection('inquiry');
+        var fields = Array.isArray(inquiry.modalFields) ? inquiry.modalFields : [];
         var modal = document.createElement('div');
         modal.id = 'inquiry-modal';
         modal.className = 'inquiry-modal';
         modal.innerHTML =
             '<div class="inquiry-dialog" role="dialog" aria-modal="true" aria-labelledby="inquiry-modal-title">' +
                 '<div class="inquiry-dialog-header">' +
-                    '<div><h3 id="inquiry-modal-title">' + (isArabic ? 'طلب عرض سعر' : 'Request Quote') + '</h3><p>' + (isArabic ? 'أرسل متطلباتك وسنتواصل معك قريباً.' : 'Send your requirements and we will contact you soon.') + '</p></div>' +
+                    '<div><h3 id="inquiry-modal-title">' + shellValue('inquiry', 'modalTitle', '') + '</h3><p>' + shellValue('inquiry', 'modalText', '') + '</p></div>' +
                     '<button type="button" class="inquiry-dialog-close" aria-label="Close">×</button>' +
                 '</div>' +
                 '<form class="inquiry-form" data-inquiry-form>' +
                     '<input type="hidden" name="productContext" value="">' +
-                    '<div class="form-group"><label for="modal-product-context">' + (isArabic ? 'المنتج المطلوب' : 'Interested Product') + '</label><input id="modal-product-context" name="productContextDisplay" readonly></div>' +
-                    '<div class="form-row"><div class="form-group"><label for="modal-name">' + (isArabic ? 'الاسم الكامل *' : 'Full Name *') + '</label><input id="modal-name" name="name" required></div><div class="form-group"><label for="modal-email">' + (isArabic ? 'البريد الإلكتروني *' : 'Email Address *') + '</label><input id="modal-email" type="email" name="email" required></div></div>' +
-                    '<div class="form-row"><div class="form-group"><label for="modal-company">' + (isArabic ? 'اسم الشركة' : 'Company Name') + '</label><input id="modal-company" name="company"></div><div class="form-group"><label for="modal-phone">' + (isArabic ? 'واتساب / الهاتف' : 'WhatsApp / Phone') + '</label><input id="modal-phone" name="phone"></div></div>' +
-                    '<div class="form-group"><label for="modal-subject">' + (isArabic ? 'الموضوع *' : 'Subject *') + '</label><select id="modal-subject" name="subject" required><option value="quote">' + (isArabic ? 'طلب عرض سعر' : 'Request a Quote') + '</option><option value="technical">' + (isArabic ? 'استشارة فنية' : 'Technical Consultation') + '</option><option value="partnership">' + (isArabic ? 'شراكة تجارية' : 'Business Partnership') + '</option><option value="support">' + (isArabic ? 'دعم ما بعد البيع' : 'After-Sales Support') + '</option><option value="other">' + (isArabic ? 'استفسار آخر' : 'Other Inquiry') + '</option></select></div>' +
-                    '<div class="form-group"><label for="modal-message">' + (isArabic ? 'الرسالة *' : 'Message *') + '</label><textarea id="modal-message" name="message" rows="5" required></textarea></div>' +
-                    '<button type="submit" class="btn btn-primary">' + (isArabic ? 'إرسال الرسالة' : 'Submit Message') + '</button>' +
+                    renderInquiryFields(fields) +
+                    '<button type="submit" class="btn btn-primary">' + shellValue('inquiry', 'modalSubmitLabel', '') + '</button>' +
                 '</form>' +
             '</div>';
         document.body.appendChild(modal);
-        ensureInquiryExtraFields(modal.querySelector('form'));
 
         modal.addEventListener('click', function (event) {
             if (event.target === modal || event.target.classList.contains('inquiry-dialog-close')) closeInquiryModal();
@@ -1177,21 +1284,6 @@
     }
 
     function ensureInquiryExtraFields(form) {
-        if (!form || form.querySelector('[name="country"]')) return;
-        var subjectGroup = form.querySelector('#modal-subject') ? form.querySelector('#modal-subject').closest('.form-group') : null;
-        if (!subjectGroup) return;
-        var rowOne = document.createElement('div');
-        rowOne.className = 'form-row';
-        rowOne.innerHTML =
-            '<div class="form-group"><label for="modal-country">' + (isArabic ? 'الدولة' : 'Country') + '</label><input id="modal-country" name="country"></div>' +
-            '<div class="form-group"><label for="modal-product-type">' + (isArabic ? 'نوع المنتج' : 'Product Type') + '</label><input id="modal-product-type" name="productType" placeholder="' + (isArabic ? 'محول / مفاتيح / شاحن' : 'Transformer / Switchgear / EV Charger') + '"></div>';
-        var rowTwo = document.createElement('div');
-        rowTwo.className = 'form-row';
-        rowTwo.innerHTML =
-            '<div class="form-group"><label for="modal-quantity-scale">' + (isArabic ? 'الكمية أو حجم المشروع' : 'Quantity or Project Scale') + '</label><input id="modal-quantity-scale" name="quantityOrScale"></div>' +
-            '<div class="form-group"><label for="modal-voltage-capacity">' + (isArabic ? 'الجهد أو السعة المطلوبة' : 'Required Voltage or Capacity') + '</label><input id="modal-voltage-capacity" name="requiredVoltageOrCapacity"></div>';
-        form.insertBefore(rowOne, subjectGroup);
-        form.insertBefore(rowTwo, subjectGroup);
     }
 
     function ensureFloatingInquiry() {
@@ -1199,7 +1291,7 @@
         var button = document.createElement('button');
         button.type = 'button';
         button.className = 'floating-inquiry';
-        button.textContent = isArabic ? 'طلب عرض سعر' : 'Request Quote';
+        button.textContent = shellValue('inquiry', 'floatingLabel', '');
         button.addEventListener('click', function () { openInquiryModal(); });
         document.body.appendChild(button);
     }
@@ -1214,12 +1306,10 @@
         var productContext = productName ? productName + (productId ? ' (' + productId + ')' : '') : '';
         if (form) {
             if (form.elements.productContext) form.elements.productContext.value = productContext;
-            if (form.elements.productContextDisplay) form.elements.productContextDisplay.value = productContext || (isArabic ? 'استفسار عام' : 'General inquiry');
+            if (form.elements.productContextDisplay) form.elements.productContextDisplay.value = productContext || shellValue('inquiry', 'generalInquiryLabel', '');
             if (form.elements.subject) form.elements.subject.value = 'quote';
             if (form.elements.message && productName) {
-                form.elements.message.value = isArabic
-                    ? 'أرغب في طلب السعر والتفاصيل الفنية لهذا المنتج: ' + productName + (productId ? ' (' + productId + ')' : '') + '.'
-                    : 'I am interested in ' + productContext + '. Please send pricing and technical details.';
+                form.elements.message.value = inquiryTemplate('productMessageTemplate', productContext);
             } else if (form.elements.message && !form.elements.message.value) {
                 form.elements.message.value = '';
             }
@@ -1246,9 +1336,7 @@
         if (productId && form.elements.subject && form.elements.message) {
             form.elements.subject.value = 'quote';
             if (!form.elements.message.value) {
-                form.elements.message.value = isArabic
-                    ? 'أرغب في طلب السعر والتفاصيل الفنية للمنتج: ' + productId
-                    : 'I would like to request pricing and technical details for product: ' + productId;
+                form.elements.message.value = inquiryTemplate('productIdMessageTemplate', productId);
             }
         }
 
@@ -1319,6 +1407,8 @@
         document.querySelectorAll('#contactForm, [data-inquiry-form]').forEach(bindInquiryForm);
     }
 
+    window.initContactForm = initContactForm;
+
     function initInquiryTriggers() {
         document.addEventListener('click', function (event) {
             var trigger = event.target.closest('[data-inquiry-product], [data-open-inquiry]');
@@ -1336,21 +1426,50 @@
         var container = document.getElementById('featured-products-container');
         if (!container) return;
         var categoryContainer = document.getElementById('featured-product-categories');
-        var homeCategories = [
-            { group: 'transformer', label: 'Transformer', labelAr: 'المحولات', href: 'products.html?group=transformer', icon: '首页矢量图/变压器.png' },
-            { group: 'new-energy-equipment', label: 'New Energy Equipment', labelAr: 'معدات الطاقة الجديدة', href: 'products.html?group=new-energy-equipment', icon: '首页矢量图/充电桩.png' },
-            { group: 'switchgear', label: 'Switchgear', labelAr: 'معدات المفاتيح', href: 'products.html?group=switchgear', icon: '首页矢量图/成套电气.png' }
-        ];
 
-        function renderFeaturedCategories(products) {
+        function productGroup(product) {
+            return product.group || product.category || '';
+        }
+
+        function configuredHomeCategories(homeContent) {
+            var products = homeContent && homeContent.products ? homeContent.products : {};
+            return Array.isArray(products.categories) ? products.categories.filter(function (item) {
+                return item && item.group && (item.label || item.labelAr);
+            }) : [];
+        }
+
+        function apiHomeCategories(apiCategories, products) {
+            var groupsWithProducts = products.reduce(function (acc, product) {
+                var group = productGroup(product);
+                if (group) acc[group] = true;
+                return acc;
+            }, {});
+            return apiCategories.filter(function (category) {
+                return category && category.group && (!Object.keys(groupsWithProducts).length || groupsWithProducts[category.group]);
+            }).map(function (category) {
+                return {
+                    group: category.group,
+                    label: category.label,
+                    labelAr: category.labelAr,
+                    href: 'products.html?group=' + encodeURIComponent(category.group),
+                    icon: category.icon || category.image || ''
+                };
+            });
+        }
+
+        function sampleForCategory(products, category) {
+            return products.find(function (product) {
+                return productGroup(product) === category.group;
+            });
+        }
+
+        function renderFeaturedCategories(products, homeContent, apiCategories) {
             if (!categoryContainer) return;
             categoryContainer.innerHTML = '';
+            var homeCategories = configuredHomeCategories(homeContent);
+            if (!homeCategories.length) homeCategories = apiHomeCategories(apiCategories, products);
             homeCategories.forEach(function (category, index) {
-                var sample = products.map(function (product) {
-                    return Object.assign({}, product, {
-                        group: product.group || (product.category === 'switchgear' ? 'switchgear' : 'transformer')
-                    });
-                }).find(function (product) { return product.group === category.group; });
+                var sample = sampleForCategory(products, category);
                 var label = isArabic ? (category.labelAr || category.label) : category.label;
                 var link = document.createElement('a');
                 link.className = 'home-product-category fade-in';
@@ -1394,9 +1513,9 @@
             return card;
         }
 
-        function renderFeatured(products) {
+        function renderFeatured(products, homeContent, apiCategories) {
             container.innerHTML = '';
-            renderFeaturedCategories(products);
+            renderFeaturedCategories(products, homeContent, apiCategories);
             var featured = products.filter(function (product) { return product.featured; });
             products.forEach(function (product) {
                 if (featured.length < 8 && featured.indexOf(product) === -1) featured.push(product);
@@ -1408,9 +1527,33 @@
             initStaggeredAnimations();
         }
 
-        fetchJson('/api/products', assetPrefix + 'data/products.json')
-            .then(function (data) {
-                renderFeatured(data.filter ? data : []);
+        function fetchHomeContent() {
+            var promise = window.longxiangContentPagePromise || fetchJson('/api/content-blocks/home');
+            return promise.then(function (block) {
+                return block && block.body ? block.body : {};
+            }).catch(function () {
+                return {};
+            });
+        }
+
+        function fetchProductCategories() {
+            return fetchJson('/api/product-categories')
+                .then(function (response) {
+                    if (Array.isArray(response)) return response;
+                    return Array.isArray(response.data) ? response.data : [];
+                })
+                .catch(function () {
+                    return [];
+                });
+        }
+
+        Promise.all([
+            fetchJson('/api/products').catch(function () { return []; }),
+            fetchHomeContent(),
+            fetchProductCategories()
+        ])
+            .then(function (result) {
+                renderFeatured(result[0].filter ? result[0] : [], result[1], result[2]);
             })
             .catch(function () {});
     }
@@ -1439,11 +1582,7 @@
             sourceImage: 'صورة',
             sourcePdf: 'غلاف PDF',
             pages: '{count} صفحات',
-            onePage: 'صفحة واحدة',
-            total: 'إجمالي السجلات',
-            reports: 'تقارير اختبار',
-            patents: 'براءات اختراع',
-            qualifications: 'مؤهلات مؤسسية'
+            onePage: 'صفحة واحدة'
         } : {
             all: 'All',
             loadMore: 'Load More',
@@ -1454,14 +1593,8 @@
             sourceImage: 'Image',
             sourcePdf: 'PDF cover',
             pages: '{count} pages',
-            onePage: '1 page',
-            total: 'Total Records',
-            reports: 'Test Reports',
-            patents: 'Patents',
-            qualifications: 'Enterprise Qualifications'
+            onePage: '1 page'
         };
-
-        var categoryOrder = ['test-reports', 'test-reports-extra', 'honors', 'qualifications', 'patents', 'software-copyrights'];
 
         function categoryLabel(category, data) {
             var match = data.find(function (item) { return item.category === category; });
@@ -1509,6 +1642,10 @@
                 acc[item.category] = (acc[item.category] || 0) + 1;
                 return acc;
             }, {});
+            var categoryOrder = data.reduce(function (order, item) {
+                if (item.category && order.indexOf(item.category) === -1) order.push(item.category);
+                return order;
+            }, []);
             var buttons = ['all'].concat(categoryOrder.filter(function (category) { return counts[category]; }));
             tabsContainer.innerHTML = buttons.map(function (category) {
                 var count = category === 'all' ? data.length : counts[category];
@@ -1657,7 +1794,7 @@
             openPreview(cert);
         });
 
-        fetchJson('/api/certifications', assetPrefix + 'data/certifications.json').then(function (data) {
+        fetchJson('/api/certifications').then(function (data) {
             certifications = Array.isArray(data) ? data : [];
             updateStats(certifications);
             renderTabs(certifications);
@@ -1670,7 +1807,8 @@
 
     function init() {
         if (applyLanguagePreference()) return;
-        initCookieConsent();
+        var shellPromise = initGlobalShellContent();
+        initCookieConsent(shellPromise);
         initUnifiedNavigation();
         injectFavicons();
         initLanguageSwitcher();

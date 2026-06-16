@@ -580,9 +580,12 @@ html {
 
 .about-cta-section {
     padding: 76px 0;
-    background:
+    background-image:
         linear-gradient(90deg, rgba(229, 57, 53, 0.9), rgba(0, 130, 180, 0.9)),
-        url('../5、厂区厂貌/厂区2.JPG') center / cover;
+        var(--about-cta-bg-image, none);
+    background-position: center, center;
+    background-size: auto, cover;
+    background-repeat: repeat, no-repeat;
 }
 
 .about-cta-panel {
@@ -3051,9 +3054,12 @@ p:last-child {
     min-height: 430px;
     border-radius: var(--radius-lg);
     overflow: hidden;
-    background:
+    background-image:
         linear-gradient(rgba(10, 22, 40, 0.64), rgba(10, 22, 40, 0.64)),
-        url('../5、厂区厂貌/龙翔公司正门.jpg') center/cover;
+        var(--global-map-bg-image, none);
+    background-position: center, center;
+    background-size: auto, cover;
+    background-repeat: repeat, no-repeat;
     box-shadow: var(--shadow-md);
 }
 
@@ -6513,9 +6519,12 @@ p:last-child {
 }
 
 .education-cta {
-    background:
+    background-image:
         linear-gradient(90deg, rgba(6, 21, 35, 0.92), rgba(6, 21, 35, 0.74)),
-        url('../assets/education/images/international-cooperation-leadership.jpeg') center/cover;
+        var(--education-cta-bg-image, none);
+    background-position: center, center;
+    background-size: auto, cover;
+    background-repeat: repeat, no-repeat;
 }
 
 #education-content .fade-in,

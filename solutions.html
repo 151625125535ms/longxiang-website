@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -8,7 +8,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v=20260615-lxdq">
     <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v=20260615-lxdq">
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=20260615-lxdq">
-    <link rel="stylesheet" href="css/styles.css?v=20260609">
+    <link rel="stylesheet" href="css/styles.css?v=20260616-shell7">
 </head>
 <body>
 
@@ -17,468 +17,38 @@
             <a href="index.html" class="nav-logo">
                 <span class="nav-logo-text">LONG<span>XIANG</span></span>
             </a>
-
-            <div class="nav-links">
-                <div class="nav-item"><a href="index.html" class="">Home</a></div>
-                <div class="nav-item has-dropdown">
-                    <a href="products.html" class="">Products</a>
-                    <div class="nav-dropdown">
-                        <a href="products.html?group=transformer">Transformer</a>
-                        <a href="products.html?group=new-energy-equipment">New Energy Equipment</a>
-                        <a href="products.html?group=new-energy-equipment&sub=energy-storage">Energy Storage</a>
-                        <a href="products.html?group=new-energy-equipment&sub=ac">AC EV Charging Station</a>
-                        <a href="products.html?group=new-energy-equipment&sub=dc">DC EV Charging Station</a>
-                        <a href="products.html?group=switchgear">Switchgear</a>
-                    </div>
-                </div>
-                <div class="nav-item has-dropdown">
-                    <a href="solutions.html" class="active">Solutions</a>
-                    <div class="nav-dropdown">
-                        <a href="solutions.html#engineering-epc">Engineering General Contracting</a>
-                        <a href="solutions.html#line-om">Line Operation &amp; Maintenance</a>
-                        <a href="solutions.html#wind-pv-ess-ev">C&I Wind+PV+ESS+EV Charging Solution</a>
-                        <a href="solutions.html#smart-microgrid">C&I Smart Microgrid Solution</a>
-                        <a href="solutions.html#pv-solution">C&I PV Solution</a>
-                    </div>
-                </div>
-                <div class="nav-item"><a href="education.html" class="">Education</a></div>
-                <div class="nav-item has-dropdown">
-                    <a href="about.html" class="">About Us</a>
-                    <div class="nav-dropdown">
-                        <a href="about.html">About LongXiang</a>
-                        <a href="certifications.html">Certificates</a>
-                    </div>
-                </div>
-                <div class="nav-item"><a href="contact.html" class="">Contact</a></div>
-            </div>
+            <div class="nav-links" aria-live="polite"></div>
             <div class="hamburger"><span></span><span></span><span></span></div>
         </div>
     </nav>
     <div class="mobile-menu-overlay"></div>
 
-    <section class="page-hero solutions-hero" style="background-image: url('assets/solutions/smart-energy/smart-ev-network-hero.png'); background-size: cover; background-position: center;">
+    <section class="page-hero solutions-hero">
         <div class="page-hero-pattern"></div>
         <div class="container">
             <div class="breadcrumb"><a href="index.html">Home</a><span class="separator">/</span><span class="current">Solutions</span></div>
-            <h1>Integrated Smart Energy Solutions</h1>
-            <p>Transformer, switchgear, EV charging, solar, storage, and microgrid equipment support for commercial and industrial power infrastructure.</p>
-            <div class="solutions-hero-actions">
-                <a href="#engineering-epc" class="btn btn-primary">Explore Solutions</a>
-                <button type="button" class="btn btn-secondary" data-open-inquiry data-product-name="Integrated Smart Energy Solutions">Talk to an Engineer</button>
-            </div>
+            <h1>Solutions</h1>
+            <p>Loading solutions...</p>
+            <div class="solutions-hero-actions"></div>
         </div>
     </section>
 
-    <main>
-        <section class="solutions-anchor-bar" aria-label="Solution sections">
+    <main data-content-page="solutions">
+        <section class="section content-page-loading" aria-live="polite">
             <div class="container">
-                <div class="solutions-anchor-list">
-                    <a href="#engineering-epc">Engineering General Contracting</a>
-                    <a href="#line-om">Line O&amp;M Projects</a>
-                    <a href="#wind-pv-ess-ev">Wind + PV + ESS + EV Charging</a>
-                    <a href="#smart-microgrid">Smart Microgrid</a>
-                    <a href="#pv-solution">C&I PV Solution</a>
-                </div>
-            </div>
-        </section>
-
-        <section class="section solutions-overview">
-            <div class="container">
-                <div class="section-header">
-                    <h2>One Platform for Power Equipment, Project Delivery, and Operation</h2>
-                    <p>Longxiang combines power transformation, distribution, charging, monitoring, engineering delivery, and line maintenance into project-ready solutions for industrial parks, campuses, public buildings, highway facilities, and commercial energy sites, including requirements from the Middle East, Africa, and Southeast Asia.</p>
-                </div>
-                <div class="solutions-overview-grid" data-stagger="120">
-                    <article class="solution-overview-card fade-in">
-                        <span class="solution-number">01</span>
-                        <h3>Generate</h3>
-                        <p>Photovoltaic and wind power access for commercial and industrial renewable energy projects.</p>
-                    </article>
-                    <article class="solution-overview-card fade-in">
-                        <span class="solution-number">02</span>
-                        <h3>Store</h3>
-                        <p>Containerized energy storage and distribution equipment for load shifting and reliable operation.</p>
-                    </article>
-                    <article class="solution-overview-card fade-in">
-                        <span class="solution-number">03</span>
-                        <h3>Charge</h3>
-                        <p>EV charging cabinets, power conversion, and monitoring support for smart charging stations.</p>
-                    </article>
-                    <article class="solution-overview-card fade-in">
-                        <span class="solution-number">04</span>
-                        <h3>Manage</h3>
-                        <p>Microgrid coordination across generation, grid connection, storage, loads, and charging terminals.</p>
-                    </article>
-                    <article class="solution-overview-card fade-in">
-                        <span class="solution-number">05</span>
-                        <h3>Deliver</h3>
-                        <p>EPC-style project coordination across equipment supply, civil works, installation, commissioning, and energization.</p>
-                    </article>
-                    <article class="solution-overview-card fade-in">
-                        <span class="solution-number">06</span>
-                        <h3>Maintain</h3>
-                        <p>Long-term high-voltage line custody, inspection, maintenance, and emergency response for operating power assets.</p>
-                    </article>
-                </div>
-            </div>
-        </section>
-
-        <section class="section market-fit-section">
-            <div class="container">
-                <div class="section-header">
-                    <h2>For Warm-Climate Distribution Projects</h2>
-                    <p>For early overseas inquiries, Longxiang focuses on clear technical matching instead of public MOQ or trade-term promises. Share the environment, voltage level, project scale, and equipment scope so engineers can review feasibility.</p>
-                </div>
-                <div class="export-support-grid">
-                    <div><strong>Middle East</strong><span>Industrial parks, solar power access, commercial buildings, and charging stations where heat tolerance and low maintenance matter.</span></div>
-                    <div><strong>Africa</strong><span>Distribution transformers, switchgear, and project-ready equipment for utility, industrial, campus, and public infrastructure needs.</span></div>
-                    <div><strong>Southeast Asia</strong><span>Compact distribution systems, PV integration, EV charging, and grid connection equipment for fast-growing sites.</span></div>
-                    <div><strong>Engineering Review</strong><span>Custom specifications are available on request after voltage, capacity, load, and installation requirements are confirmed.</span></div>
-                </div>
-            </div>
-        </section>
-
-        <section class="section solution-feature" id="engineering-epc">
-            <div class="container">
-                <div class="solution-feature-layout">
-                    <div class="solution-feature-copy">
-                        <span class="solution-index">Solution 01</span>
-                        <h2>Engineering General Contracting (EPC)</h2>
-                        <p>Coordinate residential and commercial power distribution engineering from equipment configuration to installation, commissioning, energization, and handover.</p>
-                        <ul class="solution-check-list">
-                            <li>Power distribution engineering for residential communities, industrial parks, and public facilities.</li>
-                            <li>High-voltage and low-voltage switchgear, transformer, cable, metering, and auxiliary equipment configuration.</li>
-                            <li>Integrated delivery from equipment supply through installation, commissioning, energization, and handover.</li>
-                            <li>Kaifeng Bianjing Xihuafu project reference: RMB 31.19 million total distribution engineering investment and successful energization.</li>
-                        </ul>
-                        <button type="button" class="btn btn-primary" data-open-inquiry data-product-name="Engineering General Contracting EPC">Discuss EPC Project</button>
-                    </div>
-                    <div class="solution-pv-board">
-                        <img class="solution-media-main" src="assets/solutions/project-services/kaifeng-xihuafu-power-distribution.png" alt="Kaifeng Bianjing Xihuafu power distribution engineering project" width="600" height="450" loading="lazy">
-                        <img src="assets/solutions/smart-energy/grid-connection-cabinet.png" alt="Grid connection cabinet for power engineering projects" width="349" height="425" loading="lazy">
-                        <img src="assets/solutions/smart-energy/dry-type-transformer.png" alt="Transformer equipment for power distribution engineering" width="636" height="629" loading="lazy">
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="section bg-light solution-system-map">
-            <div class="container">
-                <div class="section-header">
-                    <h2>Representative General Contracting References</h2>
-                    <p>Project examples led by residential power distribution delivery, with charging station construction as complementary project capability.</p>
-                </div>
-                <div class="solution-diagram-grid solution-image-led-grid" data-stagger="120">
-                    <article class="solution-diagram-card fade-in">
-                        <img src="assets/solutions/project-services/kaifeng-xihuafu-power-distribution.png" alt="Kaifeng Bianjing Xihuafu power distribution project" width="600" height="450" loading="lazy">
-                        <h3>Kaifeng Bianjing Xihuafu Power Distribution</h3>
-                        <p>The project planned 19 residential buildings, with RMB 31.19 million total power distribution engineering investment, including RMB 10 million in high-voltage and low-voltage cabinets and transformer equipment. The project has been energized.</p>
-                    </article>
-                    <article class="solution-diagram-card fade-in">
-                        <img src="assets/solutions/project-services/epc-charging-station.jpg" alt="Huaiyang industrial park charging station with photovoltaic canopy" width="1439" height="1080" loading="lazy">
-                        <h3>Huaiyang Industrial Park Charging Station</h3>
-                        <p>About RMB 2.3 million investment with 16 dual-gun DC chargers, two 2000kVA box transformers, 200kW PV canopy, and 20kW wind power equipment.</p>
-                    </article>
-                </div>
-            </div>
-        </section>
-
-        <section class="section solution-feature solution-feature-reverse bg-light" id="line-om">
-            <div class="container">
-                <div class="solution-feature-layout">
-                    <div class="solution-feature-copy">
-                        <span class="solution-index">Solution 02</span>
-                        <h2>Line Operation &amp; Maintenance Projects</h2>
-                        <p>Provide entrusted operation, inspection, maintenance, and response support for high-voltage power supply lines serving highway stations, tunnels, substations, and critical facilities.</p>
-                        <ul class="solution-check-list">
-                            <li>Custody and maintenance for high-voltage power supply lines across operating facilities.</li>
-                            <li>Routine inspection, defect handling, emergency response, and safety-oriented field operations.</li>
-                            <li>Support for toll station, tunnel, substation, and public infrastructure power systems.</li>
-                            <li>Field experience across expressway line maintenance and 500kV substation expansion support.</li>
-                        </ul>
-                        <button type="button" class="btn btn-primary" data-open-inquiry data-product-name="Line Operation and Maintenance Projects">Request O&amp;M Support</button>
-                    </div>
-                    <div class="solution-media-cluster" aria-label="Line operation and maintenance project scenes">
-                        <img class="solution-media-main" src="assets/solutions/project-services/line-operation-maintenance.jpg" alt="Technicians maintaining high-voltage power supply line equipment" width="1280" height="1707" loading="lazy">
-                        <img src="assets/solutions/project-services/substation-expansion.jpg" alt="500kV substation expansion project equipment" width="1024" height="576" loading="lazy">
-                        <div class="solution-om-panel" aria-label="Line operation service dashboard">
-                            <div>
-                                <span class="solution-panel-kicker">Route Custody</span>
-                                <strong>311km</strong>
-                                <p>expressway power supply lines</p>
-                            </div>
-                            <div>
-                                <span class="solution-panel-kicker">Coverage</span>
-                                <strong>32</strong>
-                                <p>toll station and tunnel circuits</p>
-                            </div>
-                            <div class="solution-om-route" aria-hidden="true">
-                                <span></span>
-                                <span></span>
-                                <span></span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="section solution-system-map">
-            <div class="container">
-                <div class="section-header">
-                    <h2>Operation Coverage and Service Records</h2>
-                    <p>Line operation services focus on safe continuity for distributed power supply assets across long-distance highway and substation scenarios.</p>
-                </div>
-                <div class="solution-diagram-grid solution-image-led-grid">
-                    <article class="solution-diagram-card">
-                        <img src="assets/solutions/project-services/line-operation-maintenance.jpg" alt="Expressway high-voltage line maintenance work" width="1280" height="1707" loading="lazy">
-                        <h3>Expressway Line Custody</h3>
-                        <p>Entrusted maintenance for 311km across the Luanshuang section of Mianchi-Xixia Expressway, Luoluan-Luolu Expressway, and Yaoluan section of Zhengluan Expressway, covering 32 toll station and tunnel high-voltage supply lines.</p>
-                    </article>
-                    <article class="solution-diagram-card">
-                        <img src="assets/solutions/project-services/substation-expansion.jpg" alt="Chongqing Jinshan 500kV substation expansion project" width="1024" height="576" loading="lazy">
-                        <h3>Substation Expansion Support</h3>
-                        <p>For the Jinshanling 500kV substation bay expansion, Longxiang completed delivery and on-site installation and commissioning of high-voltage circuit breakers and disconnectors in 2021.</p>
-                    </article>
-                </div>
-            </div>
-        </section>
-
-        <section class="section solution-feature bg-light" id="wind-pv-ess-ev">
-            <div class="container">
-                <div class="solution-feature-layout">
-                    <div class="solution-feature-copy">
-                        <span class="solution-index">Solution 03</span>
-                        <h2>C&I Wind + PV + ESS + EV Charging Solution</h2>
-                        <p>Integrates wind power, photovoltaic generation, energy storage, EV charging, and intelligent monitoring into one coordinated energy system.</p>
-                        <ul class="solution-check-list">
-                            <li>Hybrid renewable energy access for wind and solar resources.</li>
-                            <li>Energy storage support for peak shaving and renewable energy consumption.</li>
-                            <li>EV charging station equipment with distribution and monitoring support.</li>
-                            <li>Suitable for industrial parks, campuses, commercial complexes, and transport charging sites.</li>
-                        </ul>
-                        <button type="button" class="btn btn-primary" data-open-inquiry data-product-name="C&I Wind + PV + ESS + EV Charging Solution">Send Project Requirements</button>
-                    </div>
-                    <div class="solution-media-stack" aria-label="Wind, photovoltaic, storage, and EV charging equipment">
-                        <img class="solution-stack-topology" src="assets/solutions/smart-energy/hybrid-energy-topology-b.png" alt="Hybrid wind, photovoltaic, storage, grid, and EV charging system topology" width="639" height="455" loading="lazy">
-                        <div class="solution-stack-devices">
-                            <img src="assets/solutions/smart-energy/containerized-energy-storage.png" alt="Containerized energy storage equipment" width="381" height="335" loading="lazy">
-                            <img src="assets/solutions/smart-energy/dual-ev-charging-cabinet.png" alt="Dual EV charging cabinet" width="382" height="292" loading="lazy">
-                            <img src="assets/solutions/smart-energy/mobile-monitoring-dashboard.png" alt="Mobile monitoring dashboard for charging operations" width="301" height="390" loading="lazy">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="section solution-system-map">
-            <div class="container">
-                <div class="section-header">
-                    <h2>Energy Flow and System Topology</h2>
-                    <p>Connect renewable generation, energy storage, transformer and switchgear systems, EV charging terminals, and monitoring platforms in one controllable architecture.</p>
-                </div>
-                <div class="solution-diagram-grid">
-                    <article class="solution-diagram-card">
-                        <img src="assets/solutions/smart-energy/hybrid-energy-topology-a.png" alt="Hybrid wind, photovoltaic, storage, and charging topology diagram" width="639" height="455" loading="lazy">
-                        <h3>Hybrid Energy Dispatch</h3>
-                        <p>Coordinated power flow between grid supply, renewable generation, storage equipment, and charging terminals.</p>
-                    </article>
-                    <article class="solution-diagram-card">
-                        <img src="assets/solutions/smart-energy/single-line-diagram-a.png" alt="Single-line electrical diagram for a smart charging energy system" width="1339" height="578" loading="lazy">
-                        <h3>Electrical Configuration</h3>
-                        <p>Project-level transformer, switchgear, metering, and grid connection layouts for engineering design.</p>
-                    </article>
-                </div>
-            </div>
-        </section>
-
-        <section class="section solution-feature solution-feature-reverse bg-light" id="smart-microgrid">
-            <div class="container">
-                <div class="solution-feature-layout">
-                    <div class="solution-feature-copy">
-                        <span class="solution-index">Solution 04</span>
-                        <h2>C&I Smart Microgrid Solution</h2>
-                        <p>Build a controllable microgrid that coordinates distributed generation, storage, grid access, industrial loads, and EV charging demand.</p>
-                        <ul class="solution-check-list">
-                            <li>Source-grid-load-storage coordination for commercial and industrial sites.</li>
-                            <li>Improved power reliability for critical buildings and park-level distribution networks.</li>
-                            <li>Flexible integration with transformers, switchgear, grid cabinets, and monitoring platforms.</li>
-                            <li>Scalable architecture for campuses, factories, and public infrastructure.</li>
-                        </ul>
-                        <button type="button" class="btn btn-primary" data-open-inquiry data-product-name="C&I Smart Microgrid Solution">Discuss Microgrid Project</button>
-                    </div>
-                    <div class="solution-technical-board">
-                        <img src="assets/solutions/smart-energy/microgrid-topology.png" alt="Smart microgrid topology diagram" width="639" height="455" loading="lazy">
-                        <div class="solution-board-equipment">
-                            <img src="assets/solutions/smart-energy/grid-connection-cabinet.png" alt="Grid connection cabinet" width="349" height="425" loading="lazy">
-                            <img src="assets/solutions/smart-energy/dry-type-transformer.png" alt="Dry-type transformer used in energy systems" width="636" height="629" loading="lazy">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="section solution-feature" id="pv-solution">
-            <div class="container">
-                <div class="solution-feature-layout">
-                    <div class="solution-feature-copy">
-                        <span class="solution-index">Solution 05</span>
-                        <h2>C&I Photovoltaic Solution</h2>
-                        <p>Provide transformer, switchgear, distribution, grid connection, and monitoring equipment support for commercial and industrial photovoltaic projects.</p>
-                        <ul class="solution-check-list">
-                            <li>PV power access for factories, schools, hospitals, public buildings, and commercial rooftops.</li>
-                            <li>Grid connection cabinets, transformer systems, and switchgear for stable operation.</li>
-                            <li>Integrated monitoring and energy management for project operation teams.</li>
-                            <li>Flexible equipment configuration for rooftop, park-level, and distributed PV scenarios.</li>
-                        </ul>
-                        <button type="button" class="btn btn-primary" data-open-inquiry data-product-name="C&I Photovoltaic Solution">Request PV Configuration</button>
-                    </div>
-                    <div class="solution-pv-board">
-                        <img class="solution-media-main" src="assets/solutions/smart-energy/industrial-park-solar-scene.png" alt="Industrial park photovoltaic application scene" width="548" height="332" loading="lazy">
-                        <img src="assets/solutions/smart-energy/pv-grid-topology.png" alt="Photovoltaic grid connection topology" width="639" height="455" loading="lazy">
-                        <div class="solution-pv-flow" aria-label="Photovoltaic grid connection capability">
-                            <span>PV Array</span>
-                            <span>Inverter</span>
-                            <span>Transformer</span>
-                            <span>Grid Cabinet</span>
-                            <strong>Grid-ready delivery</strong>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="section bg-light solution-scenarios">
-            <div class="container">
-                <div class="section-header">
-                    <h2>Application Scenarios</h2>
-                    <p>Smart energy and project service systems can be configured for multiple commercial, industrial, transportation, and public infrastructure environments.</p>
-                </div>
-                <div class="solution-scenario-grid" data-stagger="120">
-                    <article class="solution-scenario-card fade-in">
-                        <img src="assets/solutions/smart-energy/campus-solar-scene.png" alt="Campus photovoltaic and smart energy application scene" width="738" height="447" loading="lazy">
-                        <h3>Campus</h3>
-                    </article>
-                    <article class="solution-scenario-card fade-in">
-                        <img src="assets/solutions/smart-energy/public-building-solar-scene.png" alt="Public building photovoltaic application scene" width="690" height="419" loading="lazy">
-                        <h3>Public Buildings</h3>
-                    </article>
-                    <article class="solution-scenario-card fade-in">
-                        <img src="assets/solutions/smart-energy/commercial-complex-solar-scene.png" alt="Commercial complex smart energy application scene" width="963" height="584" loading="lazy">
-                        <h3>Commercial Complex</h3>
-                    </article>
-                    <article class="solution-scenario-card fade-in">
-                        <img src="assets/solutions/smart-energy/industrial-park-solar-scene.png" alt="Industrial park smart energy application scene" width="548" height="332" loading="lazy">
-                        <h3>Industrial Park</h3>
-                    </article>
-                    <article class="solution-scenario-card fade-in">
-                        <img src="assets/solutions/project-services/line-operation-maintenance.jpg" alt="Highway power line operation and maintenance application scene" width="1280" height="1707" loading="lazy">
-                        <h3>Highway Facilities</h3>
-                    </article>
-                    <article class="solution-scenario-card fade-in">
-                        <img src="assets/solutions/project-services/substation-expansion.jpg" alt="Substation project operation support scene" width="1024" height="576" loading="lazy">
-                        <h3>Substation Projects</h3>
-                    </article>
-                </div>
-            </div>
-        </section>
-
-        <section class="section solution-credibility">
-            <div class="container">
-                <div class="section-header">
-                    <h2>Engineering Capability Behind Every Solution</h2>
-                    <p>Longxiang's project delivery is supported by manufacturing qualifications, green factory recognition, and dedicated engineering research centers.</p>
-                </div>
-                <div class="solution-credential-strip">
-                    <figure>
-                        <img src="assets/solutions/smart-energy/cert-high-tech-enterprise.png" alt="High-tech enterprise certificate" width="362" height="236" loading="lazy">
-                        <figcaption>High-tech Enterprise</figcaption>
-                    </figure>
-                    <figure>
-                        <img src="assets/solutions/smart-energy/cert-green-factory.png" alt="Green factory certificate" width="362" height="242" loading="lazy">
-                        <figcaption>Green Factory</figcaption>
-                    </figure>
-                    <figure>
-                        <img src="assets/solutions/smart-energy/cert-enterprise-technology-center.png" alt="Enterprise technology center certificate" width="362" height="236" loading="lazy">
-                        <figcaption>Technology Center</figcaption>
-                    </figure>
-                    <figure>
-                        <img src="assets/solutions/smart-energy/cert-charging-station-research-center.png" alt="Charging station engineering technology research center certificate" width="362" height="238" loading="lazy">
-                        <figcaption>Charging Research Center</figcaption>
-                    </figure>
-                    <figure>
-                        <img src="assets/solutions/smart-energy/cert-transformer-research-center.png" alt="Transformer engineering technology research center certificate" width="362" height="241" loading="lazy">
-                        <figcaption>Transformer Research Center</figcaption>
-                    </figure>
-                </div>
-            </div>
-        </section>
-
-        <section class="cta-section solutions-cta">
-            <div class="container">
-                <h2>Plan Your Energy Project with Longxiang</h2>
-                <p>Share your project type, load demand, grid access requirements, delivery scope, or operation and maintenance scenario. Our team will help match the right equipment and service configuration.</p>
-                <button type="button" class="btn btn-primary" data-open-inquiry data-product-name="Smart Energy Project Planning">Send Project Requirements</button>
+                <div class="empty-state">Loading solutions...</div>
             </div>
         </section>
     </main>
 
     <footer class="footer">
         <div class="container">
-            <div class="footer-grid">
-                <div class="footer-company">
-                    <div class="footer-brand">
-                        <a href="index.html" class="nav-logo"><span class="nav-logo-text">LONG<span>XIANG</span></span></a>
-                        <p>Providing intelligent, low-carbon power equipment and cultivating excellent professional electrical talent since 2003.</p>
-                    </div>
-                    <div class="footer-contact-item" data-company-contact="email"><span class="icon">&#9993;</span><span class="footer-contact-value">hnlxdq2003@163.com</span></div>
-                    <div class="footer-contact-item" data-company-contact="address"><span class="icon">&#8982;</span><span class="footer-contact-value">Longhu New District, Xinzheng, Zhengzhou, Henan, China</span></div>
-                    <div class="messenger-links" data-communication-links></div>
-                </div>
-                <div class="footer-navigation">
-                    <div class="footer-column">
-                        <h4>Quick Links</h4>
-                        <div class="footer-links">
-                            <a href="index.html">Home</a>
-                            <a href="products.html">Products</a>
-                            <a href="solutions.html">Solutions</a>
-                            <a href="education.html">Education</a>
-                            <a href="about.html">About Us</a>
-                            <a href="contact.html">Contact</a>
-                        </div>
-                    </div>
-                    <div class="footer-column">
-                        <h4>Products</h4>
-                        <div class="footer-links">
-                            <a href="products.html?group=transformer">Transformer</a>
-                            <a href="products.html?group=new-energy-equipment">New Energy Equipment</a>
-                        <a href="products.html?group=new-energy-equipment&sub=energy-storage">Energy Storage</a>
-                        <a href="products.html?group=new-energy-equipment&sub=ac">AC EV Charging Station</a>
-                        <a href="products.html?group=new-energy-equipment&sub=dc">DC EV Charging Station</a>
-                            <a href="products.html?group=switchgear">Switchgear</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="footer-conversion footer-column">
-                    <h4>Request Quote</h4>
-                    <p class="footer-conversion-text">Share your project requirements and our team will respond quickly.</p>
-                    <form class="footer-quote-form" data-inquiry-form>
-                        <input type="hidden" name="name" value="Footer Quote Visitor">
-                        <input type="hidden" name="subject" value="quote">
-                        <input type="hidden" name="productContext" value="Footer request quote">
-                        <textarea name="message" rows="4" placeholder="* Message" required></textarea>
-                        <div class="footer-quote-row">
-                            <input type="email" name="email" placeholder="* E-mail" required>
-                            <input type="text" name="phone" placeholder="WhatsApp / Phone">
-                        </div>
-                        <button type="submit">SUBMIT</button>
-                    </form>
-                </div>
-            </div>
-            <div class="footer-bottom"><p>&copy; 2026 Henan Longxiang Electrical Co., Ltd. All Rights Reserved.</p></div>
+            <div class="footer-grid" aria-live="polite"></div>
+            <div class="footer-bottom"><p></p></div>
         </div>
     </footer>
     <button class="back-to-top" aria-label="Back to top">&uarr;</button>
-    <script src="js/main.js?v=20260613"></script>
+    <script src="js/main.js?v=20260616-shell7"></script>
+    <script src="js/content-pages.js?v=20260616-shell7"></script>
 </body>
 </html>
