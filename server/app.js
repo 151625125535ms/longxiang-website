@@ -15,6 +15,7 @@ const contentBlocksRoutes = require('./routes/content-blocks');
 const adminRoutes = require('./routes/admin/index');
 const { ensureDirectory, resolveUploadDir } = require('./lib/fileStore');
 const { getDb } = require('./lib/db');
+const { ensureContentBlockSeeds } = require('./lib/contentBlockSeeds');
 
 let compression = null;
 try { compression = require('compression'); } catch (err) { compression = null; }
@@ -139,6 +140,12 @@ if (rateLimit) {
 const uploadDir = resolveUploadDir();
 ensureDirectory(uploadDir);
 app.use('/uploads', express.static(uploadDir, { maxAge: '30d', fallthrough: false }));
+
+try {
+    ensureContentBlockSeeds(getDb());
+} catch (err) {
+    console.warn('WARNING: failed to ensure content block seeds: ' + err.message);
+}
 
 app.use(function (req, res, next) {
     const blocked = /^\/(?:data|server|scripts|logs|backups|node_modules)(?:\/|$)|^\/package(?:-lock)?\.json$/i;

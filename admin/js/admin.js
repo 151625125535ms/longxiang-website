@@ -346,6 +346,7 @@
         var productSearchTimer = null;
         var editingInquiryId = null;
         var openedInquiry = null;
+        var activeInquiryId = null;
         var editingCertificationId = null;
         var uploadedCertificationPath = '';
         var currentView = 'dashboard';
@@ -362,6 +363,11 @@
         var auditLogMeta = { page: 1, pageSize: 20, total: 0 };
         var assetPage = 1;
         var assetMeta = { page: 1, pageSize: 20, total: 0 };
+        var assetRows = [];
+        var assetViewMode = 'grid';
+        var selectedAssetIds = {};
+        var activeAssetId = null;
+        var assetUploading = false;
         var assetSearchTimer = null;
         var activeTrashTab = 'trash-products';
         var formDirty = false;
@@ -1068,7 +1074,7 @@
         }
 
         function loadProducts() {
-            document.getElementById('products-tbody').innerHTML = skeletonRows(6, 5);
+            document.getElementById('products-tbody').innerHTML = skeletonRows(9, 5);
             clearErrorBanner('view-products');
             updateProductBatchBar();
             var searchVal = ((document.getElementById('product-search') || {}).value || '').trim();
@@ -1088,7 +1094,7 @@
                 renderProductsTable();
                 renderProductsPagination();
             }).catch(function (err) {
-                document.getElementById('products-tbody').innerHTML = emptyRow(6, '加载失败，请刷新重试');
+                document.getElementById('products-tbody').innerHTML = emptyRow(9, '加载失败，请刷新重试');
                 showErrorBanner('view-products', '产品数据加载失败，请稍后重试', loadProducts);
                 renderProductsPagination({ page: 1, pageSize: productMeta.pageSize || 20, total: 0 });
                 showToast('加载产品失败：' + err.message, 'error');
@@ -1128,7 +1134,7 @@
             if (!tbody) return;
 
             if (!products.length) {
-                tbody.innerHTML = emptyRow(6, '暂无产品');
+                tbody.innerHTML = emptyRow(9, '暂无产品');
                 updateProductBatchBar();
                 return;
             }
@@ -1138,24 +1144,36 @@
                 var displayId = product.legacy_id || product.slug || product.id;
                 var chineseName = adminProductNameCn(product);
                 var name = product.name_en || product.name || '';
-                var categoryName = product.category_name_en || product.category || '—';
+                var model = product.model || product.legacy_id || product.slug || product.id || '—';
+                var categoryName = product.category_name || product.category_name_en || product.category || '—';
                 var status = product.status || 'draft';
                 var statusClass = status === 'published' ? 'badge-green' : (status === 'deleted' ? 'badge-navy' : 'badge-gold');
                 var statusLabel = status === 'published' ? '已发布' : (status === 'deleted' ? '已删除' : '草稿');
+                var featured = productValueIsTrue(product.featured);
+                var intro = compactText(product.short_desc_en || product.short_desc_ar || product.description_en || product.description_ar || '—', 72);
+                var updatedAt = formatDate(product.updated_at);
                 var cover = product.cover_image || product.image || '';
                 var thumb = cover
                     ? '<img class="product-thumb" src="../' + escapeHtml(cover) + '" alt="">'
                     : '<div class="product-thumb" style="background:#eef1f5;border:1px solid #d8dee8;"></div>';
                 return '<tr>' +
                     '<td><input type="checkbox" class="product-row-check" data-id="' + escapeHtml(productId) + '" data-version="' + escapeHtml(product.version) + '"></td>' +
-                    '<td class="cell-muted product-cn-name">' + escapeHtml(chineseName || '-') + '</td>' +
-                    '<td><div class="product-name-cell">' + thumb + '<div><div class="product-name-text">' + escapeHtml(name) + '</div><div class="product-id-text">' + escapeHtml(displayId) + '</div></div></div></td>' +
+                    '<td><div class="product-name-cell">' + thumb + '<div><div class="product-name-text">' + escapeHtml(chineseName || name || displayId) + '</div><div class="product-id-text">' + escapeHtml(name || displayId) + '</div></div></div></td>' +
+                    '<td class="cell-muted product-model-cell">' + escapeHtml(model) + '</td>' +
                     '<td><span class="badge badge-blue">' + escapeHtml(categoryName) + '</span></td>' +
                     '<td><span class="badge ' + statusClass + '">' + statusLabel + '</span></td>' +
-                    '<td><div class="actions-cell"><button class="btn btn-icon btn-icon-edit" aria-label="编辑产品" data-edit-product="' + escapeHtml(productId) + '">' + ICON_EDIT + '</button><button class="btn btn-icon btn-icon-delete" aria-label="删除产品" data-delete-product="' + escapeHtml(productId) + '">' + ICON_DELETE + '</button></div></td>' +
+                    '<td><span class="table-switch ' + (featured ? 'is-on' : '') + '" aria-label="' + (featured ? '已推荐' : '未推荐') + '"></span></td>' +
+                    '<td class="cell-muted product-intro-cell" title="' + escapeHtml(intro) + '">' + escapeHtml(intro) + '</td>' +
+                    '<td class="cell-muted product-date-cell">' + escapeHtml(updatedAt) + '</td>' +
+                    '<td><div class="actions-cell"><button class="btn btn-icon btn-icon-view" aria-label="预览产品" data-preview-product="' + escapeHtml(displayId) + '">' + ICON_VIEW + '</button><button class="btn btn-icon btn-icon-edit" aria-label="编辑产品" data-edit-product="' + escapeHtml(productId) + '">' + ICON_EDIT + '</button><button class="btn btn-icon btn-icon-delete" aria-label="删除产品" data-delete-product="' + escapeHtml(productId) + '">' + ICON_DELETE + '</button></div></td>' +
                     '</tr>';
             }).join('');
 
+            tbody.querySelectorAll('[data-preview-product]').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    window.open('../product-detail.html?id=' + encodeURIComponent(btn.getAttribute('data-preview-product')), '_blank', 'noopener');
+                });
+            });
             tbody.querySelectorAll('[data-edit-product]').forEach(function (btn) {
                 btn.addEventListener('click', function () { openProductModal(btn.getAttribute('data-edit-product')); });
             });
@@ -1166,6 +1184,16 @@
                 checkbox.addEventListener('change', updateProductBatchBar);
             });
             updateProductBatchBar();
+        }
+
+        function productValueIsTrue(value) {
+            return value === true || value === 1 || value === '1' || value === 'true';
+        }
+
+        function compactText(value, maxLength) {
+            var text = String(value == null ? '' : value).replace(/\s+/g, ' ').trim();
+            if (!text) return '—';
+            return text.length > maxLength ? text.slice(0, maxLength - 1) + '…' : text;
         }
 
         function findProductById(productId) {
@@ -1515,13 +1543,27 @@
             var btnAddSpec = document.getElementById('btn-add-spec');
             if (btnAddSpec) btnAddSpec.addEventListener('click', function () { addSpecRow('', ''); });
 
+            var featuredField = document.getElementById('field-featured');
+            if (featuredField) featuredField.addEventListener('change', syncProductFeaturedSwitch);
+
             var form = document.getElementById('product-form');
             if (form) form.addEventListener('submit', saveProduct);
 
-            [['field-id','input'],['field-name','input'],['field-category','change']].forEach(function (pair) {
+            [['field-id','input'],['field-name','input'],['field-category','change'],['field-status','change']].forEach(function (pair) {
                 var el = document.getElementById(pair[0]);
                 if (el) el.addEventListener(pair[1], function () { clearFieldError(pair[0]); });
             });
+
+            var certificationShortcut = document.getElementById('product-cert-selector');
+            if (certificationShortcut) {
+                certificationShortcut.addEventListener('click', function (event) {
+                    var button = event.target && event.target.closest ? event.target.closest('[data-action]') : null;
+                    if (!button) return;
+                    var target = button.getAttribute('data-action') || '';
+                    closeModal('product-modal', true);
+                    if (target.indexOf('view-') === 0) switchView(target.slice(5));
+                });
+            }
         }
 
         function openProductModal(productId) {
@@ -1539,6 +1581,11 @@
             document.getElementById('image-preview').style.display = 'none';
             document.getElementById('image-preview').innerHTML = '';
             document.getElementById('upload-area').style.display = '';
+            setFieldValue('field-status', 'published');
+            renderProductSpecs([]);
+            renderProductGallery({});
+            renderProductCertifications({});
+            syncProductFeaturedSwitch();
             document.getElementById('field-id').disabled = !!productId;
             populateProductCategorySelects();
 
@@ -1568,22 +1615,95 @@
         function fillProductForm(product) {
             var fields = {
                 'field-id': product.legacy_id || product.slug || product.id || '',
+                'field-nameCn': adminProductNameCn(product),
                 'field-name': product.name_en || '',
                 'field-nameAr': product.name_ar || '',
                 'field-shortDesc': product.short_desc_en || '',
                 'field-shortDescAr': product.short_desc_ar || '',
                 'field-description': product.description_en || '',
-                'field-descriptionAr': product.description_ar || ''
+                'field-descriptionAr': product.description_ar || '',
+                'field-status': product.status || 'published',
+                'field-seo-title': product.seo_title || '',
+                'field-seo-description': product.seo_description || '',
+                'field-seo-keywords': product.seo_keywords || ''
             };
             Object.keys(fields).forEach(function (id) {
-                var field = document.getElementById(id);
-                if (field) field.value = fields[id];
+                setFieldValue(id, fields[id]);
             });
             var categoryField = document.getElementById('field-category');
             if (categoryField) categoryField.value = product.category_id || '';
-            document.getElementById('field-featured').checked = !!product.featured;
+            document.getElementById('field-featured').checked = productValueIsTrue(product.featured);
+            syncProductFeaturedSwitch();
             setProductCoverPath(product.cover_image || '');
             if (uploadedImagePath) showImagePreview('../' + uploadedImagePath);
+            renderProductSpecs(product.specs || []);
+            renderProductGallery(product);
+            renderProductCertifications(product);
+        }
+
+        function setFieldValue(id, value) {
+            var field = document.getElementById(id);
+            if (field) field.value = value == null ? '' : value;
+        }
+
+        function getFieldValue(id) {
+            var field = document.getElementById(id);
+            return field ? field.value.trim() : '';
+        }
+
+        function syncProductFeaturedSwitch() {
+            var field = document.getElementById('field-featured');
+            if (!field || !field.closest) return;
+            var label = field.closest('.switch-field');
+            if (label) label.classList.toggle('is-on', field.checked);
+        }
+
+        function renderProductSpecs(specs) {
+            var list = document.getElementById('specs-list');
+            if (!list) return;
+            list.innerHTML = '';
+            if (!specs || !specs.length) {
+                list.innerHTML = '<div class="form-empty-note">暂无参数</div>';
+                return;
+            }
+            specs.forEach(function (spec) {
+                addSpecRow(spec.spec_key || spec.key || '', spec.spec_value || spec.value || '');
+            });
+        }
+
+        function renderProductGallery(product) {
+            var container = document.getElementById('product-gallery-preview');
+            if (!container) return;
+            var media = Array.isArray(product.media) ? product.media.slice(0) : [];
+            if (!media.length && product.cover_image) {
+                media.push({ path: product.cover_image, is_cover: 1 });
+            }
+            if (!media.length) {
+                container.innerHTML = '<div class="gallery-empty">暂无图库图片</div>';
+                return;
+            }
+            container.innerHTML = media.slice(0, 6).map(function (item) {
+                var path = item.path || item.url || '';
+                if (!path) return '';
+                return '<div class="gallery-item">' +
+                    '<img src="../' + escapeHtml(path) + '" alt="">' +
+                    (productValueIsTrue(item.is_cover) ? '<span>封面</span>' : '') +
+                    '</div>';
+            }).join('') || '<div class="gallery-empty">暂无图库图片</div>';
+        }
+
+        function renderProductCertifications(product) {
+            var container = document.getElementById('product-cert-selector');
+            if (!container) return;
+            var items = product && (product.certifications || product.related_certifications || product.certification_ids);
+            var chips = Array.isArray(items) ? items : [];
+            var chipsHtml = chips.length
+                ? chips.map(function (item) {
+                    var label = item.name || item.title || item.id || item;
+                    return '<span class="relation-chip">' + escapeHtml(label) + '</span>';
+                }).join('')
+                : '<span>暂未关联证书</span>';
+            container.innerHTML = '<div class="relation-chip-row">' + chipsHtml + '</div><button class="btn btn-secondary btn-sm" type="button" data-action="view-cert-qualifications">打开证书库</button>';
         }
 
         function uploadProductImage() {
@@ -1639,11 +1759,15 @@
         }
 
         function addSpecRow(key, value) {
+            var list = document.getElementById('specs-list');
+            if (!list) return;
+            var empty = list.querySelector('.form-empty-note');
+            if (empty) empty.remove();
             var row = document.createElement('div');
             row.className = 'spec-row';
             row.innerHTML = '<input type="text" class="spec-key" placeholder="参数名" value="' + escapeHtml(key) + '"><input type="text" class="spec-value" placeholder="参数值" value="' + escapeHtml(value) + '"><button type="button" class="btn-remove-spec">×</button>';
             row.querySelector('.btn-remove-spec').addEventListener('click', function () { row.remove(); });
-            document.getElementById('specs-list').appendChild(row);
+            list.appendChild(row);
         }
 
         function getSpecsFromForm() {
@@ -1686,12 +1810,13 @@
                 showToast('图片仍在上传，请上传完成后再保存。', 'error');
                 return;
             }
-            var id = document.getElementById('field-id').value.trim();
-            var name = document.getElementById('field-name').value.trim();
-            var nameAr = document.getElementById('field-nameAr').value.trim();
-            var category = document.getElementById('field-category').value;
+            var id = getFieldValue('field-id');
+            var name = getFieldValue('field-name');
+            var nameAr = getFieldValue('field-nameAr');
+            var category = getFieldValue('field-category');
+            var status = getFieldValue('field-status') || 'published';
 
-            ['field-id', 'field-name', 'field-category'].forEach(clearFieldError);
+            ['field-id', 'field-name', 'field-category', 'field-status'].forEach(clearFieldError);
             var valid = true;
             if (!name && !nameAr) { showFieldError('field-name', '请填写产品名称'); valid = false; }
             if (!category) { showFieldError('field-category', '请选择分类'); valid = false; }
@@ -1702,12 +1827,16 @@
                 name_en: name || nameAr,
                 name_ar: nameAr,
                 category_id: parseInt(category, 10),
-                short_desc_en: document.getElementById('field-shortDesc').value.trim(),
-                short_desc_ar: document.getElementById('field-shortDescAr').value.trim(),
-                description_en: document.getElementById('field-description').value.trim(),
-                description_ar: document.getElementById('field-descriptionAr').value.trim(),
+                status: status,
+                short_desc_en: getFieldValue('field-shortDesc'),
+                short_desc_ar: getFieldValue('field-shortDescAr'),
+                description_en: getFieldValue('field-description'),
+                description_ar: getFieldValue('field-descriptionAr'),
                 featured: document.getElementById('field-featured').checked,
-                cover_image: document.getElementById('field-cover-image').value.trim() || uploadedImagePath
+                cover_image: getFieldValue('field-cover-image') || uploadedImagePath,
+                seo_title: getFieldValue('field-seo-title'),
+                seo_description: getFieldValue('field-seo-description'),
+                seo_keywords: getFieldValue('field-seo-keywords')
             };
             if (editingProductId) payload.version = editingProductVersion;
             var submittedCoverImage = payload.cover_image || '';
@@ -1794,12 +1923,17 @@
             var tbody = document.getElementById('inquiries-tbody');
             if (!inquiries.length) {
                 tbody.innerHTML = emptyRow(7, '暂无询盘');
+                activeInquiryId = null;
+                renderInquirySideDetail(null);
                 updateInquiryBatchBar();
                 return;
             }
+            if (!activeInquiryId || !findInquiryInList(activeInquiryId)) activeInquiryId = inquiries[0].id;
             tbody.innerHTML = inquiries.map(function (item) {
-                var rowClass = item.is_read === 0 ? ' class="row-unread"' : '';
-                return '<tr' + rowClass + '>' +
+                var rowClasses = [];
+                if (item.is_read === 0) rowClasses.push('row-unread');
+                if (String(item.id) === String(activeInquiryId)) rowClasses.push('row-active');
+                return '<tr class="' + rowClasses.join(' ') + '" data-inquiry-row="' + escapeHtml(item.id) + '">' +
                     '<td><input type="checkbox" class="inquiry-select" data-id="' + escapeHtml(item.id) + '"></td>' +
                     '<td><div class="product-name-text">' + escapeHtml(item.name) + '</div><div class="product-id-text">' + escapeHtml(item.email) + '</div></td>' +
                     '<td>' + escapeHtml(item.company || '-') + '</td>' +
@@ -1809,6 +1943,12 @@
                     '<td><div class="actions-cell"><button class="btn btn-icon btn-icon-view" aria-label="查看询盘" data-view-inquiry="' + escapeHtml(item.id) + '">' + ICON_VIEW + '</button><button class="btn btn-icon btn-icon-delete" aria-label="删除询盘" data-delete-inquiry="' + escapeHtml(item.id) + '">' + ICON_DELETE + '</button></div></td>' +
                     '</tr>';
             }).join('');
+            tbody.querySelectorAll('[data-inquiry-row]').forEach(function (row) {
+                row.addEventListener('click', function (event) {
+                    if (event.target && event.target.closest && event.target.closest('button, input')) return;
+                    openInquiryModal(row.getAttribute('data-inquiry-row'));
+                });
+            });
             tbody.querySelectorAll('[data-view-inquiry]').forEach(function (btn) {
                 btn.addEventListener('click', function () { openInquiryModal(btn.getAttribute('data-view-inquiry')); });
             });
@@ -1817,6 +1957,14 @@
             });
             bindRangeCheckboxes('.inquiry-select', updateInquiryBatchBar);
             updateInquiryBatchBar();
+            openInquiryModal(activeInquiryId);
+        }
+
+        function findInquiryInList(id) {
+            for (var i = 0; i < inquiries.length; i++) {
+                if (String(inquiries[i].id) === String(id)) return inquiries[i];
+            }
+            return null;
         }
 
         function bindInquiryEvents() {
@@ -1954,13 +2102,18 @@
                 '&body=' + encodeURIComponent(body)
             );
             if (openedInquiry.status !== 'replied' && openedInquiry.status !== 'closed') {
-                var currentNotes = document.getElementById('inquiry-notes').value;
+                var sideNotes = document.getElementById('inquiry-side-notes');
+                var modalNotes = document.getElementById('inquiry-notes');
+                var currentNotes = sideNotes ? sideNotes.value : (modalNotes ? modalNotes.value : '');
                 apiRequest('/admin/inquiries/' + encodeURIComponent(openedInquiry.id), {
                     method: 'PUT',
                     body: { status: 'replied', is_read: 1, notes: currentNotes }
                 }).then(function () {
                     openedInquiry.status = 'replied';
-                    document.getElementById('inquiry-status').value = 'replied';
+                    var modalStatus = document.getElementById('inquiry-status');
+                    var sideStatus = document.getElementById('inquiry-side-status');
+                    if (modalStatus) modalStatus.value = 'replied';
+                    if (sideStatus) sideStatus.value = 'replied';
                     showToast('状态已更新为已回复');
                     loadInquiries();
                 }).catch(function (err) { showToast('状态更新失败：' + err.message, 'error'); });
@@ -1987,8 +2140,75 @@
                     '<div class="detail-item detail-full"><strong>消息内容</strong><p>' + escapeHtml(item.message || '') + '</p></div>';
                 document.getElementById('inquiry-status').value = item.status || 'new';
                 document.getElementById('inquiry-notes').value = item.notes || '';
-            showModal('inquiry-modal');
+                activeInquiryId = item.id;
+                if (currentView === 'inquiries') {
+                    renderInquirySideDetail(item);
+                    document.querySelectorAll('[data-inquiry-row]').forEach(function (row) {
+                        row.classList.toggle('row-active', String(row.getAttribute('data-inquiry-row')) === String(item.id));
+                    });
+                    return;
+                }
+                showModal('inquiry-modal');
             }).catch(function (err) { showToast('加载询盘详情失败：' + err.message, 'error'); });
+        }
+
+        function renderInquirySideDetail(item) {
+            var panel = document.getElementById('inquiry-side-detail');
+            if (!panel) return;
+            if (!item) {
+                panel.className = 'inquiry-side-empty';
+                panel.innerHTML = '选择一条询盘查看详情';
+                return;
+            }
+            panel.className = 'inquiry-side-content';
+            var status = item.status || 'new';
+            panel.innerHTML =
+                '<div class="inquiry-side-head"><strong>' + escapeHtml(item.subject || '未命名询盘') + '</strong><span class="badge ' + (STATUS_BADGES[status] || 'badge-blue') + '">' + escapeHtml(STATUS_LABELS[status] || status) + '</span></div>' +
+                '<div class="inquiry-contact-card">' +
+                    '<div><span>客户</span><strong>' + escapeHtml(item.name || '—') + '</strong></div>' +
+                    '<div><span>邮箱</span><strong>' + escapeHtml(item.email || '—') + '</strong></div>' +
+                    '<div><span>公司</span><strong>' + escapeHtml(item.company || '—') + '</strong></div>' +
+                    '<div><span>电话</span><strong>' + escapeHtml(item.phone || '—') + '</strong></div>' +
+                '</div>' +
+                '<dl class="inquiry-side-meta">' +
+                    '<div><dt>产品上下文</dt><dd>' + escapeHtml(item.product_context || '—') + '</dd></div>' +
+                    '<div><dt>提交时间</dt><dd>' + escapeHtml(formatDate(item.created_at)) + '</dd></div>' +
+                    '<div><dt>IP 地址</dt><dd>' + escapeHtml(item.ip || '—') + '</dd></div>' +
+                '</dl>' +
+                '<div class="inquiry-message-block"><span>消息内容</span><p>' + escapeHtml(item.message || '—') + '</p></div>' +
+                '<div class="form-group"><label>处理状态</label><select id="inquiry-side-status"><option value="new">新询盘</option><option value="read">已读</option><option value="replied">已回复</option><option value="closed">已关闭</option></select></div>' +
+                '<div class="form-group"><label>管理员备注</label><textarea id="inquiry-side-notes" rows="4"></textarea></div>' +
+                '<div class="inquiry-side-actions"><button class="btn btn-secondary btn-sm" type="button" id="inquiry-side-reply">邮件回复</button><button class="btn btn-primary btn-sm" type="button" id="inquiry-side-save">保存状态</button></div>';
+            document.getElementById('inquiry-side-status').value = status;
+            document.getElementById('inquiry-side-notes').value = item.notes || '';
+            var reply = document.getElementById('inquiry-side-reply');
+            if (reply) reply.addEventListener('click', replyByEmail);
+            var save = document.getElementById('inquiry-side-save');
+            if (save) save.addEventListener('click', saveInquirySideStatus);
+        }
+
+        function saveInquirySideStatus() {
+            if (!openedInquiry || !openedInquiry.id) return;
+            apiRequest('/admin/inquiries/' + encodeURIComponent(openedInquiry.id), {
+                method: 'PUT',
+                body: {
+                    status: document.getElementById('inquiry-side-status').value,
+                    is_read: 1,
+                    notes: document.getElementById('inquiry-side-notes').value
+                }
+            }).then(function (response) {
+                var saved = unwrapDataResponse(response) || openedInquiry;
+                openedInquiry = saved;
+                showToast('询盘状态已保存');
+                resetFormDirty();
+                loadInquiries();
+            }).catch(function (err) {
+                if (err.status === 422) {
+                    showToast('状态不能降级', 'error');
+                    return;
+                }
+                showToast('保存失败：' + err.message, 'error');
+            });
         }
 
         function detailItem(label, value) {
@@ -2479,7 +2699,7 @@
                     ['googleMapsEmbedUrl', 'Google Maps Embed URL'], ['googleMyMapsEmbedUrl', 'Google My Maps Embed URL'],
                     ['openStreetMapUrl', 'OpenStreetMap URL'], ['mapQr', '地图二维码']
                 ],
-                jsonTextareas: [['mapLocations', '地图位置 JSON']],
+                objects: [['mapLocations', '地图位置']],
                 seo: true
             },
             'content-education': {
@@ -2513,7 +2733,7 @@
                     { key: 'hero', label: 'Hero', fields: [['title_en', '标题（英文）'], ['title_ar', '标题（阿语）'], ['title_cn', '标题（中文）'], ['subtitle_en', '副标题（英文）'], ['subtitle_ar', '副标题（阿语）'], ['subtitle_cn', '副标题（中文）'], ['image', '图片']] }
                 ],
                 arrays: [
-                    { key: 'industries', label: '行业', fields: [['name_en', '名称（英文）'], ['name_ar', '名称（阿语）'], ['name_cn', '名称（中文）'], ['summary_en', '摘要（英文）'], ['summary_ar', '摘要（阿语）'], ['summary_cn', '摘要（中文）'], ['image', '图片'], ['related_product_ids', '关联产品 ID（逗号分隔）']] }
+                    { key: 'industries', label: '行业', fields: [['name_en', '名称（英文）'], ['name_ar', '名称（阿语）'], ['name_cn', '名称（中文）'], ['summary_en', '摘要（英文）'], ['summary_ar', '摘要（阿语）'], ['summary_cn', '摘要（中文）'], ['image', '图片'], ['related_product_ids', '关联产品']] }
                 ],
                 seo: true
             },
@@ -2525,9 +2745,64 @@
                     { key: 'sections', label: '技术板块', fields: [['title_en', '标题（英文）'], ['title_ar', '标题（阿语）'], ['title_cn', '标题（中文）'], ['body_en', '正文（英文）'], ['body_ar', '正文（阿语）'], ['body_cn', '正文（中文）'], ['image', '图片']] },
                     { key: 'highlights', label: '亮点指标', fields: [['label_en', '标签（英文）'], ['label_ar', '标签（阿语）'], ['label_cn', '标签（中文）'], ['value', '数值']] }
                 ],
-                fields: [['related_certification_ids', '关联证书 ID（逗号分隔）']],
+                fields: [['related_certification_ids', '关联证书']],
                 seo: true
             }
+        };
+
+        var CONTENT_VIEW_TITLES = {
+            'content-home': '首页',
+            'content-solutions': '解决方案',
+            'content-company-overview': '企业概况',
+            'content-contact': '联系我们',
+            'content-about': '关于我们',
+            'content-product-pages': '产品页面',
+            'content-global-shell': '全站壳层',
+            'content-technology': '科技创新',
+            'content-industries': '应用行业',
+            'content-education': '教育合作',
+            'content-page-blocks': '页面区块'
+        };
+
+        var FIELD_LABELS = {
+            title: '标题',
+            title_en: '标题（英文）',
+            title_ar: '标题（阿语）',
+            title_cn: '标题（中文）',
+            subtitle: '副标题',
+            subtitle_en: '副标题（英文）',
+            subtitle_ar: '副标题（阿语）',
+            subtitle_cn: '副标题（中文）',
+            text: '正文',
+            text_en: '正文（英文）',
+            text_ar: '正文（阿语）',
+            text_cn: '正文（中文）',
+            body: '正文',
+            body_en: '正文（英文）',
+            body_ar: '正文（阿语）',
+            body_cn: '正文（中文）',
+            description: '描述',
+            description_en: '描述（英文）',
+            description_ar: '描述（阿语）',
+            description_cn: '描述（中文）',
+            summary: '摘要',
+            summary_en: '摘要（英文）',
+            summary_ar: '摘要（阿语）',
+            summary_cn: '摘要（中文）',
+            image: '图片',
+            backgroundImage: '背景图片',
+            cover_image: '封面图',
+            mapLocations: '地图位置',
+            related_product_ids: '关联产品',
+            related_certification_ids: '关联证书',
+            href: '链接',
+            is_active: '启用状态',
+            status: '状态',
+            sort_order: '排序',
+            value: '数值',
+            label: '标签',
+            labelAr: '标签（阿语）',
+            key: '区块标识'
         };
 
         function getPathValue(obj, path) {
@@ -2549,7 +2824,74 @@
             });
         }
 
+        function cloneBody(value) {
+            try {
+                return JSON.parse(JSON.stringify(value || {}));
+            } catch (err) {
+                return {};
+            }
+        }
+
+        function fieldInputValue(field) {
+            if (!field) return '';
+            if (field.type === 'checkbox') return !!field.checked;
+            return field.value;
+        }
+
+        function fieldLastKey(path) {
+            var parts = String(path || '').split('.');
+            return parts[parts.length - 1] || path;
+        }
+
+        function humanizeFieldLabel(path, label) {
+            if (label) return label;
+            var key = fieldLastKey(path);
+            if (FIELD_LABELS[key]) return FIELD_LABELS[key];
+            return String(key)
+                .replace(/_/g, ' ')
+                .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+                .replace(/\b\w/g, function (char) { return char.toUpperCase(); });
+        }
+
+        function shouldUseTextarea(path) {
+            return /body|summary|description|subtitle|text|note|answer|message|content|footer|intro|placeholder|address/i.test(fieldLastKey(path));
+        }
+
+        function isImageLikeField(path) {
+            return /(^|\.)(image|backgroundImage|cover_image|thumbnail|preview|logo|icon|qr|mapQr|wechatQr|whatsappQr)$/i.test(path);
+        }
+
+        function isRelationField(path) {
+            return /related_(product|certification)_ids$/.test(path);
+        }
+
+        function inputTypeForPath(path) {
+            var key = fieldLastKey(path).toLowerCase();
+            if (/email/.test(key)) return 'email';
+            if (/phone|tel/.test(key)) return 'tel';
+            if (/url|href/.test(key)) return 'url';
+            if (/sort|order|year|count|number|patents|partners|value|zoom|lat|lng|longitude|latitude/.test(key)) return 'number';
+            return 'text';
+        }
+
+        function renderFieldHint(path, value) {
+            var text = String(value == null ? '' : value);
+            if (/title|subtitle|summary|description|text|body/i.test(fieldLastKey(path))) {
+                var max = /title/i.test(fieldLastKey(path)) ? 60 : 120;
+                if (/body|description|text/i.test(fieldLastKey(path))) max = 500;
+                return '<small class="cms-field-hint">' + text.length + ' / ' + max + '</small>';
+            }
+            if (isImageLikeField(path)) {
+                return '<small class="cms-field-hint">建议使用 JPG / PNG / WebP，并保持前台展示比例。</small>';
+            }
+            if (isRelationField(path)) {
+                return '<small class="cms-field-hint">选择项会保存为现有接口需要的关联数组。</small>';
+            }
+            return '';
+        }
+
         function normalizeStructuredValue(path, value) {
+            if (typeof value === 'boolean') return value;
             if (/related_(product|certification)_ids$/.test(path)) {
                 var invalidItems = [];
                 var ids = String(value || '').split(',').map(function (item) {
@@ -2567,44 +2909,182 @@
             if (path === 'is_active' || /\.is_active$/.test(path)) {
                 return value === true || value === 'true' || value === '1';
             }
+            if (/sort|order|year|count|number|patents|partners|value|zoom|lat|lng|longitude|latitude/i.test(fieldLastKey(path))) {
+                var parsed = Number(value);
+                if (value !== '' && Number.isFinite(parsed)) return parsed;
+            }
             return String(value == null ? '' : value).trim();
         }
 
         function renderField(path, label, value, textarea) {
             var id = 'cms-field-' + path.replace(/[^a-zA-Z0-9_-]/g, '-');
-            var tag = textarea ? 'textarea' : 'input';
+            var resolvedLabel = humanizeFieldLabel(path, label);
             var valueText = Array.isArray(value) ? value.join(', ') : (value == null ? '' : String(value));
             if (path === 'is_active' || /\.is_active$/.test(path)) {
-                return '<label class="form-group cms-field"><span>' + escapeHtml(label) + '</span><select data-cms-field="' + escapeHtml(path) + '"><option value="true"' + (value !== false ? ' selected' : '') + '>启用</option><option value="false"' + (value === false ? ' selected' : '') + '>停用</option></select></label>';
+                return '<label class="cms-toggle-field"><input type="checkbox" data-cms-field="' + escapeHtml(path) + '"' + (value !== false ? ' checked' : '') + '><span><strong>' + escapeHtml(resolvedLabel) + '</strong><small>' + (value === false ? '当前停用' : '当前启用') + '</small></span></label>';
+            }
+            if (isRelationField(path)) {
+                var chips = Array.isArray(value) ? value : String(valueText || '').split(',').map(function (item) { return item.trim(); }).filter(Boolean);
+                return '<div class="form-group cms-field cms-relation-field"><label for="' + escapeHtml(id) + '">' + escapeHtml(resolvedLabel) + '</label><input id="' + escapeHtml(id) + '" data-cms-field="' + escapeHtml(path) + '" type="text" value="' + escapeHtml(valueText) + '" placeholder="搜索并选择关联项"><div class="cms-chip-row">' + chips.map(function (item) { return '<span class="cms-chip">' + escapeHtml(item) + '</span>'; }).join('') + '</div>' + renderFieldHint(path, valueText) + '</div>';
+            }
+            if (isImageLikeField(path)) {
+                var preview = valueText ? '<img src="../' + escapeHtml(valueText) + '" alt="' + escapeHtml(resolvedLabel) + '预览">' : '<span class="cms-image-empty">暂无图片</span>';
+                return '<div class="form-group cms-field cms-image-field"><label for="' + escapeHtml(id) + '">' + escapeHtml(resolvedLabel) + '</label><div class="cms-image-card"><div class="cms-image-preview">' + preview + '</div><div class="cms-image-controls"><input id="' + escapeHtml(id) + '" data-cms-field="' + escapeHtml(path) + '" type="text" value="' + escapeHtml(valueText) + '" placeholder="从资源库选择或粘贴资源路径"><button type="button" class="btn btn-secondary btn-sm cms-asset-shortcut" data-action="view-assets">打开资源库</button></div></div>' + renderFieldHint(path, valueText) + '</div>';
             }
             if (textarea) {
-                return '<label class="form-group cms-field"><span>' + escapeHtml(label) + '</span><textarea id="' + escapeHtml(id) + '" data-cms-field="' + escapeHtml(path) + '" rows="4">' + escapeHtml(valueText) + '</textarea></label>';
+                return '<div class="form-group cms-field"><label for="' + escapeHtml(id) + '">' + escapeHtml(resolvedLabel) + '</label><textarea id="' + escapeHtml(id) + '" data-cms-field="' + escapeHtml(path) + '" rows="4">' + escapeHtml(valueText) + '</textarea>' + renderFieldHint(path, valueText) + '</div>';
             }
-            return '<label class="form-group cms-field"><span>' + escapeHtml(label) + '</span><input id="' + escapeHtml(id) + '" data-cms-field="' + escapeHtml(path) + '" type="text" value="' + escapeHtml(valueText) + '"></label>';
+            return '<div class="form-group cms-field"><label for="' + escapeHtml(id) + '">' + escapeHtml(resolvedLabel) + '</label><input id="' + escapeHtml(id) + '" data-cms-field="' + escapeHtml(path) + '" type="' + inputTypeForPath(path) + '" value="' + escapeHtml(valueText) + '">' + renderFieldHint(path, valueText) + '</div>';
         }
 
-        function renderJsonField(path, label, value) {
-            var id = 'cms-json-' + path.replace(/[^a-zA-Z0-9_-]/g, '-');
-            return '<label class="form-group cms-field"><span>' + escapeHtml(label) + '</span><textarea id="' + escapeHtml(id) + '" class="json-field" data-cms-json="' + escapeHtml(path) + '" rows="6">' + escapeHtml(value) + '</textarea><p class="json-error" hidden></p></label>';
+        function renderListField(path, label, value) {
+            var id = 'cms-list-' + path.replace(/[^a-zA-Z0-9_-]/g, '-');
+            var list = Array.isArray(value) ? value : [];
+            return '<div class="form-group cms-field"><label for="' + escapeHtml(id) + '">' + escapeHtml(humanizeFieldLabel(path, label)) + '</label><textarea id="' + escapeHtml(id) + '" data-cms-list="' + escapeHtml(path) + '" rows="4">' + escapeHtml(list.join('\n')) + '</textarea><small class="cms-field-hint">每行一项，保存时仍写回原数组结构。</small></div>';
+        }
+
+        function renderObjectEditor(path, label, value) {
+            var objectValue = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+            var keys = Object.keys(objectValue);
+            if (!keys.length) {
+                return '<fieldset class="cms-fieldset cms-object-fieldset"><legend>' + escapeHtml(humanizeFieldLabel(path, label)) + '</legend><p class="cms-empty-note">暂无可编辑字段。</p></fieldset>';
+            }
+            return '<fieldset class="cms-fieldset cms-object-fieldset"><legend>' + escapeHtml(humanizeFieldLabel(path, label)) + '</legend><div class="cms-field-grid">' + keys.map(function (key) {
+                var childPath = path ? path + '.' + key : key;
+                return renderGenericValue(childPath, humanizeFieldLabel(childPath), objectValue[key]);
+            }).join('') + '</div></fieldset>';
+        }
+
+        function renderGenericArray(path, label, items, explicitFields) {
+            var arrayItems = Array.isArray(items) ? items : [];
+            var fieldNames = explicitFields ? explicitFields.map(function (field) { return field[0]; }) : [];
+            if (!fieldNames.length) {
+                arrayItems.forEach(function (item) {
+                    if (item && typeof item === 'object' && !Array.isArray(item)) {
+                        Object.keys(item).forEach(function (key) {
+                            if (fieldNames.indexOf(key) === -1) fieldNames.push(key);
+                        });
+                    }
+                });
+            }
+            if (!fieldNames.length && arrayItems.length && typeof arrayItems[0] !== 'object') {
+                return renderListField(path, label, arrayItems);
+            }
+            var explicitMap = {};
+            (explicitFields || []).forEach(function (field) { explicitMap[field[0]] = field; });
+            var fieldConfigs = fieldNames.map(function (fieldName) {
+                return explicitMap[fieldName] || [fieldName, humanizeFieldLabel(fieldName)];
+            });
+            return '<fieldset class="cms-fieldset" data-cms-array="' + escapeHtml(path) + '"><legend>' + escapeHtml(humanizeFieldLabel(path, label)) + '<span class="cms-count-badge">共 ' + arrayItems.length + ' 项</span></legend>' +
+                '<div class="cms-array-items">' + arrayItems.map(function (item, index) {
+                    var cardTitle = item && (item.title_cn || item.title_en || item.title || item.name_cn || item.name_en || item.label || item.year || item.key) || ('项目 ' + (index + 1));
+                    return '<details class="cms-array-item" data-cms-array-item="' + index + '" open><summary class="cms-array-summary"><span>' + escapeHtml(cardTitle) + '</span><span class="cms-array-summary-actions"><button type="button" class="btn btn-secondary btn-sm cms-move-up">上移</button><button type="button" class="btn btn-secondary btn-sm cms-move-down">下移</button><button type="button" class="btn btn-danger btn-sm cms-remove-item">删除</button></span></summary><div class="cms-array-body">' +
+                        renderFieldsWithLanguageTabs(path + '.' + index, fieldConfigs, function (fieldName) {
+                            return item && item[fieldName] !== undefined ? item[fieldName] : '';
+                        }) + '</div></details>';
+                }).join('') + '</div><button type="button" class="btn btn-secondary cms-add-item" data-cms-add="' + escapeHtml(path) + '">新增' + escapeHtml(humanizeFieldLabel(path, label)) + '</button></fieldset>';
+        }
+
+        function renderGenericValue(path, label, value) {
+            if (Array.isArray(value)) return renderGenericArray(path, label, value);
+            if (value && typeof value === 'object') return renderObjectEditor(path, label, value);
+            return renderField(path, label, value, shouldUseTextarea(path));
+        }
+
+        function renderConfiguredField(path, label, value, forceTextarea) {
+            if (Array.isArray(value) || (value && typeof value === 'object')) {
+                return renderGenericValue(path, label, value);
+            }
+            return renderField(path, label, value, !!forceTextarea || shouldUseTextarea(path));
+        }
+
+        function parseLanguageFieldName(name) {
+            var text = String(name || '');
+            var match = text.match(/^(.*)_(cn|zh|en|ar)$/i);
+            if (match) {
+                return { base: match[1], lang: match[2].toLowerCase() === 'zh' ? 'cn' : match[2].toLowerCase() };
+            }
+            match = text.match(/^(.*)(CN|En|AR|Ar)$/);
+            if (match) return { base: match[1], lang: match[2].toLowerCase() };
+            return { base: text, lang: null };
+        }
+
+        function stripLanguageLabel(label) {
+            return String(label || '').replace(/（[^）]+）/g, '').replace(/\s*\([^)]*\)\s*/g, '').trim();
+        }
+
+        function renderLocalizedFieldSet(uid, label, fields) {
+            var langLabels = { cn: '简体中文', en: 'English', ar: 'العربية' };
+            var order = { cn: 0, en: 1, ar: 2 };
+            fields.sort(function (a, b) {
+                return (order[a.lang] == null ? 10 : order[a.lang]) - (order[b.lang] == null ? 10 : order[b.lang]);
+            });
+            var active = fields[0] ? fields[0].lang : 'cn';
+            var tabs = fields.map(function (field) {
+                return '<button type="button" class="cms-lang-tab' + (field.lang === active ? ' active' : '') + '" data-cms-lang="' + escapeHtml(field.lang) + '">' + escapeHtml(langLabels[field.lang] || field.lang) + '</button>';
+            }).join('');
+            var panels = fields.map(function (field) {
+                return '<div class="cms-lang-panel' + (field.lang === active ? ' active' : '') + '" data-cms-lang-panel="' + escapeHtml(field.lang) + '">' +
+                    renderConfiguredField(field.path, field.label, field.value, field.forceTextarea) +
+                    '</div>';
+            }).join('');
+            return '<div class="cms-lang-set" id="' + escapeHtml(uid) + '"><div class="cms-lang-set-title">' + escapeHtml(label) + '</div><div class="cms-lang-tabs" role="tablist">' + tabs + '</div>' + panels + '</div>';
+        }
+
+        function renderFieldsWithLanguageTabs(basePath, fields, valueGetter) {
+            var parsed = fields.map(function (field) {
+                return {
+                    name: field[0],
+                    label: field[1],
+                    forceTextarea: !!field[2],
+                    parsed: parseLanguageFieldName(field[0])
+                };
+            });
+            var used = {};
+            var html = '';
+            parsed.forEach(function (field, index) {
+                if (used[index]) return;
+                var siblings = parsed.map(function (candidate, candidateIndex) {
+                    return { field: candidate, index: candidateIndex };
+                }).filter(function (candidate) {
+                    return candidate.field.parsed.base === field.parsed.base;
+                });
+                var hasLanguageVariant = siblings.some(function (candidate) { return candidate.field.parsed.lang; });
+                if (hasLanguageVariant && siblings.length > 1) {
+                    siblings.forEach(function (candidate) { used[candidate.index] = true; });
+                    var tabFields = siblings.map(function (candidate) {
+                        var name = candidate.field.name;
+                        var lang = candidate.field.parsed.lang || 'en';
+                        var fullPath = basePath ? basePath + '.' + name : name;
+                        return {
+                            lang: lang,
+                            path: fullPath,
+                            label: candidate.field.label,
+                            value: valueGetter(name),
+                            forceTextarea: candidate.field.forceTextarea
+                        };
+                    });
+                    var uid = 'cms-lang-' + (basePath ? basePath + '-' : '') + field.parsed.base;
+                    html += renderLocalizedFieldSet(uid.replace(/[^a-zA-Z0-9_-]/g, '-'), stripLanguageLabel(field.label) || humanizeFieldLabel(field.parsed.base), tabFields);
+                    return;
+                }
+                used[index] = true;
+                var fullPath = basePath ? basePath + '.' + field.name : field.name;
+                html += renderConfiguredField(fullPath, field.label, valueGetter(field.name), field.forceTextarea);
+            });
+            return html;
         }
 
         function renderGroup(group, body) {
             return '<fieldset class="cms-fieldset"><legend>' + escapeHtml(group.label) + '</legend>' +
-                group.fields.map(function (field) {
-                    return renderField(group.key + '.' + field[0], field[1], getPathValue(body, group.key + '.' + field[0]), /body|summary|subtitle|text/.test(field[0]));
-                }).join('') + '</fieldset>';
+                '<div class="cms-field-grid">' + renderFieldsWithLanguageTabs(group.key, group.fields, function (fieldName) {
+                    return getPathValue(body, group.key + '.' + fieldName);
+                }) + '</div></fieldset>';
         }
 
         function renderArrayEditor(arrayConfig, body) {
             var items = Array.isArray(body[arrayConfig.key]) ? body[arrayConfig.key] : [];
-            return '<fieldset class="cms-fieldset" data-cms-array="' + escapeHtml(arrayConfig.key) + '"><legend>' + escapeHtml(arrayConfig.label) + '</legend>' +
-                '<div class="cms-array-items">' + items.map(function (item, index) {
-                    return '<div class="cms-array-item" data-cms-array-item="' + index + '">' +
-                        '<div class="cms-array-actions"><button type="button" class="btn btn-secondary btn-sm cms-move-up">上移</button><button type="button" class="btn btn-secondary btn-sm cms-move-down">下移</button><button type="button" class="btn btn-danger btn-sm cms-remove-item">删除</button></div>' +
-                        arrayConfig.fields.map(function (field) {
-                            return renderField(arrayConfig.key + '.' + index + '.' + field[0], field[1], item ? item[field[0]] : '', /body|summary|description|text/.test(field[0]));
-                        }).join('') + '</div>';
-                }).join('') + '</div><button type="button" class="btn btn-secondary cms-add-item" data-cms-add="' + escapeHtml(arrayConfig.key) + '">新增</button></fieldset>';
+            return renderGenericArray(arrayConfig.key, arrayConfig.label, items, arrayConfig.fields);
         }
 
         function renderContentBlockForm(viewName, block) {
@@ -2613,34 +3093,82 @@
             if (!form) return;
             var body = block.body_json || {};
             var summary = contentBlockSummary(block);
-            var html = '<details class="content-block-card" open><summary class="block-card-header">' +
-                '<span class="block-type-label">内容块</span>' +
-                '<span class="block-summary">' + escapeHtml(summary) + '</span>' +
-                '<svg class="card-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>' +
-                '</summary><div class="block-card-body">';
-            html += '<div class="form-group"><label>标题（英文）</label><input type="text" id="' + escapeHtml(viewName) + '-title-en" value="' + escapeHtml(block.title_en || '') + '"></div>';
+            var handled = {};
+            var panels = [];
+
+            function markHandled(path) {
+                if (!path) return;
+                handled[String(path).split('.')[0]] = true;
+            }
+
+            function addPanel(label, bodyHtml) {
+                if (!bodyHtml) return;
+                panels.push({ label: label, html: bodyHtml });
+            }
+
+            addPanel('基础信息',
+                '<fieldset class="cms-fieldset"><legend>基础信息</legend>' +
+                '<div class="form-group cms-field"><label for="' + escapeHtml(viewName) + '-title-en">后台标题（英文）</label><input type="text" id="' + escapeHtml(viewName) + '-title-en" value="' + escapeHtml(block.title_en || '') + '"></div>' +
+                '<div class="cms-status-row"><span class="status-badge badge-green">' + escapeHtml(block.status || 'published') + '</span><span>内容摘要：' + escapeHtml(summary) + '</span></div>' +
+                '</fieldset>'
+            );
+
+            var simpleFieldConfigs = [];
             (config.fields || []).forEach(function (field) {
-                html += renderField(field[0], field[1], getPathValue(body, field[0]), false);
+                markHandled(field[0]);
+                simpleFieldConfigs.push([field[0], field[1], false]);
             });
             (config.textareas || []).forEach(function (field) {
-                html += renderField(field[0], field[1], getPathValue(body, field[0]), true);
+                markHandled(field[0]);
+                simpleFieldConfigs.push([field[0], field[1], true]);
             });
-            (config.jsonTextareas || []).forEach(function (field) {
-                html += renderJsonField(field[0], field[1], JSON.stringify(getPathValue(body, field[0]) || {}, null, 2));
+            var simpleFields = renderFieldsWithLanguageTabs('', simpleFieldConfigs, function (fieldName) {
+                return getPathValue(body, fieldName);
             });
-            (config.groups || []).forEach(function (group) { html += renderGroup(group, body); });
-            (config.arrays || []).forEach(function (arrayConfig) { html += renderArrayEditor(arrayConfig, body); });
-            if (config.blocks) html += renderReservedBlocks(config.blocks, body);
+            if (simpleFields) addPanel('基础字段', '<fieldset class="cms-fieldset"><legend>基础字段</legend><div class="cms-field-grid">' + simpleFields + '</div></fieldset>');
+            (config.objects || []).forEach(function (field) {
+                markHandled(field[0]);
+                addPanel(field[1], renderObjectEditor(field[0], field[1], getPathValue(body, field[0])));
+            });
+            (config.groups || []).forEach(function (group) {
+                markHandled(group.key);
+                addPanel(group.label, renderGroup(group, body));
+            });
+            (config.arrays || []).forEach(function (arrayConfig) {
+                markHandled(arrayConfig.key);
+                addPanel(arrayConfig.label, renderArrayEditor(arrayConfig, body));
+            });
+            if (config.blocks) {
+                markHandled('blocks');
+                addPanel('页面区块', renderReservedBlocks(config.blocks, body));
+            }
             if (config.seo) {
-                html += '<fieldset class="cms-fieldset"><legend>SEO</legend>' +
+                markHandled('seo');
+                addPanel('SEO 设置', '<fieldset class="cms-fieldset"><legend>SEO 设置</legend>' +
                     renderField('seo.title', 'SEO 标题', getPathValue(body, 'seo.title'), false) +
                     renderField('seo.description', 'SEO 描述', getPathValue(body, 'seo.description'), true) +
                     renderField('seo.keywords', 'SEO 关键词', getPathValue(body, 'seo.keywords'), false) +
-                    '</fieldset>';
+                    '</fieldset>');
             }
-            html += '<details class="advanced-json"><summary>高级 JSON（点击展开）</summary><textarea id="' + escapeHtml(viewName) + '-body-json" class="json-field" rows="12">' + escapeHtml(JSON.stringify(body, null, 2)) + '</textarea><p class="json-error" hidden></p></details>';
-            html += '</div></details>';
-            html += '<div class="form-actions"><button type="submit" class="btn btn-primary">保存</button><button type="button" class="btn btn-secondary cms-reload">重新加载</button><span class="form-status" id="' + escapeHtml(viewName) + '-status">' + (block.updated_at ? '已加载：' + formatDate(block.updated_at) : '已加载') + '</span></div>';
+
+            Object.keys(body || {}).forEach(function (key) {
+                if (handled[key]) return;
+                addPanel(humanizeFieldLabel(key), renderGenericValue(key, humanizeFieldLabel(key), body[key]));
+            });
+
+            var nav = panels.map(function (panel, index) {
+                return '<a href="#cms-panel-' + escapeHtml(viewName) + '-' + index + '">' + escapeHtml(panel.label) + '</a>';
+            }).join('');
+            var mainPanels = panels.map(function (panel, index) {
+                return '<div class="cms-panel" id="cms-panel-' + escapeHtml(viewName) + '-' + index + '">' + panel.html + '</div>';
+            }).join('');
+            var statusText = block.updated_at ? '已加载：' + formatDate(block.updated_at) : '已加载';
+            var html = '<div class="content-editor-toolbar"><div><strong>' + escapeHtml(CONTENT_VIEW_TITLES[viewName] || '内容管理') + '</strong><span>' + escapeHtml(summary) + '</span></div><div class="content-editor-actions"><button type="button" class="btn btn-secondary cms-reload">重新加载</button><button type="submit" class="btn btn-primary">保存更改</button></div></div>' +
+                '<div class="content-editor-shell">' +
+                '<aside class="cms-module-nav" aria-label="内容模块导航"><h3>内容模块</h3>' + nav + '</aside>' +
+                '<div class="cms-editor-main"><div class="cms-impact-banner">当前修改会影响前台 ' + escapeHtml(CONTENT_VIEW_TITLES[viewName] || '内容') + ' 相关展示区域。所有字段均通过可视化控件编辑，保存时保持原有数据结构。</div>' + mainPanels + '</div>' +
+                '<aside class="cms-side-panel"><section><h3>保存状态</h3><p id="' + escapeHtml(viewName) + '-status">' + escapeHtml(statusText) + '</p><p>版本：v' + escapeHtml(block.version || '1') + '</p></section><section><h3>编辑提示</h3><ul><li>图片建议先从资源库确认尺寸。</li><li>多语言字段保存后会同步到对应前台页面。</li><li>危险操作会进行二次确认。</li></ul></section><section><h3>快捷操作</h3><button type="button" class="btn btn-secondary btn-sm cms-reload">重新加载</button><button type="button" class="btn btn-secondary btn-sm cms-asset-shortcut" data-action="view-assets">打开资源库</button></section></aside>' +
+                '</div>';
             form.innerHTML = html;
         }
 
@@ -2676,31 +3204,21 @@
         function collectContentBlockBody(viewName) {
             var cached = contentBlockCache[viewName] || {};
             var form = document.getElementById('form-' + viewName);
-            if (form && !validateJsonFields(form)) {
-                throw new Error('JSON 格式无效，请检查红色提示');
-            }
-            var bodyEl = document.getElementById(viewName + '-body-json');
-            var body = {};
-            try {
-                body = bodyEl ? JSON.parse(bodyEl.value || '{}') : { ...(cached.body_json || {}) };
-            } catch (err) {
-                setJsonFieldError(bodyEl, err);
-                throw new Error('高级 JSON 格式无效');
-            }
-            if (!body || typeof body !== 'object' || Array.isArray(body)) throw new Error('高级 JSON 格式无效');
+            var body = cloneBody(cached.body_json || {});
+            if (!body || typeof body !== 'object' || Array.isArray(body)) throw new Error('内容结构无效，请重新加载后再试');
 
             if (!form) return body;
 
-            form.querySelectorAll('[data-cms-json]').forEach(function (field) {
-                var path = field.getAttribute('data-cms-json');
-                setPathValue(body, path, JSON.parse(field.value || '{}'));
+            form.querySelectorAll('[data-cms-list]').forEach(function (field) {
+                var path = field.getAttribute('data-cms-list');
+                var items = String(field.value || '').split(/\r?\n/).map(function (item) { return item.trim(); }).filter(Boolean);
+                setPathValue(body, path, items);
             });
 
             form.querySelectorAll('[data-cms-field]').forEach(function (field) {
+                if (field.closest('[data-cms-array-item]') || field.closest('[data-cms-block]')) return;
                 var path = field.getAttribute('data-cms-field');
-                if (/^blocks\.[^.]+\./.test(path)) return;
-                if (/^[^.]+\.\d+\./.test(path)) return;
-                setPathValue(body, path, normalizeStructuredValue(path, field.value));
+                setPathValue(body, path, normalizeStructuredValue(path, fieldInputValue(field)));
             });
 
             form.querySelectorAll('[data-cms-array]').forEach(function (arrayEl) {
@@ -2709,15 +3227,17 @@
                 arrayEl.querySelectorAll('[data-cms-array-item]').forEach(function (itemEl, index) {
                     var item = {};
                     itemEl.querySelectorAll('[data-cms-field]').forEach(function (field) {
-                        var parts = field.getAttribute('data-cms-field').split('.');
-                        item[parts.slice(2).join('.')] = normalizeStructuredValue(parts.slice(2).join('.'), field.value);
+                        var fieldPath = field.getAttribute('data-cms-field');
+                        var prefix = key + '.' + itemEl.getAttribute('data-cms-array-item') + '.';
+                        var relativePath = fieldPath.indexOf(prefix) === 0 ? fieldPath.slice(prefix.length) : fieldLastKey(fieldPath);
+                        setPathValue(item, relativePath, normalizeStructuredValue(relativePath, fieldInputValue(field)));
                     });
                     item.sort_order = index;
                     if (Object.keys(item).some(function (keyName) { return keyName === 'sort_order' ? false : item[keyName] !== '' && !(Array.isArray(item[keyName]) && !item[keyName].length); })) {
                         items.push(item);
                     }
                 });
-                body[key] = items;
+                setPathValue(body, key, items);
             });
 
             var blockEls = form.querySelectorAll('[data-cms-block]');
@@ -2731,7 +3251,7 @@
                     blockEl.querySelectorAll('[data-cms-field]').forEach(function (field) {
                         var parts = field.getAttribute('data-cms-field').split('.');
                         var key = parts.slice(2).join('.');
-                        item[key] = normalizeStructuredValue(key, field.value);
+                        item[key] = normalizeStructuredValue(key, fieldInputValue(field));
                     });
                     nextBlocks.push(item);
                 });
@@ -2853,6 +3373,24 @@
                     });
                     form.addEventListener('click', function (e) {
                         var target = e.target;
+                        var langTab = target.closest('.cms-lang-tab');
+                        if (langTab) {
+                            var set = langTab.closest('.cms-lang-set');
+                            var lang = langTab.getAttribute('data-cms-lang');
+                            if (set && lang) {
+                                set.querySelectorAll('.cms-lang-tab').forEach(function (tab) {
+                                    tab.classList.toggle('active', tab === langTab);
+                                });
+                                set.querySelectorAll('.cms-lang-panel').forEach(function (panel) {
+                                    panel.classList.toggle('active', panel.getAttribute('data-cms-lang-panel') === lang);
+                                });
+                            }
+                            return;
+                        }
+                        if (target.closest('.cms-asset-shortcut')) {
+                            switchView('assets');
+                            return;
+                        }
                         if (target.classList.contains('cms-reload')) {
                             if (!confirmDiscardChanges()) return;
                             loadContentBlock(viewName);
@@ -2916,12 +3454,12 @@
             try {
                 parsed = collectContentBlockBody(viewName);
             } catch (err) {
-                showToast(err.message || 'body_json 格式无效', 'error');
+                showToast(err.message || '内容结构无效，请检查表单后重试', 'error');
                 return;
             }
 
             if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-                showToast('body_json 格式无效', 'error');
+                showToast('内容结构无效，请检查表单后重试', 'error');
                 return;
             }
 
@@ -3061,6 +3599,44 @@
                 loadAssets();
             });
 
+            var uploadBtn = document.getElementById('btn-upload-assets');
+            var uploadInput = document.getElementById('asset-upload-input');
+            var dropzone = document.getElementById('asset-dropzone');
+            if (uploadBtn && uploadInput) uploadBtn.addEventListener('click', function () { uploadInput.click(); });
+            if (uploadInput) {
+                uploadInput.addEventListener('change', function () {
+                    uploadAssetFiles(Array.prototype.slice.call(uploadInput.files || []));
+                    uploadInput.value = '';
+                });
+            }
+            if (dropzone) {
+                dropzone.addEventListener('click', function (event) {
+                    if (event.target && event.target.id === 'asset-upload-input') return;
+                    if (uploadInput) uploadInput.click();
+                });
+                ['dragenter', 'dragover'].forEach(function (eventName) {
+                    dropzone.addEventListener(eventName, function (event) {
+                        event.preventDefault();
+                        dropzone.classList.add('is-dragover');
+                    });
+                });
+                ['dragleave', 'drop'].forEach(function (eventName) {
+                    dropzone.addEventListener(eventName, function (event) {
+                        event.preventDefault();
+                        dropzone.classList.remove('is-dragover');
+                    });
+                });
+                dropzone.addEventListener('drop', function (event) {
+                    uploadAssetFiles(Array.prototype.slice.call((event.dataTransfer && event.dataTransfer.files) || []));
+                });
+            }
+
+            document.querySelectorAll('[data-asset-view-mode]').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    setAssetViewMode(btn.getAttribute('data-asset-view-mode') || 'grid');
+                });
+            });
+
             var assetSearch = document.getElementById('asset-search');
             if (assetSearch) {
                 assetSearch.addEventListener('input', function () {
@@ -3107,6 +3683,22 @@
                 assetPage += 1;
                 loadAssets();
             });
+
+            var assetSelectAll = document.getElementById('asset-select-all');
+            if (assetSelectAll) {
+                assetSelectAll.addEventListener('change', function () {
+                    assetRows.forEach(function (asset) {
+                        if (asset && asset.id != null) selectedAssetIds[String(asset.id)] = assetSelectAll.checked;
+                    });
+                    syncAssetSelection();
+                });
+            }
+            var copySelected = document.getElementById('btn-copy-selected-asset');
+            if (copySelected) copySelected.addEventListener('click', copyFirstSelectedAssetPath);
+            var clearSelection = document.getElementById('btn-clear-asset-selection');
+            if (clearSelection) clearSelection.addEventListener('click', clearAssetSelection);
+            var deleteSelected = document.getElementById('btn-delete-selected-assets');
+            if (deleteSelected) deleteSelected.addEventListener('click', deleteSelectedAssets);
         }
 
         function updateAssetClearFilters() {
@@ -3115,6 +3707,17 @@
             var searchVal = ((document.getElementById('asset-search') || {}).value || '').trim();
             var typeVal = (document.getElementById('asset-type-filter') || {}).value || '';
             btn.style.display = searchVal || typeVal ? '' : 'none';
+        }
+
+        function setAssetViewMode(mode) {
+            assetViewMode = mode === 'list' ? 'list' : 'grid';
+            var grid = document.getElementById('assets-grid');
+            var list = document.getElementById('assets-list-panel');
+            if (grid) grid.style.display = assetViewMode === 'grid' ? '' : 'none';
+            if (list) list.style.display = assetViewMode === 'list' ? '' : 'none';
+            document.querySelectorAll('[data-asset-view-mode]').forEach(function (btn) {
+                btn.classList.toggle('active', btn.getAttribute('data-asset-view-mode') === assetViewMode);
+            });
         }
 
         function formatFileSize(bytes) {
@@ -3133,9 +3736,11 @@
 
         function loadAssets() {
             var tbody = document.getElementById('assets-tbody');
-            if (!tbody) return;
+            var grid = document.getElementById('assets-grid');
+            if (!tbody && !grid) return;
 
-            tbody.innerHTML = skeletonRows(7, 5);
+            if (tbody) tbody.innerHTML = skeletonRows(8, 5);
+            if (grid) grid.innerHTML = '<div class="asset-skeleton-card"></div><div class="asset-skeleton-card"></div><div class="asset-skeleton-card"></div>';
             clearErrorBanner('view-assets');
             var pagination = document.getElementById('assets-pagination');
             if (pagination) pagination.style.display = 'none';
@@ -3151,7 +3756,8 @@
                 assetMeta = response && response.meta ? response.meta : { page: assetPage, pageSize: 20, total: rows.length };
                 renderAssetsTable(rows);
             }).catch(function (err) {
-                tbody.innerHTML = emptyRow(7, '加载失败，请刷新重试');
+                if (tbody) tbody.innerHTML = emptyRow(8, '加载失败，请刷新重试');
+                if (grid) grid.innerHTML = '<div class="asset-empty-state">加载失败，请刷新重试</div>';
                 showErrorBanner('view-assets', '资源库数据加载失败，请稍后重试', loadAssets);
                 showToast('加载资源库失败：' + err.message, 'error');
             });
@@ -3159,45 +3765,252 @@
 
         function renderAssetsTable(rows) {
             var tbody = document.getElementById('assets-tbody');
-            if (!tbody) return;
+            var grid = document.getElementById('assets-grid');
+            assetRows = Array.isArray(rows) ? rows : [];
+            selectedAssetIds = {};
+            setAssetViewMode(assetViewMode);
 
-            if (!rows.length) {
-                tbody.innerHTML = emptyRow(7, '暂无资源记录');
+            if (!assetRows.length) {
+                if (tbody) tbody.innerHTML = emptyRow(8, '暂无资源记录');
+                if (grid) grid.innerHTML = '<div class="asset-empty-state">暂无资源记录</div>';
+                activeAssetId = null;
+                renderAssetDetail(null);
+                syncAssetSelection();
                 renderAssetsPagination();
                 return;
             }
 
-            tbody.innerHTML = rows.map(function (asset) {
-                var name = escapeHtml(asset.original_name || asset.filename || '—');
-                var rawPath = asset.path || '';
-                var path = escapeHtml(rawPath || '—');
-                var mime = escapeHtml(asset.mime_type || '—');
-                var size = formatFileSize(asset.file_size);
-                var source = asset.module ? escapeHtml(asset.module + (asset.entity_type ? '/' + asset.entity_type : '')) : '—';
-                var time = formatDate(asset.created_at);
+            if (!activeAssetId || !findAssetById(activeAssetId)) activeAssetId = assetRows[0].id;
+            if (grid) grid.innerHTML = assetRows.map(renderAssetCard).join('');
+            if (tbody) tbody.innerHTML = assetRows.map(renderAssetListRow).join('');
+            bindRenderedAssetEvents();
+            renderAssetDetail(findAssetById(activeAssetId));
+            syncAssetSelection();
+            renderAssetsPagination();
+        }
 
-                return '<tr>' +
-                    '<td class="product-name-text">' + name + '</td>' +
-                    '<td class="cell-muted" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + path + '">' + path + '</td>' +
-                    '<td class="cell-muted">' + mime + '</td>' +
-                    '<td class="cell-muted">' + escapeHtml(size) + '</td>' +
-                    '<td class="cell-muted">' + source + '</td>' +
-                    '<td class="cell-muted">' + escapeHtml(time) + '</td>' +
-                    '<td><div class="asset-actions"><button class="btn btn-secondary btn-sm" data-copy-asset="' + escapeHtml(rawPath) + '">复制路径</button><button class="btn btn-icon btn-icon-delete" aria-label="删除资源" data-delete-asset="' + escapeHtml(asset.id) + '">' + ICON_DELETE + '</button></div></td>' +
-                    '</tr>';
-            }).join('');
+        function renderAssetCard(asset) {
+            var id = asset.id == null ? '' : String(asset.id);
+            var selected = !!selectedAssetIds[id];
+            var active = String(activeAssetId) === id;
+            var path = asset.path || '';
+            var name = asset.original_name || asset.filename || '未命名资源';
+            var size = formatFileSize(asset.file_size);
+            var preview = assetIsImage(asset) && path
+                ? '<img src="../' + escapeHtml(path) + '" alt="">'
+                : '<div class="asset-file-icon">' + assetFileIcon(asset) + '</div>';
+            return '<article class="asset-card ' + (active ? 'is-active ' : '') + (selected ? 'is-selected' : '') + '" data-asset-card="' + escapeHtml(id) + '">' +
+                '<label class="asset-card-check"><input type="checkbox" class="asset-row-check" data-asset-check="' + escapeHtml(id) + '"' + (selected ? ' checked' : '') + '><span></span></label>' +
+                '<div class="asset-card-preview">' + preview + '</div>' +
+                '<div class="asset-card-body"><strong title="' + escapeHtml(name) + '">' + escapeHtml(name) + '</strong><span>' + escapeHtml(size) + ' · ' + escapeHtml(assetTypeLabel(asset)) + '</span></div>' +
+                '</article>';
+        }
 
-            tbody.querySelectorAll('[data-copy-asset]').forEach(function (btn) {
+        function renderAssetListRow(asset) {
+            var id = asset.id == null ? '' : String(asset.id);
+            var selected = !!selectedAssetIds[id];
+            var name = asset.original_name || asset.filename || '未命名资源';
+            var rawPath = asset.path || '';
+            var source = asset.module ? asset.module + (asset.entity_type ? '/' + asset.entity_type : '') : '—';
+            return '<tr class="' + (String(activeAssetId) === id ? 'row-active' : '') + '" data-asset-row="' + escapeHtml(id) + '">' +
+                '<td><input type="checkbox" class="asset-row-check" data-asset-check="' + escapeHtml(id) + '"' + (selected ? ' checked' : '') + '></td>' +
+                '<td class="product-name-text">' + escapeHtml(name) + '</td>' +
+                '<td class="cell-muted asset-path-cell" title="' + escapeHtml(rawPath || '—') + '">' + escapeHtml(rawPath || '—') + '</td>' +
+                '<td class="cell-muted">' + escapeHtml(asset.mime_type || '—') + '</td>' +
+                '<td class="cell-muted">' + escapeHtml(formatFileSize(asset.file_size)) + '</td>' +
+                '<td class="cell-muted">' + escapeHtml(source) + '</td>' +
+                '<td class="cell-muted">' + escapeHtml(formatDate(asset.created_at)) + '</td>' +
+                '<td><div class="asset-actions"><button class="btn btn-secondary btn-sm" data-copy-asset="' + escapeHtml(rawPath) + '">复制路径</button><button class="btn btn-icon btn-icon-delete" aria-label="删除资源" data-delete-asset="' + escapeHtml(id) + '">' + ICON_DELETE + '</button></div></td>' +
+                '</tr>';
+        }
+
+        function bindRenderedAssetEvents() {
+            document.querySelectorAll('[data-asset-card], [data-asset-row]').forEach(function (el) {
+                el.addEventListener('click', function (event) {
+                    if (event.target && event.target.closest && event.target.closest('button, input, label')) return;
+                    setActiveAsset(el.getAttribute('data-asset-card') || el.getAttribute('data-asset-row'));
+                });
+            });
+            document.querySelectorAll('[data-asset-check]').forEach(function (checkbox) {
+                checkbox.addEventListener('change', function () {
+                    selectedAssetIds[String(checkbox.getAttribute('data-asset-check'))] = checkbox.checked;
+                    syncAssetSelection();
+                });
+            });
+            document.querySelectorAll('[data-copy-asset]').forEach(function (btn) {
                 btn.addEventListener('click', function () {
                     copyAssetPath(btn.getAttribute('data-copy-asset') || '');
                 });
             });
-            tbody.querySelectorAll('[data-delete-asset]').forEach(function (btn) {
+            document.querySelectorAll('[data-delete-asset]').forEach(function (btn) {
                 btn.addEventListener('click', function () {
                     deleteAsset(btn.getAttribute('data-delete-asset'));
                 });
             });
-            renderAssetsPagination();
+        }
+
+        function setActiveAsset(id) {
+            activeAssetId = id;
+            document.querySelectorAll('[data-asset-card], [data-asset-row]').forEach(function (el) {
+                var itemId = el.getAttribute('data-asset-card') || el.getAttribute('data-asset-row');
+                el.classList.toggle('is-active', String(itemId) === String(activeAssetId));
+                el.classList.toggle('row-active', String(itemId) === String(activeAssetId));
+            });
+            renderAssetDetail(findAssetById(activeAssetId));
+        }
+
+        function renderAssetDetail(asset) {
+            var container = document.getElementById('asset-detail');
+            if (!container) return;
+            if (!asset) {
+                container.className = 'asset-detail-empty';
+                container.innerHTML = '选择一个资源查看详情';
+                return;
+            }
+            container.className = 'asset-detail-content';
+            var path = asset.path || '';
+            var name = asset.original_name || asset.filename || '未命名资源';
+            var preview = assetIsImage(asset) && path
+                ? '<img src="../' + escapeHtml(path) + '" alt="">'
+                : '<div class="asset-file-icon asset-file-icon-large">' + assetFileIcon(asset) + '</div>';
+            var source = asset.module ? asset.module + (asset.entity_type ? '/' + asset.entity_type : '') : '未绑定模块';
+            container.innerHTML = '<div class="asset-detail-preview">' + preview + '</div>' +
+                '<h4>' + escapeHtml(name) + '</h4>' +
+                '<dl>' +
+                    '<div><dt>路径</dt><dd title="' + escapeHtml(path) + '">' + escapeHtml(path || '—') + '</dd></div>' +
+                    '<div><dt>类型</dt><dd>' + escapeHtml(asset.mime_type || '—') + '</dd></div>' +
+                    '<div><dt>大小</dt><dd>' + escapeHtml(formatFileSize(asset.file_size)) + '</dd></div>' +
+                    '<div><dt>来源</dt><dd>' + escapeHtml(source) + '</dd></div>' +
+                    '<div><dt>上传时间</dt><dd>' + escapeHtml(formatDate(asset.created_at)) + '</dd></div>' +
+                '</dl>' +
+                '<div class="asset-detail-actions"><button class="btn btn-secondary btn-sm" type="button" data-copy-asset="' + escapeHtml(path) + '">复制路径</button><button class="btn btn-icon btn-icon-delete" type="button" aria-label="删除资源" data-delete-asset="' + escapeHtml(asset.id) + '">' + ICON_DELETE + '</button></div>';
+            container.querySelectorAll('[data-copy-asset]').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    copyAssetPath(btn.getAttribute('data-copy-asset') || '');
+                });
+            });
+            container.querySelectorAll('[data-delete-asset]').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    deleteAsset(btn.getAttribute('data-delete-asset'));
+                });
+            });
+        }
+
+        function assetIsImage(asset) {
+            var mime = String((asset && asset.mime_type) || '').toLowerCase();
+            var path = String((asset && asset.path) || '').toLowerCase();
+            return mime.indexOf('image/') === 0 || /\.(jpe?g|png|webp|gif|svg)$/.test(path);
+        }
+
+        function assetTypeLabel(asset) {
+            return assetIsImage(asset) ? '图片' : '文档';
+        }
+
+        function assetFileIcon() {
+            return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h5"/></svg>';
+        }
+
+        function findAssetById(id) {
+            for (var i = 0; i < assetRows.length; i++) {
+                if (String(assetRows[i].id) === String(id)) return assetRows[i];
+            }
+            return null;
+        }
+
+        function selectedAssets() {
+            return assetRows.filter(function (asset) {
+                return asset && asset.id != null && selectedAssetIds[String(asset.id)];
+            });
+        }
+
+        function syncAssetSelection() {
+            document.querySelectorAll('[data-asset-check]').forEach(function (checkbox) {
+                var id = String(checkbox.getAttribute('data-asset-check'));
+                checkbox.checked = !!selectedAssetIds[id];
+            });
+            document.querySelectorAll('[data-asset-card], [data-asset-row]').forEach(function (el) {
+                var id = String(el.getAttribute('data-asset-card') || el.getAttribute('data-asset-row'));
+                el.classList.toggle('is-selected', !!selectedAssetIds[id]);
+            });
+            var selected = selectedAssets();
+            var bar = document.getElementById('asset-batch-bar');
+            var count = document.getElementById('asset-batch-count');
+            var selectAll = document.getElementById('asset-select-all');
+            if (bar) bar.style.display = selected.length ? '' : 'none';
+            if (count) count.textContent = '已选 ' + selected.length + ' 个文件';
+            if (selectAll) {
+                selectAll.checked = assetRows.length > 0 && selected.length === assetRows.length;
+                selectAll.indeterminate = selected.length > 0 && selected.length < assetRows.length;
+            }
+        }
+
+        function clearAssetSelection() {
+            selectedAssetIds = {};
+            syncAssetSelection();
+        }
+
+        function copyFirstSelectedAssetPath() {
+            var selected = selectedAssets();
+            if (!selected.length) return;
+            copyAssetPath(selected[0].path || '');
+        }
+
+        function deleteSelectedAssets() {
+            var selected = selectedAssets();
+            if (!selected.length) return;
+            showConfirm('移出资源库', '确定移出已选的 ' + selected.length + ' 个资源吗？文件本身不会从服务器删除。').then(function (ok) {
+                if (!ok) return;
+                Promise.all(selected.map(function (asset) {
+                    return apiRequest('/admin/assets/' + encodeURIComponent(asset.id), { method: 'DELETE' });
+                })).then(function () {
+                    showToast('已移出 ' + selected.length + ' 个资源');
+                    clearAssetSelection();
+                    loadAssets();
+                }).catch(function (err) {
+                    showToast('批量操作失败：' + err.message, 'error');
+                });
+            });
+        }
+
+        function uploadAssetFiles(files) {
+            if (assetUploading || !files || !files.length) return;
+            var images = files.filter(function (file) { return /^image\/(jpeg|png|webp|gif)$/.test(file.type || ''); });
+            if (!images.length) {
+                showToast('请选择 JPG、PNG、WebP 或 GIF 图片。', 'error');
+                return;
+            }
+            if (images.length !== files.length) showToast('已跳过不支持的文件类型', 'error');
+            assetUploading = true;
+            var dropzone = document.getElementById('asset-dropzone');
+            if (dropzone) dropzone.classList.add('is-uploading');
+            Promise.all(images.map(uploadSingleAssetFile)).then(function () {
+                showToast('图片已上传到资源库');
+                assetPage = 1;
+                loadAssets();
+            }).catch(function (err) {
+                showToast('上传失败：' + err.message, 'error');
+            }).finally(function () {
+                assetUploading = false;
+                if (dropzone) dropzone.classList.remove('is-uploading');
+            });
+        }
+
+        function uploadSingleAssetFile(file) {
+            var formData = new FormData();
+            formData.append('image', file);
+            return fetch(API_BASE + '/admin/products/upload', {
+                method: 'POST',
+                headers: { Authorization: 'Bearer ' + getToken() },
+                body: formData
+            }).then(function (res) {
+                return res.json().then(function (data) {
+                    if (!res.ok) {
+                        var message = data.message || (data.error && data.error.message) || data.error || 'Upload failed';
+                        throw new Error(message);
+                    }
+                    return data;
+                });
+            });
         }
 
         function copyAssetPath(assetUrl) {
@@ -3457,7 +4270,13 @@
                 'system-count-content-blocks',
                 'system-count-assets',
                 'system-env-node',
-                'system-env-port'
+                'system-env-port',
+                'system-api-state',
+                'system-db-state',
+                'system-source-state',
+                'system-runtime-state',
+                'system-last-check',
+                'system-status-summary'
             ];
             ids.forEach(function (id) { setText(id, '—'); });
             apiRequest('/admin/system/status').then(function (response) {
@@ -3465,10 +4284,12 @@
                 var sqlite = data.sqlite || {};
                 var counts = data.counts || {};
                 var env = data.env || {};
+                var dbOk = !!sqlite.enabled && !!sqlite.available;
+                var source = data.publicApiSource || '—';
                 setText('system-sqlite-enabled', yesNo(sqlite.enabled));
                 setText('system-sqlite-available', yesNo(sqlite.available));
                 setText('system-schema-version', sqlite.schemaVersion == null ? '—' : sqlite.schemaVersion);
-                setText('system-public-source', data.publicApiSource || '—');
+                setText('system-public-source', source);
                 setText('system-count-products', counts.products == null ? 0 : counts.products);
                 setText('system-count-certifications', counts.certifications == null ? 0 : counts.certifications);
                 setText('system-count-inquiries', counts.inquiries == null ? 0 : counts.inquiries);
@@ -3476,11 +4297,21 @@
                 setText('system-count-assets', counts.assets == null ? 0 : counts.assets);
                 setText('system-env-node', env.nodeEnv || '—');
                 setText('system-env-port', env.port || '—');
+                setText('system-api-state', source === 'sqlite' ? '已连接主数据源' : '使用备用内容源');
+                setText('system-db-state', dbOk ? '正常' : '异常');
+                setText('system-source-state', source === 'sqlite' ? '数据库' : source);
+                setText('system-runtime-state', env.nodeEnv || 'development');
+                setText('system-last-check', '最后检查：' + formatDate(Date.now()));
+                setText('system-status-summary', dbOk ? '系统核心数据源可用，后台内容会从当前数据库读取。' : '数据库状态异常，请检查服务连接和迁移状态。');
 
                 var sourceEl = document.getElementById('system-public-source');
                 if (sourceEl) {
                     sourceEl.style.color = data.publicApiSource === 'json' ? '#b42318' : '';
                 }
+                var dbState = document.getElementById('system-db-state');
+                if (dbState) dbState.className = dbOk ? 'text-ok' : 'text-danger';
+                var summary = document.getElementById('system-status-summary');
+                if (summary) summary.classList.toggle('is-warning', !dbOk || source === 'json');
             }).catch(function (err) {
                 showToast('加载系统状态失败：' + err.message, 'error');
             });
