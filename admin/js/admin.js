@@ -1397,25 +1397,21 @@
             var nameEn = document.getElementById('cat-name-en').value.trim();
             var nameAr = document.getElementById('cat-name-ar').value.trim();
             var sortOrder = parseInt(document.getElementById('cat-sort-order').value, 10);
-            if (!nameEn) {
-                showToast('请填写英文名称', 'error');
-                return;
-            }
-            if (!id && !slug) {
-                showToast('请填写 Slug', 'error');
+            if (!nameEn && !nameAr) {
+                showToast('请填写分类名称', 'error');
                 return;
             }
             if (isNaN(sortOrder)) sortOrder = 0;
 
             var payload = id ? {
-                name_en: nameEn,
+                name_en: nameEn || nameAr,
                 name_ar: nameAr,
                 sort_order: sortOrder,
                 is_active: document.getElementById('cat-is-active').checked
             } : {
                 type: 'product',
                 slug: slug,
-                name_en: nameEn,
+                name_en: nameEn || nameAr,
                 name_ar: nameAr,
                 sort_order: sortOrder
             };
@@ -1431,10 +1427,6 @@
                 loadProductCategoriesView();
                 loadProductCategories();
             }).catch(function (err) {
-                if (err.status === 422) {
-                    showToast('Slug 已存在，请换一个', 'error');
-                    return;
-                }
                 showToast('保存分类失败：' + err.message, 'error');
             });
         }
@@ -1684,19 +1676,19 @@
             }
             var id = document.getElementById('field-id').value.trim();
             var name = document.getElementById('field-name').value.trim();
+            var nameAr = document.getElementById('field-nameAr').value.trim();
             var category = document.getElementById('field-category').value;
 
             ['field-id', 'field-name', 'field-category'].forEach(clearFieldError);
             var valid = true;
-            if (!id) { showFieldError('field-id', '请填写产品 ID'); valid = false; }
-            if (!name) { showFieldError('field-name', '请填写英文名称'); valid = false; }
+            if (!name && !nameAr) { showFieldError('field-name', '请填写产品名称'); valid = false; }
             if (!category) { showFieldError('field-category', '请选择分类'); valid = false; }
             if (!valid) return;
 
             var payload = {
                 legacy_id: id,
-                name_en: name,
-                name_ar: document.getElementById('field-nameAr').value.trim(),
+                name_en: name || nameAr,
+                name_ar: nameAr,
                 category_id: parseInt(category, 10),
                 short_desc_en: document.getElementById('field-shortDesc').value.trim(),
                 short_desc_ar: document.getElementById('field-shortDescAr').value.trim(),
@@ -2381,17 +2373,18 @@
 
         function saveCertification(e) {
             e.preventDefault();
+            var imagePath = document.getElementById('cert-image').value.trim() || uploadedCertificationPath;
             var payload = {
                 name_en: document.getElementById('cert-name').value.trim(),
                 issuer_en: document.getElementById('cert-issuer').value.trim(),
                 expiry_date: document.getElementById('cert-expiryDate').value.trim(),
-                image_path: document.getElementById('cert-image').value.trim() || uploadedCertificationPath,
+                image_path: imagePath,
                 description_en: document.getElementById('cert-description').value.trim(),
                 category_id: parseInt(document.getElementById('cert-category-id').value, 10),
                 status: 'published'
             };
-            if (!payload.name_en) {
-                showToast('请填写证书名称', 'error');
+            if (!payload.name_en && !imagePath) {
+                showToast('请填写证书名称或先上传证书文件', 'error');
                 return;
             }
             if (editingCertificationId) payload.version = document.getElementById('cert-editing-version').value;

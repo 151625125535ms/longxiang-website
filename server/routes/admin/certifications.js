@@ -17,6 +17,23 @@ function parseInteger(value, defaultValue) {
     return Number.isFinite(parsed) ? parsed : defaultValue;
 }
 
+function firstText() {
+    for (let i = 0; i < arguments.length; i += 1) {
+        const value = arguments[i];
+        if (value == null) continue;
+        const text = String(value).trim();
+        if (text) return text;
+    }
+    return '';
+}
+
+function titleFromPath(value) {
+    const text = String(value || '').trim().replace(/\\/g, '/');
+    if (!text) return '';
+    const filename = text.split('/').pop() || '';
+    return filename.replace(/\.[a-z0-9]+$/i, '').replace(/[-_]+/g, ' ').trim();
+}
+
 function normalizeStatus(value, defaultValue) {
     const status = String(value || '').trim();
     if (!status) return defaultValue;
@@ -123,8 +140,8 @@ router.get('/:id', function (req, res, next) {
 router.post('/', function (req, res, next) {
     try {
         const body = req.body || {};
-        const nameEn = String(body.name_en || '').trim();
-        if (!nameEn) return sendError(res, 422, 'VALIDATION_ERROR', 'name_en is required.');
+        const nameEn = firstText(body.name_en, body.name_ar, body.legacy_id, titleFromPath(body.image_path));
+        if (!nameEn) return sendError(res, 422, 'VALIDATION_ERROR', '请填写证书名称，或先上传证书文件。');
 
         const status = normalizeStatus(body.status, 'published');
         if (!status) return sendError(res, 422, 'VALIDATION_ERROR', 'Invalid status.');
@@ -229,7 +246,7 @@ router.put('/:id', function (req, res, next) {
                 legacy_category: body.legacy_category == null ? before.legacy_category : String(body.legacy_category).trim(),
                 status,
                 sort_order: body.sort_order == null ? before.sort_order : parseInteger(body.sort_order, before.sort_order),
-                name_en: body.name_en == null ? before.name_en : String(body.name_en).trim(),
+                name_en: body.name_en == null ? before.name_en : firstText(body.name_en, body.name_ar, before.name_en, titleFromPath(body.image_path)),
                 name_ar: body.name_ar == null ? before.name_ar : String(body.name_ar).trim(),
                 image_path: body.image_path == null ? before.image_path : String(body.image_path).trim(),
                 source_type: body.source_type == null ? before.source_type : String(body.source_type).trim(),

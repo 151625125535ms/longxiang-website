@@ -5,6 +5,28 @@ const { sendError, insertAuditLog } = require('./helpers');
 const router = express.Router();
 const CATEGORY_TYPES = ['product', 'certification', 'content'];
 
+function makeSlug(name) {
+    const slug = String(name || '')
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^a-z0-9-]/g, '')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '');
+    return slug || 'category-' + Date.now();
+}
+
+function makeUniqueCategorySlug(db, type, preferred) {
+    const base = makeSlug(preferred || type || 'category');
+    let candidate = base;
+    let suffix = 2;
+    while (db.prepare('SELECT 1 FROM categories WHERE type = ? AND slug = ? LIMIT 1').get(type, candidate)) {
+        candidate = base + '-' + suffix;
+        suffix += 1;
+    }
+    return candidate;
+}
+
 function findCategory(db, id) {
     return db.prepare(`
         SELECT id, type, slug, name_en, name_ar, sort_order, is_active, created_at, updated_at
@@ -14,15 +36,13 @@ function findCategory(db, id) {
 }
 
 function validateCreate(body) {
-    const type = String(body.type || '').trim();
-    const slug = String(body.slug || '').trim();
-    const nameEn = String(body.name_en || '').trim();
+    const type = String(body.type || 'product').trim();
+    const nameEn = String(body.name_en || body.name_ar || '').trim();
 
     if (!type || CATEGORY_TYPES.indexOf(type) === -1) {
         return 'type must be one of product, certification, content.';
     }
-    if (!slug) return 'slug is required.';
-    if (!nameEn) return 'name_en is required.';
+    if (!nameEn) return '请填写分类名称。';
     return null;
 }
 
@@ -92,9 +112,9 @@ router.post('/', function (req, res, next) {
                 VALUES
                     (@type, NULL, @slug, @name_en, @name_ar, @sort_order, 1, @created_at, @updated_at)
             `).run({
-                type: String(body.type).trim(),
-                slug: String(body.slug).trim(),
-                name_en: String(body.name_en).trim(),
+                type: String(body.type || 'product').trim(),
+                slug: makeUniqueCategorySlug(db, String(body.type || 'product').trim(), body.slug || body.name_en || body.name_ar),
+                name_en: String(body.name_en || body.name_ar).trim(),
                 name_ar: body.name_ar == null ? '' : String(body.name_ar).trim(),
                 sort_order: normalizeSortOrder(body.sort_order),
                 created_at: now,

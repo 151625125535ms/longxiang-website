@@ -68,6 +68,30 @@ function makeSlug(name) {
     return slug || 'product-' + Date.now();
 }
 
+function firstText() {
+    for (let i = 0; i < arguments.length; i += 1) {
+        const value = arguments[i];
+        if (value == null) continue;
+        const text = String(value).trim();
+        if (text) return text;
+    }
+    return '';
+}
+
+function makeUniqueProductIdentifier(db, column, preferred, fallbackPrefix) {
+    const safeColumns = { legacy_id: true, slug: true };
+    if (!safeColumns[column]) throw new Error('Invalid product identifier column.');
+
+    const base = makeSlug(preferred || fallbackPrefix || 'product');
+    let candidate = base;
+    let suffix = 2;
+    while (db.prepare(`SELECT 1 FROM products WHERE ${column} = ? LIMIT 1`).get(candidate)) {
+        candidate = base + '-' + suffix;
+        suffix += 1;
+    }
+    return candidate;
+}
+
 function normalizeStatus(value, defaultValue) {
     const status = String(value || '').trim();
     if (!status) return defaultValue;
@@ -77,7 +101,7 @@ function normalizeStatus(value, defaultValue) {
 function resolveProductCategoryMapping(db, categoryIdValue) {
     const categoryId = parseInteger(categoryIdValue, null);
     if (!categoryId) {
-        return { error: '所选分类不存在或已停用' };
+        return { error: '请选择一个有效的产品分类。' };
     }
 
     const category = db.prepare(`
@@ -87,12 +111,12 @@ function resolveProductCategoryMapping(db, categoryIdValue) {
     `).get(categoryId);
 
     if (!category) {
-        return { error: '所选分类不存在或已停用' };
+        return { error: '所选分类不存在或已停用，请重新选择。' };
     }
 
     const mapping = getCategoryMapping(category.slug);
     if (!mapping) {
-        return { error: '分类映射未定义，请联系管理员' };
+        return { error: '这个分类暂时不能用于产品，请先使用已有产品分类。' };
     }
 
     return {
@@ -102,14 +126,18 @@ function resolveProductCategoryMapping(db, categoryIdValue) {
     };
 }
 
-function validateJsonString(value) {
-    if (value == null || value === '') return '[]';
-    if (typeof value !== 'string') return null;
+function normalizeJsonString(value, defaultValue) {
+    const fallback = defaultValue == null ? '[]' : defaultValue;
+    if (value == null || value === '') return fallback;
+    if (Array.isArray(value) || (typeof value === 'object' && value !== null)) {
+        return JSON.stringify(value);
+    }
+    if (typeof value !== 'string') return fallback;
     try {
         JSON.parse(value);
         return value;
     } catch (err) {
-        return null;
+        return fallback;
     }
 }
 
@@ -326,14 +354,13 @@ router.post('/upload', function (req, res, next) {
 router.post('/', function (req, res, next) {
     try {
         const body = req.body || {};
-        const nameEn = String(body.name_en || '').trim();
-        if (!nameEn) return sendError(res, 422, 'VALIDATION_ERROR', 'name_en is required.');
+        const nameEn = firstText(body.name_en, body.name_ar, body.legacy_id, body.slug);
+        if (!nameEn) return sendError(res, 422, 'VALIDATION_ERROR', '请至少填写产品名称。');
 
         const status = normalizeStatus(body.status, 'published');
         if (!status) return sendError(res, 422, 'VALIDATION_ERROR', 'Invalid status.');
 
-        const aliasesJson = validateJsonString(body.aliases_json);
-        if (aliasesJson == null) return sendError(res, 422, 'VALIDATION_ERROR', 'aliases_json must be a JSON string.');
+        const aliasesJson = normalizeJsonString(body.aliases_json, '[]');
         const coverPath = normalizeCoverPath(body.cover_image);
         if (coverPath == null && body.cover_image != null) {
             return sendError(res, 422, 'VALIDATION_ERROR', 'Invalid cover_image path.');
@@ -347,6 +374,8 @@ router.post('/', function (req, res, next) {
 
         const now = Date.now();
         const createProduct = db.transaction(function () {
+            const legacyId = makeUniqueProductIdentifier(db, 'legacy_id', firstText(body.legacy_id, body.slug, nameEn), 'product');
+            const slug = makeUniqueProductIdentifier(db, 'slug', firstText(body.slug, legacyId, nameEn), 'product');
             const result = db.prepare(`
                 INSERT INTO products
                     (
@@ -365,8 +394,8 @@ router.post('/', function (req, res, next) {
                         1, @created_at, @updated_at
                     )
             `).run({
-                legacy_id: body.legacy_id ? String(body.legacy_id).trim() : null,
-                slug: body.slug ? String(body.slug).trim() : makeSlug(nameEn),
+                legacy_id: legacyId,
+                slug,
                 category_id: categoryMapping.categoryId,
                 product_group: categoryMapping.productGroup,
                 sub_category: categoryMapping.subCategory,
@@ -420,8 +449,7 @@ router.put('/:id', function (req, res, next) {
         const status = body.status == null ? before.status : normalizeStatus(body.status, before.status);
         if (!status) return sendError(res, 422, 'VALIDATION_ERROR', 'Invalid status.');
 
-        const aliasesJson = body.aliases_json == null ? before.aliases_json : validateJsonString(body.aliases_json);
-        if (aliasesJson == null) return sendError(res, 422, 'VALIDATION_ERROR', 'aliases_json must be a JSON string.');
+        const aliasesJson = body.aliases_json == null ? before.aliases_json : normalizeJsonString(body.aliases_json, before.aliases_json || '[]');
         const coverPath = body.cover_image === undefined ? undefined : normalizeCoverPath(body.cover_image);
         if (coverPath == null && body.cover_image !== undefined) {
             return sendError(res, 422, 'VALIDATION_ERROR', 'Invalid cover_image path.');
@@ -468,7 +496,7 @@ router.put('/:id', function (req, res, next) {
                 status,
                 sort_order: body.sort_order == null ? before.sort_order : parseInteger(body.sort_order, before.sort_order),
                 featured: body.featured == null ? before.featured : normalizeBool(body.featured, before.featured),
-                name_en: body.name_en == null ? before.name_en : String(body.name_en).trim(),
+                name_en: body.name_en == null ? before.name_en : firstText(body.name_en, body.name_ar, before.name_en, before.legacy_id),
                 name_ar: body.name_ar == null ? before.name_ar : String(body.name_ar).trim(),
                 short_desc_en: body.short_desc_en == null ? before.short_desc_en : String(body.short_desc_en).trim(),
                 short_desc_ar: body.short_desc_ar == null ? before.short_desc_ar : String(body.short_desc_ar).trim(),
