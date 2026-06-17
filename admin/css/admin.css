@@ -3219,6 +3219,54 @@ h1, h2, h3, h4, h5, h6 {
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
+    align-items: center;
+}
+
+.visual-language-switcher {
+    display: inline-flex;
+    gap: 4px;
+    padding: 3px;
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--radius-md);
+    background: var(--color-gray-100);
+}
+
+.visual-language-btn {
+    min-height: 32px;
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-gray-700);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 10px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    transition: background var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.visual-language-btn span {
+    width: 20px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--color-white-pure);
+    color: var(--color-blue-dark);
+    font-size: 0.72rem;
+}
+
+.visual-language-btn.active {
+    background: var(--color-blue);
+    color: var(--color-white-pure);
+    box-shadow: var(--shadow-sm);
+}
+
+.visual-language-btn.active span {
+    color: var(--color-blue);
 }
 
 .visual-preview-frame-wrap {
@@ -3583,6 +3631,15 @@ h1, h2, h3, h4, h5, h6 {
     .visual-editor-header .btn,
     .visual-asset-actions .btn {
         flex: 1;
+    }
+
+    .visual-language-switcher {
+        width: 100%;
+    }
+
+    .visual-language-btn {
+        flex: 1;
+        justify-content: center;
     }
 
     .visual-asset-picker {

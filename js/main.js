@@ -11,6 +11,18 @@
     var globalShellCache = null;
     var consentDocumentClickBound = false;
 
+    function camelToSnake(value) {
+        return String(value || '').replace(/([a-z0-9])([A-Z])/g, '$1_$2').toLowerCase();
+    }
+
+    function localizedArabicValue(item, key) {
+        if (!item || !isArabic) return '';
+        if (item[key + 'Ar']) return item[key + 'Ar'];
+        if (item[camelToSnake(key) + '_ar']) return item[camelToSnake(key) + '_ar'];
+        if (item[key + '_ar']) return item[key + '_ar'];
+        return '';
+    }
+
     function escapeHtml(value) {
         return String(value == null ? '' : value)
             .replace(/&/g, '&amp;')
@@ -156,7 +168,8 @@
 
     function localizedSectionValue(sectionName, key, fallback) {
         var section = shellSection(sectionName);
-        if (isArabic && section[key + 'Ar']) return section[key + 'Ar'];
+        var arabicValue = localizedArabicValue(section, key);
+        if (arabicValue) return arabicValue;
         if (section[key]) return section[key];
         return fallback || '';
     }
@@ -414,6 +427,7 @@
     }
 
     function applyLanguagePreference() {
+        if (new URLSearchParams(window.location.search).has('visualPreview')) return false;
         var pageName = currentPageName();
         if (!supportsArabicPage(pageName)) return false;
 
@@ -852,7 +866,8 @@
 
     function companyValue(company, key) {
         if (!company) return '';
-        if (isArabic && company[key + 'Ar']) return company[key + 'Ar'];
+        var arabicValue = localizedArabicValue(company, key);
+        if (arabicValue) return arabicValue;
         return company[key] || '';
     }
 
@@ -960,14 +975,15 @@
 
     function shellValue(sectionName, key, fallback) {
         var section = shellSection(sectionName);
-        var arKey = key + 'Ar';
-        if (isArabic && section[arKey]) return section[arKey];
+        var arabicValue = localizedArabicValue(section, key);
+        if (arabicValue) return arabicValue;
         return section[key] || fallback || '';
     }
 
     function shellLabel(item, fallback) {
         if (!item) return fallback || '';
-        if (isArabic && item.labelAr) return item.labelAr;
+        var arabicValue = localizedArabicValue(item, 'label');
+        if (arabicValue) return arabicValue;
         return item.label || fallback || '';
     }
 
@@ -1213,7 +1229,7 @@
         var required = field.required ? ' required' : '';
         var readonly = field.readonly ? ' readonly' : '';
         var attrs = ' id="' + escapeHtml(id) + '" name="' + escapeHtml(field.name || '') + '"' + required + readonly;
-        var placeholder = isArabic && field.placeholderAr ? field.placeholderAr : (field.placeholder || '');
+        var placeholder = localizedArabicValue(field, 'placeholder') || field.placeholder || '';
         if (field.type === 'textarea') {
             return '<div class="form-group"><label for="' + escapeHtml(id) + '">' + escapeHtml(label) + '</label><textarea' + attrs + ' rows="' + escapeHtml(field.rows || 5) + '"></textarea></div>';
         }

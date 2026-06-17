@@ -8,6 +8,10 @@
     var isArabic = /\/ar\//.test(window.location.pathname.replace(/\\/g, '/'));
     var assetPrefix = isArabic ? '../' : '';
 
+    function camelToSnake(value) {
+        return String(value || '').replace(/([a-z0-9])([A-Z])/g, '$1_$2').toLowerCase();
+    }
+
     function escapeHtml(value) {
         return String(value == null ? '' : value)
             .replace(/&/g, '&amp;')
@@ -26,13 +30,21 @@
 
     function localized(item, key) {
         if (!item) return '';
-        if (isArabic && item[key + 'Ar']) return item[key + 'Ar'];
+        if (isArabic) {
+            if (item[key + 'Ar']) return item[key + 'Ar'];
+            if (item[camelToSnake(key) + '_ar']) return item[camelToSnake(key) + '_ar'];
+            if (item[key + '_ar']) return item[key + '_ar'];
+        }
         return item[key] || '';
     }
 
     function localizedList(item, key) {
         if (!item) return [];
-        if (isArabic && Array.isArray(item[key + 'Ar']) && item[key + 'Ar'].length) return item[key + 'Ar'];
+        if (isArabic) {
+            if (Array.isArray(item[key + 'Ar']) && item[key + 'Ar'].length) return item[key + 'Ar'];
+            if (Array.isArray(item[camelToSnake(key) + '_ar']) && item[camelToSnake(key) + '_ar'].length) return item[camelToSnake(key) + '_ar'];
+            if (Array.isArray(item[key + '_ar']) && item[key + '_ar'].length) return item[key + '_ar'];
+        }
         return Array.isArray(item[key]) ? item[key] : [];
     }
 

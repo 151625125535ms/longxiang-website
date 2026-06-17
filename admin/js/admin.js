@@ -412,10 +412,16 @@
             initialized: false,
             activePage: 'home',
             activeModule: 'hero',
+            activeLanguage: 'default',
             blocks: {},
             activeAssetField: null,
             assetsLoaded: false
         };
+
+        var VISUAL_BUILDER_LANGUAGES = [
+            { key: 'default', label: '英文/默认', shortLabel: '英', previewLabel: '英文页面' },
+            { key: 'ar', label: '阿拉伯语', shortLabel: '阿', previewLabel: '阿语页面' }
+        ];
 
         var VISUAL_BUILDER_PAGES = [
             {
@@ -4007,6 +4013,78 @@
             return (page.modules || []).filter(function (module) { return module.key === moduleKey; })[0] || (page.modules || [])[0];
         }
 
+        function visualLanguageByKey(languageKey) {
+            return VISUAL_BUILDER_LANGUAGES.filter(function (language) { return language.key === languageKey; })[0] || VISUAL_BUILDER_LANGUAGES[0];
+        }
+
+        function visualActiveLanguage() {
+            return visualLanguageByKey(visualBuilderState.activeLanguage);
+        }
+
+        function visualIsArabicLanguage() {
+            return visualBuilderState.activeLanguage === 'ar';
+        }
+
+        function visualFieldSupportsLanguage(field) {
+            if (!field) return false;
+            if (field.localized === true) return true;
+            if (field.localized === false) return false;
+            if (field.type === 'textarea') return true;
+            if (field.type !== 'text') return false;
+            var key = fieldLastKey(field.key).toLowerCase();
+            if (/^(href|url|email|phone|tel|class|classname|icon|image|logo|backgroundimage|mapqr|icp|date|year)$/.test(key)) return false;
+            if (/url|href|email|phone|tel|class|image|logo|background|icon|qr|map|icp|date|year|sort|order|count|number|value|zoom|lat|lng|longitude|latitude/i.test(key)) return false;
+            return true;
+        }
+
+        function visualLanguageFieldKey(field) {
+            var key = field && field.key ? field.key : '';
+            if (!visualIsArabicLanguage() || !visualFieldSupportsLanguage(field)) return key;
+            if (field.arKey) return field.arKey;
+            var parts = key.split('.');
+            var last = parts.pop();
+            parts.push(last + 'Ar');
+            return parts.join('.');
+        }
+
+        function visualLanguageFieldLabel(field, path) {
+            var label = (field && field.label) || path;
+            if (visualIsArabicLanguage() && visualFieldSupportsLanguage(field)) return label + '（阿语）';
+            return label;
+        }
+
+        function visualArrayItemTitle(item, module, index) {
+            if (!item) return (module.itemLabel || '项目') + ' ' + (index + 1);
+            var keys = visualIsArabicLanguage() ? ['titleAr', 'labelAr', 'title', 'label', 'year', 'date', 'value', 'href'] : ['title', 'label', 'year', 'date', 'value', 'href'];
+            for (var i = 0; i < keys.length; i += 1) {
+                if (item[keys[i]]) return item[keys[i]];
+            }
+            return (module.itemLabel || '项目') + ' ' + (index + 1);
+        }
+
+        function cacheCurrentVisualDraft() {
+            var page = visualPageByKey(visualBuilderState.activePage);
+            var module = visualModuleByKey(page, visualBuilderState.activeModule);
+            if (!page || !module || !visualBuilderState.blocks[page.slug]) return;
+            visualBuilderState.blocks[page.slug].body_json = collectVisualBody(page, module);
+        }
+
+        function renderVisualLanguageSwitch() {
+            return '<div class="visual-language-switcher" role="group" aria-label="编辑语言">' +
+                VISUAL_BUILDER_LANGUAGES.map(function (language) {
+                    return '<button type="button" class="visual-language-btn" data-visual-language="' + escapeHtml(language.key) + '" aria-pressed="false"><span>' + escapeHtml(language.shortLabel) + '</span>' + escapeHtml(language.label) + '</button>';
+                }).join('') +
+            '</div>';
+        }
+
+        function syncVisualLanguageSwitch() {
+            document.querySelectorAll('[data-visual-language]').forEach(function (button) {
+                var active = button.getAttribute('data-visual-language') === visualBuilderState.activeLanguage;
+                button.classList.toggle('active', active);
+                button.setAttribute('aria-pressed', active ? 'true' : 'false');
+            });
+        }
+
         function selectVisualModule(pageKey, moduleKey, options) {
             options = options || {};
             var page = visualPageByKey(pageKey);
@@ -4055,23 +4133,24 @@
             return '../' + path.replace(/^\/+/, '');
         }
 
-        function visualFieldValue(block, module, key) {
+        function visualFieldValue(block, module, field) {
             var body = block && block.body_json ? block.body_json : {};
-            return getPathValue(body, visualPath(module, key));
+            return getPathValue(body, visualPath(module, visualLanguageFieldKey(field)));
         }
 
         function visualNewArrayItem(module) {
             var item = {};
             (module.fields || []).forEach(function (field) {
-                setPathValue(item, field.key, field.type === 'toggle' ? true : '');
+                setPathValue(item, visualLanguageFieldKey(field), field.type === 'toggle' ? true : '');
             });
             return item;
         }
 
         function renderVisualField(field, path, value) {
             var id = visualFieldId(path);
-            var label = field.label || path;
+            var label = visualLanguageFieldLabel(field, path);
             var valueText = value == null ? '' : String(value);
+            var languageAttrs = visualIsArabicLanguage() && visualFieldSupportsLanguage(field) ? ' dir="rtl" lang="ar"' : '';
             if (field.type === 'toggle') {
                 return '<label class="visual-switch-field"><input type="checkbox" data-visual-field="' + escapeHtml(path) + '"' + (value !== false ? ' checked' : '') + '><span></span><strong>' + escapeHtml(label) + '</strong></label>';
             }
@@ -4093,10 +4172,10 @@
                 '</div>';
             }
             if (field.type === 'textarea') {
-                return '<div class="visual-field"><label for="' + escapeHtml(id) + '">' + escapeHtml(label) + '</label><textarea id="' + escapeHtml(id) + '" data-visual-field="' + escapeHtml(path) + '" rows="4">' + escapeHtml(valueText) + '</textarea></div>';
+                return '<div class="visual-field"><label for="' + escapeHtml(id) + '">' + escapeHtml(label) + '</label><textarea id="' + escapeHtml(id) + '" data-visual-field="' + escapeHtml(path) + '" rows="4"' + languageAttrs + '>' + escapeHtml(valueText) + '</textarea></div>';
             }
             var type = field.type === 'email' ? 'email' : (field.type === 'url' ? 'url' : 'text');
-            return '<div class="visual-field"><label for="' + escapeHtml(id) + '">' + escapeHtml(label) + '</label><input id="' + escapeHtml(id) + '" data-visual-field="' + escapeHtml(path) + '" type="' + escapeHtml(type) + '" value="' + escapeHtml(valueText) + '"></div>';
+            return '<div class="visual-field"><label for="' + escapeHtml(id) + '">' + escapeHtml(label) + '</label><input id="' + escapeHtml(id) + '" data-visual-field="' + escapeHtml(path) + '" type="' + escapeHtml(type) + '" value="' + escapeHtml(valueText) + '"' + languageAttrs + '></div>';
         }
 
         function renderVisualArrayEditor(page, module, block) {
@@ -4106,7 +4185,7 @@
             return '<div class="visual-array-editor" data-visual-array="' + escapeHtml(module.path) + '">' +
                 '<div class="visual-array-head"><span>共 ' + items.length + ' 项</span><button type="button" class="btn btn-secondary btn-sm" data-visual-array-action="add" data-page="' + escapeHtml(page.key) + '" data-module="' + escapeHtml(module.key) + '">新增' + escapeHtml(module.itemLabel || '项目') + '</button></div>' +
                 '<div class="visual-array-list">' + items.map(function (item, index) {
-                    var title = item && (item.title || item.label || item.year || item.value || item.href) || ((module.itemLabel || '项目') + ' ' + (index + 1));
+                    var title = visualArrayItemTitle(item, module, index);
                     return '<details class="visual-array-item" open data-visual-array-item="' + index + '">' +
                         '<summary><strong>' + escapeHtml(title) + '</strong><span>' +
                             '<button type="button" class="btn btn-secondary btn-sm" data-visual-array-action="up" data-page="' + escapeHtml(page.key) + '" data-module="' + escapeHtml(module.key) + '" data-index="' + index + '">上移</button>' +
@@ -4114,7 +4193,8 @@
                             '<button type="button" class="btn btn-danger btn-sm" data-visual-array-action="remove" data-page="' + escapeHtml(page.key) + '" data-module="' + escapeHtml(module.key) + '" data-index="' + index + '">删除</button>' +
                         '</span></summary>' +
                         '<div class="visual-array-body">' + (module.fields || []).map(function (field) {
-                            return renderVisualField(field, module.path + '.' + index + '.' + field.key, getPathValue(item, field.key));
+                            var fieldKey = visualLanguageFieldKey(field);
+                            return renderVisualField(field, module.path + '.' + index + '.' + fieldKey, getPathValue(item, fieldKey));
                         }).join('') + '</div>' +
                     '</details>';
                 }).join('') + '</div>' +
@@ -4129,9 +4209,11 @@
             var body = module.array
                 ? renderVisualArrayEditor(page, module, block)
                 : '<div class="visual-field-grid">' + (module.fields || []).map(function (field) {
-                    return renderVisualField(field, visualPath(module, field.key), visualFieldValue(block, module, field.key));
+                    return renderVisualField(field, visualPath(module, visualLanguageFieldKey(field)), visualFieldValue(block, module, field));
                 }).join('') + '</div>';
-            var meta = '<div class="visual-editor-meta"><span>数据源：' + escapeHtml(block.slug || page.slug) + '</span><span>版本：v' + escapeHtml(block.version || 1) + '</span><span id="visual-save-status">' + (block.updated_at ? '已加载：' + escapeHtml(formatDate(block.updated_at)) : '已加载') + '</span></div>';
+            var language = visualActiveLanguage();
+            var languageNote = visualIsArabicLanguage() ? '<span>图片、链接、开关为中英阿共用字段</span>' : '';
+            var meta = '<div class="visual-editor-meta"><span>数据源：' + escapeHtml(block.slug || page.slug) + '</span><span>编辑语言：' + escapeHtml(language.label) + '</span><span>版本：v' + escapeHtml(block.version || 1) + '</span><span id="visual-save-status">' + (block.updated_at ? '已加载：' + escapeHtml(formatDate(block.updated_at)) : '已加载') + '</span>' + languageNote + '</div>';
             return header + meta + body;
         }
 
@@ -4154,7 +4236,7 @@
             root.innerHTML =
                 '<div class="visual-builder-shell">' +
                     '<main class="visual-preview-panel">' +
-                        '<div class="visual-preview-toolbar"><div><strong id="visual-preview-title"></strong><span id="visual-preview-subtitle"></span></div><div class="visual-preview-actions"><button type="button" class="btn btn-secondary btn-sm" data-visual-refresh-preview>刷新预览</button></div></div>' +
+                        '<div class="visual-preview-toolbar"><div><strong id="visual-preview-title"></strong><span id="visual-preview-subtitle"></span></div><div class="visual-preview-actions">' + renderVisualLanguageSwitch() + '<button type="button" class="btn btn-secondary btn-sm" data-visual-refresh-preview>刷新预览</button></div></div>' +
                         '<div class="visual-preview-note" id="visual-preview-note">选择左侧可视化模块后，预览会自动定位到对应区块。</div>' +
                         '<div class="visual-preview-frame-wrap"><iframe id="visual-preview-frame" title="前台页面预览"></iframe></div>' +
                     '</main>' +
@@ -4173,15 +4255,49 @@
             var editor = document.getElementById('visual-editor-content');
             var title = document.getElementById('visual-preview-title');
             var subtitle = document.getElementById('visual-preview-subtitle');
+            var language = visualActiveLanguage();
             if (editor) editor.innerHTML = renderVisualModuleEditor(page, module, block);
-            if (title) title.textContent = page.label + ' / ' + module.label;
-            if (subtitle) subtitle.textContent = '修改会保存到 ' + page.slug + ' 内容块，并同步影响对应前台页面。';
+            if (title) title.textContent = page.label + ' / ' + module.label + ' / ' + language.label;
+            if (subtitle) subtitle.textContent = (visualIsArabicLanguage() ? '当前编辑阿语字段；' : '当前编辑英文/默认字段；') + '修改会保存到 ' + page.slug + ' 内容块，并同步影响对应前台页面。';
             syncVisualNavActive();
+            syncVisualLanguageSwitch();
             refreshVisualPreview(false);
         }
 
         function visualPreviewUrl(page, module) {
-            return (module && module.previewUrl) || (page && page.previewUrl) || '../index.html';
+            var baseUrl = (module && module.previewUrl) || (page && page.previewUrl) || '../index.html';
+            if (!visualIsArabicLanguage()) return baseUrl;
+            var hash = '';
+            var query = '';
+            var path = baseUrl;
+            var hashIndex = path.indexOf('#');
+            if (hashIndex !== -1) {
+                hash = path.slice(hashIndex);
+                path = path.slice(0, hashIndex);
+            }
+            var queryIndex = path.indexOf('?');
+            if (queryIndex !== -1) {
+                query = path.slice(queryIndex);
+                path = path.slice(0, queryIndex);
+            }
+            if (/^(https?:)?\/\//i.test(path) || path.indexOf('/ar/') !== -1 || path.indexOf('../ar/') !== -1) return baseUrl;
+            path = path.replace(/([^/]+\.html)$/i, 'ar/$1');
+            return path + query + hash;
+        }
+
+        function syncVisualLanguageFromPreview(frame) {
+            try {
+                var pathname = frame.contentWindow && frame.contentWindow.location && frame.contentWindow.location.pathname;
+                if (!pathname) return false;
+                var nextLanguage = /\/ar\//.test(pathname.replace(/\\/g, '/')) ? 'ar' : 'default';
+                if (nextLanguage === visualBuilderState.activeLanguage) return false;
+                cacheCurrentVisualDraft();
+                visualBuilderState.activeLanguage = nextLanguage;
+                renderVisualBuilder();
+                return true;
+            } catch (err) {
+                return false;
+            }
         }
 
         function setVisualPreviewNote(message, tone) {
@@ -4200,10 +4316,12 @@
             var src = baseUrl + (baseUrl.indexOf('?') === -1 ? '?' : '&') + 'visualPreview=' + Date.now();
             var currentUrl = frame.getAttribute('data-visual-url');
             frame.onload = function () {
+                if (syncVisualLanguageFromPreview(frame)) return;
                 scrollVisualPreviewToModule(module);
             };
             if (force || currentUrl !== baseUrl) {
                 frame.setAttribute('data-visual-page', page.key);
+                frame.setAttribute('data-visual-language', visualBuilderState.activeLanguage);
                 frame.setAttribute('data-visual-url', baseUrl);
                 frame.setAttribute('src', src);
             } else {
@@ -4404,6 +4522,16 @@
             var root = document.getElementById('visual-builder-root');
             if (!root) return;
             root.addEventListener('click', function (e) {
+                var languageBtn = e.target.closest('[data-visual-language]');
+                if (languageBtn) {
+                    var languageKey = languageBtn.getAttribute('data-visual-language');
+                    if (languageKey && languageKey !== visualBuilderState.activeLanguage) {
+                        cacheCurrentVisualDraft();
+                        visualBuilderState.activeLanguage = visualLanguageByKey(languageKey).key;
+                        renderVisualBuilder();
+                    }
+                    return;
+                }
                 var pageBtn = e.target.closest('[data-visual-page]');
                 var moduleBtn = e.target.closest('[data-visual-module]');
                 if (pageBtn && !moduleBtn) {
