@@ -4869,12 +4869,13 @@ h1, h2, h3, h4, h5, h6 {
 
 .category-workspace {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 320px;
+    grid-template-columns: minmax(0, 1fr);
     gap: 16px;
     align-items: start;
 }
 
 .category-table-panel {
+    width: 100%;
     min-width: 0;
 }
 
@@ -4882,9 +4883,14 @@ h1, h2, h3, h4, h5, h6 {
     table-layout: fixed;
 }
 
+.category-table th:first-child,
+.category-table td:first-child {
+    width: 44%;
+}
+
 .category-table th:nth-child(2),
 .category-table td:nth-child(2) {
-    width: 210px;
+    width: 26%;
 }
 
 .category-table th:nth-child(3),
@@ -4922,6 +4928,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .category-name-wrap > div {
+    flex: 1 1 auto;
     min-width: 0;
 }
 
