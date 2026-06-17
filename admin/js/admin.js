@@ -1025,20 +1025,15 @@
 
         function loadDashboard() {
             ['stat-total', 'stat-featured', 'stat-categories', 'stat-inquiries', 'stat-new-inquiries'].forEach(function (id) { setText(id, '—'); });
-            ['stat-total-trend', 'stat-featured-trend', 'stat-categories-trend', 'stat-inquiries-trend', 'stat-new-inquiries-trend'].forEach(function (id) { setText(id, '正在加载'); });
             renderDashboardPendingLoading();
-            renderDashboardCategoriesLoading();
-            renderDashboardSystemLoading();
             apiRequest('/admin/dashboard').then(function (response) {
                 var data = unwrapDataResponse(response) || {};
                 inquiries = data.recentInquiries || [];
                 renderDashboard(data);
-                loadDashboardSupplemental(data);
+                loadDashboardPending(data);
             }).catch(function (err) {
                 showToast('加载控制台失败：' + err.message, 'error');
-                renderDashboardPending(null, null, null, null, null);
-                renderDashboardCategories([], [], 0);
-                renderDashboardSystemStatus(null);
+                renderDashboardPending(null, null, null, null);
             });
         }
 
@@ -1046,24 +1041,17 @@
             data = data || {};
             var productStats = data.products || {};
             var inquiryStats = data.inquiries || {};
-            var totalProducts = Number(productStats.total || 0);
-            var publishedProducts = Number(productStats.published || 0);
-            var draftProducts = Number(productStats.draft || 0);
-            var totalInquiries = Number(inquiryStats.total || 0);
-            var newInquiries = Number(inquiryStats.new || inquiryStats.unread || 0);
-            var unreadInquiries = Number(inquiryStats.unread || newInquiries || 0);
 
-            setText('stat-total', totalProducts);
+            setText('stat-total', productStats.total || 0);
             setText('stat-featured', '—');
             setText('stat-categories', '—');
-            setText('stat-inquiries', totalInquiries);
-            setText('stat-new-inquiries', newInquiries);
-            setText('stat-total-trend', '已发布 ' + publishedProducts + ' / 草稿 ' + draftProducts);
-            setText('stat-featured-trend', '首页展示位');
-            setText('stat-categories-trend', '同步分类结构');
-            setText('stat-inquiries-trend', '未读 ' + unreadInquiries + ' 条');
-            setText('stat-new-inquiries-trend', newInquiries ? '待处理' : '暂无待处理');
-            setText('quick-inquiry-badge', newInquiries);
+            setText('stat-inquiries', inquiryStats.total || 0);
+            setText('stat-new-inquiries', inquiryStats.new || 0);
+
+            var catGrid = document.getElementById('category-stats');
+            if (catGrid) {
+                catGrid.innerHTML = '<div class="category-stat-card"><span class="badge badge-navy">—</span><div><div class="category-stat-count">—</div><div class="category-stat-label">分类统计待接入</div></div></div>';
+            }
 
             renderRecentInquiries();
         }
@@ -1071,73 +1059,23 @@
         function renderDashboardPendingLoading() {
             var container = document.getElementById('dashboard-pending-cards');
             if (!container) return;
-            setText('dashboard-pending-count', '...');
             container.innerHTML = [0, 1, 2, 3].map(function () {
-                return '<button class="dashboard-pending-item pending-card-loading" type="button" disabled><span class="pending-item-icon"></span><span class="pending-item-copy"><strong>加载中...</strong><em>正在同步后台数据</em></span></button>';
+                return '<button class="pending-card pending-card-loading" type="button" disabled><span>加载中...</span></button>';
             }).join('');
         }
 
-        function renderDashboardCategoriesLoading() {
-            var donut = document.getElementById('dashboard-category-donut');
-            var grid = document.getElementById('category-stats');
-            if (donut) donut.style.setProperty('--dashboard-donut', 'conic-gradient(#d8dee8 0deg 360deg)');
-            setText('dashboard-category-total', '—');
-            setText('dashboard-category-footnote', '正在同步分类数据');
-            if (grid) {
-                grid.innerHTML = '<div class="category-stat-card"><span class="dashboard-legend-dot muted"></span><div><div class="category-stat-count">—</div><div class="category-stat-label">正在加载分类</div></div></div>';
-            }
-        }
-
-        function renderDashboardSystemLoading() {
-            var container = document.getElementById('dashboard-system-status');
-            if (!container) return;
-            container.innerHTML = ['服务器状态', '数据库连接', '存储空间', 'API 服务'].map(function (label) {
-                return '<div class="dashboard-system-item"><span class="system-dot"></span><strong>' + escapeHtml(label) + '</strong><em>检测中</em></div>';
-            }).join('');
-        }
-
-        function loadDashboardSupplemental(dashboardData) {
+        function loadDashboardPending(dashboardData) {
             var recentContent = dashboardData && dashboardData.recentContent ? dashboardData.recentContent : null;
             Promise.all([
                 apiRequest('/admin/inquiries?unread=true&page=1&pageSize=1').catch(function () { return null; }),
                 apiRequest('/admin/products?status=draft&page=1&pageSize=1').catch(function () { return null; }),
-                apiRequest('/admin/assets?page=1&pageSize=1').catch(function () { return null; }),
-                apiRequest('/admin/products?featured=1&page=1&pageSize=1').catch(function () { return null; }),
-                apiRequest('/admin/categories?type=product').catch(function () { return null; }),
-                apiRequest('/admin/products?page=1&pageSize=100').catch(function () { return null; }),
-                apiRequest('/admin/system/status').catch(function () { return null; })
+                apiRequest('/admin/assets?page=1&pageSize=1').catch(function () { return null; })
             ]).then(function (responses) {
-                var unreadTotal = dashboardMetaTotal(responses[0], null);
-                var draftTotal = dashboardMetaTotal(responses[1], null);
+                var unreadTotal = responses[0] && responses[0].meta ? responses[0].meta.total : null;
+                var draftTotal = responses[1] && responses[1].meta ? responses[1].meta.total : null;
                 var assetRows = responses[2] ? unwrapListResponse(responses[2]) : [];
-                var assetTotal = dashboardMetaTotal(responses[2], assetRows.length);
-                var featuredTotal = dashboardMetaTotal(responses[3], null);
-                var categories = responses[4] ? unwrapListResponse(responses[4]) : [];
-                var productRows = responses[5] ? unwrapListResponse(responses[5]) : [];
-                var systemData = responses[6] ? unwrapDataResponse(responses[6]) : null;
-                var productStats = dashboardData && dashboardData.products ? dashboardData.products : {};
-
-                setText('stat-featured', featuredTotal == null ? '—' : featuredTotal);
-                setText('stat-featured-trend', featuredTotal == null ? '接口待检查' : '首页展示 ' + featuredTotal + ' 个');
-                setText('stat-categories', categories.length || '—');
-                setText('stat-categories-trend', categories.length ? '已启用 ' + categories.length + ' 类' : '暂无分类');
-                renderDashboardPending(unreadTotal, draftTotal, recentContent, assetRows[0] || null, {
-                    assets: assetTotal,
-                    inquiries: dashboardData && dashboardData.inquiries ? dashboardData.inquiries : {}
-                });
-                renderDashboardCategories(productRows, categories, productStats.total || productRows.length);
-                renderDashboardSystemStatus(systemData);
-            }).catch(function () {
-                renderDashboardPending(null, null, recentContent, null, null);
-                renderDashboardCategories([], [], 0);
-                renderDashboardSystemStatus(null);
+                renderDashboardPending(unreadTotal, draftTotal, recentContent, assetRows[0] || null);
             });
-        }
-
-        function dashboardMetaTotal(response, fallback) {
-            if (response && response.meta && response.meta.total != null) return response.meta.total;
-            if (response && response.data && response.data.meta && response.data.meta.total != null) return response.data.meta.total;
-            return fallback == null ? null : fallback;
         }
 
         function contentViewFromSlug(slug) {
@@ -1157,67 +1095,45 @@
             return map[slug] || 'content-page-blocks';
         }
 
-        function renderDashboardPending(unreadTotal, draftTotal, recentContent, recentAsset, dashboardCounts) {
+        function renderDashboardPending(unreadTotal, draftTotal, recentContent, recentAsset) {
             var container = document.getElementById('dashboard-pending-cards');
             if (!container) return;
             var contentView = recentContent ? contentViewFromSlug(recentContent.slug) : '';
-            var pendingCount = 0;
-            if (Number(unreadTotal || 0) > 0) pendingCount += 1;
-            if (Number(draftTotal || 0) > 0) pendingCount += 1;
-            if (recentContent) pendingCount += 1;
-            if (recentAsset) pendingCount += 1;
-            setText('dashboard-pending-count', pendingCount);
-
-            var inquiryNewTotal = dashboardCounts && dashboardCounts.inquiries ? Number(dashboardCounts.inquiries.new || dashboardCounts.inquiries.unread || 0) : Number(unreadTotal || 0);
             var cards = [
                 {
-                    tone: 'danger',
-                    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
-                    title: inquiryNewTotal ? '有 ' + inquiryNewTotal + ' 条新询盘需要处理' : '暂无新询盘',
-                    desc: unreadTotal == null ? '未读统计暂不可用' : '来自客户的咨询与报价请求',
-                    cta: '查看询盘',
-                    action: 'pending-inquiries',
-                    urgent: inquiryNewTotal > 0
+                    label: '新询盘',
+                    value: unreadTotal == null ? '—' : unreadTotal + ' 条',
+                    meta: '筛选未读询盘',
+                    action: 'pending-inquiries'
                 },
                 {
-                    tone: 'warning',
-                    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
-                    title: draftTotal == null ? '草稿产品待检查' : draftTotal + ' 个产品草稿未发布',
-                    desc: '完成编辑后可发布到网站产品中心',
-                    cta: '管理产品',
-                    action: 'pending-drafts',
-                    urgent: Number(draftTotal || 0) > 0
+                    label: '草稿产品',
+                    value: draftTotal == null ? '—' : draftTotal + ' 件',
+                    meta: '筛选草稿状态',
+                    action: 'pending-drafts'
                 },
                 {
-                    tone: 'info',
-                    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>',
-                    title: recentContent ? '最近更新：' + ((VIEW_META[contentView] ? VIEW_META[contentView].title : recentContent.slug) || '内容区块') : '内容区块暂无更新',
-                    desc: recentContent && recentContent.updated_at ? '更新时间：' + formatDate(recentContent.updated_at) : '可进入内容管理维护页面文案',
-                    cta: '内容管理',
-                    action: contentView ? 'pending-content' : 'pending-content-home',
-                    view: contentView || 'visual-builder',
-                    urgent: false
+                    label: '最近修改内容',
+                    value: recentContent ? (VIEW_META[contentView] ? VIEW_META[contentView].title : recentContent.slug) : '暂无记录',
+                    meta: recentContent && recentContent.updated_at ? formatDate(recentContent.updated_at) : '无最近修改',
+                    action: contentView ? 'pending-content' : '',
+                    view: contentView
                 },
                 {
-                    tone: 'neutral',
-                    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>',
-                    title: recentAsset ? '资源库有 ' + (dashboardCounts && dashboardCounts.assets != null ? dashboardCounts.assets : '—') + ' 个文件' : '资源库待整理',
-                    desc: recentAsset ? '最近上传：' + (recentAsset.original_name || recentAsset.filename || '未命名资源') : '建议定期清理未使用资源',
-                    cta: '前往清理',
-                    action: 'pending-assets',
-                    urgent: false
+                    label: '最近上传资源',
+                    value: recentAsset ? (recentAsset.original_name || recentAsset.filename || '未命名资源') : '暂无资源',
+                    meta: recentAsset && recentAsset.created_at ? formatDate(recentAsset.created_at) : '无最近上传',
+                    action: 'pending-assets'
                 }
             ];
 
             container.innerHTML = cards.map(function (card) {
                 var attrs = card.action ? ' data-pending-action="' + escapeHtml(card.action) + '"' : ' disabled';
                 if (card.view) attrs += ' data-target-view="' + escapeHtml(card.view) + '"';
-                return '<button class="dashboard-pending-item ' + escapeHtml(card.tone) + '" type="button"' + attrs + '>' +
-                    '<span class="pending-dot' + (card.urgent ? ' is-active' : '') + '"></span>' +
-                    '<span class="pending-item-icon">' + card.icon + '</span>' +
-                    '<span class="pending-item-copy"><strong>' + escapeHtml(card.title) + '</strong><em>' + escapeHtml(card.desc) + '</em></span>' +
-                    '<span class="pending-item-action">' + escapeHtml(card.cta) + '</span>' +
-                    '<span class="pending-arrow">›</span>' +
+                return '<button class="pending-card" type="button"' + attrs + '>' +
+                    '<span class="pending-card-label">' + escapeHtml(card.label) + '</span>' +
+                    '<span class="pending-card-value">' + escapeHtml(card.value) + '</span>' +
+                    '<span class="pending-card-meta">' + escapeHtml(card.meta) + '</span>' +
                     '</button>';
             }).join('');
 
@@ -1232,126 +1148,11 @@
                         setProductStatusFilter('draft');
                     } else if (action === 'pending-content') {
                         switchView(card.getAttribute('data-target-view'));
-                    } else if (action === 'pending-content-home') {
-                        switchView('visual-builder');
                     } else if (action === 'pending-assets') {
                         switchView('assets');
                     }
                 });
             });
-        }
-
-        function dashboardCategoryName(product) {
-            return product.category_name || product.category_name_en || product.category || product.product_group || '未分类';
-        }
-
-        function renderDashboardCategories(productRows, categories, totalProducts) {
-            var grid = document.getElementById('category-stats');
-            var donut = document.getElementById('dashboard-category-donut');
-            var palette = ['#00a3e0', '#d4a843', '#28a745', '#0a1628', '#e76f51', '#6f42c1'];
-            var total = Number(totalProducts || 0);
-            var counts = {};
-            (productRows || []).forEach(function (product) {
-                var name = dashboardCategoryName(product);
-                counts[name] = (counts[name] || 0) + 1;
-            });
-            var items = Object.keys(counts).map(function (name) {
-                return { name: name, count: counts[name] };
-            }).sort(function (a, b) { return b.count - a.count; });
-
-            if (!items.length && categories && categories.length) {
-                items = categories.slice(0, 5).map(function (category) {
-                    return { name: category.name_en || category.name_ar || category.slug || '未命名分类', count: 0 };
-                });
-            }
-
-            setText('dashboard-category-total', total);
-            setText('dashboard-category-footnote', productRows && productRows.length ? '按当前加载的 ' + productRows.length + ' 条产品统计' : '暂无产品分类数据');
-
-            if (!items.length || !total) {
-                if (donut) donut.style.setProperty('--dashboard-donut', 'conic-gradient(#d8dee8 0deg 360deg)');
-                if (grid) {
-                    grid.innerHTML = '<div class="category-stat-card"><span class="dashboard-legend-dot muted"></span><div><div class="category-stat-count">0</div><div class="category-stat-label">暂无分类数据</div></div></div>';
-                }
-                return;
-            }
-
-            var visibleItems = items.slice(0, 5);
-            var otherTotal = items.slice(5).reduce(function (sum, item) { return sum + item.count; }, 0);
-            if (otherTotal) visibleItems.push({ name: '其他', count: otherTotal });
-            var countedTotal = visibleItems.reduce(function (sum, item) { return sum + item.count; }, 0) || 1;
-            var currentDeg = 0;
-            var segments = visibleItems.map(function (item, index) {
-                var nextDeg = currentDeg + (item.count / countedTotal) * 360;
-                var color = palette[index % palette.length];
-                var segment = color + ' ' + currentDeg.toFixed(2) + 'deg ' + nextDeg.toFixed(2) + 'deg';
-                currentDeg = nextDeg;
-                item.color = color;
-                return segment;
-            });
-
-            if (donut) donut.style.setProperty('--dashboard-donut', 'conic-gradient(' + segments.join(', ') + ')');
-            if (grid) {
-                grid.innerHTML = visibleItems.map(function (item) {
-                    var percent = Math.round(item.count / countedTotal * 100);
-                    return '<div class="category-stat-card">' +
-                        '<span class="dashboard-legend-dot" style="background:' + escapeHtml(item.color) + '"></span>' +
-                        '<div><div class="category-stat-count">' + escapeHtml(item.count) + '<small>' + percent + '%</small></div>' +
-                        '<div class="category-stat-label">' + escapeHtml(item.name) + '</div></div>' +
-                        '</div>';
-                }).join('');
-            }
-        }
-
-        function renderDashboardSystemStatus(systemData) {
-            var container = document.getElementById('dashboard-system-status');
-            if (!container) return;
-            var data = systemData || {};
-            var sqlite = data.sqlite || {};
-            var counts = data.counts || {};
-            var env = data.env || {};
-            var dbOk = sqlite.available === true;
-            var apiOk = data.publicApiSource === 'sqlite' && dbOk;
-            var items = [
-                {
-                    label: '服务器状态',
-                    value: env.nodeEnv ? ('运行中 · ' + env.nodeEnv) : '状态待确认',
-                    status: env.nodeEnv ? 'ok' : 'warning'
-                },
-                {
-                    label: '数据库连接',
-                    value: dbOk ? ('SQLite v' + (sqlite.schemaVersion || '最新')) : '连接异常',
-                    status: dbOk ? 'ok' : 'danger'
-                },
-                {
-                    label: '存储空间',
-                    value: counts.assets != null ? ('资源 ' + counts.assets + ' 个') : '资源统计待确认',
-                    status: counts.assets != null ? 'ok' : 'warning'
-                },
-                {
-                    label: 'API 服务',
-                    value: apiOk ? '接口正常' : '需要检查',
-                    status: apiOk ? 'ok' : 'danger'
-                }
-            ];
-            container.innerHTML = items.map(function (item) {
-                return '<div class="dashboard-system-item is-' + escapeHtml(item.status) + '">' +
-                    '<span class="system-dot"></span><strong>' + escapeHtml(item.label) + '</strong><em>' + escapeHtml(item.value) + '</em>' +
-                    '</div>';
-            }).join('');
-        }
-
-        function dashboardInitial(name) {
-            var text = String(name || '').trim();
-            return text ? text.charAt(0).toUpperCase() : '客';
-        }
-
-        function dashboardInquiryStatusMeta(status) {
-            if (status === 'new') return { label: '新询盘', className: 'is-new' };
-            if (status === 'read') return { label: '待回复', className: 'is-read' };
-            if (status === 'replied') return { label: '已回复', className: 'is-replied' };
-            if (status === 'closed') return { label: '已关闭', className: 'is-closed' };
-            return { label: status || '待处理', className: 'is-read' };
         }
 
         function renderRecentInquiries() {
@@ -1368,20 +1169,18 @@
             }
 
             container.innerHTML = sorted.map(function (item) {
+                var isNew = item.status === 'new';
                 var name = escapeHtml(item.name || '—');
-                var company = escapeHtml(item.company || item.company_name || item.email || '未填写公司');
                 var subject = escapeHtml(item.subject || item.product || '（无主题）');
                 var createdAt = item.created_at || item.createdAt;
-                var date = createdAt ? new Date(createdAt).toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : '—';
-                var status = dashboardInquiryStatusMeta(item.status);
+                var date = createdAt ? new Date(createdAt).toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' }) : '';
+                var status = escapeHtml(STATUS_LABELS[item.status] || item.status || '');
                 return '<div class="recent-inquiry-item" data-id="' + escapeHtml(item.id) + '" role="button" tabindex="0" aria-label="查看询盘：' + name + '">' +
-                    '<div class="recent-inquiry-avatar">' + escapeHtml(dashboardInitial(item.name || item.email)) + '</div>' +
+                    '<div class="recent-inquiry-dot' + (isNew ? ' new' : '') + '"></div>' +
                     '<div class="recent-inquiry-info">' +
                         '<div class="recent-inquiry-name">' + name + '</div>' +
-                        '<div class="recent-inquiry-company">' + company + '</div>' +
-                        '<div class="recent-inquiry-subject">' + subject + '</div>' +
+                        '<div class="recent-inquiry-subject">' + subject + (status ? ' · ' + status : '') + '</div>' +
                     '</div>' +
-                    '<span class="recent-inquiry-status ' + escapeHtml(status.className) + '">' + escapeHtml(status.label) + '</span>' +
                     '<div class="recent-inquiry-time">' + date + '</div>' +
                     '</div>';
             }).join('');
@@ -1411,14 +1210,6 @@
                         switchView('inquiries');
                     } else if (action === 'view-products') {
                         switchView('products');
-                    } else if (action === 'view-content') {
-                        switchView('visual-builder');
-                    } else if (action === 'view-certifications') {
-                        switchView('cert-qualifications');
-                    } else if (action === 'view-assets') {
-                        switchView('assets');
-                    } else if (action === 'view-settings') {
-                        switchView('settings-modules');
                     } else if (action === 'view-company') {
                         switchView('content-company-overview');
                     }
