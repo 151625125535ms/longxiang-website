@@ -4,6 +4,37 @@ const { sendError, insertAuditLog } = require('./helpers');
 
 const router = express.Router();
 const CATEGORY_TYPES = ['product', 'certification', 'content'];
+const CATEGORY_FIELDS = `
+    c.id,
+    c.type,
+    c.parent_id,
+    c.slug,
+    c.name_en,
+    c.name_ar,
+    c.sort_order,
+    c.is_active,
+    c.created_at,
+    c.updated_at,
+    parent.slug AS parent_slug,
+    parent.name_en AS parent_name_en,
+    parent.name_ar AS parent_name_ar,
+    parent.sort_order AS parent_sort_order,
+    (
+        SELECT COUNT(*)
+        FROM categories child
+        WHERE child.parent_id = c.id
+    ) AS child_count,
+    (
+        SELECT COUNT(*)
+        FROM products p
+        WHERE p.category_id = c.id
+    ) AS product_count,
+    (
+        SELECT COUNT(*)
+        FROM certifications cert
+        WHERE cert.category_id = c.id
+    ) AS certification_count
+`;
 
 function makeSlug(name) {
     const slug = String(name || '')
@@ -29,9 +60,10 @@ function makeUniqueCategorySlug(db, type, preferred) {
 
 function findCategory(db, id) {
     return db.prepare(`
-        SELECT id, type, slug, name_en, name_ar, sort_order, is_active, created_at, updated_at
-        FROM categories
-        WHERE id = ?
+        SELECT ${CATEGORY_FIELDS}
+        FROM categories c
+        LEFT JOIN categories parent ON parent.id = c.parent_id
+        WHERE c.id = ?
     `).get(id);
 }
 
@@ -57,6 +89,50 @@ function normalizeActive(value) {
     return 1;
 }
 
+function normalizeParentId(value) {
+    if (value == null || value === '' || value === 'null' || value === 'none') return null;
+    const parsed = parseInt(value, 10);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : NaN;
+}
+
+function resolveParentId(db, type, value, currentId) {
+    const parentId = normalizeParentId(value);
+    if (parentId == null) return { parentId: null };
+    if (!Number.isFinite(parentId)) {
+        return { error: 'Invalid parent category.' };
+    }
+    if (currentId != null && String(parentId) === String(currentId)) {
+        return { error: 'Category cannot be its own parent.' };
+    }
+
+    const parent = db.prepare(`
+        SELECT id, type, parent_id
+        FROM categories
+        WHERE id = ?
+    `).get(parentId);
+
+    if (!parent || parent.type !== type) {
+        return { error: 'Parent category not found.' };
+    }
+    if (parent.parent_id != null) {
+        return { error: 'Only top-level categories can be selected as parent.' };
+    }
+
+    return { parentId };
+}
+
+function countChildCategories(db, id) {
+    return db.prepare('SELECT COUNT(*) AS total FROM categories WHERE parent_id = ?')
+        .get(id).total;
+}
+
+function categoryItemCount(category) {
+    if (!category) return 0;
+    if (category.type === 'product') return category.product_count || 0;
+    if (category.type === 'certification') return category.certification_count || 0;
+    return 0;
+}
+
 router.get('/', function (req, res, next) {
     try {
         const db = getDb();
@@ -68,15 +144,26 @@ router.get('/', function (req, res, next) {
 
         const rows = type
             ? db.prepare(`
-                SELECT id, type, slug, name_en, name_ar, sort_order, is_active, created_at, updated_at
-                FROM categories
-                WHERE type = ?
-                ORDER BY sort_order, id
+                SELECT ${CATEGORY_FIELDS}
+                FROM categories c
+                LEFT JOIN categories parent ON parent.id = c.parent_id
+                WHERE c.type = ?
+                ORDER BY
+                    COALESCE(parent.sort_order, c.sort_order),
+                    CASE WHEN c.parent_id IS NULL THEN 0 ELSE 1 END,
+                    c.sort_order,
+                    c.id
             `).all(type)
             : db.prepare(`
-                SELECT id, type, slug, name_en, name_ar, sort_order, is_active, created_at, updated_at
-                FROM categories
-                ORDER BY type, sort_order, id
+                SELECT ${CATEGORY_FIELDS}
+                FROM categories c
+                LEFT JOIN categories parent ON parent.id = c.parent_id
+                ORDER BY
+                    c.type,
+                    COALESCE(parent.sort_order, c.sort_order),
+                    CASE WHEN c.parent_id IS NULL THEN 0 ELSE 1 END,
+                    c.sort_order,
+                    c.id
             `).all();
 
         res.json({ ok: true, data: rows });
@@ -104,16 +191,22 @@ router.post('/', function (req, res, next) {
         }
 
         const db = getDb();
+        const type = String(body.type || 'product').trim();
+        const parentResult = resolveParentId(db, type, body.parent_id, null);
+        if (parentResult.error) {
+            return sendError(res, 422, 'VALIDATION_ERROR', parentResult.error);
+        }
         const now = Date.now();
         const createCategory = db.transaction(function () {
             const result = db.prepare(`
                 INSERT INTO categories
                     (type, parent_id, slug, name_en, name_ar, sort_order, is_active, created_at, updated_at)
                 VALUES
-                    (@type, NULL, @slug, @name_en, @name_ar, @sort_order, 1, @created_at, @updated_at)
+                    (@type, @parent_id, @slug, @name_en, @name_ar, @sort_order, 1, @created_at, @updated_at)
             `).run({
-                type: String(body.type || 'product').trim(),
-                slug: makeUniqueCategorySlug(db, String(body.type || 'product').trim(), body.slug || body.name_en || body.name_ar),
+                type,
+                parent_id: parentResult.parentId,
+                slug: makeUniqueCategorySlug(db, type, body.slug || body.name_en || body.name_ar),
                 name_en: String(body.name_en || body.name_ar).trim(),
                 name_ar: body.name_ar == null ? '' : String(body.name_ar).trim(),
                 sort_order: normalizeSortOrder(body.sort_order),
@@ -143,10 +236,24 @@ router.put('/:id', function (req, res, next) {
         if (!before) return sendError(res, 404, 'NOT_FOUND', 'Category not found.');
 
         const body = req.body || {};
+        let nextParentId = before.parent_id;
+        if (Object.prototype.hasOwnProperty.call(body, 'parent_id')) {
+            const parentResult = resolveParentId(db, before.type, body.parent_id, before.id);
+            if (parentResult.error) {
+                return sendError(res, 422, 'VALIDATION_ERROR', parentResult.error);
+            }
+            nextParentId = parentResult.parentId;
+        }
+
+        if (nextParentId != null && countChildCategories(db, before.id) > 0) {
+            return sendError(res, 422, 'VALIDATION_ERROR', 'Category with children cannot be moved under another parent.');
+        }
+
         const updateCategory = db.transaction(function () {
             db.prepare(`
                 UPDATE categories
                 SET
+                    parent_id = @parent_id,
                     name_en = @name_en,
                     name_ar = @name_ar,
                     sort_order = @sort_order,
@@ -155,6 +262,7 @@ router.put('/:id', function (req, res, next) {
                 WHERE id = @id
             `).run({
                 id: before.id,
+                parent_id: nextParentId,
                 name_en: body.name_en == null ? before.name_en : String(body.name_en).trim(),
                 name_ar: body.name_ar == null ? before.name_ar : String(body.name_ar).trim(),
                 sort_order: body.sort_order == null ? before.sort_order : normalizeSortOrder(body.sort_order),
@@ -186,6 +294,16 @@ router.delete('/:id', function (req, res, next) {
             .prepare('SELECT COUNT(*) AS total FROM certifications WHERE category_id = ?')
             .get(before.id).total;
         const totalRefs = productRefs + certificationRefs;
+        const childRefs = countChildCategories(db, before.id);
+
+        if (childRefs > 0) {
+            return sendError(
+                res,
+                409,
+                'BATCH_FAILED',
+                'Category has ' + childRefs + ' child category item(s).'
+            );
+        }
 
         if (totalRefs > 0) {
             return sendError(

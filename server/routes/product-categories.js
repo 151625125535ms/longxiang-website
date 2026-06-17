@@ -65,14 +65,59 @@ function serializeGroup(group) {
     };
 }
 
+function serializeHierarchy(rows) {
+    const byId = {};
+    const childrenByParent = {};
+
+    rows.forEach(function (row) {
+        byId[row.id] = row;
+        if (row.parent_id != null) {
+            if (!childrenByParent[row.parent_id]) childrenByParent[row.parent_id] = [];
+            childrenByParent[row.parent_id].push(row);
+        }
+    });
+
+    return rows
+        .filter(function (row) { return row.parent_id == null; })
+        .map(function (parent) {
+            const children = (childrenByParent[parent.id] || []).map(function (child) {
+                return {
+                    sub: child.slug,
+                    label: child.name_en || child.slug,
+                    labelAr: child.name_ar || child.name_en || child.slug
+                };
+            });
+
+            return {
+                group: parent.slug,
+                label: parent.name_en || parent.slug,
+                labelAr: parent.name_ar || parent.name_en || parent.slug,
+                children
+            };
+        })
+        .filter(function (group) { return group.children.length; });
+}
+
 router.get('/', function (req, res, next) {
     try {
         const rows = getDb().prepare(`
-            SELECT id, slug, name_en, name_ar, sort_order
-            FROM categories
-            WHERE type = 'product' AND is_active = 1
-            ORDER BY sort_order ASC, id ASC
+            SELECT c.id, c.parent_id, c.slug, c.name_en, c.name_ar, c.sort_order
+            FROM categories c
+            LEFT JOIN categories parent ON parent.id = c.parent_id
+            WHERE c.type = 'product'
+                AND c.is_active = 1
+                AND (c.parent_id IS NULL OR parent.is_active = 1)
+            ORDER BY
+                COALESCE(parent.sort_order, c.sort_order) ASC,
+                CASE WHEN c.parent_id IS NULL THEN 0 ELSE 1 END,
+                c.sort_order ASC,
+                c.id ASC
         `).all();
+
+        const hierarchy = serializeHierarchy(rows);
+        if (hierarchy.length) {
+            return res.json({ ok: true, data: hierarchy });
+        }
 
         const grouped = {};
 

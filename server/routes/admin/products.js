@@ -4,7 +4,6 @@ const path = require('path');
 const multer = require('multer');
 const { getDb } = require('../../lib/db');
 const { ensureDirectory, resolveUploadDir, resolveUploadPublicPath } = require('../../lib/fileStore');
-const { getCategoryMapping } = require('../../lib/category-helper');
 const { normalizeUploadedFilename } = require('../../lib/filenameEncoding');
 const { sendError, insertAuditLog } = require('./helpers');
 
@@ -106,24 +105,27 @@ function resolveProductCategoryMapping(db, categoryIdValue) {
     }
 
     const category = db.prepare(`
-        SELECT id, slug
-        FROM categories
-        WHERE id = ? AND type = 'product' AND is_active = 1
+        SELECT
+            c.id,
+            c.slug,
+            c.parent_id,
+            parent.slug AS parent_slug
+        FROM categories c
+        LEFT JOIN categories parent ON parent.id = c.parent_id
+        WHERE c.id = ? AND c.type = 'product' AND c.is_active = 1
     `).get(categoryId);
 
     if (!category) {
         return { error: '所选分类不存在或已停用，请重新选择。' };
     }
-
-    const mapping = getCategoryMapping(category.slug);
-    if (!mapping) {
-        return { error: '这个分类暂时不能用于产品，请先使用已有产品分类。' };
+    if (!category.parent_id || !category.parent_slug) {
+        return { error: '请选择父类下的子类，父类仅用于分组。' };
     }
 
     return {
         categoryId: category.id,
-        productGroup: mapping.group,
-        subCategory: mapping.subCategory
+        productGroup: category.parent_slug,
+        subCategory: category.slug
     };
 }
 

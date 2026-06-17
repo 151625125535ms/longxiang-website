@@ -375,6 +375,7 @@
         var assetSearchTimer = null;
         var activeTrashTab = 'trash-products';
         var activeCategoryId = null;
+        var collapsedCategoryParents = {};
         var formDirty = false;
         var dirtyMessage = '当前有未保存的修改，是否确认离开？离开后修改将丢失。';
         var activeModalTrigger = null;
@@ -1580,6 +1581,65 @@
             });
         }
 
+        function categoryDisplayName(category) {
+            if (!category) return '';
+            return category.name_en || category.slug || ('#' + category.id);
+        }
+
+        function categoryParentId(category) {
+            return category && category.parent_id != null ? String(category.parent_id) : '';
+        }
+
+        function buildProductCategoryTree() {
+            var parents = [];
+            var childrenByParent = {};
+            var orphanChildren = [];
+
+            productCategories.forEach(function (category) {
+                var parentId = categoryParentId(category);
+                if (!parentId) {
+                    parents.push({ category: category, children: [] });
+                    return;
+                }
+                if (!childrenByParent[parentId]) childrenByParent[parentId] = [];
+                childrenByParent[parentId].push(category);
+            });
+
+            parents.forEach(function (parent) {
+                var id = String(parent.category.id);
+                parent.children = childrenByParent[id] || [];
+                delete childrenByParent[id];
+            });
+
+            Object.keys(childrenByParent).forEach(function (parentId) {
+                orphanChildren = orphanChildren.concat(childrenByParent[parentId]);
+            });
+
+            if (orphanChildren.length) {
+                parents.push({
+                    category: { id: '__orphans', name_en: '未归属分类', slug: 'uncategorized' },
+                    children: orphanChildren
+                });
+            }
+
+            return parents;
+        }
+
+        function populateCategoryParentSelect(selectedParentId, editingId) {
+            var select = document.getElementById('cat-parent-id');
+            if (!select) return;
+            var options = '<option value="">设为顶级父类</option>';
+            productCategories.forEach(function (category) {
+                if (String(category.id) === String(editingId || '')) return;
+                if (category.parent_id != null) return;
+                var childCount = parseInt(category.child_count || 0, 10);
+                var label = categoryDisplayName(category) + (childCount ? '（' + childCount + ' 个子类）' : '');
+                options += '<option value="' + escapeHtml(category.id) + '">' + escapeHtml(label) + '</option>';
+            });
+            select.innerHTML = options;
+            select.value = selectedParentId == null ? '' : String(selectedParentId);
+        }
+
         function populateProductCategorySelects() {
             var filter = document.getElementById('product-category-filter');
             var field = document.getElementById('field-category');
@@ -1587,14 +1647,34 @@
             var fieldValue = field ? field.value : '';
             var filterOptions = '<option value="">全部分类</option>';
             var fieldOptions = '<option value="">选择分类</option>';
+            var tree = buildProductCategoryTree();
+            var hasChildren = tree.some(function (parent) { return parent.children.length; });
 
-            productCategories.forEach(function (category) {
-                var value = category.id;
-                var label = category.name_en || category.slug || ('#' + category.id);
-                var option = '<option value="' + escapeHtml(value) + '">' + escapeHtml(label) + '</option>';
-                filterOptions += option;
-                fieldOptions += option;
-            });
+            if (hasChildren) {
+                tree.forEach(function (parent) {
+                    if (!parent.children.length) return;
+                    var parentLabel = categoryDisplayName(parent.category);
+                    filterOptions += '<optgroup label="' + escapeHtml(parentLabel) + '">';
+                    fieldOptions += '<optgroup label="' + escapeHtml(parentLabel) + '">';
+                    parent.children.forEach(function (category) {
+                        var value = category.id;
+                        var label = categoryDisplayName(category);
+                        var option = '<option value="' + escapeHtml(value) + '">' + escapeHtml(label) + '</option>';
+                        filterOptions += option;
+                        fieldOptions += option;
+                    });
+                    filterOptions += '</optgroup>';
+                    fieldOptions += '</optgroup>';
+                });
+            } else {
+                productCategories.forEach(function (category) {
+                    var value = category.id;
+                    var label = categoryDisplayName(category);
+                    var option = '<option value="' + escapeHtml(value) + '">' + escapeHtml(label) + '</option>';
+                    filterOptions += option;
+                    fieldOptions += option;
+                });
+            }
 
             if (filter) {
                 filter.innerHTML = filterOptions;
@@ -1631,22 +1711,60 @@
             }
             if (!activeCategoryId || !findProductCategory(activeCategoryId)) activeCategoryId = productCategories[0].id;
 
-            tbody.innerHTML = productCategories.map(function (category) {
+            var tree = buildProductCategoryTree();
+            var rows = [];
+
+            tree.forEach(function (parent) {
+                var category = parent.category;
                 var active = category.is_active !== 0;
                 var selected = String(activeCategoryId) === String(category.id);
-                return '<tr class="' + (selected ? 'row-active' : '') + '" data-category-row="' + escapeHtml(category.id) + '">' +
-                    '<td>' + escapeHtml(category.name_en || '—') + '</td>' +
-                    '<td class="cell-muted">' + escapeHtml(category.slug || '') + '</td>' +
-                    '<td>' + escapeHtml(category.sort_order || 0) + '</td>' +
-                    '<td><span class="badge ' + (active ? 'badge-green' : 'badge-navy') + '">' + (active ? '启用' : '停用') + '</span></td>' +
-                    '<td><div class="actions-cell"><button class="btn btn-icon btn-icon-edit" aria-label="编辑分类" data-edit-category="' + escapeHtml(category.id) + '">' + ICON_EDIT + '</button><button class="btn btn-icon btn-icon-delete" aria-label="删除分类" data-delete-category="' + escapeHtml(category.id) + '">' + ICON_DELETE + '</button></div></td>' +
-                    '</tr>';
-            }).join('');
+                var hasChildren = parent.children.length > 0;
+                var collapsed = hasChildren && collapsedCategoryParents[String(category.id)] === true;
+                var childLabel = hasChildren ? parent.children.length + ' 个子类' : '顶级父类';
+                rows.push(
+                    '<tr class="category-parent-row ' + (selected ? 'row-active' : '') + (collapsed ? ' is-collapsed' : '') + '" data-category-row="' + escapeHtml(category.id) + '" data-category-level="parent">' +
+                        '<td><div class="category-name-wrap category-name-parent">' +
+                            (hasChildren
+                                ? '<button type="button" class="category-tree-toggle" data-toggle-category="' + escapeHtml(category.id) + '" aria-label="' + (collapsed ? '展开子类' : '折叠子类') + '" aria-expanded="' + (collapsed ? 'false' : 'true') + '"></button>'
+                                : '<span class="category-tree-spacer"></span>') +
+                            '<div><strong>' + escapeHtml(categoryDisplayName(category)) + '</strong><small>' + escapeHtml(childLabel) + '</small></div>' +
+                        '</div></td>' +
+                        '<td class="cell-muted">' + escapeHtml(category.slug || '') + '</td>' +
+                        '<td>' + escapeHtml(category.sort_order || 0) + '</td>' +
+                        '<td><span class="badge ' + (active ? 'badge-green' : 'badge-navy') + '">' + (active ? '启用' : '停用') + '</span></td>' +
+                        '<td><div class="actions-cell"><button class="btn btn-icon btn-icon-edit" aria-label="编辑分类" data-edit-category="' + escapeHtml(category.id) + '">' + ICON_EDIT + '</button><button class="btn btn-icon btn-icon-delete" aria-label="删除分类" data-delete-category="' + escapeHtml(category.id) + '">' + ICON_DELETE + '</button></div></td>' +
+                    '</tr>'
+                );
+
+                if (collapsed) return;
+                parent.children.forEach(function (child) {
+                    var childActive = child.is_active !== 0;
+                    var childSelected = String(activeCategoryId) === String(child.id);
+                    rows.push(
+                        '<tr class="category-child-row ' + (childSelected ? 'row-active' : '') + '" data-category-row="' + escapeHtml(child.id) + '" data-category-level="child" data-category-parent="' + escapeHtml(category.id) + '">' +
+                            '<td><div class="category-name-wrap category-name-child"><span class="category-tree-branch"></span><div><strong>' + escapeHtml(categoryDisplayName(child)) + '</strong><small>归属：' + escapeHtml(categoryDisplayName(category)) + '</small></div></div></td>' +
+                            '<td class="cell-muted">' + escapeHtml(child.slug || '') + '</td>' +
+                            '<td>' + escapeHtml(child.sort_order || 0) + '</td>' +
+                            '<td><span class="badge ' + (childActive ? 'badge-green' : 'badge-navy') + '">' + (childActive ? '启用' : '停用') + '</span></td>' +
+                            '<td><div class="actions-cell"><button class="btn btn-icon btn-icon-edit" aria-label="编辑分类" data-edit-category="' + escapeHtml(child.id) + '">' + ICON_EDIT + '</button><button class="btn btn-icon btn-icon-delete" aria-label="删除分类" data-delete-category="' + escapeHtml(child.id) + '">' + ICON_DELETE + '</button></div></td>' +
+                        '</tr>'
+                    );
+                });
+            });
+
+            tbody.innerHTML = rows.join('');
 
             tbody.querySelectorAll('[data-category-row]').forEach(function (row) {
                 row.addEventListener('click', function (event) {
                     if (event.target && event.target.closest && event.target.closest('button')) return;
                     selectCategory(row.getAttribute('data-category-row'));
+                });
+            });
+            tbody.querySelectorAll('[data-toggle-category]').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var id = String(btn.getAttribute('data-toggle-category'));
+                    collapsedCategoryParents[id] = !collapsedCategoryParents[id];
+                    renderProductCategoriesTable();
                 });
             });
             tbody.querySelectorAll('[data-edit-category]').forEach(function (btn) {
@@ -1675,16 +1793,22 @@
                 return;
             }
             var active = category.is_active !== 0;
+            var childCount = parseInt(category.child_count || 0, 10);
+            var productCount = parseInt(category.product_count || 0, 10);
+            var roleLabel = category.parent_id == null ? '顶级父类' : '子类';
+            var parentLabel = category.parent_id == null ? '无' : (category.parent_name_en || category.parent_slug || category.parent_id);
             panel.className = 'category-detail-content';
             panel.innerHTML =
                 '<div class="category-detail-head"><strong>' + escapeHtml(category.name_en || '未命名分类') + '</strong><span class="badge ' + (active ? 'badge-green' : 'badge-navy') + '">' + (active ? '启用' : '停用') + '</span></div>' +
                 '<dl class="category-detail-meta">' +
                     '<div><dt>Slug</dt><dd>' + escapeHtml(category.slug || '—') + '</dd></div>' +
-                    '<div><dt>分类类型</dt><dd>' + escapeHtml(category.type || 'product') + '</dd></div>' +
-                    '<div><dt>父级分类</dt><dd>' + escapeHtml(category.parent_id || '无') + '</dd></div>' +
+                    '<div><dt>层级类型</dt><dd>' + escapeHtml(roleLabel) + '</dd></div>' +
+                    '<div><dt>父级分类</dt><dd>' + escapeHtml(parentLabel) + '</dd></div>' +
+                    '<div><dt>子类数量</dt><dd>' + escapeHtml(childCount) + '</dd></div>' +
+                    '<div><dt>关联产品</dt><dd>' + escapeHtml(productCount) + '</dd></div>' +
                     '<div><dt>排序</dt><dd>' + escapeHtml(category.sort_order || 0) + '</dd></div>' +
                 '</dl>' +
-                '<div class="category-impact-note">产品编辑器会通过下拉选择该分类，不需要手动填写分类 ID。</div>' +
+                '<div class="category-impact-note">' + (category.parent_id == null ? '父类用于产品体系分组，产品编辑时请选择它下面的子类。' : '产品编辑器会通过分组下拉选择该子类，不需要手动填写分类 ID。') + '</div>' +
                 '<div class="category-detail-actions"><button class="btn btn-primary btn-sm" type="button" data-edit-category="' + escapeHtml(category.id) + '">编辑分类</button></div>';
             panel.querySelectorAll('[data-edit-category]').forEach(function (btn) {
                 btn.addEventListener('click', function () { openCategoryModal(btn.getAttribute('data-edit-category')); });
@@ -1724,6 +1848,7 @@
             document.getElementById('cat-editing-id').value = id || '';
             document.getElementById('cat-sort-order').value = '0';
             slug.disabled = !!id;
+            populateCategoryParentSelect('', id);
 
             if (id) {
                 var category = findProductCategory(id);
@@ -1735,6 +1860,7 @@
                     document.getElementById('cat-name-ar').value = category.name_ar || '';
                     document.getElementById('cat-sort-order').value = category.sort_order || 0;
                     document.getElementById('cat-is-active').checked = category.is_active !== 0;
+                    populateCategoryParentSelect(category.parent_id, id);
                 }
             } else {
                 title.textContent = '新增分类';
@@ -1750,6 +1876,7 @@
             var nameEn = document.getElementById('cat-name-en').value.trim();
             var nameAr = document.getElementById('cat-name-ar').value.trim();
             var sortOrder = parseInt(document.getElementById('cat-sort-order').value, 10);
+            var parentId = document.getElementById('cat-parent-id').value || null;
             if (!nameEn && !nameAr) {
                 showToast('请填写分类名称', 'error');
                 return;
@@ -1759,6 +1886,7 @@
             var payload = id ? {
                 name_en: nameEn || nameAr,
                 name_ar: nameAr,
+                parent_id: parentId,
                 sort_order: sortOrder,
                 is_active: document.getElementById('cat-is-active').checked
             } : {
@@ -1766,6 +1894,7 @@
                 slug: slug,
                 name_en: nameEn || nameAr,
                 name_ar: nameAr,
+                parent_id: parentId,
                 sort_order: sortOrder
             };
 

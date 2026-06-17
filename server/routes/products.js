@@ -28,7 +28,10 @@ function mapSqliteProduct(row, specsByProduct, coverByProduct) {
     let group = row.product_group || '';
     let subCategory = row.sub_category || '';
 
-    if (!group || !VALID_GROUPS.has(group)) {
+    if (row.parent_slug) {
+        group = row.parent_slug;
+        subCategory = row.category_slug || subCategory;
+    } else if (!group || !VALID_GROUPS.has(group)) {
         const mapping = getCategoryMapping(row.category_slug);
         if (!mapping) return null;
         group = mapping.group;
@@ -43,6 +46,10 @@ function mapSqliteProduct(row, specsByProduct, coverByProduct) {
         category: row.category_slug || '',
         categoryLabel: row.category_label || '',
         categoryLabelAr: row.category_label_ar || '',
+        groupLabel: row.parent_label || '',
+        groupLabelAr: row.parent_label_ar || '',
+        subCategoryLabel: row.category_label || '',
+        subCategoryLabelAr: row.category_label_ar || '',
         group,
         subCategory,
         shortDesc: row.short_desc_en || '',
@@ -94,13 +101,18 @@ function readSqliteProducts(id) {
             p.*,
             c.slug AS category_slug,
             c.name_en AS category_label,
-            c.name_ar AS category_label_ar
+            c.name_ar AS category_label_ar,
+            parent.slug AS parent_slug,
+            parent.name_en AS parent_label,
+            parent.name_ar AS parent_label_ar
         FROM products p
         LEFT JOIN categories c ON c.id = p.category_id
+        LEFT JOIN categories parent ON parent.id = c.parent_id
         WHERE p.status = 'published'
             AND p.category_id IS NOT NULL
             AND c.id IS NOT NULL
             AND c.is_active = 1
+            AND (c.parent_id IS NULL OR parent.is_active = 1)
             ${idWhere}
         ORDER BY p.sort_order, p.id
     `).all(params);
