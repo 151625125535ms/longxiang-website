@@ -3304,16 +3304,28 @@
             }, obj || {});
         }
 
+        function isPathIndex(key) {
+            return /^\d+$/.test(String(key || ''));
+        }
+
         function setPathValue(obj, path, value) {
             var parts = path.split('.');
             var current = obj;
             parts.forEach(function (key, index) {
+                var targetKey = Array.isArray(current) && isPathIndex(key) ? Number(key) : key;
                 if (index === parts.length - 1) {
-                    current[key] = value;
+                    current[targetKey] = value;
                     return;
                 }
-                if (!current[key] || typeof current[key] !== 'object' || Array.isArray(current[key])) current[key] = {};
-                current = current[key];
+                var nextKey = parts[index + 1];
+                var shouldBeArray = isPathIndex(nextKey);
+                var nextValue = current[targetKey];
+                if (shouldBeArray) {
+                    if (!Array.isArray(nextValue)) current[targetKey] = [];
+                } else if (!nextValue || typeof nextValue !== 'object' || Array.isArray(nextValue)) {
+                    current[targetKey] = {};
+                }
+                current = current[targetKey];
             });
         }
 
