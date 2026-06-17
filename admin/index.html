@@ -211,53 +211,57 @@
 
             <div class="content-body">
                 <section class="view-section active" id="view-dashboard">
-                    <div class="section-header-bar"><h2>数据概览</h2></div>
                     <div class="dashboard-grid">
-                        <div class="stat-card"><div class="stat-card-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div><div class="stat-card-value" id="stat-total">0</div><div class="stat-card-label">产品总数</div></div>
-                        <div class="stat-card"><div class="stat-card-icon gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div><div class="stat-card-value" id="stat-featured">0</div><div class="stat-card-label">首页推荐产品</div></div>
-                        <div class="stat-card"><div class="stat-card-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div><div class="stat-card-value" id="stat-categories">0</div><div class="stat-card-label">产品分类</div></div>
-                        <div class="stat-card"><div class="stat-card-icon navy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><div class="stat-card-value" id="stat-inquiries">0</div><div class="stat-card-label">询盘总数</div></div>
-                        <div class="stat-card"><div class="stat-card-icon gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div><div class="stat-card-value" id="stat-new-inquiries">0</div><div class="stat-card-label">新询盘</div></div>
-                    </div>
-                    <div class="dashboard-pending-panel">
-                        <div class="dashboard-panel-header">
-                            <h3>待处理事项</h3>
-                            <span class="dashboard-panel-hint">点击卡片可进入对应模块</span>
+                        <div class="stat-card stat-card-products">
+                            <div class="stat-card-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div>
+                            <div><div class="stat-card-value" id="stat-total">0</div><div class="stat-card-label">产品总数</div><div class="stat-card-trend" id="stat-total-trend">正在加载</div></div>
                         </div>
-                        <div class="pending-cards-grid" id="dashboard-pending-cards">
-                            <button class="pending-card pending-card-loading" type="button" disabled><span>加载中...</span></button>
-                            <button class="pending-card pending-card-loading" type="button" disabled><span>加载中...</span></button>
-                            <button class="pending-card pending-card-loading" type="button" disabled><span>加载中...</span></button>
-                            <button class="pending-card pending-card-loading" type="button" disabled><span>加载中...</span></button>
+                        <div class="stat-card stat-card-featured">
+                            <div class="stat-card-icon gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+                            <div><div class="stat-card-value" id="stat-featured">0</div><div class="stat-card-label">推荐产品</div><div class="stat-card-trend" id="stat-featured-trend">首页展示位</div></div>
+                        </div>
+                        <div class="stat-card stat-card-categories">
+                            <div class="stat-card-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
+                            <div><div class="stat-card-value" id="stat-categories">0</div><div class="stat-card-label">产品分类</div><div class="stat-card-trend" id="stat-categories-trend">分类结构</div></div>
+                        </div>
+                        <div class="stat-card stat-card-inquiries">
+                            <div class="stat-card-icon navy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+                            <div><div class="stat-card-value" id="stat-inquiries">0</div><div class="stat-card-label">询盘总数</div><div class="stat-card-trend" id="stat-inquiries-trend">客户咨询</div></div>
+                        </div>
+                        <div class="stat-card stat-card-alert">
+                            <div class="stat-card-icon red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+                            <div><div class="stat-card-value" id="stat-new-inquiries">0</div><div class="stat-card-label">新询盘</div><div class="stat-card-trend danger" id="stat-new-inquiries-trend">待处理</div></div>
                         </div>
                     </div>
-                    <div class="section-header-bar"><h2>产品分类统计</h2></div>
-                    <div class="category-stats-grid" id="category-stats"></div>
 
-                    <div class="dashboard-bottom-row">
-                        <div class="dashboard-panel">
-                            <div class="dashboard-panel-header"><h3>快捷操作</h3></div>
-                            <div class="quick-actions-list">
-                                <button class="quick-action-btn" data-action="add-product" aria-label="新增产品">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><line x1="12" y1="22.08" x2="12" y2="12"/><line x1="3.27" y1="6.96" x2="12" y2="12.01"/><line x1="20.73" y1="6.96" x2="12" y2="12.01"/></svg>
-                                    新增产品
-                                </button>
-                                <button class="quick-action-btn" data-action="view-inquiries" aria-label="查看询盘">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                                    查看询盘
-                                </button>
-                                <button class="quick-action-btn" data-action="view-products" aria-label="产品列表">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-                                    产品列表
-                                </button>
-                                <button class="quick-action-btn" data-action="view-company" aria-label="公司信息">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                                    公司信息
-                                </button>
+                    <div class="dashboard-main-grid">
+                        <section class="dashboard-panel dashboard-pending-panel">
+                            <div class="dashboard-panel-header">
+                                <h3>待处理事项 <span class="dashboard-alert-count" id="dashboard-pending-count">0</span></h3>
+                                <a role="button" tabindex="0" data-action="view-inquiries">查看全部</a>
                             </div>
-                        </div>
+                            <div class="dashboard-pending-list" id="dashboard-pending-cards">
+                                <button class="pending-card pending-card-loading" type="button" disabled><span>加载中...</span></button>
+                            </div>
+                        </section>
 
-                        <div class="dashboard-panel">
+                        <section class="dashboard-panel dashboard-category-panel">
+                            <div class="dashboard-panel-header">
+                                <h3>产品分类统计</h3>
+                                <a role="button" tabindex="0" data-action="view-products">查看详情</a>
+                            </div>
+                            <div class="dashboard-category-body">
+                                <div class="dashboard-donut" id="dashboard-category-donut" style="--dashboard-donut: conic-gradient(#d8dee8 0deg 360deg);">
+                                    <div class="dashboard-donut-center"><strong id="dashboard-category-total">0</strong><span>总产品数</span></div>
+                                </div>
+                                <div class="category-stats-grid" id="category-stats">
+                                    <div class="category-stat-card"><span class="dashboard-legend-dot muted"></span><div><div class="category-stat-count">—</div><div class="category-stat-label">正在加载分类</div></div></div>
+                                </div>
+                            </div>
+                            <div class="dashboard-panel-foot" id="dashboard-category-footnote">正在同步分类数据</div>
+                        </section>
+
+                        <section class="dashboard-panel dashboard-recent-panel">
                             <div class="dashboard-panel-header">
                                 <h3>最新询盘</h3>
                                 <a role="button" tabindex="0" data-action="view-inquiries">查看全部</a>
@@ -265,7 +269,31 @@
                             <div class="recent-inquiry-list" id="recent-inquiries-list">
                                 <p class="recent-inquiries-empty">加载中...</p>
                             </div>
-                        </div>
+                        </section>
+                    </div>
+
+                    <div class="dashboard-bottom-row">
+                        <section class="dashboard-panel dashboard-quick-panel">
+                            <div class="dashboard-panel-header"><h3>快捷操作</h3></div>
+                            <div class="quick-actions-list">
+                                <button class="quick-action-btn" data-action="add-product" aria-label="新增产品"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg><span>新增产品</span></button>
+                                <button class="quick-action-btn" data-action="view-inquiries" aria-label="查看询盘"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>查看询盘</span><em id="quick-inquiry-badge">0</em></button>
+                                <button class="quick-action-btn" data-action="view-content" aria-label="内容管理"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span>内容管理</span></button>
+                                <button class="quick-action-btn" data-action="view-certifications" aria-label="证书管理"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 15l3-3 4 4"/><path d="M20 14V5a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8"/></svg><span>证书管理</span></button>
+                                <button class="quick-action-btn" data-action="view-assets" aria-label="资源库"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><span>资源库</span></button>
+                                <button class="quick-action-btn" data-action="view-settings" aria-label="系统设置"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21a2 2 0 0 1-4 0v-.09A1.7 1.7 0 0 0 8.6 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1H4a2 2 0 0 1 0-4h.09a1.7 1.7 0 0 0 .51-1.4 1.7 1.7 0 0 0-.34-1.88l-.06-.06A2 2 0 1 1 7.03 3.8l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1.1V3a2 2 0 0 1 4 0v.09a1.7 1.7 0 0 0 1 1.51 1.7 1.7 0 0 0 1.88-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9c.2.36.42.7.6 1h.09a2 2 0 0 1 0 4H20a1.7 1.7 0 0 0-.6 1z"/></svg><span>系统设置</span></button>
+                            </div>
+                        </section>
+
+                        <section class="dashboard-panel dashboard-system-panel">
+                            <div class="dashboard-panel-header"><h3>系统状态</h3></div>
+                            <div class="dashboard-system-list" id="dashboard-system-status">
+                                <div class="dashboard-system-item"><span class="system-dot"></span><strong>服务器状态</strong><em>检测中</em></div>
+                                <div class="dashboard-system-item"><span class="system-dot"></span><strong>数据库连接</strong><em>检测中</em></div>
+                                <div class="dashboard-system-item"><span class="system-dot"></span><strong>存储空间</strong><em>检测中</em></div>
+                                <div class="dashboard-system-item"><span class="system-dot"></span><strong>API 服务</strong><em>检测中</em></div>
+                            </div>
+                        </section>
                     </div>
                 </section>
 
