@@ -2743,7 +2743,7 @@
             if (empty) empty.remove();
             var row = document.createElement('div');
             row.className = 'spec-row';
-            row.innerHTML = '<input type="text" class="spec-key" placeholder="参数名" value="' + escapeHtml(key) + '"><input type="text" class="spec-value" placeholder="参数值" value="' + escapeHtml(value) + '"><button type="button" class="btn-remove-spec">×</button>';
+            row.innerHTML = '<input type="text" class="spec-key bidi-field" dir="auto" placeholder="参数名" value="' + escapeHtml(key) + '"><input type="text" class="spec-value bidi-field" dir="auto" placeholder="参数值" value="' + escapeHtml(value) + '"><button type="button" class="btn-remove-spec">×</button>';
             row.querySelector('.btn-remove-spec').addEventListener('click', function () { row.remove(); });
             list.appendChild(row);
         }
@@ -2814,7 +2814,8 @@
                 cover_image: getFieldValue('field-cover-image') || uploadedImagePath,
                 seo_title: getFieldValue('field-seo-title'),
                 seo_description: getFieldValue('field-seo-description'),
-                seo_keywords: getFieldValue('field-seo-keywords')
+                seo_keywords: getFieldValue('field-seo-keywords'),
+                specs: getSpecsFromForm()
             };
             if (editingProductId) payload.version = editingProductVersion;
             var submittedCoverImage = payload.cover_image || '';

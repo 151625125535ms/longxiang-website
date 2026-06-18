@@ -43,6 +43,10 @@
         return product[field] || '';
     }
 
+    function rtlTextAttrs(className) {
+        return isArabic ? ' dir="rtl" lang="ar" class="' + (className || 'rtl-product-text') + '"' : '';
+    }
+
     function normalizeImagePath(path) {
         path = String(path || '').trim().replace(/\\/g, '/');
         if (!path) return '';
@@ -100,8 +104,8 @@
                     (imagePath ? '<img src="' + escapeHtml(imagePath) + '" alt="' + escapeHtml(name) + '" loading="lazy">' : '') +
                 '</div>' +
                 '<div class="product-card-body">' +
-                    '<h4>' + escapeHtml(name) + '</h4>' +
-                    '<p>' + escapeHtml(desc) + '</p>' +
+                    '<h4' + rtlTextAttrs('rtl-product-text') + '>' + escapeHtml(name) + '</h4>' +
+                    '<p' + rtlTextAttrs('rtl-product-text') + '>' + escapeHtml(desc) + '</p>' +
                 '</div>' +
             '</a>' +
             '<div class="product-card-footer">' +

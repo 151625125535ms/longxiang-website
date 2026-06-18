@@ -71,7 +71,17 @@
         if (!el && id === 'breadcrumb-product') {
             el = document.querySelector('.page-hero .breadcrumb .current');
         }
-        if (el) el.textContent = value;
+        if (el) {
+            el.textContent = value;
+            applyArabicTextDirection(el, 'rtl');
+        }
+    }
+
+    function applyArabicTextDirection(el, direction) {
+        if (!el || !isArabic) return;
+        el.setAttribute('dir', direction || 'rtl');
+        el.setAttribute('lang', 'ar');
+        el.classList.add(direction === 'auto' ? 'bidi-product-text' : 'rtl-product-text');
     }
 
     function setLoading() {
@@ -91,6 +101,7 @@
             desc.innerHTML = escapeHtml(notFoundLabel('text')) +
                 ' <a href="' + escapeHtml(productPageContent.notFound && productPageContent.notFound.backHref || 'products.html') + '">' +
                 escapeHtml(notFoundLabel('backLabel')) + '</a>';
+            applyArabicTextDirection(desc, 'rtl');
         }
 
         var specs = document.querySelector('.product-detail-specs');
@@ -165,7 +176,8 @@
             specsBody.innerHTML = '';
             (product.specs || []).forEach(function (spec) {
                 var row = document.createElement('tr');
-                row.innerHTML = '<td>' + escapeHtml(spec[0]) + '</td><td>' + escapeHtml(spec[1]) + '</td>';
+                var cellAttrs = isArabic ? ' dir="auto" lang="ar" class="bidi-product-text"' : '';
+                row.innerHTML = '<td' + cellAttrs + '>' + escapeHtml(spec[0]) + '</td><td' + cellAttrs + '>' + escapeHtml(spec[1]) + '</td>';
                 specsBody.appendChild(row);
             });
         }

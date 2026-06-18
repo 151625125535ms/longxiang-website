@@ -98,6 +98,75 @@ function normalizeStatus(value, defaultValue) {
     return STATUSES.indexOf(status) !== -1 ? status : null;
 }
 
+function normalizeProductSpecs(value) {
+    if (value == null || value === '') return [];
+
+    let source = value;
+    if (typeof source === 'string') {
+        try {
+            source = JSON.parse(source);
+        } catch (err) {
+            return [];
+        }
+    }
+    if (!Array.isArray(source)) return [];
+
+    return source.map(function (item, index) {
+        let specGroup = 'technical';
+        let specKey = '';
+        let specValue = '';
+        let unit = '';
+        let sortOrder = index;
+
+        if (Array.isArray(item)) {
+            specKey = item[0] == null ? '' : String(item[0]).trim();
+            specValue = item[1] == null ? '' : String(item[1]).trim();
+            unit = item[2] == null ? '' : String(item[2]).trim();
+        } else if (item && typeof item === 'object') {
+            specGroup = firstText(item.spec_group, item.group, item.group_name, 'technical');
+            specKey = firstText(item.spec_key, item.key, item.name, item.label);
+            specValue = firstText(item.spec_value, item.value, item.text);
+            unit = item.unit == null ? '' : String(item.unit).trim();
+            sortOrder = parseInteger(item.sort_order, index);
+        }
+
+        return {
+            spec_group: specGroup || 'technical',
+            spec_key: specKey,
+            spec_value: specValue,
+            unit,
+            sort_order: sortOrder
+        };
+    }).filter(function (spec) {
+        return spec.spec_key || spec.spec_value;
+    });
+}
+
+function replaceProductSpecs(db, productId, specs, timestamp) {
+    db.prepare('DELETE FROM product_specs WHERE product_id = ?').run(productId);
+    if (!specs || !specs.length) return;
+
+    const insertSpec = db.prepare(`
+        INSERT INTO product_specs
+            (product_id, spec_group, spec_key, spec_value, unit, sort_order, created_at, updated_at)
+        VALUES
+            (@product_id, @spec_group, @spec_key, @spec_value, @unit, @sort_order, @created_at, @updated_at)
+    `);
+
+    specs.forEach(function (spec, index) {
+        insertSpec.run({
+            product_id: productId,
+            spec_group: spec.spec_group || 'technical',
+            spec_key: spec.spec_key || '',
+            spec_value: spec.spec_value || '',
+            unit: spec.unit || '',
+            sort_order: parseInteger(spec.sort_order, index),
+            created_at: timestamp,
+            updated_at: timestamp
+        });
+    });
+}
+
 function resolveProductCategoryMapping(db, categoryIdValue) {
     const categoryId = parseInteger(categoryIdValue, null);
     if (!categoryId) {
@@ -420,7 +489,9 @@ router.post('/', function (req, res, next) {
                 updated_at: now
             });
 
-            const product = getFullProduct(db, result.lastInsertRowid);
+            const productId = result.lastInsertRowid;
+            replaceProductSpecs(db, productId, normalizeProductSpecs(body.specs), now);
+            const product = getFullProduct(db, productId);
             replaceCoverImage(db, product.id, coverPath, now);
             insertAuditLog(db, req, 'product', product.id, 'create', null, product);
             return getFullProduct(db, product.id);
@@ -512,6 +583,9 @@ router.put('/:id', function (req, res, next) {
                 updated_at: timestamp
             });
 
+            if (body.specs !== undefined) {
+                replaceProductSpecs(db, before.id, normalizeProductSpecs(body.specs), timestamp);
+            }
             replaceCoverImage(db, before.id, coverPath, timestamp);
             const afterAudit = getAuditProduct(db, before.id);
             insertAuditLog(db, req, 'product', before.id, 'update', before, afterAudit);

@@ -6,7 +6,7 @@
     <title>龙翔电气网站后台</title>
     <link rel="icon" type="image/webp" href="../assets/optimized/longxiang-logo-symbol-320.webp?v=20260618-imgopt2">
     <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png?v=20260615-lxdq">
-    <link rel="stylesheet" href="css/admin.css?v=3">
+    <link rel="stylesheet" href="css/admin.css?v=4">
 </head>
 <body>
     <div class="admin-layout" id="admin-page">
@@ -928,17 +928,17 @@
                                         <div class="form-group"><label>中文名称</label><input type="text" id="field-nameCn" placeholder="按产品编号自动匹配，可留空" readonly></div>
                                         <div class="form-group"><label>英文名称 <span class="required">*</span></label><input type="text" id="field-name"></div>
                                     </div>
-                                    <div class="form-group"><label>阿拉伯语名称</label><input type="text" id="field-nameAr" dir="rtl"></div>
+                                    <div class="form-group"><label>阿拉伯语名称</label><input type="text" id="field-nameAr" class="rtl-field" dir="rtl" lang="ar"></div>
                                 </section>
 
                                 <section class="form-section product-form-section">
                                     <h3 class="form-section-title">简介与详情</h3>
                                     <div class="form-row">
                                         <div class="form-group"><label>英文短描述</label><input type="text" id="field-shortDesc"></div>
-                                        <div class="form-group"><label>阿拉伯语短描述</label><input type="text" id="field-shortDescAr" dir="rtl"></div>
+                                        <div class="form-group"><label>阿拉伯语短描述</label><input type="text" id="field-shortDescAr" class="rtl-field" dir="rtl" lang="ar"></div>
                                     </div>
                                     <div class="form-group"><label>英文详情</label><textarea id="field-description" rows="4"></textarea></div>
-                                    <div class="form-group"><label>阿拉伯语详情</label><textarea id="field-descriptionAr" rows="4" dir="rtl"></textarea></div>
+                                    <div class="form-group"><label>阿拉伯语详情</label><textarea id="field-descriptionAr" class="rtl-field" rows="4" dir="rtl" lang="ar"></textarea></div>
                                 </section>
 
                                 <section class="form-section product-form-section">
@@ -951,9 +951,9 @@
 
                                 <section class="form-section product-form-section">
                                     <h3 class="form-section-title">SEO 信息</h3>
-                                    <div class="form-group"><label>SEO 标题</label><input type="text" id="field-seo-title"></div>
-                                    <div class="form-group"><label>SEO 描述</label><textarea id="field-seo-description" rows="3"></textarea></div>
-                                    <div class="form-group"><label>SEO 关键词</label><input type="text" id="field-seo-keywords" placeholder="多个关键词用逗号分隔"></div>
+                                    <div class="form-group"><label>SEO 标题</label><input type="text" id="field-seo-title" class="bidi-field" dir="auto"></div>
+                                    <div class="form-group"><label>SEO 描述</label><textarea id="field-seo-description" class="bidi-field" rows="3" dir="auto"></textarea></div>
+                                    <div class="form-group"><label>SEO 关键词</label><input type="text" id="field-seo-keywords" class="bidi-field" dir="auto" placeholder="多个关键词用逗号分隔"></div>
                                 </section>
                             </div>
 
@@ -1119,6 +1119,6 @@
         <div class="toast-container" id="toast-container"></div>
     </div>
     <script src="js/pagination.js"></script>
-    <script src="js/admin.js?v=3"></script>
+    <script src="js/admin.js?v=4"></script>
 </body>
 </html>

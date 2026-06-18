@@ -3352,6 +3352,26 @@ p:last-child {
     text-align: right;
 }
 
+.rtl-product-text {
+    direction: rtl;
+    text-align: right;
+    unicode-bidi: plaintext;
+}
+
+.bidi-product-text {
+    unicode-bidi: plaintext;
+}
+
+[dir="rtl"] .product-card-body h4,
+[dir="rtl"] .product-card-body p,
+[dir="rtl"] #product-title,
+[dir="rtl"] #product-desc,
+[dir="rtl"] #page-title,
+[dir="rtl"] #page-subtitle,
+[dir="rtl"] .product-specs-table td {
+    unicode-bidi: plaintext;
+}
+
 @media (max-width: 1024px) {
     .certifications-grid,
     .download-grid,
@@ -9495,7 +9515,12 @@ p:last-child {
 [dir="rtl"] .inquiry-form input,
 [dir="rtl"] .inquiry-form textarea,
 [dir="rtl"] .inquiry-form select,
-[dir="rtl"] .footer-quote-form textarea {
+[dir="rtl"] .footer-quote-form textarea,
+[dir="rtl"] .rtl-product-text,
+[dir="rtl"] #product-title,
+[dir="rtl"] #product-desc,
+[dir="rtl"] #page-title,
+[dir="rtl"] #page-subtitle {
     direction: rtl;
     text-align: right;
 }
@@ -9508,6 +9533,12 @@ p:last-child {
 [dir="rtl"] [data-company-field="phone"],
 [dir="rtl"] .footer-contact-value,
 [dir="rtl"] .product-card-body h4,
+[dir="rtl"] .product-card-body p,
+[dir="rtl"] #product-title,
+[dir="rtl"] #product-desc,
+[dir="rtl"] #page-title,
+[dir="rtl"] #page-subtitle,
+[dir="rtl"] .product-specs-table td,
 [dir="rtl"] .product-detail-info h1,
 [dir="rtl"] .comparison-table th,
 [dir="rtl"] .comparison-table td {

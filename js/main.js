@@ -1512,14 +1512,15 @@
             var desc = isArabic ? (product.shortDescAr || product.shortDesc || '') : (product.shortDesc || '');
             var detail = (isArabic ? 'product-detail.html' : 'product-detail.html') + '?id=' + encodeURIComponent(product.id);
             var imagePath = resolveAssetPath(product.image);
+            var textAttrs = isArabic ? ' dir="rtl" lang="ar" class="rtl-product-text"' : '';
             card.innerHTML =
                 '<a class="product-card-clickarea" href="' + detail + '">' +
                     '<div class="product-card-image">' +
                         (imagePath ? '<img src="' + escapeHtml(imagePath) + '" alt="' + escapeHtml(name) + '" loading="lazy">' : '') +
                     '</div>' +
                     '<div class="product-card-body">' +
-                        '<h4>' + escapeHtml(name) + '</h4>' +
-                        '<p>' + escapeHtml(desc) + '</p>' +
+                        '<h4' + textAttrs + '>' + escapeHtml(name) + '</h4>' +
+                        '<p' + textAttrs + '>' + escapeHtml(desc) + '</p>' +
                     '</div>' +
                 '</a>' +
                 '<div class="product-card-footer">' +
