@@ -31,7 +31,7 @@
     var optimizedImages = {
         'longxiang-logo-symbol.png': {
             src: 'assets/optimized/longxiang-logo-symbol-320.webp',
-            fallback: 'longxiang-logo-symbol.png',
+            fallback: 'longxiang-logo-symbol.png?v=20260618-imgopt1',
             width: 320,
             height: 336
         },
