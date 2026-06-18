@@ -28,6 +28,79 @@
         return assetPrefix + path.replace(/^\/+/, '');
     }
 
+    var optimizedImages = {
+        'longxiang-logo-symbol.png': {
+            src: 'assets/optimized/longxiang-logo-symbol-320.webp',
+            fallback: 'longxiang-logo-symbol.png',
+            width: 320,
+            height: 336
+        },
+        'longxiang-factory-gate.jpg': {
+            sources: [
+                { maxWidth: 768, src: 'assets/optimized/longxiang-factory-gate-768.webp' },
+                { src: 'assets/optimized/longxiang-factory-gate-1147.webp' }
+            ]
+        },
+        '5\u3001\u5382\u533a\u5382\u8c8c/\u9f99\u7fd4\u516c\u53f8\u6b63\u95e8.jpg': {
+            sources: [
+                { maxWidth: 768, src: 'assets/optimized/longxiang-factory-main-768.webp' },
+                { maxWidth: 1440, src: 'assets/optimized/longxiang-factory-main-1280.webp' },
+                { src: 'assets/optimized/longxiang-factory-main-1920.webp' }
+            ]
+        }
+    };
+
+    function normalizeAssetKey(path) {
+        path = String(path || '').trim().replace(/\\/g, '/').replace(/^\.?\//, '').replace(/^\/+/, '');
+        try {
+            path = decodeURIComponent(path);
+        } catch (err) {
+            // Keep the original path when it is not URL encoded.
+        }
+        return path;
+    }
+
+    function getOptimizedImage(path) {
+        return optimizedImages[normalizeAssetKey(path)] || null;
+    }
+
+    function selectResponsiveSource(sources) {
+        if (!Array.isArray(sources) || !sources.length) return '';
+        var viewportWidth = window.innerWidth || document.documentElement.clientWidth || 1280;
+        for (var i = 0; i < sources.length; i += 1) {
+            if (!sources[i].maxWidth || viewportWidth <= sources[i].maxWidth) {
+                return sources[i].src;
+            }
+        }
+        return sources[sources.length - 1].src;
+    }
+
+    function cssUrl(path) {
+        return "url('" + resolveAsset(path).replace(/'/g, "\\'") + "')";
+    }
+
+    function setOptimizedBackground(element, path) {
+        var optimized = getOptimizedImage(path);
+        var source = optimized && optimized.sources ? selectResponsiveSource(optimized.sources) : '';
+        element.style.backgroundImage = cssUrl(source || path);
+    }
+
+    function setOptimizedImage(image, path, alt) {
+        var optimized = getOptimizedImage(path);
+        var source = optimized && optimized.src ? optimized.src : path;
+        image.src = resolveAsset(source);
+        image.alt = alt || '';
+        image.decoding = 'async';
+        if (optimized && optimized.width) image.width = optimized.width;
+        if (optimized && optimized.height) image.height = optimized.height;
+        if (optimized && optimized.fallback) {
+            image.onerror = function () {
+                image.onerror = null;
+                image.src = resolveAsset(optimized.fallback);
+            };
+        }
+    }
+
     function localized(item, key) {
         if (!item) return '';
         if (isArabic) {
@@ -676,10 +749,9 @@
         var actions = heroEl.querySelector('.hero-hex-actions');
         var proof = heroEl.querySelector('.hero-proof-strip');
 
-        if (bg && hero.backgroundImage) bg.style.backgroundImage = "url('" + resolveAsset(hero.backgroundImage).replace(/'/g, "\\'") + "')";
-        if (logo && hero.logo) {
-            logo.src = resolveAsset(hero.logo);
-            logo.alt = localized(hero, 'logoAlt') || 'Longxiang Electrical logo';
+        if (bg && hero.backgroundImage) setOptimizedBackground(bg, hero.backgroundImage);
+        if (logo && hero.logo && getComputedStyle(logo).display !== 'none') {
+            setOptimizedImage(logo, hero.logo, localized(hero, 'logoAlt') || 'Longxiang Electrical logo');
         }
         if (title && localized(hero, 'title')) title.textContent = localized(hero, 'title');
         if (subtitle && localized(hero, 'subtitle')) subtitle.textContent = localized(hero, 'subtitle');
