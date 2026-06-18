@@ -4,7 +4,8 @@ set -euo pipefail
 ROOT_DIR="${LONGXIANG_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 SITE_URL="${SITE_URL:-https://www.lxenelectric.com/}"
 LOCAL_HEALTH_URL="${LOCAL_HEALTH_URL:-http://127.0.0.1:3000/api/health}"
-CERT_FILE="${CERT_FILE:-/etc/letsencrypt/live/lxenelectric.com/fullchain.pem}"
+SSL_HOST="${SSL_HOST:-www.lxenelectric.com}"
+SSL_PORT="${SSL_PORT:-443}"
 PM2_NAME="${PM2_NAME:-longxiang-website}"
 DISK_PATH="${DISK_PATH:-${ROOT_DIR}}"
 DISK_WARN_PERCENT="${DISK_WARN_PERCENT:-85}"
@@ -37,15 +38,17 @@ else
     fail "local node health endpoint unreachable: ${LOCAL_HEALTH_URL}"
 fi
 
-if [ -f "${CERT_FILE}" ]; then
-    if openssl x509 -checkend "$((CERT_WARN_DAYS * 86400))" -noout -in "${CERT_FILE}" >/dev/null; then
-        pass "origin certificate valid for more than ${CERT_WARN_DAYS} days"
+cert_tmp="$(mktemp)"
+if timeout 15 sh -c "printf '' | openssl s_client -servername '${SSL_HOST}' -connect '${SSL_HOST}:${SSL_PORT}' 2>/dev/null | openssl x509 -out '${cert_tmp}'" && [ -s "${cert_tmp}" ]; then
+    if openssl x509 -checkend "$((CERT_WARN_DAYS * 86400))" -noout -in "${cert_tmp}" >/dev/null; then
+        pass "public TLS certificate valid for more than ${CERT_WARN_DAYS} days: ${SSL_HOST}"
     else
-        fail "origin certificate expires within ${CERT_WARN_DAYS} days"
+        fail "public TLS certificate expires within ${CERT_WARN_DAYS} days: ${SSL_HOST}"
     fi
 else
-    fail "certificate file missing: ${CERT_FILE}"
+    fail "unable to read public TLS certificate: ${SSL_HOST}:${SSL_PORT}"
 fi
+rm -f "${cert_tmp}"
 
 disk_used="$(df -P "${DISK_PATH}" | awk 'NR==2 { gsub("%", "", $5); print $5 }')"
 if [ -n "${disk_used}" ] && [ "${disk_used}" -lt "${DISK_WARN_PERCENT}" ]; then
