@@ -2,7 +2,7 @@
 
 记录日期：2026-06-18  
 正式域名：`https://www.lxenelectric.com/`  
-最新代码版本：`430aed7`
+代码版本：以 `main` 当前 HEAD 为准，本地、GitHub、服务器需保持一致。
 
 ## 已完成并验证
 
@@ -115,44 +115,44 @@ Sitemap: https://www.lxenelectric.com/sitemap.xml
 https://www.lxenelectric.com/
 ```
 
-## 待账号控制台确认
+## 账号控制台项
 
 ### AWS Lightsail 服务器快照
 
-当前状态：待确认。
+当前状态：已确认。
 
-原因：服务器没有 AWS CLI、没有可用 AWS 环境凭据，也未确认到可用 IAM 实例角色，因此无法通过命令行读取 Lightsail 自动快照设置。
+确认来源：AWS Lightsail 控制台截图。
 
-需要用户在 AWS Lightsail 控制台确认：
+确认页面：
 
 ```text
 Lightsail -> Ubuntu-1 -> 快照 / Snapshots -> 自动快照
 ```
 
-确认目标：
+确认结果：
 
 - 自动快照已开启
-- 快照对象为当前实例 `Ubuntu-1`
-- 快照时间和保留策略可接受
+- 每日快照时间为 GMT+8 22:00
+- Lightsail 将保留最近七个自动快照
+- 截图时尚未生成第一份每日快照，等待下一个计划时间自动创建
 
 ### Cloudflare WAF 基础规则
 
-当前状态：待确认。
+当前状态：已确认。
 
-原因：当前环境没有 Cloudflare API Token，无法通过 API 读取 WAF managed ruleset 状态。
+确认来源：Cloudflare 控制台截图。
 
-需要用户在 Cloudflare 控制台确认：
+确认页面：
 
 ```text
 Cloudflare -> lxenelectric.com -> Security -> WAF -> Managed rules
 ```
 
-确认目标：
+确认结果：
 
-- `Cloudflare Managed Ruleset` 为启用状态
-- HTTP DDoS / Network-layer DDoS 保持启用
-- 不开启会误伤正常访问的严格挑战规则
+- `Cloudflare managed ruleset` 显示为 `Always active`
+- 覆盖标签包括 `Web application exploits`、`DDoS attacks`、`Bot traffic`、`API abuse`
 
-## 后续完成标准
+## 完成结论
 
-收到 AWS Lightsail 自动快照截图和 Cloudflare WAF Managed rules 截图后，逐项确认无误，即可将本次上线收口目标标记为完成。
+上线收口目标已完成。后续只需要在第一次自动快照计划时间后，回到 Lightsail 快照页面确认每日快照列表开始出现即可。
