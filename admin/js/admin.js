@@ -377,6 +377,8 @@
         var activeCategoryId = null;
         var collapsedCategoryParents = {};
         var formDirty = false;
+        var menuVisibilitySettings = null;
+        var dashboardDataCache = null;
         var dirtyMessage = '当前有未保存的修改，是否确认离开？离开后修改将丢失。';
         var activeModalTrigger = null;
         var suppressHashChange = false;
@@ -404,7 +406,7 @@
             'cert-test-reports': { title: '检测报告', group: 'certificates', groupLabel: '证书', breadcrumb: '证书 › 检测报告', description: '管理检测报告资料与展示状态。' },
             assets: { title: '资源库', group: 'resources', groupLabel: '资源', breadcrumb: '资源 › 资源库', description: '管理已上传图片和文件资源。' },
             'audit-logs': { title: '审计日志', group: 'system', groupLabel: '系统', breadcrumb: '系统 › 审计日志', description: '查看后台关键操作记录。' },
-            'settings-modules': { title: '模块开关', group: 'system', groupLabel: '系统', breadcrumb: '系统 › 模块开关', description: '控制后台与网站模块的启用状态。' },
+            'settings-modules': { title: '菜单显示设置', group: 'system', groupLabel: '系统', breadcrumb: '系统 › 菜单显示', description: '控制后台左侧菜单和控制台快捷入口是否显示，不影响数据、接口和前台页面。' },
             'system-status': { title: '系统状态', group: 'system', groupLabel: '系统', breadcrumb: '系统 › 系统状态', description: '查看服务、存储和运行状态。' },
             trash: { title: '回收站', group: 'system', groupLabel: '系统', breadcrumb: '系统 › 回收站', description: '恢复或永久删除已移入回收站的内容。' }
         };
@@ -624,6 +626,7 @@
         bindSystemSettingsEvents();
         bindTrashEvents();
         bindAssetsEvents();
+        loadMenuVisibilitySettings({ silent: true });
         loadProductCategories();
         loadCertificationCategories();
         bindHashRouting();
@@ -689,6 +692,10 @@
             var addProduct = document.getElementById('header-add-product');
             if (addProduct) {
                 addProduct.addEventListener('click', function () {
+                    if (!isMenuVisible('products')) {
+                        showToast('产品入口已在菜单显示设置中隐藏', 'error');
+                        return;
+                    }
                     if (!switchView('products')) return;
                     setTimeout(function () { openProductModal(null); }, 50);
                 });
@@ -697,13 +704,23 @@
             var newInquiries = document.getElementById('header-new-inquiries');
             if (newInquiries) {
                 newInquiries.addEventListener('click', function () {
+                    if (!isMenuVisible('inquiries')) {
+                        showToast('询盘入口已在菜单显示设置中隐藏', 'error');
+                        return;
+                    }
                     if (!switchView('inquiries')) return;
                     setInquiryUnreadFilter(true);
                 });
             }
 
             var assetsButton = document.getElementById('header-assets');
-            if (assetsButton) assetsButton.addEventListener('click', function () { switchView('assets'); });
+            if (assetsButton) assetsButton.addEventListener('click', function () {
+                if (!isMenuVisible('assets')) {
+                    showToast('资源库入口已在菜单显示设置中隐藏', 'error');
+                    return;
+                }
+                switchView('assets');
+            });
 
             var refreshButton = document.getElementById('header-refresh');
             if (refreshButton) refreshButton.addEventListener('click', reloadCurrentView);
@@ -954,6 +971,118 @@
             } catch (err) {}
         }
 
+        function isProtectedMenuKey(key) {
+            return key === 'dashboard' || key === 'settings';
+        }
+
+        function defaultMenuVisibilitySettings() {
+            return moduleKeys().reduce(function (result, key) {
+                result[key] = true;
+                return result;
+            }, {});
+        }
+
+        function hasOwn(obj, key) {
+            return !!obj && Object.prototype.hasOwnProperty.call(obj, key);
+        }
+
+        function normalizeVisibilityValue(value) {
+            return !(value === false || value === 0 || value === '0' || value === 'false');
+        }
+
+        function normalizeMenuVisibilitySettings(data) {
+            var normalized = defaultMenuVisibilitySettings();
+            data = data || {};
+            moduleKeys().forEach(function (key) {
+                if (hasOwn(data, key)) normalized[key] = normalizeVisibilityValue(data[key]);
+            });
+            if (!hasOwn(data, 'visual') && hasOwn(data, 'content')) {
+                normalized.visual = normalizeVisibilityValue(data.content);
+            }
+            Object.keys(normalized).forEach(function (key) {
+                if (isProtectedMenuKey(key)) normalized[key] = true;
+            });
+            return normalized;
+        }
+
+        function setElementVisible(el, visible) {
+            if (!el) return;
+            el.hidden = !visible;
+            el.setAttribute('aria-hidden', visible ? 'false' : 'true');
+        }
+
+        function menuKeyForView(view) {
+            if (!view) return '';
+            if (view === 'dashboard') return 'dashboard';
+            if (view === 'products' || view === 'categories') return 'products';
+            if (view === 'visual-builder') return 'visual';
+            if (view === 'inquiries') return 'inquiries';
+            if (view === 'assets') return 'assets';
+            if (view.indexOf('cert-') === 0) return 'certifications';
+            if (view === 'audit-logs' || view === 'settings-modules' || view === 'system-status' || view === 'trash') return 'settings';
+            return '';
+        }
+
+        function dashboardActionMenuKey(action, targetView) {
+            if (action === 'todo') return menuKeyForView(targetView);
+            if (action === 'add-product' || action === 'view-products' || action === 'view-product-drafts' || action === 'view-categories') return 'products';
+            if (action === 'view-inquiries' || action === 'view-unread-inquiries' || action === 'view-new-inquiries') return 'inquiries';
+            if (action === 'view-assets') return 'assets';
+            if (action === 'view-certifications') return 'certifications';
+            if (action === 'view-visual-builder' || action === 'open-visual') return 'visual';
+            if (action === 'view-system-status') return 'settings';
+            return '';
+        }
+
+        function isMenuVisible(key) {
+            if (!key || isProtectedMenuKey(key)) return true;
+            var settings = menuVisibilitySettings || defaultMenuVisibilitySettings();
+            return settings[key] !== false;
+        }
+
+        function isDashboardActionVisible(action, targetView) {
+            return isMenuVisible(dashboardActionMenuKey(action, targetView));
+        }
+
+        function syncDashboardEntryVisibility() {
+            var dashboard = document.getElementById('view-dashboard');
+            if (!dashboard) return;
+            dashboard.querySelectorAll('[data-action]').forEach(function (el) {
+                setElementVisible(el, isDashboardActionVisible(el.getAttribute('data-action'), el.getAttribute('data-target-view') || ''));
+            });
+            dashboard.querySelectorAll('[data-dashboard-action]').forEach(function (el) {
+                setElementVisible(el, isDashboardActionVisible(el.getAttribute('data-dashboard-action'), el.getAttribute('data-target-view') || ''));
+            });
+        }
+
+        function applyMenuVisibilitySettings(settings) {
+            menuVisibilitySettings = normalizeMenuVisibilitySettings(settings);
+            var groupMap = {
+                overview: 'dashboard',
+                products: 'products',
+                visual: 'visual',
+                certificates: 'certifications',
+                inquiries: 'inquiries',
+                resources: 'assets',
+                system: 'settings'
+            };
+
+            document.querySelectorAll('.nav-group').forEach(function (groupEl) {
+                var group = groupEl.getAttribute('data-group');
+                if (!hasOwn(groupMap, group)) return;
+                setElementVisible(groupEl, isMenuVisible(groupMap[group]));
+            });
+
+            setElementVisible(document.getElementById('header-add-product'), isMenuVisible('products'));
+            setElementVisible(document.getElementById('header-new-inquiries'), isMenuVisible('inquiries'));
+            setElementVisible(document.getElementById('header-assets'), isMenuVisible('assets'));
+            syncDashboardEntryVisibility();
+
+            if (currentView === 'dashboard' && dashboardDataCache) {
+                renderDashboard(dashboardDataCache);
+            }
+        }
+
         function expandNavGroupForView(view) {
             var meta = VIEW_META[view];
             if (!meta || !meta.group) return;
@@ -1070,6 +1199,7 @@
 
         function renderDashboard(data) {
             data = data || {};
+            dashboardDataCache = data;
             renderDashboardSummary(data);
             renderDashboardKpis(data);
             renderDashboardTodos(data);
@@ -1078,6 +1208,7 @@
             renderDashboardSystemHealth(data);
             renderDashboardRecentActivity(data);
             renderRecentInquiries();
+            syncDashboardEntryVisibility();
         }
 
         function renderDashboardSummary(data) {
@@ -1091,20 +1222,38 @@
             var contentLabel = latestContent && latestContent.updated_at ? shortDate(latestContent.updated_at) : '暂无更新';
             var refreshLabel = summary.lastUpdatedAt ? shortTime(summary.lastUpdatedAt) : shortTime(Date.now());
 
-            setHtml('dashboard-status-strip',
-                '<button class="dashboard-status-item is-clickable" type="button" data-dashboard-action="view-unread-inquiries">' +
-                    '<span>今日待办</span><strong>' + escapeHtml(asNumber(summary.todoTotal)) + '</strong><em>' + escapeHtml(asNumber(inquiriesStats.unread)) + ' 条未读询盘</em>' +
-                '</button>' +
-                '<button class="dashboard-status-item is-clickable" type="button" data-dashboard-action="open-visual" data-visual-page="' + escapeHtml(contentSlugToVisualTarget(latestContent && latestContent.slug).page) + '" data-visual-module="' + escapeHtml(contentSlugToVisualTarget(latestContent && latestContent.slug).module) + '">' +
-                    '<span>最近内容</span><strong>' + escapeHtml(contentLabel) + '</strong><em>共 ' + escapeHtml(asNumber(contentStats.total)) + ' 个内容块</em>' +
-                '</button>' +
-                '<button class="dashboard-status-item is-clickable" type="button" data-dashboard-action="view-assets">' +
-                    '<span>资源库</span><strong>' + escapeHtml(asNumber(assetsStats.total)) + '</strong><em>图片 ' + escapeHtml(asNumber(assetsStats.images)) + '，文件 ' + escapeHtml(asNumber(assetsStats.files)) + '</em>' +
-                '</button>' +
-                '<button class="dashboard-status-item is-clickable" type="button" data-dashboard-action="view-system-status">' +
-                    '<span>系统状态</span><strong>' + escapeHtml(status) + '</strong><em>Schema ' + escapeHtml(system.schemaVersion || '-') + '，刷新 ' + escapeHtml(refreshLabel) + '</em>' +
-                '</button>'
-            );
+            var visualTarget = contentSlugToVisualTarget(latestContent && latestContent.slug);
+            var items = [
+                {
+                    key: 'inquiries',
+                    html: '<button class="dashboard-status-item is-clickable" type="button" data-dashboard-action="view-unread-inquiries">' +
+                        '<span>今日待办</span><strong>' + escapeHtml(asNumber(summary.todoTotal)) + '</strong><em>' + escapeHtml(asNumber(inquiriesStats.unread)) + ' 条未读询盘</em>' +
+                    '</button>'
+                },
+                {
+                    key: 'visual',
+                    html: '<button class="dashboard-status-item is-clickable" type="button" data-dashboard-action="open-visual" data-visual-page="' + escapeHtml(visualTarget.page) + '" data-visual-module="' + escapeHtml(visualTarget.module) + '">' +
+                        '<span>最近内容</span><strong>' + escapeHtml(contentLabel) + '</strong><em>共 ' + escapeHtml(asNumber(contentStats.total)) + ' 个内容块</em>' +
+                    '</button>'
+                },
+                {
+                    key: 'assets',
+                    html: '<button class="dashboard-status-item is-clickable" type="button" data-dashboard-action="view-assets">' +
+                        '<span>资源库</span><strong>' + escapeHtml(asNumber(assetsStats.total)) + '</strong><em>图片 ' + escapeHtml(asNumber(assetsStats.images)) + '，文件 ' + escapeHtml(asNumber(assetsStats.files)) + '</em>' +
+                    '</button>'
+                },
+                {
+                    key: 'settings',
+                    html: '<button class="dashboard-status-item is-clickable" type="button" data-dashboard-action="view-system-status">' +
+                        '<span>系统状态</span><strong>' + escapeHtml(status) + '</strong><em>Schema ' + escapeHtml(system.schemaVersion || '-') + '，刷新 ' + escapeHtml(refreshLabel) + '</em>' +
+                    '</button>'
+                }
+            ];
+            setHtml('dashboard-status-strip', items.filter(function (item) {
+                return isMenuVisible(item.key);
+            }).map(function (item) {
+                return item.html;
+            }).join(''));
         }
 
         function renderDashboardKpis(data) {
@@ -1122,7 +1271,8 @@
                     meta: '已发布 ' + asNumber(productStats.published) + ' · 草稿 ' + asNumber(productStats.draft) + ' · 推荐 ' + asNumber(productStats.featured),
                     icon: 'products',
                     tone: 'blue',
-                    action: 'view-products'
+                    action: 'view-products',
+                    key: 'products'
                 },
                 {
                     label: '询盘',
@@ -1130,7 +1280,8 @@
                     meta: '新询盘 ' + asNumber(inquiryStats.new) + ' · 总数 ' + asNumber(inquiryStats.total),
                     icon: 'inquiries',
                     tone: 'danger',
-                    action: 'view-unread-inquiries'
+                    action: 'view-unread-inquiries',
+                    key: 'inquiries'
                 },
                 {
                     label: '分类',
@@ -1138,7 +1289,8 @@
                     meta: '父类 ' + asNumber(categoryStats.parents) + ' · 子类 ' + asNumber(categoryStats.children) + ' · 停用 ' + asNumber(categoryStats.inactive),
                     icon: 'categories',
                     tone: 'green',
-                    action: 'view-categories'
+                    action: 'view-categories',
+                    key: 'products'
                 },
                 {
                     label: '内容',
@@ -1146,7 +1298,8 @@
                     meta: '已发布 ' + asNumber(contentStats.published) + ' · 草稿 ' + asNumber(contentStats.draft) + ' · 更新 ' + (latestContent ? shortDate(latestContent.updated_at) : '暂无'),
                     icon: 'content',
                     tone: 'gold',
-                    action: 'view-visual-builder'
+                    action: 'view-visual-builder',
+                    key: 'visual'
                 },
                 {
                     label: '证书',
@@ -1154,7 +1307,8 @@
                     meta: '已发布 ' + asNumber(certStats.published) + ' · 草稿 ' + asNumber(certStats.draft),
                     icon: 'certifications',
                     tone: 'navy',
-                    action: 'view-certifications'
+                    action: 'view-certifications',
+                    key: 'certifications'
                 },
                 {
                     label: '资源',
@@ -1162,9 +1316,16 @@
                     meta: '图片 ' + asNumber(assetStats.images) + ' · 文件 ' + asNumber(assetStats.files),
                     icon: 'assets',
                     tone: 'blue',
-                    action: 'view-assets'
+                    action: 'view-assets',
+                    key: 'assets'
                 }
             ];
+
+            cards = cards.filter(function (card) { return isMenuVisible(card.key); });
+            if (!cards.length) {
+                setHtml('dashboard-kpis', '<div class="dashboard-empty-state"><strong>快捷指标已隐藏</strong><span>可在菜单显示设置中重新显示入口。</span></div>');
+                return;
+            }
 
             setHtml('dashboard-kpis', cards.map(function (card) {
                 return '<button class="dashboard-kpi-card tone-' + escapeHtml(card.tone) + '" type="button" data-dashboard-action="' + escapeHtml(card.action) + '">' +
@@ -1191,6 +1352,9 @@
             var container = document.getElementById('dashboard-todos');
             if (!container) return;
             var todos = Array.isArray(data.todos) ? data.todos.slice() : [];
+            todos = todos.filter(function (todo) {
+                return isMenuVisible(menuKeyForView(todo.targetView || ''));
+            });
             if (!todos.length) {
                 container.innerHTML = '<div class="dashboard-empty-state"><strong>当前无待处理事项</strong><span>产品、内容、询盘和资源状态正常。</span></div>';
                 return;
@@ -1208,6 +1372,10 @@
         }
 
         function renderDashboardCategoryHealth(data) {
+            if (!isMenuVisible('products')) {
+                setHtml('dashboard-category-health', '<div class="dashboard-empty-state"><strong>产品入口已隐藏</strong><span>可在菜单显示设置中重新显示分类管理入口。</span></div>');
+                return;
+            }
             var categoryStats = data.categories && data.categories.product ? data.categories.product : {};
             var tree = Array.isArray(categoryStats.tree) ? categoryStats.tree : [];
             if (!tree.length) {
@@ -1235,6 +1403,10 @@
         }
 
         function renderDashboardContentHealth(data) {
+            if (!isMenuVisible('visual')) {
+                setHtml('dashboard-content-health', '<div class="dashboard-empty-state"><strong>可视化管理入口已隐藏</strong><span>可在菜单显示设置中重新显示内容编辑入口。</span></div>');
+                return;
+            }
             var contentStats = data.contentBlocks || {};
             var recent = Array.isArray(contentStats.recent) ? contentStats.recent.slice(0, 5) : [];
             if (!recent.length) {
@@ -1313,6 +1485,9 @@
                     action: ''
                 });
             });
+            items = items.filter(function (item) {
+                return isDashboardActionVisible(item.action, item.targetView || '');
+            });
             items.sort(function (a, b) { return asNumber(b.time) - asNumber(a.time); });
             items = items.slice(0, 8);
             if (!items.length) {
@@ -1334,6 +1509,10 @@
         function renderRecentInquiries() {
             var container = document.getElementById('recent-inquiries-list');
             if (!container) return;
+            if (!isMenuVisible('inquiries')) {
+                container.innerHTML = '<p class="recent-inquiries-empty">询盘入口已隐藏，可在菜单显示设置中恢复。</p>';
+                return;
+            }
 
             var sorted = inquiries.slice().sort(function (a, b) {
                 return new Date(b.created_at || b.createdAt || 0) - new Date(a.created_at || a.createdAt || 0);
@@ -1393,6 +1572,11 @@
 
         function performDashboardAction(action, el) {
             if (!action) return;
+            var targetView = el ? (el.getAttribute('data-target-view') || '') : '';
+            if (!isDashboardActionVisible(action, targetView)) {
+                showToast('该入口已在菜单显示设置中隐藏', 'error');
+                return;
+            }
             if (action === 'todo') {
                 openDashboardTodo(el);
             } else if (action === 'add-product') {
@@ -5866,7 +6050,7 @@
         }
 
         function moduleKeys() {
-            return ['dashboard', 'website', 'products', 'content', 'certifications', 'inquiries', 'assets', 'settings'];
+            return ['dashboard', 'products', 'visual', 'certifications', 'inquiries', 'assets', 'settings'];
         }
 
         function syncModuleSettingsView() {
@@ -5876,33 +6060,46 @@
                 var input = document.getElementById('module-' + key);
                 var card = input && input.closest ? input.closest('.module-toggle-card') : null;
                 var state = document.querySelector('[data-module-state="' + key + '"]');
+                if (input && isProtectedMenuKey(key)) {
+                    input.checked = true;
+                    input.disabled = true;
+                }
                 var isOn = !!(input && input.checked);
                 if (isOn) enabled += 1;
                 else disabled += 1;
                 if (card) card.classList.toggle('is-on', isOn);
-                if (state) state.textContent = isOn ? '已启用' : '已停用';
+                if (card) card.classList.toggle('is-locked', isProtectedMenuKey(key));
+                if (state) state.textContent = isOn ? '已显示' : '已隐藏';
             });
             var enabledEl = document.getElementById('module-enabled-count');
             var disabledEl = document.getElementById('module-disabled-count');
+            var totalEl = document.getElementById('module-total-count');
             if (enabledEl) enabledEl.textContent = enabled;
             if (disabledEl) disabledEl.textContent = disabled;
+            if (totalEl) totalEl.textContent = moduleKeys().length;
         }
 
-        function loadModuleSettings() {
+        function loadMenuVisibilitySettings(options) {
+            options = options || {};
             var statusEl = document.getElementById('module-settings-status');
-            if (statusEl) statusEl.textContent = '加载中...';
+            if (statusEl && !options.silent) statusEl.textContent = '加载中...';
             apiRequest('/admin/settings/modules').then(function (response) {
-                var data = unwrapDataResponse(response) || {};
+                var data = normalizeMenuVisibilitySettings(unwrapDataResponse(response) || {});
                 moduleKeys().forEach(function (key) {
                     var input = document.getElementById('module-' + key);
                     if (input) input.checked = !!data[key];
                 });
+                applyMenuVisibilitySettings(data);
                 syncModuleSettingsView();
                 if (statusEl) statusEl.textContent = '已加载';
             }).catch(function (err) {
                 if (statusEl) statusEl.textContent = '加载失败';
-                showToast('加载模块设置失败：' + err.message, 'error');
+                showToast('加载菜单显示设置失败：' + err.message, 'error');
             });
+        }
+
+        function loadModuleSettings() {
+            loadMenuVisibilitySettings();
         }
 
         function saveModuleSettings() {
@@ -5910,25 +6107,26 @@
             var statusEl = document.getElementById('module-settings-status');
             moduleKeys().forEach(function (key) {
                 var input = document.getElementById('module-' + key);
-                if (input) body[key] = !!input.checked;
+                if (input) body[key] = isProtectedMenuKey(key) ? true : !!input.checked;
             });
             if (statusEl) statusEl.textContent = '保存中...';
             apiRequest('/admin/settings/modules', {
                 method: 'PUT',
                 body: body
             }).then(function (response) {
-                var data = unwrapDataResponse(response) || {};
+                var data = normalizeMenuVisibilitySettings(unwrapDataResponse(response) || {});
                 moduleKeys().forEach(function (key) {
                     var input = document.getElementById('module-' + key);
                     if (input) input.checked = !!data[key];
                 });
+                applyMenuVisibilitySettings(data);
                 syncModuleSettingsView();
                 if (statusEl) statusEl.textContent = '已保存';
-                showToast('模块设置已保存');
+                showToast('菜单显示设置已保存');
                 resetFormDirty();
             }).catch(function (err) {
                 if (statusEl) statusEl.textContent = '保存失败';
-                showToast('保存模块设置失败：' + err.message, 'error');
+                showToast('保存菜单显示设置失败：' + err.message, 'error');
             });
         }
 

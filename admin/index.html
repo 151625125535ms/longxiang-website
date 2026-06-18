@@ -7,7 +7,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png?v=20260615-lxdq">
     <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png?v=20260615-lxdq">
     <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png?v=20260615-lxdq">
-    <link rel="stylesheet" href="css/admin.css?v=2">
+    <link rel="stylesheet" href="css/admin.css?v=3">
 </head>
 <body>
     <div class="admin-layout" id="admin-page">
@@ -167,7 +167,7 @@
                     </button>
                     <ul class="nav-group-items">
                         <li><a href="#" data-view="audit-logs" class="nav-sub-item">审计日志</a></li>
-                        <li><a href="#" data-view="settings-modules" class="nav-sub-item">模块开关</a></li>
+                        <li><a href="#" data-view="settings-modules" class="nav-sub-item">菜单显示</a></li>
                         <li><a href="#" data-view="system-status" class="nav-sub-item">系统状态</a></li>
                         <li><a href="#" data-view="trash" class="nav-sub-item">回收站</a></li>
                     </ul>
@@ -820,26 +820,29 @@
                 </section>
 
                 <section class="view-section" id="view-settings-modules">
-                    <div class="section-header-bar"><h2>模块开关</h2><button type="submit" form="module-settings-form" class="btn btn-primary" id="btn-save-module-settings">保存设置</button></div>
+                    <div class="section-header-bar"><h2>菜单显示设置</h2><button type="submit" form="module-settings-form" class="btn btn-primary" id="btn-save-module-settings">保存显示设置</button></div>
                     <form class="module-settings-shell" id="module-settings-form">
+                        <div class="module-settings-notice" role="note">
+                            这里仅控制后台左侧菜单和控制台快捷入口是否显示。隐藏入口不会删除数据，也不会关闭接口或影响前台页面。
+                        </div>
                         <div class="module-settings-main">
-                            <label class="module-toggle-card"><input type="checkbox" id="module-dashboard" data-module-key="dashboard"><span class="module-toggle-switch"></span><strong>控制台</strong><small>后台首页、经营指标和快捷入口。</small><em data-module-state="dashboard">等待加载</em></label>
-                            <label class="module-toggle-card"><input type="checkbox" id="module-website" data-module-key="website"><span class="module-toggle-switch"></span><strong>网站管理</strong><small>公司基础信息和公开网站配置。</small><em data-module-state="website">等待加载</em></label>
-                            <label class="module-toggle-card"><input type="checkbox" id="module-products" data-module-key="products"><span class="module-toggle-switch"></span><strong>产品管理</strong><small>产品列表、分类、图库和发布状态。</small><em data-module-state="products">等待加载</em></label>
-                            <label class="module-toggle-card"><input type="checkbox" id="module-content" data-module-key="content"><span class="module-toggle-switch"></span><strong>内容管理</strong><small>网站页面内容块和多语言展示。</small><em data-module-state="content">等待加载</em></label>
-                            <label class="module-toggle-card"><input type="checkbox" id="module-certifications" data-module-key="certifications"><span class="module-toggle-switch"></span><strong>证书资质</strong><small>企业资质、专利、软著和检测报告。</small><em data-module-state="certifications">等待加载</em></label>
-                            <label class="module-toggle-card"><input type="checkbox" id="module-inquiries" data-module-key="inquiries"><span class="module-toggle-switch"></span><strong>询盘管理</strong><small>客户询盘、未读提醒和处理记录。</small><em data-module-state="inquiries">等待加载</em></label>
-                            <label class="module-toggle-card"><input type="checkbox" id="module-assets" data-module-key="assets"><span class="module-toggle-switch"></span><strong>资源库</strong><small>图片上传、文件路径和资源清理。</small><em data-module-state="assets">等待加载</em></label>
-                            <label class="module-toggle-card"><input type="checkbox" id="module-settings" data-module-key="settings"><span class="module-toggle-switch"></span><strong>系统设置</strong><small>系统状态、审计日志和模块开关。</small><em data-module-state="settings">等待加载</em></label>
+                            <label class="module-toggle-card is-locked"><input type="checkbox" id="module-dashboard" data-module-key="dashboard" disabled><span class="module-toggle-switch"></span><strong>控制台</strong><small>固定显示，作为后台首页和恢复入口。</small><em data-module-state="dashboard">等待加载</em></label>
+                            <label class="module-toggle-card"><input type="checkbox" id="module-products" data-module-key="products"><span class="module-toggle-switch"></span><strong>产品</strong><small>产品列表、分类管理和相关快捷入口。</small><em data-module-state="products">等待加载</em></label>
+                            <label class="module-toggle-card"><input type="checkbox" id="module-visual" data-module-key="visual"><span class="module-toggle-switch"></span><strong>可视化管理</strong><small>首页、关于我们、产品中心、联系我们和全站公共内容编辑入口。</small><em data-module-state="visual">等待加载</em></label>
+                            <label class="module-toggle-card"><input type="checkbox" id="module-certifications" data-module-key="certifications"><span class="module-toggle-switch"></span><strong>证书</strong><small>企业资质、专利、软著和检测报告入口。</small><em data-module-state="certifications">等待加载</em></label>
+                            <label class="module-toggle-card"><input type="checkbox" id="module-inquiries" data-module-key="inquiries"><span class="module-toggle-switch"></span><strong>询盘</strong><small>客户询盘、未读提醒和处理入口。</small><em data-module-state="inquiries">等待加载</em></label>
+                            <label class="module-toggle-card"><input type="checkbox" id="module-assets" data-module-key="assets"><span class="module-toggle-switch"></span><strong>资源库</strong><small>图片、文件资源和资源清理入口。</small><em data-module-state="assets">等待加载</em></label>
+                            <label class="module-toggle-card is-locked"><input type="checkbox" id="module-settings" data-module-key="settings" disabled><span class="module-toggle-switch"></span><strong>系统</strong><small>固定显示，包含菜单显示设置、系统状态和审计日志。</small><em data-module-state="settings">等待加载</em></label>
                         </div>
                         <aside class="module-settings-side">
-                            <h3>启用摘要</h3>
+                            <h3>显示摘要</h3>
                             <div class="module-summary-grid">
-                                <div><span>已启用</span><strong id="module-enabled-count">—</strong></div>
-                                <div><span>已停用</span><strong id="module-disabled-count">—</strong></div>
+                                <div><span>已显示</span><strong id="module-enabled-count">—</strong></div>
+                                <div><span>已隐藏</span><strong id="module-disabled-count">—</strong></div>
+                                <div><span>总入口</span><strong id="module-total-count">—</strong></div>
                             </div>
-                            <p id="module-settings-status">正在读取模块状态...</p>
-                            <div class="system-impact-note">关闭模块会隐藏对应后台入口。保存前请确认当前团队仍有必要的系统入口。</div>
+                            <p id="module-settings-status">正在读取菜单显示设置...</p>
+                            <div class="system-impact-note">隐藏入口只是减少后台显示项，不代表关闭功能；控制台和系统入口会固定保留，避免无法恢复。</div>
                         </aside>
                     </form>
                 </section>
@@ -1117,6 +1120,6 @@
         <div class="toast-container" id="toast-container"></div>
     </div>
     <script src="js/pagination.js"></script>
-    <script src="js/admin.js?v=2"></script>
+    <script src="js/admin.js?v=3"></script>
 </body>
 </html>

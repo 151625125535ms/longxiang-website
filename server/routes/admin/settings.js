@@ -3,10 +3,13 @@ const { getDb } = require('../../lib/db');
 const { sendError, insertAuditLog } = require('./helpers');
 
 const router = express.Router();
-const MODULE_KEYS = ['dashboard', 'website', 'products', 'content', 'certifications', 'inquiries', 'assets', 'settings'];
+const MENU_VISIBILITY_KEYS = ['dashboard', 'products', 'visual', 'certifications', 'inquiries', 'assets', 'settings'];
+const LEGACY_MODULE_KEYS = ['website', 'content'];
+const MODULE_KEYS = MENU_VISIBILITY_KEYS.concat(LEGACY_MODULE_KEYS);
+const PROTECTED_MENU_KEYS = new Set(['dashboard', 'settings']);
 
 function defaultModules() {
-    return MODULE_KEYS.reduce(function (result, key) {
+    return MENU_VISIBILITY_KEYS.reduce(function (result, key) {
         result[key] = true;
         return result;
     }, {});
@@ -15,7 +18,17 @@ function defaultModules() {
 function parseModules(value) {
     try {
         const parsed = JSON.parse(value || '{}');
-        return { ...defaultModules(), ...parsed };
+        const merged = { ...defaultModules(), ...parsed };
+        if (
+            !Object.prototype.hasOwnProperty.call(parsed, 'visual') &&
+            Object.prototype.hasOwnProperty.call(parsed, 'content')
+        ) {
+            merged.visual = parsed.content !== false;
+        }
+        for (const key of PROTECTED_MENU_KEYS) {
+            merged[key] = true;
+        }
+        return merged;
     } catch (err) {
         return defaultModules();
     }
@@ -50,11 +63,17 @@ router.put('/modules', function (req, res, next) {
         for (const key of MODULE_KEYS) {
             if (Object.prototype.hasOwnProperty.call(body, key)) {
                 const normalized = normalizeBoolean(body[key]);
-                if (normalized == null) {
+                if (normalized === null) {
                     return sendError(res, 422, 'VALIDATION_ERROR', 'Invalid boolean value for ' + key + '.');
                 }
                 after[key] = normalized;
             }
+        }
+        if (!Object.prototype.hasOwnProperty.call(body, 'visual') && Object.prototype.hasOwnProperty.call(body, 'content')) {
+            after.visual = after.content !== false;
+        }
+        for (const key of PROTECTED_MENU_KEYS) {
+            after[key] = true;
         }
 
         const updateModules = db.transaction(function () {

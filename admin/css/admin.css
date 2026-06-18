@@ -4919,6 +4919,17 @@ h1, h2, h3, h4, h5, h6 {
     align-items: start;
 }
 
+.module-settings-notice {
+    grid-column: 1 / -1;
+    padding: 14px 16px;
+    border: 1px solid rgba(11, 102, 216, 0.18);
+    border-radius: var(--radius-md);
+    background: rgba(11, 102, 216, 0.06);
+    color: var(--color-gray-700);
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
 .module-settings-main {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -4983,6 +4994,21 @@ h1, h2, h3, h4, h5, h6 {
     border-color: rgba(16, 185, 129, 0.36);
 }
 
+.module-toggle-card.is-locked {
+    cursor: default;
+    padding-bottom: 38px;
+}
+
+.module-toggle-card.is-locked::before {
+    content: "固定显示";
+    position: absolute;
+    right: 18px;
+    bottom: 16px;
+    color: var(--color-gray-400);
+    font-size: 0.72rem;
+    font-weight: 800;
+}
+
 .module-toggle-card.is-on em {
     background: rgba(16, 185, 129, 0.12);
     color: #047857;
@@ -5041,7 +5067,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .module-summary-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 10px;
 }
 
