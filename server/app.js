@@ -31,6 +31,7 @@ try { rateLimit = require('express-rate-limit'); } catch (err) { rateLimit = nul
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const HOST = process.env.HOST || '127.0.0.1';
 
 // Only trust proxy XFF headers when explicitly configured — avoids IP spoofing for rate limiting.
 // Set TRUST_PROXY to the upstream proxy IP/CIDR (e.g. "10.0.0.0/8") or "1" for loopback-only.
@@ -211,6 +212,6 @@ app.use(function (req, res) {
     res.status(404).sendFile(path.join(__dirname, '..', '404.html'));
 });
 
-app.listen(PORT, function () {
-    console.log('Server running on http://localhost:' + PORT);
+app.listen(PORT, HOST, function () {
+    console.log('Server running on http://' + HOST + ':' + PORT);
 });
