@@ -348,8 +348,12 @@
         return [
             'Henan Longxiang Electrical | Power Equipment Manufacturer',
             'Longxiang Electrical manufactures energy-saving transformers, switchgear, and power distribution equipment.',
+            'Transformer, Switchgear & EV Charger Manufacturer | Henan Longxiang Electrical',
+            'Henan Longxiang Electrical manufactures transformers, switchgear, and EV charging equipment for power distribution projects.',
             'Products | Longxiang Electrical',
-            'Product list of Longxiang Electrical.'
+            'Product list of Longxiang Electrical.',
+            'Products | Henan Longxiang Electrical Co., Ltd.',
+            'Explore Longxiang transformers, switchgear, EV chargers, and power distribution equipment for industrial parks, PV projects, charging stations, and utility applications.'
         ].indexOf(text) !== -1;
     }
 
