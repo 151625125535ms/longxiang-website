@@ -1316,9 +1316,9 @@
                 {
                     label: '产品',
                     value: asNumber(productStats.total),
-                    meta: '已发布 ' + asNumber(productStats.published) + ' · 草稿 ' + asNumber(productStats.draft) + ' · 推荐 ' + asNumber(productStats.featured),
+                    meta: '已发布 ' + asNumber(productStats.published) + ' · 草稿 ' + asNumber(productStats.draft) + ' · 推荐 ' + asNumber(productStats.featured) + ' · 待补项 ' + asNumber(productStats.qualityIssueTotal),
                     icon: 'products',
-                    tone: 'blue',
+                    tone: asNumber(productStats.qualityIssueTotal) > 0 ? 'gold' : 'blue',
                     action: 'view-products',
                     key: 'products'
                 },
@@ -1410,6 +1410,7 @@
             container.innerHTML = todos.map(function (todo) {
                 var attrs = ' data-dashboard-action="todo" data-target-view="' + escapeHtml(todo.targetView || '') + '"';
                 if (todo.filter && todo.filter.status) attrs += ' data-filter-status="' + escapeHtml(todo.filter.status) + '"';
+                if (todo.filter && todo.filter.issue) attrs += ' data-filter-issue="' + escapeHtml(todo.filter.issue) + '"';
                 if (todo.filter && todo.filter.unread) attrs += ' data-filter-unread="true"';
                 return '<button class="pending-card severity-' + escapeHtml(todo.severity || 'low') + '" type="button"' + attrs + '>' +
                     '<span class="pending-card-label">' + escapeHtml(todo.label || '待处理') + '</span>' +
@@ -1664,10 +1665,11 @@
         function openDashboardTodo(el) {
             var targetView = el.getAttribute('data-target-view');
             var status = el.getAttribute('data-filter-status') || '';
+            var issue = el.getAttribute('data-filter-issue') || '';
             var unread = el.getAttribute('data-filter-unread') === 'true';
             if (targetView === 'products') {
                 if (!switchView('products')) return;
-                setProductStatusFilter(status);
+                setProductStatusFilter(status, issue);
             } else if (targetView === 'inquiries') {
                 if (!switchView('inquiries')) return;
                 setInquiryStatusFilter(status, unread);
@@ -1865,11 +1867,13 @@
             var catVal = (document.getElementById('product-category-filter') || {}).value || '';
             var statusVal = (document.getElementById('product-status-filter') || {}).value || '';
             var featuredVal = (document.getElementById('product-featured-filter') || {}).value || '';
+            var issueVal = (document.getElementById('product-issue-filter') || {}).value || '';
             var url = '/admin/products?page=' + encodeURIComponent(productPage) + '&pageSize=' + encodeURIComponent(productMeta.pageSize || 20);
             if (searchVal) url += '&q=' + encodeURIComponent(searchVal);
             if (catVal) url += '&category=' + encodeURIComponent(catVal);
             if (statusVal) url += '&status=' + encodeURIComponent(statusVal);
             if (featuredVal !== '') url += '&featured=' + encodeURIComponent(featuredVal);
+            if (issueVal) url += '&issue=' + encodeURIComponent(issueVal);
             updateProductClearFilters();
 
             apiRequest(url).then(function (response) {
@@ -1902,7 +1906,8 @@
                 ((document.getElementById('product-search') || {}).value || '').trim(),
                 (document.getElementById('product-category-filter') || {}).value || '',
                 (document.getElementById('product-status-filter') || {}).value || '',
-                (document.getElementById('product-featured-filter') || {}).value || ''
+                (document.getElementById('product-featured-filter') || {}).value || '',
+                (document.getElementById('product-issue-filter') || {}).value || ''
             ].some(Boolean);
             btn.style.display = hasFilters ? '' : 'none';
         }
@@ -1926,9 +1931,11 @@
             });
         }
 
-        function setProductStatusFilter(status) {
+        function setProductStatusFilter(status, issue) {
             var statusFilter = document.getElementById('product-status-filter');
             if (statusFilter) statusFilter.value = status || '';
+            var issueFilter = document.getElementById('product-issue-filter');
+            if (issueFilter) issueFilter.value = issue || '';
             syncProductStatusTabs();
             productPage = 1;
             loadProducts();
@@ -1945,6 +1952,10 @@
                 if (!hasTitle) badges.push('<span class="product-seo-badge product-seo-badge-warn">缺SEO标题</span>');
                 if (!hasDescription) badges.push('<span class="product-seo-badge product-seo-badge-warn">缺SEO描述</span>');
             }
+            if (productValueIsTrue(product.missing_arabic)) badges.push('<span class="product-seo-badge product-seo-badge-danger">缺阿语内容</span>');
+            if (productValueIsTrue(product.missing_cover)) badges.push('<span class="product-seo-badge product-seo-badge-warn">缺封面图</span>');
+            if (productValueIsTrue(product.missing_specs)) badges.push('<span class="product-seo-badge product-seo-badge-warn">缺产品参数</span>');
+            if (productValueIsTrue(product.missing_public_url)) badges.push('<span class="product-seo-badge product-seo-badge-danger">未进Sitemap</span>');
 
             return '<div class="product-meta-badges">' + badges.join('') + '</div>';
         }
@@ -1992,7 +2003,7 @@
 
             tbody.querySelectorAll('[data-preview-product]').forEach(function (btn) {
                 btn.addEventListener('click', function () {
-                    window.open('../product-detail.html?id=' + encodeURIComponent(btn.getAttribute('data-preview-product')), '_blank', 'noopener');
+                    window.open('../products/' + encodeURIComponent(btn.getAttribute('data-preview-product')), '_blank', 'noopener');
                 });
             });
             tbody.querySelectorAll('[data-edit-product]').forEach(function (btn) {
@@ -2536,7 +2547,7 @@
                     loadProducts();
                 }, 250);
             });
-            ['product-category-filter', 'product-status-filter', 'product-featured-filter'].forEach(function (id) {
+            ['product-category-filter', 'product-status-filter', 'product-featured-filter', 'product-issue-filter'].forEach(function (id) {
                 var filter = document.getElementById(id);
                 if (filter) {
                     filter.addEventListener('change', function () {
@@ -2548,7 +2559,7 @@
             var clearProductFilters = document.getElementById('product-clear-filters');
             if (clearProductFilters) {
                 clearProductFilters.addEventListener('click', function () {
-                    ['product-search', 'product-category-filter', 'product-status-filter', 'product-featured-filter'].forEach(function (id) {
+                    ['product-search', 'product-category-filter', 'product-status-filter', 'product-featured-filter', 'product-issue-filter'].forEach(function (id) {
                         var field = document.getElementById(id);
                         if (field) field.value = '';
                     });

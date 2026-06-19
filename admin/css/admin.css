@@ -2185,6 +2185,11 @@ h1, h2, h3, h4, h5, h6 {
     color: #92400e;
 }
 
+.product-seo-badge-danger {
+    background: rgba(220, 38, 38, 0.12);
+    color: #b91c1c;
+}
+
 .product-table .product-name-text,
 .product-table .product-id-text,
 .product-model-cell,
@@ -3093,7 +3098,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .product-filter-panel {
     display: grid;
-    grid-template-columns: minmax(240px, 1.2fr) minmax(220px, 1.1fr) minmax(180px, 0.8fr) minmax(170px, 0.7fr) auto;
+    grid-template-columns: minmax(240px, 1.2fr) minmax(220px, 1.1fr) minmax(170px, 0.75fr) minmax(150px, 0.65fr) minmax(170px, 0.75fr) auto;
     align-items: end;
     gap: 16px 20px;
     margin-bottom: 18px;
@@ -3123,6 +3128,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .product-filter-panel .search-input,
 .product-filter-panel .toolbar-select {
+    width: 100%;
     min-height: 40px;
 }
 

@@ -4,6 +4,12 @@ const { getDb } = require('../../lib/db');
 const router = express.Router();
 const LOW_ASSET_THRESHOLD = 5;
 
+const EMPTY_PRODUCT_TEXT = "COALESCE(NULLIF(TRIM(%s), ''), '') = ''";
+
+function emptyTextExpression(column) {
+    return EMPTY_PRODUCT_TEXT.replace('%s', column);
+}
+
 function getCount(db, sql, params) {
     const row = db.prepare(sql).get(params || {});
     return row ? row.total : 0;
@@ -195,7 +201,47 @@ function buildTodos(stats) {
         severity: 'high',
         meta: '已发布产品需要补齐 SEO 标题和描述',
         targetView: 'products',
-        filter: { status: 'published' }
+        filter: { status: 'published', issue: 'missing_seo' }
+    });
+
+    addTodo(todos, stats.products.missingPublicUrl > 0, {
+        key: 'missing-product-public-url',
+        label: '未进 Sitemap 产品',
+        count: stats.products.missingPublicUrl,
+        severity: 'high',
+        meta: '检查产品公开 ID、分类状态和父分类状态',
+        targetView: 'products',
+        filter: { status: 'published', issue: 'missing_public_url' }
+    });
+
+    addTodo(todos, stats.products.missingArabic > 0, {
+        key: 'missing-product-arabic',
+        label: '缺阿语内容产品',
+        count: stats.products.missingArabic,
+        severity: 'high',
+        meta: '外贸阿语页面需要名称、简介和详情内容',
+        targetView: 'products',
+        filter: { status: 'published', issue: 'missing_arabic' }
+    });
+
+    addTodo(todos, stats.products.missingCover > 0, {
+        key: 'missing-product-cover',
+        label: '缺封面图产品',
+        count: stats.products.missingCover,
+        severity: 'medium',
+        meta: '补齐封面图，避免列表和详情页展示空白',
+        targetView: 'products',
+        filter: { status: 'published', issue: 'missing_cover' }
+    });
+
+    addTodo(todos, stats.products.missingSpecs > 0, {
+        key: 'missing-product-specs',
+        label: '缺产品参数',
+        count: stats.products.missingSpecs,
+        severity: 'medium',
+        meta: '补齐技术参数，提升选型和询盘转化',
+        targetView: 'products',
+        filter: { status: 'published', issue: 'missing_specs' }
     });
 
     addTodo(todos, stats.contentBlocks.draft > 0, {
@@ -256,6 +302,52 @@ router.get('/', function (req, res, next) {
         const recentProducts = getRecentProducts(db);
         const recentActivity = getRecentActivity(db);
         const schemaVersion = getSchemaVersion(db);
+        const missingSeo = getCount(db, "SELECT COUNT(*) AS total FROM products WHERE status = 'published' AND (COALESCE(NULLIF(TRIM(seo_title), ''), '') = '' OR COALESCE(NULLIF(TRIM(seo_description), ''), '') = '')");
+        const missingPublicUrl = getCount(db, `
+            SELECT COUNT(*) AS total
+            FROM products p
+            LEFT JOIN categories c ON c.id = p.category_id
+            LEFT JOIN categories parent ON parent.id = c.parent_id
+            WHERE p.status = 'published'
+                AND (
+                    p.category_id IS NULL
+                    OR c.id IS NULL
+                    OR COALESCE(c.type, '') != 'product'
+                    OR c.is_active != 1
+                    OR (c.parent_id IS NOT NULL AND COALESCE(parent.is_active, 0) != 1)
+                    OR COALESCE(NULLIF(TRIM(p.slug), ''), NULLIF(TRIM(p.legacy_id), ''), '') = ''
+                )
+        `);
+        const missingArabic = getCount(db, `
+            SELECT COUNT(*) AS total
+            FROM products p
+            WHERE p.status = 'published'
+                AND (${emptyTextExpression('p.name_ar')} OR ${emptyTextExpression('p.short_desc_ar')} OR ${emptyTextExpression('p.description_ar')})
+        `);
+        const missingCover = getCount(db, `
+            SELECT COUNT(*) AS total
+            FROM products p
+            WHERE p.status = 'published'
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM product_media cover
+                    WHERE cover.product_id = p.id
+                        AND cover.is_cover = 1
+                        AND COALESCE(NULLIF(TRIM(cover.path), ''), '') != ''
+                )
+        `);
+        const missingSpecs = getCount(db, `
+            SELECT COUNT(*) AS total
+            FROM products p
+            WHERE p.status = 'published'
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM product_specs ps
+                    WHERE ps.product_id = p.id
+                        AND ps.spec_group = 'technical'
+                        AND COALESCE(NULLIF(TRIM(ps.spec_key), ''), NULLIF(TRIM(ps.spec_value), ''), '') != ''
+                )
+        `);
 
         const data = {
             products: {
@@ -263,9 +355,14 @@ router.get('/', function (req, res, next) {
                 published: getCount(db, "SELECT COUNT(*) AS total FROM products WHERE status = 'published'"),
                 draft: getCount(db, "SELECT COUNT(*) AS total FROM products WHERE status = 'draft'"),
                 featured: getCount(db, "SELECT COUNT(*) AS total FROM products WHERE featured = 1 AND status != 'deleted'"),
-                missingSeo: getCount(db, "SELECT COUNT(*) AS total FROM products WHERE status = 'published' AND (COALESCE(NULLIF(TRIM(seo_title), ''), '') = '' OR COALESCE(NULLIF(TRIM(seo_description), ''), '') = '')"),
+                missingSeo,
                 missingSeoTitle: getCount(db, "SELECT COUNT(*) AS total FROM products WHERE status = 'published' AND COALESCE(NULLIF(TRIM(seo_title), ''), '') = ''"),
                 missingSeoDescription: getCount(db, "SELECT COUNT(*) AS total FROM products WHERE status = 'published' AND COALESCE(NULLIF(TRIM(seo_description), ''), '') = ''"),
+                missingPublicUrl,
+                missingArabic,
+                missingCover,
+                missingSpecs,
+                qualityIssueTotal: missingSeo + missingPublicUrl + missingArabic + missingCover + missingSpecs,
                 recent: recentProducts
             },
             categories: {

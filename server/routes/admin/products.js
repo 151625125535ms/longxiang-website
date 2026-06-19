@@ -10,6 +10,7 @@ const { sendError, insertAuditLog } = require('./helpers');
 const router = express.Router();
 const STATUSES = ['published', 'draft', 'deleted'];
 const BATCH_ACTIONS = ['soft_delete', 'publish', 'draft', 'hard_delete'];
+const PRODUCT_ISSUE_FILTERS = new Set(['missing_seo', 'missing_arabic', 'missing_cover', 'missing_specs', 'missing_public_url']);
 const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
 const IMAGE_EXTENSIONS = {
     'image/jpeg': '.jpg',
@@ -96,6 +97,48 @@ function normalizeStatus(value, defaultValue) {
     const status = String(value || '').trim();
     if (!status) return defaultValue;
     return STATUSES.indexOf(status) !== -1 ? status : null;
+}
+
+function emptyTextExpression(column) {
+    return "COALESCE(NULLIF(TRIM(" + column + "), ''), '') = ''";
+}
+
+function productIssueCondition(issue) {
+    if (issue === 'missing_seo') {
+        return "(p.status = 'published' AND (" + emptyTextExpression('p.seo_title') + ' OR ' + emptyTextExpression('p.seo_description') + '))';
+    }
+    if (issue === 'missing_arabic') {
+        return "(p.status = 'published' AND (" + emptyTextExpression('p.name_ar') + ' OR ' + emptyTextExpression('p.short_desc_ar') + ' OR ' + emptyTextExpression('p.description_ar') + '))';
+    }
+    if (issue === 'missing_cover') {
+        return `(p.status = 'published' AND NOT EXISTS (
+            SELECT 1
+            FROM product_media issue_cover
+            WHERE issue_cover.product_id = p.id
+                AND issue_cover.is_cover = 1
+                AND COALESCE(NULLIF(TRIM(issue_cover.path), ''), '') != ''
+        ))`;
+    }
+    if (issue === 'missing_specs') {
+        return `(p.status = 'published' AND NOT EXISTS (
+            SELECT 1
+            FROM product_specs issue_specs
+            WHERE issue_specs.product_id = p.id
+                AND issue_specs.spec_group = 'technical'
+                AND COALESCE(NULLIF(TRIM(issue_specs.spec_key), ''), NULLIF(TRIM(issue_specs.spec_value), ''), '') != ''
+        ))`;
+    }
+    if (issue === 'missing_public_url') {
+        return `(p.status = 'published' AND (
+            p.category_id IS NULL
+            OR c.id IS NULL
+            OR COALESCE(c.type, '') != 'product'
+            OR c.is_active != 1
+            OR (c.parent_id IS NOT NULL AND COALESCE(parent.is_active, 0) != 1)
+            OR COALESCE(NULLIF(TRIM(p.slug), ''), NULLIF(TRIM(p.legacy_id), ''), '') = ''
+        ))`;
+    }
+    return '';
 }
 
 function normalizeProductSpecs(value) {
@@ -336,6 +379,12 @@ function buildListQuery(query) {
         params.featured = featured;
     }
 
+    const issue = String(query.issue || '').trim();
+    if (issue) {
+        if (!PRODUCT_ISSUE_FILTERS.has(issue)) return { error: 'Invalid issue filter.' };
+        where.push(productIssueCondition(issue));
+    }
+
     const q = String(query.q || '').trim();
     if (q) {
         where.push('(p.name_en LIKE @q OR p.name_ar LIKE @q)');
@@ -358,8 +407,10 @@ router.get('/', function (req, res, next) {
 
         const db = getDb();
         const totalRow = db.prepare(`
-            SELECT COUNT(*) AS total
+            SELECT COUNT(DISTINCT p.id) AS total
             FROM products p
+            LEFT JOIN categories c ON c.id = p.category_id
+            LEFT JOIN categories parent ON parent.id = c.parent_id
             ${built.whereSql}
         `).get(built.params);
 
@@ -370,9 +421,34 @@ router.get('/', function (req, res, next) {
                 p.name_en, p.name_ar, p.short_desc_en, p.short_desc_ar,
                 p.seo_title, p.seo_description, p.seo_keywords,
                 COALESCE(cover.path, '') AS cover_image,
+                CASE WHEN p.status = 'published' AND (${emptyTextExpression('p.seo_title')} OR ${emptyTextExpression('p.seo_description')}) THEN 1 ELSE 0 END AS missing_seo,
+                CASE WHEN p.status = 'published' AND (${emptyTextExpression('p.name_ar')} OR ${emptyTextExpression('p.short_desc_ar')} OR ${emptyTextExpression('p.description_ar')}) THEN 1 ELSE 0 END AS missing_arabic,
+                CASE WHEN p.status = 'published' AND NOT EXISTS (
+                    SELECT 1
+                    FROM product_media cover_check
+                    WHERE cover_check.product_id = p.id
+                        AND cover_check.is_cover = 1
+                        AND COALESCE(NULLIF(TRIM(cover_check.path), ''), '') != ''
+                ) THEN 1 ELSE 0 END AS missing_cover,
+                CASE WHEN p.status = 'published' AND NOT EXISTS (
+                    SELECT 1
+                    FROM product_specs ps
+                    WHERE ps.product_id = p.id
+                        AND ps.spec_group = 'technical'
+                        AND COALESCE(NULLIF(TRIM(ps.spec_key), ''), NULLIF(TRIM(ps.spec_value), ''), '') != ''
+                ) THEN 1 ELSE 0 END AS missing_specs,
+                CASE WHEN p.status = 'published' AND (
+                    p.category_id IS NULL
+                    OR c.id IS NULL
+                    OR COALESCE(c.type, '') != 'product'
+                    OR c.is_active != 1
+                    OR (c.parent_id IS NOT NULL AND COALESCE(parent.is_active, 0) != 1)
+                    OR COALESCE(NULLIF(TRIM(p.slug), ''), NULLIF(TRIM(p.legacy_id), ''), '') = ''
+                ) THEN 1 ELSE 0 END AS missing_public_url,
                 p.version, p.created_at, p.updated_at
             FROM products p
             LEFT JOIN categories c ON c.id = p.category_id
+            LEFT JOIN categories parent ON parent.id = c.parent_id
             LEFT JOIN product_media cover ON cover.product_id = p.id AND cover.is_cover = 1
             ${built.whereSql}
             GROUP BY p.id
