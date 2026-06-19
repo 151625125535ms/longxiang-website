@@ -1934,6 +1934,21 @@
             loadProducts();
         }
 
+        function renderProductSeoBadges(product) {
+            var hasTitle = !!String(product.seo_title || '').trim();
+            var hasDescription = !!String(product.seo_description || '').trim();
+            var badges = [];
+
+            if (hasTitle && hasDescription) {
+                badges.push('<span class="product-seo-badge product-seo-badge-ok">SEO完整</span>');
+            } else {
+                if (!hasTitle) badges.push('<span class="product-seo-badge product-seo-badge-warn">缺SEO标题</span>');
+                if (!hasDescription) badges.push('<span class="product-seo-badge product-seo-badge-warn">缺SEO描述</span>');
+            }
+
+            return '<div class="product-meta-badges">' + badges.join('') + '</div>';
+        }
+
         function renderProductsTable() {
             var tbody = document.getElementById('products-tbody');
             if (!tbody) return;
@@ -1964,7 +1979,7 @@
                     : '<div class="product-thumb" style="background:#eef1f5;border:1px solid #d8dee8;"></div>';
                 return '<tr data-product-row="' + escapeHtml(productId) + '">' +
                     '<td><input type="checkbox" class="product-row-check" data-id="' + escapeHtml(productId) + '" data-version="' + escapeHtml(product.version) + '"></td>' +
-                    '<td><div class="product-name-cell">' + thumb + '<div><div class="product-name-text">' + escapeHtml(chineseName || name || displayId) + '</div><div class="product-id-text">' + escapeHtml(name || displayId) + '</div></div></div></td>' +
+                    '<td><div class="product-name-cell">' + thumb + '<div><div class="product-name-text">' + escapeHtml(chineseName || name || displayId) + '</div><div class="product-id-text">' + escapeHtml(name || displayId) + '</div>' + renderProductSeoBadges(product) + '</div></div></td>' +
                     '<td class="cell-muted product-model-cell">' + escapeHtml(model) + '</td>' +
                     '<td class="product-category-cell" title="' + escapeHtml(categoryName) + '"><span class="badge badge-blue product-category-badge">' + escapeHtml(categoryName) + '</span></td>' +
                     '<td class="product-status-cell"><span class="badge ' + statusClass + ' product-status-badge">' + statusLabel + '</span></td>' +

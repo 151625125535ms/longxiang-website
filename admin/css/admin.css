@@ -2155,6 +2155,36 @@ h1, h2, h3, h4, h5, h6 {
     min-width: 0;
 }
 
+.product-meta-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 6px;
+}
+
+.product-seo-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 20px;
+    max-width: 100%;
+    padding: 2px 7px;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.product-seo-badge-ok {
+    background: rgba(16, 185, 129, 0.12);
+    color: #047857;
+}
+
+.product-seo-badge-warn {
+    background: rgba(245, 158, 11, 0.14);
+    color: #92400e;
+}
+
 .product-table .product-name-text,
 .product-table .product-id-text,
 .product-model-cell,

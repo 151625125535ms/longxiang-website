@@ -368,6 +368,7 @@ router.get('/', function (req, res, next) {
                 p.id, p.legacy_id, p.slug, p.category_id, c.name_en AS category_name_en,
                 p.product_group, p.sub_category, p.status, p.sort_order, p.featured,
                 p.name_en, p.name_ar, p.short_desc_en, p.short_desc_ar,
+                p.seo_title, p.seo_description, p.seo_keywords,
                 COALESCE(cover.path, '') AS cover_image,
                 p.version, p.created_at, p.updated_at
             FROM products p

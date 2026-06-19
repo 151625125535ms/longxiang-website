@@ -188,6 +188,16 @@ function buildTodos(stats) {
         filter: { status: 'draft' }
     });
 
+    addTodo(todos, stats.products.missingSeo > 0, {
+        key: 'missing-product-seo',
+        label: '缺 SEO 产品',
+        count: stats.products.missingSeo,
+        severity: 'high',
+        meta: '已发布产品需要补齐 SEO 标题和描述',
+        targetView: 'products',
+        filter: { status: 'published' }
+    });
+
     addTodo(todos, stats.contentBlocks.draft > 0, {
         key: 'draft-content',
         label: '草稿内容',
@@ -253,6 +263,9 @@ router.get('/', function (req, res, next) {
                 published: getCount(db, "SELECT COUNT(*) AS total FROM products WHERE status = 'published'"),
                 draft: getCount(db, "SELECT COUNT(*) AS total FROM products WHERE status = 'draft'"),
                 featured: getCount(db, "SELECT COUNT(*) AS total FROM products WHERE featured = 1 AND status != 'deleted'"),
+                missingSeo: getCount(db, "SELECT COUNT(*) AS total FROM products WHERE status = 'published' AND (COALESCE(NULLIF(TRIM(seo_title), ''), '') = '' OR COALESCE(NULLIF(TRIM(seo_description), ''), '') = '')"),
+                missingSeoTitle: getCount(db, "SELECT COUNT(*) AS total FROM products WHERE status = 'published' AND COALESCE(NULLIF(TRIM(seo_title), ''), '') = ''"),
+                missingSeoDescription: getCount(db, "SELECT COUNT(*) AS total FROM products WHERE status = 'published' AND COALESCE(NULLIF(TRIM(seo_description), ''), '') = ''"),
                 recent: recentProducts
             },
             categories: {
