@@ -281,6 +281,78 @@
         return '<a href="' + escapeHtml(pageHref(button.href || '#')) + '" class="' + escapeHtml(classes) + '">' + escapeHtml(label) + '</a>';
     }
 
+    function upsertMeta(name, property, content) {
+        if (!content) return;
+        var selector = property ? 'meta[property="' + property + '"]' : 'meta[name="' + name + '"]';
+        var meta = document.querySelector(selector);
+        if (!meta) {
+            meta = document.createElement('meta');
+            if (property) meta.setAttribute('property', property);
+            else meta.setAttribute('name', name);
+            document.head.appendChild(meta);
+        }
+        meta.setAttribute('content', content);
+    }
+
+    function upsertHeadLink(rel, attrs) {
+        if (!rel || !attrs || !attrs.href) return;
+        var selector = 'link[rel="' + rel + '"]';
+        if (attrs.hreflang) selector += '[hreflang="' + attrs.hreflang + '"]';
+        var link = document.querySelector(selector);
+        if (!link) {
+            link = document.createElement('link');
+            link.setAttribute('rel', rel);
+            document.head.appendChild(link);
+        }
+        Object.keys(attrs).forEach(function (key) {
+            link.setAttribute(key, attrs[key]);
+        });
+    }
+
+    function absoluteSiteUrl(pathname) {
+        var path = String(pathname || window.location.pathname || '/').split('#')[0].split('?')[0];
+        if (path === '/index.html') path = '/';
+        if (/\/index\.html$/i.test(path)) path = path.replace(/index\.html$/i, '');
+        return window.location.origin + path;
+    }
+
+    function absoluteAssetUrl(path) {
+        path = resolveAsset(path || '').replace(/^\.\.\//, '');
+        if (!path) return '';
+        if (/^https?:\/\//i.test(path)) return path;
+        return window.location.origin + '/' + path.replace(/^\/+/, '');
+    }
+
+    function defaultSeoForPage() {
+        if (pageSlug === 'home') {
+            return {
+                title: isArabic ? '' : 'Transformer & Switchgear Manufacturer | Longxiang',
+                description: isArabic ? '' : 'Longxiang Electrical manufactures transformers, switchgear, EV charging stations and energy storage systems for industrial and renewable energy projects.',
+                canonicalPath: isArabic ? '/ar/' : '/'
+            };
+        }
+        if (pageSlug === 'product-pages') {
+            return {
+                title: isArabic ? '' : 'Transformers, Switchgear & EV Chargers | Longxiang',
+                description: isArabic ? '' : 'Browse Longxiang transformers, switchgear, EV charging stations, energy storage and PV equipment for industrial and renewable energy projects.',
+                canonicalPath: isArabic ? '/ar/products.html' : '/products.html'
+            };
+        }
+        return {};
+    }
+
+    function shouldUseDefaultSeo(value, fallbackValue) {
+        if (!fallbackValue) return false;
+        var text = String(value || '').trim();
+        if (!text) return true;
+        return [
+            'Henan Longxiang Electrical | Power Equipment Manufacturer',
+            'Longxiang Electrical manufactures energy-saving transformers, switchgear, and power distribution equipment.',
+            'Products | Longxiang Electrical',
+            'Product list of Longxiang Electrical.'
+        ].indexOf(text) !== -1;
+    }
+
     function updateHero(hero) {
         var heroEl = document.querySelector('.page-hero');
         if (!heroEl || !hero) return;
@@ -301,20 +373,27 @@
 
     function updateSeo(seo, hero) {
         seo = seo || {};
+        var defaults = defaultSeoForPage();
         var title = localized(seo, 'title');
         var description = localized(seo, 'description');
+        if (shouldUseDefaultSeo(title, defaults.title)) title = defaults.title;
+        if (shouldUseDefaultSeo(description, defaults.description)) description = defaults.description;
         var image = seo.image || (hero && hero.backgroundImage);
+        var canonicalUrl = absoluteSiteUrl(seo.canonicalPath || defaults.canonicalPath);
         if (title) document.title = title;
-        var descMeta = document.querySelector('meta[name="description"]');
-        if (descMeta && description) descMeta.setAttribute('content', description);
+        upsertMeta('description', '', description);
+        upsertMeta('', 'og:title', title);
+        upsertMeta('', 'og:description', description);
+        upsertMeta('', 'og:type', 'website');
+        upsertMeta('', 'og:url', canonicalUrl);
+        upsertMeta('twitter:card', '', image ? 'summary_large_image' : 'summary');
+        upsertMeta('twitter:title', '', title);
+        upsertMeta('twitter:description', '', description);
+        upsertHeadLink('canonical', { href: canonicalUrl });
         if (image) {
-            var ogImage = document.querySelector('meta[property="og:image"]');
-            if (!ogImage) {
-                ogImage = document.createElement('meta');
-                ogImage.setAttribute('property', 'og:image');
-                document.head.appendChild(ogImage);
-            }
-            ogImage.setAttribute('content', window.location.origin + '/' + encodeURI(resolveAsset(image).replace(/^\.\.\//, '')));
+            var imageUrl = encodeURI(absoluteAssetUrl(image));
+            upsertMeta('', 'og:image', imageUrl);
+            upsertMeta('twitter:image', '', imageUrl);
         }
     }
 
