@@ -6,7 +6,7 @@
     <title>龙翔电气网站后台</title>
     <link rel="icon" type="image/webp" href="../assets/optimized/longxiang-logo-symbol-320.webp?v=20260618-imgopt2">
     <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png?v=20260615-lxdq">
-    <link rel="stylesheet" href="css/admin.css?v=5">
+    <link rel="stylesheet" href="css/admin.css?v=6">
 </head>
 <body>
     <div class="admin-layout" id="admin-page">
@@ -962,11 +962,20 @@
                                         <div class="upload-placeholder"><p>上传产品封面</p><small>JPG / PNG / WebP / GIF，最大 8MB</small></div>
                                     </div>
                                     <div class="image-preview-container" id="image-preview" style="display:none;"></div>
+                                    <div class="asset-field-actions product-cover-actions">
+                                        <button class="btn btn-secondary btn-sm" id="btn-product-select-asset" type="button">从资源库选择</button>
+                                        <button class="btn btn-secondary btn-sm" id="btn-product-clear-image" type="button">清空图片</button>
+                                    </div>
                                     <p class="form-help-text">上传成功后点击保存，封面会替换为新图片。</p>
                                 </section>
 
                                 <section class="form-section product-form-section">
                                     <h3 class="form-section-title">图库</h3>
+                                    <div class="asset-field-actions product-gallery-actions">
+                                        <input type="file" id="product-gallery-upload-input" accept="image/jpeg,image/png,image/webp,image/gif" multiple hidden>
+                                        <button class="btn btn-secondary btn-sm" id="btn-product-gallery-upload" type="button">本地上传</button>
+                                        <button class="btn btn-secondary btn-sm" id="btn-product-gallery-select" type="button">从资源库添加</button>
+                                    </div>
                                     <div class="gallery-preview-grid" id="product-gallery-preview">
                                         <div class="gallery-empty">暂无图库图片</div>
                                     </div>
@@ -1040,6 +1049,10 @@
                                 <section class="form-section cert-form-section">
                                     <h3 class="form-section-title">展示内容</h3>
                                     <div class="form-group"><label for="cert-image">图片/文件路径</label><input type="text" id="cert-image" placeholder="例如 uploads/certification-xxx.jpg"></div>
+                                    <div class="asset-field-actions cert-asset-actions">
+                                        <button class="btn btn-secondary btn-sm" id="btn-cert-select-asset" type="button">从资源库选择</button>
+                                        <button class="btn btn-secondary btn-sm" id="btn-cert-clear-image" type="button">清空文件</button>
+                                    </div>
                                     <div class="form-group"><label for="cert-description">说明</label><textarea id="cert-description" rows="5"></textarea></div>
                                 </section>
                             </div>
@@ -1065,6 +1078,61 @@
                     </form>
                 </div>
                 <div class="modal-footer"><button class="btn btn-secondary" id="certification-cancel">取消</button><button class="btn btn-primary" type="submit" form="certification-form">保存</button></div>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="asset-picker-modal">
+            <div class="modal modal-wide asset-picker-modal" role="dialog" aria-modal="true" aria-labelledby="asset-picker-title">
+                <div class="modal-header">
+                    <div>
+                        <h3 id="asset-picker-title">选择资源</h3>
+                        <p class="modal-subtitle" id="asset-picker-subtitle">从资源库选择图片，或上传新图片后直接使用。</p>
+                    </div>
+                    <button class="modal-close" id="asset-picker-close" type="button">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="asset-picker-toolbar">
+                        <div class="search-input-wrap">
+                            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                            <input type="text" id="asset-picker-search" class="search-input" placeholder="搜索文件名或路径">
+                        </div>
+                        <select id="asset-picker-module" class="toolbar-select" aria-label="来源模块筛选">
+                            <option value="">全部来源</option>
+                            <option value="products">产品</option>
+                            <option value="certifications">证书</option>
+                            <option value="content_blocks">内容模块</option>
+                            <option value="visual_builder">可视化管理</option>
+                            <option value="education">教育合作</option>
+                            <option value="assets">资源库</option>
+                        </select>
+                        <select id="asset-picker-usage" class="toolbar-select" aria-label="使用状态筛选">
+                            <option value="">全部状态</option>
+                            <option value="used">已使用</option>
+                            <option value="unused">未使用</option>
+                        </select>
+                        <input type="file" id="asset-picker-upload-input" accept="image/jpeg,image/png,image/webp,image/gif" hidden>
+                        <button class="btn btn-secondary btn-sm" id="asset-picker-upload-btn" type="button">本地上传</button>
+                    </div>
+                    <div class="asset-picker-layout">
+                        <div class="asset-picker-grid" id="asset-picker-grid">
+                            <div class="asset-empty-state">正在加载资源...</div>
+                        </div>
+                        <aside class="asset-picker-detail" id="asset-picker-detail">
+                            <div class="asset-detail-empty">请选择一个资源</div>
+                        </aside>
+                    </div>
+                </div>
+                <div class="modal-footer asset-picker-footer">
+                    <div class="asset-picker-pages">
+                        <button class="btn btn-secondary btn-sm" id="asset-picker-prev" type="button">上一页</button>
+                        <span id="asset-picker-page-info">第 1 页</span>
+                        <button class="btn btn-secondary btn-sm" id="asset-picker-next" type="button">下一页</button>
+                    </div>
+                    <div class="asset-picker-confirm-actions">
+                        <button class="btn btn-secondary" id="asset-picker-cancel" type="button">取消</button>
+                        <button class="btn btn-primary" id="asset-picker-confirm" type="button" disabled>确认选择</button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -1127,6 +1195,6 @@
         <div class="toast-container" id="toast-container"></div>
     </div>
     <script src="js/pagination.js"></script>
-    <script src="js/admin.js?v=5"></script>
+    <script src="js/admin.js?v=6"></script>
 </body>
 </html>

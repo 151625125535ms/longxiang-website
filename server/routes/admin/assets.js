@@ -1,9 +1,44 @@
+const crypto = require('crypto');
+const fs = require('fs');
+const path = require('path');
 const express = require('express');
+const multer = require('multer');
 const { getDb } = require('../../lib/db');
+const { ensureDirectory, resolveUploadDir, resolveUploadPublicPath } = require('../../lib/fileStore');
 const { normalizeUploadedFilename } = require('../../lib/filenameEncoding');
 const { sendError } = require('./helpers');
 
 const router = express.Router();
+const uploadDir = resolveUploadDir();
+const uploadPublicPath = resolveUploadPublicPath();
+
+const UPLOAD_EXTENSIONS = {
+    'image/jpeg': '.jpg',
+    'image/png': '.png',
+    'image/webp': '.webp',
+    'image/gif': '.gif',
+    'application/pdf': '.pdf'
+};
+
+ensureDirectory(uploadDir);
+
+const upload = multer({
+    storage: multer.diskStorage({
+        destination: function (req, file, cb) {
+            ensureDirectory(uploadDir);
+            cb(null, uploadDir);
+        },
+        filename: function (req, file, cb) {
+            const ext = UPLOAD_EXTENSIONS[file.mimetype] || path.extname(file.originalname).toLowerCase();
+            cb(null, 'asset-' + Date.now() + '-' + crypto.randomBytes(6).toString('hex') + ext);
+        }
+    }),
+    limits: { fileSize: 10 * 1024 * 1024 },
+    fileFilter: function (req, file, cb) {
+        if (UPLOAD_EXTENSIONS[file.mimetype]) return cb(null, true);
+        cb(new Error('Only jpeg, png, webp, gif images or PDF files are allowed.'));
+    }
+});
 
 function parsePositiveInt(value, defaultValue, maxValue) {
     const parsed = parseInt(value, 10);
@@ -20,6 +55,20 @@ function normalizeBoolean(value, defaultValue) {
     if (value === true || value === 1 || value === '1' || value === 'true') return 1;
     if (value === false || value === 0 || value === '0' || value === 'false') return 0;
     return defaultValue;
+}
+
+function normalizeAssetPath(value) {
+    return String(value || '').trim().replace(/\\/g, '/').replace(/^(\.\.\/)+/, '').replace(/^\/+/, '');
+}
+
+function normalizeAssetMeta(value, fallback) {
+    const text = String(value == null ? '' : value).trim();
+    if (!text) return fallback || '';
+    return text.replace(/[^a-zA-Z0-9_-]/g, '-').replace(/-+/g, '-').slice(0, 64) || (fallback || '');
+}
+
+function fileChecksum(filePath) {
+    return crypto.createHash('sha256').update(fs.readFileSync(filePath)).digest('hex');
 }
 
 function getAsset(db, id) {
@@ -73,10 +122,159 @@ function buildQuery(query) {
         }
     }
 
+    const usageStatus = String(query.usage_status || '').trim();
+    if (usageStatus && usageStatus !== 'used' && usageStatus !== 'unused') {
+        return { error: 'Invalid usage_status value.' };
+    }
+
     return {
         whereSql: where.length ? 'WHERE ' + where.join(' AND ') : '',
-        params
+        params,
+        usageStatus
     };
+}
+
+function collectJsonPathMatches(value, targetPath, currentPath, matches) {
+    if (typeof value === 'string') {
+        if (normalizeAssetPath(value) === targetPath) matches.push(currentPath || 'body_json');
+        return;
+    }
+    if (!value || typeof value !== 'object') return;
+    if (Array.isArray(value)) {
+        value.forEach(function (item, index) {
+            collectJsonPathMatches(item, targetPath, currentPath + '[' + index + ']', matches);
+        });
+        return;
+    }
+    Object.keys(value).forEach(function (key) {
+        collectJsonPathMatches(value[key], targetPath, currentPath ? currentPath + '.' + key : key, matches);
+    });
+}
+
+function findAssetUsage(db, assetOrPath) {
+    const rawPath = typeof assetOrPath === 'string' ? assetOrPath : assetOrPath && assetOrPath.path;
+    const targetPath = normalizeAssetPath(rawPath);
+    if (!targetPath) return [];
+
+    const usage = [];
+    db.prepare(`
+        SELECT
+            pm.id AS media_id, pm.product_id, pm.is_cover, pm.sort_order,
+            p.name_en, p.name_ar, p.legacy_id, p.slug, p.status
+        FROM product_media pm
+        INNER JOIN products p ON p.id = pm.product_id
+        WHERE pm.path = @path AND p.status != 'deleted'
+        ORDER BY pm.is_cover DESC, pm.sort_order, pm.id
+    `).all({ path: targetPath }).forEach(function (row) {
+        usage.push({
+            module: 'products',
+            entity_type: 'product',
+            entity_id: row.product_id,
+            title: row.name_en || row.name_ar || row.legacy_id || row.slug || ('Product #' + row.product_id),
+            field_path: row.is_cover ? 'cover_image' : 'media[' + row.sort_order + ']'
+        });
+    });
+
+    db.prepare(`
+        SELECT id, name_en, name_ar, legacy_id, status
+        FROM certifications
+        WHERE image_path = @path AND status != 'deleted'
+        ORDER BY sort_order, id
+    `).all({ path: targetPath }).forEach(function (row) {
+        usage.push({
+            module: 'certifications',
+            entity_type: 'certification',
+            entity_id: row.id,
+            title: row.name_en || row.name_ar || row.legacy_id || ('Certification #' + row.id),
+            field_path: 'image_path'
+        });
+    });
+
+    db.prepare(`
+        SELECT id, slug, title_en, title_ar, body_json, status
+        FROM content_blocks
+        WHERE status != 'deleted'
+        ORDER BY sort_order, id
+    `).all().forEach(function (row) {
+        const matches = [];
+        try {
+            collectJsonPathMatches(JSON.parse(row.body_json || '{}'), targetPath, 'body_json', matches);
+        } catch (err) {
+            if (String(row.body_json || '').indexOf(targetPath) !== -1) matches.push('body_json');
+        }
+        matches.forEach(function (fieldPath) {
+            usage.push({
+                module: 'content_blocks',
+                entity_type: 'content_block',
+                entity_id: row.id,
+                title: row.title_en || row.title_ar || row.slug || ('Content block #' + row.id),
+                field_path: fieldPath
+            });
+        });
+    });
+
+    return usage;
+}
+
+function attachUsage(db, rows) {
+    return rows.map(function (row) {
+        const usage = findAssetUsage(db, row);
+        return {
+            ...row,
+            usage_count: usage.length,
+            usage_status: usage.length ? 'used' : 'unused',
+            usage: usage.slice(0, 8)
+        };
+    });
+}
+
+function createUploadAsset(db, file, context) {
+    const publicPath = uploadPublicPath + '/' + file.filename;
+    const checksum = fileChecksum(file.path);
+    const duplicate = checksum ? db.prepare(`
+        SELECT
+            id, path, filename, original_name, mime_type, file_size,
+            checksum, module, entity_type, entity_id, is_active, created_at
+        FROM assets
+        WHERE checksum = @checksum
+            AND file_size = @file_size
+            AND mime_type = @mime_type
+            AND is_active = 1
+        ORDER BY created_at DESC, id DESC
+        LIMIT 1
+    `).get({ checksum, file_size: file.size || 0, mime_type: file.mimetype || '' }) : null;
+
+    if (duplicate) {
+        try { fs.unlinkSync(file.path); } catch (err) {}
+        return { ...duplicate, reused: true };
+    }
+
+    const originalName = normalizeUploadedFilename(file.originalname);
+    const result = db.prepare(`
+        INSERT INTO assets
+            (
+                path, filename, original_name, mime_type, file_size,
+                checksum, module, entity_type, entity_id, is_active, created_at
+            )
+        VALUES
+            (
+                @path, @filename, @original_name, @mime_type, @file_size,
+                @checksum, @module, @entity_type, @entity_id, 1, @created_at
+            )
+    `).run({
+        path: publicPath,
+        filename: file.filename,
+        original_name: originalName,
+        mime_type: file.mimetype || '',
+        file_size: file.size || 0,
+        checksum,
+        module: normalizeAssetMeta(context.module, 'assets'),
+        entity_type: normalizeAssetMeta(context.entity_type, ''),
+        entity_id: context.entity_id == null || context.entity_id === '' ? null : parseInteger(context.entity_id, null),
+        created_at: Date.now()
+    });
+
+    return getAsset(db, result.lastInsertRowid);
 }
 
 router.get('/', function (req, res, next) {
@@ -88,30 +286,74 @@ router.get('/', function (req, res, next) {
         if (built.error) return sendError(res, 422, 'VALIDATION_ERROR', built.error);
 
         const db = getDb();
-        const totalRow = db.prepare(`
-            SELECT COUNT(*) AS total
-            FROM assets
-            ${built.whereSql}
-        `).get(built.params);
+        const includeUsage = normalizeBoolean(req.query.include_usage, 0) === 1 || !!built.usageStatus;
+        let total = 0;
+        let rows = [];
 
-        const rows = db.prepare(`
-            SELECT
-                id, path, filename, original_name, mime_type, file_size,
-                checksum, module, entity_type, entity_id, is_active, created_at
-            FROM assets
-            ${built.whereSql}
-            ORDER BY created_at DESC, id DESC
-            LIMIT @limit OFFSET @offset
-        `).all({ ...built.params, limit: pageSize, offset });
+        if (built.usageStatus) {
+            const allRows = db.prepare(`
+                SELECT
+                    id, path, filename, original_name, mime_type, file_size,
+                    checksum, module, entity_type, entity_id, is_active, created_at
+                FROM assets
+                ${built.whereSql}
+                ORDER BY created_at DESC, id DESC
+            `).all(built.params);
+            const rowsWithUsage = attachUsage(db, allRows).filter(function (row) {
+                return row.usage_status === built.usageStatus;
+            });
+            total = rowsWithUsage.length;
+            rows = rowsWithUsage.slice(offset, offset + pageSize);
+        } else {
+            const totalRow = db.prepare(`
+                SELECT COUNT(*) AS total
+                FROM assets
+                ${built.whereSql}
+            `).get(built.params);
+            total = totalRow ? totalRow.total : 0;
+            rows = db.prepare(`
+                SELECT
+                    id, path, filename, original_name, mime_type, file_size,
+                    checksum, module, entity_type, entity_id, is_active, created_at
+                FROM assets
+                ${built.whereSql}
+                ORDER BY created_at DESC, id DESC
+                LIMIT @limit OFFSET @offset
+            `).all({ ...built.params, limit: pageSize, offset });
+            if (includeUsage) rows = attachUsage(db, rows);
+        }
 
         res.json({
             ok: true,
             data: rows,
-            meta: { page, pageSize, total: totalRow ? totalRow.total : 0 }
+            meta: { page, pageSize, total }
         });
     } catch (err) {
         next(err);
     }
+});
+
+router.post('/upload', function (req, res, next) {
+    upload.any()(req, res, function (err) {
+        if (err) {
+            const message = err.code === 'LIMIT_FILE_SIZE'
+                ? 'File must be 10MB or smaller.'
+                : err.message;
+            return sendError(res, 422, 'VALIDATION_ERROR', message);
+        }
+
+        const file = req.files && req.files[0];
+        if (!file) return sendError(res, 400, 'VALIDATION_ERROR', 'No file uploaded.');
+
+        try {
+            const db = getDb();
+            const asset = createUploadAsset(db, file, req.body || {});
+            res.status(asset.reused ? 200 : 201).json({ ok: true, data: asset, path: asset.path });
+        } catch (uploadErr) {
+            try { fs.unlinkSync(file.path); } catch (unlinkErr) {}
+            next(uploadErr);
+        }
+    });
 });
 
 router.post('/', function (req, res, next) {
@@ -160,14 +402,50 @@ router.post('/', function (req, res, next) {
     }
 });
 
+router.get('/:id/usage', function (req, res, next) {
+    try {
+        const db = getDb();
+        const asset = getAsset(db, req.params.id);
+        if (!asset || asset.is_active === 0) return sendError(res, 404, 'NOT_FOUND', 'Asset not found.');
+        const usage = findAssetUsage(db, asset);
+        res.json({
+            ok: true,
+            data: {
+                asset_id: asset.id,
+                path: asset.path,
+                usage_count: usage.length,
+                usage_status: usage.length ? 'used' : 'unused',
+                items: usage
+            }
+        });
+    } catch (err) {
+        next(err);
+    }
+});
+
 router.delete('/:id', function (req, res, next) {
     try {
         const db = getDb();
         const asset = getAsset(db, req.params.id);
         if (!asset || asset.is_active === 0) return sendError(res, 404, 'NOT_FOUND', 'Asset not found.');
+        const usage = findAssetUsage(db, asset);
+        const force = normalizeBoolean(req.query.force, 0) === 1;
+        if (usage.length && !force) {
+            return res.status(409).json({
+                ok: false,
+                error: {
+                    code: 'RESOURCE_IN_USE',
+                    message: '该资源正在被 ' + usage.length + ' 个位置使用，请先替换引用后再移出资源库。'
+                },
+                data: {
+                    usage_count: usage.length,
+                    usage
+                }
+            });
+        }
 
         db.prepare('UPDATE assets SET is_active = 0 WHERE id = ?').run(asset.id);
-        res.json({ ok: true, data: { id: asset.id, deactivated: true } });
+        res.json({ ok: true, data: { id: asset.id, deactivated: true, usage_count: usage.length } });
     } catch (err) {
         next(err);
     }

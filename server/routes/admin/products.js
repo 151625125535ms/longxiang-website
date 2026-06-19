@@ -269,12 +269,43 @@ function replaceCoverImage(db, productId, coverPath, timestamp) {
     if (coverPath == null) return;
     db.prepare('DELETE FROM product_media WHERE product_id = ? AND is_cover = 1').run(productId);
     if (!coverPath) return;
+    const asset = db.prepare('SELECT id FROM assets WHERE path = ? AND is_active = 1').get(coverPath);
     db.prepare(`
         INSERT INTO product_media
             (product_id, asset_id, media_type, path, is_cover, sort_order, created_at)
         VALUES
-            (?, NULL, 'image', ?, 1, 1, ?)
-    `).run(productId, coverPath, timestamp);
+            (?, ?, 'image', ?, 1, 1, ?)
+    `).run(productId, asset ? asset.id : null, coverPath, timestamp);
+}
+
+function normalizeGalleryPaths(value) {
+    if (value == null) return [];
+    const items = Array.isArray(value)
+        ? value
+        : String(value).split(/[\r\n,]+/);
+    const paths = [];
+    for (const item of items) {
+        const normalized = normalizeCoverPath(item);
+        if (normalized == null) return null;
+        if (normalized && paths.indexOf(normalized) === -1) paths.push(normalized);
+    }
+    return paths;
+}
+
+function replaceGalleryImages(db, productId, paths, coverPath, timestamp) {
+    if (paths == null) return;
+    db.prepare('DELETE FROM product_media WHERE product_id = ? AND is_cover = 0').run(productId);
+    paths
+        .filter(function (galleryPath) { return galleryPath && galleryPath !== coverPath; })
+        .forEach(function (galleryPath, index) {
+            const asset = db.prepare('SELECT id FROM assets WHERE path = ? AND is_active = 1').get(galleryPath);
+            db.prepare(`
+                INSERT INTO product_media
+                    (product_id, asset_id, media_type, path, is_cover, sort_order, created_at)
+                VALUES
+                    (?, ?, 'image', ?, 0, ?, ?)
+            `).run(productId, asset ? asset.id : null, galleryPath, index + 2, timestamp);
+        });
 }
 
 function buildListQuery(query) {
@@ -438,6 +469,10 @@ router.post('/', function (req, res, next) {
         if (coverPath == null && body.cover_image != null) {
             return sendError(res, 422, 'VALIDATION_ERROR', 'Invalid cover_image path.');
         }
+        const galleryPaths = body.gallery === undefined ? [] : normalizeGalleryPaths(body.gallery);
+        if (galleryPaths == null) {
+            return sendError(res, 422, 'VALIDATION_ERROR', 'Invalid cover_image path.');
+        }
 
         const db = getDb();
         const categoryMapping = resolveProductCategoryMapping(db, body.category_id);
@@ -491,10 +526,11 @@ router.post('/', function (req, res, next) {
 
             const productId = result.lastInsertRowid;
             replaceProductSpecs(db, productId, normalizeProductSpecs(body.specs), now);
+            replaceCoverImage(db, productId, coverPath, now);
+            replaceGalleryImages(db, productId, galleryPaths, coverPath, now);
             const product = getFullProduct(db, productId);
-            replaceCoverImage(db, product.id, coverPath, now);
             insertAuditLog(db, req, 'product', product.id, 'create', null, product);
-            return getFullProduct(db, product.id);
+            return product;
         });
 
         const product = createProduct();
@@ -527,6 +563,10 @@ router.put('/:id', function (req, res, next) {
         const aliasesJson = body.aliases_json == null ? before.aliases_json : normalizeJsonString(body.aliases_json, before.aliases_json || '[]');
         const coverPath = body.cover_image === undefined ? undefined : normalizeCoverPath(body.cover_image);
         if (coverPath == null && body.cover_image !== undefined) {
+            return sendError(res, 422, 'VALIDATION_ERROR', 'Invalid cover_image path.');
+        }
+        const galleryPaths = body.gallery === undefined ? undefined : normalizeGalleryPaths(body.gallery);
+        if (galleryPaths == null && body.gallery !== undefined) {
             return sendError(res, 422, 'VALIDATION_ERROR', 'Invalid cover_image path.');
         }
 
@@ -587,6 +627,9 @@ router.put('/:id', function (req, res, next) {
                 replaceProductSpecs(db, before.id, normalizeProductSpecs(body.specs), timestamp);
             }
             replaceCoverImage(db, before.id, coverPath, timestamp);
+            if (galleryPaths !== undefined) {
+                replaceGalleryImages(db, before.id, galleryPaths, coverPath === undefined ? before.cover_image : coverPath, timestamp);
+            }
             const afterAudit = getAuditProduct(db, before.id);
             insertAuditLog(db, req, 'product', before.id, 'update', before, afterAudit);
             return getFullProduct(db, before.id);

@@ -343,6 +343,7 @@
         var editingProductId = null;
         var editingProductVersion = null;
         var uploadedImagePath = '';
+        var productGalleryPaths = [];
         var productImageUploading = false;
         var productCategories = [];
         var productSearchTimer = null;
@@ -373,6 +374,23 @@
         var activeAssetId = null;
         var assetUploading = false;
         var assetSearchTimer = null;
+        var assetPickerTimer = null;
+        var assetPickerState = {
+            open: false,
+            page: 1,
+            pageSize: 24,
+            total: 0,
+            rows: [],
+            selectedId: null,
+            selectedAsset: null,
+            type: 'image',
+            module: 'assets',
+            entityType: '',
+            entityId: '',
+            title: '选择资源',
+            subtitle: '从资源库选择图片，或上传新图片后直接使用。',
+            onSelect: null
+        };
         var activeTrashTab = 'trash-products';
         var activeCategoryId = null;
         var collapsedCategoryParents = {};
@@ -626,6 +644,7 @@
         bindSystemSettingsEvents();
         bindTrashEvents();
         bindAssetsEvents();
+        bindAssetPickerEvents();
         loadMenuVisibilitySettings({ silent: true });
         loadProductCategories();
         loadCertificationCategories();
@@ -874,6 +893,35 @@
             path = String(path).trim().replace(/\\/g, '/');
             path = path.replace(/^https?:\/\/[^/]+\//i, '');
             return path.replace(/^\/+/, '');
+        }
+
+        function assetPreviewSrc(path) {
+            path = String(path || '').trim();
+            if (!path) return '';
+            if (/^(https?:)?\/\//i.test(path) || path.charAt(0) === '/' || /^data:/i.test(path) || /^blob:/i.test(path)) return path;
+            return '../' + path.replace(/^\/+/, '');
+        }
+
+        function uploadAdminAssetFile(file, context) {
+            var formData = new FormData();
+            formData.append('file', file);
+            context = context || {};
+            Object.keys(context).forEach(function (key) {
+                if (context[key] != null && context[key] !== '') formData.append(key, context[key]);
+            });
+            return fetch(API_BASE + '/admin/assets/upload', {
+                method: 'POST',
+                headers: { Authorization: 'Bearer ' + getToken() },
+                body: formData
+            }).then(function (res) {
+                return res.json().then(function (data) {
+                    if (!res.ok) {
+                        var message = data.message || (data.error && data.error.message) || data.error || 'Upload failed';
+                        throw new Error(message);
+                    }
+                    return data;
+                });
+            });
         }
 
         function setProductSubmitDisabled(disabled) {
@@ -2517,6 +2565,16 @@
 
             var imageInput = document.getElementById('field-image');
             if (imageInput) imageInput.addEventListener('change', uploadProductImage);
+            var selectProductAsset = document.getElementById('btn-product-select-asset');
+            if (selectProductAsset) selectProductAsset.addEventListener('click', openProductAssetPicker);
+            var clearProductImage = document.getElementById('btn-product-clear-image');
+            if (clearProductImage) clearProductImage.addEventListener('click', clearProductCoverImage);
+            var galleryUploadBtn = document.getElementById('btn-product-gallery-upload');
+            var galleryUploadInput = document.getElementById('product-gallery-upload-input');
+            if (galleryUploadBtn && galleryUploadInput) galleryUploadBtn.addEventListener('click', function () { galleryUploadInput.click(); });
+            if (galleryUploadInput) galleryUploadInput.addEventListener('change', uploadProductGalleryFiles);
+            var gallerySelectBtn = document.getElementById('btn-product-gallery-select');
+            if (gallerySelectBtn) gallerySelectBtn.addEventListener('click', openProductGalleryAssetPicker);
 
             var btnAddSpec = document.getElementById('btn-add-spec');
             if (btnAddSpec) btnAddSpec.addEventListener('click', function () { addSpecRow('', ''); });
@@ -2552,6 +2610,7 @@
             productImageUploading = false;
             setProductSubmitDisabled(false);
             setProductCoverPath('');
+            productGalleryPaths = [];
             var modal = document.getElementById('product-modal');
             var title = document.getElementById('modal-title');
             var form = document.getElementById('product-form');
@@ -2652,22 +2711,84 @@
         function renderProductGallery(product) {
             var container = document.getElementById('product-gallery-preview');
             if (!container) return;
-            var media = Array.isArray(product.media) ? product.media.slice(0) : [];
-            if (!media.length && product.cover_image) {
-                media.push({ path: product.cover_image, is_cover: 1 });
+            if (product && Array.isArray(product.media)) {
+                productGalleryPaths = product.media
+                    .filter(function (item) { return item && !productValueIsTrue(item.is_cover) && (item.path || item.url); })
+                    .map(function (item) { return String(item.path || item.url || '').trim(); })
+                    .filter(Boolean);
             }
-            if (!media.length) {
+            if (!productGalleryPaths.length) {
                 container.innerHTML = '<div class="gallery-empty">暂无图库图片</div>';
                 return;
             }
-            container.innerHTML = media.slice(0, 6).map(function (item) {
-                var path = item.path || item.url || '';
-                if (!path) return '';
+            container.innerHTML = productGalleryPaths.map(function (path, index) {
                 return '<div class="gallery-item">' +
-                    '<img src="../' + escapeHtml(path) + '" alt="">' +
-                    (productValueIsTrue(item.is_cover) ? '<span>封面</span>' : '') +
+                    '<img src="' + escapeHtml(assetPreviewSrc(path)) + '" alt="">' +
+                    '<button class="gallery-remove-btn" type="button" data-remove-gallery-image="' + index + '" aria-label="移除图库图片">×</button>' +
                     '</div>';
             }).join('') || '<div class="gallery-empty">暂无图库图片</div>';
+            container.querySelectorAll('[data-remove-gallery-image]').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var index = parseInt(btn.getAttribute('data-remove-gallery-image'), 10);
+                    if (!isNaN(index)) {
+                        productGalleryPaths.splice(index, 1);
+                        renderProductGallery();
+                        markFormDirty();
+                    }
+                });
+            });
+        }
+
+        function addProductGalleryPath(path) {
+            path = String(path || '').trim();
+            if (!path) return;
+            if (productGalleryPaths.indexOf(path) === -1) productGalleryPaths.push(path);
+            renderProductGallery();
+            markFormDirty();
+        }
+
+        function uploadProductGalleryFiles() {
+            var input = document.getElementById('product-gallery-upload-input');
+            var files = Array.prototype.slice.call((input && input.files) || []);
+            if (input) input.value = '';
+            var images = files.filter(function (file) { return /^image\/(jpeg|png|webp|gif)$/.test(file.type || ''); });
+            if (!images.length) {
+                showToast('请选择 JPG、PNG、WebP 或 GIF 图片。', 'error');
+                return;
+            }
+            productImageUploading = true;
+            setProductSubmitDisabled(true);
+            Promise.all(images.map(function (file) {
+                return uploadAdminAssetFile(file, {
+                    module: 'products',
+                    entity_type: 'product',
+                    entity_id: editingProductId || ''
+                });
+            })).then(function (responses) {
+                responses.forEach(function (response) {
+                    addProductGalleryPath(getProductUploadPath(response));
+                });
+                showToast('图库图片已上传');
+            }).catch(function (err) {
+                showToast('图库上传失败：' + err.message, 'error');
+            }).finally(function () {
+                productImageUploading = false;
+                setProductSubmitDisabled(false);
+            });
+        }
+
+        function openProductGalleryAssetPicker() {
+            openAssetPicker({
+                title: '添加产品图库图片',
+                subtitle: '选择资源库中的图片加入当前产品图库。',
+                module: 'products',
+                entityType: 'product',
+                entityId: editingProductId || '',
+                onSelect: function (asset) {
+                    addProductGalleryPath(asset && asset.path ? asset.path : '');
+                    showToast('已添加到产品图库');
+                }
+            });
         }
 
         function renderProductCertifications(product) {
@@ -2691,20 +2812,10 @@
             productImageUploading = true;
             setProductSubmitDisabled(true);
 
-            var formData = new FormData();
-            formData.append('image', file);
-            fetch(API_BASE + '/admin/products/upload', {
-                method: 'POST',
-                headers: { Authorization: 'Bearer ' + getToken() },
-                body: formData
-            }).then(function (res) {
-                return res.json().then(function (data) {
-                    if (!res.ok) {
-                        var message = data.message || (data.error && data.error.message) || data.error || 'Upload failed';
-                        throw new Error(message);
-                    }
-                    return data;
-                });
+            uploadAdminAssetFile(file, {
+                module: 'products',
+                entity_type: 'product',
+                entity_id: editingProductId || ''
             })
                 .then(function (data) {
                     if (data.error) throw new Error(data.error);
@@ -2718,6 +2829,36 @@
                     productImageUploading = false;
                     setProductSubmitDisabled(false);
                 });
+        }
+
+        function openProductAssetPicker() {
+            openAssetPicker({
+                title: '选择产品封面',
+                subtitle: '从资源库复用已有图片，或上传新图片作为当前产品封面。',
+                module: 'products',
+                entityType: 'product',
+                entityId: editingProductId || '',
+                onSelect: function (asset) {
+                    var path = asset && asset.path ? asset.path : '';
+                    if (!path) return;
+                    setProductCoverPath(path);
+                    showImagePreview(assetPreviewSrc(path));
+                    markFormDirty();
+                    showToast('已选择产品封面');
+                }
+            });
+        }
+
+        function clearProductCoverImage() {
+            setProductCoverPath('');
+            var preview = document.getElementById('image-preview');
+            var uploadArea = document.getElementById('upload-area');
+            if (preview) {
+                preview.style.display = 'none';
+                preview.innerHTML = '';
+            }
+            if (uploadArea) uploadArea.style.display = '';
+            markFormDirty();
         }
 
         function showImagePreview(src) {
@@ -2815,7 +2956,8 @@
                 seo_title: getFieldValue('field-seo-title'),
                 seo_description: getFieldValue('field-seo-description'),
                 seo_keywords: getFieldValue('field-seo-keywords'),
-                specs: getSpecsFromForm()
+                specs: getSpecsFromForm(),
+                gallery: productGalleryPaths.slice(0)
             };
             if (editingProductId) payload.version = editingProductVersion;
             var submittedCoverImage = payload.cover_image || '';
@@ -3267,6 +3409,10 @@
             if (certFile) certFile.addEventListener('change', uploadCertificationFile);
             var certImage = document.getElementById('cert-image');
             if (certImage) certImage.addEventListener('input', function () { renderCertificationPreview(certImage.value); });
+            var selectCertAsset = document.getElementById('btn-cert-select-asset');
+            if (selectCertAsset) selectCertAsset.addEventListener('click', openCertificationAssetPicker);
+            var clearCertImage = document.getElementById('btn-cert-clear-image');
+            if (clearCertImage) clearCertImage.addEventListener('click', clearCertificationImage);
         }
 
         function bindCertAddButton(viewName) {
@@ -3692,21 +3838,50 @@
             var file = this.files[0];
             if (!file) return;
             renderCertificationPreview(URL.createObjectURL(file));
-            var formData = new FormData();
-            formData.append('image', file);
-            fetch(API_BASE + '/admin/products/upload', {
-                method: 'POST',
-                headers: { Authorization: 'Bearer ' + getToken() },
-                body: formData
-            }).then(function (res) { return res.json(); })
+            uploadAdminAssetFile(file, {
+                module: 'certifications',
+                entity_type: 'certification',
+                entity_id: editingCertificationId || ''
+            })
                 .then(function (data) {
                     if (data.error) throw new Error(data.error);
-                    uploadedCertificationPath = data.path;
-                    document.getElementById('cert-image').value = data.path;
-                    renderCertificationPreview(data.path);
+                    var path = getProductUploadPath(data);
+                    uploadedCertificationPath = path;
+                    document.getElementById('cert-image').value = path;
+                    renderCertificationPreview(path);
+                    markFormDirty();
                     showToast('证书文件上传成功');
                 })
                 .catch(function (err) { showToast('证书文件上传失败：' + err.message, 'error'); });
+        }
+
+        function openCertificationAssetPicker() {
+            openAssetPicker({
+                title: '选择证书图片',
+                subtitle: '从资源库复用已有证书图片，或上传新图片后直接回填。',
+                module: 'certifications',
+                entityType: 'certification',
+                entityId: editingCertificationId || '',
+                onSelect: function (asset) {
+                    var path = asset && asset.path ? asset.path : '';
+                    if (!path) return;
+                    uploadedCertificationPath = path;
+                    document.getElementById('cert-image').value = path;
+                    renderCertificationPreview(path);
+                    markFormDirty();
+                    showToast('已选择证书图片');
+                }
+            });
+        }
+
+        function clearCertificationImage() {
+            uploadedCertificationPath = '';
+            var field = document.getElementById('cert-image');
+            if (field) field.value = '';
+            var certFile = document.getElementById('cert-file');
+            if (certFile) certFile.value = '';
+            renderCertificationPreview('');
+            markFormDirty();
         }
 
         function saveCertification(e) {
@@ -4047,7 +4222,7 @@
             }
             if (isImageLikeField(path)) {
                 var preview = valueText ? '<img src="../' + escapeHtml(valueText) + '" alt="' + escapeHtml(resolvedLabel) + '预览">' : '<span class="cms-image-empty">暂无图片</span>';
-                return '<div class="form-group cms-field cms-image-field"><label for="' + escapeHtml(id) + '">' + escapeHtml(resolvedLabel) + '</label><div class="cms-image-card"><div class="cms-image-preview">' + preview + '</div><div class="cms-image-controls"><input id="' + escapeHtml(id) + '" data-cms-field="' + escapeHtml(path) + '" type="text" value="' + escapeHtml(valueText) + '" placeholder="从资源库选择或粘贴资源路径"><button type="button" class="btn btn-secondary btn-sm cms-asset-shortcut" data-action="view-assets">打开资源库</button></div></div>' + renderFieldHint(path, valueText) + '</div>';
+                return '<div class="form-group cms-field cms-image-field"><label for="' + escapeHtml(id) + '">' + escapeHtml(resolvedLabel) + '</label><div class="cms-image-card"><div class="cms-image-preview">' + preview + '</div><div class="cms-image-controls"><input id="' + escapeHtml(id) + '" data-cms-field="' + escapeHtml(path) + '" type="text" value="' + escapeHtml(valueText) + '" placeholder="从资源库选择或粘贴资源路径"><div class="asset-field-actions cms-image-actions"><button type="button" class="btn btn-secondary btn-sm cms-asset-shortcut" data-cms-select-asset="' + escapeHtml(id) + '">从资源库选择</button><button type="button" class="btn btn-secondary btn-sm cms-clear-asset" data-cms-clear-asset="' + escapeHtml(id) + '">清空</button></div></div></div>' + renderFieldHint(path, valueText) + '</div>';
             }
             if (textarea) {
                 return '<div class="form-group cms-field"><label for="' + escapeHtml(id) + '">' + escapeHtml(resolvedLabel) + '</label><textarea id="' + escapeHtml(id) + '" data-cms-field="' + escapeHtml(path) + '" rows="4">' + escapeHtml(valueText) + '</textarea>' + renderFieldHint(path, valueText) + '</div>';
@@ -4468,6 +4643,37 @@
             renderContentBlockForm(viewName, block);
         }
 
+        function updateCmsAssetField(input, path) {
+            if (!input) return;
+            input.value = path || '';
+            var card = input.closest ? input.closest('.cms-image-card') : null;
+            var preview = card ? card.querySelector('.cms-image-preview') : null;
+            if (preview) {
+                preview.innerHTML = path
+                    ? '<img src="' + escapeHtml(assetPreviewSrc(path)) + '" alt="图片预览">'
+                    : '<span class="cms-image-empty">暂无图片</span>';
+            }
+            markFormDirty();
+        }
+
+        function openContentAssetPicker(viewName, inputId) {
+            var input = document.getElementById(inputId);
+            if (!input) return;
+            var block = contentBlockCache[viewName] || {};
+            openAssetPicker({
+                title: '选择内容图片',
+                subtitle: '选择后会自动回填当前内容字段，不需要手动复制路径。',
+                module: 'content_blocks',
+                entityType: 'content_block',
+                entityId: block.id || '',
+                onSelect: function (asset) {
+                    var path = asset && asset.path ? asset.path : '';
+                    updateCmsAssetField(input, path);
+                    showToast('已回填内容图片');
+                }
+            });
+        }
+
         function bindContentBlockEvents() {
             var views = [
                 'content-home',
@@ -4505,8 +4711,14 @@
                             }
                             return;
                         }
-                        if (target.closest('.cms-asset-shortcut')) {
-                            switchView('assets');
+                        var selectAsset = target.closest('[data-cms-select-asset]');
+                        if (selectAsset) {
+                            openContentAssetPicker(viewName, selectAsset.getAttribute('data-cms-select-asset'));
+                            return;
+                        }
+                        var clearAsset = target.closest('[data-cms-clear-asset]');
+                        if (clearAsset) {
+                            updateCmsAssetField(document.getElementById(clearAsset.getAttribute('data-cms-clear-asset')), '');
                             return;
                         }
                         if (target.classList.contains('cms-reload')) {
@@ -5177,7 +5389,19 @@
                 }
                 var selectAsset = e.target.closest('[data-visual-select-asset]');
                 if (selectAsset) {
-                    openVisualAssetPicker(selectAsset.getAttribute('data-visual-select-asset'));
+                    (function (fieldId) {
+                        openAssetPicker({
+                            title: '选择可视化图片',
+                            subtitle: '选择后会自动回填当前可视化字段并更新预览。',
+                            module: 'visual_builder',
+                            entityType: 'content_block',
+                            entityId: '',
+                            onSelect: function (asset) {
+                                updateVisualAssetField(fieldId, asset && asset.path ? asset.path : '');
+                                showToast('已选择可视化图片');
+                            }
+                        });
+                    })(selectAsset.getAttribute('data-visual-select-asset'));
                     return;
                 }
                 var clearAsset = e.target.closest('[data-visual-clear-asset]');
@@ -5440,6 +5664,256 @@
             return (i === 0 ? size : size.toFixed(1)) + ' ' + units[i];
         }
 
+        function openAssetPicker(options) {
+            options = options || {};
+            assetPickerState.open = true;
+            assetPickerState.page = 1;
+            assetPickerState.pageSize = options.pageSize || 24;
+            assetPickerState.total = 0;
+            assetPickerState.rows = [];
+            assetPickerState.selectedId = null;
+            assetPickerState.selectedAsset = null;
+            assetPickerState.type = options.type || 'image';
+            assetPickerState.module = options.module || 'assets';
+            assetPickerState.entityType = options.entityType || '';
+            assetPickerState.entityId = options.entityId || '';
+            assetPickerState.title = options.title || '选择资源';
+            assetPickerState.subtitle = options.subtitle || '从资源库选择图片，或上传新图片后直接使用。';
+            assetPickerState.onSelect = typeof options.onSelect === 'function' ? options.onSelect : null;
+            assetPickerState.trigger = document.activeElement;
+
+            var title = document.getElementById('asset-picker-title');
+            var subtitle = document.getElementById('asset-picker-subtitle');
+            var search = document.getElementById('asset-picker-search');
+            var moduleFilter = document.getElementById('asset-picker-module');
+            var usageFilter = document.getElementById('asset-picker-usage');
+            if (title) title.textContent = assetPickerState.title;
+            if (subtitle) subtitle.textContent = assetPickerState.subtitle;
+            if (search) search.value = '';
+            if (moduleFilter) moduleFilter.value = '';
+            if (usageFilter) usageFilter.value = '';
+
+            var modal = document.getElementById('asset-picker-modal');
+            if (modal) {
+                modal.classList.add('show');
+                trapFocus(modal, closeAssetPicker);
+            }
+            loadAssetPickerAssets();
+        }
+
+        function closeAssetPicker() {
+            var modal = document.getElementById('asset-picker-modal');
+            if (modal) {
+                releaseFocusTrap(modal);
+                modal.classList.remove('show');
+            }
+            if (assetPickerState.trigger && assetPickerState.trigger.focus) assetPickerState.trigger.focus();
+            assetPickerState.open = false;
+            assetPickerState.onSelect = null;
+            assetPickerState.trigger = null;
+        }
+
+        function assetPickerFilterValues() {
+            return {
+                q: ((document.getElementById('asset-picker-search') || {}).value || '').trim(),
+                module: (document.getElementById('asset-picker-module') || {}).value || '',
+                usage: (document.getElementById('asset-picker-usage') || {}).value || ''
+            };
+        }
+
+        function loadAssetPickerAssets() {
+            var grid = document.getElementById('asset-picker-grid');
+            if (!grid) return;
+            grid.innerHTML = '<div class="asset-empty-state">正在加载资源...</div>';
+            renderAssetPickerDetail(assetPickerState.selectedAsset);
+            var filters = assetPickerFilterValues();
+            var url = '/admin/assets?page=' + encodeURIComponent(assetPickerState.page) +
+                '&pageSize=' + encodeURIComponent(assetPickerState.pageSize) +
+                '&include_usage=1';
+            if (assetPickerState.type) url += '&type=' + encodeURIComponent(assetPickerState.type);
+            if (filters.q) url += '&q=' + encodeURIComponent(filters.q);
+            if (filters.module) url += '&module=' + encodeURIComponent(filters.module);
+            if (filters.usage) url += '&usage_status=' + encodeURIComponent(filters.usage);
+            apiRequest(url).then(function (response) {
+                var rows = unwrapListResponse(response);
+                assetPickerState.rows = rows;
+                assetPickerState.total = response && response.meta ? response.meta.total : rows.length;
+                if (assetPickerState.selectedId && !assetPickerState.selectedAsset && !findAssetPickerRow(assetPickerState.selectedId)) {
+                    assetPickerState.selectedId = null;
+                    assetPickerState.selectedAsset = null;
+                }
+                renderAssetPickerGrid();
+                renderAssetPickerPagination(response && response.meta ? response.meta : null);
+                renderAssetPickerDetail(assetPickerState.selectedAsset);
+            }).catch(function (err) {
+                grid.innerHTML = '<div class="asset-empty-state">资源加载失败：' + escapeHtml(err.message) + '</div>';
+                renderAssetPickerPagination({ page: 1, pageSize: assetPickerState.pageSize, total: 0 });
+            });
+        }
+
+        function findAssetPickerRow(id) {
+            for (var i = 0; i < assetPickerState.rows.length; i++) {
+                if (String(assetPickerState.rows[i].id) === String(id)) return assetPickerState.rows[i];
+            }
+            return null;
+        }
+
+        function renderAssetPickerGrid() {
+            var grid = document.getElementById('asset-picker-grid');
+            if (!grid) return;
+            if (!assetPickerState.rows.length) {
+                grid.innerHTML = '<div class="asset-empty-state">暂无可选择资源</div>';
+                return;
+            }
+            grid.innerHTML = assetPickerState.rows.map(function (asset) {
+                var id = asset.id == null ? '' : String(asset.id);
+                var path = asset.path || '';
+                var name = asset.original_name || asset.filename || '未命名资源';
+                var usageText = asset.usage_count > 0 ? '已使用 ' + asset.usage_count + ' 处' : '未使用';
+                var preview = assetIsImage(asset) && path
+                    ? '<img src="' + escapeHtml(assetPreviewSrc(path)) + '" alt="">'
+                    : '<div class="asset-file-icon">' + assetFileIcon(asset) + '</div>';
+                return '<button type="button" class="asset-picker-card ' + (String(assetPickerState.selectedId) === id ? 'is-selected' : '') + '" data-asset-picker-id="' + escapeHtml(id) + '">' +
+                    '<span class="asset-picker-thumb">' + preview + '</span>' +
+                    '<strong title="' + escapeHtml(name) + '">' + escapeHtml(name) + '</strong>' +
+                    '<small>' + escapeHtml(asset.module || '未绑定来源') + ' · ' + escapeHtml(usageText) + '</small>' +
+                '</button>';
+            }).join('');
+            grid.querySelectorAll('[data-asset-picker-id]').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    selectAssetPickerRow(btn.getAttribute('data-asset-picker-id'));
+                });
+            });
+        }
+
+        function selectAssetPickerRow(id) {
+            var asset = findAssetPickerRow(id);
+            if (!asset) return;
+            assetPickerState.selectedId = asset.id;
+            assetPickerState.selectedAsset = asset;
+            renderAssetPickerGrid();
+            renderAssetPickerDetail(asset);
+            var confirm = document.getElementById('asset-picker-confirm');
+            if (confirm) confirm.disabled = false;
+        }
+
+        function renderAssetPickerDetail(asset) {
+            var detail = document.getElementById('asset-picker-detail');
+            var confirm = document.getElementById('asset-picker-confirm');
+            if (confirm) confirm.disabled = !asset;
+            if (!detail) return;
+            if (!asset) {
+                detail.innerHTML = '<div class="asset-detail-empty">请选择一个资源</div>';
+                return;
+            }
+            var path = asset.path || '';
+            var name = asset.original_name || asset.filename || '未命名资源';
+            var source = asset.module ? asset.module + (asset.entity_type ? '/' + asset.entity_type : '') : '未绑定来源';
+            var usage = asset.usage_count > 0 ? '已使用 ' + asset.usage_count + ' 处' : '未使用';
+            var preview = assetIsImage(asset) && path
+                ? '<img src="' + escapeHtml(assetPreviewSrc(path)) + '" alt="">'
+                : '<div class="asset-file-icon asset-file-icon-large">' + assetFileIcon(asset) + '</div>';
+            detail.innerHTML = '<div class="asset-detail-preview">' + preview + '</div>' +
+                '<h4>' + escapeHtml(name) + '</h4>' +
+                '<dl>' +
+                    '<div><dt>路径</dt><dd title="' + escapeHtml(path) + '">' + escapeHtml(path || '-') + '</dd></div>' +
+                    '<div><dt>类型</dt><dd>' + escapeHtml(asset.mime_type || assetTypeLabel(asset)) + '</dd></div>' +
+                    '<div><dt>大小</dt><dd>' + escapeHtml(formatFileSize(asset.file_size)) + '</dd></div>' +
+                    '<div><dt>来源</dt><dd>' + escapeHtml(source) + '</dd></div>' +
+                    '<div><dt>状态</dt><dd>' + escapeHtml(usage) + '</dd></div>' +
+                    '<div><dt>上传时间</dt><dd>' + escapeHtml(formatDate(asset.created_at)) + '</dd></div>' +
+                '</dl>';
+        }
+
+        function renderAssetPickerPagination(meta) {
+            meta = meta || { page: assetPickerState.page, pageSize: assetPickerState.pageSize, total: assetPickerState.total };
+            assetPickerState.page = meta.page || assetPickerState.page;
+            assetPickerState.pageSize = meta.pageSize || assetPickerState.pageSize;
+            assetPickerState.total = meta.total || 0;
+            var totalPages = Math.max(1, Math.ceil((assetPickerState.total || 0) / (assetPickerState.pageSize || 24)));
+            var pageInfo = document.getElementById('asset-picker-page-info');
+            var prev = document.getElementById('asset-picker-prev');
+            var next = document.getElementById('asset-picker-next');
+            if (pageInfo) pageInfo.textContent = '第 ' + assetPickerState.page + ' 页，共 ' + assetPickerState.total + ' 条';
+            if (prev) prev.disabled = assetPickerState.page <= 1;
+            if (next) next.disabled = assetPickerState.page >= totalPages;
+        }
+
+        function confirmAssetPickerSelection() {
+            if (!assetPickerState.selectedAsset || !assetPickerState.onSelect) return;
+            assetPickerState.onSelect(assetPickerState.selectedAsset);
+            closeAssetPicker();
+        }
+
+        function uploadAssetFromPicker(file) {
+            if (!file) return;
+            uploadAdminAssetFile(file, {
+                module: assetPickerState.module || 'assets',
+                entity_type: assetPickerState.entityType || '',
+                entity_id: assetPickerState.entityId || ''
+            }).then(function (response) {
+                var asset = unwrapDataResponse(response) || response;
+                assetPickerState.selectedId = asset.id || null;
+                assetPickerState.selectedAsset = asset;
+                renderAssetPickerDetail(asset);
+                showToast(asset.reused ? '资源库已有相同图片，已直接选中' : '图片已上传并选中');
+                assetPickerState.page = 1;
+                loadAssetPickerAssets();
+            }).catch(function (err) {
+                showToast('上传失败：' + err.message, 'error');
+            });
+        }
+
+        function bindAssetPickerEvents() {
+            var modal = document.getElementById('asset-picker-modal');
+            if (modal) {
+                modal.addEventListener('click', function (event) {
+                    if (event.target === modal) closeAssetPicker();
+                });
+            }
+            var closeBtn = document.getElementById('asset-picker-close');
+            if (closeBtn) closeBtn.addEventListener('click', closeAssetPicker);
+            var cancelBtn = document.getElementById('asset-picker-cancel');
+            if (cancelBtn) cancelBtn.addEventListener('click', closeAssetPicker);
+            var confirmBtn = document.getElementById('asset-picker-confirm');
+            if (confirmBtn) confirmBtn.addEventListener('click', confirmAssetPickerSelection);
+            var prev = document.getElementById('asset-picker-prev');
+            if (prev) prev.addEventListener('click', function () {
+                if (assetPickerState.page <= 1) return;
+                assetPickerState.page -= 1;
+                loadAssetPickerAssets();
+            });
+            var next = document.getElementById('asset-picker-next');
+            if (next) next.addEventListener('click', function () {
+                var totalPages = Math.max(1, Math.ceil((assetPickerState.total || 0) / (assetPickerState.pageSize || 24)));
+                if (assetPickerState.page >= totalPages) return;
+                assetPickerState.page += 1;
+                loadAssetPickerAssets();
+            });
+            var search = document.getElementById('asset-picker-search');
+            if (search) search.addEventListener('input', function () {
+                clearTimeout(assetPickerTimer);
+                assetPickerTimer = setTimeout(function () {
+                    assetPickerState.page = 1;
+                    loadAssetPickerAssets();
+                }, 250);
+            });
+            ['asset-picker-module', 'asset-picker-usage'].forEach(function (id) {
+                var field = document.getElementById(id);
+                if (field) field.addEventListener('change', function () {
+                    assetPickerState.page = 1;
+                    loadAssetPickerAssets();
+                });
+            });
+            var uploadBtn = document.getElementById('asset-picker-upload-btn');
+            var uploadInput = document.getElementById('asset-picker-upload-input');
+            if (uploadBtn && uploadInput) uploadBtn.addEventListener('click', function () { uploadInput.click(); });
+            if (uploadInput) uploadInput.addEventListener('change', function () {
+                uploadAssetFromPicker(uploadInput.files && uploadInput.files[0]);
+                uploadInput.value = '';
+            });
+        }
+
         function loadAssets() {
             var tbody = document.getElementById('assets-tbody');
             var grid = document.getElementById('assets-grid');
@@ -5452,7 +5926,7 @@
             if (pagination) pagination.style.display = 'none';
             var searchVal = ((document.getElementById('asset-search') || {}).value || '').trim();
             var typeVal = (document.getElementById('asset-type-filter') || {}).value || '';
-            var url = '/admin/assets?page=' + encodeURIComponent(assetPage) + '&pageSize=20';
+            var url = '/admin/assets?page=' + encodeURIComponent(assetPage) + '&pageSize=20&include_usage=1';
             if (searchVal) url += '&q=' + encodeURIComponent(searchVal);
             if (typeVal) url += '&type=' + encodeURIComponent(typeVal);
             updateAssetClearFilters();
@@ -5502,13 +5976,14 @@
             var path = asset.path || '';
             var name = asset.original_name || asset.filename || '未命名资源';
             var size = formatFileSize(asset.file_size);
+            var usageText = asset.usage_count > 0 ? '已使用 ' + asset.usage_count + ' 处' : '未使用';
             var preview = assetIsImage(asset) && path
                 ? '<img src="../' + escapeHtml(path) + '" alt="">'
                 : '<div class="asset-file-icon">' + assetFileIcon(asset) + '</div>';
             return '<article class="asset-card ' + (active ? 'is-active ' : '') + (selected ? 'is-selected' : '') + '" data-asset-card="' + escapeHtml(id) + '">' +
                 '<label class="asset-card-check"><input type="checkbox" class="asset-row-check" data-asset-check="' + escapeHtml(id) + '"' + (selected ? ' checked' : '') + '><span></span></label>' +
                 '<div class="asset-card-preview">' + preview + '</div>' +
-                '<div class="asset-card-body"><strong title="' + escapeHtml(name) + '">' + escapeHtml(name) + '</strong><span>' + escapeHtml(size) + ' · ' + escapeHtml(assetTypeLabel(asset)) + '</span></div>' +
+                '<div class="asset-card-body"><strong title="' + escapeHtml(name) + '">' + escapeHtml(name) + '</strong><span>' + escapeHtml(size) + ' · ' + escapeHtml(assetTypeLabel(asset)) + ' · ' + escapeHtml(usageText) + '</span></div>' +
                 '</article>';
         }
 
@@ -5518,13 +5993,14 @@
             var name = asset.original_name || asset.filename || '未命名资源';
             var rawPath = asset.path || '';
             var source = asset.module ? asset.module + (asset.entity_type ? '/' + asset.entity_type : '') : '—';
+            var usage = asset.usage_count > 0 ? '已使用 ' + asset.usage_count + ' 处' : '未使用';
             return '<tr class="' + (String(activeAssetId) === id ? 'row-active' : '') + '" data-asset-row="' + escapeHtml(id) + '">' +
                 '<td><input type="checkbox" class="asset-row-check" data-asset-check="' + escapeHtml(id) + '"' + (selected ? ' checked' : '') + '></td>' +
                 '<td class="product-name-text">' + escapeHtml(name) + '</td>' +
                 '<td class="cell-muted asset-path-cell" title="' + escapeHtml(rawPath || '—') + '">' + escapeHtml(rawPath || '—') + '</td>' +
                 '<td class="cell-muted">' + escapeHtml(asset.mime_type || '—') + '</td>' +
                 '<td class="cell-muted">' + escapeHtml(formatFileSize(asset.file_size)) + '</td>' +
-                '<td class="cell-muted">' + escapeHtml(source) + '</td>' +
+                '<td class="cell-muted">' + escapeHtml(source) + ' · ' + escapeHtml(usage) + '</td>' +
                 '<td class="cell-muted">' + escapeHtml(formatDate(asset.created_at)) + '</td>' +
                 '<td><div class="asset-actions"><button class="btn btn-secondary btn-sm" data-copy-asset="' + escapeHtml(rawPath) + '">复制路径</button><button class="btn btn-icon btn-icon-delete" aria-label="删除资源" data-delete-asset="' + escapeHtml(id) + '">' + ICON_DELETE + '</button></div></td>' +
                 '</tr>';
@@ -5580,6 +6056,7 @@
                 ? '<img src="../' + escapeHtml(path) + '" alt="">'
                 : '<div class="asset-file-icon asset-file-icon-large">' + assetFileIcon(asset) + '</div>';
             var source = asset.module ? asset.module + (asset.entity_type ? '/' + asset.entity_type : '') : '未绑定模块';
+            var usage = asset.usage_count > 0 ? '已使用 ' + asset.usage_count + ' 处' : '未使用';
             container.innerHTML = '<div class="asset-detail-preview">' + preview + '</div>' +
                 '<h4>' + escapeHtml(name) + '</h4>' +
                 '<dl>' +
@@ -5587,6 +6064,7 @@
                     '<div><dt>类型</dt><dd>' + escapeHtml(asset.mime_type || '—') + '</dd></div>' +
                     '<div><dt>大小</dt><dd>' + escapeHtml(formatFileSize(asset.file_size)) + '</dd></div>' +
                     '<div><dt>来源</dt><dd>' + escapeHtml(source) + '</dd></div>' +
+                    '<div><dt>使用状态</dt><dd>' + escapeHtml(usage) + '</dd></div>' +
                     '<div><dt>上传时间</dt><dd>' + escapeHtml(formatDate(asset.created_at)) + '</dd></div>' +
                 '</dl>' +
                 '<div class="asset-detail-actions"><button class="btn btn-secondary btn-sm" type="button" data-copy-asset="' + escapeHtml(path) + '">复制路径</button><button class="btn btn-icon btn-icon-delete" type="button" aria-label="删除资源" data-delete-asset="' + escapeHtml(asset.id) + '">' + ICON_DELETE + '</button></div>';
@@ -5702,20 +6180,9 @@
         }
 
         function uploadSingleAssetFile(file) {
-            var formData = new FormData();
-            formData.append('image', file);
-            return fetch(API_BASE + '/admin/products/upload', {
-                method: 'POST',
-                headers: { Authorization: 'Bearer ' + getToken() },
-                body: formData
-            }).then(function (res) {
-                return res.json().then(function (data) {
-                    if (!res.ok) {
-                        var message = data.message || (data.error && data.error.message) || data.error || 'Upload failed';
-                        throw new Error(message);
-                    }
-                    return data;
-                });
+            return uploadAdminAssetFile(file, {
+                module: 'assets',
+                entity_type: 'resource'
             });
         }
 
