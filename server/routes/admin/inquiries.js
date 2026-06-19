@@ -23,7 +23,7 @@ function getInquiry(db, id) {
     return db.prepare(`
         SELECT
             id, legacy_id, name, email, company, phone, subject, message,
-            product_context, status, is_read, notes, ip, user_agent,
+            country, product_context, status, is_read, notes, ip, user_agent,
             replied_at, deleted_at, created_at, updated_at
         FROM inquiries
         WHERE id = ?
@@ -79,7 +79,7 @@ router.get('/', function (req, res, next) {
         const rows = db.prepare(`
             SELECT
                 id, legacy_id, name, email, company, phone, subject,
-                product_context, status, is_read, notes, ip, created_at, updated_at
+                country, product_context, status, is_read, notes, ip, created_at, updated_at
             FROM inquiries
             ${built.whereSql}
             ORDER BY created_at DESC, id DESC

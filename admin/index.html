@@ -6,7 +6,7 @@
     <title>龙翔电气网站后台</title>
     <link rel="icon" type="image/webp" href="../assets/optimized/longxiang-logo-symbol-320.webp?v=20260618-imgopt2">
     <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png?v=20260615-lxdq">
-    <link rel="stylesheet" href="css/admin.css?v=4">
+    <link rel="stylesheet" href="css/admin.css?v=5">
 </head>
 <body>
     <div class="admin-layout" id="admin-page">
@@ -446,10 +446,6 @@
                                 <tbody id="inquiries-tbody"><tr class="skeleton-row"><td colspan="7"><div class="skeleton-line"></div></td></tr><tr class="skeleton-row"><td colspan="7"><div class="skeleton-line"></div></td></tr><tr class="skeleton-row"><td colspan="7"><div class="skeleton-line"></div></td></tr></tbody>
                             </table>
                         </div>
-                        <aside class="inquiry-detail-panel">
-                            <h3>询盘详情</h3>
-                            <div id="inquiry-side-detail" class="inquiry-side-empty">选择一条询盘查看详情</div>
-                        </aside>
                     </div>
                     <div class="batch-actions-bar" id="inquiry-batch-bar" style="display:none;">
                         <span id="inquiry-batch-count">已选 0 条</span>
@@ -1000,12 +996,24 @@
         </div>
 
         <div class="modal-overlay" id="inquiry-modal">
-            <div class="modal">
-                <div class="modal-header"><h3>询盘详情</h3><button class="modal-close" id="inquiry-modal-close">×</button></div>
+            <div class="modal modal-wide inquiry-detail-modal">
+                <div class="modal-header">
+                    <div>
+                        <h3>询盘详情</h3>
+                        <p class="modal-subtitle" id="inquiry-modal-position">当前询盘</p>
+                    </div>
+                    <button class="modal-close" id="inquiry-modal-close">×</button>
+                </div>
                 <div class="modal-body">
-                    <div class="detail-grid" id="inquiry-detail"></div>
-                    <div class="form-group" style="margin-top:16px;"><label>处理状态</label><select id="inquiry-status"><option value="new">新询盘</option><option value="read">已读</option><option value="replied">已回复</option><option value="closed">已关闭</option></select></div>
-                    <div class="form-group"><label>管理员备注</label><textarea id="inquiry-notes" rows="4"></textarea></div>
+                    <div class="inquiry-modal-shell">
+                        <button class="inquiry-modal-nav inquiry-modal-nav-prev" type="button" id="inquiry-prev" aria-label="上一个询盘" title="上一个询盘">‹</button>
+                        <div class="inquiry-modal-content">
+                            <div class="detail-grid inquiry-detail-grid" id="inquiry-detail"></div>
+                            <div class="form-group"><label>处理状态</label><select id="inquiry-status"><option value="new">新询盘</option><option value="read">已读</option><option value="replied">已回复</option><option value="closed">已关闭</option></select></div>
+                            <div class="form-group"><label>管理员备注</label><textarea id="inquiry-notes" rows="4"></textarea></div>
+                        </div>
+                        <button class="inquiry-modal-nav inquiry-modal-nav-next" type="button" id="inquiry-next" aria-label="下一个询盘" title="下一个询盘">›</button>
+                    </div>
                 </div>
                 <div class="modal-footer"><button class="btn btn-reply" id="inquiry-reply"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;margin-right:6px;vertical-align:middle;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>邮件回复</button><button class="btn btn-secondary" id="inquiry-cancel">关闭</button><button class="btn btn-primary" id="inquiry-save">保存状态</button></div>
             </div>
@@ -1119,6 +1127,6 @@
         <div class="toast-container" id="toast-container"></div>
     </div>
     <script src="js/pagination.js"></script>
-    <script src="js/admin.js?v=4"></script>
+    <script src="js/admin.js?v=5"></script>
 </body>
 </html>

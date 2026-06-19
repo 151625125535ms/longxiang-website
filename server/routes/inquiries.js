@@ -157,13 +157,13 @@ router.post('/', async function (req, res) {
         const result = getDb().prepare(`
             INSERT INTO inquiries
                 (
-                    legacy_id, name, email, company, phone, subject, message,
+                    legacy_id, name, email, company, phone, country, subject, message,
                     product_context, status, is_read, notes, ip, user_agent,
                     replied_at, deleted_at, created_at, updated_at
                 )
             VALUES
                 (
-                    NULL, @name, @email, @company, @phone, @subject, @message,
+                    NULL, @name, @email, @company, @phone, @country, @subject, @message,
                     @product_context, 'new', 0, '', @ip, @user_agent,
                     NULL, NULL, @created_at, @updated_at
                 )
@@ -172,6 +172,7 @@ router.post('/', async function (req, res) {
             email: normalized.email,
             company: normalized.company,
             phone: normalized.phone,
+            country: normalized.country,
             subject: normalized.subject,
             message: normalized.message,
             product_context: normalized.productContext,

@@ -21,7 +21,21 @@ function getDb() {
     dbInstance = new Database(dbPath);
     dbInstance.pragma('journal_mode = WAL');
     dbInstance.pragma('foreign_keys = ON');
+    ensureRuntimeSchema(dbInstance);
     return dbInstance;
+}
+
+function ensureRuntimeSchema(db) {
+    const hasInquiriesTable = db.prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'inquiries'").get();
+    if (!hasInquiriesTable) return;
+
+    const inquiryColumns = db.prepare('PRAGMA table_info(inquiries)').all();
+    const hasCountry = inquiryColumns.some(function (column) {
+        return column.name === 'country';
+    });
+    if (!hasCountry) {
+        db.prepare('ALTER TABLE inquiries ADD COLUMN country TEXT').run();
+    }
 }
 
 module.exports = {

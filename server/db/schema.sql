@@ -121,6 +121,7 @@ CREATE TABLE IF NOT EXISTS inquiries (
     email TEXT NOT NULL,
     company TEXT,
     phone TEXT,
+    country TEXT,
     subject TEXT,
     message TEXT NOT NULL,
     product_context TEXT,
