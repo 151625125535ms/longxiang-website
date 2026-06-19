@@ -264,7 +264,8 @@
             'alt="' + escapeHtml(localized(image, 'alt')) + '"',
             image.width ? 'width="' + escapeHtml(image.width) + '"' : '',
             image.height ? 'height="' + escapeHtml(image.height) + '"' : '',
-            'loading="lazy"'
+            'loading="lazy"',
+            'decoding="async"'
         ].filter(Boolean).join(' ');
         return '<img ' + attrs + '>';
     }

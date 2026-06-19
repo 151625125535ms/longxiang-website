@@ -102,7 +102,7 @@
 
     function imageHtml(src, alt) {
         if (!src) return '';
-        return '<img src="' + escapeHtml(resolveAsset(src)) + '" alt="' + escapeHtml(alt || '') + '">';
+        return '<img src="' + escapeHtml(resolveAsset(src)) + '" alt="' + escapeHtml(alt || '') + '" loading="lazy" decoding="async" width="960" height="640">';
     }
 
     function renderList(items) {

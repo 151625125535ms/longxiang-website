@@ -101,7 +101,7 @@
         card.innerHTML =
             '<a class="product-card-clickarea" href="' + href + '">' +
                 '<div class="product-card-image">' +
-                    (imagePath ? '<img src="' + escapeHtml(imagePath) + '" alt="' + escapeHtml(name) + '" loading="lazy">' : '') +
+                    (imagePath ? '<img src="' + escapeHtml(imagePath) + '" alt="' + escapeHtml(name) + '" loading="lazy" decoding="async" width="640" height="420">' : '') +
                 '</div>' +
                 '<div class="product-card-body">' +
                     '<h4' + rtlTextAttrs('rtl-product-text') + '>' + escapeHtml(name) + '</h4>' +

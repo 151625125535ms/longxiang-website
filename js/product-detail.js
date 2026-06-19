@@ -370,7 +370,7 @@
                 var imagePath = normalizeImagePath(product.image);
                 return '<article class="product-related-card">' +
                     '<a href="' + escapeHtml(detailHref(product)) + '">' +
-                    '<div class="product-related-image">' + (imagePath ? '<img src="' + escapeHtml(imagePath) + '" alt="' + escapeHtml(name) + '" loading="lazy">' : '') + '</div>' +
+                    '<div class="product-related-image">' + (imagePath ? '<img src="' + escapeHtml(imagePath) + '" alt="' + escapeHtml(name) + '" loading="lazy" decoding="async" width="320" height="220">' : '') + '</div>' +
                     '<div class="product-related-body"><h3' + rtlAttrs('rtl-product-text') + '>' + escapeHtml(name) + '</h3>' +
                     '<p' + rtlAttrs('rtl-product-text') + '>' + escapeHtml(desc) + '</p></div>' +
                     '</a>' +
@@ -507,6 +507,9 @@
         if (mainImage) {
             var imagePath = normalizeImagePath(product.image);
             mainImage.alt = name;
+            mainImage.decoding = 'async';
+            mainImage.loading = 'eager';
+            if ('fetchPriority' in mainImage) mainImage.fetchPriority = 'high';
             if (imagePath) {
                 mainImage.src = imagePath;
                 mainImage.style.display = '';

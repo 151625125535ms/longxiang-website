@@ -188,8 +188,8 @@ app.use(express.static(path.join(__dirname, '..'), {
     setHeaders: function (res, filePath) {
         if (/\.(html|json|xml|txt)$/i.test(filePath)) {
             res.setHeader('Cache-Control', 'public, max-age=300');
-        } else if (/\.js$/i.test(filePath)) {
-            res.setHeader('Cache-Control', 'public, max-age=300');
+        } else if (/\.(?:css|js|mjs|png|jpe?g|webp|gif|svg|ico|woff2?)$/i.test(filePath)) {
+            res.setHeader('Cache-Control', 'public, max-age=2592000, immutable');
         }
     }
 }));

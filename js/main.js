@@ -1578,9 +1578,9 @@
                 link.innerHTML =
                     '<span class="home-product-category-image">' +
                         (category.icon
-                            ? '<img src="' + escapeHtml(resolveAssetPath(category.icon)) + '" alt="' + escapeHtml(label) + '" loading="lazy">'
+                            ? '<img src="' + escapeHtml(resolveAssetPath(category.icon)) + '" alt="' + escapeHtml(label) + '" loading="lazy" decoding="async" width="240" height="180">'
                             : sample && sample.image
-                                ? '<img src="' + escapeHtml(resolveAssetPath(sample.image)) + '" alt="' + escapeHtml(label) + '" loading="lazy">'
+                                ? '<img src="' + escapeHtml(resolveAssetPath(sample.image)) + '" alt="' + escapeHtml(label) + '" loading="lazy" decoding="async" width="240" height="180">'
                             : '<span class="home-product-category-fallback">' + escapeHtml(label.charAt(0)) + '</span>') +
                     '</span>' +
                     '<span class="home-product-category-title">' + escapeHtml(label) + '</span>';
@@ -1600,7 +1600,7 @@
             card.innerHTML =
                 '<a class="product-card-clickarea" href="' + detail + '">' +
                     '<div class="product-card-image">' +
-                        (imagePath ? '<img src="' + escapeHtml(imagePath) + '" alt="' + escapeHtml(name) + '" loading="lazy">' : '') +
+                        (imagePath ? '<img src="' + escapeHtml(imagePath) + '" alt="' + escapeHtml(name) + '" loading="lazy" decoding="async" width="640" height="420">' : '') +
                     '</div>' +
                     '<div class="product-card-body">' +
                         '<h4' + textAttrs + '>' + escapeHtml(name) + '</h4>' +
@@ -1794,7 +1794,7 @@
                 var meta = sourceLabel(cert) + (cert.category && cert.category.indexOf('test-reports') === 0 ? ' · ' + pagesLabel(cert) : '');
                 return '<button type="button" class="cert-card fade-in" data-cert-id="' + escapeHtml(cert.id) + '">' +
                     '<span class="cert-media">' +
-                        (image ? '<img src="' + escapeHtml(image) + '" alt="' + escapeHtml(name) + '" loading="lazy" width="' + escapeHtml(cert.width || 800) + '" height="' + escapeHtml(cert.height || 1100) + '">' : '<span class="cert-placeholder">CERT</span>') +
+                        (image ? '<img src="' + escapeHtml(image) + '" alt="' + escapeHtml(name) + '" loading="lazy" decoding="async" width="' + escapeHtml(cert.width || 800) + '" height="' + escapeHtml(cert.height || 1100) + '">' : '<span class="cert-placeholder">CERT</span>') +
                     '</span>' +
                     '<span class="cert-body">' +
                         '<span class="cert-category">' + escapeHtml(category) + '</span>' +
@@ -1826,7 +1826,7 @@
             modal.innerHTML =
                 '<div class="cert-preview-dialog" role="dialog" aria-modal="true" aria-labelledby="cert-preview-title">' +
                     '<button type="button" class="cert-preview-close" aria-label="' + escapeHtml(labels.close) + '">×</button>' +
-                    '<div class="cert-preview-image-wrap"><img src="" alt="' + escapeHtml(labels.imageAlt) + '"></div>' +
+                    '<div class="cert-preview-image-wrap"><img src="" alt="' + escapeHtml(labels.imageAlt) + '" decoding="async"></div>' +
                     '<div class="cert-preview-info">' +
                         '<span class="cert-category"></span>' +
                         '<h3 id="cert-preview-title"></h3>' +
