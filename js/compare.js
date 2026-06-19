@@ -7,6 +7,47 @@
     var isArabic = /\/ar\//.test(window.location.pathname.replace(/\\/g, '/'));
     var assetPrefix = isArabic ? '../' : '';
     var contentPromise = window.longxiangContentPagePromise || Promise.resolve(null);
+    var ARABIC_TEXT_FALLBACKS = {
+        'Product Comparison': 'مقارنة المنتجات',
+        'Compare selected products.': 'قارن بين المنتجات المحددة.',
+        'Back': 'رجوع',
+        'Print': 'طباعة',
+        'No products selected': 'لم يتم تحديد منتجات',
+        'Return to the product list and choose products to compare.': 'ارجع إلى قائمة المنتجات واختر المنتجات المراد مقارنتها.',
+        'Product': 'المنتج',
+        'Category': 'الفئة',
+        'Image': 'الصورة',
+        'Capacities': 'السعات',
+        'Voltages': 'الجهود',
+        'Description': 'الوصف',
+        'Specification': 'المواصفة'
+    };
+    var ARABIC_SPEC_LABELS = {
+        'Product Model': 'طراز المنتج',
+        'Model': 'الطراز',
+        'Core Type': 'نوع القلب',
+        'Phase': 'الطور',
+        'Frequency': 'التردد',
+        'Cooling Method': 'طريقة التبريد',
+        'Short-Circuit Withstand': 'تحمل القصر الكهربائي',
+        'Insulation Level': 'مستوى العزل',
+        'Standard': 'المعيار',
+        'Rated Capacity': 'السعة المقننة',
+        'Rated Voltage': 'الجهد المقنن',
+        'Voltage': 'الجهد',
+        'Capacity': 'السعة',
+        'Impedance': 'المعاوقة',
+        'Connection Group': 'مجموعة التوصيل',
+        'No-load Loss': 'الفقد بدون حمل',
+        'Load Loss': 'الفقد تحت الحمل',
+        'No-load Current': 'تيار اللاحمل',
+        'Temperature Rise': 'ارتفاع درجة الحرارة',
+        'Protection Level': 'درجة الحماية',
+        'Application': 'التطبيق',
+        'Material': 'المادة',
+        'Enclosure': 'الغلاف',
+        'Installation': 'طريقة التركيب'
+    };
 
     function escapeHtml(value) {
         return String(value == null ? '' : value)
@@ -36,6 +77,9 @@
     function localized(item, key) {
         if (!item) return '';
         if (isArabic && item[key + 'Ar']) return item[key + 'Ar'];
+        if (isArabic && typeof item[key] === 'string' && ARABIC_TEXT_FALLBACKS[item[key].trim()]) {
+            return ARABIC_TEXT_FALLBACKS[item[key].trim()];
+        }
         return item[key] || '';
     }
 
@@ -69,6 +113,20 @@
     function valueList(values) {
         if (!values || !values.length) return '-';
         return values.map(escapeHtml).join('<br>');
+    }
+
+    function translatedSpecLabel(label) {
+        if (!isArabic) return label || '';
+        label = String(label || '').trim();
+        return ARABIC_SPEC_LABELS[label] || label;
+    }
+
+    function headerCellAttrs() {
+        return isArabic ? ' dir="rtl" lang="ar" class="rtl-product-text"' : '';
+    }
+
+    function textCellAttrs() {
+        return isArabic ? ' dir="auto" lang="ar" class="bidi-product-text"' : '';
     }
 
     function specsByName(product) {
@@ -108,7 +166,7 @@
 
         specNames.forEach(function (name) {
             rows.push({
-                label: name,
+                label: translatedSpecLabel(name),
                 html: function (p) {
                     return escapeHtml(specsByName(p)[name] || '-');
                 }
@@ -118,12 +176,12 @@
         container.innerHTML =
             '<div class="comparison-table-wrapper">' +
                 '<table class="comparison-table">' +
-                    '<thead><tr><th>' + escapeHtml(compareLabel(content, 'specificationLabel', isArabic ? 'المواصفة' : 'Specification')) + '</th>' +
-                        selected.map(function (p) { return '<th>' + escapeHtml(localize(p, 'name')) + '</th>'; }).join('') +
+                    '<thead><tr><th' + headerCellAttrs() + '>' + escapeHtml(compareLabel(content, 'specificationLabel', isArabic ? 'المواصفة' : 'Specification')) + '</th>' +
+                        selected.map(function (p) { return '<th' + headerCellAttrs() + '>' + escapeHtml(localize(p, 'name')) + '</th>'; }).join('') +
                     '</tr></thead>' +
                     '<tbody>' +
                         rows.map(function (row) {
-                            return '<tr><td>' + escapeHtml(row.label) + '</td>' + selected.map(function (p) { return '<td>' + row.html(p) + '</td>'; }).join('') + '</tr>';
+                            return '<tr><td' + headerCellAttrs() + '>' + escapeHtml(row.label) + '</td>' + selected.map(function (p) { return '<td' + textCellAttrs() + '>' + row.html(p) + '</td>'; }).join('') + '</tr>';
                         }).join('') +
                     '</tbody>' +
                 '</table>' +

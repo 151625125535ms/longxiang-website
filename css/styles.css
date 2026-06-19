@@ -3320,14 +3320,22 @@ p:last-child {
     direction: rtl;
 }
 
-[dir="rtl"] .nav-links,
 [dir="rtl"] .hero-buttons,
 [dir="rtl"] .cta-buttons,
 [dir="rtl"] .filter-bar,
 [dir="rtl"] .product-card-link,
-[dir="rtl"] .breadcrumb,
 [dir="rtl"] .footer-contact-item {
     flex-direction: row-reverse;
+}
+
+[dir="rtl"] .nav-links,
+[dir="rtl"] .breadcrumb {
+    flex-direction: row;
+}
+
+[dir="rtl"] .breadcrumb {
+    justify-content: flex-start;
+    text-align: right;
 }
 
 [dir="rtl"] .section-header,
@@ -3360,6 +3368,12 @@ p:last-child {
 
 .bidi-product-text {
     unicode-bidi: plaintext;
+}
+
+[dir="rtl"] .ltr-token,
+[dir="rtl"] bdi[dir="ltr"] {
+    direction: ltr;
+    unicode-bidi: isolate;
 }
 
 [dir="rtl"] .product-card-body h4,
@@ -10552,26 +10566,27 @@ p:last-child {
 }
 [dir="rtl"] .hero-hex-panel {
     align-items: flex-start;
-    text-align: left;
+    text-align: right;
 }
 
-[dir="rtl"] .hero-hex .hero-hex-title {
-    text-align: left;
+[dir="rtl"] .hero-hex .hero-hex-title,
+[dir="rtl"] .hero-hex-subtitle {
+    text-align: right;
 }
 
 [dir="rtl"] .hero-hex-actions {
-    align-self: flex-end;
-    justify-content: flex-end;
+    align-self: flex-start;
+    justify-content: flex-start;
     direction: rtl;
     margin-inline-start: 0;
-    margin-inline-end: auto;
+    margin-inline-end: 0;
 }
 
 @media (min-width: 769px) {
     [dir="rtl"] .hero-hex-actions {
         width: auto;
         max-width: min(540px, 100%);
-        transform: translateX(clamp(-360px, -27vw, -220px));
+        transform: none;
     }
 }
 

@@ -10,9 +10,46 @@
     var companyCache = null;
     var globalShellCache = null;
     var consentDocumentClickBound = false;
+    var ARABIC_TEXT_FALLBACKS = {
+        'Home': 'الرئيسية',
+        'Products': 'المنتجات',
+        'Applications': 'التطبيقات',
+        'About Us': 'من نحن',
+        'Contact': 'اتصل بنا',
+        'Contact Us': 'اتصل بنا',
+        'Certificates': 'الشهادات',
+        'Quick Links': 'روابط سريعة',
+        'All Products': 'جميع المنتجات',
+        'Cookie Settings': 'إعدادات ملفات تعريف الارتباط',
+        'Get a Quote': 'طلب عرض سعر',
+        'Send us your requirements and our team will respond quickly.': 'أرسل متطلبات مشروعك وسيتواصل فريقنا معك بسرعة.',
+        'Inquiry': 'استفسار',
+        'Website visitor': 'زائر الموقع',
+        'General inquiry': 'استفسار عام',
+        'Tell us your voltage, capacity, quantity, and project location.': 'اذكر الجهد والسعة والكمية وموقع المشروع.',
+        'Email': 'البريد الإلكتروني',
+        'Phone / WhatsApp': 'الهاتف / واتساب',
+        'Submit': 'إرسال',
+        'Request a Quote': 'طلب عرض سعر',
+        'Fill in your contact details and project requirements.': 'املأ بيانات الاتصال ومتطلبات المشروع.',
+        'Submit Inquiry': 'إرسال الاستفسار',
+        'Name': 'الاسم',
+        'Phone': 'رقم الهاتف',
+        'Company': 'الشركة',
+        'Message': 'الرسالة',
+        'I would like to request a quotation for {product}.': 'أرغب في طلب عرض سعر لـ {product}.',
+        'I would like to request a quotation for product ID {product}.': 'أرغب في طلب عرض سعر للمنتج رقم {product}.',
+        'Henan Longxiang Electrical manufactures power equipment for industrial and energy projects.': 'تصنع شركة خنان لونغشيانغ إلكتريكال معدات الطاقة للمشروعات الصناعية ومشروعات الطاقة.',
+        '© Henan Longxiang Electrical Co., Ltd. All rights reserved.': '© شركة خنان لونغشيانغ إلكتريكال المحدودة. جميع الحقوق محفوظة.'
+    };
 
     function camelToSnake(value) {
         return String(value || '').replace(/([a-z0-9])([A-Z])/g, '$1_$2').toLowerCase();
+    }
+
+    function arabicTextFallback(value) {
+        if (!isArabic || typeof value !== 'string') return '';
+        return ARABIC_TEXT_FALLBACKS[value.trim()] || '';
     }
 
     function localizedArabicValue(item, key) {
@@ -20,7 +57,11 @@
         if (item[key + 'Ar']) return item[key + 'Ar'];
         if (item[camelToSnake(key) + '_ar']) return item[camelToSnake(key) + '_ar'];
         if (item[key + '_ar']) return item[key + '_ar'];
-        return '';
+        return arabicTextFallback(item[key]);
+    }
+
+    function localizeFallback(value) {
+        return arabicTextFallback(value) || value || '';
     }
 
     function escapeHtml(value) {
@@ -170,8 +211,8 @@
         var section = shellSection(sectionName);
         var arabicValue = localizedArabicValue(section, key);
         if (arabicValue) return arabicValue;
-        if (section[key]) return section[key];
-        return fallback || '';
+        if (section[key]) return localizeFallback(section[key]);
+        return localizeFallback(fallback);
     }
 
     function embedConsentText() {
@@ -977,14 +1018,14 @@
         var section = shellSection(sectionName);
         var arabicValue = localizedArabicValue(section, key);
         if (arabicValue) return arabicValue;
-        return section[key] || fallback || '';
+        return localizeFallback(section[key] || fallback);
     }
 
     function shellLabel(item, fallback) {
-        if (!item) return fallback || '';
+        if (!item) return localizeFallback(fallback);
         var arabicValue = localizedArabicValue(item, 'label');
         if (arabicValue) return arabicValue;
-        return item.label || fallback || '';
+        return localizeFallback(item.label || fallback);
     }
 
     function renderShellLinks(items, fallbackItems) {
@@ -1229,7 +1270,7 @@
         var required = field.required ? ' required' : '';
         var readonly = field.readonly ? ' readonly' : '';
         var attrs = ' id="' + escapeHtml(id) + '" name="' + escapeHtml(field.name || '') + '"' + required + readonly;
-        var placeholder = localizedArabicValue(field, 'placeholder') || field.placeholder || '';
+        var placeholder = localizedArabicValue(field, 'placeholder') || localizeFallback(field.placeholder);
         if (field.type === 'textarea') {
             return '<div class="form-group"><label for="' + escapeHtml(id) + '">' + escapeHtml(label) + '</label><textarea' + attrs + ' rows="' + escapeHtml(field.rows || 5) + '"></textarea></div>';
         }

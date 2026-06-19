@@ -4,6 +4,48 @@
     var isArabic = /\/ar\//.test(window.location.pathname.replace(/\\/g, '/'));
     var assetPrefix = isArabic ? '../' : '';
     var productPageContent = {};
+    var ARABIC_TEXT_FALLBACKS = {
+        'Product Details': 'تفاصيل المنتج',
+        'Review product information and request a quotation.': 'راجع معلومات المنتج واطلب عرض سعر.',
+        'Overview': 'نظرة عامة',
+        'Specifications': 'المواصفات',
+        'Request a Quote': 'طلب عرض سعر',
+        'Related Products': 'منتجات ذات صلة',
+        'Product not found': 'لم يتم العثور على المنتج',
+        'Please return to the product list and choose another item.': 'يرجى العودة إلى قائمة المنتجات واختيار منتج آخر.',
+        'Back to Products': 'العودة إلى المنتجات',
+        'Technical Support': 'الدعم الفني',
+        'Our team can help confirm parameters, voltage levels, and delivery requirements.': 'يمكن لفريقنا مساعدتك في تأكيد المعايير ومستويات الجهد ومتطلبات التسليم.',
+        'Product Inquiry': 'استفسار عن المنتج',
+        'Leave your contact details and requirements.': 'اترك بيانات الاتصال ومتطلباتك.',
+        'Submit Inquiry': 'إرسال الاستفسار'
+    };
+    var ARABIC_SPEC_LABELS = {
+        'Product Model': 'طراز المنتج',
+        'Model': 'الطراز',
+        'Core Type': 'نوع القلب',
+        'Phase': 'الطور',
+        'Frequency': 'التردد',
+        'Cooling Method': 'طريقة التبريد',
+        'Short-Circuit Withstand': 'تحمل القصر الكهربائي',
+        'Insulation Level': 'مستوى العزل',
+        'Standard': 'المعيار',
+        'Rated Capacity': 'السعة المقننة',
+        'Rated Voltage': 'الجهد المقنن',
+        'Voltage': 'الجهد',
+        'Capacity': 'السعة',
+        'Impedance': 'المعاوقة',
+        'Connection Group': 'مجموعة التوصيل',
+        'No-load Loss': 'الفقد بدون حمل',
+        'Load Loss': 'الفقد تحت الحمل',
+        'No-load Current': 'تيار اللاحمل',
+        'Temperature Rise': 'ارتفاع درجة الحرارة',
+        'Protection Level': 'درجة الحماية',
+        'Application': 'التطبيق',
+        'Material': 'المادة',
+        'Enclosure': 'الغلاف',
+        'Installation': 'طريقة التركيب'
+    };
 
     function getQueryParam(name) {
         return new URLSearchParams(window.location.search).get(name);
@@ -29,7 +71,24 @@
     function localizedContent(item, field) {
         if (!item) return '';
         if (isArabic && item[field + 'Ar']) return item[field + 'Ar'];
+        if (isArabic && typeof item[field] === 'string' && ARABIC_TEXT_FALLBACKS[item[field].trim()]) {
+            return ARABIC_TEXT_FALLBACKS[item[field].trim()];
+        }
         return item[field] || '';
+    }
+
+    function translatedSpecLabel(label) {
+        if (!isArabic) return label || '';
+        label = String(label || '').trim();
+        return ARABIC_SPEC_LABELS[label] || label;
+    }
+
+    function specLabelAttrs() {
+        return isArabic ? ' dir="rtl" lang="ar" class="rtl-product-text"' : '';
+    }
+
+    function specValueAttrs() {
+        return isArabic ? ' dir="auto" lang="ar" class="bidi-product-text"' : '';
     }
 
     function detailLabel(field, fallback) {
@@ -176,8 +235,7 @@
             specsBody.innerHTML = '';
             (product.specs || []).forEach(function (spec) {
                 var row = document.createElement('tr');
-                var cellAttrs = isArabic ? ' dir="auto" lang="ar" class="bidi-product-text"' : '';
-                row.innerHTML = '<td' + cellAttrs + '>' + escapeHtml(spec[0]) + '</td><td' + cellAttrs + '>' + escapeHtml(spec[1]) + '</td>';
+                row.innerHTML = '<td' + specLabelAttrs() + '>' + escapeHtml(translatedSpecLabel(spec[0])) + '</td><td' + specValueAttrs() + '>' + escapeHtml(spec[1]) + '</td>';
                 specsBody.appendChild(row);
             });
         }

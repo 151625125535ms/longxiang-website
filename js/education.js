@@ -182,7 +182,7 @@
                 return '<a class="education-model-card fade-in" href="#' + escapeHtml(section.id) + '">' +
                     '<span>' + escapeHtml(section.modeNumber || '') + '</span>' +
                     '<h3>' + escapeHtml(localized(section, 'title')) + '</h3>' +
-                    '<p>' + escapeHtml(section.tagline || localized(section, 'summary')) + '</p>' +
+                    '<p>' + escapeHtml(localized(section, 'tagline') || localized(section, 'summary')) + '</p>' +
                     '</a>';
             }).join('') +
             '</div></div></section>';

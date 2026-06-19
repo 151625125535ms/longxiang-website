@@ -7,6 +7,120 @@
     var pageSlug = pageRoot.getAttribute('data-content-page');
     var isArabic = /\/ar\//.test(window.location.pathname.replace(/\\/g, '/'));
     var assetPrefix = isArabic ? '../' : '';
+    var ARABIC_TEXT_FALLBACKS = {
+        'Home': 'الرئيسية',
+        'Products': 'المنتجات',
+        'Product Details': 'تفاصيل المنتج',
+        'Contact Us': 'اتصل بنا',
+        'Contact': 'اتصل بنا',
+        'About Us': 'من نحن',
+        'Applications': 'التطبيقات',
+        'Certificates': 'الشهادات',
+        'Henan Longxiang Electrical': 'شركة خنان لونغشيانغ إلكتريكال',
+        'Energy-saving power equipment for industrial, utility, and renewable energy projects.': 'معدات كهربائية موفرة للطاقة للمشروعات الصناعية ومرافق الطاقة والطاقة المتجددة.',
+        'Longxiang Electrical logo': 'شعار لونغشيانغ إلكتريكال',
+        'View Products': 'عرض المنتجات',
+        'years of electrical equipment experience': 'سنة من الخبرة في معدات الكهرباء',
+        'patents and technical achievements': 'براءة وإنجاز تقني',
+        'project applications': 'تطبيق مشروع',
+        'Explore transformers, switchgear, and integrated power distribution solutions.': 'استكشف المحولات ومعدات المفاتيح وحلول توزيع الطاقة المتكاملة.',
+        'All Products': 'جميع المنتجات',
+        'Application Industries': 'قطاعات التطبيق',
+        'Longxiang equipment supports industrial power distribution, grid upgrades, renewable energy, and infrastructure projects.': 'تدعم معدات لونغشيانغ توزيع الطاقة الصناعية وتحديث الشبكات والطاقة المتجددة ومشروعات البنية التحتية.',
+        'View Solutions': 'عرض الحلول',
+        'Industrial Power': 'الطاقة الصناعية',
+        'Stable transformer and switchgear support for factories and parks.': 'دعم مستقر بالمحولات ومعدات المفاتيح للمصانع والمجمعات الصناعية.',
+        'Renewable Energy': 'الطاقة المتجددة',
+        'Equipment support for photovoltaic, wind, and storage scenarios.': 'دعم بالمعدات لمشروعات الطاقة الشمسية وطاقة الرياح وأنظمة التخزين.',
+        'Infrastructure': 'البنية التحتية',
+        'Power distribution solutions for public and commercial projects.': 'حلول توزيع الطاقة للمشروعات العامة والتجارية.',
+        'News & Updates': 'الأخبار والتحديثات',
+        'Follow Longxiang project updates, technical progress, and company news.': 'تابع تحديثات مشروعات لونغشيانغ والتقدم التقني وأخبار الشركة.',
+        'Contact for Updates': 'تواصل للاطلاع على التحديثات',
+        'Trusted Manufacturing Capability': 'قدرات تصنيع موثوقة',
+        'Longxiang combines manufacturing, quality control, and project delivery experience.': 'تجمع لونغشيانغ بين التصنيع وضبط الجودة وخبرة تسليم المشروعات.',
+        'Energy Efficiency': 'كفاءة الطاقة',
+        'Focused on low-loss, reliable power equipment.': 'تركيز على معدات طاقة موثوقة ومنخفضة الفقد.',
+        'Project Support': 'دعم المشروعات',
+        'Suitable for industrial, grid, and renewable energy scenarios.': 'مناسبة للقطاعات الصناعية والشبكات ومشروعات الطاقة المتجددة.',
+        'Quality Control': 'ضبط الجودة',
+        'Standardized production and inspection processes.': 'عمليات إنتاج وفحص معيارية.',
+        'Years Experience': 'سنة خبرة',
+        'Patents': 'براءة اختراع',
+        'Projects': 'مشروع',
+        'Send Inquiry': 'إرسال استفسار',
+        'Need a power distribution solution?': 'هل تحتاج إلى حل لتوزيع الطاقة؟',
+        'Tell us your voltage, capacity, and project scenario. Our team will help match the right equipment.': 'أخبرنا بالجهد والسعة وسيناريو المشروع، وسيساعدك فريقنا في اختيار المعدات المناسبة.',
+        'Contact Longxiang': 'التواصل مع لونغشيانغ',
+        'Phone': 'رقم الهاتف',
+        'Email': 'البريد الإلكتروني',
+        'Address': 'العنوان',
+        'Longxiang Location': 'موقع لونغشيانغ',
+        'Social Media': 'وسائل التواصل الاجتماعي',
+        'Send Inquiry': 'إرسال استفسار',
+        'Leave your contact details and project requirements.': 'اترك بيانات الاتصال ومتطلبات المشروع.',
+        'We will respond after receiving your message.': 'سنرد بعد استلام رسالتك.',
+        'Submit Inquiry': 'إرسال الاستفسار',
+        'Name': 'الاسم',
+        'Message': 'الرسالة',
+        'Send your project requirements and our team will respond quickly.': 'أرسل متطلبات مشروعك وسيتواصل فريقنا معك بسرعة.',
+        'Products': 'المنتجات',
+        'Browse Longxiang transformers, switchgear, and power distribution equipment.': 'تصفح محولات لونغشيانغ ومعدات المفاتيح ومعدات توزيع الطاقة.',
+        'Review product information and request a quotation.': 'راجع معلومات المنتج واطلب عرض سعر.',
+        'Overview': 'نظرة عامة',
+        'Specifications': 'المواصفات',
+        'Request a Quote': 'طلب عرض سعر',
+        'Related Products': 'منتجات ذات صلة',
+        'Product Inquiry': 'استفسار عن المنتج',
+        'Leave your contact details and requirements.': 'اترك بيانات الاتصال ومتطلباتك.',
+        'Product Support': 'دعم المنتجات',
+        'Filter by product category and contact us for model selection support.': 'صف المنتجات حسب الفئة وتواصل معنا لدعم اختيار الطراز.',
+        'Need model selection help?': 'هل تحتاج إلى مساعدة في اختيار الطراز؟',
+        'Send us your project parameters and application scenario.': 'أرسل لنا معايير المشروع وسيناريو التطبيق.',
+        'Technical Support': 'الدعم الفني',
+        'Our team can help confirm parameters, voltage levels, and delivery requirements.': 'يمكن لفريقنا مساعدتك في تأكيد المعايير ومستويات الجهد ومتطلبات التسليم.',
+        'About Longxiang': 'عن لونغشيانغ',
+        'Reliable power equipment manufacturing for industrial, grid, and energy projects.': 'تصنيع موثوق لمعدات الطاقة للمشروعات الصناعية ومشروعات الشبكات والطاقة.',
+        'Company Profile': 'نبذة عن الشركة',
+        'Power equipment manufacturing capability': 'قدرات تصنيع معدات الطاقة',
+        'Longxiang focuses on transformers, switchgear, and supporting power distribution equipment.': 'تركز لونغشيانغ على المحولات ومعدات المفاتيح ومعدات دعم توزيع الطاقة.',
+        'The company supports industrial, infrastructure, and energy project scenarios.': 'تدعم الشركة سيناريوهات المشروعات الصناعية والبنية التحتية ومشروعات الطاقة.',
+        'Production and inspection processes are organized around reliable delivery and practical operation.': 'تُنظم عمليات الإنتاج والفحص بما يضمن التسليم الموثوق والتشغيل العملي.',
+        'Years of experience': 'سنة خبرة',
+        'Technical achievements': 'إنجاز تقني',
+        'Longxiang manufacturing capability': 'قدرات لونغشيانغ التصنيعية',
+        'Quality Credentials': 'شهادات الجودة',
+        'Qualification and quality control': 'الاعتمادات وضبط الجودة',
+        'Qualification materials, inspection routines, and production management support reliable delivery.': 'تدعم مواد الاعتماد وإجراءات الفحص وإدارة الإنتاج التسليم الموثوق.',
+        'Standardized production': 'إنتاج معياري',
+        'Inspection process': 'إجراءات الفحص',
+        'Development': 'التطور',
+        'Longxiang development history': 'تاريخ تطور لونغشيانغ',
+        'Review key stages of Longxiang manufacturing and project service capability.': 'استعرض المراحل الرئيسية لتطور قدرات لونغشيانغ في التصنيع وخدمة المشروعات.',
+        'Manufacturing Foundation': 'تأسيس التصنيع',
+        'Longxiang began building power equipment production capability.': 'بدأت لونغشيانغ في بناء قدراتها لإنتاج معدات الطاقة.',
+        'Today': 'اليوم',
+        'Energy-Saving Equipment': 'معدات موفرة للطاقة',
+        'The company continues to serve industrial and energy projects.': 'تواصل الشركة خدمة المشروعات الصناعية ومشروعات الطاقة.',
+        'Discuss Your Equipment Requirements': 'ناقش متطلبات معداتك',
+        'Share your project scenario and our team will help match suitable products.': 'شاركنا سيناريو مشروعك وسيساعدك فريقنا في اختيار المنتجات المناسبة.',
+        'Solutions': 'الحلول',
+        'Power equipment solutions for industry, infrastructure, and new energy.': 'حلول معدات الطاقة للصناعة والبنية التحتية والطاقة الجديدة.',
+        'Application-Oriented Solutions': 'حلول موجهة حسب التطبيق',
+        'Select equipment and service support by project scenario.': 'اختر المعدات ودعم الخدمة وفقاً لسيناريو المشروع.',
+        'Project Fit': 'ملاءمة المشروع',
+        'Designed for stable operation and practical deployment.': 'مصممة للتشغيل المستقر والتنفيذ العملي.',
+        'Scenarios': 'السيناريوهات',
+        'Credentials': 'الاعتمادات',
+        'Discuss Your Project': 'ناقش مشروعك',
+        'Share your project requirements with us.': 'شاركنا متطلبات مشروعك.',
+        'Common Questions': 'الأسئلة الشائعة',
+        'Contact us for model selection, quotation, and project support.': 'تواصل معنا لاختيار الطراز وطلب عرض السعر ودعم المشروع.',
+        'What information should I provide?': 'ما المعلومات التي ينبغي تقديمها؟',
+        'Please share voltage level, capacity, quantity, application scenario, and destination if available.': 'يرجى تزويدنا بمستوى الجهد والسعة والكمية وسيناريو التطبيق والوجهة إن توفرت.',
+        'Can Longxiang support model selection?': 'هل يمكن للونغشيانغ دعم اختيار الطراز؟',
+        'Yes. Our team can provide product matching suggestions based on your project requirements.': 'نعم. يمكن لفريقنا تقديم اقتراحات مطابقة المنتجات بناءً على متطلبات مشروعك.'
+    };
 
     function camelToSnake(value) {
         return String(value || '').replace(/([a-z0-9])([A-Z])/g, '$1_$2').toLowerCase();
@@ -101,12 +215,20 @@
         }
     }
 
+    function localizedText(value) {
+        if (isArabic && typeof value === 'string' && ARABIC_TEXT_FALLBACKS[value.trim()]) {
+            return ARABIC_TEXT_FALLBACKS[value.trim()];
+        }
+        return value || '';
+    }
+
     function localized(item, key) {
         if (!item) return '';
         if (isArabic) {
             if (item[key + 'Ar']) return item[key + 'Ar'];
             if (item[camelToSnake(key) + '_ar']) return item[camelToSnake(key) + '_ar'];
             if (item[key + '_ar']) return item[key + '_ar'];
+            return localizedText(item[key]);
         }
         return item[key] || '';
     }
@@ -118,7 +240,13 @@
             if (Array.isArray(item[camelToSnake(key) + '_ar']) && item[camelToSnake(key) + '_ar'].length) return item[camelToSnake(key) + '_ar'];
             if (Array.isArray(item[key + '_ar']) && item[key + '_ar'].length) return item[key + '_ar'];
         }
-        return Array.isArray(item[key]) ? item[key] : [];
+        var list = Array.isArray(item[key]) ? item[key] : [];
+        if (isArabic) {
+            return list.map(function (entry) {
+                return typeof entry === 'string' ? localizedText(entry) : entry;
+            });
+        }
+        return list;
     }
 
     function pageHref(href) {
@@ -400,7 +528,7 @@
             (localized(snapshot, 'text') ? '<p>' + escapeHtml(localized(snapshot, 'text')) + '</p>' : '') +
             (snapshot.body || []).map(function (item) {
                 var field = item.companyField ? ' data-company-field="' + escapeHtml(item.companyField) + '"' : '';
-                var text = typeof item === 'string' ? item : localized(item, 'text');
+                var text = typeof item === 'string' ? localizedText(item) : localized(item, 'text');
                 return '<p' + field + '>' + escapeHtml(text) + '</p>';
             }).join('') +
             '</div>' +
@@ -451,7 +579,7 @@
             '<h2>' + escapeHtml(localized(history, 'title')) + '</h2>' +
             '<p>' + escapeHtml(localized(history, 'text')) + '</p></div>' +
             '<div class="about-history-rail">' + milestones.map(function (item) {
-                var date = item.date || item.year || '';
+                var date = localized(item, 'date') || item.year || '';
                 var title = localized(item, 'title') || item.title_en || item.title_cn || '';
                 var text = localized(item, 'text') || item.description_en || item.description_cn || '';
                 return '<article class="about-history-item"><time>' + escapeHtml(date) + '</time>' +
