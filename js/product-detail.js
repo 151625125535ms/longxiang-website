@@ -133,8 +133,17 @@
         return isArabic ? ' dir="rtl" lang="ar" class="' + (className || 'rtl-product-text') + '"' : '';
     }
 
+    function productSlug(product) {
+        return String(product && (product.slug || product.id) || '').trim();
+    }
+
+    function productPublicPath(product, lang) {
+        var slug = encodeURIComponent(productSlug(product));
+        return (lang === 'ar' ? '/ar/products/' : '/products/') + slug;
+    }
+
     function detailHref(product) {
-        return 'product-detail.html?id=' + encodeURIComponent(product.id);
+        return productPublicPath(product, isArabic ? 'ar' : 'en');
     }
 
     function firstValue(values) {
@@ -161,6 +170,89 @@
         return isArabic
             ? (product.subCategoryLabelAr || product.categoryLabelAr || product.groupLabelAr || product.subCategoryLabel || product.categoryLabel || product.groupLabel || '')
             : (product.subCategoryLabel || product.categoryLabel || product.groupLabel || '');
+    }
+
+    function productIdentifierFromPath() {
+        var path = window.location.pathname.replace(/\\/g, '/');
+        var match = path.match(/^\/(?:ar\/)?products\/([^/]+)\/?$/);
+        return match ? decodeURIComponent(match[1]) : '';
+    }
+
+    function upsertHeadLink(rel, attrs) {
+        var selector = 'link[rel="' + rel + '"]';
+        if (attrs.hreflang) selector += '[hreflang="' + attrs.hreflang + '"]';
+        var link = document.querySelector(selector);
+        if (!link) {
+            link = document.createElement('link');
+            link.rel = rel;
+            if (attrs.hreflang) link.setAttribute('hreflang', attrs.hreflang);
+            document.head.appendChild(link);
+        }
+        Object.keys(attrs).forEach(function (key) {
+            link.setAttribute(key, attrs[key]);
+        });
+    }
+
+    function upsertMeta(name, property, content) {
+        if (!content) return;
+        var selector = property ? 'meta[property="' + property + '"]' : 'meta[name="' + name + '"]';
+        var meta = document.querySelector(selector);
+        if (!meta) {
+            meta = document.createElement('meta');
+            if (property) meta.setAttribute('property', property);
+            else meta.setAttribute('name', name);
+            document.head.appendChild(meta);
+        }
+        meta.setAttribute('content', content);
+    }
+
+    function injectJsonLd(key, data) {
+        var old = document.querySelector('script[data-schema-auto="' + key + '"]');
+        if (old) old.remove();
+        var script = document.createElement('script');
+        script.type = 'application/ld+json';
+        script.setAttribute('data-schema-auto', key);
+        script.textContent = JSON.stringify(data);
+        document.head.appendChild(script);
+    }
+
+    function productCanonicalUrls(product) {
+        return {
+            en: window.location.origin + productPublicPath(product, 'en'),
+            ar: window.location.origin + productPublicPath(product, 'ar')
+        };
+    }
+
+    function productSeoTitle(product, name) {
+        if (!isArabic && product.seoTitle) return product.seoTitle;
+        var titleSuffix = detailLabel('titleSuffix');
+        return titleSuffix ? name + ' | ' + titleSuffix : name;
+    }
+
+    function productSeoDescription(product, desc) {
+        if (!isArabic && product.seoDescription) return product.seoDescription;
+        return desc || localize(product, 'shortDesc');
+    }
+
+    function injectProductSeo(product, name, desc) {
+        var urls = productCanonicalUrls(product);
+        var canonicalUrl = isArabic ? urls.ar : urls.en;
+        var title = productSeoTitle(product, name);
+        var description = productSeoDescription(product, desc);
+        var image = absoluteImageUrl(product.image);
+
+        if (title) document.title = title;
+        upsertMeta('description', '', description);
+        upsertMeta('', 'og:title', title);
+        upsertMeta('', 'og:description', description);
+        upsertMeta('', 'og:type', 'product');
+        upsertMeta('', 'og:url', canonicalUrl);
+        upsertMeta('', 'og:image', image);
+        upsertHeadLink('canonical', { href: canonicalUrl });
+        upsertHeadLink('alternate', { hreflang: 'en', href: urls.en });
+        upsertHeadLink('alternate', { hreflang: 'ar', href: urls.ar });
+        upsertHeadLink('alternate', { hreflang: 'x-default', href: urls.en });
+        return canonicalUrl;
     }
 
     function productGroupKey(product) {
@@ -346,18 +438,26 @@
         if (sidebar) sidebar.style.display = 'none';
     }
 
-    function injectProductSchema(product, name, desc) {
-        var old = document.querySelector('script[data-schema-auto="product"]');
-        if (old) old.remove();
-
+    function injectProductSchema(product, name, desc, canonicalUrl) {
         var schema = {
             '@context': 'https://schema.org',
             '@type': 'Product',
             name: name,
             description: desc,
             image: absoluteImageUrl(product.image),
+            sku: product.id || product.slug || '',
+            url: canonicalUrl,
             category: product.categoryLabel || product.category
         };
+        if (Array.isArray(product.specs) && product.specs.length) {
+            schema.additionalProperty = product.specs.slice(0, 12).map(function (spec) {
+                return {
+                    '@type': 'PropertyValue',
+                    name: translatedSpecLabel(spec[0]),
+                    value: spec[1]
+                };
+            });
+        }
         var brandName = detailLabel('schemaBrand');
         if (brandName) {
             schema.brand = {
@@ -366,11 +466,25 @@
             };
         }
 
-        var script = document.createElement('script');
-        script.type = 'application/ld+json';
-        script.setAttribute('data-schema-auto', 'product');
-        script.textContent = JSON.stringify(schema);
-        document.head.appendChild(script);
+        injectJsonLd('product', schema);
+        injectJsonLd('product-breadcrumb', {
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+                {
+                    '@type': 'ListItem',
+                    position: 1,
+                    name: text('Products', 'المنتجات'),
+                    item: window.location.origin + (isArabic ? '/ar/products.html' : '/products.html')
+                },
+                {
+                    '@type': 'ListItem',
+                    position: 2,
+                    name: name,
+                    item: canonicalUrl
+                }
+            ]
+        });
     }
 
     function renderProduct(product) {
@@ -384,8 +498,7 @@
         var categoryLabel = productCategoryLabel(product);
         var contextValue = productContextValue(product, name);
 
-        var titleSuffix = detailLabel('titleSuffix');
-        document.title = titleSuffix ? name + ' | ' + titleSuffix : name;
+        var canonicalUrl = injectProductSeo(product, name, desc);
         setText('breadcrumb-product', name);
         setText('page-title', name);
         setText('page-subtitle', categoryLabel || detailLabel('defaultSubtitle'));
@@ -438,7 +551,7 @@
             button.setAttribute('data-product-name', name);
         });
 
-        injectProductSchema(product, name, desc);
+        injectProductSchema(product, name, desc, canonicalUrl);
         loadRelatedProducts(product);
     }
 
@@ -456,7 +569,7 @@
     }
 
     function init() {
-        var productId = getQueryParam('id');
+        var productId = getQueryParam('id') || productIdentifierFromPath();
         if (!productId) {
             window.location.replace('products.html');
             return;

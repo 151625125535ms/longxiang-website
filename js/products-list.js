@@ -63,7 +63,7 @@
     }
 
     function detailHref(product) {
-        return 'product-detail.html?id=' + encodeURIComponent(product.id);
+        return (isArabic ? '/ar/products/' : '/products/') + encodeURIComponent(product.slug || product.id);
     }
 
     function productSearchText(product) {

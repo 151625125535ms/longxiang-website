@@ -3,6 +3,7 @@ require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') }
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 const { authMiddleware } = require('./middleware/auth');
 const authRoutes = require('./routes/auth');
 const productsRoutes = require('./routes/products');
@@ -166,6 +167,21 @@ app.get('/sitemap.xml', function (req, res, next) {
         next(err);
     }
 });
+
+function sendProductDetailShell(req, res, next) {
+    const isArabicProduct = req.path.indexOf('/ar/') === 0;
+    const filePath = path.join(__dirname, '..', isArabicProduct ? 'ar/product-detail.html' : 'product-detail.html');
+    fs.readFile(filePath, 'utf8', function (err, html) {
+        if (err) return next(err);
+        const baseHref = isArabicProduct ? '/ar/' : '/';
+        const withBase = html.replace(/<head>/i, '<head>\n    <base href="' + baseHref + '">');
+        res.type('html');
+        res.setHeader('Cache-Control', 'public, max-age=300');
+        res.send(withBase);
+    });
+}
+
+app.get(['/products/:slug', '/ar/products/:slug'], sendProductDetailShell);
 
 app.use(express.static(path.join(__dirname, '..'), {
     maxAge: '7d',

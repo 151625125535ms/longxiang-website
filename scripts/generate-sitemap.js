@@ -56,7 +56,7 @@ function buildUrl(pathname) {
 }
 
 function productPublicId(product) {
-    return String(product.legacy_id || product.slug || product.id || '').trim();
+    return String(product.slug || product.legacy_id || product.id || '').trim();
 }
 
 function readContentBlockUpdatedAt(db) {
@@ -127,13 +127,13 @@ function buildSitemap() {
         const encodedId = encodeURIComponent(id);
         const lastmod = toIsoDate(product.updated_at);
         entries.push(makeEntry(
-            buildUrl('/product-detail.html?id=' + encodedId),
+            buildUrl('/products/' + encodedId),
             lastmod,
             'monthly',
             '0.7'
         ));
         entries.push(makeEntry(
-            buildUrl('/ar/product-detail.html?id=' + encodedId),
+            buildUrl('/ar/products/' + encodedId),
             lastmod,
             'monthly',
             '0.6'

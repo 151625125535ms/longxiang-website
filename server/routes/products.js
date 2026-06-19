@@ -40,6 +40,7 @@ function mapSqliteProduct(row, specsByProduct, coverByProduct) {
 
     return {
         id: row.legacy_id,
+        slug: row.slug || '',
         name: row.name_en,
         nameAr: row.name_ar || '',
         image: coverByProduct[row.id] || '',
@@ -87,9 +88,9 @@ function readSqliteProducts(id) {
         const direct = db.prepare(`
             SELECT id
             FROM products
-            WHERE status = 'published' AND legacy_id = ?
+            WHERE status = 'published' AND (legacy_id = ? OR slug = ?)
             LIMIT 1
-        `).get(id);
+        `).get(id, id);
         const internalId = direct ? direct.id : findSqliteProductByAlias(db, id);
         if (!internalId) return [];
         params = [internalId];

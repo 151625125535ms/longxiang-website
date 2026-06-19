@@ -409,7 +409,9 @@
     }
 
     function currentPageName() {
-        var name = window.location.pathname.split('/').pop();
+        var path = window.location.pathname.replace(/\\/g, '/');
+        if (/^\/(?:ar\/)?products\/[^/]+\/?$/.test(path)) return 'product-detail.html';
+        var name = path.split('/').pop();
         return name || 'index.html';
     }
 
@@ -419,6 +421,10 @@
 
     function languageUrl(lang) {
         var path = window.location.pathname.replace(/\\/g, '/');
+        var productMatch = path.match(/^\/(?:ar\/)?products\/([^/]+)\/?$/);
+        if (productMatch) {
+            return (lang === 'ar' ? '/ar/products/' : '/products/') + productMatch[1] + window.location.search + window.location.hash;
+        }
         var pageName = currentPageName();
         var targetPage = supportsArabicPage(pageName) ? pageName : 'index.html';
         var targetPath;
@@ -1588,7 +1594,7 @@
             card.setAttribute('data-delay', (index * 100).toString());
             var name = isArabic ? (product.nameAr || product.name) : product.name;
             var desc = isArabic ? (product.shortDescAr || product.shortDesc || '') : (product.shortDesc || '');
-            var detail = (isArabic ? 'product-detail.html' : 'product-detail.html') + '?id=' + encodeURIComponent(product.id);
+            var detail = (isArabic ? '/ar/products/' : '/products/') + encodeURIComponent(product.slug || product.id);
             var imagePath = resolveAssetPath(product.image);
             var textAttrs = isArabic ? ' dir="rtl" lang="ar" class="rtl-product-text"' : '';
             card.innerHTML =
