@@ -16,6 +16,7 @@ const adminRoutes = require('./routes/admin/index');
 const { ensureDirectory, resolveUploadDir } = require('./lib/fileStore');
 const { getDb } = require('./lib/db');
 const { ensureContentBlockSeeds } = require('./lib/contentBlockSeeds');
+const { buildSitemap } = require('../scripts/generate-sitemap');
 
 let compression = null;
 try { compression = require('compression'); } catch (err) { compression = null; }
@@ -154,6 +155,16 @@ app.use(function (req, res, next) {
         return res.status(403).json({ ok: false, error: { code: 'FORBIDDEN', message: 'Access denied.' } });
     }
     next();
+});
+
+app.get('/sitemap.xml', function (req, res, next) {
+    try {
+        res.type('application/xml');
+        res.setHeader('Cache-Control', 'public, max-age=300');
+        res.send(buildSitemap());
+    } catch (err) {
+        next(err);
+    }
 });
 
 app.use(express.static(path.join(__dirname, '..'), {
