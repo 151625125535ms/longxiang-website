@@ -1966,8 +1966,8 @@
                     '<td><input type="checkbox" class="product-row-check" data-id="' + escapeHtml(productId) + '" data-version="' + escapeHtml(product.version) + '"></td>' +
                     '<td><div class="product-name-cell">' + thumb + '<div><div class="product-name-text">' + escapeHtml(chineseName || name || displayId) + '</div><div class="product-id-text">' + escapeHtml(name || displayId) + '</div></div></div></td>' +
                     '<td class="cell-muted product-model-cell">' + escapeHtml(model) + '</td>' +
-                    '<td><span class="badge badge-blue">' + escapeHtml(categoryName) + '</span></td>' +
-                    '<td><span class="badge ' + statusClass + '">' + statusLabel + '</span></td>' +
+                    '<td class="product-category-cell" title="' + escapeHtml(categoryName) + '"><span class="badge badge-blue product-category-badge">' + escapeHtml(categoryName) + '</span></td>' +
+                    '<td class="product-status-cell"><span class="badge ' + statusClass + ' product-status-badge">' + statusLabel + '</span></td>' +
                     '<td><span class="table-switch ' + (featured ? 'is-on' : '') + '" aria-label="' + (featured ? '已推荐' : '未推荐') + '"></span></td>' +
                     '<td class="cell-muted product-intro-cell" title="' + escapeHtml(intro) + '">' + escapeHtml(intro) + '</td>' +
                     '<td class="cell-muted product-date-cell">' + escapeHtml(updatedAt) + '</td>' +

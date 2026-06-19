@@ -2120,12 +2120,12 @@ h1, h2, h3, h4, h5, h6 {
 
 .product-table th:nth-child(4),
 .product-table td:nth-child(4) {
-    width: 126px;
+    width: 168px;
 }
 
 .product-table th:nth-child(5),
 .product-table td:nth-child(5) {
-    width: 72px;
+    width: 92px;
 }
 
 .product-table th:nth-child(6),
@@ -3172,7 +3172,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .product-table {
-    min-width: 1120px;
+    min-width: 1180px;
 }
 
 .product-table input[type="checkbox"] {
@@ -3190,6 +3190,28 @@ h1, h2, h3, h4, h5, h6 {
 
 .product-table .badge {
     white-space: nowrap;
+}
+
+.product-table .product-category-cell {
+    min-width: 0;
+    overflow: hidden;
+}
+
+.product-table .product-category-badge {
+    max-width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+}
+
+.product-table .product-status-cell {
+    white-space: nowrap;
+}
+
+.product-table .product-status-badge {
+    flex: 0 0 auto;
+    justify-content: center;
 }
 
 .product-table tbody tr.row-selected > td {
@@ -3416,8 +3438,22 @@ h1, h2, h3, h4, h5, h6 {
     #view-products .product-table .badge {
         max-width: 100%;
         white-space: normal;
+        overflow-wrap: anywhere;
         text-align: left;
         line-height: 1.3;
+    }
+
+    #view-products .product-table .product-category-cell {
+        overflow: visible;
+    }
+
+    #view-products .product-table .product-category-badge {
+        overflow: visible;
+        text-overflow: clip;
+    }
+
+    #view-products .product-table .product-status-badge {
+        white-space: nowrap;
     }
 
     #view-products .product-table .actions-cell {
