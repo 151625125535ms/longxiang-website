@@ -31,7 +31,9 @@ function cleanPhoneField(field) {
 }
 
 function ensureFields(fields, defaults, insertBeforeName) {
-    const source = Array.isArray(fields) ? fields.slice(0) : [];
+    const source = Array.isArray(fields)
+        ? fields.filter(function (field) { return !field || field.name !== 'subject'; }).slice(0)
+        : [];
     const existing = new Set();
     source.forEach(function (field) {
         if (field && field.name) existing.add(field.name);

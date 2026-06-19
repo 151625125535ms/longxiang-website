@@ -1282,7 +1282,9 @@
     }
 
     function defaultInquiryModalFields(fields) {
-        var source = Array.isArray(fields) ? fields.slice(0) : [];
+        var source = Array.isArray(fields) ? fields.filter(function (field) {
+            return !field || field.name !== 'subject';
+        }).slice(0) : [];
         var existing = {};
         source.forEach(function (field) {
             if (field && field.name) existing[field.name] = true;

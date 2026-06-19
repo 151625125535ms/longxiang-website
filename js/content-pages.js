@@ -711,7 +711,9 @@
     }
 
     function contactInquiryDefaultFields(fields) {
-        var source = Array.isArray(fields) ? fields.slice(0) : [];
+        var source = Array.isArray(fields) ? fields.filter(function (field) {
+            return !field || field.name !== 'subject';
+        }).slice(0) : [];
         var existing = {};
         source.forEach(function (field) {
             if (field && field.name) existing[field.name] = true;
@@ -885,7 +887,9 @@
     }
 
     function productInquiryDefaultFields(form) {
-        var fields = form && Array.isArray(form.fields) ? form.fields.slice(0) : [];
+        var fields = form && Array.isArray(form.fields) ? form.fields.filter(function (field) {
+            return !field || field.name !== 'subject';
+        }).slice(0) : [];
         var existing = {};
         fields.forEach(function (field) {
             if (field && field.name) existing[field.name] = true;
