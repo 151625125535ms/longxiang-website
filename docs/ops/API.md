@@ -166,7 +166,7 @@
 | `subject` | ✅ | 主题 |
 | `message` | ✅ | 消息内容 |
 | `company` | | 公司名 |
-| `phone` | | 电话 / WhatsApp |
+| `phone` | | 电话 |
 | `productContext` | | 感兴趣的产品（由前端自动填入产品名） |
 
 **成功响应** `201`
@@ -260,7 +260,6 @@
   "headquarters": "...",
   "officeHours": "Mon–Fri 08:30–17:30",
   "huaiyangBase": "...",
-  "whatsapp": "8613812345678",
   "wechat": "...",
   "skype": "...",
   "ga4TrackingId": "G-XXXXXXXXXX",

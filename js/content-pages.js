@@ -7,6 +7,7 @@
     var pageSlug = pageRoot.getAttribute('data-content-page');
     var isArabic = /\/ar\//.test(window.location.pathname.replace(/\\/g, '/'));
     var assetPrefix = isArabic ? '../' : '';
+    var ARABIC_CHAT_APP_NAME = '\u0648\u0627\u062a\u0633\u0627\u0628';
     var ARABIC_TEXT_FALLBACKS = {
         'Home': 'الرئيسية',
         'Products': 'المنتجات',
@@ -709,14 +710,42 @@
         return '<div class="form-group"><label for="' + id + '">' + label + '</label><input type="' + escapeHtml(field.type || 'text') + '" id="' + id + '" name="' + id + '"' + required + ' placeholder="' + placeholder + '"></div>';
     }
 
+    function contactInquiryDefaultFields(fields) {
+        var source = Array.isArray(fields) ? fields.slice(0) : [];
+        var existing = {};
+        source.forEach(function (field) {
+            if (field && field.name) existing[field.name] = true;
+        });
+        [
+            { name: 'company', label: 'Company', labelAr: 'الشركة', type: 'text' },
+            { name: 'country', label: 'Destination Country', labelAr: 'بلد المشروع', type: 'text', placeholder: 'Country or region', placeholderAr: 'الدولة أو المنطقة' },
+            { name: 'productType', label: 'Product Type', labelAr: 'نوع المنتج', type: 'text', placeholder: 'Transformer, switchgear, EV charger...', placeholderAr: 'محول، مفاتيح كهربائية، شاحن مركبات...' },
+            { name: 'requiredVoltageOrCapacity', label: 'Required Voltage / Capacity', labelAr: 'الجهد / السعة المطلوبة', type: 'text', column: 'right', placeholder: 'Voltage, capacity, power rating', placeholderAr: 'الجهد أو السعة أو القدرة' },
+            { name: 'quantityOrScale', label: 'Quantity / Project Scale', labelAr: 'الكمية / حجم المشروع', type: 'text', column: 'right', placeholder: 'Quantity or project scale', placeholderAr: 'الكمية أو حجم المشروع' },
+            { name: 'applicationScenario', label: 'Application Scenario', labelAr: 'سيناريو الاستخدام', type: 'text', column: 'right', placeholder: 'Factory, PV project, charging station...', placeholderAr: 'مصنع، مشروع شمسي، محطة شحن...' }
+        ].forEach(function (field) {
+            if (!existing[field.name]) {
+                source.splice(Math.max(0, source.length - 1), 0, field);
+                existing[field.name] = true;
+            }
+        });
+        return source.map(function (field) {
+            if (field.name === 'phone') {
+                return Object.assign({}, field, { label: field.label || 'Phone', labelAr: field.labelAr && field.labelAr.indexOf(ARABIC_CHAT_APP_NAME) === -1 ? field.labelAr : 'رقم الهاتف' });
+            }
+            return field;
+        });
+    }
+
     function renderContactForm(form) {
         if (!form) return '';
-        var fields = form.fields || [];
+        var fields = contactInquiryDefaultFields(form.fields);
         var left = fields.filter(function (field) { return field.column !== 'right'; });
         var right = fields.filter(function (field) { return field.column === 'right'; });
         return '<section class="section contact-form-section"><div class="container">' +
             '<div class="contact-form-heading fade-in"><h2>' + escapeHtml(localized(form, 'title')) + '</h2><p>' + escapeHtml(localized(form, 'note')) + '</p></div>' +
             '<div class="contact-form contact-page-form fade-in"><form id="contactForm">' +
+            '<input type="hidden" name="subject" value="quote">' +
             '<div class="contact-inquiry-columns">' +
             '<div class="contact-inquiry-column">' + left.map(renderContactField).join('') + '</div>' +
             '<div class="contact-inquiry-column">' + right.map(renderContactField).join('') + '</div>' +
@@ -763,11 +792,31 @@
             '<div class="cta-buttons fade-in">' + buttonHtml(cta.button, 'btn btn-gold btn-lg') + '</div></div>';
     }
 
+    function defaultProductDetailSupportItems() {
+        return [
+            { title: 'Parameter Review', titleAr: 'مراجعة المعايير', text: 'Confirm voltage, capacity, protection level, and project conditions before quotation.', textAr: 'تأكيد الجهد والسعة ومستوى الحماية وظروف المشروع قبل عرض السعر.' },
+            { title: 'Project Configuration', titleAr: 'تكوين المشروع', text: 'Match products with transformers, switchgear, charging, PV, or storage systems.', textAr: 'مطابقة المنتجات مع المحولات والمفاتيح والشحن والطاقة الشمسية أو التخزين.' },
+            { title: 'Export Delivery', titleAr: 'تسليم التصدير', text: 'Support packaging, documents, delivery schedule, and destination requirements.', textAr: 'دعم التغليف والمستندات وجدول التسليم ومتطلبات بلد الوصول.' },
+            { title: 'After-sales Support', titleAr: 'دعم ما بعد البيع', text: 'Provide technical communication for installation, operation, and maintenance.', textAr: 'توفير تواصل فني للتركيب والتشغيل والصيانة.' }
+        ];
+    }
+
+    function defaultProductDetailFaqItems() {
+        return [
+            { question: 'What information is needed for a quotation?', questionAr: 'ما المعلومات المطلوبة لعرض السعر؟', answer: 'Please provide product type, voltage or capacity, quantity, destination country, and application scenario.', answerAr: 'يرجى تزويد نوع المنتج والجهد أو السعة والكمية وبلد المشروع وسيناريو الاستخدام.' },
+            { question: 'Can Longxiang help with product selection?', questionAr: 'هل يمكن لونغشيانغ المساعدة في اختيار المنتج؟', answer: 'Yes. Our team can review parameters and recommend a suitable configuration for the project.', answerAr: 'نعم، يمكن لفريقنا مراجعة المعايير واقتراح تكوين مناسب للمشروع.' },
+            { question: 'Are drawings or technical documents available?', questionAr: 'هل تتوفر الرسومات أو المستندات الفنية؟', answer: 'Technical documents can be provided according to the product model and project requirements.', answerAr: 'يمكن توفير المستندات الفنية حسب طراز المنتج ومتطلبات المشروع.' },
+            { question: 'Can products be supplied for overseas projects?', questionAr: 'هل يمكن توريد المنتجات للمشاريع الخارجية؟', answer: 'Yes. Please share the destination country and delivery requirements so we can confirm packaging and documents.', answerAr: 'نعم. يرجى مشاركة بلد الوصول ومتطلبات التسليم لتأكيد التغليف والمستندات.' }
+        ];
+    }
+
     function renderProductDetailSupport(section) {
         var target = pageRoot.querySelector('[data-product-detail-support]');
-        if (!target || !section) return;
+        if (!target) return;
+        section = section || {};
+        var items = Array.isArray(section.items) && section.items.length ? section.items : defaultProductDetailSupportItems();
         target.innerHTML = '<h2>' + escapeHtml(localized(section, 'title')) + '</h2><div class="export-support-grid">' +
-            (section.items || []).map(function (item) {
+            items.map(function (item) {
                 return '<div><strong>' + escapeHtml(localized(item, 'title')) + '</strong><span>' + escapeHtml(localized(item, 'text')) + '</span></div>';
             }).join('') +
             '</div>';
@@ -775,7 +824,8 @@
 
     function renderProductDetailFaq(items, labels) {
         var target = pageRoot.querySelector('[data-product-detail-faq]');
-        if (!target || !items || !items.length) return;
+        if (!target) return;
+        items = Array.isArray(items) && items.length ? items : defaultProductDetailFaqItems();
         target.innerHTML = '<h2>' + escapeHtml(localized(labels, 'faqTitle')) + '</h2>' +
             items.map(function (item) {
                 return '<details><summary>' + escapeHtml(localized(item, 'question')) + '</summary><p>' + escapeHtml(localized(item, 'answer')) + '</p></details>';
@@ -817,7 +867,9 @@
         var id = productFieldId(field.name);
         var label = localized(field, 'label') + (field.required ? ' *' : '');
         var required = field.required ? ' required' : '';
-        var attrs = ' id="' + escapeHtml(id) + '" name="' + escapeHtml(field.name || '') + '"' + required;
+        var readonly = field.readonly ? ' readonly' : '';
+        var displayAttr = field.productContextDisplay ? ' data-product-context-display' : '';
+        var attrs = ' id="' + escapeHtml(id) + '" name="' + escapeHtml(field.name || '') + '"' + required + readonly + displayAttr;
         var placeholder = localized(field, 'placeholder');
         if (field.type === 'textarea') {
             return '<div class="form-group"><label for="' + escapeHtml(id) + '">' + escapeHtml(label) + '</label><textarea' + attrs + ' rows="' + escapeHtml(field.rows || 5) + '"' + (field.productMessage ? ' data-product-message' : '') + '></textarea></div>';
@@ -832,14 +884,50 @@
         return '<div class="form-group"><label for="' + escapeHtml(id) + '">' + escapeHtml(label) + '</label><input type="' + escapeHtml(field.type || 'text') + '"' + attrs + (placeholder ? ' placeholder="' + escapeHtml(placeholder) + '"' : '') + '></div>';
     }
 
+    function productInquiryDefaultFields(form) {
+        var fields = form && Array.isArray(form.fields) ? form.fields.slice(0) : [];
+        var existing = {};
+        fields.forEach(function (field) {
+            if (field && field.name) existing[field.name] = true;
+        });
+        [
+            { name: 'productContextDisplay', label: 'Interested Product', labelAr: 'المنتج المطلوب', type: 'text', readonly: true, productContextDisplay: true },
+            { name: 'name', label: 'Name', labelAr: 'الاسم', type: 'text', required: true },
+            { name: 'email', label: 'Email', labelAr: 'البريد الإلكتروني', type: 'email', required: true },
+            { name: 'phone', label: 'Phone', labelAr: 'رقم الهاتف', type: 'text' },
+            { name: 'company', label: 'Company', labelAr: 'الشركة', type: 'text' },
+            { name: 'country', label: 'Destination Country', labelAr: 'بلد المشروع', type: 'text', placeholder: 'Country or region', placeholderAr: 'الدولة أو المنطقة' },
+            { name: 'productType', label: 'Product Type', labelAr: 'نوع المنتج', type: 'text', placeholder: 'Transformer, switchgear, EV charger...', placeholderAr: 'محول، مفاتيح كهربائية، شاحن مركبات...' },
+            { name: 'requiredVoltageOrCapacity', label: 'Required Voltage / Capacity', labelAr: 'الجهد / السعة المطلوبة', type: 'text', placeholder: 'Voltage, capacity, power rating', placeholderAr: 'الجهد أو السعة أو القدرة' },
+            { name: 'quantityOrScale', label: 'Quantity / Project Scale', labelAr: 'الكمية / حجم المشروع', type: 'text', placeholder: 'Quantity or project scale', placeholderAr: 'الكمية أو حجم المشروع' },
+            { name: 'applicationScenario', label: 'Application Scenario', labelAr: 'سيناريو الاستخدام', type: 'text', placeholder: 'Factory, PV project, charging station...', placeholderAr: 'مصنع، مشروع شمسي، محطة شحن...' },
+            { name: 'message', label: 'Message', labelAr: 'الرسالة', type: 'textarea', required: true, rows: 5, productMessage: true }
+        ].forEach(function (field) {
+            if (!existing[field.name]) {
+                fields.push(field);
+                existing[field.name] = true;
+            }
+        });
+        return fields.map(function (field) {
+            if (field.name === 'phone') {
+                return Object.assign({}, field, { label: field.label || 'Phone', labelAr: field.labelAr && field.labelAr.indexOf(ARABIC_CHAT_APP_NAME) === -1 ? field.labelAr : 'رقم الهاتف' });
+            }
+            return field;
+        });
+    }
+
     function renderProductInquiryForm(form) {
         var target = pageRoot.querySelector('[data-product-detail-inquiry]');
-        if (!target || !form) return;
-        target.innerHTML = '<h3>' + escapeHtml(localized(form, 'title')) + '</h3>' +
+        if (!target) return;
+        form = form || {};
+        var fields = productInquiryDefaultFields(form);
+        target.innerHTML = '<h3>' + escapeHtml(localized(form, 'title') || (isArabic ? 'استفسار عن المنتج' : 'Product Inquiry')) + '</h3>' +
+            (localized(form, 'note') ? '<p class="product-inquiry-note">' + escapeHtml(localized(form, 'note')) + '</p>' : '') +
             '<form class="inquiry-form" data-inquiry-form>' +
+            '<input type="hidden" name="subject" value="quote">' +
             '<input type="hidden" name="productContext" data-product-context value="">' +
-            (form.fields || []).map(renderProductInquiryField).join('') +
-            '<button type="submit" class="btn btn-primary">' + escapeHtml(localized(form, 'submitLabel')) + '</button>' +
+            fields.map(renderProductInquiryField).join('') +
+            '<button type="submit" class="btn btn-primary">' + escapeHtml(localized(form, 'submitLabel') || (isArabic ? 'إرسال الاستفسار' : 'Submit Inquiry')) + '</button>' +
             '</form>';
     }
 

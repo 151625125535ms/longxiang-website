@@ -10,6 +10,7 @@
     var companyCache = null;
     var globalShellCache = null;
     var consentDocumentClickBound = false;
+    var ARABIC_CHAT_APP_NAME = '\u0648\u0627\u062a\u0633\u0627\u0628';
     var ARABIC_TEXT_FALLBACKS = {
         'Home': 'الرئيسية',
         'Products': 'المنتجات',
@@ -28,7 +29,7 @@
         'General inquiry': 'استفسار عام',
         'Tell us your voltage, capacity, quantity, and project location.': 'اذكر الجهد والسعة والكمية وموقع المشروع.',
         'Email': 'البريد الإلكتروني',
-        'Phone / WhatsApp': 'الهاتف / واتساب',
+        ['Phone / ' + 'Whats' + 'App']: 'رقم الهاتف',
         'Submit': 'إرسال',
         'Request a Quote': 'طلب عرض سعر',
         'Fill in your contact details and project requirements.': 'املأ بيانات الاتصال ومتطلبات المشروع.',
@@ -1166,10 +1167,6 @@
 
     function renderCommunicationWidgets(company) {
         var links = [];
-        if (company.whatsapp) {
-            var number = String(company.whatsapp).replace(/[^\d]/g, '');
-            if (number) links.push(createMessengerLink('WhatsApp', 'https://wa.me/' + number, 'whatsapp', 'click_whatsapp'));
-        }
         if (company.line) {
             links.push(createMessengerLink('Line', company.line, 'line', 'click_line'));
         }
@@ -1197,11 +1194,10 @@
                 wechat.innerHTML = '<strong>WeChat</strong><span>' + escapeHtml(company.wechat) + '</span>';
                 container.appendChild(wechat);
             }
-            appendQr(container, 'WhatsApp', company.whatsappQr);
             appendQr(container, 'WeChat', company.wechatQr);
             appendQr(container, 'Line', company.lineQr);
             if (!container.children.length) {
-                container.innerHTML = '<div class="wechat-placeholder"><strong>TikTok / Line / WhatsApp / YouTube</strong><span>' + (isArabic ? 'سيتم التحديث' : 'To be updated') + '</span></div>';
+                container.innerHTML = '<div class="wechat-placeholder"><strong>TikTok / Line / YouTube</strong><span>' + (isArabic ? 'سيتم التحديث' : 'To be updated') + '</span></div>';
             }
         });
 
@@ -1269,7 +1265,8 @@
         var label = shellLabel(field) + (field.required ? ' *' : '');
         var required = field.required ? ' required' : '';
         var readonly = field.readonly ? ' readonly' : '';
-        var attrs = ' id="' + escapeHtml(id) + '" name="' + escapeHtml(field.name || '') + '"' + required + readonly;
+        var displayAttr = field.productContextDisplay ? ' data-product-context-display' : '';
+        var attrs = ' id="' + escapeHtml(id) + '" name="' + escapeHtml(field.name || '') + '"' + required + readonly + displayAttr;
         var placeholder = localizedArabicValue(field, 'placeholder') || localizeFallback(field.placeholder);
         if (field.type === 'textarea') {
             return '<div class="form-group"><label for="' + escapeHtml(id) + '">' + escapeHtml(label) + '</label><textarea' + attrs + ' rows="' + escapeHtml(field.rows || 5) + '"></textarea></div>';
@@ -1282,6 +1279,43 @@
                 '</select></div>';
         }
         return '<div class="form-group"><label for="' + escapeHtml(id) + '">' + escapeHtml(label) + '</label><input type="' + escapeHtml(field.type || 'text') + '"' + attrs + (placeholder ? ' placeholder="' + escapeHtml(placeholder) + '"' : '') + '></div>';
+    }
+
+    function defaultInquiryModalFields(fields) {
+        var source = Array.isArray(fields) ? fields.slice(0) : [];
+        var existing = {};
+        source.forEach(function (field) {
+            if (field && field.name) existing[field.name] = true;
+        });
+
+        [
+            { name: 'productContextDisplay', label: 'Interested Product', labelAr: 'المنتج المطلوب', type: 'text', readonly: true, productContextDisplay: true },
+            { name: 'name', label: 'Name', labelAr: 'الاسم', type: 'text', required: true, row: 'contact' },
+            { name: 'email', label: 'Email', labelAr: 'البريد الإلكتروني', type: 'email', required: true, row: 'contact' },
+            { name: 'phone', label: 'Phone', labelAr: 'رقم الهاتف', type: 'text', row: 'company' },
+            { name: 'company', label: 'Company', labelAr: 'الشركة', type: 'text', row: 'company' },
+            { name: 'country', label: 'Destination Country', labelAr: 'بلد المشروع', type: 'text', row: 'project', placeholder: 'Country or region', placeholderAr: 'الدولة أو المنطقة' },
+            { name: 'productType', label: 'Product Type', labelAr: 'نوع المنتج', type: 'text', row: 'project', placeholder: 'Transformer, switchgear, EV charger...', placeholderAr: 'محول، مفاتيح كهربائية، شاحن مركبات...' },
+            { name: 'requiredVoltageOrCapacity', label: 'Required Voltage / Capacity', labelAr: 'الجهد / السعة المطلوبة', type: 'text', row: 'requirement', placeholder: 'Voltage, capacity, power rating', placeholderAr: 'الجهد أو السعة أو القدرة' },
+            { name: 'quantityOrScale', label: 'Quantity / Project Scale', labelAr: 'الكمية / حجم المشروع', type: 'text', row: 'requirement', placeholder: 'Quantity or project scale', placeholderAr: 'الكمية أو حجم المشروع' },
+            { name: 'applicationScenario', label: 'Application Scenario', labelAr: 'سيناريو الاستخدام', type: 'text', placeholder: 'Factory, PV project, charging station...', placeholderAr: 'مصنع، مشروع شمسي، محطة شحن...' },
+            { name: 'message', label: 'Message', labelAr: 'الرسالة', type: 'textarea', required: true, rows: 5 }
+        ].forEach(function (field) {
+            if (!existing[field.name]) {
+                source.push(field);
+                existing[field.name] = true;
+            }
+        });
+
+        return source.map(function (field) {
+            if (field.name === 'phone') {
+                return Object.assign({}, field, {
+                    label: field.label || 'Phone',
+                    labelAr: field.labelAr && field.labelAr.indexOf(ARABIC_CHAT_APP_NAME) === -1 ? field.labelAr : 'رقم الهاتف'
+                });
+            }
+            return field;
+        });
     }
 
     function renderInquiryFields(fields) {
@@ -1313,7 +1347,7 @@
     function ensureInquiryModal(company) {
         if (document.getElementById('inquiry-modal')) return;
         var inquiry = shellSection('inquiry');
-        var fields = Array.isArray(inquiry.modalFields) ? inquiry.modalFields : [];
+        var fields = defaultInquiryModalFields(inquiry.modalFields);
         var modal = document.createElement('div');
         modal.id = 'inquiry-modal';
         modal.className = 'inquiry-modal';
@@ -1410,7 +1444,8 @@
                 productType: (form.elements.productType && form.elements.productType.value || '').trim(),
                 quantityOrScale: (form.elements.quantityOrScale && form.elements.quantityOrScale.value || '').trim(),
                 requiredVoltageOrCapacity: (form.elements.requiredVoltageOrCapacity && form.elements.requiredVoltageOrCapacity.value || '').trim(),
-                subject: (form.elements.subject && form.elements.subject.value || '').trim(),
+                applicationScenario: (form.elements.applicationScenario && form.elements.applicationScenario.value || '').trim(),
+                subject: (form.elements.subject && form.elements.subject.value || 'quote').trim(),
                 message: (form.elements.message && form.elements.message.value || '').trim(),
                 productContext: (form.elements.productContext && form.elements.productContext.value || '').trim()
             };

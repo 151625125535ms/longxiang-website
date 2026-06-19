@@ -229,7 +229,7 @@ const CONTENT_BLOCK_SEEDS = [
                     fields: [
                         { name: 'name', label: 'Name', labelAr: 'الاسم', type: 'text', required: true },
                         { name: 'email', label: 'Email', labelAr: 'البريد الإلكتروني', type: 'email', required: true },
-                        { name: 'phone', label: 'Phone', labelAr: 'رقم الهاتف / واتساب', type: 'text', column: 'right' },
+                        { name: 'phone', label: 'Phone', labelAr: 'رقم الهاتف', type: 'text', column: 'right' },
                         { name: 'message', label: 'Message', labelAr: 'الرسالة', type: 'textarea', required: true, column: 'right' }
                     ]
                 },
@@ -348,7 +348,7 @@ const CONTENT_BLOCK_SEEDS = [
                 productContext: 'General inquiry',
                 messagePlaceholder: 'Tell us your voltage, capacity, quantity, and project location.',
                 emailPlaceholder: 'Email',
-                phonePlaceholder: 'Phone / WhatsApp',
+                phonePlaceholder: 'Phone',
                 submitLabel: 'Submit',
                 modalTitle: 'Request a Quote',
                 modalText: 'Fill in your contact details and project requirements.',
@@ -363,7 +363,7 @@ const CONTENT_BLOCK_SEEDS = [
                 productContextAr: 'استفسار عام',
                 messagePlaceholderAr: 'اذكر الجهد والسعة والكمية وموقع المشروع.',
                 emailPlaceholderAr: 'البريد الإلكتروني',
-                phonePlaceholderAr: 'الهاتف / واتساب',
+                phonePlaceholderAr: 'رقم الهاتف',
                 submitLabelAr: 'إرسال',
                 modalTitleAr: 'طلب عرض سعر',
                 modalTextAr: 'املأ بيانات الاتصال ومتطلبات المشروع.',

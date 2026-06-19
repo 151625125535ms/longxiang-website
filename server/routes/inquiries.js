@@ -20,6 +20,7 @@ function normalizeInquiry(body) {
         productType: String(body.productType || '').trim(),
         quantityOrScale: String(body.quantityOrScale || '').trim(),
         requiredVoltageOrCapacity: String(body.requiredVoltageOrCapacity || '').trim(),
+        applicationScenario: String(body.applicationScenario || '').trim(),
         productContext: String(body.productContext || '').trim(),
         subject: String(body.subject || '').trim(),
         message: String(body.message || '').trim()
@@ -40,6 +41,17 @@ function getClientIp(req) {
     const forwarded = req.headers['x-forwarded-for'];
     if (forwarded) return String(forwarded).split(',')[0].trim();
     return req.socket && req.socket.remoteAddress ? req.socket.remoteAddress : '';
+}
+
+function buildStoredProductContext(inquiry) {
+    const rows = [];
+    if (inquiry.productContext) rows.push('Interested Product: ' + inquiry.productContext);
+    if (inquiry.productType) rows.push('Product Type: ' + inquiry.productType);
+    if (inquiry.requiredVoltageOrCapacity) rows.push('Required Voltage / Capacity: ' + inquiry.requiredVoltageOrCapacity);
+    if (inquiry.quantityOrScale) rows.push('Quantity / Project Scale: ' + inquiry.quantityOrScale);
+    if (inquiry.country) rows.push('Destination Country: ' + inquiry.country);
+    if (inquiry.applicationScenario) rows.push('Application Scenario: ' + inquiry.applicationScenario);
+    return rows.join('\n');
 }
 
 function parseJson(value, fallback) {
@@ -115,11 +127,12 @@ async function sendNotification(inquiry) {
             'Name: ' + inquiry.name,
             'Email: ' + inquiry.email,
             'Company: ' + (inquiry.company || '-'),
-            'WhatsApp / Phone: ' + (inquiry.phone || '-'),
+            'Phone: ' + (inquiry.phone || '-'),
             'Country: ' + (inquiry.country || '-'),
             'Product Type: ' + (inquiry.productType || '-'),
             'Quantity / Project Scale: ' + (inquiry.quantityOrScale || '-'),
             'Required Voltage / Capacity: ' + (inquiry.requiredVoltageOrCapacity || '-'),
+            'Application Scenario: ' + (inquiry.applicationScenario || '-'),
             'Interested Product: ' + (inquiry.productContext || '-'),
             'Subject: ' + inquiry.subject,
             'Message:',
@@ -175,7 +188,7 @@ router.post('/', async function (req, res) {
             country: normalized.country,
             subject: normalized.subject,
             message: normalized.message,
-            product_context: normalized.productContext,
+            product_context: buildStoredProductContext(normalized),
             ip,
             user_agent: userAgent,
             created_at: now,

@@ -3989,7 +3989,7 @@
                     ['address', '地址'], ['addressAr', '地址（阿语）'], ['headquarters', '总部'], ['headquartersAr', '总部（阿语）'],
                     ['phone', '电话'], ['email', '邮箱'], ['officeHours', '办公时间'], ['officeHoursAr', '办公时间（阿语）'],
                     ['huaiyangBase', '淮阳基地'], ['huaiyangBaseAr', '淮阳基地（阿语）'],
-                    ['whatsapp', 'WhatsApp'], ['whatsappQr', 'WhatsApp 二维码'], ['wechat', '微信'], ['wechatQr', '微信二维码'],
+                    ['wechat', '微信'], ['wechatQr', '微信二维码'],
                     ['skype', 'Skype'], ['line', 'Line'], ['lineQr', 'Line 二维码'], ['tiktok', 'TikTok'],
                     ['instagram', 'Instagram'], ['youtube', 'YouTube'], ['googleMapsUrl', 'Google Maps URL'],
                     ['googleMapsEmbedUrl', 'Google Maps Embed URL'], ['googleMyMapsEmbedUrl', 'Google My Maps Embed URL'],
@@ -4166,7 +4166,7 @@
         }
 
         function isImageLikeField(path) {
-            return /(^|\.)(image|backgroundImage|cover_image|thumbnail|preview|logo|icon|qr|mapQr|wechatQr|whatsappQr)$/i.test(path);
+            return /(^|\.)(image|backgroundImage|cover_image|thumbnail|preview|logo|icon|qr|mapQr|wechatQr)$/i.test(path);
         }
 
         function isRelationField(path) {
