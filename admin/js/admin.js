@@ -1211,7 +1211,6 @@
             renderDashboardLoading();
             apiRequest('/admin/dashboard').then(function (response) {
                 var data = unwrapDataResponse(response) || {};
-                inquiries = (data.inquiries && data.inquiries.recent) || data.recentInquiries || [];
                 renderDashboard(data);
             }).catch(function (err) {
                 showToast('加载控制台失败：' + err.message, 'error');
@@ -1220,88 +1219,28 @@
         }
 
         function renderDashboardLoading() {
-            setHtml('dashboard-status-strip', '<div class="dashboard-loading-line">正在加载控制台数据...</div>');
             setHtml('dashboard-kpis', '<div class="dashboard-loading-line">正在加载核心指标...</div>');
             setHtml('dashboard-todos', [0, 1, 2].map(function () {
                 return '<button class="pending-card pending-card-loading" type="button" disabled><span>加载中...</span></button>';
             }).join(''));
             setHtml('dashboard-category-health', '<div class="dashboard-loading-line">正在加载分类结构...</div>');
-            setHtml('dashboard-content-health', '<div class="dashboard-loading-line">正在加载内容状态...</div>');
-            setHtml('dashboard-system-health', '<div class="dashboard-loading-line">正在加载系统状态...</div>');
-            setHtml('dashboard-recent-activity', '<div class="dashboard-loading-line">正在加载最近动态...</div>');
-            setHtml('recent-inquiries-list', '<p class="recent-inquiries-empty">加载中...</p>');
         }
 
         function renderDashboardError(err) {
             var message = err && err.message ? err.message : '控制台数据暂时不可用';
             var errorHtml = '<div class="dashboard-empty-state"><strong>加载失败</strong><span>' + escapeHtml(message) + '</span></div>';
-            setHtml('dashboard-status-strip', errorHtml);
             setHtml('dashboard-kpis', '');
             setHtml('dashboard-todos', errorHtml);
             setHtml('dashboard-category-health', errorHtml);
-            setHtml('dashboard-content-health', errorHtml);
-            setHtml('dashboard-system-health', errorHtml);
-            setHtml('dashboard-recent-activity', errorHtml);
-            setHtml('recent-inquiries-list', '<p class="recent-inquiries-empty">暂无询盘记录</p>');
         }
 
         function renderDashboard(data) {
             data = data || {};
             dashboardDataCache = data;
-            renderDashboardSummary(data);
             renderDashboardKpis(data);
             renderDashboardTodos(data);
             renderDashboardCategoryHealth(data);
-            renderDashboardContentHealth(data);
-            renderDashboardSystemHealth(data);
-            renderDashboardRecentActivity(data);
-            renderRecentInquiries();
             syncDashboardEntryVisibility();
-        }
-
-        function renderDashboardSummary(data) {
-            var summary = data.summary || {};
-            var inquiriesStats = data.inquiries || {};
-            var contentStats = data.contentBlocks || {};
-            var assetsStats = data.assets || {};
-            var system = data.system || {};
-            var latestContent = firstItem(contentStats.recent) || data.recentContent;
-            var status = system.sqliteAvailable === false ? '数据库异常' : '数据库正常';
-            var contentLabel = latestContent && latestContent.updated_at ? shortDate(latestContent.updated_at) : '暂无更新';
-            var refreshLabel = summary.lastUpdatedAt ? shortTime(summary.lastUpdatedAt) : shortTime(Date.now());
-
-            var visualTarget = contentSlugToVisualTarget(latestContent && latestContent.slug);
-            var items = [
-                {
-                    key: 'inquiries',
-                    html: '<button class="dashboard-status-item is-clickable" type="button" data-dashboard-action="view-unread-inquiries">' +
-                        '<span>今日待办</span><strong>' + escapeHtml(asNumber(summary.todoTotal)) + '</strong><em>' + escapeHtml(asNumber(inquiriesStats.unread)) + ' 条未读询盘</em>' +
-                    '</button>'
-                },
-                {
-                    key: 'visual',
-                    html: '<button class="dashboard-status-item is-clickable" type="button" data-dashboard-action="open-visual" data-visual-page="' + escapeHtml(visualTarget.page) + '" data-visual-module="' + escapeHtml(visualTarget.module) + '">' +
-                        '<span>最近内容</span><strong>' + escapeHtml(contentLabel) + '</strong><em>共 ' + escapeHtml(asNumber(contentStats.total)) + ' 个内容块</em>' +
-                    '</button>'
-                },
-                {
-                    key: 'assets',
-                    html: '<button class="dashboard-status-item is-clickable" type="button" data-dashboard-action="view-assets">' +
-                        '<span>资源库</span><strong>' + escapeHtml(asNumber(assetsStats.total)) + '</strong><em>图片 ' + escapeHtml(asNumber(assetsStats.images)) + '，文件 ' + escapeHtml(asNumber(assetsStats.files)) + '</em>' +
-                    '</button>'
-                },
-                {
-                    key: 'settings',
-                    html: '<button class="dashboard-status-item is-clickable" type="button" data-dashboard-action="view-system-status">' +
-                        '<span>系统状态</span><strong>' + escapeHtml(status) + '</strong><em>Schema ' + escapeHtml(system.schemaVersion || '-') + '，刷新 ' + escapeHtml(refreshLabel) + '</em>' +
-                    '</button>'
-                }
-            ];
-            setHtml('dashboard-status-strip', items.filter(function (item) {
-                return isMenuVisible(item.key);
-            }).map(function (item) {
-                return item.html;
-            }).join(''));
         }
 
         function renderDashboardKpis(data) {
@@ -1385,17 +1324,6 @@
             }).join(''));
         }
 
-        function contentSlugToVisualTarget(slug) {
-            var map = {
-                home: { page: 'home', module: 'hero' },
-                'about-us': { page: 'about', module: 'hero' },
-                'product-pages': { page: 'products', module: 'hero' },
-                contact: { page: 'contact', module: 'hero' },
-                'global-shell': { page: 'global', module: 'navigation' }
-            };
-            return map[slug] || { page: 'home', module: 'hero' };
-        }
-
         function renderDashboardTodos(data) {
             var container = document.getElementById('dashboard-todos');
             if (!container) return;
@@ -1449,155 +1377,6 @@
                     '</button>';
                 }).join('')
             );
-        }
-
-        function renderDashboardContentHealth(data) {
-            if (!isMenuVisible('visual')) {
-                setHtml('dashboard-content-health', '<div class="dashboard-empty-state"><strong>可视化管理入口已隐藏</strong><span>可在菜单显示设置中重新显示内容编辑入口。</span></div>');
-                return;
-            }
-            var contentStats = data.contentBlocks || {};
-            var recent = Array.isArray(contentStats.recent) ? contentStats.recent.slice(0, 5) : [];
-            if (!recent.length) {
-                setHtml('dashboard-content-health', '<div class="dashboard-empty-state"><strong>暂无内容更新</strong><span>进入可视化管理维护页面内容。</span></div>');
-                return;
-            }
-            setHtml('dashboard-content-health',
-                '<div class="dashboard-health-summary">' +
-                    '<span>已发布 <strong>' + escapeHtml(asNumber(contentStats.published)) + '</strong></span>' +
-                    '<span>草稿 <strong>' + escapeHtml(asNumber(contentStats.draft)) + '</strong></span>' +
-                '</div>' +
-                recent.map(function (item) {
-                    var target = contentSlugToVisualTarget(item.slug);
-                    return '<button class="dashboard-list-row" type="button" data-dashboard-action="open-visual" data-visual-page="' + escapeHtml(target.page) + '" data-visual-module="' + escapeHtml(target.module) + '">' +
-                        '<span><strong>' + escapeHtml(contentBlockTitle(item)) + '</strong><em>' + escapeHtml(item.slug || '') + '</em></span>' +
-                        '<span class="dashboard-status-badge ' + (item.status === 'draft' ? 'warning' : 'ok') + '">' + escapeHtml(item.status === 'draft' ? '草稿' : '已发布') + '</span>' +
-                        '<time>' + escapeHtml(shortDate(item.updated_at)) + '</time>' +
-                    '</button>';
-                }).join('')
-            );
-        }
-
-        function renderDashboardSystemHealth(data) {
-            var system = data.system || {};
-            var assetStats = data.assets || {};
-            var summary = data.summary || {};
-            setHtml('dashboard-system-health',
-                '<div class="dashboard-system-grid">' +
-                    '<div><span>数据库</span><strong>' + escapeHtml(system.sqliteAvailable === false ? '异常' : '正常') + '</strong></div>' +
-                    '<div><span>Schema</span><strong>' + escapeHtml(system.schemaVersion || '-') + '</strong></div>' +
-                    '<div><span>资源</span><strong>' + escapeHtml(asNumber(assetStats.total)) + '</strong></div>' +
-                    '<div><span>刷新</span><strong>' + escapeHtml(summary.lastUpdatedAt ? shortTime(summary.lastUpdatedAt) : '-') + '</strong></div>' +
-                '</div>' +
-                '<div class="dashboard-system-note">公开 API 数据源：' + escapeHtml(system.publicApiSource || 'sqlite') + '</div>'
-            );
-        }
-
-        function renderDashboardRecentActivity(data) {
-            var items = [];
-            (data.contentBlocks && Array.isArray(data.contentBlocks.recent) ? data.contentBlocks.recent : []).slice(0, 3).forEach(function (item) {
-                var target = contentSlugToVisualTarget(item.slug);
-                items.push({
-                    type: '内容',
-                    title: contentBlockTitle(item),
-                    meta: item.status === 'draft' ? '草稿内容' : '内容已发布',
-                    time: item.updated_at,
-                    action: 'open-visual',
-                    page: target.page,
-                    module: target.module
-                });
-            });
-            (data.assets && Array.isArray(data.assets.recent) ? data.assets.recent : []).slice(0, 3).forEach(function (item) {
-                items.push({
-                    type: '资源',
-                    title: item.original_name || item.filename || item.path || '未命名资源',
-                    meta: item.mime_type || '文件资源',
-                    time: item.created_at,
-                    action: 'view-assets'
-                });
-            });
-            (data.products && Array.isArray(data.products.recent) ? data.products.recent : []).slice(0, 3).forEach(function (item) {
-                items.push({
-                    type: '产品',
-                    title: item.name_en || item.name_ar || '未命名产品',
-                    meta: item.featured ? '首页推荐' : (item.status || '产品更新'),
-                    time: item.updated_at,
-                    action: 'view-products'
-                });
-            });
-            (Array.isArray(data.recentActivity) ? data.recentActivity : []).slice(0, 3).forEach(function (item) {
-                items.push({
-                    type: activityEntityLabel(item.entity_type),
-                    title: activityActionLabel(item.action),
-                    meta: '操作者：' + (item.performed_by || 'admin'),
-                    time: item.created_at,
-                    action: ''
-                });
-            });
-            items = items.filter(function (item) {
-                return isDashboardActionVisible(item.action, item.targetView || '');
-            });
-            items.sort(function (a, b) { return asNumber(b.time) - asNumber(a.time); });
-            items = items.slice(0, 8);
-            if (!items.length) {
-                setHtml('dashboard-recent-activity', '<div class="dashboard-empty-state"><strong>暂无最近动态</strong><span>完成内容、产品或资源操作后会显示在这里。</span></div>');
-                return;
-            }
-            setHtml('dashboard-recent-activity', items.map(function (item) {
-                var attrs = item.action ? ' type="button" data-dashboard-action="' + escapeHtml(item.action) + '"' : ' type="button" disabled';
-                if (item.page) attrs += ' data-visual-page="' + escapeHtml(item.page) + '"';
-                if (item.module) attrs += ' data-visual-module="' + escapeHtml(item.module) + '"';
-                return '<button class="dashboard-activity-item" ' + attrs + '>' +
-                    '<span class="dashboard-activity-type">' + escapeHtml(item.type) + '</span>' +
-                    '<span class="dashboard-activity-main"><strong>' + escapeHtml(item.title) + '</strong><em>' + escapeHtml(item.meta || '') + '</em></span>' +
-                    '<time>' + escapeHtml(shortDate(item.time)) + '</time>' +
-                '</button>';
-            }).join(''));
-        }
-
-        function renderRecentInquiries() {
-            var container = document.getElementById('recent-inquiries-list');
-            if (!container) return;
-            if (!isMenuVisible('inquiries')) {
-                container.innerHTML = '<p class="recent-inquiries-empty">询盘入口已隐藏，可在菜单显示设置中恢复。</p>';
-                return;
-            }
-
-            var sorted = inquiries.slice().sort(function (a, b) {
-                return new Date(b.created_at || b.createdAt || 0) - new Date(a.created_at || a.createdAt || 0);
-            }).slice(0, 6);
-
-            if (!sorted.length) {
-                container.innerHTML = '<p class="recent-inquiries-empty">暂无询盘记录</p>';
-                return;
-            }
-
-            container.innerHTML = sorted.map(function (item) {
-                var isNew = item.status === 'new';
-                var name = escapeHtml(item.name || '—');
-                var subject = escapeHtml(item.subject || item.product || '（无主题）');
-                var createdAt = item.created_at || item.createdAt;
-                var date = createdAt ? new Date(createdAt).toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' }) : '';
-                var status = escapeHtml(STATUS_LABELS[item.status] || item.status || '');
-                return '<div class="recent-inquiry-item" data-id="' + escapeHtml(item.id) + '" role="button" tabindex="0" aria-label="查看询盘：' + name + '">' +
-                    '<div class="recent-inquiry-dot' + (isNew ? ' new' : '') + '"></div>' +
-                    '<div class="recent-inquiry-info">' +
-                        '<div class="recent-inquiry-name">' + name + '</div>' +
-                        '<div class="recent-inquiry-subject">' + subject + (status ? ' · ' + status : '') + '</div>' +
-                    '</div>' +
-                    '<div class="recent-inquiry-time">' + date + '</div>' +
-                    '</div>';
-            }).join('');
-
-            container.querySelectorAll('.recent-inquiry-item').forEach(function (el) {
-                el.addEventListener('click', function () {
-                    var id = el.getAttribute('data-id');
-                    if (id) openInquiryModal(id);
-                });
-                el.addEventListener('keydown', function (e) {
-                    if (e.key === 'Enter' || e.key === ' ') el.click();
-                });
-            });
         }
 
         function bindDashboardActions() {
@@ -1722,51 +1501,6 @@
             var date = new Date(value);
             if (isNaN(date.getTime())) return '—';
             return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false });
-        }
-
-        function contentBlockTitle(item) {
-            if (!item) return '内容块';
-            var labels = {
-                home: '首页',
-                'about-us': '关于我们',
-                'product-pages': '产品中心',
-                contact: '联系我们',
-                'global-shell': '全站公共',
-                solutions: '解决方案',
-                innovation: '科技创新',
-                applications: '应用行业',
-                education: '教育合作',
-                'page-blocks': '页面区块'
-            };
-            return labels[item.slug] || item.title_en || item.title_ar || item.slug || '内容块';
-        }
-
-        function activityEntityLabel(value) {
-            var map = {
-                product: '产品',
-                category: '分类',
-                inquiry: '询盘',
-                certification: '证书',
-                content_block: '内容',
-                asset: '资源',
-                settings: '系统'
-            };
-            return map[value] || '操作';
-        }
-
-        function activityActionLabel(value) {
-            var map = {
-                create: '新增',
-                update: '更新',
-                soft_delete: '移入回收站',
-                hard_delete: '永久删除',
-                publish: '发布',
-                unpublish: '取消发布',
-                draft: '设为草稿',
-                close: '关闭',
-                mark_read: '标记已读'
-            };
-            return map[value] || value || '更新';
         }
 
         function dashboardIcon(name) {
