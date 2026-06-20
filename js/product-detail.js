@@ -162,6 +162,46 @@
         return '';
     }
 
+    function compactSpecValues(values) {
+        var seen = {};
+        var result = [];
+        (values || []).forEach(function (value) {
+            var textValue = String(value || '').trim();
+            var key = textValue.toLowerCase();
+            if (!textValue || seen[key]) return;
+            seen[key] = true;
+            result.push(textValue);
+        });
+        return result;
+    }
+
+    function displaySpecRows(product) {
+        var specs = Array.isArray(product.specs) ? product.specs : [];
+        var capacityValues = [];
+        var rows = [];
+
+        if (Array.isArray(product.capacities)) {
+            capacityValues = capacityValues.concat(product.capacities);
+        }
+
+        specs.forEach(function (spec) {
+            if (!Array.isArray(spec)) return;
+            var label = String(spec[0] || '').trim();
+            var value = spec[1];
+            if (/^capacity$/i.test(label)) {
+                capacityValues.push(value);
+                return;
+            }
+            rows.push([label, value]);
+        });
+
+        capacityValues = compactSpecValues(capacityValues);
+        if (capacityValues.length) {
+            rows.unshift(['Capacity', capacityValues.join('/')]);
+        }
+        return rows;
+    }
+
     function productContextValue(product, name) {
         return name ? name + (product.id ? ' (' + product.id + ')' : '') : (product.id || '');
     }
@@ -498,8 +538,9 @@
             url: canonicalUrl,
             category: product.categoryLabel || product.category
         };
-        if (Array.isArray(product.specs) && product.specs.length) {
-            schema.additionalProperty = product.specs.slice(0, 12).map(function (spec) {
+        var schemaSpecs = displaySpecRows(product);
+        if (schemaSpecs.length) {
+            schema.additionalProperty = schemaSpecs.slice(0, 12).map(function (spec) {
                 return {
                     '@type': 'PropertyValue',
                     name: translatedSpecLabel(spec[0]),
@@ -577,7 +618,7 @@
         var specsBody = document.getElementById('specs-body');
         if (specsBody) {
             specsBody.innerHTML = '';
-            (product.specs || []).forEach(function (spec) {
+            displaySpecRows(product).forEach(function (spec) {
                 var row = document.createElement('tr');
                 row.innerHTML = '<td' + specLabelAttrs() + '>' + escapeHtml(translatedSpecLabel(spec[0])) + '</td><td' + specValueAttrs() + '>' + escapeHtml(spec[1]) + '</td>';
                 specsBody.appendChild(row);
