@@ -11196,3 +11196,47 @@ main[data-content-page] .section-header h2,
         padding-bottom: 42px;
     }
 }
+
+/* 产品详情样板内容：提升分段、列表和 RTL 间距可读性。 */
+.product-detail-desc {
+    display: grid;
+    gap: 12px;
+    max-width: 860px;
+    color: var(--color-gray-600);
+    line-height: 1.78;
+}
+
+.product-detail-desc p {
+    margin: 0;
+}
+
+.product-desc-heading {
+    display: block;
+    margin-top: 4px;
+    color: var(--color-navy);
+    font-weight: 900;
+    line-height: 1.32;
+}
+
+.product-desc-list {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    padding-left: 1.15rem;
+    color: var(--color-gray-600);
+}
+
+.product-desc-list li {
+    list-style: disc;
+    padding-left: 0.15rem;
+}
+
+[dir="rtl"] .product-desc-list {
+    padding-right: 1.15rem;
+    padding-left: 0;
+}
+
+[dir="rtl"] .product-desc-list li {
+    padding-right: 0.15rem;
+    padding-left: 0;
+}

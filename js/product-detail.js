@@ -413,6 +413,45 @@
         }
     }
 
+    function renderDescription(id, value) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        var lines = String(value || '').split(/\r?\n/).map(function (line) {
+            return line.trim();
+        });
+        var html = [];
+        var list = [];
+
+        function flushList() {
+            if (!list.length) return;
+            html.push('<ul class="product-desc-list">' + list.map(function (item) {
+                return '<li>' + escapeHtml(item) + '</li>';
+            }).join('') + '</ul>');
+            list = [];
+        }
+
+        lines.forEach(function (line) {
+            if (!line) {
+                flushList();
+                return;
+            }
+            if (/^[-*]\s+/.test(line)) {
+                list.push(line.replace(/^[-*]\s+/, ''));
+                return;
+            }
+            flushList();
+            if (/^[^:：]{2,80}[:：]$/.test(line)) {
+                html.push('<strong class="product-desc-heading">' + escapeHtml(line.replace(/[:：]$/, '')) + '</strong>');
+            } else {
+                html.push('<p>' + escapeHtml(line) + '</p>');
+            }
+        });
+        flushList();
+
+        el.innerHTML = html.join('');
+        applyArabicTextDirection(el, 'rtl');
+    }
+
     function applyArabicTextDirection(el, direction) {
         if (!el || !isArabic) return;
         el.setAttribute('dir', direction || 'rtl');
@@ -530,7 +569,7 @@
         }
 
         setText('product-title', name);
-        setText('product-desc', desc);
+        renderDescription('product-desc', desc);
         renderDecisionSummary(product, name, categoryLabel);
         renderApplications(product);
         renderSelection(product);
