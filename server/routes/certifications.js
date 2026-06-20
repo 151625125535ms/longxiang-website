@@ -68,6 +68,45 @@ function registerAsset(file, publicPath) {
     });
 }
 
+function containsCjk(value) {
+    return /[\u3400-\u9fff]/.test(String(value || ''));
+}
+
+function legacyNumber(certification) {
+    const match = String(certification.legacy_id || '').match(/(\d+)$/);
+    return match ? match[1] : String(certification.id || '').padStart(3, '0');
+}
+
+const qualificationNames = {
+    'qualifications-001': 'AAA Credit Rating Certificate',
+    'qualifications-002': 'Work Safety Permit',
+    'qualifications-003': 'Power Facility Installation, Maintenance and Testing Permit',
+    'qualifications-004': 'Engineering Design Qualification Certificate',
+    'qualifications-005': 'Environmental Management System Certificate',
+    'qualifications-006': 'Construction Enterprise Qualification Certificate',
+    'qualifications-007': 'Energy Management System Certificate',
+    'qualifications-008': 'Occupational Health and Safety Management System Certificate',
+    'qualifications-009': 'Quality Management System Certificate'
+};
+
+function publicCertificationName(certification, lang) {
+    const sourceName = lang === 'ar' ? certification.name_ar : certification.name_en;
+    if (sourceName && !containsCjk(sourceName)) return sourceName;
+
+    const id = String(certification.legacy_id || '');
+    const number = legacyNumber(certification);
+    if (lang === 'ar') {
+        if (id.indexOf('test-reports-extra') === 0) return '\u062a\u0642\u0631\u064a\u0631 \u0627\u062e\u062a\u0628\u0627\u0631 \u0645\u062d\u0648\u0644 \u0631\u0642\u0645 ' + number;
+        if (id.indexOf('patents') === 0) return '\u0634\u0647\u0627\u062f\u0629 \u0628\u0631\u0627\u0621\u0629 \u0627\u062e\u062a\u0631\u0627\u0639 \u0631\u0642\u0645 ' + number;
+        if (id.indexOf('qualifications') === 0) return '\u0634\u0647\u0627\u062f\u0629 \u062a\u0623\u0647\u064a\u0644 \u0631\u0642\u0645 ' + number;
+        return '\u0634\u0647\u0627\u062f\u0629 \u0644\u0648\u0646\u063a\u0634\u064a\u0627\u0646\u063a \u0631\u0642\u0645 ' + number;
+    }
+    if (qualificationNames[id]) return qualificationNames[id];
+    if (id.indexOf('test-reports-extra') === 0) return 'Transformer Test Report ' + number;
+    if (id.indexOf('patents') === 0) return 'Patent Certificate ' + number;
+    return 'Longxiang Certificate ' + number;
+}
+
 router.get('/', function (req, res) {
     try {
         const certifications = getDb().prepare(`
@@ -77,8 +116,8 @@ router.get('/', function (req, res) {
         `).all().map(function (certification) {
             return {
                 id: certification.legacy_id,
-                name: certification.name_en || '',
-                nameAr: certification.name_ar || '',
+                name: publicCertificationName(certification, 'en'),
+                nameAr: publicCertificationName(certification, 'ar'),
                 category: certification.legacy_category || '',
                 image: certification.image_path || '',
                 type: certification.source_type || '',

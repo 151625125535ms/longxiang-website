@@ -11177,3 +11177,22 @@ main[data-content-page] .section-header h2,
         padding: 0;
     }
 }
+
+/* Products listing hero: reduce first-screen height so the catalog appears sooner. */
+.products-page-hero {
+    min-height: clamp(360px, 44vh, 440px);
+    padding-top: calc(var(--navbar-height) + 54px);
+    padding-bottom: 54px;
+}
+
+.products-page-hero .container {
+    max-width: 1180px;
+}
+
+@media (max-width: 640px) {
+    .products-page-hero {
+        min-height: clamp(340px, 48vh, 400px);
+        padding-top: calc(var(--navbar-height) + 42px);
+        padding-bottom: 42px;
+    }
+}

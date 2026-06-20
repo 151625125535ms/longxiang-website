@@ -168,17 +168,80 @@ app.get('/sitemap.xml', function (req, res, next) {
     }
 });
 
-function sendProductDetailShell(req, res, next) {
-    const isArabicProduct = req.path.indexOf('/ar/') === 0;
-    const filePath = path.join(__dirname, '..', isArabicProduct ? 'ar/product-detail.html' : 'product-detail.html');
+function parseJsonArray(value) {
+    try {
+        const parsed = JSON.parse(value || '[]');
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (err) {
+        return [];
+    }
+}
+
+function activeProductExists(identifier) {
+    const db = getDb();
+    const direct = db.prepare(`
+        SELECT p.id
+        FROM products p
+        LEFT JOIN categories c ON c.id = p.category_id
+        LEFT JOIN categories parent ON parent.id = c.parent_id
+        WHERE p.status = 'published'
+            AND p.category_id IS NOT NULL
+            AND c.id IS NOT NULL
+            AND c.is_active = 1
+            AND (c.parent_id IS NULL OR parent.is_active = 1)
+            AND (p.slug = ? OR p.legacy_id = ?)
+        LIMIT 1
+    `).get(identifier, identifier);
+    if (direct) return true;
+
+    const rows = db.prepare(`
+        SELECT p.aliases_json
+        FROM products p
+        LEFT JOIN categories c ON c.id = p.category_id
+        LEFT JOIN categories parent ON parent.id = c.parent_id
+        WHERE p.status = 'published'
+            AND p.category_id IS NOT NULL
+            AND c.id IS NOT NULL
+            AND c.is_active = 1
+            AND (c.parent_id IS NULL OR parent.is_active = 1)
+            AND p.aliases_json IS NOT NULL
+            AND p.aliases_json != ''
+    `).all();
+
+    return rows.some(function (row) {
+        return parseJsonArray(row.aliases_json).indexOf(identifier) !== -1;
+    });
+}
+
+function sendHtmlShell(res, next, filePath, baseHref, statusCode) {
     fs.readFile(filePath, 'utf8', function (err, html) {
         if (err) return next(err);
-        const baseHref = isArabicProduct ? '/ar/' : '/';
         const withBase = html.replace(/<head>/i, '<head>\n    <base href="' + baseHref + '">');
+        res.status(statusCode || 200);
         res.type('html');
         res.setHeader('Cache-Control', 'public, max-age=300');
         res.send(withBase);
     });
+}
+
+function sendNotFoundShell(req, res, next) {
+    const isArabic = req.path.indexOf('/ar/') === 0 || req.path === '/ar';
+    const filePath = path.join(__dirname, '..', isArabic ? 'ar/404.html' : '404.html');
+    sendHtmlShell(res, next, filePath, isArabic ? '/ar/' : '/', 404);
+}
+
+function sendProductDetailShell(req, res, next) {
+    const isArabicProduct = req.path.indexOf('/ar/') === 0;
+    const filePath = path.join(__dirname, '..', isArabicProduct ? 'ar/product-detail.html' : 'product-detail.html');
+    const identifier = String(req.params.slug || '').trim();
+    try {
+        if (!identifier || !activeProductExists(identifier)) {
+            return sendNotFoundShell(req, res, next);
+        }
+    } catch (err) {
+        return next(err);
+    }
+    sendHtmlShell(res, next, filePath, isArabicProduct ? '/ar/' : '/', 200);
 }
 
 app.get(['/products/:slug', '/ar/products/:slug'], sendProductDetailShell);
@@ -235,8 +298,8 @@ app.use('/api', function (req, res) {
     res.status(404).json({ error: 'API endpoint not found.' });
 });
 
-app.use(function (req, res) {
-    res.status(404).sendFile(path.join(__dirname, '..', '404.html'));
+app.use(function (req, res, next) {
+    sendNotFoundShell(req, res, next);
 });
 
 app.listen(PORT, HOST, function () {

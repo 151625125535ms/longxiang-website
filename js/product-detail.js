@@ -229,9 +229,19 @@
         return titleSuffix ? name + ' | ' + titleSuffix : name;
     }
 
+    function cleanMetaDescription(value) {
+        var textValue = String(value || '').replace(/\s+/g, ' ').trim();
+        if (textValue.length <= 165) return textValue;
+        var clipped = textValue.slice(0, 162).replace(/[\s,;:.-]+[^\s,;:.-]*$/, '');
+        return (clipped || textValue.slice(0, 162)).trim() + '...';
+    }
+
     function productSeoDescription(product, desc) {
-        if (!isArabic && product.seoDescription) return product.seoDescription;
-        return desc || localize(product, 'shortDesc');
+        var value = '';
+        if (!isArabic && product.seoDescription) value = product.seoDescription;
+        else if (isArabic) value = localize(product, 'shortDesc') || desc;
+        else value = desc || localize(product, 'shortDesc');
+        return cleanMetaDescription(value);
     }
 
     function injectProductSeo(product, name, desc) {
