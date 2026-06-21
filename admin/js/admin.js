@@ -595,58 +595,66 @@
                         { key: 'title', label: '页面标题', type: 'text' },
                         { key: 'subtitle', label: '页面说明', type: 'textarea' },
                         { key: 'backgroundImage', label: '背景图片', type: 'asset', localized: false }
-                    ] },
-                    { key: 'heroActions', label: '头图按钮', path: 'hero.actions', previewSelector: '.solutions-hero-actions, .solutions-hero', array: true, itemLabel: '按钮', fields: [
-                        { key: 'label', label: '按钮文字', type: 'text' },
-                        { key: 'href', label: '按钮链接/锚点', type: 'url' },
-                        { key: 'productName', label: '询盘产品名', type: 'text' },
-                        { key: 'className', label: '按钮样式', type: 'text', localized: false }
-                    ] },
-                    { key: 'anchors', label: '锚点导航', path: 'anchors', previewSelector: '.solutions-anchor-bar', array: true, itemLabel: '导航项', fields: [
-                        { key: 'label', label: '显示名称', type: 'text' },
-                        { key: 'href', label: '跳转锚点', type: 'text', localized: false }
+                    ], children: [
+                        { key: 'heroActions', label: '头图按钮', path: 'hero.actions', previewSelector: '.solutions-hero-actions, .solutions-hero', array: true, itemLabel: '按钮', fields: [
+                            { key: 'label', label: '按钮文字', type: 'text' },
+                            { key: 'href', label: '按钮链接/锚点', type: 'url' },
+                            { key: 'productName', label: '询盘产品名', type: 'text' },
+                            { key: 'className', label: '按钮样式', type: 'text', localized: false }
+                        ] },
+                        { key: 'anchors', label: '锚点导航', path: 'anchors', previewSelector: '.solutions-anchor-bar', array: true, itemLabel: '导航项', fields: [
+                            { key: 'label', label: '显示名称', type: 'text' },
+                            { key: 'href', label: '跳转锚点', type: 'text', localized: false }
+                        ] }
                     ] },
                     { key: 'overview', label: '方案总览', path: 'overview', previewSelector: '.solutions-overview', fields: [
                         { key: 'title', label: '模块标题', type: 'text' },
                         { key: 'text', label: '模块说明', type: 'textarea' }
-                    ] },
-                    { key: 'overviewCards', label: '总览卡片', path: 'overview.cards', previewSelector: '.solutions-overview-grid', array: true, itemLabel: '总览卡片', fields: [
-                        { key: 'number', label: '序号', type: 'text', localized: false },
-                        { key: 'title', label: '卡片标题', type: 'text' },
-                        { key: 'text', label: '卡片说明', type: 'textarea' },
-                        { key: 'items', label: '卡片要点（每行一项）', type: 'list' }
+                    ], children: [
+                        { key: 'overviewCards', label: '总览卡片', path: 'overview.cards', previewSelector: '.solutions-overview-grid', array: true, itemLabel: '总览卡片', fields: [
+                            { key: 'number', label: '序号', type: 'text', localized: false },
+                            { key: 'title', label: '卡片标题', type: 'text' },
+                            { key: 'text', label: '卡片说明', type: 'textarea' },
+                            { key: 'items', label: '卡片要点（每行一项）', type: 'list' }
+                        ] }
                     ] },
                     { key: 'marketFit', label: '市场适配', path: 'marketFit', previewSelector: '.market-fit-section', fields: [
                         { key: 'title', label: '模块标题', type: 'text' },
                         { key: 'text', label: '模块说明', type: 'textarea' }
+                    ], children: [
+                        { key: 'marketItems', label: '市场条目', path: 'marketFit.items', previewSelector: '.market-fit-section .export-support-grid', array: true, itemLabel: '市场条目', fields: [
+                            { key: 'title', label: '条目标题', type: 'text' },
+                            { key: 'text', label: '条目说明', type: 'textarea' }
+                        ] }
                     ] },
-                    { key: 'marketItems', label: '市场条目', path: 'marketFit.items', previewSelector: '.market-fit-section .export-support-grid', array: true, itemLabel: '市场条目', fields: [
-                        { key: 'title', label: '条目标题', type: 'text' },
-                        { key: 'text', label: '条目说明', type: 'textarea' }
+                    { key: 'engineeringEpc', label: 'EPC 工程总承包', path: 'sections.0', sectionId: 'engineering-epc', previewSelector: '#engineering-epc', fields: visualSolutionFeatureFields(3), children: [
+                        { key: 'epcCases', label: 'EPC 案例卡片', path: 'sections.1.cards', sectionTitle: 'Representative General Contracting References', sectionPath: 'cards', previewSelector: '#engineering-epc + .section, .solution-system-map', array: true, itemLabel: '案例卡片', fields: visualSolutionCardFields() }
                     ] },
-                    { key: 'engineeringEpc', label: 'EPC 工程总承包', path: 'sections.0', sectionId: 'engineering-epc', previewSelector: '#engineering-epc', fields: visualSolutionFeatureFields(3) },
-                    { key: 'epcCases', label: 'EPC 案例卡片', path: 'sections.1.cards', sectionTitle: 'Representative General Contracting References', sectionPath: 'cards', previewSelector: '#engineering-epc + .section, .solution-system-map', array: true, itemLabel: '案例卡片', fields: visualSolutionCardFields() },
-                    { key: 'lineOm', label: '线路运维', path: 'sections.2', sectionId: 'line-om', previewSelector: '#line-om', fields: visualSolutionFeatureFields(2) },
-                    { key: 'lineOmRecords', label: '运维案例卡片', path: 'sections.3.cards', sectionTitle: 'Operation Coverage and Service Records', sectionPath: 'cards', previewSelector: '#line-om + .section, .solution-system-map', array: true, itemLabel: '案例卡片', fields: visualSolutionCardFields() },
+                    { key: 'lineOm', label: '线路运维', path: 'sections.2', sectionId: 'line-om', previewSelector: '#line-om', fields: visualSolutionFeatureFields(2), children: [
+                        { key: 'lineOmRecords', label: '运维案例卡片', path: 'sections.3.cards', sectionTitle: 'Operation Coverage and Service Records', sectionPath: 'cards', previewSelector: '#line-om + .section, .solution-system-map', array: true, itemLabel: '案例卡片', fields: visualSolutionCardFields() }
+                    ] },
                     { key: 'powerDistribution', label: '变配电集成', path: 'sections.4', sectionId: 'power-distribution', previewSelector: '#power-distribution', fields: visualSolutionFeatureFields(3) },
                     { key: 'pvSolution', label: '工商业光伏', path: 'sections.5', sectionId: 'pv-solution', previewSelector: '#pv-solution', fields: visualSolutionFeatureFields(2) },
-                    { key: 'storageCharging', label: '风光储充', path: 'sections.6', sectionId: 'wind-pv-ess-ev', previewSelector: '#wind-pv-ess-ev', fields: visualSolutionFeatureFields(4) },
-                    { key: 'energyTopology', label: '系统拓扑卡片', path: 'sections.7.cards', sectionTitle: 'Energy Flow and System Topology', sectionPath: 'cards', previewSelector: '#wind-pv-ess-ev + .section, .solution-system-map', array: true, itemLabel: '拓扑卡片', fields: visualSolutionCardFields() },
+                    { key: 'storageCharging', label: '风光储充', path: 'sections.6', sectionId: 'wind-pv-ess-ev', previewSelector: '#wind-pv-ess-ev', fields: visualSolutionFeatureFields(4), children: [
+                        { key: 'energyTopology', label: '系统拓扑卡片', path: 'sections.7.cards', sectionTitle: 'Energy Flow and System Topology', sectionPath: 'cards', previewSelector: '#wind-pv-ess-ev + .section, .solution-system-map', array: true, itemLabel: '拓扑卡片', fields: visualSolutionCardFields() }
+                    ] },
                     { key: 'smartMicrogrid', label: '智能微电网', path: 'sections.8', sectionId: 'smart-microgrid', previewSelector: '#smart-microgrid', fields: visualSolutionFeatureFields(3) },
                     { key: 'evChargingStation', label: '充电站建设', path: 'sections.9', sectionId: 'ev-charging-station', previewSelector: '#ev-charging-station', fields: visualSolutionFeatureFields(4) },
                     { key: 'scenarios', label: '应用场景', path: 'scenarios', previewSelector: '.solution-scenarios', fields: [
                         { key: 'title', label: '模块标题', type: 'text' },
                         { key: 'text', label: '模块说明', type: 'textarea' }
+                    ], children: [
+                        { key: 'scenarioCards', label: '场景卡片', path: 'scenarios.cards', previewSelector: '.solution-scenario-grid', array: true, itemLabel: '场景卡片', fields: visualSolutionCardFields() }
                     ] },
-                    { key: 'scenarioCards', label: '场景卡片', path: 'scenarios.cards', previewSelector: '.solution-scenario-grid', array: true, itemLabel: '场景卡片', fields: visualSolutionCardFields() },
                     { key: 'credentials', label: '资质能力', path: 'credentials', previewSelector: '.solution-credibility', fields: [
                         { key: 'title', label: '模块标题', type: 'text' },
                         { key: 'text', label: '模块说明', type: 'textarea' }
-                    ] },
-                    { key: 'credentialItems', label: '资质图片', path: 'credentials.items', previewSelector: '.solution-credential-strip', array: true, itemLabel: '资质图片', fields: [
-                        { key: 'label', label: '资质名称', type: 'text' },
-                        { key: 'image.src', label: '资质图片', type: 'asset', localized: false },
-                        { key: 'image.alt', label: '图片说明', type: 'text' }
+                    ], children: [
+                        { key: 'credentialItems', label: '资质图片', path: 'credentials.items', previewSelector: '.solution-credential-strip', array: true, itemLabel: '资质图片', fields: [
+                            { key: 'label', label: '资质名称', type: 'text' },
+                            { key: 'image.src', label: '资质图片', type: 'asset', localized: false },
+                            { key: 'image.alt', label: '图片说明', type: 'text' }
+                        ] }
                     ] },
                     { key: 'cta', label: '询盘 CTA', path: 'cta', previewSelector: '.solutions-cta', fields: [
                         { key: 'title', label: '标题', type: 'text' },
@@ -4693,8 +4701,19 @@
             return VISUAL_BUILDER_PAGES.filter(function (page) { return page.key === pageKey; })[0] || VISUAL_BUILDER_PAGES[0];
         }
 
+        function visualFindModuleByKey(modules, moduleKey) {
+            for (var i = 0; i < (modules || []).length; i += 1) {
+                var module = modules[i];
+                if (module && module.key === moduleKey) return module;
+                var child = visualFindModuleByKey(module && module.children ? module.children : [], moduleKey);
+                if (child) return child;
+            }
+            return null;
+        }
+
         function visualModuleByKey(page, moduleKey) {
-            return (page.modules || []).filter(function (module) { return module.key === moduleKey; })[0] || (page.modules || [])[0];
+            var modules = page && page.modules ? page.modules : [];
+            return visualFindModuleByKey(modules, moduleKey) || modules[0];
         }
 
         function visualLanguageByKey(languageKey) {
@@ -4906,17 +4925,36 @@
             '</div>';
         }
 
+        function renderVisualModuleFields(page, module, block) {
+            if (module.array) return renderVisualArrayEditor(page, module, block);
+            return '<div class="visual-field-grid">' + (module.fields || []).map(function (field) {
+                var blockBody = block && block.body_json ? block.body_json : {};
+                return renderVisualField(field, visualPath(module, visualLanguageFieldKey(field), blockBody), visualFieldValue(block, module, field));
+            }).join('') + '</div>';
+        }
+
+        function renderVisualSubmodule(page, module, block, isPrimary) {
+            var hasFields = module.array || (module.fields && module.fields.length);
+            if (!hasFields) return '';
+            return '<section class="visual-submodule-section' + (isPrimary ? ' is-primary' : '') + '">' +
+                '<h4>' + escapeHtml(module.label) + '</h4>' +
+                renderVisualModuleFields(page, module, block) +
+            '</section>';
+        }
+
         function renderVisualModuleEditor(page, module, block) {
             if (!block) {
                 return '<div class="visual-empty-panel">正在加载内容块...</div>';
             }
             var header = '<div class="visual-editor-header"><div><span>' + escapeHtml(page.label) + '</span><h3>' + escapeHtml(module.label) + '</h3></div><button type="button" class="btn btn-primary" data-visual-save>保存修改</button></div>';
-            var body = module.array
-                ? renderVisualArrayEditor(page, module, block)
-                : '<div class="visual-field-grid">' + (module.fields || []).map(function (field) {
-                    var blockBody = block && block.body_json ? block.body_json : {};
-                    return renderVisualField(field, visualPath(module, visualLanguageFieldKey(field), blockBody), visualFieldValue(block, module, field));
-                }).join('') + '</div>';
+            var sections = [];
+            sections.push(renderVisualSubmodule(page, module, block, true));
+            (module.children || []).forEach(function (child) {
+                sections.push(renderVisualSubmodule(page, child, block, false));
+            });
+            var body = module.children && module.children.length
+                ? '<div class="visual-composite-editor">' + sections.join('') + '</div>'
+                : renderVisualModuleFields(page, module, block);
             var language = visualActiveLanguage();
             var languageNote = visualIsArabicLanguage() ? '<span>图片、链接、开关为中英阿共用字段</span>' : '';
             var meta = '<div class="visual-editor-meta"><span>数据源：' + escapeHtml(block.slug || page.slug) + '</span><span>编辑语言：' + escapeHtml(language.label) + '</span><span>版本：v' + escapeHtml(block.version || 1) + '</span><span id="visual-save-status">' + (block.updated_at ? '已加载：' + escapeHtml(formatDate(block.updated_at)) : '已加载') + '</span>' + languageNote + '</div>';
@@ -5090,6 +5128,16 @@
             });
         }
 
+        function visualArrayModules(module) {
+            var modules = [];
+            if (!module) return modules;
+            if (module.array) modules.push(module);
+            (module.children || []).forEach(function (child) {
+                modules = modules.concat(visualArrayModules(child));
+            });
+            return modules;
+        }
+
         function collectVisualBody(page, module) {
             var block = visualBuilderState.blocks[page.slug] || {};
             var body = cloneBody(block.body_json || {});
@@ -5104,13 +5152,13 @@
                 }
                 setPathValue(body, path, normalizeStructuredValue(path, value));
             });
-            if (module.array) {
-                var arrayPath = visualModulePath(module, body);
+            visualArrayModules(module).forEach(function (arrayModule) {
+                var arrayPath = visualModulePath(arrayModule, body);
                 var items = getPathValue(body, arrayPath);
                 if (Array.isArray(items)) {
                     items.forEach(function (item, index) { item.sort_order = index; });
                 }
-            }
+            });
             return body;
         }
 

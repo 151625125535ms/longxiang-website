@@ -6705,3 +6705,28 @@ h1, h2, h3, h4, h5, h6 {
         width: 100%;
     }
 }
+
+/* Visual builder composite sections */
+.visual-composite-editor {
+    display: grid;
+    gap: 18px;
+}
+
+.visual-submodule-section {
+    display: grid;
+    gap: 12px;
+    padding-top: 16px;
+    border-top: 1px solid var(--color-gray-200);
+}
+
+.visual-submodule-section:first-child {
+    padding-top: 0;
+    border-top: 0;
+}
+
+.visual-submodule-section h4 {
+    margin: 0;
+    color: var(--color-navy);
+    font-size: 0.96rem;
+    line-height: 1.35;
+}
