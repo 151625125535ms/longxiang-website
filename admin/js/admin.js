@@ -444,6 +444,32 @@
             { key: 'ar', label: '阿拉伯语', shortLabel: '阿', previewLabel: '阿语页面' }
         ];
 
+        function visualSolutionFeatureFields(imageCount) {
+            var fields = [
+                { key: 'indexLabel', label: '方案编号', type: 'text' },
+                { key: 'title', label: '方案标题', type: 'text' },
+                { key: 'text', label: '方案说明', type: 'textarea' },
+                { key: 'bullets', label: '要点列表（每行一项）', type: 'list' },
+                { key: 'button.label', label: '按钮文字', type: 'text' },
+                { key: 'button.href', label: '按钮链接', type: 'url' },
+                { key: 'button.productName', label: '询盘产品名', type: 'text' }
+            ];
+            for (var i = 0; i < imageCount; i += 1) {
+                fields.push({ key: 'images.' + i + '.src', label: '展示图片 ' + (i + 1), type: 'asset', localized: false });
+                fields.push({ key: 'images.' + i + '.alt', label: '图片说明 ' + (i + 1), type: 'text' });
+            }
+            return fields;
+        }
+
+        function visualSolutionCardFields() {
+            return [
+                { key: 'title', label: '卡片标题', type: 'text' },
+                { key: 'text', label: '卡片说明', type: 'textarea' },
+                { key: 'image.src', label: '卡片图片', type: 'asset', localized: false },
+                { key: 'image.alt', label: '图片说明', type: 'text' }
+            ];
+        }
+
         var VISUAL_BUILDER_PAGES = [
             {
                 key: 'home',
@@ -556,6 +582,85 @@
                         { key: 'inquiryForm.title', label: '询盘表单标题', type: 'text' },
                         { key: 'inquiryForm.note', label: '询盘表单说明', type: 'textarea' },
                         { key: 'inquiryForm.submitLabel', label: '提交按钮文字', type: 'text' }
+                    ] }
+                ]
+            },
+            {
+                key: 'solutions',
+                label: '解决方案',
+                slug: 'solutions',
+                previewUrl: '../solutions.html',
+                modules: [
+                    { key: 'hero', label: '页面头图', path: 'hero', previewSelector: '.solutions-hero, .page-hero', fields: [
+                        { key: 'title', label: '页面标题', type: 'text' },
+                        { key: 'subtitle', label: '页面说明', type: 'textarea' },
+                        { key: 'backgroundImage', label: '背景图片', type: 'asset', localized: false }
+                    ] },
+                    { key: 'heroActions', label: '头图按钮', path: 'hero.actions', previewSelector: '.solutions-hero-actions, .solutions-hero', array: true, itemLabel: '按钮', fields: [
+                        { key: 'label', label: '按钮文字', type: 'text' },
+                        { key: 'href', label: '按钮链接/锚点', type: 'url' },
+                        { key: 'productName', label: '询盘产品名', type: 'text' },
+                        { key: 'className', label: '按钮样式', type: 'text', localized: false }
+                    ] },
+                    { key: 'anchors', label: '锚点导航', path: 'anchors', previewSelector: '.solutions-anchor-bar', array: true, itemLabel: '导航项', fields: [
+                        { key: 'label', label: '显示名称', type: 'text' },
+                        { key: 'href', label: '跳转锚点', type: 'text', localized: false }
+                    ] },
+                    { key: 'overview', label: '方案总览', path: 'overview', previewSelector: '.solutions-overview', fields: [
+                        { key: 'title', label: '模块标题', type: 'text' },
+                        { key: 'text', label: '模块说明', type: 'textarea' }
+                    ] },
+                    { key: 'overviewCards', label: '总览卡片', path: 'overview.cards', previewSelector: '.solutions-overview-grid', array: true, itemLabel: '总览卡片', fields: [
+                        { key: 'number', label: '序号', type: 'text', localized: false },
+                        { key: 'title', label: '卡片标题', type: 'text' },
+                        { key: 'text', label: '卡片说明', type: 'textarea' },
+                        { key: 'items', label: '卡片要点（每行一项）', type: 'list' }
+                    ] },
+                    { key: 'marketFit', label: '市场适配', path: 'marketFit', previewSelector: '.market-fit-section', fields: [
+                        { key: 'title', label: '模块标题', type: 'text' },
+                        { key: 'text', label: '模块说明', type: 'textarea' }
+                    ] },
+                    { key: 'marketItems', label: '市场条目', path: 'marketFit.items', previewSelector: '.market-fit-section .export-support-grid', array: true, itemLabel: '市场条目', fields: [
+                        { key: 'title', label: '条目标题', type: 'text' },
+                        { key: 'text', label: '条目说明', type: 'textarea' }
+                    ] },
+                    { key: 'engineeringEpc', label: 'EPC 工程总承包', path: 'sections.0', sectionId: 'engineering-epc', previewSelector: '#engineering-epc', fields: visualSolutionFeatureFields(3) },
+                    { key: 'epcCases', label: 'EPC 案例卡片', path: 'sections.1.cards', sectionTitle: 'Representative General Contracting References', sectionPath: 'cards', previewSelector: '#engineering-epc + .section, .solution-system-map', array: true, itemLabel: '案例卡片', fields: visualSolutionCardFields() },
+                    { key: 'lineOm', label: '线路运维', path: 'sections.2', sectionId: 'line-om', previewSelector: '#line-om', fields: visualSolutionFeatureFields(2) },
+                    { key: 'lineOmRecords', label: '运维案例卡片', path: 'sections.3.cards', sectionTitle: 'Operation Coverage and Service Records', sectionPath: 'cards', previewSelector: '#line-om + .section, .solution-system-map', array: true, itemLabel: '案例卡片', fields: visualSolutionCardFields() },
+                    { key: 'powerDistribution', label: '变配电集成', path: 'sections.4', sectionId: 'power-distribution', previewSelector: '#power-distribution', fields: visualSolutionFeatureFields(3) },
+                    { key: 'pvSolution', label: '工商业光伏', path: 'sections.5', sectionId: 'pv-solution', previewSelector: '#pv-solution', fields: visualSolutionFeatureFields(2) },
+                    { key: 'storageCharging', label: '风光储充', path: 'sections.6', sectionId: 'wind-pv-ess-ev', previewSelector: '#wind-pv-ess-ev', fields: visualSolutionFeatureFields(4) },
+                    { key: 'energyTopology', label: '系统拓扑卡片', path: 'sections.7.cards', sectionTitle: 'Energy Flow and System Topology', sectionPath: 'cards', previewSelector: '#wind-pv-ess-ev + .section, .solution-system-map', array: true, itemLabel: '拓扑卡片', fields: visualSolutionCardFields() },
+                    { key: 'smartMicrogrid', label: '智能微电网', path: 'sections.8', sectionId: 'smart-microgrid', previewSelector: '#smart-microgrid', fields: visualSolutionFeatureFields(3) },
+                    { key: 'evChargingStation', label: '充电站建设', path: 'sections.9', sectionId: 'ev-charging-station', previewSelector: '#ev-charging-station', fields: visualSolutionFeatureFields(4) },
+                    { key: 'scenarios', label: '应用场景', path: 'scenarios', previewSelector: '.solution-scenarios', fields: [
+                        { key: 'title', label: '模块标题', type: 'text' },
+                        { key: 'text', label: '模块说明', type: 'textarea' }
+                    ] },
+                    { key: 'scenarioCards', label: '场景卡片', path: 'scenarios.cards', previewSelector: '.solution-scenario-grid', array: true, itemLabel: '场景卡片', fields: visualSolutionCardFields() },
+                    { key: 'credentials', label: '资质能力', path: 'credentials', previewSelector: '.solution-credibility', fields: [
+                        { key: 'title', label: '模块标题', type: 'text' },
+                        { key: 'text', label: '模块说明', type: 'textarea' }
+                    ] },
+                    { key: 'credentialItems', label: '资质图片', path: 'credentials.items', previewSelector: '.solution-credential-strip', array: true, itemLabel: '资质图片', fields: [
+                        { key: 'label', label: '资质名称', type: 'text' },
+                        { key: 'image.src', label: '资质图片', type: 'asset', localized: false },
+                        { key: 'image.alt', label: '图片说明', type: 'text' }
+                    ] },
+                    { key: 'cta', label: '询盘 CTA', path: 'cta', previewSelector: '.solutions-cta', fields: [
+                        { key: 'title', label: '标题', type: 'text' },
+                        { key: 'text', label: '说明', type: 'textarea' },
+                        { key: 'parameters', label: '询盘参数（每行一项）', type: 'list' },
+                        { key: 'button.label', label: '按钮文字', type: 'text' },
+                        { key: 'button.href', label: '按钮链接', type: 'url' },
+                        { key: 'button.productName', label: '询盘产品名', type: 'text' }
+                    ] },
+                    { key: 'seo', label: 'SEO', path: 'seo', fields: [
+                        { key: 'title', label: 'SEO 标题', type: 'text' },
+                        { key: 'description', label: 'SEO 描述', type: 'textarea' },
+                        { key: 'image', label: '分享图片', type: 'asset', localized: false },
+                        { key: 'canonicalPath', label: '规范路径', type: 'text', localized: false }
                     ] }
                 ]
             },
@@ -4608,7 +4713,7 @@
             if (!field) return false;
             if (field.localized === true) return true;
             if (field.localized === false) return false;
-            if (field.type === 'textarea') return true;
+            if (field.type === 'textarea' || field.type === 'list') return true;
             if (field.type !== 'text') return false;
             var key = fieldLastKey(field.key).toLowerCase();
             if (/^(href|url|email|phone|tel|class|classname|icon|image|logo|backgroundimage|mapqr|icp|date|year)$/.test(key)) return false;
@@ -4695,10 +4800,27 @@
             });
         }
 
-        function visualPath(module, key) {
-            if (!module || !module.path) return key;
-            if (!key) return module.path;
-            return module.path + '.' + key;
+        function visualModulePath(module, body) {
+            if (!module) return '';
+            if ((module.sectionId || module.sectionTitle) && body && Array.isArray(body.sections)) {
+                var sectionIndex = -1;
+                body.sections.forEach(function (section, index) {
+                    if (sectionIndex !== -1 || !section) return;
+                    if (module.sectionId && section.id === module.sectionId) sectionIndex = index;
+                    if (sectionIndex === -1 && module.sectionTitle && section.title === module.sectionTitle) sectionIndex = index;
+                });
+                if (sectionIndex !== -1) {
+                    return 'sections.' + sectionIndex + (module.sectionPath ? '.' + module.sectionPath : '');
+                }
+            }
+            return module.path || '';
+        }
+
+        function visualPath(module, key, body) {
+            var basePath = visualModulePath(module, body);
+            if (!basePath) return key;
+            if (!key) return basePath;
+            return basePath + '.' + key;
         }
 
         function visualFieldId(path) {
@@ -4714,13 +4836,13 @@
 
         function visualFieldValue(block, module, field) {
             var body = block && block.body_json ? block.body_json : {};
-            return getPathValue(body, visualPath(module, visualLanguageFieldKey(field)));
+            return getPathValue(body, visualPath(module, visualLanguageFieldKey(field), body));
         }
 
         function visualNewArrayItem(module) {
             var item = {};
             (module.fields || []).forEach(function (field) {
-                setPathValue(item, visualLanguageFieldKey(field), field.type === 'toggle' ? true : '');
+                setPathValue(item, visualLanguageFieldKey(field), field.type === 'toggle' ? true : (field.type === 'list' ? [] : ''));
             });
             return item;
         }
@@ -4728,7 +4850,7 @@
         function renderVisualField(field, path, value) {
             var id = visualFieldId(path);
             var label = visualLanguageFieldLabel(field, path);
-            var valueText = value == null ? '' : String(value);
+            var valueText = Array.isArray(value) ? value.join('\n') : (value == null ? '' : String(value));
             var languageAttrs = visualIsArabicLanguage() && visualFieldSupportsLanguage(field) ? ' dir="rtl" lang="ar"' : '';
             if (field.type === 'toggle') {
                 return '<label class="visual-switch-field"><input type="checkbox" data-visual-field="' + escapeHtml(path) + '"' + (value !== false ? ' checked' : '') + '><span></span><strong>' + escapeHtml(label) + '</strong></label>';
@@ -4750,6 +4872,9 @@
                     '</div>' +
                 '</div>';
             }
+            if (field.type === 'list') {
+                return '<div class="visual-field"><label for="' + escapeHtml(id) + '">' + escapeHtml(label) + '</label><textarea id="' + escapeHtml(id) + '" data-visual-field="' + escapeHtml(path) + '" data-visual-field-type="list" rows="6"' + languageAttrs + '>' + escapeHtml(valueText) + '</textarea><small>每行填写一项，保存后会自动转换为前台列表。</small></div>';
+            }
             if (field.type === 'textarea') {
                 return '<div class="visual-field"><label for="' + escapeHtml(id) + '">' + escapeHtml(label) + '</label><textarea id="' + escapeHtml(id) + '" data-visual-field="' + escapeHtml(path) + '" rows="4"' + languageAttrs + '>' + escapeHtml(valueText) + '</textarea></div>';
             }
@@ -4759,9 +4884,10 @@
 
         function renderVisualArrayEditor(page, module, block) {
             var body = block && block.body_json ? block.body_json : {};
-            var items = getPathValue(body, module.path);
+            var arrayPath = visualModulePath(module, body);
+            var items = getPathValue(body, arrayPath);
             if (!Array.isArray(items)) items = [];
-            return '<div class="visual-array-editor" data-visual-array="' + escapeHtml(module.path) + '">' +
+            return '<div class="visual-array-editor" data-visual-array="' + escapeHtml(arrayPath) + '">' +
                 '<div class="visual-array-head"><span>共 ' + items.length + ' 项</span><button type="button" class="btn btn-secondary btn-sm" data-visual-array-action="add" data-page="' + escapeHtml(page.key) + '" data-module="' + escapeHtml(module.key) + '">新增' + escapeHtml(module.itemLabel || '项目') + '</button></div>' +
                 '<div class="visual-array-list">' + items.map(function (item, index) {
                     var title = visualArrayItemTitle(item, module, index);
@@ -4773,7 +4899,7 @@
                         '</span></summary>' +
                         '<div class="visual-array-body">' + (module.fields || []).map(function (field) {
                             var fieldKey = visualLanguageFieldKey(field);
-                            return renderVisualField(field, module.path + '.' + index + '.' + fieldKey, getPathValue(item, fieldKey));
+                            return renderVisualField(field, arrayPath + '.' + index + '.' + fieldKey, getPathValue(item, fieldKey));
                         }).join('') + '</div>' +
                     '</details>';
                 }).join('') + '</div>' +
@@ -4788,7 +4914,8 @@
             var body = module.array
                 ? renderVisualArrayEditor(page, module, block)
                 : '<div class="visual-field-grid">' + (module.fields || []).map(function (field) {
-                    return renderVisualField(field, visualPath(module, visualLanguageFieldKey(field)), visualFieldValue(block, module, field));
+                    var blockBody = block && block.body_json ? block.body_json : {};
+                    return renderVisualField(field, visualPath(module, visualLanguageFieldKey(field), blockBody), visualFieldValue(block, module, field));
                 }).join('') + '</div>';
             var language = visualActiveLanguage();
             var languageNote = visualIsArabicLanguage() ? '<span>图片、链接、开关为中英阿共用字段</span>' : '';
@@ -4971,10 +5098,15 @@
             root.querySelectorAll('[data-visual-field]').forEach(function (field) {
                 var path = field.getAttribute('data-visual-field');
                 var value = field.type === 'checkbox' ? field.checked : field.value;
+                if (field.getAttribute('data-visual-field-type') === 'list') {
+                    setPathValue(body, path, String(value || '').split(/\r?\n/).map(function (item) { return item.trim(); }).filter(Boolean));
+                    return;
+                }
                 setPathValue(body, path, normalizeStructuredValue(path, value));
             });
             if (module.array) {
-                var items = getPathValue(body, module.path);
+                var arrayPath = visualModulePath(module, body);
+                var items = getPathValue(body, arrayPath);
                 if (Array.isArray(items)) {
                     items.forEach(function (item, index) { item.sort_order = index; });
                 }
@@ -5026,7 +5158,8 @@
             var block = visualBuilderState.blocks[page.slug];
             if (!page || !module || !block) return;
             var body = collectVisualBody(page, module);
-            var items = getPathValue(body, module.path);
+            var arrayPath = visualModulePath(module, body);
+            var items = getPathValue(body, arrayPath);
             if (!Array.isArray(items)) items = [];
             if (action === 'add') items.push(visualNewArrayItem(module));
             if (action === 'remove' && index >= 0) items.splice(index, 1);
@@ -5040,7 +5173,7 @@
                 items[index + 1] = items[index];
                 items[index] = next;
             }
-            setPathValue(body, module.path, items);
+            setPathValue(body, arrayPath, items);
             block.body_json = body;
             visualBuilderState.blocks[page.slug] = block;
             markFormDirty();
