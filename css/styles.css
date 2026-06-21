@@ -11303,3 +11303,45 @@ main[data-content-page] .section-header h2,
     right: 0;
     left: auto;
 }
+
+@media (min-width: 1200px) {
+    .solutions-cta-parameters {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        max-width: 1320px;
+    }
+}
+
+@media (min-width: 769px) {
+    #line-om .solution-media-cluster {
+        grid-template-columns: minmax(220px, 0.92fr) minmax(240px, 1fr);
+        align-items: start;
+    }
+
+    #line-om .solution-media-cluster .solution-media-main {
+        height: 560px;
+        min-height: 560px;
+        max-height: 560px;
+        padding: 0;
+        object-fit: cover;
+    }
+
+    #line-om .solution-media-cluster img:not(.solution-media-main) {
+        height: 230px;
+        min-height: 230px;
+    }
+
+    #line-om .solution-om-panel {
+        min-height: 306px;
+        align-content: stretch;
+    }
+
+    #ev-charging-station .solution-stack-topology {
+        height: 340px;
+        padding: 0;
+        object-fit: cover;
+    }
+
+    #ev-charging-station .solution-stack-devices img {
+        height: 170px;
+    }
+}
