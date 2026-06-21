@@ -408,6 +408,13 @@
         }).join('') + '</ul>';
     }
 
+    function compactListHtml(items, className) {
+        if (!items || !items.length) return '';
+        return '<ul class="' + escapeHtml(className || '') + '">' + items.map(function (item) {
+            return '<li>' + escapeHtml(item) + '</li>';
+        }).join('') + '</ul>';
+    }
+
     function renderAnchorBar(anchors) {
         if (!anchors || !anchors.length) return '';
         return '<section class="solutions-anchor-bar" aria-label="' + (isArabic ? 'أقسام الحلول' : 'Solution sections') + '">' +
@@ -429,10 +436,12 @@
             '</div>' +
             '<div class="solutions-overview-grid" data-stagger="120">' +
             cards.map(function (card, index) {
+                var items = localizedList(card, 'items');
                 return '<article class="solution-overview-card fade-in">' +
                     '<span class="solution-number">' + escapeHtml(card.number || String(index + 1).padStart(2, '0')) + '</span>' +
                     '<h3>' + escapeHtml(localized(card, 'title')) + '</h3>' +
                     '<p>' + escapeHtml(localized(card, 'text')) + '</p>' +
+                    compactListHtml(items, 'solution-overview-details') +
                     '</article>';
             }).join('') +
             '</div></div></section>';
@@ -541,11 +550,29 @@
 
     function renderCta(cta) {
         if (!cta) return '';
+        var parameters = localizedList(cta, 'parameters');
         return '<section class="cta-section solutions-cta"><div class="container">' +
             '<h2>' + escapeHtml(localized(cta, 'title')) + '</h2>' +
             '<p>' + escapeHtml(localized(cta, 'text')) + '</p>' +
+            compactListHtml(parameters, 'solutions-cta-parameters') +
             '<div class="cta-buttons">' + buttonHtml(cta.button, 'btn btn-gold btn-lg') + '</div>' +
             '</div></section>';
+    }
+
+    function scrollToCurrentHash() {
+        if (!window.location.hash) return;
+        var id = window.location.hash.slice(1);
+        if (!id) return;
+        try {
+            id = decodeURIComponent(id);
+        } catch (err) {
+            // Keep the raw hash when decoding fails.
+        }
+        var target = document.getElementById(id);
+        if (!target) return;
+        window.requestAnimationFrame(function () {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
     }
 
     function backgroundStyle(path) {
@@ -1293,6 +1320,7 @@
             renderCredentials(body.credentials) +
             renderCta(body.cta);
         refreshDynamicUi();
+        scrollToCurrentHash();
     }
 
     function renderPage(block) {

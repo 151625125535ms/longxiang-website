@@ -12,7 +12,8 @@
     "content:upgrade-inquiry": "node scripts/upgrade-inquiry-conversion-content.js",
     "seo:fill-products": "node scripts/fill-product-seo.js",
     "sitemap:generate": "node scripts/generate-sitemap.js",
-    "start": "node server/app.js"
+    "start": "node server/app.js",
+    "content:upgrade-solutions": "node scripts/upgrade-solutions-content-20260621.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
