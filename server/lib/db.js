@@ -25,16 +25,45 @@ function getDb() {
     return dbInstance;
 }
 
-function ensureRuntimeSchema(db) {
-    const hasInquiriesTable = db.prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'inquiries'").get();
-    if (!hasInquiriesTable) return;
+function hasTable(db, tableName) {
+    return !!db.prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?").get(tableName);
+}
 
-    const inquiryColumns = db.prepare('PRAGMA table_info(inquiries)').all();
-    const hasCountry = inquiryColumns.some(function (column) {
-        return column.name === 'country';
+function hasColumn(db, tableName, columnName) {
+    return db.prepare('PRAGMA table_info(' + tableName + ')').all().some(function (column) {
+        return column.name === columnName;
     });
-    if (!hasCountry) {
+}
+
+function ensureRuntimeSchema(db) {
+    const hasInquiriesTable = hasTable(db, 'inquiries');
+    if (hasInquiriesTable && !hasColumn(db, 'inquiries', 'country')) {
         db.prepare('ALTER TABLE inquiries ADD COLUMN country TEXT').run();
+    }
+
+    if (hasTable(db, 'certifications') && !hasColumn(db, 'certifications', 'asset_id')) {
+        db.prepare('ALTER TABLE certifications ADD COLUMN asset_id INTEGER').run();
+    }
+
+    if (hasTable(db, 'assets')) {
+        db.prepare(`
+            CREATE TABLE IF NOT EXISTS asset_references (
+                id INTEGER PRIMARY KEY,
+                asset_id INTEGER NOT NULL,
+                asset_path TEXT NOT NULL,
+                module TEXT NOT NULL,
+                entity_type TEXT NOT NULL,
+                entity_id INTEGER NOT NULL,
+                field_path TEXT NOT NULL,
+                title TEXT,
+                created_at INTEGER,
+                updated_at INTEGER,
+                FOREIGN KEY (asset_id) REFERENCES assets(id)
+            )
+        `).run();
+        db.prepare('CREATE UNIQUE INDEX IF NOT EXISTS idx_asset_references_unique ON asset_references(module, entity_type, entity_id, field_path, asset_id)').run();
+        db.prepare('CREATE INDEX IF NOT EXISTS idx_asset_references_asset ON asset_references(asset_id)').run();
+        db.prepare('CREATE INDEX IF NOT EXISTS idx_asset_references_owner ON asset_references(module, entity_type, entity_id)').run();
     }
 }
 

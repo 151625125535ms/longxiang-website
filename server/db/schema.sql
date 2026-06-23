@@ -86,6 +86,7 @@ CREATE TABLE IF NOT EXISTS certifications (
     category_label_en TEXT,
     category_label_ar TEXT,
     image_path TEXT,
+    asset_id INTEGER,
     source_type TEXT,
     pages INTEGER DEFAULT 1,
     width INTEGER,
@@ -98,7 +99,8 @@ CREATE TABLE IF NOT EXISTS certifications (
     version INTEGER DEFAULT 1,
     created_at INTEGER,
     updated_at INTEGER,
-    FOREIGN KEY (category_id) REFERENCES categories(id)
+    FOREIGN KEY (category_id) REFERENCES categories(id),
+    FOREIGN KEY (asset_id) REFERENCES assets(id)
 );
 
 CREATE TABLE IF NOT EXISTS content_blocks (
@@ -151,6 +153,20 @@ CREATE TABLE IF NOT EXISTS assets (
     created_at INTEGER
 );
 
+
+CREATE TABLE IF NOT EXISTS asset_references (
+    id INTEGER PRIMARY KEY,
+    asset_id INTEGER NOT NULL,
+    asset_path TEXT NOT NULL,
+    module TEXT NOT NULL,
+    entity_type TEXT NOT NULL,
+    entity_id INTEGER NOT NULL,
+    field_path TEXT NOT NULL,
+    title TEXT,
+    created_at INTEGER,
+    updated_at INTEGER,
+    FOREIGN KEY (asset_id) REFERENCES assets(id)
+);
 CREATE TABLE IF NOT EXISTS audit_logs (
     id INTEGER PRIMARY KEY,
     entity_type TEXT NOT NULL,
@@ -180,8 +196,12 @@ CREATE INDEX IF NOT EXISTS idx_product_media_product ON product_media(product_id
 CREATE INDEX IF NOT EXISTS idx_product_specs_product ON product_specs(product_id);
 CREATE INDEX IF NOT EXISTS idx_certifications_category ON certifications(category_id);
 CREATE INDEX IF NOT EXISTS idx_certifications_status ON certifications(status);
+CREATE INDEX IF NOT EXISTS idx_certifications_asset ON certifications(asset_id);
 CREATE INDEX IF NOT EXISTS idx_content_blocks_slug ON content_blocks(slug);
 CREATE INDEX IF NOT EXISTS idx_inquiries_status ON inquiries(status);
 CREATE INDEX IF NOT EXISTS idx_inquiries_created ON inquiries(created_at);
 CREATE INDEX IF NOT EXISTS idx_assets_entity ON assets(module, entity_type, entity_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_asset_references_unique ON asset_references(module, entity_type, entity_id, field_path, asset_id);
+CREATE INDEX IF NOT EXISTS idx_asset_references_asset ON asset_references(asset_id);
+CREATE INDEX IF NOT EXISTS idx_asset_references_owner ON asset_references(module, entity_type, entity_id);
 CREATE INDEX IF NOT EXISTS idx_audit_entity ON audit_logs(entity_type, entity_id);

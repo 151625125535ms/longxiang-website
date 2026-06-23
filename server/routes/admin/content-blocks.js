@@ -1,6 +1,7 @@
 const express = require('express');
 const { getDb } = require('../../lib/db');
 const { sendError, insertAuditLog } = require('./helpers');
+const { syncContentBlockAssetReferences } = require('../../lib/assetReferences');
 
 const router = express.Router();
 const BATCH_ACTIONS = ['publish', 'unpublish'];
@@ -251,6 +252,7 @@ router.put('/:slug', function (req, res, next) {
             });
 
             const after = getContentBlockBySlug(db, before.slug);
+            syncContentBlockAssetReferences(db, after.id);
             insertAuditLog(db, req, 'content_block', before.id, 'update', before, after);
             return after;
         });
@@ -322,6 +324,7 @@ router.post('/batch', function (req, res, next) {
 
             beforeRows.forEach(function (before) {
                 const after = getContentBlockById(db, before.id);
+                syncContentBlockAssetReferences(db, after.id);
                 insertAuditLog(db, req, 'content_block', before.id, action, before, after);
             });
         });

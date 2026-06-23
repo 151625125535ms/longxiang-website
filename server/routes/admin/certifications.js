@@ -1,6 +1,7 @@
 const express = require('express');
 const { getDb } = require('../../lib/db');
 const { sendError, insertAuditLog } = require('./helpers');
+const { resolveAssetIdByPath, syncCertificationAssetReference, deleteAssetReferences } = require('../../lib/assetReferences');
 
 const router = express.Router();
 const STATUSES = ['published', 'draft', 'deleted'];
@@ -46,7 +47,7 @@ function getCertification(db, id) {
             cert.id, cert.legacy_id, cert.category_id, c.name_en AS category_name_en,
             cert.legacy_category, cert.status, cert.sort_order,
             cert.name_en, cert.name_ar, cert.category_label_en, cert.category_label_ar,
-            cert.image_path, cert.source_type, cert.pages, cert.width, cert.height,
+            cert.image_path, cert.asset_id, cert.source_type, cert.pages, cert.width, cert.height,
             cert.issuer_en, cert.issuer_ar, cert.expiry_date,
             cert.description_en, cert.description_ar,
             cert.version, cert.created_at, cert.updated_at
@@ -108,7 +109,7 @@ router.get('/', function (req, res, next) {
             SELECT
                 cert.id, cert.legacy_id, cert.category_id, c.name_en AS category_name_en,
                 cert.legacy_category, cert.status, cert.sort_order,
-                cert.name_en, cert.name_ar, cert.image_path, cert.source_type,
+                cert.name_en, cert.name_ar, cert.image_path, cert.asset_id, cert.source_type,
                 cert.pages, cert.version, cert.created_at, cert.updated_at
             FROM certifications cert
             LEFT JOIN categories c ON c.id = cert.category_id
@@ -153,14 +154,14 @@ router.post('/', function (req, res, next) {
                 INSERT INTO certifications
                     (
                         legacy_id, category_id, legacy_category, status,
-                        sort_order, name_en, name_ar, image_path, source_type,
+                        sort_order, name_en, name_ar, image_path, asset_id, source_type,
                         pages, width, height, issuer_en, issuer_ar, expiry_date,
                         description_en, description_ar, version, created_at, updated_at
                     )
                 VALUES
                     (
                         @legacy_id, @category_id, @legacy_category, @status,
-                        @sort_order, @name_en, @name_ar, @image_path, @source_type,
+                        @sort_order, @name_en, @name_ar, @image_path, @asset_id, @source_type,
                         @pages, @width, @height, @issuer_en, @issuer_ar, @expiry_date,
                         @description_en, @description_ar, 1, @created_at, @updated_at
                     )
@@ -173,6 +174,7 @@ router.post('/', function (req, res, next) {
                 name_en: nameEn,
                 name_ar: body.name_ar ? String(body.name_ar).trim() : '',
                 image_path: body.image_path ? String(body.image_path).trim() : '',
+                asset_id: resolveAssetIdByPath(db, body.image_path ? String(body.image_path).trim() : ''),
                 source_type: body.source_type ? String(body.source_type).trim() : '',
                 pages: parseInteger(body.pages, 1),
                 width: body.width == null || body.width === '' ? null : parseInteger(body.width, null),
@@ -186,6 +188,7 @@ router.post('/', function (req, res, next) {
                 updated_at: now
             });
 
+            syncCertificationAssetReference(db, result.lastInsertRowid);
             const certification = getCertification(db, result.lastInsertRowid);
             insertAuditLog(db, req, 'certification', certification.id, 'create', null, certification);
             return certification;
@@ -218,6 +221,8 @@ router.put('/:id', function (req, res, next) {
         if (!status) return sendError(res, 422, 'VALIDATION_ERROR', 'Invalid status.');
 
         const updateCertification = db.transaction(function () {
+            const nextImagePath = body.image_path == null ? before.image_path : String(body.image_path).trim();
+            const nextAssetId = resolveAssetIdByPath(db, nextImagePath);
             db.prepare(`
                 UPDATE certifications
                 SET
@@ -228,6 +233,7 @@ router.put('/:id', function (req, res, next) {
                     name_en = @name_en,
                     name_ar = @name_ar,
                     image_path = @image_path,
+                    asset_id = @asset_id,
                     source_type = @source_type,
                     pages = @pages,
                     width = @width,
@@ -248,7 +254,8 @@ router.put('/:id', function (req, res, next) {
                 sort_order: body.sort_order == null ? before.sort_order : parseInteger(body.sort_order, before.sort_order),
                 name_en: body.name_en == null ? before.name_en : firstText(body.name_en, body.name_ar, before.name_en, titleFromPath(body.image_path)),
                 name_ar: body.name_ar == null ? before.name_ar : String(body.name_ar).trim(),
-                image_path: body.image_path == null ? before.image_path : String(body.image_path).trim(),
+                image_path: nextImagePath,
+                asset_id: nextAssetId,
                 source_type: body.source_type == null ? before.source_type : String(body.source_type).trim(),
                 pages: body.pages == null ? before.pages : parseInteger(body.pages, before.pages),
                 width: body.width === undefined ? before.width : (body.width == null || body.width === '' ? null : parseInteger(body.width, null)),
@@ -261,6 +268,7 @@ router.put('/:id', function (req, res, next) {
                 updated_at: Date.now()
             });
 
+            syncCertificationAssetReference(db, before.id);
             const after = getCertification(db, before.id);
             insertAuditLog(db, req, 'certification', before.id, 'update', before, after);
             return after;
@@ -285,6 +293,7 @@ router.delete('/:id', function (req, res, next) {
                 WHERE id = @id
             `).run({ id: before.id, updated_at: Date.now() });
 
+            deleteAssetReferences(db, { module: 'certifications', entity_type: 'certification', entity_id: before.id });
             const after = getCertification(db, before.id);
             insertAuditLog(db, req, 'certification', before.id, 'soft_delete', before, after);
         });
@@ -353,6 +362,9 @@ router.post('/batch', function (req, res, next) {
             const now = Date.now();
 
             if (action === 'hard_delete') {
+                uniqueIds.forEach(function (id) {
+                    deleteAssetReferences(db, { module: 'certifications', entity_type: 'certification', entity_id: id });
+                });
                 db.prepare(`DELETE FROM certifications WHERE id IN (${placeholders})`).run(...uniqueIds);
                 beforeRows.forEach(function (before) {
                     insertAuditLog(db, req, 'certification', before.id, 'hard_delete', before, null);
@@ -368,6 +380,11 @@ router.post('/batch', function (req, res, next) {
             `).run(nextStatus, now, ...uniqueIds);
 
             beforeRows.forEach(function (before) {
+                if (nextStatus === 'deleted') {
+                    deleteAssetReferences(db, { module: 'certifications', entity_type: 'certification', entity_id: before.id });
+                } else {
+                    syncCertificationAssetReference(db, before.id);
+                }
                 const after = getCertification(db, before.id);
                 insertAuditLog(db, req, 'certification', before.id, action, before, after);
             });

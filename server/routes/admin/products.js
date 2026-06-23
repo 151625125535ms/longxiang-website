@@ -7,6 +7,7 @@ const { getDb } = require('../../lib/db');
 const { ensureDirectory, resolveUploadDir, resolveUploadPublicPath } = require('../../lib/fileStore');
 const { normalizeUploadedFilename } = require('../../lib/filenameEncoding');
 const { sendError, insertAuditLog } = require('./helpers');
+const { syncProductAssetReferences, deleteAssetReferences } = require('../../lib/assetReferences');
 
 const router = express.Router();
 const STATUSES = ['published', 'draft', 'deleted'];
@@ -634,6 +635,7 @@ router.post('/', function (req, res, next) {
             replaceProductSpecs(db, productId, normalizeProductSpecs(body.specs), now);
             replaceCoverImage(db, productId, coverPath, now);
             replaceGalleryImages(db, productId, galleryPaths, coverPath, now);
+            syncProductAssetReferences(db, productId);
             const product = getFullProduct(db, productId);
             insertAuditLog(db, req, 'product', product.id, 'create', null, product);
             return product;
@@ -736,6 +738,7 @@ router.put('/:id', function (req, res, next) {
             if (galleryPaths !== undefined) {
                 replaceGalleryImages(db, before.id, galleryPaths, coverPath === undefined ? before.cover_image : coverPath, timestamp);
             }
+            syncProductAssetReferences(db, before.id);
             const afterAudit = getAuditProduct(db, before.id);
             insertAuditLog(db, req, 'product', before.id, 'update', before, afterAudit);
             return getFullProduct(db, before.id);
@@ -760,6 +763,7 @@ router.delete('/:id', function (req, res, next) {
                 WHERE id = @id
             `).run({ id: before.id, updated_at: Date.now() });
 
+            deleteAssetReferences(db, { module: 'products', entity_type: 'product', entity_id: before.id });
             const after = getAuditProduct(db, before.id);
             insertAuditLog(db, req, 'product', before.id, 'soft_delete', before, after);
         });
@@ -826,6 +830,9 @@ router.post('/batch', function (req, res, next) {
             const now = Date.now();
 
             if (action === 'hard_delete') {
+                uniqueIds.forEach(function (id) {
+                    deleteAssetReferences(db, { module: 'products', entity_type: 'product', entity_id: id });
+                });
                 db.prepare(`DELETE FROM product_specs WHERE product_id IN (${placeholders})`).run(...uniqueIds);
                 db.prepare(`DELETE FROM product_media WHERE product_id IN (${placeholders})`).run(...uniqueIds);
                 db.prepare(`DELETE FROM products WHERE id IN (${placeholders})`).run(...uniqueIds);
@@ -843,6 +850,11 @@ router.post('/batch', function (req, res, next) {
             `).run(nextStatus, now, ...uniqueIds);
 
             beforeRows.forEach(function (before) {
+                if (nextStatus === 'deleted') {
+                    deleteAssetReferences(db, { module: 'products', entity_type: 'product', entity_id: before.id });
+                } else {
+                    syncProductAssetReferences(db, before.id);
+                }
                 const after = getAuditProduct(db, before.id);
                 insertAuditLog(db, req, 'product', before.id, action, before, after);
             });

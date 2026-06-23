@@ -7,6 +7,7 @@ const { getDb } = require('../../lib/db');
 const { ensureDirectory, resolveUploadDir, resolveUploadPublicPath } = require('../../lib/fileStore');
 const { normalizeUploadedFilename } = require('../../lib/filenameEncoding');
 const { sendError } = require('./helpers');
+const assetReferences = require('../../lib/assetReferences');
 
 const router = express.Router();
 const uploadDir = resolveUploadDir();
@@ -152,68 +153,7 @@ function collectJsonPathMatches(value, targetPath, currentPath, matches) {
 }
 
 function findAssetUsage(db, assetOrPath) {
-    const rawPath = typeof assetOrPath === 'string' ? assetOrPath : assetOrPath && assetOrPath.path;
-    const targetPath = normalizeAssetPath(rawPath);
-    if (!targetPath) return [];
-
-    const usage = [];
-    db.prepare(`
-        SELECT
-            pm.id AS media_id, pm.product_id, pm.is_cover, pm.sort_order,
-            p.name_en, p.name_ar, p.legacy_id, p.slug, p.status
-        FROM product_media pm
-        INNER JOIN products p ON p.id = pm.product_id
-        WHERE pm.path = @path AND p.status != 'deleted'
-        ORDER BY pm.is_cover DESC, pm.sort_order, pm.id
-    `).all({ path: targetPath }).forEach(function (row) {
-        usage.push({
-            module: 'products',
-            entity_type: 'product',
-            entity_id: row.product_id,
-            title: row.name_en || row.name_ar || row.legacy_id || row.slug || ('Product #' + row.product_id),
-            field_path: row.is_cover ? 'cover_image' : 'media[' + row.sort_order + ']'
-        });
-    });
-
-    db.prepare(`
-        SELECT id, name_en, name_ar, legacy_id, status
-        FROM certifications
-        WHERE image_path = @path AND status != 'deleted'
-        ORDER BY sort_order, id
-    `).all({ path: targetPath }).forEach(function (row) {
-        usage.push({
-            module: 'certifications',
-            entity_type: 'certification',
-            entity_id: row.id,
-            title: row.name_en || row.name_ar || row.legacy_id || ('Certification #' + row.id),
-            field_path: 'image_path'
-        });
-    });
-
-    db.prepare(`
-        SELECT id, slug, title_en, title_ar, body_json, status
-        FROM content_blocks
-        WHERE status != 'deleted'
-        ORDER BY sort_order, id
-    `).all().forEach(function (row) {
-        const matches = [];
-        try {
-            collectJsonPathMatches(JSON.parse(row.body_json || '{}'), targetPath, 'body_json', matches);
-        } catch (err) {
-            if (String(row.body_json || '').indexOf(targetPath) !== -1) matches.push('body_json');
-        }
-        matches.forEach(function (fieldPath) {
-            usage.push({
-                module: 'content_blocks',
-                entity_type: 'content_block',
-                entity_id: row.id,
-                title: row.title_en || row.title_ar || row.slug || ('Content block #' + row.id),
-                field_path: fieldPath
-            });
-        });
-    });
-
-    return usage;
+    return assetReferences.findAssetUsage(db, assetOrPath);
 }
 
 function attachUsage(db, rows) {
