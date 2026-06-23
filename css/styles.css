@@ -3553,7 +3553,7 @@ p:last-child {
     position: absolute;
     inset: 0;
     z-index: 1;
-    background: linear-gradient(90deg, rgba(10, 22, 40, 0.62), rgba(10, 22, 40, 0.12) 54%, rgba(10, 22, 40, 0.3));
+    background: linear-gradient(90deg, rgba(10, 22, 40, 0.5), rgba(10, 22, 40, 0.08) 54%, rgba(10, 22, 40, 0.22));
 }
 
 .hero-hex-panel {
@@ -6023,8 +6023,8 @@ p:last-child {
 /* Education page */
 .education-page-hero::before {
     background:
-        linear-gradient(90deg, rgba(10, 22, 40, 0.58), rgba(10, 22, 40, 0.2)),
-        linear-gradient(180deg, rgba(10, 22, 40, 0.16), rgba(10, 22, 40, 0.28));
+        linear-gradient(90deg, rgba(10, 22, 40, 0.46), rgba(10, 22, 40, 0.14)),
+        linear-gradient(180deg, rgba(10, 22, 40, 0.1), rgba(10, 22, 40, 0.2));
 }
 
 .education-page-hero h1 {
@@ -6447,8 +6447,8 @@ p:last-child {
 
 .education-page-hero::before {
     background:
-        linear-gradient(90deg, rgba(6, 21, 35, 0.58), rgba(6, 21, 35, 0.34) 48%, rgba(6, 21, 35, 0.1)),
-        linear-gradient(0deg, rgba(6, 21, 35, 0.2), rgba(6, 21, 35, 0));
+        linear-gradient(90deg, rgba(6, 21, 35, 0.46), rgba(6, 21, 35, 0.26) 48%, rgba(6, 21, 35, 0.06)),
+        linear-gradient(0deg, rgba(6, 21, 35, 0.14), rgba(6, 21, 35, 0));
 }
 
 .education-page-hero .container {
@@ -8807,8 +8807,8 @@ p:last-child {
 
     .hero-hex .hero-overlay {
         background:
-            linear-gradient(180deg, rgba(7, 17, 32, 0.62) 0%, rgba(7, 17, 32, 0.24) 34%, rgba(7, 17, 32, 0.62) 100%),
-            linear-gradient(90deg, rgba(7, 17, 32, 0.64), rgba(7, 17, 32, 0.18));
+            linear-gradient(180deg, rgba(7, 17, 32, 0.5) 0%, rgba(7, 17, 32, 0.16) 34%, rgba(7, 17, 32, 0.5) 100%),
+            linear-gradient(90deg, rgba(7, 17, 32, 0.52), rgba(7, 17, 32, 0.12));
     }
 
     .hero-hex-panel {
@@ -9012,8 +9012,8 @@ p:last-child {
 
     .hero-hex .hero-overlay {
         background:
-            linear-gradient(90deg, rgba(7, 17, 32, 0.68) 0%, rgba(7, 17, 32, 0.46) 34%, rgba(7, 17, 32, 0.16) 66%, rgba(7, 17, 32, 0.12) 100%),
-            linear-gradient(180deg, rgba(7, 17, 32, 0.28) 0%, rgba(7, 17, 32, 0.05) 42%, rgba(7, 17, 32, 0.48) 100%);
+            linear-gradient(90deg, rgba(7, 17, 32, 0.56) 0%, rgba(7, 17, 32, 0.36) 34%, rgba(7, 17, 32, 0.1) 66%, rgba(7, 17, 32, 0.08) 100%),
+            linear-gradient(180deg, rgba(7, 17, 32, 0.2) 0%, rgba(7, 17, 32, 0.03) 42%, rgba(7, 17, 32, 0.36) 100%);
     }
 
     .hero-hex-panel {
