@@ -5179,15 +5179,15 @@
                 var preview = path
                     ? '<img src="' + escapeHtml(visualAssetSrc(path)) + '" alt="图片资料 ' + escapeHtml(index + 1) + '">'
                     : '<span>未选择图片</span>';
-                return '<article class="visual-image-tile" data-visual-image-index="' + index + '">' +
+                return '<article class="visual-image-tile visual-image-tile-filled" data-visual-image-index="' + index + '">' +
                     '<div class="visual-image-tile-preview">' + preview + '</div>' +
                     '<div class="visual-image-tile-meta"><strong>图片 ' + (index + 1) + '</strong><span title="' + escapeHtml(path) + '">' + escapeHtml(path || '未选择') + '</span></div>' +
                     '<div class="visual-image-tile-actions">' +
-                        '<button type="button" class="btn btn-secondary btn-sm" data-visual-image-action="select" data-visual-image-field="' + escapeHtml(fieldId) + '" data-visual-image-index="' + index + '">资源库</button>' +
-                        '<button type="button" class="btn btn-secondary btn-sm" data-visual-image-action="upload" data-visual-image-field="' + escapeHtml(fieldId) + '" data-visual-image-index="' + index + '">上传</button>' +
-                        '<button type="button" class="btn btn-secondary btn-sm" data-visual-image-action="up" data-visual-image-field="' + escapeHtml(fieldId) + '" data-visual-image-index="' + index + '"' + (index <= 0 ? ' disabled' : '') + '>上移</button>' +
-                        '<button type="button" class="btn btn-secondary btn-sm" data-visual-image-action="down" data-visual-image-field="' + escapeHtml(fieldId) + '" data-visual-image-index="' + index + '"' + (index >= images.length - 1 ? ' disabled' : '') + '>下移</button>' +
-                        '<button type="button" class="btn btn-danger btn-sm" data-visual-image-action="remove" data-visual-image-field="' + escapeHtml(fieldId) + '" data-visual-image-index="' + index + '">删除</button>' +
+                        '<button type="button" class="btn btn-secondary btn-sm" title="从资源库选择图片替换当前图片" data-visual-image-action="select" data-visual-image-field="' + escapeHtml(fieldId) + '" data-visual-image-index="' + index + '">资源库替换</button>' +
+                        '<button type="button" class="btn btn-secondary btn-sm" title="从本地上传新图片替换当前图片" data-visual-image-action="upload" data-visual-image-field="' + escapeHtml(fieldId) + '" data-visual-image-index="' + index + '">上传替换</button>' +
+                        '<button type="button" class="btn btn-secondary btn-sm visual-image-order-btn" title="上移" data-visual-image-action="up" data-visual-image-field="' + escapeHtml(fieldId) + '" data-visual-image-index="' + index + '"' + (index <= 0 ? ' disabled' : '') + '>上移</button>' +
+                        '<button type="button" class="btn btn-secondary btn-sm visual-image-order-btn" title="下移" data-visual-image-action="down" data-visual-image-field="' + escapeHtml(fieldId) + '" data-visual-image-index="' + index + '"' + (index >= images.length - 1 ? ' disabled' : '') + '>下移</button>' +
+                        '<button type="button" class="btn btn-danger btn-sm" title="从当前图片资料中删除" data-visual-image-action="remove" data-visual-image-field="' + escapeHtml(fieldId) + '" data-visual-image-index="' + index + '">删除</button>' +
                     '</div>' +
                 '</article>';
             });
@@ -5208,7 +5208,7 @@
             return '<div class="visual-field visual-image-grid-field">' +
                 '<label>' + escapeHtml(label) + '</label>' +
                 '<div class="visual-image-grid-card" data-visual-image-grid-card="' + escapeHtml(id) + '">' +
-                    '<div class="visual-image-grid-head"><span>已选择 <strong data-visual-image-count="' + escapeHtml(id) + '">' + images.length + '</strong> / ' + maxItems + ' 张</span><button type="button" class="btn btn-secondary btn-sm" data-visual-image-action="upload" data-visual-image-field="' + escapeHtml(id) + '" data-visual-image-index="' + images.length + '"' + (images.length >= maxItems ? ' disabled' : '') + '>本地上传</button></div>' +
+                    '<div class="visual-image-grid-head"><span>已选择 <strong data-visual-image-count="' + escapeHtml(id) + '">' + images.length + '</strong> / ' + maxItems + ' 张</span><button type="button" class="btn btn-secondary btn-sm" title="' + (images.length >= maxItems ? '已达到数量上限，请先删除一张后再新增；已有图片仍可单独替换。' : '从本地上传并新增一张图片') + '" data-visual-image-action="upload" data-visual-image-field="' + escapeHtml(id) + '" data-visual-image-index="' + images.length + '"' + (images.length >= maxItems ? ' disabled' : '') + '>' + (images.length >= maxItems ? '已达上限' : '本地上传新增') + '</button></div>' +
                     '<input type="hidden" id="' + escapeHtml(id) + '" data-visual-field="' + escapeHtml(path) + '" data-visual-field-type="image-grid" data-visual-image-grid-max="' + maxItems + '" value="' + escapeHtml(JSON.stringify(images)) + '">' +
                     '<div class="visual-image-grid" data-visual-image-grid="' + escapeHtml(id) + '">' + renderVisualImageGridTiles(id, images, maxItems) + '</div>' +
                     '<small class="visual-image-grid-help">' + escapeHtml(help) + '</small>' +
@@ -7564,7 +7564,7 @@
             return '<div class="form-group education-image-grid-field visual-image-grid-field">' +
                 '<label>' + escapeHtml(label) + '</label>' +
                 '<div class="visual-image-grid-card" data-visual-image-grid-card="' + escapeHtml(id) + '">' +
-                    '<div class="visual-image-grid-head"><span>已选择 <strong data-visual-image-count="' + escapeHtml(id) + '">' + images.length + '</strong> / ' + limit + ' 张</span><button type="button" class="btn btn-secondary btn-sm" data-visual-image-action="upload" data-visual-image-field="' + escapeHtml(id) + '" data-visual-image-index="' + images.length + '"' + (images.length >= limit ? ' disabled' : '') + '>本地上传</button></div>' +
+                    '<div class="visual-image-grid-head"><span>已选择 <strong data-visual-image-count="' + escapeHtml(id) + '">' + images.length + '</strong> / ' + limit + ' 张</span><button type="button" class="btn btn-secondary btn-sm" title="' + (images.length >= limit ? '已达到数量上限，请先删除一张后再新增；已有图片仍可单独替换。' : '从本地上传并新增一张图片') + '" data-visual-image-action="upload" data-visual-image-field="' + escapeHtml(id) + '" data-visual-image-index="' + images.length + '"' + (images.length >= limit ? ' disabled' : '') + '>' + (images.length >= limit ? '已达上限' : '本地上传新增') + '</button></div>' +
                     '<input type="hidden" id="' + escapeHtml(id) + '" data-edu-field="' + escapeHtml(name) + '" data-visual-field-type="image-grid" data-visual-image-grid-max="' + limit + '" value="' + escapeHtml(JSON.stringify(images)) + '">' +
                     '<div class="visual-image-grid" data-visual-image-grid="' + escapeHtml(id) + '">' + renderVisualImageGridTiles(id, images, limit) + '</div>' +
                     '<small class="visual-image-grid-help">' + escapeHtml(helpText) + '</small>' +

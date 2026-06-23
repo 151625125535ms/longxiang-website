@@ -124,6 +124,7 @@ function verifyDatabase() {
 function verifySource() {
     const educationJs = readText('js/education.js');
     const adminJs = readText('admin/js/admin.js');
+    const adminCss = readText('admin/css/admin.css');
     const adminIndex = readText('admin/index.html');
     const contentBlocksJs = readText('server/routes/admin/content-blocks.js');
 
@@ -154,6 +155,13 @@ function verifySource() {
     assert(adminJs.includes('function educationImageGridField'), 'Legacy education editor should have an image-grid field helper.');
     assert(adminJs.includes("educationImageGridField('gallery.images'"), 'Legacy education gallery images should use visual image-grid controls.');
     assert(!adminJs.includes("educationListField('gallery.images'"), 'Legacy education gallery images should not use a manual path textarea.');
+    assert(adminJs.includes('资源库替换'), 'Gallery image tiles should expose a clear resource-library replacement action.');
+    assert(adminJs.includes('上传替换'), 'Gallery image tiles should expose a clear local-upload replacement action.');
+    assert(adminJs.includes('本地上传新增'), 'Gallery image grid header should clarify local upload adds a new image.');
+    assert(adminCss.includes('.visual-editor-panel .visual-image-tile-filled'), 'Admin CSS should compact visual image tiles in the editor panel.');
+    assert(adminCss.includes('grid-template-areas:'), 'Admin CSS should use a compact tile layout for image previews and actions.');
+    assert(adminIndex.includes('css/admin.css?v=10'), 'Admin CSS version should be bumped after gallery image-grid styling changes.');
+    assert(adminIndex.includes('js/admin.js?v=13'), 'Admin JS version should be bumped after gallery image-grid behavior changes.');
     assert(adminJs.includes('renderEducationVisualRedirect'), 'Legacy content-education editor should redirect to visual builder.');
 }
 
