@@ -645,12 +645,29 @@
                             <option value="image">图片</option>
                             <option value="file">文档</option>
                         </select>
+                        <select id="asset-usage-filter" class="toolbar-select" aria-label="使用状态筛选">
+                            <option value="">全部使用状态</option>
+                            <option value="used">已使用</option>
+                            <option value="unused">未使用</option>
+                        </select>
+                        <select id="asset-active-filter" class="toolbar-select" aria-label="资源状态筛选">
+                            <option value="1">正常资源</option>
+                            <option value="0">已移出资源</option>
+                        </select>
+                        <button type="button" class="btn btn-secondary btn-sm" id="btn-show-asset-duplicates">重复资源</button>
                         <button type="button" class="btn btn-secondary btn-sm btn-clear-filters" id="btn-clear-asset-filters" style="display:none;">清空筛选</button>
                         <div class="segmented-control assets-view-toggle" id="asset-view-mode" role="group" aria-label="资源视图">
                             <button type="button" class="segmented-btn active" data-asset-view-mode="grid">网格</button>
                             <button type="button" class="segmented-btn" data-asset-view-mode="list">列表</button>
                         </div>
                     </div>
+                    <div class="asset-governance-grid" id="asset-governance-grid">
+                        <article><span>资源总数</span><strong>—</strong><small>等待加载</small></article>
+                        <article><span>未使用</span><strong>—</strong><small>可进入清理列表</small></article>
+                        <article><span>重复资源</span><strong>—</strong><small>按 checksum 检测</small></article>
+                        <article><span>大图建议</span><strong>—</strong><small>压缩与尺寸提示</small></article>
+                    </div>
+                    <div class="asset-duplicates-panel" id="asset-duplicates-panel" hidden></div>
                     <div class="assets-workspace">
                         <div class="assets-main-panel">
                             <div class="asset-dropzone" id="asset-dropzone">

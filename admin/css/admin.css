@@ -2785,6 +2785,7 @@ h1, h2, h3, h4, h5, h6 {
         grid-template-columns: 1fr;
     }
 
+
     .assets-toolbar {
         align-items: stretch;
     }
@@ -3492,6 +3493,124 @@ h1, h2, h3, h4, h5, h6 {
     backdrop-filter: blur(10px);
 }
 
+
+.asset-governance-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.asset-governance-grid article,
+.asset-duplicates-panel {
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--radius-md);
+    background: var(--color-white-pure);
+    box-shadow: var(--shadow-sm);
+}
+
+.asset-governance-grid article {
+    display: grid;
+    gap: 5px;
+    padding: 14px;
+}
+
+.asset-governance-grid span,
+.asset-governance-grid small,
+.asset-duplicate-meta,
+.asset-inspection-note {
+    color: var(--color-gray-500);
+    font-size: 0.78rem;
+    line-height: 1.45;
+}
+
+.asset-governance-grid strong {
+    color: var(--color-navy);
+    font-size: 1.35rem;
+    line-height: 1.1;
+}
+
+.asset-duplicates-panel {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 14px;
+    padding: 14px;
+}
+
+.asset-duplicates-panel[hidden] {
+    display: none;
+}
+
+.asset-duplicate-group {
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--radius-sm);
+    padding: 10px;
+    background: var(--color-gray-50);
+}
+
+.asset-duplicate-group strong,
+.asset-inspection-section strong {
+    display: block;
+    color: var(--color-navy);
+    font-size: 0.86rem;
+    line-height: 1.35;
+}
+
+.asset-duplicate-assets {
+    display: grid;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.asset-duplicate-assets button {
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--radius-sm);
+    background: var(--color-white-pure);
+    color: var(--color-gray-700);
+    cursor: pointer;
+    padding: 7px 9px;
+    text-align: left;
+    overflow-wrap: anywhere;
+}
+
+.asset-duplicate-assets button:hover {
+    border-color: var(--color-blue);
+    color: var(--color-blue);
+}
+
+.asset-inspection-section {
+    border-top: 1px solid var(--color-gray-200);
+    display: grid;
+    gap: 8px;
+    padding-top: 12px;
+}
+
+.asset-inspection-list {
+    display: grid;
+    gap: 6px;
+}
+
+.asset-inspection-list span {
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--radius-sm);
+    background: var(--color-gray-50);
+    color: var(--color-gray-600);
+    font-size: 0.76rem;
+    line-height: 1.45;
+    padding: 7px 9px;
+}
+
+@media (max-width: 1100px) {
+    .asset-governance-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .asset-governance-grid {
+        grid-template-columns: 1fr;
+    }
+}
 .assets-toolbar {
     align-items: stretch;
 }

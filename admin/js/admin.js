@@ -376,6 +376,7 @@
         var selectedAssetIds = {};
         var activeAssetId = null;
         var assetUploading = false;
+        var assetDuplicateOpen = false;
         var assetSearchTimer = null;
         var assetPickerTimer = null;
         var assetPickerState = {
@@ -5586,11 +5587,23 @@
             }
 
             var assetType = document.getElementById('asset-type-filter');
-            if (assetType) {
-                assetType.addEventListener('change', function () {
+            var assetUsage = document.getElementById('asset-usage-filter');
+            var assetActive = document.getElementById('asset-active-filter');
+            [assetType, assetUsage, assetActive].forEach(function (field) {
+                if (!field) return;
+                field.addEventListener('change', function () {
                     assetPage = 1;
                     updateAssetClearFilters();
                     loadAssets();
+                });
+            });
+
+            var duplicateBtn = document.getElementById('btn-show-asset-duplicates');
+            if (duplicateBtn) {
+                duplicateBtn.addEventListener('click', function () {
+                    assetDuplicateOpen = !assetDuplicateOpen;
+                    renderAssetDuplicatesPanel(null);
+                    if (assetDuplicateOpen) loadAssetDuplicates();
                 });
             }
 
@@ -5599,6 +5612,8 @@
                 clearAssetFilters.addEventListener('click', function () {
                     if (assetSearch) assetSearch.value = '';
                     if (assetType) assetType.value = '';
+                    if (assetUsage) assetUsage.value = '';
+                    if (assetActive) assetActive.value = '1';
                     assetPage = 1;
                     updateAssetClearFilters();
                     loadAssets();
@@ -5642,7 +5657,9 @@
             if (!btn) return;
             var searchVal = ((document.getElementById('asset-search') || {}).value || '').trim();
             var typeVal = (document.getElementById('asset-type-filter') || {}).value || '';
-            btn.style.display = searchVal || typeVal ? '' : 'none';
+            var usageVal = (document.getElementById('asset-usage-filter') || {}).value || '';
+            var activeVal = (document.getElementById('asset-active-filter') || {}).value || '1';
+            btn.style.display = searchVal || typeVal || usageVal || activeVal !== '1' ? '' : 'none';
         }
 
         function setAssetViewMode(mode) {
@@ -5717,6 +5734,18 @@
             return '该资源正在被 ' + total + ' 个位置使用，不能直接移出资源库。\n\n' + lines.join('\n') + '\n\n请先替换这些引用后再删除。';
         }
 
+
+
+        function formatAssetReplaceMessage(target, items, total) {
+            items = Array.isArray(items) ? items : [];
+            total = Number(total || items.length || 0);
+            var targetName = target && (target.original_name || target.filename || target.path || ('资源 #' + target.id)) || '目标资源';
+            var lines = items.slice(0, 8).map(function (item, index) {
+                return (index + 1) + '. ' + (item.title || item.entity_type || '未命名内容') + '：' + assetUsageLocationText(item);
+            });
+            if (total > lines.length) lines.push('还有 ' + (total - lines.length) + ' 个引用位置未显示。');
+            return '将把当前资源的 ' + total + ' 个引用位置替换为：' + targetName + '\n\n' + lines.join('\n') + '\n\n确认后会同步更新产品、证书、内容模块和可视化页面中的图片引用。';
+        }
         function refreshAssetUsageDetail(assetId, hostId) {
             var host = document.getElementById(hostId);
             if (!assetId || !host) return;
@@ -5910,8 +5939,23 @@
             if (next) next.disabled = assetPickerState.page >= totalPages;
         }
 
+
+
+        function logAssetSelection(asset) {
+            if (!asset || !asset.id) return;
+            apiRequest('/admin/assets/' + encodeURIComponent(asset.id) + '/select-log', {
+                method: 'POST',
+                body: {
+                    module: assetPickerState.module || 'assets',
+                    entity_type: assetPickerState.entityType || '',
+                    entity_id: assetPickerState.entityId || '',
+                    source: 'asset_picker'
+                }
+            }).catch(function () {});
+        }
         function confirmAssetPickerSelection() {
             if (!assetPickerState.selectedAsset || !assetPickerState.onSelect) return;
+            logAssetSelection(assetPickerState.selectedAsset);
             assetPickerState.onSelect(assetPickerState.selectedAsset);
             closeAssetPicker();
         }
@@ -5985,6 +6029,69 @@
             });
         }
 
+
+
+        function renderAssetGovernance(data) {
+            var grid = document.getElementById('asset-governance-grid');
+            if (!grid) return;
+            data = data || {};
+            var cards = [
+                { label: '资源总数', value: data.total == null ? '—' : data.total, hint: '正常 ' + (data.images || 0) + ' 张图片 / ' + (data.files || 0) + ' 个文件' },
+                { label: '未使用', value: data.unused == null ? '—' : data.unused, hint: '可通过使用状态筛选进入清理列表' },
+                { label: '重复资源', value: data.duplicate_groups == null ? '—' : data.duplicate_groups, hint: (data.duplicate_assets || 0) + ' 个资源存在重复文件特征' },
+                { label: '大图建议', value: data.large_images ? data.large_images.length : '—', hint: '总大小 ' + formatFileSize(data.total_size || 0) + '，已移出 ' + (data.inactive || 0) + ' 个' }
+            ];
+            grid.innerHTML = cards.map(function (card) {
+                return '<article><span>' + escapeHtml(card.label) + '</span><strong>' + escapeHtml(card.value) + '</strong><small>' + escapeHtml(card.hint) + '</small></article>';
+            }).join('');
+        }
+
+        function loadAssetGovernance() {
+            apiRequest('/admin/assets/governance').then(function (response) {
+                renderAssetGovernance(unwrapDataResponse(response) || {});
+            }).catch(function () {
+                renderAssetGovernance(null);
+            });
+        }
+
+        function renderAssetDuplicatesPanel(groups) {
+            var panel = document.getElementById('asset-duplicates-panel');
+            var btn = document.getElementById('btn-show-asset-duplicates');
+            if (!panel) return;
+            if (btn) btn.classList.toggle('active', assetDuplicateOpen);
+            panel.hidden = !assetDuplicateOpen;
+            if (!assetDuplicateOpen) return;
+            if (!groups) {
+                panel.innerHTML = '<div class="asset-empty-state">正在检查重复资源...</div>';
+                return;
+            }
+            if (!groups.length) {
+                panel.innerHTML = '<div class="asset-empty-state">未发现重复资源。</div>';
+                return;
+            }
+            panel.innerHTML = groups.map(function (group, index) {
+                var assets = Array.isArray(group.assets) ? group.assets : [];
+                var assetButtons = assets.map(function (asset) {
+                    var label = asset.original_name || asset.filename || asset.path || ('资源 #' + asset.id);
+                    return '<button type="button" data-asset-duplicate-focus="' + escapeHtml(asset.id) + '">' + escapeHtml(label) + '<br><small>' + escapeHtml(asset.path || '') + '</small></button>';
+                }).join('');
+                return '<section class="asset-duplicate-group"><strong>重复组 ' + escapeHtml(index + 1) + '：' + escapeHtml(group.count || assets.length) + ' 个资源</strong><div class="asset-duplicate-meta">类型 ' + escapeHtml(group.mime_type || '未知') + ' · 单个 ' + escapeHtml(formatFileSize(group.file_size)) + '</div><div class="asset-duplicate-assets">' + assetButtons + '</div></section>';
+            }).join('');
+            panel.querySelectorAll('[data-asset-duplicate-focus]').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    setActiveAsset(btn.getAttribute('data-asset-duplicate-focus'));
+                });
+            });
+        }
+
+        function loadAssetDuplicates() {
+            apiRequest('/admin/assets/duplicates').then(function (response) {
+                renderAssetDuplicatesPanel(unwrapListResponse(response));
+            }).catch(function (err) {
+                var panel = document.getElementById('asset-duplicates-panel');
+                if (panel) panel.innerHTML = '<div class="asset-empty-state">重复资源检查失败：' + escapeHtml(err.message) + '</div>';
+            });
+        }
         function loadAssets() {
             var tbody = document.getElementById('assets-tbody');
             var grid = document.getElementById('assets-grid');
@@ -5997,9 +6104,14 @@
             if (pagination) pagination.style.display = 'none';
             var searchVal = ((document.getElementById('asset-search') || {}).value || '').trim();
             var typeVal = (document.getElementById('asset-type-filter') || {}).value || '';
+            var usageVal = (document.getElementById('asset-usage-filter') || {}).value || '';
+            var activeVal = (document.getElementById('asset-active-filter') || {}).value || '1';
             var url = '/admin/assets?page=' + encodeURIComponent(assetPage) + '&pageSize=20&include_usage=1';
             if (searchVal) url += '&q=' + encodeURIComponent(searchVal);
             if (typeVal) url += '&type=' + encodeURIComponent(typeVal);
+            if (usageVal) url += '&usage_status=' + encodeURIComponent(usageVal);
+            if (activeVal !== '') url += '&is_active=' + encodeURIComponent(activeVal);
+            loadAssetGovernance();
             updateAssetClearFilters();
 
             apiRequest(url).then(function (response) {
@@ -6112,6 +6224,29 @@
             renderAssetDetail(findAssetById(activeAssetId));
         }
 
+
+
+        function renderAssetInspection(data) {
+            if (!data) return '<div class="asset-inspection-note">正在读取图片尺寸和文件状态...</div>';
+            var sizeText = data.width && data.height ? (data.width + ' x ' + data.height + ' px') : '未读取到尺寸';
+            var existsText = data.exists ? '文件存在' : '文件不存在';
+            var suggestions = Array.isArray(data.suggestions) && data.suggestions.length
+                ? '<div class="asset-inspection-list">' + data.suggestions.map(function (item) { return '<span>' + escapeHtml(item) + '</span>'; }).join('') + '</div>'
+                : '<div class="asset-inspection-note">暂无压缩或尺寸风险。</div>';
+            return '<strong>图片与文件检查</strong><div class="asset-inspection-note">' + escapeHtml(existsText) + ' · ' + escapeHtml(sizeText) + ' · ' + escapeHtml(formatFileSize(data.file_size)) + '</div>' + suggestions;
+        }
+
+        function refreshAssetInspection(assetId, hostId) {
+            var host = document.getElementById(hostId);
+            if (!assetId || !host) return;
+            apiRequest('/admin/assets/' + encodeURIComponent(assetId) + '/inspection').then(function (response) {
+                var nextHost = document.getElementById(hostId);
+                if (nextHost) nextHost.innerHTML = renderAssetInspection(unwrapDataResponse(response) || {});
+            }).catch(function () {
+                var nextHost = document.getElementById(hostId);
+                if (nextHost) nextHost.innerHTML = '<div class="asset-inspection-note">文件检查失败，请刷新后重试。</div>';
+            });
+        }
         function renderAssetDetail(asset) {
             var container = document.getElementById('asset-detail');
             if (!container) return;
@@ -6128,7 +6263,12 @@
                 : '<div class="asset-file-icon asset-file-icon-large">' + assetFileIcon(asset) + '</div>';
             var source = asset.module ? asset.module + (asset.entity_type ? '/' + asset.entity_type : '') : '未绑定模块';
             var usage = asset.usage_count > 0 ? '已使用 ' + asset.usage_count + ' 处' : '未使用';
+            var activeText = asset.is_active === 0 ? '已移出' : '正常';
             var usageHostId = 'asset-usage-detail-' + String(asset.id || 'active');
+            var inspectionHostId = 'asset-inspection-detail-' + String(asset.id || 'active');
+            var actionHtml = asset.is_active === 0
+                ? '<button class="btn btn-primary btn-sm" type="button" data-restore-asset="' + escapeHtml(asset.id) + '">恢复资源</button>'
+                : '<button class="btn btn-secondary btn-sm" type="button" data-replace-asset="' + escapeHtml(asset.id) + '">替换引用</button><button class="btn btn-icon btn-icon-delete" type="button" aria-label="删除资源" data-delete-asset="' + escapeHtml(asset.id) + '">' + ICON_DELETE + '</button>';
             container.innerHTML = '<div class="asset-detail-preview">' + preview + '</div>' +
                 '<h4>' + escapeHtml(name) + '</h4>' +
                 '<dl>' +
@@ -6136,12 +6276,15 @@
                     '<div><dt>类型</dt><dd>' + escapeHtml(asset.mime_type || '—') + '</dd></div>' +
                     '<div><dt>大小</dt><dd>' + escapeHtml(formatFileSize(asset.file_size)) + '</dd></div>' +
                     '<div><dt>来源</dt><dd>' + escapeHtml(source) + '</dd></div>' +
+                    '<div><dt>资源状态</dt><dd>' + escapeHtml(activeText) + '</dd></div>' +
                     '<div><dt>使用状态</dt><dd data-asset-usage-count="' + escapeHtml(asset.id) + '">' + escapeHtml(usage) + '</dd></div>' +
                     '<div><dt>上传时间</dt><dd>' + escapeHtml(formatDate(asset.created_at)) + '</dd></div>' +
                 '</dl>' +
+                '<section class="asset-inspection-section" id="' + escapeHtml(inspectionHostId) + '">' + renderAssetInspection(null) + '</section>' +
                 '<section class="asset-usage-section"><h5>使用位置</h5><div id="' + escapeHtml(usageHostId) + '">' + renderAssetUsageList(asset.usage || [], asset.usage_count || 0) + '</div></section>' +
-                '<div class="asset-detail-actions"><button class="btn btn-secondary btn-sm" type="button" data-copy-asset="' + escapeHtml(path) + '">复制路径</button><button class="btn btn-icon btn-icon-delete" type="button" aria-label="删除资源" data-delete-asset="' + escapeHtml(asset.id) + '">' + ICON_DELETE + '</button></div>';
+                '<div class="asset-detail-actions"><button class="btn btn-secondary btn-sm" type="button" data-copy-asset="' + escapeHtml(path) + '">复制路径</button>' + actionHtml + '</div>';
             refreshAssetUsageDetail(asset.id, usageHostId);
+            refreshAssetInspection(asset.id, inspectionHostId);
             container.querySelectorAll('[data-copy-asset]').forEach(function (btn) {
                 btn.addEventListener('click', function () {
                     copyAssetPath(btn.getAttribute('data-copy-asset') || '');
@@ -6150,6 +6293,16 @@
             container.querySelectorAll('[data-delete-asset]').forEach(function (btn) {
                 btn.addEventListener('click', function () {
                     deleteAsset(btn.getAttribute('data-delete-asset'));
+                });
+            });
+            container.querySelectorAll('[data-restore-asset]').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    restoreAsset(btn.getAttribute('data-restore-asset'));
+                });
+            });
+            container.querySelectorAll('[data-replace-asset]').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    openReplaceAssetPicker(btn.getAttribute('data-replace-asset'));
                 });
             });
         }
@@ -6244,6 +6397,7 @@
             Promise.all(images.map(uploadSingleAssetFile)).then(function () {
                 showToast('图片已上传到资源库');
                 assetPage = 1;
+                if (assetDuplicateOpen) loadAssetDuplicates();
                 loadAssets();
             }).catch(function (err) {
                 showToast('上传失败：' + err.message, 'error');
@@ -6289,12 +6443,61 @@
             if (nextBtn) nextBtn.disabled = assetPage >= totalPages;
         }
 
+
+
+        function restoreAsset(id) {
+            showConfirm('恢复资源', '确定将这个资源恢复到资源库吗？恢复后可重新被选择和复用。').then(function (ok) {
+                if (!ok) return;
+                apiRequest('/admin/assets/' + encodeURIComponent(id) + '/restore', { method: 'POST' }).then(function () {
+                    showToast('资源已恢复');
+                    loadAssets();
+                }).catch(function (err) {
+                    showToast('恢复失败：' + err.message, 'error');
+                });
+            });
+        }
+
+        function openReplaceAssetPicker(sourceId) {
+            var source = findAssetById(sourceId);
+            if (!source) return;
+            openAssetPicker({
+                title: '选择替换资源',
+                subtitle: '选择后会把当前资源的所有引用替换为新资源，执行前会再次确认影响范围。',
+                module: 'assets',
+                entityType: 'replace',
+                entityId: source.id,
+                type: assetIsImage(source) ? 'image' : '',
+                onSelect: function (target) {
+                    if (!target || String(target.id) === String(source.id)) {
+                        showToast('请选择一个不同的目标资源', 'error');
+                        return;
+                    }
+                    var usage = source.usage || [];
+                    var total = source.usage_count || usage.length;
+                    var message = formatAssetReplaceMessage(target, usage, total);
+                    showConfirm('替换所有引用', message).then(function (ok) {
+                        if (!ok) return;
+                        apiRequest('/admin/assets/' + encodeURIComponent(source.id) + '/replace', {
+                            method: 'POST',
+                            body: { target_asset_id: target.id, confirm: true }
+                        }).then(function () {
+                            showToast('资源引用已替换');
+                            assetPage = 1;
+                            loadAssets();
+                        }).catch(function (err) {
+                            showToast('替换失败：' + err.message, 'error');
+                        });
+                    });
+                }
+            });
+        }
         function deleteAsset(id) {
             showConfirm('删除资源', '确定删除这条资源记录吗？文件本身不会从服务器删除，仅移出资源库。').then(function (ok) {
                 if (!ok) return;
 
                 apiRequest('/admin/assets/' + encodeURIComponent(id), { method: 'DELETE' }).then(function () {
                     showToast('资源已移出资源库');
+                    if (assetDuplicateOpen) loadAssetDuplicates();
                     loadAssets();
                 }).catch(function (err) {
                     if (err.code === 'RESOURCE_IN_USE') {

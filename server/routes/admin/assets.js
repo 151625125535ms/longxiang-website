@@ -6,7 +6,7 @@ const multer = require('multer');
 const { getDb } = require('../../lib/db');
 const { ensureDirectory, resolveUploadDir, resolveUploadPublicPath } = require('../../lib/fileStore');
 const { normalizeUploadedFilename } = require('../../lib/filenameEncoding');
-const { sendError } = require('./helpers');
+const { sendError, insertAuditLog } = require('./helpers');
 const assetReferences = require('../../lib/assetReferences');
 
 const router = express.Router();
@@ -217,6 +217,102 @@ function createUploadAsset(db, file, context) {
     return getAsset(db, result.lastInsertRowid);
 }
 
+
+function readImageDimensions(filePath, mimeType) {
+    const buffer = fs.readFileSync(filePath);
+    if (buffer.length < 10) return null;
+    if (buffer[0] === 0x89 && buffer.toString('ascii', 1, 4) === 'PNG') {
+        return { width: buffer.readUInt32BE(16), height: buffer.readUInt32BE(20) };
+    }
+    if (buffer.toString('ascii', 0, 3) === 'GIF') {
+        return { width: buffer.readUInt16LE(6), height: buffer.readUInt16LE(8) };
+    }
+    if (buffer[0] === 0xff && buffer[1] === 0xd8) {
+        let offset = 2;
+        while (offset + 9 < buffer.length) {
+            if (buffer[offset] !== 0xff) { offset += 1; continue; }
+            const marker = buffer[offset + 1];
+            const length = buffer.readUInt16BE(offset + 2);
+            if (marker >= 0xc0 && marker <= 0xc3) {
+                return { width: buffer.readUInt16BE(offset + 7), height: buffer.readUInt16BE(offset + 5) };
+            }
+            offset += 2 + length;
+        }
+    }
+    if ((mimeType || '').indexOf('webp') !== -1 && buffer.toString('ascii', 0, 4) === 'RIFF' && buffer.toString('ascii', 8, 12) === 'WEBP') {
+        const chunk = buffer.toString('ascii', 12, 16);
+        if (chunk === 'VP8X' && buffer.length >= 30) {
+            return { width: 1 + buffer.readUIntLE(24, 3), height: 1 + buffer.readUIntLE(27, 3) };
+        }
+        if (chunk === 'VP8 ' && buffer.length >= 30) {
+            return { width: buffer.readUInt16LE(26) & 0x3fff, height: buffer.readUInt16LE(28) & 0x3fff };
+        }
+        if (chunk === 'VP8L' && buffer.length >= 25) {
+            const bits = buffer.readUInt32LE(21);
+            return { width: (bits & 0x3fff) + 1, height: ((bits >> 14) & 0x3fff) + 1 };
+        }
+    }
+    return null;
+}
+
+function inspectAsset(asset) {
+    const filePath = assetReferences.resolveLocalFilePath(asset.path || '');
+    const exists = fs.existsSync(filePath) && fs.statSync(filePath).isFile();
+    const result = {
+        exists,
+        local_path: filePath,
+        file_size: asset.file_size || 0,
+        width: null,
+        height: null,
+        suggestions: []
+    };
+    if (!exists) {
+        result.suggestions.push('文件不存在，请确认上传目录或资源路径。');
+        return result;
+    }
+    const stat = fs.statSync(filePath);
+    result.file_size = stat.size;
+    if (String(asset.mime_type || '').indexOf('image/') === 0) {
+        try {
+            const dimensions = readImageDimensions(filePath, asset.mime_type) || {};
+            result.width = dimensions.width || null;
+            result.height = dimensions.height || null;
+        } catch (err) {}
+        if (stat.size > 800 * 1024) result.suggestions.push('图片体积较大，建议压缩到 800KB 以内。');
+        if ((result.width || 0) > 2400 || (result.height || 0) > 2400) result.suggestions.push('图片尺寸较大，建议按展示区域裁切或缩放。');
+        if (!result.width || !result.height) result.suggestions.push('无法读取图片尺寸，建议确认文件格式是否标准。');
+    }
+    return result;
+}
+
+function duplicateGroups(db) {
+    return db.prepare(`
+        SELECT checksum, mime_type, file_size, COUNT(*) AS count, SUM(file_size) AS total_size
+        FROM assets
+        WHERE is_active = 1 AND COALESCE(NULLIF(TRIM(checksum), ''), '') != ''
+        GROUP BY checksum, mime_type, file_size
+        HAVING COUNT(*) > 1
+        ORDER BY count DESC, total_size DESC
+        LIMIT 20
+    `).all().map(function (group) {
+        const assets = db.prepare(`
+            SELECT id, path, filename, original_name, mime_type, file_size, checksum, module, entity_type, entity_id, is_active, created_at
+            FROM assets
+            WHERE is_active = 1 AND checksum = @checksum AND mime_type = @mime_type AND file_size = @file_size
+            ORDER BY created_at DESC, id DESC
+        `).all(group);
+        return { ...group, assets: attachUsage(db, assets) };
+    });
+}
+
+function activeAssetRows(db) {
+    return db.prepare(`
+        SELECT id, path, filename, original_name, mime_type, file_size, checksum, module, entity_type, entity_id, is_active, created_at
+        FROM assets
+        WHERE is_active = 1
+        ORDER BY created_at DESC, id DESC
+    `).all();
+}
 router.get('/', function (req, res, next) {
     try {
         const page = parsePositiveInt(req.query.page, 1);
@@ -273,6 +369,51 @@ router.get('/', function (req, res, next) {
     }
 });
 
+
+router.get('/governance', function (req, res, next) {
+    try {
+        const db = getDb();
+        const rows = activeAssetRows(db);
+        const rowsWithUsage = attachUsage(db, rows);
+        const inspections = rowsWithUsage.map(function (asset) {
+            return { asset, inspection: inspectAsset(asset) };
+        });
+        const largeImages = inspections
+            .filter(function (item) { return String(item.asset.mime_type || '').indexOf('image/') === 0 && item.inspection.suggestions.length; })
+            .slice(0, 12)
+            .map(function (item) {
+                return { ...item.asset, inspection: item.inspection };
+            });
+        const totalSize = rows.reduce(function (sum, asset) { return sum + Number(asset.file_size || 0); }, 0);
+        const inactiveRow = db.prepare('SELECT COUNT(*) AS total FROM assets WHERE is_active = 0').get();
+        const duplicateList = duplicateGroups(db);
+        res.json({
+            ok: true,
+            data: {
+                total: rows.length,
+                used: rowsWithUsage.filter(function (asset) { return asset.usage_count > 0; }).length,
+                unused: rowsWithUsage.filter(function (asset) { return asset.usage_count === 0; }).length,
+                images: rows.filter(function (asset) { return String(asset.mime_type || '').indexOf('image/') === 0; }).length,
+                files: rows.filter(function (asset) { return String(asset.mime_type || '').indexOf('image/') !== 0; }).length,
+                total_size: totalSize,
+                inactive: inactiveRow ? inactiveRow.total : 0,
+                duplicate_groups: duplicateList.length,
+                duplicate_assets: duplicateList.reduce(function (sum, group) { return sum + Number(group.count || 0); }, 0),
+                large_images: largeImages
+            }
+        });
+    } catch (err) {
+        next(err);
+    }
+});
+
+router.get('/duplicates', function (req, res, next) {
+    try {
+        res.json({ ok: true, data: duplicateGroups(getDb()) });
+    } catch (err) {
+        next(err);
+    }
+});
 router.post('/upload', function (req, res, next) {
     upload.any()(req, res, function (err) {
         if (err) {
@@ -288,6 +429,7 @@ router.post('/upload', function (req, res, next) {
         try {
             const db = getDb();
             const asset = createUploadAsset(db, file, req.body || {});
+            insertAuditLog(db, req, 'asset', asset.id, asset.reused ? 'reuse_upload' : 'upload', null, asset);
             res.status(asset.reused ? 200 : 201).json({ ok: true, data: asset, path: asset.path });
         } catch (uploadErr) {
             try { fs.unlinkSync(file.path); } catch (unlinkErr) {}
@@ -333,7 +475,9 @@ router.post('/', function (req, res, next) {
             return getAsset(db, result.lastInsertRowid);
         });
 
-        res.status(201).json({ ok: true, data: createAsset() });
+        const asset = createAsset();
+        insertAuditLog(db, req, 'asset', asset.id, 'create', null, asset);
+        res.status(201).json({ ok: true, data: asset });
     } catch (err) {
         if (err && err.code && String(err.code).indexOf('SQLITE_CONSTRAINT') === 0) {
             return sendError(res, 422, 'VALIDATION_ERROR', 'path already exists.');
@@ -342,6 +486,77 @@ router.post('/', function (req, res, next) {
     }
 });
 
+
+router.get('/:id/inspection', function (req, res, next) {
+    try {
+        const db = getDb();
+        const asset = getAsset(db, req.params.id);
+        if (!asset) return sendError(res, 404, 'NOT_FOUND', 'Asset not found.');
+        res.json({ ok: true, data: inspectAsset(asset) });
+    } catch (err) {
+        next(err);
+    }
+});
+
+router.post('/:id/select-log', function (req, res, next) {
+    try {
+        const db = getDb();
+        const asset = getAsset(db, req.params.id);
+        if (!asset || asset.is_active === 0) return sendError(res, 404, 'NOT_FOUND', 'Asset not found.');
+        insertAuditLog(db, req, 'asset', asset.id, 'select', null, {
+            asset_id: asset.id,
+            path: asset.path,
+            context: req.body || {}
+        });
+        res.json({ ok: true, data: { id: asset.id, logged: true } });
+    } catch (err) {
+        next(err);
+    }
+});
+
+router.post('/:id/restore', function (req, res, next) {
+    try {
+        const db = getDb();
+        const asset = getAsset(db, req.params.id);
+        if (!asset) return sendError(res, 404, 'NOT_FOUND', 'Asset not found.');
+        if (asset.is_active === 1) return res.json({ ok: true, data: { id: asset.id, restored: false } });
+        db.prepare('UPDATE assets SET is_active = 1 WHERE id = ?').run(asset.id);
+        const restored = getAsset(db, asset.id);
+        insertAuditLog(db, req, 'asset', asset.id, 'restore', asset, restored);
+        res.json({ ok: true, data: { ...restored, restored: true } });
+    } catch (err) {
+        next(err);
+    }
+});
+
+router.post('/:id/replace', function (req, res, next) {
+    try {
+        const body = req.body || {};
+        const targetId = parseInteger(body.target_asset_id, null);
+        if (!targetId) return sendError(res, 422, 'VALIDATION_ERROR', 'target_asset_id is required.');
+        const db = getDb();
+        const source = getAsset(db, req.params.id);
+        const target = getAsset(db, targetId);
+        if (!source || source.is_active === 0) return sendError(res, 404, 'NOT_FOUND', 'Source asset not found.');
+        if (!target || target.is_active === 0) return sendError(res, 404, 'NOT_FOUND', 'Target asset not found.');
+        if (String(source.id) === String(target.id)) return sendError(res, 422, 'VALIDATION_ERROR', 'Target asset must be different.');
+        const usage = findAssetUsage(db, source);
+        if (body.confirm !== true) {
+            return res.status(409).json({
+                ok: false,
+                error: { code: 'CONFIRM_REQUIRED', message: '替换资源会影响 ' + usage.length + ' 个引用位置，请确认后再执行。' },
+                data: { usage_count: usage.length, usage }
+            });
+        }
+        const result = db.transaction(function () {
+            return assetReferences.replaceAssetUsageReferences(db, source, target);
+        })();
+        insertAuditLog(db, req, 'asset', source.id, 'replace_references', { source, target, usage }, result);
+        res.json({ ok: true, data: { source_asset_id: source.id, target_asset_id: target.id, ...result } });
+    } catch (err) {
+        next(err);
+    }
+});
 router.get('/:id/usage', function (req, res, next) {
     try {
         const db = getDb();
@@ -385,6 +600,7 @@ router.delete('/:id', function (req, res, next) {
         }
 
         db.prepare('UPDATE assets SET is_active = 0 WHERE id = ?').run(asset.id);
+        insertAuditLog(db, req, 'asset', asset.id, 'deactivate', asset, { ...asset, is_active: 0, usage_count: usage.length });
         res.json({ ok: true, data: { id: asset.id, deactivated: true, usage_count: usage.length } });
     } catch (err) {
         next(err);

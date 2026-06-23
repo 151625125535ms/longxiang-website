@@ -399,6 +399,96 @@ function createMissingAssetForPath(db, assetPath, moduleName) {
     return { created: true };
 }
 
+
+function replaceAssetPathStrings(value, sourcePath, targetPath) {
+    if (typeof value === 'string') {
+        return normalizeAssetPath(value) === sourcePath
+            ? { value: targetPath, changed: true }
+            : { value, changed: false };
+    }
+    if (!value || typeof value !== 'object') return { value, changed: false };
+    if (Array.isArray(value)) {
+        let changed = false;
+        const next = value.map(function (item) {
+            const result = replaceAssetPathStrings(item, sourcePath, targetPath);
+            if (result.changed) changed = true;
+            return result.value;
+        });
+        return { value: next, changed };
+    }
+    let changed = false;
+    const next = {};
+    Object.keys(value).forEach(function (key) {
+        const result = replaceAssetPathStrings(value[key], sourcePath, targetPath);
+        if (result.changed) changed = true;
+        next[key] = result.value;
+    });
+    return { value: next, changed };
+}
+
+function replaceAssetUsageReferences(db, sourceAsset, targetAsset) {
+    const sourceId = sourceAsset && sourceAsset.id;
+    const sourcePath = normalizeAssetPath(sourceAsset && sourceAsset.path);
+    const targetId = targetAsset && targetAsset.id;
+    const targetPath = normalizeAssetPath(targetAsset && targetAsset.path);
+    if (!sourceId || !sourcePath || !targetId || !targetPath || String(sourceId) === String(targetId)) {
+        return { replaced: false, usage_before: [], products: 0, certifications: 0, content_blocks: 0 };
+    }
+
+    const usageBefore = findAssetUsage(db, sourceAsset);
+    const productIds = db.prepare(`
+        SELECT DISTINCT product_id AS id
+        FROM product_media
+        WHERE path = @source_path OR asset_id = @source_id
+    `).all({ source_path: sourcePath, source_id: sourceId }).map(function (row) { return row.id; });
+
+    db.prepare(`
+        UPDATE product_media
+        SET path = @target_path, asset_id = @target_id
+        WHERE path = @source_path OR asset_id = @source_id
+    `).run({ target_path: targetPath, target_id: targetId, source_path: sourcePath, source_id: sourceId });
+    productIds.forEach(function (id) { syncProductAssetReferences(db, id); });
+
+    const certificationIds = db.prepare(`
+        SELECT DISTINCT id
+        FROM certifications
+        WHERE image_path = @source_path OR asset_id = @source_id
+    `).all({ source_path: sourcePath, source_id: sourceId }).map(function (row) { return row.id; });
+
+    db.prepare(`
+        UPDATE certifications
+        SET image_path = @target_path, asset_id = @target_id, version = version + 1, updated_at = @updated_at
+        WHERE image_path = @source_path OR asset_id = @source_id
+    `).run({ target_path: targetPath, target_id: targetId, source_path: sourcePath, source_id: sourceId, updated_at: Date.now() });
+    certificationIds.forEach(function (id) { syncCertificationAssetReference(db, id); });
+
+    const contentBlockIds = [];
+    db.prepare("SELECT id, body_json FROM content_blocks WHERE status != 'deleted'").all().forEach(function (row) {
+        const bodyJson = parseBodyJson(row.body_json);
+        const result = replaceAssetPathStrings(bodyJson, sourcePath, targetPath);
+        if (!result.changed) return;
+        db.prepare(`
+            UPDATE content_blocks
+            SET body_json = @body_json, version = version + 1, updated_at = @updated_at
+            WHERE id = @id
+        `).run({ id: row.id, body_json: JSON.stringify(result.value), updated_at: Date.now() });
+        syncContentBlockAssetReferences(db, row.id);
+        contentBlockIds.push(row.id);
+    });
+
+    db.prepare(`
+        DELETE FROM asset_references
+        WHERE asset_id = @source_id OR asset_path = @source_path
+    `).run({ source_id: sourceId, source_path: sourcePath });
+
+    return {
+        replaced: true,
+        usage_before: usageBefore,
+        products: productIds.length,
+        certifications: certificationIds.length,
+        content_blocks: contentBlockIds.length
+    };
+}
 function collectUsedAssetPaths(db) {
     const paths = [];
     db.prepare(`
@@ -513,5 +603,7 @@ module.exports = {
     syncCertificationAssetReference,
     syncContentBlockAssetReferences,
     findAssetUsage,
+    replaceAssetUsageReferences,
+    resolveLocalFilePath,
     backfillAssetReferences
 };
