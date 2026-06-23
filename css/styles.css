@@ -1211,8 +1211,8 @@ p:last-child {
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    transform: scale(1.02);
-    animation: heroZoom 20s ease-in-out infinite alternate;
+    transform: none;
+    animation: none;
 }
 
 @keyframes heroZoom {
@@ -3545,7 +3545,7 @@ p:last-child {
 }
 
 .hero-hex .hero-bg {
-    filter: saturate(0.9) contrast(1.06);
+    filter: none;
 }
 
 .hero-hex .hero-overlay {
@@ -8791,7 +8791,7 @@ p:last-child {
 
     .hero-hex .hero-bg {
         background-position: 42% center;
-        filter: saturate(0.95) contrast(1.08);
+        filter: none;
     }
 
     .hero-hex .hero-overlay {
@@ -8996,7 +8996,7 @@ p:last-child {
 
     .hero-hex .hero-bg {
         background-position: center;
-        filter: saturate(0.96) contrast(1.08);
+        filter: none;
     }
 
     .hero-hex .hero-overlay {

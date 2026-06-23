@@ -22,6 +22,46 @@
         return assetPrefix + path;
     }
 
+    var optimizedHeroImages = {
+        'assets/education/images/longxiang-electrical-college-hero.png': {
+            sources: [
+                { maxWidth: 768, src: 'assets/education/images/longxiang-electrical-college-hero-1280.webp' },
+                { src: 'assets/education/images/longxiang-electrical-college-hero-1920.webp' }
+            ]
+        }
+    };
+
+    function normalizeAssetKey(path) {
+        path = String(path || '').trim().replace(/\\/g, '/').replace(/^\.?\//, '').replace(/^\/+/, '');
+        try {
+            path = decodeURIComponent(path);
+        } catch (err) {
+            // Keep the original path when it is not URL encoded.
+        }
+        return path;
+    }
+
+    function selectResponsiveSource(sources) {
+        if (!Array.isArray(sources) || !sources.length) return '';
+        var viewportWidth = window.innerWidth || document.documentElement.clientWidth || 1280;
+        for (var i = 0; i < sources.length; i += 1) {
+            if (!sources[i].maxWidth || viewportWidth <= sources[i].maxWidth) {
+                return sources[i].src;
+            }
+        }
+        return sources[sources.length - 1].src;
+    }
+
+    function cssUrl(path) {
+        return "url('" + resolveAsset(path).replace(/'/g, "\\'") + "')";
+    }
+
+    function setOptimizedHeroBackground(element, path) {
+        var optimized = optimizedHeroImages[normalizeAssetKey(path)] || null;
+        var source = optimized && optimized.sources ? selectResponsiveSource(optimized.sources) : '';
+        element.style.backgroundImage = cssUrl(source || path);
+    }
+
     function backgroundVariableStyle(name, path) {
         path = resolveAsset(path);
         return path ? ' style="--' + escapeHtml(name) + ': url(&quot;' + escapeHtml(path) + '&quot;);"' : '';
@@ -138,7 +178,7 @@
         if (!heroEl) return;
 
         if (hero.backgroundImage) {
-            heroEl.style.backgroundImage = "url('" + resolveAsset(hero.backgroundImage).replace(/'/g, "\\'") + "')";
+            setOptimizedHeroBackground(heroEl, hero.backgroundImage);
         }
 
         var title = heroEl.querySelector('h1');
