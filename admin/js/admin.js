@@ -474,6 +474,28 @@
             ];
         }
 
+
+        function visualEducationModeFields() {
+            return [
+                { key: 'modeNumber', label: '板块编号', type: 'text', localized: false },
+                { key: 'title', label: '板块标题', type: 'text', required: true },
+                { key: 'tagline', label: '一句话亮点', type: 'text' },
+                { key: 'summary', label: '详细说明', type: 'textarea' },
+                { key: 'bestFor', label: '适合对象', type: 'textarea' },
+                { key: 'deliverables', label: '交付内容（每行一项）', type: 'list' },
+                { key: 'outcomes', label: '合作成果（每行一项）', type: 'list' },
+                { key: 'image', label: '主图', type: 'asset', localized: false },
+                { key: 'images', label: '证明图片（每行一张）', type: 'list', localized: false }
+            ];
+        }
+
+        function visualEducationCardFields() {
+            return [
+                { key: 'title', label: '卡片标题', type: 'text' },
+                { key: 'text', label: '卡片说明', type: 'textarea' }
+            ];
+        }
+
         var VISUAL_BUILDER_PAGES = [
             {
                 key: 'home',
@@ -674,6 +696,148 @@
                         { key: 'image', label: '分享图片', type: 'asset', localized: false },
                         { key: 'canonicalPath', label: '规范路径', type: 'text', localized: false }
                     ] }
+                ]
+            },
+            {
+                key: 'education',
+                label: '教育合作',
+                slug: 'education',
+                previewUrl: '../education.html',
+                modules: [
+                    {
+                        key: 'hero',
+                        label: '页面首屏',
+                        path: 'hero',
+                        previewSelector: '.education-page-hero',
+                        fields: [
+                            { key: 'title', label: '主标题', type: 'textarea', required: true },
+                            { key: 'subtitle', label: '简介', type: 'textarea' },
+                            { key: 'backgroundImage', label: '背景图', type: 'asset', localized: false }
+                        ]
+                    },
+                    {
+                        key: 'stats',
+                        label: '核心数字',
+                        path: 'stats',
+                        previewSelector: '#education-proof',
+                        array: true,
+                        itemLabel: '数字',
+                        fields: [
+                            { key: 'id', label: '内部标识', type: 'text', localized: false },
+                            { key: 'value', label: '数字', type: 'text', localized: false },
+                            { key: 'label', label: '说明文字', type: 'text' }
+                        ]
+                    },
+                    {
+                        key: 'industryCollege',
+                        label: '产业学院合作',
+                        sectionId: 'industry-college',
+                        previewSelector: '#industry-college',
+                        fields: visualEducationModeFields(),
+                        children: [
+                            {
+                                key: 'industryCollegeCards',
+                                label: '说明卡片',
+                                sectionId: 'industry-college',
+                                sectionPath: 'cards',
+                                previewSelector: '#industry-college .education-offer-grid',
+                                array: true,
+                                itemLabel: '说明卡片',
+                                fields: visualEducationCardFields()
+                            }
+                        ]
+                    },
+                    {
+                        key: 'talentTraining',
+                        label: '人才培养合作',
+                        sectionId: 'talent-training',
+                        previewSelector: '#talent-training',
+                        fields: visualEducationModeFields(),
+                        children: [
+                            {
+                                key: 'talentTrainingCards',
+                                label: '说明卡片',
+                                sectionId: 'talent-training',
+                                sectionPath: 'cards',
+                                previewSelector: '#talent-training .education-offer-grid',
+                                array: true,
+                                itemLabel: '说明卡片',
+                                fields: visualEducationCardFields()
+                            }
+                        ]
+                    },
+                    {
+                        key: 'trainingEquipment',
+                        label: '实训设备与场景',
+                        sectionId: 'training-equipment',
+                        previewSelector: '#training-equipment',
+                        fields: visualEducationModeFields(),
+                        children: [
+                            {
+                                key: 'trainingEquipmentCards',
+                                label: '说明卡片',
+                                sectionId: 'training-equipment',
+                                sectionPath: 'cards',
+                                previewSelector: '#training-equipment .education-offer-grid',
+                                array: true,
+                                itemLabel: '说明卡片',
+                                fields: visualEducationCardFields()
+                            }
+                        ]
+                    },
+                    {
+                        key: 'researchGlobal',
+                        label: '科研与国际合作',
+                        sectionId: 'research-global',
+                        previewSelector: '#research-global',
+                        fields: visualEducationModeFields(),
+                        children: [
+                            {
+                                key: 'researchGlobalCards',
+                                label: '说明卡片',
+                                sectionId: 'research-global',
+                                sectionPath: 'cards',
+                                previewSelector: '#research-global .education-offer-grid',
+                                array: true,
+                                itemLabel: '说明卡片',
+                                fields: visualEducationCardFields()
+                            }
+                        ]
+                    },
+                    {
+                        key: 'gallery',
+                        label: '图片资料',
+                        sectionId: 'gallery',
+                        previewSelector: '#education-gallery',
+                        fields: [
+                            { key: 'title', label: '标题', type: 'text' },
+                            { key: 'summary', label: '说明文字', type: 'textarea' },
+                            { key: 'images', label: '图片路径（每行一张）', type: 'list', localized: false }
+                        ]
+                    },
+                    {
+                        key: 'philosophy',
+                        label: '合作理念',
+                        sectionId: 'cooperation-philosophy',
+                        previewSelector: '#cooperation-philosophy',
+                        fields: [
+                            { key: 'summary', label: '理念标题', type: 'text' },
+                            { key: 'body', label: '段落内容（每行一段）', type: 'list' }
+                        ]
+                    },
+                    {
+                        key: 'cta',
+                        label: '底部 CTA',
+                        path: 'cta',
+                        previewSelector: '#education-contact',
+                        fields: [
+                            { key: 'title', label: '标题', type: 'text' },
+                            { key: 'text', label: '说明文字', type: 'textarea' },
+                            { key: 'buttonText', label: '按钮文字', type: 'text' },
+                            { key: 'href', label: '按钮跳转链接', type: 'url', localized: false },
+                            { key: 'backgroundImage', label: '背景图', type: 'asset', localized: false }
+                        ]
+                    }
                 ]
             },
             {
