@@ -35,7 +35,7 @@ const SCHEMAS = {
     'not-found': { panel: 'object', seo: 'object' },
     'applications': { hero: 'object', industries: 'array', seo: 'object' },
     'innovation': { hero: 'object', sections: 'array', highlights: 'array', related_certification_ids: 'array', seo: 'object' },
-    education: { hero: 'object', stats: 'array', sections: 'array', cta: 'object', seo: 'object' },
+    education: { hero: 'object', stats: 'array', intro: 'object', sections: 'array', cta: 'object', seo: 'object' },
     'page-blocks': { blocks: 'array' }
 };
 

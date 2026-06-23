@@ -11364,3 +11364,27 @@ main[data-content-page] .section-header h2,
         height: 170px;
     }
 }
+
+
+/* Education unified content fields */
+.education-hero-kicker {
+    color: var(--color-gold);
+    text-shadow: 0 2px 14px rgba(0, 0, 0, 0.24);
+}
+
+.education-mode-body {
+    display: grid;
+    gap: 0.85rem;
+    margin-top: 1rem;
+}
+
+.education-mode-body p {
+    margin: 0;
+    color: var(--color-gray-600);
+    font-size: 1rem;
+    line-height: 1.78;
+}
+
+[dir="rtl"] .education-mode-body p {
+    line-height: 1.9;
+}

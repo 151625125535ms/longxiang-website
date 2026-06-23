@@ -481,11 +481,12 @@
                 { key: 'title', label: '板块标题', type: 'text', required: true },
                 { key: 'tagline', label: '一句话亮点', type: 'text' },
                 { key: 'summary', label: '详细说明', type: 'textarea' },
+                { key: 'body', label: '补充段落（每行一段）', type: 'list' },
                 { key: 'bestFor', label: '适合对象', type: 'textarea' },
                 { key: 'deliverables', label: '交付内容（每行一项）', type: 'list' },
                 { key: 'outcomes', label: '合作成果（每行一项）', type: 'list' },
                 { key: 'image', label: '主图', type: 'asset', localized: false },
-                { key: 'images', label: '证明图片（每行一张）', type: 'list', localized: false }
+                { key: 'images', label: '证明图片', type: 'image-grid', localized: false, maxItems: 3, help: '用于当前合作方向左侧证明图，最多 3 张，支持本地上传和从资源库选择。' }
             ];
         }
 
@@ -710,6 +711,7 @@
                         path: 'hero',
                         previewSelector: '.education-page-hero',
                         fields: [
+                            { key: 'eyebrow', label: '小标题', type: 'text' },
                             { key: 'title', label: '主标题', type: 'textarea', required: true },
                             { key: 'subtitle', label: '简介', type: 'textarea' },
                             { key: 'backgroundImage', label: '背景图', type: 'asset', localized: false }
@@ -728,6 +730,18 @@
                             { key: 'label', label: '说明文字', type: 'text' }
                         ]
                     },
+                    {
+                        key: 'intro',
+                        label: '合作模式引导',
+                        path: 'intro',
+                        previewSelector: '#cooperation-models',
+                        fields: [
+                            { key: 'kicker', label: '小标题', type: 'text' },
+                            { key: 'title', label: '引导标题', type: 'textarea' },
+                            { key: 'text', label: '引导说明', type: 'textarea' }
+                        ]
+                    },
+
                     {
                         key: 'industryCollege',
                         label: '产业学院合作',
@@ -821,6 +835,7 @@
                         sectionId: 'cooperation-philosophy',
                         previewSelector: '#cooperation-philosophy',
                         fields: [
+                            { key: 'title', label: '理念小标题', type: 'text' },
                             { key: 'summary', label: '理念标题', type: 'text' },
                             { key: 'body', label: '段落内容（每行一段）', type: 'list' }
                         ]
@@ -836,6 +851,17 @@
                             { key: 'buttonText', label: '按钮文字', type: 'text' },
                             { key: 'href', label: '按钮跳转链接', type: 'url', localized: false },
                             { key: 'backgroundImage', label: '背景图', type: 'asset', localized: false }
+                        ]
+                    },
+                    {
+                        key: 'seo',
+                        label: 'SEO',
+                        path: 'seo',
+                        fields: [
+                            { key: 'title', label: 'SEO 标题', type: 'text' },
+                            { key: 'description', label: 'SEO 描述', type: 'textarea' },
+                            { key: 'image', label: '分享图', type: 'asset', localized: false },
+                            { key: 'canonicalPath', label: '规范路径', type: 'text', localized: false }
                         ]
                     }
                 ]
@@ -4437,10 +4463,21 @@
             return renderGenericArray(arrayConfig.key, arrayConfig.label, items, arrayConfig.fields);
         }
 
+        function renderEducationVisualRedirect(form) {
+            form.innerHTML = '<div class="content-editor-panel visual-redirect-panel">' +
+                '<div class="content-editor-panel-head"><h3>教育合作已统一到可视化管理</h3><p>请在“可视化管理 > 教育合作”维护页面字段、阿拉伯语内容和图片资源，旧内容模块不再提供路径列表编辑。</p></div>' +
+                '<button type="button" class="btn btn-primary" data-education-visual-redirect>打开教育合作可视化管理</button>' +
+            '</div>';
+        }
+
         function renderContentBlockForm(viewName, block) {
             var config = CONTENT_BLOCK_FORMS[viewName] || {};
             var form = document.getElementById('form-' + viewName);
             if (!form) return;
+            if (viewName === 'content-education') {
+                renderEducationVisualRedirect(form);
+                return;
+            }
             var body = block.body_json || {};
             var summary = contentBlockSummary(block);
             var handled = {};
@@ -4790,6 +4827,12 @@
                     });
                     form.addEventListener('click', function (e) {
                         var target = e.target;
+                        var educationRedirect = target.closest('[data-education-visual-redirect]');
+                        if (educationRedirect) {
+                            e.preventDefault();
+                            openVisualDashboardTarget('education', 'hero');
+                            return;
+                        }
                         var langTab = target.closest('.cms-lang-tab');
                         if (langTab) {
                             var set = langTab.closest('.cms-lang-set');
@@ -5161,13 +5204,14 @@
             var label = visualLanguageFieldLabel(field, path);
             var maxItems = parseInt(field.maxItems, 10) || 9;
             var images = visualNormalizeImageList(value, maxItems);
+            var help = field.help || ('最多可选择 ' + maxItems + ' 张图片，支持资源库选择、本地上传、预览、删除和排序。');
             return '<div class="visual-field visual-image-grid-field">' +
                 '<label>' + escapeHtml(label) + '</label>' +
                 '<div class="visual-image-grid-card" data-visual-image-grid-card="' + escapeHtml(id) + '">' +
                     '<div class="visual-image-grid-head"><span>已选择 <strong data-visual-image-count="' + escapeHtml(id) + '">' + images.length + '</strong> / ' + maxItems + ' 张</span><button type="button" class="btn btn-secondary btn-sm" data-visual-image-action="upload" data-visual-image-field="' + escapeHtml(id) + '" data-visual-image-index="' + images.length + '"' + (images.length >= maxItems ? ' disabled' : '') + '>本地上传</button></div>' +
                     '<input type="hidden" id="' + escapeHtml(id) + '" data-visual-field="' + escapeHtml(path) + '" data-visual-field-type="image-grid" data-visual-image-grid-max="' + maxItems + '" value="' + escapeHtml(JSON.stringify(images)) + '">' +
                     '<div class="visual-image-grid" data-visual-image-grid="' + escapeHtml(id) + '">' + renderVisualImageGridTiles(id, images, maxItems) + '</div>' +
-                    '<small class="visual-image-grid-help">图片会保存为前台 Proof in Real Scenarios 模块的九宫格，最多 9 张。</small>' +
+                    '<small class="visual-image-grid-help">' + escapeHtml(help) + '</small>' +
                 '</div>' +
             '</div>';
         }

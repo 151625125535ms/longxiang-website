@@ -82,22 +82,22 @@
     function t(key) {
         var labels = isArabic ? {
             pageNav: 'أقسام صفحة التعليم',
-            models: 'نماذج التعاون',
+            models: 'النماذج',
             industrialCollege: 'الكلية الصناعية',
             talentTraining: 'تدريب المواهب',
             teachingEquipment: 'معدات التدريب',
             researchGlobal: 'البحث والتعاون الدولي',
             contact: 'تواصل معنا',
             fourModels: 'أربعة نماذج للتعاون',
-            introTitle: 'اختر مسار تعاون يمكن عرضه وتشغيله وتوسيعه.',
-            introText: 'تقدم Longxiang حلول تعاون تعليمية عملية تشمل بناء المنصات، وتنمية المواهب، وتسليم معدات التدريب، والبحث والتوسع الدولي.',
+            introTitle: 'اختر مسار تعاون قابل للعرض والتشغيل والتوسع.',
+            introText: 'توفر Longxiang حلول تعاون تعليمي تشمل بناء المنصات وتنمية المواهب وتسليم معدات التدريب والتعاون الدولي.',
             bestFor: 'مناسب لـ',
-            delivers: 'ما تقدمه Longxiang',
+            delivers: 'ما الذي تقدمه Longxiang',
             outcomes: 'نتائج الشريك',
-            proofAlt: 'دليل تعاون',
+            proofAlt: 'صورة تعاون تعليمي من Longxiang',
             proofOverlay: 'دليل التعاون',
             philosophy: 'فلسفة التعاون',
-            discuss: 'مناقشة التعاون'
+            discuss: 'ناقش التعاون'
         } : {
             pageNav: 'Education page sections',
             models: 'Models',
@@ -120,13 +120,72 @@
         return labels[key] || key;
     }
 
+
+    function setMetaTag(attribute, key, value) {
+        if (!value) return;
+        var selector = 'meta[' + attribute + '="' + key + '"]';
+        var meta = document.querySelector(selector);
+        if (!meta) {
+            meta = document.createElement('meta');
+            meta.setAttribute(attribute, key);
+            document.head.appendChild(meta);
+        }
+        meta.setAttribute('content', value);
+    }
+
+    function setCanonicalLink(path) {
+        if (!path) return;
+        var link = document.querySelector('link[rel="canonical"]');
+        if (!link) {
+            link = document.createElement('link');
+            link.setAttribute('rel', 'canonical');
+            document.head.appendChild(link);
+        }
+        var canonicalPath = String(path || '').trim();
+        if (isArabic && canonicalPath === 'education.html') canonicalPath = 'ar/education.html';
+        try {
+            link.setAttribute('href', new URL(canonicalPath.replace(/^\/+/, ''), window.location.origin + '/').href);
+        } catch (err) {
+            link.setAttribute('href', canonicalPath);
+        }
+    }
+
+    function absoluteAssetUrl(path) {
+        if (!path) return '';
+        if (/^(https?:)?\/\//.test(path)) return path;
+        try {
+            return new URL(resolveAsset(path), window.location.href).href;
+        } catch (err) {
+            return resolveAsset(path);
+        }
+    }
+
+    function applyEducationSeo(data) {
+        var seo = data && data.seo ? data.seo : {};
+        var title = localized(seo, 'title');
+        var description = localized(seo, 'description');
+        var image = absoluteAssetUrl(seo.image);
+
+        if (title) {
+            document.title = title;
+            setMetaTag('property', 'og:title', title);
+        }
+        if (description) {
+            setMetaTag('name', 'description', description);
+            setMetaTag('property', 'og:description', description);
+        }
+        if (image) setMetaTag('property', 'og:image', image);
+        if (seo.canonicalPath) setCanonicalLink(seo.canonicalPath);
+    }
+
     function fetchJson(url, fallbackUrl) {
         return fetch(url)
             .then(function (res) {
                 if (!res.ok) throw new Error('API request failed');
                 return res.json();
             })
-            .catch(function () {
+            .catch(function (err) {
+                if (!fallbackUrl) throw err;
                 return fetch(fallbackUrl).then(function (res) {
                     if (!res.ok) throw new Error('Fallback request failed');
                     return res.json();
@@ -150,6 +209,13 @@
         return '<ul class="education-checklist">' + items.map(function (item) {
             return '<li>' + escapeHtml(item) + '</li>';
         }).join('') + '</ul>';
+    }
+
+    function renderBodyParagraphs(items) {
+        if (!items || !items.length) return '';
+        return '<div class="education-mode-body">' + items.map(function (item) {
+            return '<p>' + escapeHtml(item) + '</p>';
+        }).join('') + '</div>';
     }
 
     function renderProofImages(images, title) {
@@ -183,6 +249,17 @@
 
         var title = heroEl.querySelector('h1');
         var subtitle = heroEl.querySelector('p');
+        var eyebrow = localized(hero, 'eyebrow');
+        var kicker = heroEl.querySelector('.education-hero-kicker');
+        if (!kicker && eyebrow && title) {
+            kicker = document.createElement('span');
+            kicker.className = 'education-hero-kicker section-kicker';
+            title.parentNode.insertBefore(kicker, title);
+        }
+        if (kicker) {
+            kicker.textContent = eyebrow;
+            kicker.hidden = !eyebrow;
+        }
         if (title) title.textContent = localized(hero, 'title') || 'Education';
         if (subtitle) subtitle.textContent = localized(hero, 'subtitle');
     }
@@ -210,12 +287,17 @@
 
     function renderConversionIntro(data) {
         var sections = cooperationSections(data);
+        var intro = data.intro || {};
+        var kicker = localized(intro, 'kicker') || t('fourModels');
+        var title = localized(intro, 'title') || t('introTitle');
+        var text = localized(intro, 'text') || t('introText');
+
         return '<section class="section education-conversion" id="cooperation-models">' +
             '<div class="container">' +
             '<div class="education-conversion-head fade-in">' +
-            '<span class="section-kicker">' + escapeHtml(t('fourModels')) + '</span>' +
-            '<h2>' + escapeHtml(t('introTitle')) + '</h2>' +
-            '<p>' + escapeHtml(t('introText')) + '</p>' +
+            '<span class="section-kicker">' + escapeHtml(kicker) + '</span>' +
+            '<h2>' + escapeHtml(title) + '</h2>' +
+            '<p>' + escapeHtml(text) + '</p>' +
             '</div>' +
             '<div class="education-model-grid">' +
             sections.map(function (section) {
@@ -244,6 +326,7 @@
             '<h2>' + escapeHtml(localized(section, 'title')) + '</h2>' +
             '<p class="education-mode-tagline">' + escapeHtml(localized(section, 'tagline') || '') + '</p>' +
             '<p class="education-mode-summary">' + escapeHtml(localized(section, 'summary')) + '</p>' +
+            renderBodyParagraphs(localizedList(section, 'body')) +
             '<div class="education-buyer-fit"><strong>' + escapeHtml(t('bestFor')) + '</strong><span>' + escapeHtml(localized(section, 'bestFor') || '') + '</span></div>' +
             '<div class="education-mode-columns">' +
             '<div><h4>' + escapeHtml(t('delivers')) + '</h4>' + renderList(localizedList(section, 'deliverables')) + '</div>' +
@@ -279,10 +362,11 @@
     function renderPhilosophy(section) {
         if (!section) return '';
         var body = localizedList(section, 'body');
+        var kicker = localized(section, 'title') || t('philosophy');
         return '<section class="section education-philosophy" id="cooperation-philosophy">' +
             '<div class="container">' +
             '<div class="education-philosophy-panel fade-in">' +
-            '<span class="section-kicker">' + escapeHtml(t('philosophy')) + '</span>' +
+            '<span class="section-kicker">' + escapeHtml(kicker) + '</span>' +
             '<h2>' + escapeHtml(localized(section, 'summary')) + '</h2>' +
             body.map(function (item) { return '<p>' + escapeHtml(item) + '</p>'; }).join('') +
             '</div></div></section>';
@@ -304,6 +388,7 @@
         var gallery = findSection(data, 'gallery');
         var sections = cooperationSections(data);
 
+        applyEducationSeo(data);
         renderHero(data);
         pageRoot.innerHTML =
             renderPageNav() +
