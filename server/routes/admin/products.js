@@ -1,5 +1,6 @@
 const express = require('express');
 const crypto = require('crypto');
+const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
 const { getDb } = require('../../lib/db');
@@ -50,6 +51,10 @@ function parsePositiveInt(value, defaultValue, maxValue) {
 function parseInteger(value, defaultValue) {
     const parsed = parseInt(value, 10);
     return Number.isFinite(parsed) ? parsed : defaultValue;
+}
+
+function fileChecksum(filePath) {
+    return crypto.createHash('sha256').update(fs.readFileSync(filePath)).digest('hex');
 }
 
 function normalizeBool(value, defaultValue) {
@@ -492,6 +497,29 @@ router.post('/upload', function (req, res, next) {
             const originalName = normalizeUploadedFilename(req.file.originalname);
             const db = getDb();
             const createdAt = Date.now();
+            const checksum = fileChecksum(req.file.path);
+            const duplicate = checksum ? db.prepare(`
+                SELECT
+                    id, path, filename, original_name, mime_type, file_size,
+                    checksum, module, entity_type, entity_id, is_active, created_at
+                FROM assets
+                WHERE checksum = @checksum
+                    AND file_size = @file_size
+                    AND mime_type = @mime_type
+                    AND is_active = 1
+                ORDER BY created_at DESC, id DESC
+                LIMIT 1
+            `).get({
+                checksum,
+                file_size: req.file.size || 0,
+                mime_type: req.file.mimetype || ''
+            }) : null;
+
+            if (duplicate) {
+                try { fs.unlinkSync(req.file.path); } catch (unlinkErr) {}
+                return res.status(200).json({ ok: true, data: { ...duplicate, reused: true }, path: duplicate.path });
+            }
+
             const createAsset = db.transaction(function () {
                 const result = db.prepare(`
                     INSERT INTO assets
@@ -510,7 +538,7 @@ router.post('/upload', function (req, res, next) {
                     original_name: originalName,
                     mime_type: req.file.mimetype || '',
                     file_size: req.file.size || 0,
-                    checksum: '',
+                    checksum,
                     created_at: createdAt
                 });
 
@@ -520,7 +548,8 @@ router.post('/upload', function (req, res, next) {
                     filename: req.file.filename,
                     original_name: originalName,
                     mime_type: req.file.mimetype || '',
-                    file_size: req.file.size || 0
+                    file_size: req.file.size || 0,
+                    checksum
                 };
             });
 

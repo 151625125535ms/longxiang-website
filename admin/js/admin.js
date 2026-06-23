@@ -127,6 +127,8 @@
                     var err = new Error(message);
                     err.status = res.status;
                     err.code = data.error && data.error.code;
+                    err.data = data;
+                    err.details = data && data.data;
                     throw err;
                 }
                 return data;
@@ -222,6 +224,7 @@
 
             titleEl.textContent = title;
             msgEl.textContent = message;
+            msgEl.classList.toggle('confirm-message-long', String(message || '').indexOf('\n') !== -1);
             overlay.classList.add('show');
             trapFocus(overlay, onCancel);
 
@@ -3863,7 +3866,7 @@
                 ],
                 arrays: [
                     { key: 'stats', label: '统计数据', fields: [['value', '数值'], ['label', '标签'], ['labelAr', '标签（阿语）']] },
-                    { key: 'sections', label: '合作板块', fields: [['id', 'ID'], ['modeNumber', '序号'], ['title', '标题'], ['titleAr', '标题（阿语）'], ['tagline', '标语'], ['taglineAr', '标语（阿语）'], ['summary', '摘要'], ['summaryAr', '摘要（阿语）'], ['image', '图片'], ['bestFor', '适合对象'], ['bestForAr', '适合对象（阿语）']] }
+                    { key: 'sections', label: '合作板块', fields: [['id', 'ID'], ['modeNumber', '序号'], ['title', '标题'], ['titleAr', '标题（阿语）'], ['tagline', '标语'], ['taglineAr', '标语（阿语）'], ['summary', '摘要'], ['summaryAr', '摘要（阿语）'], ['image', '图片'], ['images', '证明图片'], ['bestFor', '适合对象'], ['bestForAr', '适合对象（阿语）']] }
                 ]
             },
             'content-page-blocks': {
@@ -4027,6 +4030,16 @@
             return /(^|\.)(image|backgroundImage|cover_image|thumbnail|preview|logo|icon|qr|mapQr|wechatQr)$/i.test(path);
         }
 
+        function isImageListField(path) {
+            return /(^|\.)(images|galleryImages)$/i.test(path);
+        }
+
+        function isPrimitiveList(value) {
+            return Array.isArray(value) && value.every(function (item) {
+                return item == null || typeof item !== 'object';
+            });
+        }
+
         function isRelationField(path) {
             return /related_(product|certification)_ids$/.test(path);
         }
@@ -4106,7 +4119,12 @@
         function renderListField(path, label, value) {
             var id = 'cms-list-' + path.replace(/[^a-zA-Z0-9_-]/g, '-');
             var list = Array.isArray(value) ? value : [];
-            return '<div class="form-group cms-field"><label for="' + escapeHtml(id) + '">' + escapeHtml(humanizeFieldLabel(path, label)) + '</label><textarea id="' + escapeHtml(id) + '" data-cms-list="' + escapeHtml(path) + '" rows="4">' + escapeHtml(list.join('\n')) + '</textarea><small class="cms-field-hint">每行一项，保存时仍写回原数组结构。</small></div>';
+            var listText = list.join('\n');
+            var imageActions = isImageListField(path)
+                ? '<div class="asset-field-actions cms-image-actions"><button type="button" class="btn btn-secondary btn-sm cms-asset-shortcut" data-cms-select-list-asset="' + escapeHtml(id) + '">从资源库添加</button><button type="button" class="btn btn-secondary btn-sm cms-clear-asset" data-cms-clear-list-asset="' + escapeHtml(id) + '">清空</button></div>'
+                : '';
+            var hint = isImageListField(path) ? '每行一张图片；可从资源库追加，保存时仍写回原数组结构。' : '每行一项，保存时仍写回原数组结构。';
+            return '<div class="form-group cms-field"><label for="' + escapeHtml(id) + '">' + escapeHtml(humanizeFieldLabel(path, label)) + '</label><textarea id="' + escapeHtml(id) + '" data-cms-list="' + escapeHtml(path) + '" rows="4">' + escapeHtml(listText) + '</textarea>' + imageActions + '<small class="cms-field-hint">' + escapeHtml(hint) + '</small></div>';
         }
 
         function renderObjectEditor(path, label, value) {
@@ -4158,6 +4176,7 @@
         }
 
         function renderConfiguredField(path, label, value, forceTextarea) {
+            if (isPrimitiveList(value)) return renderListField(path, label, value);
             if (Array.isArray(value) || (value && typeof value === 'object')) {
                 return renderGenericValue(path, label, value);
             }
@@ -4389,9 +4408,13 @@
 
             form.querySelectorAll('[data-cms-array]').forEach(function (arrayEl) {
                 var key = arrayEl.getAttribute('data-cms-array');
+                var existingItems = getPathValue(body, key);
+                if (!Array.isArray(existingItems)) existingItems = [];
                 var items = [];
                 arrayEl.querySelectorAll('[data-cms-array-item]').forEach(function (itemEl, index) {
-                    var item = {};
+                    var originalIndex = parseInt(itemEl.getAttribute('data-cms-array-item'), 10);
+                    var originalItem = existingItems[Number.isFinite(originalIndex) ? originalIndex : index];
+                    var item = originalItem && typeof originalItem === 'object' && !Array.isArray(originalItem) ? cloneBody(originalItem) : {};
                     itemEl.querySelectorAll('[data-cms-field]').forEach(function (field) {
                         var fieldPath = field.getAttribute('data-cms-field');
                         var prefix = key + '.' + itemEl.getAttribute('data-cms-array-item') + '.';
@@ -4547,6 +4570,38 @@
             });
         }
 
+
+        function updateCmsAssetListField(input, path, clear) {
+            if (!input) return;
+            if (clear) {
+                input.value = '';
+                markFormDirty();
+                return;
+            }
+            path = String(path || '').trim();
+            if (!path) return;
+            var rows = String(input.value || '').split(/\r?\n/).map(function (item) { return item.trim(); }).filter(Boolean);
+            if (rows.indexOf(path) === -1) rows.push(path);
+            input.value = rows.join('\n');
+            markFormDirty();
+        }
+
+        function openContentAssetListPicker(viewName, inputId) {
+            var input = document.getElementById(inputId);
+            if (!input) return;
+            var block = contentBlockCache[viewName] || {};
+            openAssetPicker({
+                title: '添加内容图片',
+                subtitle: '选择后会追加到当前图片列表，不需要手动复制路径。',
+                module: 'content_blocks',
+                entityType: 'content_block',
+                entityId: block.id || '',
+                onSelect: function (asset) {
+                    updateCmsAssetListField(input, asset && asset.path ? asset.path : '', false);
+                    showToast('已追加到图片列表');
+                }
+            });
+        }
         function bindContentBlockEvents() {
             var views = [
                 'content-home',
@@ -4592,6 +4647,16 @@
                         var clearAsset = target.closest('[data-cms-clear-asset]');
                         if (clearAsset) {
                             updateCmsAssetField(document.getElementById(clearAsset.getAttribute('data-cms-clear-asset')), '');
+                            return;
+                        }
+                        var selectListAsset = target.closest('[data-cms-select-list-asset]');
+                        if (selectListAsset) {
+                            openContentAssetListPicker(viewName, selectListAsset.getAttribute('data-cms-select-list-asset'));
+                            return;
+                        }
+                        var clearListAsset = target.closest('[data-cms-clear-list-asset]');
+                        if (clearListAsset) {
+                            updateCmsAssetListField(document.getElementById(clearListAsset.getAttribute('data-cms-clear-list-asset')), '', true);
                             return;
                         }
                         if (target.classList.contains('cms-reload')) {
@@ -5605,6 +5670,70 @@
             return (i === 0 ? size : size.toFixed(1)) + ' ' + units[i];
         }
 
+
+        function assetUsageModuleLabel(moduleName) {
+            var labels = {
+                products: '产品',
+                certifications: '证书',
+                content_blocks: '内容模块',
+                visual_builder: '可视化管理',
+                education: '教育合作',
+                assets: '资源库'
+            };
+            return labels[moduleName] || moduleName || '未知模块';
+        }
+
+        function assetUsageLocationText(item) {
+            if (!item) return '未知位置';
+            var parts = [assetUsageModuleLabel(item.module)];
+            if (item.entity_type) parts.push(item.entity_type);
+            if (item.entity_id != null && item.entity_id !== '') parts.push('#' + item.entity_id);
+            if (item.field_path) parts.push(item.field_path);
+            return parts.join(' · ');
+        }
+
+        function renderAssetUsageList(items, total) {
+            items = Array.isArray(items) ? items : [];
+            total = Number(total || items.length || 0);
+            if (!total && !items.length) {
+                return '<div class="asset-usage-empty">当前未发现后台引用。</div>';
+            }
+            var shown = items.slice(0, 20);
+            var listHtml = shown.map(function (item) {
+                var title = item.title || item.entity_type || '未命名内容';
+                return '<div class="asset-usage-item"><strong>' + escapeHtml(title) + '</strong><span>' + escapeHtml(assetUsageLocationText(item)) + '</span></div>';
+            }).join('');
+            var more = total > shown.length ? '<small class="asset-usage-more">还有 ' + escapeHtml(total - shown.length) + ' 个引用位置未显示。</small>' : '';
+            return '<div class="asset-usage-list">' + listHtml + '</div>' + more;
+        }
+
+        function formatAssetUsageMessage(items, total) {
+            items = Array.isArray(items) ? items : [];
+            total = Number(total || items.length || 0);
+            var lines = items.slice(0, 8).map(function (item, index) {
+                return (index + 1) + '. ' + (item.title || item.entity_type || '未命名内容') + '（' + assetUsageLocationText(item) + '）';
+            });
+            if (total > lines.length) lines.push('还有 ' + (total - lines.length) + ' 个引用位置未显示。');
+            return '该资源正在被 ' + total + ' 个位置使用，不能直接移出资源库。\n\n' + lines.join('\n') + '\n\n请先替换这些引用后再删除。';
+        }
+
+        function refreshAssetUsageDetail(assetId, hostId) {
+            var host = document.getElementById(hostId);
+            if (!assetId || !host) return;
+            apiRequest('/admin/assets/' + encodeURIComponent(assetId) + '/usage').then(function (response) {
+                if (String(activeAssetId) !== String(assetId)) return;
+                var data = unwrapDataResponse(response) || {};
+                var items = data.items || [];
+                var total = data.usage_count || items.length;
+                var nextHost = document.getElementById(hostId);
+                if (nextHost) nextHost.innerHTML = renderAssetUsageList(items, total);
+                var countEl = document.querySelector('[data-asset-usage-count="' + String(assetId).replace(/"/g, '') + '"]');
+                if (countEl) countEl.textContent = total > 0 ? '已使用 ' + total + ' 处' : '未使用';
+            }).catch(function () {
+                var nextHost = document.getElementById(hostId);
+                if (nextHost) nextHost.innerHTML = '<div class="asset-usage-empty">使用位置加载失败，请刷新后重试。</div>';
+            });
+        }
         function openAssetPicker(options) {
             options = options || {};
             assetPickerState.open = true;
@@ -5763,7 +5892,8 @@
                     '<div><dt>来源</dt><dd>' + escapeHtml(source) + '</dd></div>' +
                     '<div><dt>状态</dt><dd>' + escapeHtml(usage) + '</dd></div>' +
                     '<div><dt>上传时间</dt><dd>' + escapeHtml(formatDate(asset.created_at)) + '</dd></div>' +
-                '</dl>';
+                '</dl>' +
+                '<section class="asset-usage-section"><h5>使用位置</h5>' + renderAssetUsageList(asset.usage || [], asset.usage_count || 0) + '</section>';
         }
 
         function renderAssetPickerPagination(meta) {
@@ -5998,6 +6128,7 @@
                 : '<div class="asset-file-icon asset-file-icon-large">' + assetFileIcon(asset) + '</div>';
             var source = asset.module ? asset.module + (asset.entity_type ? '/' + asset.entity_type : '') : '未绑定模块';
             var usage = asset.usage_count > 0 ? '已使用 ' + asset.usage_count + ' 处' : '未使用';
+            var usageHostId = 'asset-usage-detail-' + String(asset.id || 'active');
             container.innerHTML = '<div class="asset-detail-preview">' + preview + '</div>' +
                 '<h4>' + escapeHtml(name) + '</h4>' +
                 '<dl>' +
@@ -6005,10 +6136,12 @@
                     '<div><dt>类型</dt><dd>' + escapeHtml(asset.mime_type || '—') + '</dd></div>' +
                     '<div><dt>大小</dt><dd>' + escapeHtml(formatFileSize(asset.file_size)) + '</dd></div>' +
                     '<div><dt>来源</dt><dd>' + escapeHtml(source) + '</dd></div>' +
-                    '<div><dt>使用状态</dt><dd>' + escapeHtml(usage) + '</dd></div>' +
+                    '<div><dt>使用状态</dt><dd data-asset-usage-count="' + escapeHtml(asset.id) + '">' + escapeHtml(usage) + '</dd></div>' +
                     '<div><dt>上传时间</dt><dd>' + escapeHtml(formatDate(asset.created_at)) + '</dd></div>' +
                 '</dl>' +
+                '<section class="asset-usage-section"><h5>使用位置</h5><div id="' + escapeHtml(usageHostId) + '">' + renderAssetUsageList(asset.usage || [], asset.usage_count || 0) + '</div></section>' +
                 '<div class="asset-detail-actions"><button class="btn btn-secondary btn-sm" type="button" data-copy-asset="' + escapeHtml(path) + '">复制路径</button><button class="btn btn-icon btn-icon-delete" type="button" aria-label="删除资源" data-delete-asset="' + escapeHtml(asset.id) + '">' + ICON_DELETE + '</button></div>';
+            refreshAssetUsageDetail(asset.id, usageHostId);
             container.querySelectorAll('[data-copy-asset]').forEach(function (btn) {
                 btn.addEventListener('click', function () {
                     copyAssetPath(btn.getAttribute('data-copy-asset') || '');
@@ -6164,6 +6297,19 @@
                     showToast('资源已移出资源库');
                     loadAssets();
                 }).catch(function (err) {
+                    if (err.code === 'RESOURCE_IN_USE') {
+                        var details = err.details || {};
+                        var usage = details.usage || details.items || [];
+                        var total = details.usage_count || usage.length;
+                        var active = findAssetById(id);
+                        if (active) {
+                            active.usage = usage;
+                            active.usage_count = total;
+                            if (String(activeAssetId) === String(id)) renderAssetDetail(active);
+                        }
+                        showConfirm('资源正在使用，无法删除', formatAssetUsageMessage(usage, total));
+                        return;
+                    }
                     showToast('删除失败：' + err.message, 'error');
                 });
             });

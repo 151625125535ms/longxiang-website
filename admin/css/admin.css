@@ -2485,6 +2485,13 @@ h1, h2, h3, h4, h5, h6 {
     margin-bottom: 24px;
 }
 
+.confirm-dialog .confirm-message-long {
+    text-align: left;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+    line-height: 1.6;
+}
+
 .confirm-actions {
     display: flex;
     gap: 12px;
@@ -3838,6 +3845,52 @@ h1, h2, h3, h4, h5, h6 {
     overflow-wrap: anywhere;
 }
 
+.asset-usage-section {
+    border-top: 1px solid var(--color-gray-200);
+    padding-top: 12px;
+}
+
+.asset-usage-section h5 {
+    margin: 0 0 8px;
+    color: var(--color-navy);
+    font-size: 0.86rem;
+    font-weight: 800;
+}
+
+.asset-usage-list {
+    display: grid;
+    gap: 8px;
+}
+
+.asset-usage-item {
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--radius-sm);
+    background: var(--color-gray-50);
+    padding: 9px 10px;
+}
+
+.asset-usage-item strong,
+.asset-usage-item span,
+.asset-usage-more,
+.asset-usage-empty {
+    display: block;
+    overflow-wrap: anywhere;
+}
+
+.asset-usage-item strong {
+    color: var(--color-navy);
+    font-size: 0.82rem;
+    line-height: 1.35;
+}
+
+.asset-usage-item span,
+.asset-usage-more,
+.asset-usage-empty {
+    margin-top: 3px;
+    color: var(--color-gray-500);
+    font-size: 0.76rem;
+    line-height: 1.45;
+}
 .asset-detail-actions {
     display: flex;
     align-items: center;
