@@ -267,7 +267,7 @@
             '<div class="section-header fade-in"><h2>' + escapeHtml(localized(section, 'title')) + '</h2>' +
             '<p>' + escapeHtml(localized(section, 'summary')) + '</p></div>' +
             '<div class="gallery-grid education-gallery-grid" data-stagger="80">' +
-            section.images.slice(0, 8).map(function (src, index) {
+            section.images.slice(0, 9).map(function (src, index) {
                 return '<div class="gallery-item fade-in">' +
                     imageHtml(src, t('proofAlt') + ' ' + (index + 1)) +
                     '<div class="gallery-item-overlay"><span>' + escapeHtml(t('proofOverlay')) + '</span></div>' +

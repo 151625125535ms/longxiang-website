@@ -6254,6 +6254,9 @@ p:last-child {
     box-shadow: 0 0 0 4px rgba(0, 163, 224, 0.1);
 }
 
+.gallery-grid.education-gallery-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
 .education-gallery-grid .gallery-item img {
     height: clamp(230px, 22vw, 320px);
 }
@@ -6393,6 +6396,10 @@ p:last-child {
         grid-template-columns: 1fr;
     }
 
+    .gallery-grid.education-gallery-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
     .education-card-image img,
     .education-scene-media img,
     .education-gallery-grid .gallery-item img {
@@ -6415,6 +6422,10 @@ p:last-child {
     .education-intro .about-intro-text,
     .education-scene-content {
         max-width: min(100%, 340px);
+    }
+
+    .gallery-grid.education-gallery-grid {
+        grid-template-columns: 1fr;
     }
 
     .education-card-image img,

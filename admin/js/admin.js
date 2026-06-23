@@ -812,7 +812,7 @@
                         fields: [
                             { key: 'title', label: '标题', type: 'text' },
                             { key: 'summary', label: '说明文字', type: 'textarea' },
-                            { key: 'images', label: '图片路径（每行一张）', type: 'list', localized: false }
+                            { key: 'images', label: '图片资料', type: 'image-grid', localized: false, maxItems: 9 }
                         ]
                     },
                     {
@@ -5103,11 +5103,175 @@
         function visualNewArrayItem(module) {
             var item = {};
             (module.fields || []).forEach(function (field) {
-                setPathValue(item, visualLanguageFieldKey(field), field.type === 'toggle' ? true : (field.type === 'list' ? [] : ''));
+                setPathValue(item, visualLanguageFieldKey(field), field.type === 'toggle' ? true : ((field.type === 'list' || field.type === 'image-grid') ? [] : ''));
             });
             return item;
         }
 
+        function visualNormalizeImageList(value, maxItems) {
+            var items = [];
+            if (Array.isArray(value)) {
+                items = value;
+            } else if (typeof value === 'string') {
+                var text = value.trim();
+                if (text.charAt(0) === '[') {
+                    try {
+                        var parsed = JSON.parse(text);
+                        if (Array.isArray(parsed)) items = parsed;
+                    } catch (err) {
+                        items = [];
+                    }
+                }
+                if (!items.length && text) items = text.split(/\r?\n/);
+            }
+            items = items.map(function (item) {
+                return String(item == null ? '' : item).trim();
+            }).filter(Boolean);
+            maxItems = parseInt(maxItems, 10) || 9;
+            return maxItems > 0 ? items.slice(0, maxItems) : items;
+        }
+
+        function renderVisualImageGridTiles(fieldId, images, maxItems) {
+            var tiles = images.map(function (path, index) {
+                var preview = path
+                    ? '<img src="' + escapeHtml(visualAssetSrc(path)) + '" alt="图片资料 ' + escapeHtml(index + 1) + '">'
+                    : '<span>未选择图片</span>';
+                return '<article class="visual-image-tile" data-visual-image-index="' + index + '">' +
+                    '<div class="visual-image-tile-preview">' + preview + '</div>' +
+                    '<div class="visual-image-tile-meta"><strong>图片 ' + (index + 1) + '</strong><span title="' + escapeHtml(path) + '">' + escapeHtml(path || '未选择') + '</span></div>' +
+                    '<div class="visual-image-tile-actions">' +
+                        '<button type="button" class="btn btn-secondary btn-sm" data-visual-image-action="select" data-visual-image-field="' + escapeHtml(fieldId) + '" data-visual-image-index="' + index + '">资源库</button>' +
+                        '<button type="button" class="btn btn-secondary btn-sm" data-visual-image-action="upload" data-visual-image-field="' + escapeHtml(fieldId) + '" data-visual-image-index="' + index + '">上传</button>' +
+                        '<button type="button" class="btn btn-secondary btn-sm" data-visual-image-action="up" data-visual-image-field="' + escapeHtml(fieldId) + '" data-visual-image-index="' + index + '"' + (index <= 0 ? ' disabled' : '') + '>上移</button>' +
+                        '<button type="button" class="btn btn-secondary btn-sm" data-visual-image-action="down" data-visual-image-field="' + escapeHtml(fieldId) + '" data-visual-image-index="' + index + '"' + (index >= images.length - 1 ? ' disabled' : '') + '>下移</button>' +
+                        '<button type="button" class="btn btn-danger btn-sm" data-visual-image-action="remove" data-visual-image-field="' + escapeHtml(fieldId) + '" data-visual-image-index="' + index + '">删除</button>' +
+                    '</div>' +
+                '</article>';
+            });
+            if (images.length < maxItems) {
+                tiles.push('<button type="button" class="visual-image-tile visual-image-tile-add" data-visual-image-action="select" data-visual-image-field="' + escapeHtml(fieldId) + '" data-visual-image-index="' + images.length + '">' +
+                    '<span>+</span><strong>添加图片</strong><small>从资源库选择，或在弹窗中本地上传</small>' +
+                '</button>');
+            }
+            return tiles.join('');
+        }
+
+        function renderVisualImageGridField(field, path, value) {
+            var id = visualFieldId(path);
+            var label = visualLanguageFieldLabel(field, path);
+            var maxItems = parseInt(field.maxItems, 10) || 9;
+            var images = visualNormalizeImageList(value, maxItems);
+            return '<div class="visual-field visual-image-grid-field">' +
+                '<label>' + escapeHtml(label) + '</label>' +
+                '<div class="visual-image-grid-card" data-visual-image-grid-card="' + escapeHtml(id) + '">' +
+                    '<div class="visual-image-grid-head"><span>已选择 <strong data-visual-image-count="' + escapeHtml(id) + '">' + images.length + '</strong> / ' + maxItems + ' 张</span><button type="button" class="btn btn-secondary btn-sm" data-visual-image-action="upload" data-visual-image-field="' + escapeHtml(id) + '" data-visual-image-index="' + images.length + '"' + (images.length >= maxItems ? ' disabled' : '') + '>本地上传</button></div>' +
+                    '<input type="hidden" id="' + escapeHtml(id) + '" data-visual-field="' + escapeHtml(path) + '" data-visual-field-type="image-grid" data-visual-image-grid-max="' + maxItems + '" value="' + escapeHtml(JSON.stringify(images)) + '">' +
+                    '<div class="visual-image-grid" data-visual-image-grid="' + escapeHtml(id) + '">' + renderVisualImageGridTiles(id, images, maxItems) + '</div>' +
+                    '<small class="visual-image-grid-help">图片会保存为前台 Proof in Real Scenarios 模块的九宫格，最多 9 张。</small>' +
+                '</div>' +
+            '</div>';
+        }
+
+        function getVisualImageGridInput(fieldId) {
+            return document.getElementById(fieldId);
+        }
+
+        function getVisualImageGridItems(fieldId) {
+            var input = getVisualImageGridInput(fieldId);
+            if (!input) return [];
+            return visualNormalizeImageList(input.value, input.getAttribute('data-visual-image-grid-max'));
+        }
+
+        function setVisualImageGridItems(fieldId, items) {
+            var input = getVisualImageGridInput(fieldId);
+            if (!input) return;
+            var maxItems = parseInt(input.getAttribute('data-visual-image-grid-max'), 10) || 9;
+            var images = visualNormalizeImageList(items, maxItems);
+            input.value = JSON.stringify(images);
+            var grid = document.querySelector('[data-visual-image-grid="' + fieldId + '"]');
+            if (grid) grid.innerHTML = renderVisualImageGridTiles(fieldId, images, maxItems);
+            var count = document.querySelector('[data-visual-image-count="' + fieldId + '"]');
+            if (count) count.textContent = images.length;
+            var uploadBtn = document.querySelector('[data-visual-image-grid-card="' + fieldId + '"] .visual-image-grid-head [data-visual-image-action="upload"]');
+            if (uploadBtn) {
+                uploadBtn.disabled = images.length >= maxItems;
+                uploadBtn.setAttribute('data-visual-image-index', images.length);
+            }
+            markFormDirty();
+        }
+
+        function updateVisualImageGridItem(fieldId, index, path) {
+            var input = getVisualImageGridInput(fieldId);
+            if (!input) return;
+            var maxItems = parseInt(input.getAttribute('data-visual-image-grid-max'), 10) || 9;
+            var images = getVisualImageGridItems(fieldId);
+            index = parseInt(index, 10);
+            if (!Number.isFinite(index) || index < 0) index = images.length;
+            if (index >= maxItems) {
+                showToast('图片资料最多只能上传 ' + maxItems + ' 张', 'error');
+                return;
+            }
+            if (path) images[index] = path;
+            setVisualImageGridItems(fieldId, images);
+        }
+
+        function removeVisualImageGridItem(fieldId, index) {
+            var images = getVisualImageGridItems(fieldId);
+            index = parseInt(index, 10);
+            if (!Number.isFinite(index) || index < 0 || index >= images.length) return;
+            images.splice(index, 1);
+            setVisualImageGridItems(fieldId, images);
+        }
+
+        function moveVisualImageGridItem(fieldId, index, direction) {
+            var images = getVisualImageGridItems(fieldId);
+            index = parseInt(index, 10);
+            var nextIndex = direction === 'up' ? index - 1 : index + 1;
+            if (!Number.isFinite(index) || nextIndex < 0 || nextIndex >= images.length) return;
+            var current = images[index];
+            images[index] = images[nextIndex];
+            images[nextIndex] = current;
+            setVisualImageGridItems(fieldId, images);
+        }
+
+        function openVisualImageGridAssetPicker(fieldId, index) {
+            openAssetPicker({
+                title: '选择教育合作图片',
+                subtitle: '从资源库选择图片，或在弹窗中本地上传后直接使用。',
+                module: 'visual_builder',
+                entityType: 'content_block',
+                entityId: 'education',
+                onSelect: function (asset) {
+                    updateVisualImageGridItem(fieldId, index, asset && asset.path ? asset.path : '');
+                    showToast('已选择图片资料');
+                }
+            });
+        }
+
+        function uploadVisualImageGridFile(fieldId, index, file) {
+            if (!file) return;
+            uploadAdminAssetFile(file, {
+                module: 'visual_builder',
+                entity_type: 'content_block',
+                entity_id: 'education'
+            }).then(function (response) {
+                var asset = unwrapDataResponse(response) || response;
+                updateVisualImageGridItem(fieldId, index, asset && asset.path ? asset.path : '');
+                showToast(asset && asset.reused ? '资源库已有相同图片，已直接使用' : '图片已上传并加入资源库');
+            }).catch(function (err) {
+                showToast('上传失败：' + err.message, 'error');
+            });
+        }
+
+        function openVisualImageGridUpload(fieldId, index) {
+            var input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/jpeg,image/png,image/webp,image/gif';
+            input.addEventListener('change', function () {
+                uploadVisualImageGridFile(fieldId, index, input.files && input.files[0]);
+            });
+            input.click();
+        }
         function renderVisualField(field, path, value) {
             var id = visualFieldId(path);
             var label = visualLanguageFieldLabel(field, path);
@@ -5135,6 +5299,9 @@
             }
             if (field.type === 'list') {
                 return '<div class="visual-field"><label for="' + escapeHtml(id) + '">' + escapeHtml(label) + '</label><textarea id="' + escapeHtml(id) + '" data-visual-field="' + escapeHtml(path) + '" data-visual-field-type="list" rows="6"' + languageAttrs + '>' + escapeHtml(valueText) + '</textarea><small>每行填写一项，保存后会自动转换为前台列表。</small></div>';
+            }
+            if (field.type === 'image-grid') {
+                return renderVisualImageGridField(field, path, value);
             }
             if (field.type === 'textarea') {
                 return '<div class="visual-field"><label for="' + escapeHtml(id) + '">' + escapeHtml(label) + '</label><textarea id="' + escapeHtml(id) + '" data-visual-field="' + escapeHtml(path) + '" rows="4"' + languageAttrs + '>' + escapeHtml(valueText) + '</textarea></div>';
@@ -5393,6 +5560,10 @@
                     setPathValue(body, path, String(value || '').split(/\r?\n/).map(function (item) { return item.trim(); }).filter(Boolean));
                     return;
                 }
+                if (field.getAttribute('data-visual-field-type') === 'image-grid') {
+                    setPathValue(body, path, visualNormalizeImageList(value, field.getAttribute('data-visual-image-grid-max')));
+                    return;
+                }
                 setPathValue(body, path, normalizeStructuredValue(path, value));
             });
             visualArrayModules(module).forEach(function (arrayModule) {
@@ -5593,7 +5764,17 @@
                     updateVisualAssetField(clearAsset.getAttribute('data-visual-clear-asset'), '');
                     return;
                 }
-                var pickedAsset = e.target.closest('[data-visual-pick-asset]');
+                var imageGridAction = e.target.closest('[data-visual-image-action]');
+                if (imageGridAction) {
+                    var imageGridField = imageGridAction.getAttribute('data-visual-image-field');
+                    var imageGridIndex = parseInt(imageGridAction.getAttribute('data-visual-image-index'), 10);
+                    var action = imageGridAction.getAttribute('data-visual-image-action');
+                    if (action === 'select') openVisualImageGridAssetPicker(imageGridField, imageGridIndex);
+                    if (action === 'upload') openVisualImageGridUpload(imageGridField, imageGridIndex);
+                    if (action === 'remove') removeVisualImageGridItem(imageGridField, imageGridIndex);
+                    if (action === 'up' || action === 'down') moveVisualImageGridItem(imageGridField, imageGridIndex, action);
+                    return;
+                }                var pickedAsset = e.target.closest('[data-visual-pick-asset]');
                 if (pickedAsset && visualBuilderState.activeAssetField) {
                     updateVisualAssetField(visualBuilderState.activeAssetField, pickedAsset.getAttribute('data-visual-pick-asset'));
                     closeVisualAssetPicker();
