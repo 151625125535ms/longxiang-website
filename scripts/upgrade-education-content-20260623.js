@@ -7,7 +7,6 @@ const root = path.resolve(__dirname, '..');
 const dbPath = path.join(root, 'data', 'longxiang.db');
 const backupDir = path.join(root, 'data', 'backups');
 const modeSectionIds = ['industry-college', 'talent-training', 'training-equipment', 'research-global'];
-const heroImage = 'assets/education/images/longxiang-electrical-college-hero.png';
 const apply = process.argv.includes('--apply');
 const dryRun = process.argv.includes('--dry-run') || !apply;
 
@@ -88,7 +87,7 @@ function upgradeBody(body) {
     fillText(next.seo, 'titleAr', (next.hero.titleAr || 'Education Cooperation') + ' | Henan Longxiang Electrical Co., Ltd.', changes, 'seo.titleAr');
     fillText(next.seo, 'description', next.hero.subtitle || 'Education cooperation programs from Longxiang for colleges, vocational groups, utilities, and overseas institutions.', changes, 'seo.description');
     fillText(next.seo, 'descriptionAr', next.hero.subtitleAr || next.hero.subtitle || 'Education cooperation programs from Longxiang.', changes, 'seo.descriptionAr');
-    fillText(next.seo, 'image', next.hero.backgroundImage || heroImage, changes, 'seo.image');
+    fillText(next.seo, 'image', next.hero.backgroundImage || '', changes, 'seo.image');
     fillText(next.seo, 'canonicalPath', 'education.html', changes, 'seo.canonicalPath');
 
     next.sections = Array.isArray(next.sections) ? next.sections : [];
@@ -125,10 +124,6 @@ function upgradeBody(body) {
     if (originalHeroImage && next.hero.backgroundImage !== originalHeroImage) {
         throw new Error('Hero image changed unexpectedly.');
     }
-    if (next.hero.backgroundImage && next.hero.backgroundImage !== heroImage) {
-        console.warn('[warn] Education hero image is not the expected baseline:', next.hero.backgroundImage);
-    }
-
     next.updatedAt = new Date().toISOString();
     return { body: next, changes: Array.from(new Set(changes)) };
 }
