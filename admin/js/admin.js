@@ -7444,6 +7444,18 @@
             var editor = document.getElementById('education-editor');
             if (editor) {
                 editor.addEventListener('click', function (e) {
+                    var imageGridAction = e.target.closest('[data-visual-image-action]');
+                    if (imageGridAction && editor.contains(imageGridAction)) {
+                        e.preventDefault();
+                        var imageGridField = imageGridAction.getAttribute('data-visual-image-field');
+                        var imageGridIndex = parseInt(imageGridAction.getAttribute('data-visual-image-index'), 10);
+                        var imageAction = imageGridAction.getAttribute('data-visual-image-action');
+                        if (imageAction === 'select') openVisualImageGridAssetPicker(imageGridField, imageGridIndex);
+                        if (imageAction === 'upload') openVisualImageGridUpload(imageGridField, imageGridIndex);
+                        if (imageAction === 'remove') removeVisualImageGridItem(imageGridField, imageGridIndex);
+                        if (imageAction === 'up' || imageAction === 'down') moveVisualImageGridItem(imageGridField, imageGridIndex, imageAction);
+                        return;
+                    }
                     var action = e.target.getAttribute('data-education-action');
                     if (!action) return;
                     e.preventDefault();
@@ -7544,6 +7556,41 @@
             return educationField(name, label, listToText(value), 'textarea', help || '每行填写一条内容，保存后会按列表显示。');
         }
 
+        function educationImageGridField(name, label, value, maxItems, help) {
+            var id = 'education-image-grid-' + String(name || '').replace(/[^a-zA-Z0-9_-]/g, '-');
+            var limit = maxItems || 9;
+            var images = visualNormalizeImageList(value, limit);
+            var helpText = help || ('最多可选择 ' + limit + ' 张图片，支持资源库选择、本地上传、预览、删除和排序。');
+            return '<div class="form-group education-image-grid-field visual-image-grid-field">' +
+                '<label>' + escapeHtml(label) + '</label>' +
+                '<div class="visual-image-grid-card" data-visual-image-grid-card="' + escapeHtml(id) + '">' +
+                    '<div class="visual-image-grid-head"><span>已选择 <strong data-visual-image-count="' + escapeHtml(id) + '">' + images.length + '</strong> / ' + limit + ' 张</span><button type="button" class="btn btn-secondary btn-sm" data-visual-image-action="upload" data-visual-image-field="' + escapeHtml(id) + '" data-visual-image-index="' + images.length + '"' + (images.length >= limit ? ' disabled' : '') + '>本地上传</button></div>' +
+                    '<input type="hidden" id="' + escapeHtml(id) + '" data-edu-field="' + escapeHtml(name) + '" data-visual-field-type="image-grid" data-visual-image-grid-max="' + limit + '" value="' + escapeHtml(JSON.stringify(images)) + '">' +
+                    '<div class="visual-image-grid" data-visual-image-grid="' + escapeHtml(id) + '">' + renderVisualImageGridTiles(id, images, limit) + '</div>' +
+                    '<small class="visual-image-grid-help">' + escapeHtml(helpText) + '</small>' +
+                '</div>' +
+            '</div>';
+        }
+
+        function educationImageGridValue(container, name, maxItems) {
+            var el = container.querySelector('[data-edu-field="' + name + '"]');
+            return el ? visualNormalizeImageList(el.value, maxItems || el.getAttribute('data-visual-image-grid-max') || 9) : [];
+        }
+
+        function appendEducationImageGridValue(container, name, path) {
+            var el = container.querySelector('[data-edu-field="' + name + '"]');
+            if (!el || !path) return false;
+            var maxItems = parseInt(el.getAttribute('data-visual-image-grid-max'), 10) || 9;
+            var images = visualNormalizeImageList(el.value, maxItems);
+            if (images.length >= maxItems) {
+                showToast('图片资料最多只能上传 ' + maxItems + ' 张', 'error');
+                return true;
+            }
+            images.push(path);
+            setVisualImageGridItems(el.id, images);
+            return true;
+        }
+
         function listToText(value) {
             return Array.isArray(value) ? value.join('\n') : (value || '');
         }
@@ -7606,7 +7653,7 @@
                     educationPanelTitle('▧', '图片资料', '管理页面里的证明图片和现场图片。', '影响页面位置：集中展示学校、培训、合作现场等图片的区域。') +
                     educationField('gallery.title', '图片资料标题', gallery.title, 'text', '示例：Proof in Real Scenarios') +
                     educationField('gallery.summary', '图片资料说明', gallery.summary, 'textarea', '说明这些图片展示了哪些合作现场或证明材料。') +
-                    educationListField('gallery.images', '图片路径列表', gallery.images, '每行一个图片路径；上传图片后可选择“加入图片资料”自动追加。') +
+                    educationImageGridField('gallery.images', '图片资料', gallery.images, 9, '最多 9 张。可从资源库选择或本地上传，保存后会自动更新前台九宫格。') +
                     educationLanguageDetails(
                         educationField('gallery.titleAr', '阿拉伯语图片资料标题', gallery.titleAr) +
                         educationField('gallery.summaryAr', '阿拉伯语图片资料说明', gallery.summaryAr, 'textarea')
@@ -7776,7 +7823,7 @@
                     titleAr: fieldValue(editor, 'gallery.titleAr'),
                     summary: fieldValue(editor, 'gallery.summary'),
                     summaryAr: fieldValue(editor, 'gallery.summaryAr'),
-                    images: textToList(fieldValue(editor, 'gallery.images'))
+                    images: educationImageGridValue(editor, 'gallery.images', 9)
                 },
                 philosophy: {
                     summary: fieldValue(editor, 'philosophy.summary'),
@@ -7897,7 +7944,9 @@
                 var hero = editor.querySelector('[data-edu-field="hero.backgroundImage"]');
                 if (hero) hero.value = path;
             } else if (target === 'gallery.images') {
-                appendLineValue(editor.querySelector('[data-edu-field="gallery.images"]'), path);
+                if (!appendEducationImageGridValue(editor, 'gallery.images', path)) {
+                    appendLineValue(editor.querySelector('[data-edu-field="gallery.images"]'), path);
+                }
             } else if (/^section\.(\d+)\.image$/.test(target)) {
                 var imageMatch = target.match(/^section\.(\d+)\.image$/);
                 var section = editor.querySelectorAll('[data-edu-section]')[Number(imageMatch[1])];

@@ -151,6 +151,9 @@ function verifySource() {
     assert(educationConfig.includes("key: 'eyebrow'"), 'Visual builder education hero should expose eyebrow.');
     assert(/key:\s*'philosophy'[\s\S]*?fields:\s*\[[\s\S]*?key:\s*'title'/.test(educationConfig), 'Visual builder philosophy module should expose title.');
     assert(!adminJs.includes('Proof in Real Scenarios 妯″潡鐨勪節瀹牸'), 'image-grid help text should not be hard-coded to Proof in Real Scenarios.');
+    assert(adminJs.includes('function educationImageGridField'), 'Legacy education editor should have an image-grid field helper.');
+    assert(adminJs.includes("educationImageGridField('gallery.images'"), 'Legacy education gallery images should use visual image-grid controls.');
+    assert(!adminJs.includes("educationListField('gallery.images'"), 'Legacy education gallery images should not use a manual path textarea.');
     assert(adminJs.includes('renderEducationVisualRedirect'), 'Legacy content-education editor should redirect to visual builder.');
 }
 
