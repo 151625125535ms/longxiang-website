@@ -159,7 +159,7 @@
         '5\u3001\u5382\u533a\u5382\u8c8c/\u9f99\u7fd4\u516c\u53f8\u6b63\u95e8.jpg': {
             sources: [
                 { maxWidth: 768, src: 'assets/optimized/longxiang-factory-main-768.webp' },
-                { maxWidth: 1440, src: 'assets/optimized/longxiang-factory-main-1280.webp' },
+                { maxWidth: 1024, src: 'assets/optimized/longxiang-factory-main-1280.webp' },
                 { src: 'assets/optimized/longxiang-factory-main-1920.webp' }
             ]
         }

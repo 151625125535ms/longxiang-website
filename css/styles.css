@@ -1211,13 +1211,13 @@ p:last-child {
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    transform: scale(1.05);
+    transform: scale(1.02);
     animation: heroZoom 20s ease-in-out infinite alternate;
 }
 
 @keyframes heroZoom {
-    0% { transform: scale(1.05); }
-    100% { transform: scale(1.15); }
+    0% { transform: scale(1.02); }
+    100% { transform: scale(1.06); }
 }
 
 .hero-overlay {
