@@ -5049,15 +5049,27 @@
             });
         }
 
-        function visualModulePath(module, body) {
+        function visualModulePath(module, body, options) {
+            options = options || {};
             if (!module) return '';
-            if ((module.sectionId || module.sectionTitle) && body && Array.isArray(body.sections)) {
+            if ((module.sectionId || module.sectionTitle) && body) {
+                if (!Array.isArray(body.sections)) {
+                    if (!options.createMissing) return module.path || '';
+                    body.sections = [];
+                }
                 var sectionIndex = -1;
                 body.sections.forEach(function (section, index) {
                     if (sectionIndex !== -1 || !section) return;
                     if (module.sectionId && section.id === module.sectionId) sectionIndex = index;
                     if (sectionIndex === -1 && module.sectionTitle && section.title === module.sectionTitle) sectionIndex = index;
                 });
+                if (sectionIndex === -1 && options.createMissing) {
+                    body.sections.push({
+                        id: module.sectionId || '',
+                        title: module.sectionTitle || ''
+                    });
+                    sectionIndex = body.sections.length - 1;
+                }
                 if (sectionIndex !== -1) {
                     return 'sections.' + sectionIndex + (module.sectionPath ? '.' + module.sectionPath : '');
                 }
@@ -5065,8 +5077,8 @@
             return module.path || '';
         }
 
-        function visualPath(module, key, body) {
-            var basePath = visualModulePath(module, body);
+        function visualPath(module, key, body, options) {
+            var basePath = visualModulePath(module, body, options);
             if (!basePath) return key;
             if (!key) return basePath;
             return basePath + '.' + key;
@@ -5133,7 +5145,7 @@
 
         function renderVisualArrayEditor(page, module, block) {
             var body = block && block.body_json ? block.body_json : {};
-            var arrayPath = visualModulePath(module, body);
+            var arrayPath = visualModulePath(module, body, { createMissing: true });
             var items = getPathValue(body, arrayPath);
             if (!Array.isArray(items)) items = [];
             return '<div class="visual-array-editor" data-visual-array="' + escapeHtml(arrayPath) + '">' +
@@ -5159,7 +5171,8 @@
             if (module.array) return renderVisualArrayEditor(page, module, block);
             return '<div class="visual-field-grid">' + (module.fields || []).map(function (field) {
                 var blockBody = block && block.body_json ? block.body_json : {};
-                return renderVisualField(field, visualPath(module, visualLanguageFieldKey(field), blockBody), visualFieldValue(block, module, field));
+                var path = visualPath(module, visualLanguageFieldKey(field), blockBody, { createMissing: true });
+                return renderVisualField(field, path, getPathValue(blockBody, path));
             }).join('') + '</div>';
         }
 
@@ -5383,7 +5396,7 @@
                 setPathValue(body, path, normalizeStructuredValue(path, value));
             });
             visualArrayModules(module).forEach(function (arrayModule) {
-                var arrayPath = visualModulePath(arrayModule, body);
+                var arrayPath = visualModulePath(arrayModule, body, { createMissing: true });
                 var items = getPathValue(body, arrayPath);
                 if (Array.isArray(items)) {
                     items.forEach(function (item, index) { item.sort_order = index; });
@@ -5436,7 +5449,7 @@
             var block = visualBuilderState.blocks[page.slug];
             if (!page || !module || !block) return;
             var body = collectVisualBody(page, module);
-            var arrayPath = visualModulePath(module, body);
+            var arrayPath = visualModulePath(module, body, { createMissing: true });
             var items = getPathValue(body, arrayPath);
             if (!Array.isArray(items)) items = [];
             if (action === 'add') items.push(visualNewArrayItem(module));
