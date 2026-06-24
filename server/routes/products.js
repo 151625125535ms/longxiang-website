@@ -1,8 +1,12 @@
 const express = require('express');
+const fs = require('fs');
+const path = require('path');
 const { getDb } = require('../lib/db');
 const { VALID_GROUPS, getCategoryMapping } = require('../lib/category-helper');
 
 const router = express.Router();
+const PROJECT_ROOT = path.resolve(__dirname, '..', '..');
+const CARD_IMAGE_DIR = 'assets/optimized/product-cards';
 
 function parseJsonArray(value) {
     try {
@@ -21,6 +25,21 @@ function legacyGone(res) {
             message: 'Legacy JSON product writes are disabled. Use /api/admin/products.'
         }
     });
+}
+
+function cardImageSlug(row) {
+    const source = String(row.slug || row.legacy_id || '').trim().toLowerCase();
+    return source
+        .replace(/[^a-z0-9-]+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '');
+}
+
+function resolveProductCardImage(row) {
+    const slug = cardImageSlug(row);
+    if (!slug) return '';
+    const publicPath = CARD_IMAGE_DIR + '/' + slug + '.webp';
+    return fs.existsSync(path.join(PROJECT_ROOT, publicPath)) ? publicPath : '';
 }
 
 function mapSqliteProduct(row, specsByProduct, coverByProduct) {
@@ -44,6 +63,7 @@ function mapSqliteProduct(row, specsByProduct, coverByProduct) {
         name: row.name_en,
         nameAr: row.name_ar || '',
         image: coverByProduct[row.id] || '',
+        cardImage: resolveProductCardImage(row),
         category: row.category_slug || '',
         categoryLabel: row.category_label || '',
         categoryLabelAr: row.category_label_ar || '',

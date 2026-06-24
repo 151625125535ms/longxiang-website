@@ -96,7 +96,7 @@
         var name = localize(product, 'name');
         var desc = localize(product, 'shortDesc');
         var href = detailHref(product);
-        var imagePath = normalizeImagePath(product.image);
+        var imagePath = normalizeImagePath(product.cardImage || product.image);
 
         card.innerHTML =
             '<a class="product-card-clickarea" href="' + href + '">' +
