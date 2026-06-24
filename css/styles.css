@@ -4139,44 +4139,9 @@ p:last-child {
 }
 
 .product-directory-section .product-card-v2 .product-card-image {
-    --product-image-scale: 1.08;
-    --product-image-hover-scale: 1.14;
-    --product-image-y: 0;
-    display: flex;
-    height: clamp(220px, 15.5vw, 236px);
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    margin-bottom: 14px;
-    padding: 6px 10px;
+    height: 220px;
+    margin-bottom: 15px;
     background: var(--color-white-pure);
-}
-
-.product-directory-section .product-card-v2 .product-card-image.is-image-narrow {
-    --product-image-scale: 1.02;
-    --product-image-hover-scale: 1.06;
-    --product-image-y: 1px;
-}
-
-.product-directory-section .product-card-v2 .product-card-image.is-image-tall {
-    --product-image-scale: 1.03;
-    --product-image-hover-scale: 1.08;
-    --product-image-y: 1px;
-}
-
-.product-directory-section .product-card-v2 .product-card-image.is-image-balanced {
-    --product-image-scale: 1.09;
-    --product-image-hover-scale: 1.15;
-}
-
-.product-directory-section .product-card-v2 .product-card-image.is-image-landscape {
-    --product-image-scale: 1.07;
-    --product-image-hover-scale: 1.13;
-}
-
-.product-directory-section .product-card-v2 .product-card-image.is-image-wide {
-    --product-image-scale: 1.03;
-    --product-image-hover-scale: 1.08;
 }
 
 .product-directory-section .product-card-v2:hover .product-card-image {
@@ -4184,17 +4149,11 @@ p:last-child {
 }
 
 .product-directory-section .product-card-v2 .product-card-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    object-position: center center;
-    transform: translateY(var(--product-image-y)) scale(var(--product-image-scale));
-    transform-origin: center center;
     transition: transform 0.34s ease;
 }
 
 .product-directory-section .product-card-v2:hover .product-card-image img {
-    transform: translateY(var(--product-image-y)) scale(var(--product-image-hover-scale));
+    transform: scale(1.06);
 }
 
 .product-directory-section .product-card-v2 .product-card-body {

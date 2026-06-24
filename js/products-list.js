@@ -66,44 +66,6 @@
         return (isArabic ? '/ar/products/' : '/products/') + encodeURIComponent(product.slug || product.id);
     }
 
-    function productImageFrameClass(img) {
-        if (!img || !img.naturalWidth || !img.naturalHeight) return 'is-image-unresolved';
-        var ratio = img.naturalWidth / img.naturalHeight;
-        if (ratio < 0.58) return 'is-image-narrow';
-        if (ratio < 0.98) return 'is-image-tall';
-        if (ratio > 1.75) return 'is-image-wide';
-        if (ratio > 1.28) return 'is-image-landscape';
-        return 'is-image-balanced';
-    }
-
-    function updateProductImageFrame(img) {
-        var frame = img && img.closest ? img.closest('.product-card-image') : null;
-        if (!frame) return;
-        frame.classList.remove(
-            'is-image-unresolved',
-            'is-image-narrow',
-            'is-image-tall',
-            'is-image-balanced',
-            'is-image-landscape',
-            'is-image-wide'
-        );
-        frame.classList.add(productImageFrameClass(img));
-    }
-
-    function initProductImageFrames(scope) {
-        (scope || document).querySelectorAll('.product-card-image img').forEach(function (img) {
-            if (img.complete) {
-                updateProductImageFrame(img);
-                return;
-            }
-            img.addEventListener('load', function () { updateProductImageFrame(img); }, { once: true });
-            img.addEventListener('error', function () {
-                var frame = img.closest ? img.closest('.product-card-image') : null;
-                if (frame) frame.classList.add('is-image-unresolved');
-            }, { once: true });
-        });
-    }
-
     function productSearchText(product) {
         var parts = [
             product.id,
@@ -330,7 +292,6 @@
         pageItems.forEach(function (product) {
             container.appendChild(createProductCard(product));
         });
-        initProductImageFrames(container);
 
         if (typeof window.initScrollAnimations === 'function') {
             window.initScrollAnimations();
