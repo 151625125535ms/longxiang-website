@@ -8,6 +8,7 @@ const { ensureDirectory, resolveUploadDir, resolveUploadPublicPath } = require('
 const { normalizeUploadedFilename } = require('../../lib/filenameEncoding');
 const { sendError, insertAuditLog } = require('./helpers');
 const { syncProductAssetReferences, deleteAssetReferences } = require('../../lib/assetReferences');
+const { deleteProductCardThumbnail, queueProductCardThumbnail } = require('../../lib/productCardThumbnail');
 
 const router = express.Router();
 const STATUSES = ['published', 'draft', 'deleted'];
@@ -302,6 +303,18 @@ function getAuditProduct(db, id) {
     const product = getProductBase(db, id);
     if (!product) return null;
     return product;
+}
+
+function productCardThumbnailPayload(product) {
+    if (!product) return null;
+    return {
+        id: product.id,
+        slug: product.slug,
+        legacy_id: product.legacy_id,
+        name_en: product.name_en,
+        cover_image: product.cover_image,
+        updated_at: product.updated_at
+    };
 }
 
 function normalizeCoverPath(value) {
@@ -642,6 +655,7 @@ router.post('/', function (req, res, next) {
         });
 
         const product = createProduct();
+        queueProductCardThumbnail(productCardThumbnailPayload(product));
         res.status(201).json({ ok: true, data: product });
     } catch (err) {
         if (err && err.code && String(err.code).indexOf('SQLITE_CONSTRAINT') === 0) {
@@ -744,7 +758,11 @@ router.put('/:id', function (req, res, next) {
             return getFullProduct(db, before.id);
         });
 
-        res.json({ ok: true, data: updateProduct() });
+        const product = updateProduct();
+        if (body.cover_image !== undefined && String(before.cover_image || '') !== String(product.cover_image || '')) {
+            queueProductCardThumbnail(productCardThumbnailPayload(product));
+        }
+        res.json({ ok: true, data: product });
     } catch (err) {
         next(err);
     }
@@ -825,8 +843,8 @@ router.post('/batch', function (req, res, next) {
             });
         }
 
+        const beforeRows = uniqueIds.map(id => getAuditProduct(db, id)).filter(Boolean);
         const runBatch = db.transaction(function () {
-            const beforeRows = uniqueIds.map(id => getAuditProduct(db, id));
             const now = Date.now();
 
             if (action === 'hard_delete') {
@@ -866,6 +884,15 @@ router.post('/batch', function (req, res, next) {
             return res.status(409).json({
                 ok: false,
                 error: { code: 'BATCH_FAILED', message: 'Batch operation failed.' }
+            });
+        }
+
+        if (action === 'hard_delete') {
+            beforeRows.forEach(function (before) {
+                const result = deleteProductCardThumbnail(productCardThumbnailPayload(before));
+                if (result.reason === 'delete_failed') {
+                    console.warn('[product-card-thumbnail] delete failed', result);
+                }
             });
         }
 

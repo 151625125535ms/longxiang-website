@@ -17,20 +17,28 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_DB = ROOT / "data" / "longxiang.db"
 DEFAULT_OUTPUT_DIR = ROOT / "assets" / "optimized" / "product-cards"
 DEFAULT_REPORT = ROOT / ".tmp" / "product-card-thumbnail-report.json"
-CANVAS_SIZE = (960, 720)
-WHITE_THRESHOLD = 246
-ALPHA_THRESHOLD = 8
-BBOX_EXPAND_RATIO = 0.035
-WEBP_QUALITY = 88
-PRODUCT_SCALE_OVERRIDES = {
-    "gcs": 0.78,
-    "lxac-14kw": 0.74,
-    "product-1781800386893": 0.76,
-    "grid-connected-pv-box": 0.76,
-    "pv-combiner-box": 0.76,
-    "grid-connected-pv-cabinet": 0.76,
-    "segmented-arc-quenching-surge-arrester": 0.70,
-}
+CONFIG_PATH = ROOT / "config" / "product-card-thumbnails.json"
+
+
+def load_config() -> Dict[str, Any]:
+    config = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
+    return {
+        "canvas": config.get("canvas") or {},
+        "whiteThreshold": int(config.get("whiteThreshold", 246)),
+        "alphaThreshold": int(config.get("alphaThreshold", 8)),
+        "bboxExpandRatio": float(config.get("bboxExpandRatio", 0.035)),
+        "webpQuality": int(config.get("webpQuality", 88)),
+        "scaleOverrides": config.get("scaleOverrides") or {},
+    }
+
+
+CONFIG = load_config()
+CANVAS_SIZE = (int(CONFIG["canvas"].get("width", 960)), int(CONFIG["canvas"].get("height", 720)))
+WHITE_THRESHOLD = CONFIG["whiteThreshold"]
+ALPHA_THRESHOLD = CONFIG["alphaThreshold"]
+BBOX_EXPAND_RATIO = CONFIG["bboxExpandRatio"]
+WEBP_QUALITY = CONFIG["webpQuality"]
+PRODUCT_SCALE_OVERRIDES = CONFIG["scaleOverrides"]
 
 
 def query_products(db_path: Path) -> Iterable[sqlite3.Row]:
