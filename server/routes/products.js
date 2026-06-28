@@ -7,6 +7,7 @@ const { VALID_GROUPS, getCategoryMapping } = require('../lib/category-helper');
 const router = express.Router();
 const PROJECT_ROOT = path.resolve(__dirname, '..', '..');
 const CARD_IMAGE_DIR = 'assets/optimized/product-cards';
+const ONE_SECOND_MS = 1000;
 
 function parseJsonArray(value) {
     try {
@@ -35,11 +36,35 @@ function cardImageSlug(row) {
         .replace(/^-|-$/g, '');
 }
 
-function resolveProductCardImage(row) {
+function publicPathToFile(publicPath) {
+    const normalized = String(publicPath || '').trim().replace(/\\/g, '/').replace(/^\/+/, '');
+    if (!normalized || normalized.indexOf('..') !== -1 || /^(?:https?:)?\/\//i.test(normalized)) return '';
+    return path.join(PROJECT_ROOT, ...normalized.split('/'));
+}
+
+function updatedAtMs(value) {
+    const number = Number(value || 0);
+    return Number.isFinite(number) ? number : 0;
+}
+
+function resolveProductCardImage(row, coverPath) {
     const slug = cardImageSlug(row);
     if (!slug) return '';
     const publicPath = CARD_IMAGE_DIR + '/' + slug + '.webp';
-    return fs.existsSync(path.join(PROJECT_ROOT, publicPath)) ? publicPath : '';
+    const cardFile = publicPathToFile(publicPath);
+    if (!cardFile || !fs.existsSync(cardFile)) return '';
+
+    const cardStat = fs.statSync(cardFile);
+    const sourceFile = publicPathToFile(coverPath);
+    if (sourceFile && fs.existsSync(sourceFile)) {
+        const sourceStat = fs.statSync(sourceFile);
+        if (cardStat.mtimeMs + ONE_SECOND_MS < sourceStat.mtimeMs) return '';
+    } else {
+        const rowUpdatedAt = updatedAtMs(row.updated_at);
+        if (rowUpdatedAt && cardStat.mtimeMs + ONE_SECOND_MS < rowUpdatedAt) return '';
+    }
+
+    return publicPath + '?v=' + Math.round(cardStat.mtimeMs);
 }
 
 function mapSqliteProduct(row, specsByProduct, coverByProduct) {
@@ -63,7 +88,7 @@ function mapSqliteProduct(row, specsByProduct, coverByProduct) {
         name: row.name_en,
         nameAr: row.name_ar || '',
         image: coverByProduct[row.id] || '',
-        cardImage: resolveProductCardImage(row),
+        cardImage: resolveProductCardImage(row, coverByProduct[row.id] || ''),
         category: row.category_slug || '',
         categoryLabel: row.category_label || '',
         categoryLabelAr: row.category_label_ar || '',

@@ -22,6 +22,15 @@ WHITE_THRESHOLD = 246
 ALPHA_THRESHOLD = 8
 BBOX_EXPAND_RATIO = 0.035
 WEBP_QUALITY = 88
+PRODUCT_SCALE_OVERRIDES = {
+    "gcs": 0.78,
+    "lxac-14kw": 0.74,
+    "product-1781800386893": 0.76,
+    "grid-connected-pv-box": 0.76,
+    "pv-combiner-box": 0.76,
+    "grid-connected-pv-cabinet": 0.76,
+    "segmented-arc-quenching-surge-arrester": 0.70,
+}
 
 
 def query_products(db_path: Path) -> Iterable[sqlite3.Row]:
@@ -62,6 +71,10 @@ def slugify(value: str, fallback: str) -> str:
 
 def output_name(row: sqlite3.Row) -> str:
     return slugify(row["slug"] or row["legacy_id"] or "", f"product-{row['id']}") + ".webp"
+
+
+def product_key(row: sqlite3.Row) -> str:
+    return slugify(row["slug"] or row["legacy_id"] or "", f"product-{row['id']}")
 
 
 def is_background_pixel(r: int, g: int, b: int, a: int) -> bool:
@@ -144,6 +157,12 @@ def fit_size(source_size: Tuple[int, int], limits: Tuple[int, int]) -> Tuple[int
     return max(1, round(source_width * scale)), max(1, round(source_height * scale))
 
 
+def scaled_limits(row: sqlite3.Row, crop_size: Tuple[int, int]) -> Tuple[int, int]:
+    max_width, max_height = target_limits(crop_size)
+    scale = PRODUCT_SCALE_OVERRIDES.get(product_key(row), 1)
+    return max(1, round(max_width * scale)), max(1, round(max_height * scale))
+
+
 def flatten_to_white(image: Image.Image) -> Image.Image:
     rgba = image.convert("RGBA")
     white = Image.new("RGBA", rgba.size, (255, 255, 255, 255))
@@ -191,7 +210,7 @@ def generate_thumbnail(row: sqlite3.Row, output_dir: Path) -> Dict[str, Any]:
 
         crop = image.crop(crop_box)
         flattened = flatten_to_white(crop)
-        fitted_size = fit_size(flattened.size, target_limits(flattened.size))
+        fitted_size = fit_size(flattened.size, scaled_limits(row, flattened.size))
         resized = flattened.resize(fitted_size, Image.Resampling.LANCZOS)
 
         canvas = Image.new("RGB", CANVAS_SIZE, (255, 255, 255))
