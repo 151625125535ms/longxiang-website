@@ -49,6 +49,32 @@ async function createSourceImage() {
         .toFile(SOURCE_FILE);
 }
 
+async function createExternalUploadImage(uploadDir, filename) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+    await sharp({
+        create: {
+            width: 360,
+            height: 260,
+            channels: 4,
+            background: { r: 255, g: 255, b: 255, alpha: 1 }
+        }
+    })
+        .composite([
+            {
+                input: Buffer.from(
+                    '<svg width="180" height="150" xmlns="http://www.w3.org/2000/svg">' +
+                    '<rect x="0" y="0" width="180" height="150" rx="10" fill="#1492d0"/>' +
+                    '<circle cx="90" cy="76" r="44" fill="#ffffff" opacity="0.24"/>' +
+                    '</svg>'
+                ),
+                left: 90,
+                top: 55
+            }
+        ])
+        .png()
+        .toFile(path.join(uploadDir, filename));
+}
+
 async function main() {
     await createSourceImage();
     deleteProductCardThumbnail(TEST_PRODUCT);
@@ -73,6 +99,36 @@ async function main() {
     });
     assert.strictEqual(missing.ok, false, 'missing source should not throw or block product save');
     assert.strictEqual(missing.reason, 'missing_file');
+
+    const previousUploadDir = process.env.UPLOAD_DIR;
+    const previousUploadPublicPath = process.env.UPLOAD_PUBLIC_PATH;
+    const externalUploadDir = path.join(TMP_DIR, 'external-uploads');
+    const externalUploadFilename = 'product-card-thumbnail-upload-dir.png';
+    const externalProduct = {
+        ...TEST_PRODUCT,
+        id: 999002,
+        slug: 'test-card-thumbnail-upload-dir',
+        legacy_id: 'test-card-thumbnail-upload-dir',
+        cover_image: 'uploads/' + externalUploadFilename,
+        updated_at: Date.now()
+    };
+    process.env.UPLOAD_DIR = externalUploadDir;
+    process.env.UPLOAD_PUBLIC_PATH = 'uploads';
+    await createExternalUploadImage(externalUploadDir, externalUploadFilename);
+    deleteProductCardThumbnail(externalProduct);
+    const externalResult = await generateProductCardThumbnail(externalProduct);
+    assert.strictEqual(externalResult.ok, true, 'external UPLOAD_DIR image should generate successfully');
+    assert.ok(fs.existsSync(path.join(ROOT, externalResult.publicPath)), 'external upload thumbnail should exist');
+    let externalRemoved = deleteProductCardThumbnail(externalProduct);
+    if (!externalRemoved.deleted && externalRemoved.reason === 'delete_failed') {
+        await new Promise(resolve => setTimeout(resolve, 250));
+        externalRemoved = deleteProductCardThumbnail(externalProduct);
+    }
+    assert.strictEqual(externalRemoved.deleted, true, 'external upload thumbnail should be deleted');
+    if (previousUploadDir == null) delete process.env.UPLOAD_DIR;
+    else process.env.UPLOAD_DIR = previousUploadDir;
+    if (previousUploadPublicPath == null) delete process.env.UPLOAD_PUBLIC_PATH;
+    else process.env.UPLOAD_PUBLIC_PATH = previousUploadPublicPath;
 
     await new Promise(resolve => setTimeout(resolve, 100));
     let removed = deleteProductCardThumbnail(TEST_PRODUCT);

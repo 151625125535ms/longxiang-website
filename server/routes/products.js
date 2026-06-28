@@ -2,6 +2,7 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const { getDb } = require('../lib/db');
+const { resolveUploadDir, resolveUploadPublicPath } = require('../lib/fileStore');
 const { VALID_GROUPS, getCategoryMapping } = require('../lib/category-helper');
 
 const router = express.Router();
@@ -39,6 +40,19 @@ function cardImageSlug(row) {
 function publicPathToFile(publicPath) {
     const normalized = String(publicPath || '').trim().replace(/\\/g, '/').replace(/^\/+/, '');
     if (!normalized || normalized.indexOf('..') !== -1 || /^(?:https?:)?\/\//i.test(normalized)) return '';
+
+    const uploadPublicPath = String(resolveUploadPublicPath() || '').trim().replace(/\\/g, '/').replace(/^\/+|\/+$/g, '');
+    if (uploadPublicPath && (normalized === uploadPublicPath || normalized.startsWith(uploadPublicPath + '/'))) {
+        const relativeUploadPath = normalized === uploadPublicPath
+            ? ''
+            : normalized.slice(uploadPublicPath.length + 1);
+        const uploadDir = path.resolve(resolveUploadDir());
+        const resolvedUploadFile = path.resolve(uploadDir, ...relativeUploadPath.split('/').filter(Boolean));
+        const uploadRootWithSep = uploadDir.endsWith(path.sep) ? uploadDir : uploadDir + path.sep;
+        if (resolvedUploadFile !== uploadDir && !resolvedUploadFile.startsWith(uploadRootWithSep)) return '';
+        return resolvedUploadFile;
+    }
+
     return path.join(PROJECT_ROOT, ...normalized.split('/'));
 }
 

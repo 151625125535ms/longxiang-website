@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const sharp = require('sharp');
-const { PROJECT_ROOT, ensureDirectory } = require('./fileStore');
+const { PROJECT_ROOT, ensureDirectory, resolveUploadDir, resolveUploadPublicPath } = require('./fileStore');
 
 const CONFIG = require('../../config/product-card-thumbnails.json');
 const CARD_IMAGE_DIR = 'assets/optimized/product-cards';
@@ -52,6 +52,19 @@ function normalizePublicPath(publicPath) {
 function resolvePublicPathToFile(publicPath) {
     const normalized = normalizePublicPath(publicPath);
     if (!normalized) return '';
+
+    const uploadPublicPath = normalizePublicPath(resolveUploadPublicPath());
+    if (uploadPublicPath && (normalized === uploadPublicPath || normalized.startsWith(uploadPublicPath + '/'))) {
+        const relativeUploadPath = normalized === uploadPublicPath
+            ? ''
+            : normalized.slice(uploadPublicPath.length + 1);
+        const uploadDir = path.resolve(resolveUploadDir());
+        const resolvedUploadFile = path.resolve(uploadDir, ...relativeUploadPath.split('/').filter(Boolean));
+        const uploadRootWithSep = uploadDir.endsWith(path.sep) ? uploadDir : uploadDir + path.sep;
+        if (resolvedUploadFile !== uploadDir && !resolvedUploadFile.startsWith(uploadRootWithSep)) return '';
+        return resolvedUploadFile;
+    }
+
     const resolved = path.resolve(PROJECT_ROOT, ...normalized.split('/'));
     const rootWithSep = PROJECT_ROOT.endsWith(path.sep) ? PROJECT_ROOT : PROJECT_ROOT + path.sep;
     if (resolved !== PROJECT_ROOT && !resolved.startsWith(rootWithSep)) return '';
