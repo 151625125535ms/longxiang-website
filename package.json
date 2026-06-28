@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "Henan Longxiang Electrical Co., Ltd. Official Website",
   "main": "server/app.js",
+  "engines": {
+    "node": ">=24 <25",
+    "npm": ">=11 <12"
+  },
   "scripts": {
     "db:init": "node server/db/init.js",
     "db:backup": "node server/db/backup.js",
