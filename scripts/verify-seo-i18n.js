@@ -7,38 +7,94 @@ const sitemapNamespace = 'http://www.sitemaps.org/schemas/sitemap/0.9';
 const xhtmlNamespace = 'http://www.w3.org/1999/xhtml';
 const failures = [];
 
+function loadLocaleConfig() {
+    const parsed = JSON.parse(readText('config/locales.json'));
+    const localeMap = parsed.locales || {};
+    const supportedLocales = Array.isArray(parsed.supportedLocales) && parsed.supportedLocales.length
+        ? parsed.supportedLocales
+        : Object.keys(localeMap);
+
+    return {
+        defaultLocale: parsed.defaultLocale || supportedLocales[0] || 'en',
+        supportedLocales: supportedLocales,
+        locales: localeMap
+    };
+}
+
+function normalizePathPrefix(value) {
+    const prefix = String(value || '').trim().replace(/\/+$/, '');
+    if (!prefix || prefix === '/') return '';
+    return prefix.charAt(0) === '/' ? prefix : '/' + prefix;
+}
+
+function localeEntry(code) {
+    const locale = localeConfig.locales[code] || {};
+    const prefix = normalizePathPrefix(locale.pathPrefix);
+
+    return {
+        code: code,
+        htmlLang: locale.htmlLang || code,
+        hreflang: locale.hreflang || locale.htmlLang || code,
+        dir: locale.dir || '',
+        pathPrefix: prefix,
+        homePath: locale.homePath || (prefix ? prefix + '/index.html' : '/'),
+        includeInSitemap: locale.includeInSitemap !== false
+    };
+}
+
+function sitemapLocaleEntries() {
+    return localeConfig.supportedLocales
+        .map(localeEntry)
+        .filter((locale) => locale.includeInSitemap);
+}
+
+const localeConfig = loadLocaleConfig();
+const sitemapLocales = sitemapLocaleEntries();
+const defaultLocale = localeEntry(localeConfig.defaultLocale);
+const sitemapAlternateLanguages = sitemapLocales.map((locale) => locale.hreflang).concat(['x-default']);
+
+function localizedStaticPath(basePath, locale) {
+    if (basePath === '/') return locale.homePath;
+    return locale.pathPrefix + basePath;
+}
+
+function localizedProductPath(productId, locale) {
+    return locale.pathPrefix + '/products/' + productId;
+}
+
+function alternatePathMap(basePath) {
+    return sitemapLocales.reduce((acc, locale) => {
+        acc[locale.hreflang] = localizedStaticPath(basePath, locale);
+        return acc;
+    }, {
+        'x-default': localizedStaticPath(basePath, defaultLocale)
+    });
+}
+
 const htmlPages = [
     {
         file: 'products.html',
-        lang: 'en',
-        dir: '',
+        lang: localeEntry('en').htmlLang,
+        dir: localeEntry('en').dir,
         canonicalPath: '/products.html',
-        alternates: {
-            en: '/products.html',
-            ar: '/ar/products.html',
-            'x-default': '/products.html'
-        }
+        alternates: alternatePathMap('/products.html')
     },
     {
         file: 'ar/products.html',
-        lang: 'ar',
-        dir: 'rtl',
+        lang: localeEntry('ar').htmlLang,
+        dir: localeEntry('ar').dir,
         canonicalPath: '/ar/products.html',
-        alternates: {
-            en: '/products.html',
-            ar: '/ar/products.html',
-            'x-default': '/products.html'
-        }
+        alternates: alternatePathMap('/products.html')
     },
     {
         file: 'product-detail.html',
-        lang: 'en',
-        dir: ''
+        lang: localeEntry('en').htmlLang,
+        dir: localeEntry('en').dir
     },
     {
         file: 'ar/product-detail.html',
-        lang: 'ar',
-        dir: 'rtl'
+        lang: localeEntry('ar').htmlLang,
+        dir: localeEntry('ar').dir
     }
 ];
 
@@ -158,7 +214,7 @@ function verifyHtmlPage(page) {
     if (htmlTag) {
         const attrs = htmlTag.attrs;
         assert(String(attrs.lang || '').toLowerCase() === page.lang, page.file + ' 的 html lang 应为 "' + page.lang + '"。');
-        if (page.dir) {
+        if (page.dir && page.dir.toLowerCase() !== 'ltr') {
             assert(String(attrs.dir || '').toLowerCase() === page.dir, page.file + ' 的 html dir 应为 "' + page.dir + '"。');
         } else {
             assert(!attrs.dir || String(attrs.dir).toLowerCase() === 'ltr', page.file + ' 不应设置非 ltr 的 dir。');
@@ -222,11 +278,13 @@ function verifyProductDetailJs() {
     assert(/productPublicPath\s*\(\s*product\s*,\s*['"]ar['"]\s*\)/.test(source), 'js/product-detail.js 动态 canonical 缺少阿语产品 URL。');
     assert(canonicalObjects.some((objectSource) => hasIdentifierProperty(objectSource, 'href', 'canonicalUrl')), 'js/product-detail.js 缺少写入 canonicalUrl 的动态 canonical。');
 
-    [
-        { lang: 'en', href: 'urls.en' },
-        { lang: 'ar', href: 'urls.ar' },
-        { lang: 'x-default', href: 'urls.en' }
-    ].forEach((expected) => {
+    sitemapLocales.map((locale) => ({
+        lang: locale.hreflang,
+        href: 'urls.' + locale.code
+    })).concat([{
+        lang: 'x-default',
+        href: 'urls.' + defaultLocale.code
+    }]).forEach((expected) => {
         const found = alternateObjects.some((objectSource) => (
             hasStringProperty(objectSource, 'hreflang', expected.lang)
             && hasIdentifierProperty(objectSource, 'href', expected.href)
@@ -238,8 +296,6 @@ function verifyProductDetailJs() {
     assert(/upsertMeta\s*\(\s*['"][^'"]*['"]\s*,\s*['"]og:type['"]\s*,\s*['"]product['"]\s*\)/.test(source), 'js/product-detail.js 缺少 og:type product。');
 }
 
-const sitemapAlternateLanguages = ['en', 'ar', 'x-default'];
-
 function parseSitemapUrl(value) {
     try {
         return new URL(value);
@@ -249,9 +305,13 @@ function parseSitemapUrl(value) {
 }
 
 function hasInvalidSitemapPath(pathname) {
-    return pathname.indexOf('//') !== -1
-        || pathname === '/ar/ar'
-        || pathname.indexOf('/ar/ar/') !== -1;
+    if (pathname.indexOf('//') !== -1) return true;
+
+    return sitemapLocales.some((locale) => {
+        return locale.pathPrefix
+            && (pathname === locale.pathPrefix + locale.pathPrefix
+                || pathname.indexOf(locale.pathPrefix + locale.pathPrefix + '/') !== -1);
+    });
 }
 
 function sitemapPathFromUrl(value, label) {
@@ -267,33 +327,38 @@ function sitemapPathFromUrl(value, label) {
 }
 
 function expectedSitemapAlternates(pathname) {
-    let englishPath;
-    let arabicPath;
+    const productMatch = sitemapLocales.reduce((match, locale) => {
+        if (match) return match;
+        const productPrefix = locale.pathPrefix + '/products/';
+        return pathname.indexOf(productPrefix) === 0
+            ? pathname.slice(productPrefix.length)
+            : '';
+    }, '');
 
-    if (pathname.indexOf('/ar/products/') === 0) {
-        const productId = pathname.slice('/ar/products/'.length);
-        englishPath = '/products/' + productId;
-        arabicPath = '/ar/products/' + productId;
-    } else if (pathname.indexOf('/products/') === 0) {
-        const productId = pathname.slice('/products/'.length);
-        englishPath = '/products/' + productId;
-        arabicPath = '/ar/products/' + productId;
-    } else if (pathname === '/' || pathname === '/ar/index.html') {
-        englishPath = '/';
-        arabicPath = '/ar/index.html';
-    } else if (pathname.indexOf('/ar/') === 0) {
-        englishPath = '/' + pathname.slice('/ar/'.length);
-        arabicPath = pathname;
-    } else {
-        englishPath = pathname;
-        arabicPath = '/ar' + pathname;
+    if (productMatch) {
+        return sitemapLocales.reduce((acc, locale) => {
+            acc[locale.hreflang] = buildUrl(localizedProductPath(productMatch, locale));
+            return acc;
+        }, {
+            'x-default': buildUrl(localizedProductPath(productMatch, defaultLocale))
+        });
     }
 
-    return {
-        en: buildUrl(englishPath),
-        ar: buildUrl(arabicPath),
-        'x-default': buildUrl(englishPath)
-    };
+    const matchedLocale = sitemapLocales.find((locale) => pathname === locale.homePath)
+        || sitemapLocales.find((locale) => locale.pathPrefix && pathname.indexOf(locale.pathPrefix + '/') === 0)
+        || defaultLocale;
+    const basePath = pathname === matchedLocale.homePath
+        ? '/'
+        : (matchedLocale.pathPrefix && pathname.indexOf(matchedLocale.pathPrefix + '/') === 0
+            ? '/' + pathname.slice(matchedLocale.pathPrefix.length + 1)
+            : pathname);
+
+    return sitemapLocales.reduce((acc, locale) => {
+        acc[locale.hreflang] = buildUrl(localizedStaticPath(basePath, locale));
+        return acc;
+    }, {
+        'x-default': buildUrl(localizedStaticPath(basePath, defaultLocale))
+    });
 }
 
 function verifySitemapAlternateSet(loc, alternateLinks) {
@@ -301,7 +366,8 @@ function verifySitemapAlternateSet(loc, alternateLinks) {
     const expectedAlternates = locPath ? expectedSitemapAlternates(locPath) : null;
     const alternatesByLanguage = {};
 
-    assert(alternateLinks.length === sitemapAlternateLanguages.length, 'sitemap.xml 的 ' + loc + ' 必须正好包含 en/ar/x-default 三个 alternate。');
+    assert(alternateLinks.length === sitemapAlternateLanguages.length, 'sitemap.xml 的 ' + loc + ' 必须正好包含 '
+        + sitemapAlternateLanguages.join('/') + ' 共 ' + sitemapAlternateLanguages.length + ' 个 alternate。');
 
     alternateLinks.forEach((attrs) => {
         const lang = String(attrs.hreflang || '').toLowerCase();

@@ -6,6 +6,7 @@ const { resolveDbPath } = require('../server/lib/db');
 const SITE_ORIGIN = (process.env.SITE_ORIGIN || 'https://www.lxenelectric.com').replace(/\/+$/, '');
 const PROJECT_ROOT = path.join(__dirname, '..');
 const OUTPUT_PATH = path.join(PROJECT_ROOT, 'sitemap.xml');
+const LOCALE_CONFIG_PATH = path.join(PROJECT_ROOT, 'config', 'locales.json');
 
 const STATIC_PAGES = [
     { path: '/', changefreq: 'weekly', priority: '1.0', file: 'index.html' },
@@ -62,40 +63,120 @@ function openReadonlyDb() {
     return db;
 }
 
-function staticAlternates(pathname) {
-    let englishPath = pathname;
-    let arabicPath = pathname;
+function loadLocaleConfig() {
+    const parsed = JSON.parse(fs.readFileSync(LOCALE_CONFIG_PATH, 'utf8'));
+    const localeMap = parsed.locales || {};
+    const supportedLocales = Array.isArray(parsed.supportedLocales) && parsed.supportedLocales.length
+        ? parsed.supportedLocales
+        : Object.keys(localeMap);
 
-    if (pathname === '/') {
-        englishPath = '/';
-        arabicPath = '/ar/index.html';
-    } else if (pathname === '/ar/index.html') {
-        englishPath = '/';
-        arabicPath = pathname;
-    } else if (pathname.indexOf('/ar/') === 0) {
-        englishPath = '/' + pathname.slice('/ar/'.length);
-        arabicPath = pathname;
-    } else {
-        englishPath = pathname;
-        arabicPath = '/ar' + pathname;
+    return {
+        defaultLocale: parsed.defaultLocale || supportedLocales[0] || 'en',
+        supportedLocales: supportedLocales,
+        locales: localeMap
+    };
+}
+
+function normalizePathPrefix(value) {
+    const prefix = String(value || '').trim().replace(/\/+$/, '');
+    if (!prefix || prefix === '/') return '';
+    return prefix.charAt(0) === '/' ? prefix : '/' + prefix;
+}
+
+const LOCALE_CONFIG = loadLocaleConfig();
+
+function localeEntry(code) {
+    const locale = LOCALE_CONFIG.locales[code] || {};
+    const prefix = normalizePathPrefix(locale.pathPrefix);
+
+    return {
+        code: code,
+        hreflang: locale.hreflang || locale.htmlLang || code,
+        pathPrefix: prefix,
+        homePath: locale.homePath || (prefix ? prefix + '/index.html' : '/'),
+        includeInSitemap: locale.includeInSitemap !== false
+    };
+}
+
+function sitemapLocaleEntries() {
+    return LOCALE_CONFIG.supportedLocales
+        .map(localeEntry)
+        .filter(function (locale) {
+            return locale.includeInSitemap;
+        });
+}
+
+const SITEMAP_LOCALES = sitemapLocaleEntries();
+const DEFAULT_LOCALE = localeEntry(LOCALE_CONFIG.defaultLocale);
+
+function localeForPath(pathname) {
+    const normalized = String(pathname || '/');
+    const matches = SITEMAP_LOCALES.slice().sort(function (a, b) {
+        return b.pathPrefix.length - a.pathPrefix.length;
+    });
+
+    for (let i = 0; i < matches.length; i += 1) {
+        const locale = matches[i];
+        if (normalized === locale.homePath) return locale;
+        if (locale.pathPrefix && (normalized === locale.pathPrefix || normalized.indexOf(locale.pathPrefix + '/') === 0)) {
+            return locale;
+        }
     }
 
-    return [
-        { hreflang: 'en', href: buildUrl(englishPath) },
-        { hreflang: 'ar', href: buildUrl(arabicPath) },
-        { hreflang: 'x-default', href: buildUrl(englishPath) }
-    ];
+    return DEFAULT_LOCALE;
+}
+
+function baseStaticPath(pathname) {
+    const normalized = String(pathname || '/');
+    const locale = localeForPath(normalized);
+
+    if (normalized === locale.homePath) return '/';
+    if (locale.pathPrefix && normalized.indexOf(locale.pathPrefix + '/') === 0) {
+        return '/' + normalized.slice(locale.pathPrefix.length + 1);
+    }
+    return normalized;
+}
+
+function localizedStaticPath(basePath, locale) {
+    if (basePath === '/') return locale.homePath;
+    return locale.pathPrefix + basePath;
+}
+
+function localizedProductPath(encodedId, locale) {
+    return locale.pathPrefix + '/products/' + encodedId;
+}
+
+function alternateLinks(defaultHref, entries) {
+    return entries.concat([
+        { hreflang: 'x-default', href: defaultHref }
+    ]);
+}
+
+function staticAlternates(pathname) {
+    const basePath = baseStaticPath(pathname);
+    const entries = SITEMAP_LOCALES.map(function (locale) {
+        return {
+            hreflang: locale.hreflang,
+            href: buildUrl(localizedStaticPath(basePath, locale))
+        };
+    });
+
+    return alternateLinks(buildUrl(localizedStaticPath(basePath, DEFAULT_LOCALE)), entries);
 }
 
 function productAlternates(encodedId) {
-    const englishPath = '/products/' + encodedId;
-    const arabicPath = '/ar/products/' + encodedId;
+    const entries = SITEMAP_LOCALES.map(function (locale) {
+        return {
+            hreflang: locale.hreflang,
+            href: buildUrl(localizedProductPath(encodedId, locale))
+        };
+    });
 
-    return [
-        { hreflang: 'en', href: buildUrl(englishPath) },
-        { hreflang: 'ar', href: buildUrl(arabicPath) },
-        { hreflang: 'x-default', href: buildUrl(englishPath) }
-    ];
+    return alternateLinks(buildUrl(localizedProductPath(encodedId, DEFAULT_LOCALE)), entries);
+}
+
+function productPriority(locale) {
+    return locale.code === DEFAULT_LOCALE.code ? '0.7' : '0.6';
 }
 
 function productPublicId(product) {
@@ -177,20 +258,15 @@ function buildSitemap() {
             if (!id) return;
             const encodedId = encodeURIComponent(id);
             const lastmod = toIsoDate(product.updated_at);
-            entries.push(makeEntry(
-                buildUrl('/products/' + encodedId),
-                lastmod,
-                'monthly',
-                '0.7',
-                productAlternates(encodedId)
-            ));
-            entries.push(makeEntry(
-                buildUrl('/ar/products/' + encodedId),
-                lastmod,
-                'monthly',
-                '0.6',
-                productAlternates(encodedId)
-            ));
+            SITEMAP_LOCALES.forEach(function (locale) {
+                entries.push(makeEntry(
+                    buildUrl(localizedProductPath(encodedId, locale)),
+                    lastmod,
+                    'monthly',
+                    productPriority(locale),
+                    productAlternates(encodedId)
+                ));
+            });
         });
 
         return '<?xml version="1.0" encoding="UTF-8"?>\n'

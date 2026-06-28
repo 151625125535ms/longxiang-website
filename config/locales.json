@@ -6,19 +6,23 @@
       "label": "English",
       "nativeLabel": "English",
       "htmlLang": "en",
+      "hreflang": "en",
       "dir": "ltr",
       "pathPrefix": "",
       "homePath": "/",
-      "fallbackLocale": null
+      "fallbackLocale": null,
+      "includeInSitemap": true
     },
     "ar": {
       "label": "Arabic",
       "nativeLabel": "\u0627\u0644\u0639\u0631\u0628\u064a\u0629",
       "htmlLang": "ar",
+      "hreflang": "ar",
       "dir": "rtl",
       "pathPrefix": "/ar",
       "homePath": "/ar/index.html",
-      "fallbackLocale": "en"
+      "fallbackLocale": "en",
+      "includeInSitemap": true
     }
   }
 }
