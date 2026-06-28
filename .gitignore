@@ -10,9 +10,16 @@ data/*.db-wal
 data/*.db.bak*
 
 *.log
+logs/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+*.bak
+*.bak-*
+*.tmp
+!/.tmp/
+*.old
 
 .env
 .env.*
