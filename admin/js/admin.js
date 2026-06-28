@@ -428,6 +428,7 @@
         var inquiryMeta = { page: 1, pageSize: 20, total: 0 };
         var inquirySearchTimer = null;
         var inquiryUnreadOnly = false;
+        var inquiryModule = null;
         var certPageByView = {};
         var certMetaByView = {};
         var certSearchTimers = {};
@@ -1023,6 +1024,59 @@
         loadCertificationCategories();
         bindHashRouting();
         switchView(initialViewFromHash(), { skipDirtyCheck: true });
+
+        function getInquiryModule() {
+            if (!inquiryModule) {
+                var inquiryFactory = window.LongxiangAdminModules && window.LongxiangAdminModules.inquiries;
+                if (!inquiryFactory) throw new Error('询盘模块未加载');
+
+                inquiryModule = inquiryFactory({
+                    apiRequest: apiRequest,
+                    unwrapDataResponse: unwrapDataResponse,
+                    unwrapListResponse: unwrapListResponse,
+                    escapeHtml: escapeHtml,
+                    showToast: showToast,
+                    showConfirm: showConfirm,
+                    skeletonRows: skeletonRows,
+                    emptyRow: emptyRow,
+                    clearErrorBanner: clearErrorBanner,
+                    showErrorBanner: showErrorBanner,
+                    bindRangeCheckboxes: bindRangeCheckboxes,
+                    syncBatchBarFocus: syncBatchBarFocus,
+                    bindModalClose: bindModalClose,
+                    showModal: showModal,
+                    closeModal: closeModal,
+                    formatDate: formatDate,
+                    resetFormDirty: resetFormDirty,
+                    confirmDiscardChanges: confirmDiscardChanges,
+                    renderPagination: window.renderPagination,
+                    getCurrentView: function () { return currentView; },
+                    setActiveModalTrigger: function (element) { activeModalTrigger = element; },
+                    getActiveElement: function () { return document.activeElement; },
+                    getInquiries: function () { return inquiries; },
+                    setInquiries: function (value) { inquiries = Array.isArray(value) ? value : []; },
+                    getInquiryPage: function () { return inquiryPage; },
+                    setInquiryPage: function (value) { inquiryPage = value; },
+                    getInquiryMeta: function () { return inquiryMeta; },
+                    setInquiryMeta: function (value) { inquiryMeta = value || { page: inquiryPage, pageSize: 20, total: 0 }; },
+                    getInquirySearchTimer: function () { return inquirySearchTimer; },
+                    setInquirySearchTimer: function (value) { inquirySearchTimer = value; },
+                    getInquiryUnreadOnly: function () { return inquiryUnreadOnly; },
+                    setInquiryUnreadOnly: function (value) { inquiryUnreadOnly = !!value; },
+                    getEditingInquiryId: function () { return editingInquiryId; },
+                    setEditingInquiryId: function (value) { editingInquiryId = value; },
+                    getOpenedInquiry: function () { return openedInquiry; },
+                    setOpenedInquiry: function (value) { openedInquiry = value; },
+                    getActiveInquiryId: function () { return activeInquiryId; },
+                    setActiveInquiryId: function (value) { activeInquiryId = value; },
+                    STATUS_LABELS: STATUS_LABELS,
+                    STATUS_BADGES: STATUS_BADGES,
+                    ICON_VIEW: ICON_VIEW,
+                    ICON_DELETE: ICON_DELETE
+                });
+            }
+            return inquiryModule;
+        }
 
         function bindNavigation() {
             initNavGroups();
@@ -3142,337 +3196,91 @@
         }
 
         function loadInquiries() {
-            document.getElementById('inquiries-tbody').innerHTML = skeletonRows(7, 5);
-            clearErrorBanner('view-inquiries');
-            updateInquiryBatchBar();
-            var status = document.getElementById('inquiry-status-filter').value;
-            var searchVal = ((document.getElementById('inquiry-search') || {}).value || '').trim();
-            var url = '/admin/inquiries?page=' + encodeURIComponent(inquiryPage) + '&pageSize=' + encodeURIComponent(inquiryMeta.pageSize || 20);
-            if (status) url += '&status=' + encodeURIComponent(status);
-            if (searchVal) url += '&q=' + encodeURIComponent(searchVal);
-            if (inquiryUnreadOnly) url += '&unread=true';
-            apiRequest(url).then(function (response) {
-                inquiries = unwrapListResponse(response);
-                inquiryMeta = response && response.meta ? response.meta : { page: inquiryPage, pageSize: inquiryMeta.pageSize || 20, total: inquiries.length };
-                renderInquiriesTable();
-                renderInquiriesPagination();
-            }).catch(function (err) {
-                document.getElementById('inquiries-tbody').innerHTML = emptyRow(7, '加载失败，请刷新重试');
-                showErrorBanner('view-inquiries', '询盘数据加载失败，请稍后重试', loadInquiries);
-                renderInquiriesPagination({ page: 1, pageSize: inquiryMeta.pageSize || 20, total: 0 });
-                showToast('加载询盘失败：' + err.message, 'error');
-            });
+            return getInquiryModule().loadInquiries();
         }
 
         function renderInquiriesPagination(metaOverride) {
-            var pagination = document.getElementById('inquiries-pagination');
-            if (!window.renderPagination || !pagination) return;
-            window.renderPagination(pagination, metaOverride || inquiryMeta, function (nextPage) {
-                inquiryPage = nextPage;
-                loadInquiries();
-            });
+            return getInquiryModule().renderInquiriesPagination(metaOverride);
         }
 
         function renderInquiriesTable() {
-            var tbody = document.getElementById('inquiries-tbody');
-            if (!inquiries.length) {
-                tbody.innerHTML = emptyRow(7, '暂无询盘');
-                activeInquiryId = null;
-                updateInquiryBatchBar();
-                return;
-            }
-            if (activeInquiryId && !findInquiryInList(activeInquiryId)) activeInquiryId = null;
-            tbody.innerHTML = inquiries.map(function (item) {
-                var rowClasses = [];
-                if (item.is_read === 0) rowClasses.push('row-unread');
-                if (String(item.id) === String(activeInquiryId)) rowClasses.push('row-active');
-                return '<tr class="' + rowClasses.join(' ') + '" data-inquiry-row="' + escapeHtml(item.id) + '">' +
-                    '<td><input type="checkbox" class="inquiry-select" data-id="' + escapeHtml(item.id) + '"></td>' +
-                    '<td><div class="product-name-text">' + escapeHtml(item.name) + '</div><div class="product-id-text">' + escapeHtml(item.email) + '</div></td>' +
-                    '<td>' + escapeHtml(item.company || '-') + '</td>' +
-                    '<td>' + escapeHtml(item.subject || '-') + '</td>' +
-                    '<td>' + formatDate(item.created_at) + '</td>' +
-                    '<td><span class="badge ' + (STATUS_BADGES[item.status] || 'badge-blue') + '">' + (STATUS_LABELS[item.status] || item.status) + '</span></td>' +
-                    '<td><div class="actions-cell"><button class="btn btn-icon btn-icon-view" aria-label="查看询盘" data-view-inquiry="' + escapeHtml(item.id) + '">' + ICON_VIEW + '</button><button class="btn btn-icon btn-icon-delete" aria-label="删除询盘" data-delete-inquiry="' + escapeHtml(item.id) + '">' + ICON_DELETE + '</button></div></td>' +
-                    '</tr>';
-            }).join('');
-            tbody.querySelectorAll('[data-view-inquiry]').forEach(function (btn) {
-                btn.addEventListener('click', function () { openInquiryModal(btn.getAttribute('data-view-inquiry')); });
-            });
-            tbody.querySelectorAll('[data-delete-inquiry]').forEach(function (btn) {
-                btn.addEventListener('click', function () { deleteInquiry(btn.getAttribute('data-delete-inquiry')); });
-            });
-            bindRangeCheckboxes('.inquiry-select', updateInquiryBatchBar);
-            updateInquiryBatchBar();
+            return getInquiryModule().renderInquiriesTable();
         }
 
         function findInquiryInList(id) {
-            for (var i = 0; i < inquiries.length; i++) {
-                if (String(inquiries[i].id) === String(id)) return inquiries[i];
-            }
-            return null;
+            return getInquiryModule().findInquiryInList(id);
         }
 
         function bindInquiryEvents() {
-            var filter = document.getElementById('inquiry-status-filter');
-            if (filter) filter.addEventListener('change', function () {
-                inquiryPage = 1;
-                loadInquiries();
-            });
-            var search = document.getElementById('inquiry-search');
-            if (search) search.addEventListener('input', function () {
-                clearTimeout(inquirySearchTimer);
-                inquirySearchTimer = setTimeout(function () {
-                    inquiryPage = 1;
-                    loadInquiries();
-                }, 250);
-            });
-            var unreadFilter = document.getElementById('inquiry-unread-filter');
-            if (unreadFilter) {
-                unreadFilter.querySelectorAll('[data-unread]').forEach(function (btn) {
-                    btn.addEventListener('click', function () {
-                        unreadFilter.querySelectorAll('[data-unread]').forEach(function (item) { item.classList.remove('active'); });
-                        btn.classList.add('active');
-                        inquiryUnreadOnly = btn.getAttribute('data-unread') === 'true';
-                        inquiryPage = 1;
-                        loadInquiries();
-                    });
-                });
-            }
-            var selectAll = document.getElementById('inquiry-select-all');
-            if (selectAll) {
-                selectAll.addEventListener('change', function () {
-                    document.querySelectorAll('.inquiry-select').forEach(function (checkbox) {
-                        checkbox.checked = selectAll.checked;
-                    });
-                    updateInquiryBatchBar();
-                });
-            }
-            bindInquiryBatchButton('btn-batch-read-inquiries', 'mark_read');
-            bindInquiryBatchButton('btn-batch-close-inquiries', 'close');
-            bindInquiryBatchButton('btn-batch-delete-inquiries', 'soft_delete');
-            var clearSelection = document.getElementById('btn-clear-inquiry-selection');
-            if (clearSelection) clearSelection.addEventListener('click', clearInquirySelection);
-            bindModalClose('inquiry-modal', ['inquiry-modal-close', 'inquiry-cancel']);
-            var save = document.getElementById('inquiry-save');
-            if (save) save.addEventListener('click', saveInquiryStatus);
-            var reply = document.getElementById('inquiry-reply');
-            if (reply) reply.addEventListener('click', replyByEmail);
-            var prev = document.getElementById('inquiry-prev');
-            if (prev) prev.addEventListener('click', function () { openAdjacentInquiry(-1); });
-            var next = document.getElementById('inquiry-next');
-            if (next) next.addEventListener('click', function () { openAdjacentInquiry(1); });
+            return getInquiryModule().bindInquiryEvents();
         }
 
         function setInquiryUnreadFilter(unreadOnly) {
-            var unreadFilter = document.getElementById('inquiry-unread-filter');
-            inquiryUnreadOnly = !!unreadOnly;
-            inquiryPage = 1;
-
-            if (unreadFilter) {
-                unreadFilter.querySelectorAll('[data-unread]').forEach(function (btn) {
-                    var targetValue = inquiryUnreadOnly ? 'true' : '';
-                    btn.classList.toggle('active', btn.getAttribute('data-unread') === targetValue);
-                });
-            }
-
-            loadInquiries();
+            return getInquiryModule().setInquiryUnreadFilter(unreadOnly);
         }
 
         function bindInquiryBatchButton(id, action) {
-            var btn = document.getElementById(id);
-            if (btn) btn.addEventListener('click', function () { batchInquiryAction(action); });
+            return getInquiryModule().bindInquiryBatchButton(id, action);
         }
 
         function getSelectedInquiryIds() {
-            var ids = [];
-            document.querySelectorAll('.inquiry-select:checked').forEach(function (checkbox) {
-                var id = parseInt(checkbox.getAttribute('data-id'), 10);
-                if (!isNaN(id)) ids.push(id);
-            });
-            return ids;
+            return getInquiryModule().getSelectedInquiryIds();
         }
 
         function updateInquiryBatchBar() {
-            var selected = document.querySelectorAll('.inquiry-select:checked');
-            var all = document.querySelectorAll('.inquiry-select');
-            var bar = document.getElementById('inquiry-batch-bar');
-            var count = document.getElementById('inquiry-batch-count');
-            var selectAll = document.getElementById('inquiry-select-all');
-            if (count) count.textContent = '已选 ' + selected.length + ' 条';
-            syncBatchBarFocus(bar, selected.length, '.inquiry-select');
-            if (selectAll) {
-                selectAll.checked = all.length > 0 && selected.length === all.length;
-                selectAll.indeterminate = selected.length > 0 && selected.length < all.length;
-            }
+            return getInquiryModule().updateInquiryBatchBar();
         }
 
         function clearInquirySelection() {
-            document.querySelectorAll('.inquiry-select').forEach(function (checkbox) {
-                checkbox.checked = false;
-            });
-            updateInquiryBatchBar();
+            return getInquiryModule().clearInquirySelection();
         }
 
         function inquiryBatchLabel(action) {
-            var labels = {
-                mark_read: '标记已读',
-                close: '关闭',
-                soft_delete: '删除'
-            };
-            return labels[action] || action;
+            return getInquiryModule().inquiryBatchLabel(action);
         }
 
         function batchInquiryAction(action) {
-            var ids = getSelectedInquiryIds();
-            if (!ids.length) {
-                showToast('请先选择询盘', 'error');
-                return;
-            }
-            apiRequest('/admin/inquiries/batch', {
-                method: 'POST',
-                body: { ids: ids, action: action }
-            }).then(function () {
-                showToast('已' + inquiryBatchLabel(action) + ' ' + ids.length + ' 条询盘');
-                clearInquirySelection();
-                loadInquiries();
-            }).catch(function (err) {
-                showToast('批量操作失败：' + err.message, 'error');
-            });
+            return getInquiryModule().batchInquiryAction(action);
         }
 
         function replyByEmail() {
-            if (!openedInquiry || !openedInquiry.email) return;
-            var subject = 'Re: ' + (openedInquiry.subject || 'Your Inquiry');
-            var body = 'Dear ' + (openedInquiry.name || '') + ',\n\n\n\n---\nOriginal message:\n' + (openedInquiry.message || '');
-            window.open(
-                'https://mail.google.com/mail/?view=cm' +
-                '&to=' + encodeURIComponent(openedInquiry.email) +
-                '&su=' + encodeURIComponent(subject) +
-                '&body=' + encodeURIComponent(body)
-            );
-            if (openedInquiry.status !== 'replied' && openedInquiry.status !== 'closed') {
-                var modalNotes = document.getElementById('inquiry-notes');
-                var currentNotes = modalNotes ? modalNotes.value : '';
-                apiRequest('/admin/inquiries/' + encodeURIComponent(openedInquiry.id), {
-                    method: 'PUT',
-                    body: { status: 'replied', is_read: 1, notes: currentNotes }
-                }).then(function () {
-                    openedInquiry.status = 'replied';
-                    var modalStatus = document.getElementById('inquiry-status');
-                    if (modalStatus) modalStatus.value = 'replied';
-                    showToast('状态已更新为已回复');
-                    loadInquiries();
-                }).catch(function (err) { showToast('状态更新失败：' + err.message, 'error'); });
-            }
+            return getInquiryModule().replyByEmail();
         }
 
         function openInquiryModal(id) {
-            var modal = document.getElementById('inquiry-modal');
-            var modalIsOpen = modal && modal.classList.contains('show');
-            if (!modalIsOpen) activeModalTrigger = document.activeElement;
-            resetFormDirty();
-            editingInquiryId = id;
-            openedInquiry = null;
-            apiRequest('/admin/inquiries/' + encodeURIComponent(id)).then(function (response) {
-                var item = unwrapDataResponse(response) || {};
-                openedInquiry = item;
-                renderInquiryModalDetail(item);
-                document.getElementById('inquiry-status').value = item.status || 'new';
-                document.getElementById('inquiry-notes').value = item.notes || '';
-                activeInquiryId = item.id;
-                if (currentView === 'inquiries') {
-                    document.querySelectorAll('[data-inquiry-row]').forEach(function (row) {
-                        row.classList.toggle('row-active', String(row.getAttribute('data-inquiry-row')) === String(item.id));
-                    });
-                }
-                updateInquiryModalNav();
-                showModal('inquiry-modal');
-            }).catch(function (err) { showToast('加载询盘详情失败：' + err.message, 'error'); });
+            return getInquiryModule().openInquiryModal(id);
         }
 
         function renderInquiryModalDetail(item) {
-            var status = item.status || 'new';
-            document.getElementById('inquiry-detail').innerHTML =
-                detailItem('客户姓名', item.name || '-') +
-                detailItem('联系方式', item.phone || '-') +
-                detailItem('邮箱', item.email || '-') +
-                detailItem('公司', item.company || '-') +
-                detailItem('国家', item.country || '-') +
-                detailItem('产品', item.product_context || '-') +
-                detailItem('主题', item.subject || '-') +
-                detailItem('状态', STATUS_LABELS[status] || status || '-') +
-                detailItem('提交时间', formatDate(item.created_at)) +
-                detailItem('IP 地址', item.ip || '-') +
-                '<div class="detail-item detail-full"><strong>消息内容</strong><p>' + escapeHtml(item.message || '') + '</p></div>';
+            return getInquiryModule().renderInquiryModalDetail(item);
         }
 
         function getInquiryListIndex(id) {
-            for (var i = 0; i < inquiries.length; i += 1) {
-                if (String(inquiries[i].id) === String(id)) return i;
-            }
-            return -1;
+            return getInquiryModule().getInquiryListIndex(id);
         }
 
         function updateInquiryModalNav() {
-            var index = getInquiryListIndex(editingInquiryId);
-            var prev = document.getElementById('inquiry-prev');
-            var next = document.getElementById('inquiry-next');
-            var position = document.getElementById('inquiry-modal-position');
-            var hasListContext = index !== -1 && inquiries.length > 0;
-            if (prev) prev.disabled = !hasListContext || index <= 0;
-            if (next) next.disabled = !hasListContext || index >= inquiries.length - 1;
-            if (position) {
-                position.textContent = hasListContext
-                    ? '当前结果第 ' + (index + 1) + ' / ' + inquiries.length + ' 条'
-                    : '当前询盘';
-            }
+            return getInquiryModule().updateInquiryModalNav();
         }
 
         function openAdjacentInquiry(direction) {
-            if (!confirmDiscardChanges()) return;
-            var index = getInquiryListIndex(editingInquiryId);
-            if (index === -1) return;
-            var nextItem = inquiries[index + direction];
-            if (!nextItem) return;
-            openInquiryModal(nextItem.id);
+            return getInquiryModule().openAdjacentInquiry(direction);
         }
 
         function detailItem(label, value) {
-            return '<div class="detail-item"><strong>' + label + '</strong><span>' + escapeHtml(value) + '</span></div>';
+            return getInquiryModule().detailItem(label, value);
         }
 
         function saveInquiryStatus() {
-            if (!editingInquiryId) return;
-            apiRequest('/admin/inquiries/' + encodeURIComponent(editingInquiryId), {
-                method: 'PUT',
-                body: {
-                    status: document.getElementById('inquiry-status').value,
-                    is_read: 1,
-                    notes: document.getElementById('inquiry-notes').value
-                }
-            }).then(function () {
-                showToast('询盘状态已保存');
-                resetFormDirty();
-                closeModal('inquiry-modal', true);
-                loadInquiries();
-            }).catch(function (err) {
-                if (err.status === 422) {
-                    showToast('状态不能降级', 'error');
-                    return;
-                }
-                showToast('保存失败：' + err.message, 'error');
-            });
+            return getInquiryModule().saveInquiryStatus();
         }
 
         function deleteInquiry(id) {
-            showConfirm('删除询盘', '确定删除这条询盘吗？').then(function (ok) {
-                if (!ok) return;
-                apiRequest('/admin/inquiries/' + encodeURIComponent(id), { method: 'DELETE' }).then(function () {
-                    showToast('询盘已删除');
-                    loadInquiries();
-                }).catch(function (err) { showToast('删除失败：' + err.message, 'error'); });
-            });
+            return getInquiryModule().deleteInquiry(id);
+        }
+
+        function resetInquiryModalState() {
+            return getInquiryModule().resetModalState();
         }
 
         function bindCompanyEvents() {
@@ -8053,7 +7861,7 @@
             }
             if (modalId === 'product-modal') editingProductId = null;
             if (modalId === 'certification-modal') editingCertificationId = null;
-            if (modalId === 'inquiry-modal') { editingInquiryId = null; openedInquiry = null; }
+            if (modalId === 'inquiry-modal') resetInquiryModalState();
             if (activeModalTrigger && activeModalTrigger.focus) activeModalTrigger.focus();
             activeModalTrigger = null;
             return true;
