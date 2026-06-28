@@ -4841,14 +4841,19 @@ p:last-child {
 .product-detail-redesign .product-detail-main-image {
     height: 420px;
     margin-bottom: 28px;
-    border: 1px solid var(--color-gray-200);
-    border-radius: 4px;
-    background: #F8FAFC;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
 }
 
 .product-detail-redesign .product-detail-main-image img {
+    height: 100%;
     object-fit: contain;
-    padding: 24px;
+    object-position: left center;
+    padding: 0;
 }
 
 .product-section-block {
@@ -5651,6 +5656,16 @@ p:last-child {
     .product-tree,
     .product-detail-sidebar {
         position: static;
+    }
+
+    .product-detail-redesign .product-detail-main-image {
+        height: auto;
+    }
+
+    .product-detail-redesign .product-detail-main-image img {
+        width: 100%;
+        height: auto;
+        max-height: 320px;
     }
 
     .product-detail-content-card #product-title {
