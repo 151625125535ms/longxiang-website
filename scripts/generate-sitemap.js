@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
-const { getDb } = require('../server/lib/db');
+const Database = require('better-sqlite3');
+const { resolveDbPath } = require('../server/lib/db');
 
 const SITE_ORIGIN = (process.env.SITE_ORIGIN || 'https://www.lxenelectric.com').replace(/\/+$/, '');
 const PROJECT_ROOT = path.join(__dirname, '..');
@@ -55,6 +56,48 @@ function buildUrl(pathname) {
     return SITE_ORIGIN + pathname;
 }
 
+function openReadonlyDb() {
+    const db = new Database(resolveDbPath(), { readonly: true, fileMustExist: true });
+    db.pragma('query_only = ON');
+    return db;
+}
+
+function staticAlternates(pathname) {
+    let englishPath = pathname;
+    let arabicPath = pathname;
+
+    if (pathname === '/') {
+        englishPath = '/';
+        arabicPath = '/ar/index.html';
+    } else if (pathname === '/ar/index.html') {
+        englishPath = '/';
+        arabicPath = pathname;
+    } else if (pathname.indexOf('/ar/') === 0) {
+        englishPath = '/' + pathname.slice('/ar/'.length);
+        arabicPath = pathname;
+    } else {
+        englishPath = pathname;
+        arabicPath = '/ar' + pathname;
+    }
+
+    return [
+        { hreflang: 'en', href: buildUrl(englishPath) },
+        { hreflang: 'ar', href: buildUrl(arabicPath) },
+        { hreflang: 'x-default', href: buildUrl(englishPath) }
+    ];
+}
+
+function productAlternates(encodedId) {
+    const englishPath = '/products/' + encodedId;
+    const arabicPath = '/ar/products/' + encodedId;
+
+    return [
+        { hreflang: 'en', href: buildUrl(englishPath) },
+        { hreflang: 'ar', href: buildUrl(arabicPath) },
+        { hreflang: 'x-default', href: buildUrl(englishPath) }
+    ];
+}
+
 function productPublicId(product) {
     return String(product.slug || product.legacy_id || product.id || '').trim();
 }
@@ -92,64 +135,86 @@ function readPublishedProducts(db) {
     `).all();
 }
 
-function makeEntry(loc, lastmod, changefreq, priority) {
+function makeEntry(loc, lastmod, changefreq, priority, alternates) {
+    const alternateLinks = alternates.map(function (alternate) {
+        return '    <xhtml:link rel="alternate" hreflang="' + escapeXml(alternate.hreflang)
+            + '" href="' + escapeXml(alternate.href) + '" />';
+    });
+
     return [
         '  <url>',
-        '    <loc>' + escapeXml(loc) + '</loc>',
+        '    <loc>' + escapeXml(loc) + '</loc>'
+    ].concat(alternateLinks, [
         '    <lastmod>' + escapeXml(lastmod) + '</lastmod>',
         '    <changefreq>' + escapeXml(changefreq) + '</changefreq>',
         '    <priority>' + escapeXml(priority) + '</priority>',
         '  </url>'
-    ].join('\n');
+    ]).join('\n');
 }
 
 function buildSitemap() {
-    const db = getDb();
-    const contentUpdatedAt = readContentBlockUpdatedAt(db);
-    const entries = [];
+    const db = openReadonlyDb();
+    try {
+        const contentUpdatedAt = readContentBlockUpdatedAt(db);
+        const entries = [];
 
-    STATIC_PAGES.forEach(function (page) {
-        const fileMtime = fileLastModified(page.file);
-        const lastmodSource = page.block && contentUpdatedAt[page.block]
-            ? contentUpdatedAt[page.block]
-            : (fileMtime ? fileMtime.getTime() : Date.now());
-        entries.push(makeEntry(
-            buildUrl(page.path),
-            toIsoDate(lastmodSource),
-            page.changefreq,
-            page.priority
-        ));
-    });
+        STATIC_PAGES.forEach(function (page) {
+            const fileMtime = fileLastModified(page.file);
+            const lastmodSource = page.block && contentUpdatedAt[page.block]
+                ? contentUpdatedAt[page.block]
+                : (fileMtime ? fileMtime.getTime() : Date.now());
+            entries.push(makeEntry(
+                buildUrl(page.path),
+                toIsoDate(lastmodSource),
+                page.changefreq,
+                page.priority,
+                staticAlternates(page.path)
+            ));
+        });
 
-    readPublishedProducts(db).forEach(function (product) {
-        const id = productPublicId(product);
-        if (!id) return;
-        const encodedId = encodeURIComponent(id);
-        const lastmod = toIsoDate(product.updated_at);
-        entries.push(makeEntry(
-            buildUrl('/products/' + encodedId),
-            lastmod,
-            'monthly',
-            '0.7'
-        ));
-        entries.push(makeEntry(
-            buildUrl('/ar/products/' + encodedId),
-            lastmod,
-            'monthly',
-            '0.6'
-        ));
-    });
+        readPublishedProducts(db).forEach(function (product) {
+            const id = productPublicId(product);
+            if (!id) return;
+            const encodedId = encodeURIComponent(id);
+            const lastmod = toIsoDate(product.updated_at);
+            entries.push(makeEntry(
+                buildUrl('/products/' + encodedId),
+                lastmod,
+                'monthly',
+                '0.7',
+                productAlternates(encodedId)
+            ));
+            entries.push(makeEntry(
+                buildUrl('/ar/products/' + encodedId),
+                lastmod,
+                'monthly',
+                '0.6',
+                productAlternates(encodedId)
+            ));
+        });
 
-    return '<?xml version="1.0" encoding="UTF-8"?>\n'
-        + '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-        + entries.join('\n')
-        + '\n</urlset>\n';
+        return '<?xml version="1.0" encoding="UTF-8"?>\n'
+            + '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n'
+            + entries.join('\n')
+            + '\n</urlset>\n';
+    } finally {
+        db.close();
+    }
 }
 
-function main() {
+function main(argv) {
+    const args = Array.isArray(argv) ? argv : process.argv.slice(2);
+    const dryRun = args.indexOf('--dry-run') !== -1;
     const xml = buildSitemap();
-    fs.writeFileSync(OUTPUT_PATH, xml, 'utf8');
     const urlCount = (xml.match(/<url>/g) || []).length;
+
+    if (dryRun) {
+        console.log('Sitemap dry run (no file written):', OUTPUT_PATH);
+        console.log('URL count:', urlCount);
+        return;
+    }
+
+    fs.writeFileSync(OUTPUT_PATH, xml, 'utf8');
     console.log('Sitemap generated:', OUTPUT_PATH);
     console.log('URL count:', urlCount);
 }
@@ -159,5 +224,6 @@ if (require.main === module) {
 }
 
 module.exports = {
-    buildSitemap
+    buildSitemap,
+    main
 };

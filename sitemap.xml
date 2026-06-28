@@ -1,602 +1,866 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://www.lxenelectric.com/</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/index.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/" />
+    <lastmod>2026-06-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/about.html</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/about.html" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/about.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/about.html" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/products.html</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products.html" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products.html" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/solutions.html</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/solutions.html" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/solutions.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/solutions.html" />
+    <lastmod>2026-06-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/education.html</loc>
-    <lastmod>2026-06-15</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/education.html" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/education.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/education.html" />
+    <lastmod>2026-06-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/certifications.html</loc>
-    <lastmod>2026-06-16</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/certifications.html" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/certifications.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/certifications.html" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/compare.html</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/compare.html" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/compare.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/compare.html" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/contact.html</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/contact.html" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/contact.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/contact.html" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/index.html</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/index.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/" />
+    <lastmod>2026-06-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/about.html</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/about.html" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/about.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/about.html" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/products.html</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products.html" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products.html" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/solutions.html</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/solutions.html" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/solutions.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/solutions.html" />
+    <lastmod>2026-06-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/education.html</loc>
-    <lastmod>2026-06-15</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/education.html" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/education.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/education.html" />
+    <lastmod>2026-06-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/certifications.html</loc>
-    <lastmod>2026-06-16</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/certifications.html" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/certifications.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/certifications.html" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/compare.html</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/compare.html" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/compare.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/compare.html" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/contact.html</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/contact.html" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/contact.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/contact.html" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/products/anti-short-amorphous</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/anti-short-amorphous" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/anti-short-amorphous" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/anti-short-amorphous" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/products/anti-short-amorphous</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/anti-short-amorphous" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/anti-short-amorphous" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/anti-short-amorphous" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/products/amorphous-veg-oil</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/amorphous-veg-oil" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/amorphous-veg-oil" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/amorphous-veg-oil" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/products/amorphous-veg-oil</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/amorphous-veg-oil" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/amorphous-veg-oil" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/amorphous-veg-oil" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/products/aluminum</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/aluminum" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/aluminum" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/aluminum" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/products/aluminum</loc>
-    <lastmod>2026-06-19</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://www.lxenelectric.com/products/single-phase-dry</loc>
-    <lastmod>2026-06-19</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://www.lxenelectric.com/ar/products/single-phase-dry</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/aluminum" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/aluminum" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/aluminum" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/products/3phase-3limb</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/3phase-3limb" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/3phase-3limb" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/3phase-3limb" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/products/3phase-3limb</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/3phase-3limb" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/3phase-3limb" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/3phase-3limb" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/products/3phase-5limb</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/3phase-5limb" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/3phase-5limb" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/3phase-5limb" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/products/3phase-5limb</loc>
-    <lastmod>2026-06-19</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://www.lxenelectric.com/products/traction</loc>
-    <lastmod>2026-06-19</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://www.lxenelectric.com/ar/products/traction</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/3phase-5limb" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/3phase-5limb" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/3phase-5limb" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/products/wind-power</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/wind-power" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/wind-power" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/wind-power" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/products/wind-power</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/wind-power" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/wind-power" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/wind-power" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/products/pv-combined</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/pv-combined" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/pv-combined" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/pv-combined" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/products/pv-combined</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/pv-combined" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/pv-combined" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/pv-combined" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/products/gcs</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/gcs" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/gcs" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/gcs" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/products/gcs</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/gcs" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/gcs" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/gcs" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/products/lxac-7kw</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/lxac-7kw" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/lxac-7kw" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/lxac-7kw" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/products/lxac-7kw</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/lxac-7kw" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/lxac-7kw" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/lxac-7kw" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/products/lxac-7kw-display</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/lxac-7kw-display" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/lxac-7kw-display" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/lxac-7kw-display" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/products/lxac-7kw-display</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/lxac-7kw-display" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/lxac-7kw-display" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/lxac-7kw-display" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/products/lxac-14kw</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/lxac-14kw" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/lxac-14kw" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/lxac-14kw" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/products/lxac-14kw</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/lxac-14kw" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/lxac-14kw" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/lxac-14kw" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/products/lxdc-20-30-40kw</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/lxdc-20-30-40kw" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/lxdc-20-30-40kw" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/lxdc-20-30-40kw" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/products/lxdc-20-30-40kw</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/lxdc-20-30-40kw" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/lxdc-20-30-40kw" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/lxdc-20-30-40kw" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/products/lxdc-120-400kw</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/lxdc-120-400kw" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/lxdc-120-400kw" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/lxdc-120-400kw" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/products/lxdc-120-400kw</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/lxdc-120-400kw" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/lxdc-120-400kw" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/lxdc-120-400kw" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/products/lxdc480-1280kw</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/lxdc480-1280kw" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/lxdc480-1280kw" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/lxdc480-1280kw" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/products/lxdc480-1280kw</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/lxdc480-1280kw" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/lxdc480-1280kw" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/lxdc480-1280kw" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/products/portable-storage-1kw-3kwh</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/portable-storage-1kw-3kwh" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/portable-storage-1kw-3kwh" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/portable-storage-1kw-3kwh" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/products/portable-storage-1kw-3kwh</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/portable-storage-1kw-3kwh" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/portable-storage-1kw-3kwh" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/portable-storage-1kw-3kwh" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/products/portable-storage-3kw-5kwh</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/portable-storage-3kw-5kwh" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/portable-storage-3kw-5kwh" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/portable-storage-3kw-5kwh" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/products/portable-storage-3kw-5kwh</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/portable-storage-3kw-5kwh" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/portable-storage-3kw-5kwh" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/portable-storage-3kw-5kwh" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/products/ts-mes-115k12l</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/ts-mes-115k12l" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/ts-mes-115k12l" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/ts-mes-115k12l" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/products/ts-mes-115k12l</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/ts-mes-115k12l" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/ts-mes-115k12l" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/ts-mes-115k12l" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/products/ts-les-920k100l</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/ts-les-920k100l" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/ts-les-920k100l" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/ts-les-920k100l" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/products/ts-les-920k100l</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/ts-les-920k100l" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/ts-les-920k100l" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/ts-les-920k100l" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/products/zgsbh15-pv</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/zgsbh15-pv" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/zgsbh15-pv" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/zgsbh15-pv" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/products/zgsbh15-pv</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/zgsbh15-pv" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/zgsbh15-pv" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/zgsbh15-pv" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/products/zgs13-wind</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/zgs13-wind" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/zgs13-wind" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/zgs13-wind" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/products/zgs13-wind</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/zgs13-wind" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/zgs13-wind" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/zgs13-wind" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/products/compact-cooling-box</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/compact-cooling-box" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/compact-cooling-box" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/compact-cooling-box" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/products/compact-cooling-box</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/compact-cooling-box" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/compact-cooling-box" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/compact-cooling-box" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/products/box-type-substation</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/box-type-substation" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/box-type-substation" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/box-type-substation" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/products/box-type-substation</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/box-type-substation" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/box-type-substation" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/box-type-substation" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/products/ggd</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/ggd" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/ggd" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/ggd" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/products/ggd</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/ggd" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/ggd" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/ggd" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/products/kyn28-12</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/kyn28-12" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/kyn28-12" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/kyn28-12" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/products/kyn28-12</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/kyn28-12" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/kyn28-12" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/kyn28-12" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/products/kyn-12</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/kyn-12" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/kyn-12" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/kyn-12" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/products/kyn-12</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/kyn-12" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/kyn-12" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/kyn-12" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/products/lxwz</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/lxwz" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/lxwz" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/lxwz" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/products/lxwz</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/lxwz" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/lxwz" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/lxwz" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/products/silicon-scb-dry</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/silicon-scb-dry" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/silicon-scb-dry" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/silicon-scb-dry" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/products/silicon-scb-dry</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/silicon-scb-dry" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/silicon-scb-dry" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/silicon-scb-dry" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/products/silicon-smrl-wound-core</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/silicon-smrl-wound-core" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/silicon-smrl-wound-core" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/silicon-smrl-wound-core" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/products/silicon-smrl-wound-core</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/silicon-smrl-wound-core" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/silicon-smrl-wound-core" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/silicon-smrl-wound-core" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/products/silicon-smrl-anti-short</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/silicon-smrl-anti-short" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/silicon-smrl-anti-short" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/silicon-smrl-anti-short" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/products/silicon-smrl-anti-short</loc>
-    <lastmod>2026-06-19</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://www.lxenelectric.com/products/silicon-sm-oil-power</loc>
-    <lastmod>2026-06-19</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://www.lxenelectric.com/ar/products/silicon-sm-oil-power</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/silicon-smrl-anti-short" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/silicon-smrl-anti-short" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/silicon-smrl-anti-short" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/products/silicon-s13-vegetable-oil-high-overload</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/silicon-s13-vegetable-oil-high-overload" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/silicon-s13-vegetable-oil-high-overload" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/silicon-s13-vegetable-oil-high-overload" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/products/silicon-s13-vegetable-oil-high-overload</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/silicon-s13-vegetable-oil-high-overload" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/silicon-s13-vegetable-oil-high-overload" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/silicon-s13-vegetable-oil-high-overload" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/products/amorphous-scbh-dry</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/amorphous-scbh-dry" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/amorphous-scbh-dry" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/amorphous-scbh-dry" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/products/amorphous-scbh-dry</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/amorphous-scbh-dry" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/amorphous-scbh-dry" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/amorphous-scbh-dry" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/products/amorphous-dgh-furnace</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/amorphous-dgh-furnace" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/amorphous-dgh-furnace" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/amorphous-dgh-furnace" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/products/amorphous-dgh-furnace</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/amorphous-dgh-furnace" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/amorphous-dgh-furnace" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/amorphous-dgh-furnace" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/products/amorphous-sbh-mrl-wound-core</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/amorphous-sbh-mrl-wound-core" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/amorphous-sbh-mrl-wound-core" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/amorphous-sbh-mrl-wound-core" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/products/amorphous-sbh-mrl-wound-core</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/amorphous-sbh-mrl-wound-core" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/amorphous-sbh-mrl-wound-core" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/amorphous-sbh-mrl-wound-core" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/products/amorphous-sbh15-m</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/amorphous-sbh15-m" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/amorphous-sbh15-m" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/amorphous-sbh15-m" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/products/amorphous-sbh15-m</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/amorphous-sbh15-m" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/amorphous-sbh15-m" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/amorphous-sbh15-m" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/products/amorphous-sbh21-m</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/amorphous-sbh21-m" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/amorphous-sbh21-m" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/amorphous-sbh21-m" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/products/amorphous-sbh21-m</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/amorphous-sbh21-m" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/amorphous-sbh21-m" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/amorphous-sbh21-m" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/products/amorphous-sbh25-m</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/amorphous-sbh25-m" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/amorphous-sbh25-m" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/amorphous-sbh25-m" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/products/amorphous-sbh25-m</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/amorphous-sbh25-m" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/amorphous-sbh25-m" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/amorphous-sbh25-m" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/products/grid-connected-pv-box</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/grid-connected-pv-box" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/grid-connected-pv-box" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/grid-connected-pv-box" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/products/grid-connected-pv-box</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/grid-connected-pv-box" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/grid-connected-pv-box" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/grid-connected-pv-box" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/products/pv-combiner-box</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/pv-combiner-box" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/pv-combiner-box" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/pv-combiner-box" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/products/pv-combiner-box</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/pv-combiner-box" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/pv-combiner-box" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/pv-combiner-box" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/products/grid-connected-pv-cabinet</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/grid-connected-pv-cabinet" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/grid-connected-pv-cabinet" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/grid-connected-pv-cabinet" />
+    <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.lxenelectric.com/ar/products/grid-connected-pv-cabinet</loc>
-    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/grid-connected-pv-cabinet" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/grid-connected-pv-cabinet" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/grid-connected-pv-cabinet" />
+    <lastmod>2026-06-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.lxenelectric.com/products/segmented-arc-quenching-surge-arrester</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/segmented-arc-quenching-surge-arrester" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/segmented-arc-quenching-surge-arrester" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/segmented-arc-quenching-surge-arrester" />
+    <lastmod>2026-06-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.lxenelectric.com/ar/products/segmented-arc-quenching-surge-arrester</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.lxenelectric.com/products/segmented-arc-quenching-surge-arrester" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.lxenelectric.com/ar/products/segmented-arc-quenching-surge-arrester" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.lxenelectric.com/products/segmented-arc-quenching-surge-arrester" />
+    <lastmod>2026-06-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>

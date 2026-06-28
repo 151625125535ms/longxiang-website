@@ -316,6 +316,48 @@
         return window.location.origin + path;
     }
 
+    function alternatePathsForCanonical(pathname) {
+        var path = String(pathname || window.location.pathname || '/').split('#')[0].split('?')[0];
+        if (/^https?:\/\//i.test(path)) {
+            var parser = document.createElement('a');
+            parser.href = path;
+            path = parser.pathname || '/';
+        }
+        path = '/' + path.replace(/^\/+/, '');
+        if (path === '/index.html') path = '/';
+        if (path === '/ar' || path === '/ar/') path = '/ar/index.html';
+
+        if (path === '/' || path === '/ar/index.html') {
+            return {
+                en: '/',
+                ar: '/ar/index.html',
+                xDefault: '/'
+            };
+        }
+
+        if (path.indexOf('/ar/') === 0) {
+            var englishPath = path.replace(/^\/ar\//, '/');
+            return {
+                en: englishPath,
+                ar: path,
+                xDefault: englishPath
+            };
+        }
+
+        return {
+            en: path,
+            ar: '/ar' + path,
+            xDefault: path
+        };
+    }
+
+    function upsertAlternateLinks(canonicalPath) {
+        var paths = alternatePathsForCanonical(canonicalPath);
+        upsertHeadLink('alternate', { hreflang: 'en', href: window.location.origin + paths.en });
+        upsertHeadLink('alternate', { hreflang: 'ar', href: window.location.origin + paths.ar });
+        upsertHeadLink('alternate', { hreflang: 'x-default', href: window.location.origin + paths.xDefault });
+    }
+
     function absoluteAssetUrl(path) {
         path = resolveAsset(path || '').replace(/^\.\.\//, '');
         if (!path) return '';
@@ -333,8 +375,8 @@
         }
         if (pageSlug === 'product-pages') {
             return {
-                title: isArabic ? '' : 'Transformers, Switchgear & EV Chargers | Longxiang',
-                description: isArabic ? '' : 'Browse Longxiang transformers, switchgear, EV charging stations, energy storage and PV equipment for industrial and renewable energy projects.',
+                title: isArabic ? 'منتجات المحولات ومعدات التوزيع | لونغشيانغ' : 'Transformers, Switchgear & EV Chargers | Longxiang',
+                description: isArabic ? 'تصفح محولات لونغشيانغ ومعدات المفاتيح ومحطات شحن المركبات الكهربائية وأنظمة تخزين الطاقة لمشروعات الصناعة والطاقة المتجددة.' : 'Browse Longxiang transformers, switchgear, EV charging stations, energy storage and PV equipment for industrial and renewable energy projects.',
                 canonicalPath: isArabic ? '/ar/products.html' : '/products.html'
             };
         }
@@ -394,6 +436,7 @@
         upsertMeta('twitter:title', '', title);
         upsertMeta('twitter:description', '', description);
         upsertHeadLink('canonical', { href: canonicalUrl });
+        upsertAlternateLinks(seo.canonicalPath || defaults.canonicalPath);
         if (image) {
             var imageUrl = encodeURI(absoluteAssetUrl(image));
             upsertMeta('', 'og:image', imageUrl);
