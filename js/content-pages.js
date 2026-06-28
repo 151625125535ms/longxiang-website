@@ -5,7 +5,10 @@
     if (!pageRoot) return;
 
     var pageSlug = pageRoot.getAttribute('data-content-page');
-    var isArabic = /\/ar\//.test(window.location.pathname.replace(/\\/g, '/'));
+    var locale = window.LongxiangI18n && window.LongxiangI18n.currentLocale
+        ? window.LongxiangI18n.currentLocale()
+        : (/\/ar\//.test(window.location.pathname.replace(/\\/g, '/')) ? 'ar' : 'en');
+    var isArabic = locale === 'ar';
     var assetPrefix = isArabic ? '../' : '';
     var ARABIC_CHAT_APP_NAME = '\u0648\u0627\u062a\u0633\u0627\u0628';
     var ARABIC_TEXT_FALLBACKS = {
@@ -225,6 +228,10 @@
 
     function localized(item, key) {
         if (!item) return '';
+        if (window.LongxiangI18n && window.LongxiangI18n.localized) {
+            var value = window.LongxiangI18n.localized(item, key, locale);
+            if (value && (!isArabic || value !== item[key])) return value;
+        }
         if (isArabic) {
             if (item[key + 'Ar']) return item[key + 'Ar'];
             if (item[camelToSnake(key) + '_ar']) return item[camelToSnake(key) + '_ar'];
@@ -236,6 +243,10 @@
 
     function localizedList(item, key) {
         if (!item) return [];
+        if (window.LongxiangI18n && window.LongxiangI18n.localized) {
+            var value = window.LongxiangI18n.localized(item, key, locale);
+            if (Array.isArray(value) && value.length && (!isArabic || value !== item[key])) return value;
+        }
         if (isArabic) {
             if (Array.isArray(item[key + 'Ar']) && item[key + 'Ar'].length) return item[key + 'Ar'];
             if (Array.isArray(item[camelToSnake(key) + '_ar']) && item[camelToSnake(key) + '_ar'].length) return item[camelToSnake(key) + '_ar'];

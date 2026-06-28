@@ -1,11 +1,123 @@
 (function () {
     'use strict';
 
+    var LOCALE_CONFIG = {
+        defaultLocale: 'en',
+        supportedLocales: ['en', 'ar'],
+        locales: {
+            en: {
+                label: 'English',
+                nativeLabel: 'English',
+                htmlLang: 'en',
+                dir: 'ltr',
+                pathPrefix: '',
+                homePath: '/',
+                fallbackLocale: null
+            },
+            ar: {
+                label: 'Arabic',
+                nativeLabel: '\u0627\u0644\u0639\u0631\u0628\u064a\u0629',
+                htmlLang: 'ar',
+                dir: 'rtl',
+                pathPrefix: '/ar',
+                homePath: '/ar/index.html',
+                fallbackLocale: 'en'
+            }
+        }
+    };
+
+    function hasLocalizedValue(value) {
+        if (value == null || value === '') return false;
+        if (Array.isArray(value)) return value.length > 0;
+        return true;
+    }
+
+    function normalizeLocale(locale) {
+        locale = String(locale || '').toLowerCase();
+        return LOCALE_CONFIG.locales[locale] ? locale : LOCALE_CONFIG.defaultLocale;
+    }
+
+    function inferLocaleFromPath(pathname) {
+        var path = String(pathname || window.location.pathname || '').replace(/\\/g, '/');
+        return path === '/ar' || path.indexOf('/ar/') === 0 ? 'ar' : LOCALE_CONFIG.defaultLocale;
+    }
+
+    function currentLocale() {
+        return inferLocaleFromPath(window.location.pathname);
+    }
+
+    function isRtl(locale) {
+        locale = normalizeLocale(locale || currentLocale());
+        return LOCALE_CONFIG.locales[locale].dir === 'rtl';
+    }
+
+    function localeFieldSuffix(locale) {
+        locale = normalizeLocale(locale);
+        return locale.charAt(0).toUpperCase() + locale.slice(1);
+    }
+
+    function localizedFieldValue(entity, field, locale) {
+        if (!entity || !field) return '';
+        var snakeField = camelToSnake(field);
+        var candidates = [
+            field + localeFieldSuffix(locale),
+            snakeField + '_' + locale,
+            field + '_' + locale
+        ];
+        for (var i = 0; i < candidates.length; i += 1) {
+            if (hasLocalizedValue(entity[candidates[i]])) return entity[candidates[i]];
+        }
+        return '';
+    }
+
+    function localizedObjectValue(value, locale) {
+        if (!value || typeof value !== 'object' || Array.isArray(value)) return '';
+        if (hasLocalizedValue(value[locale])) return value[locale];
+        return '';
+    }
+
+    function localized(entity, field, locale) {
+        if (!entity || !field) return '';
+        locale = normalizeLocale(locale || currentLocale());
+
+        var directValue = entity[field];
+        var objectValue = localizedObjectValue(directValue, locale);
+        if (hasLocalizedValue(objectValue)) return objectValue;
+
+        var localeValue = localizedFieldValue(entity, field, locale);
+        if (hasLocalizedValue(localeValue)) return localeValue;
+
+        if (hasLocalizedValue(directValue) && (typeof directValue !== 'object' || Array.isArray(directValue))) {
+            return directValue;
+        }
+
+        var fallbackLocale = LOCALE_CONFIG.locales[locale].fallbackLocale;
+        if (fallbackLocale) {
+            var fallbackObjectValue = localizedObjectValue(directValue, fallbackLocale);
+            if (hasLocalizedValue(fallbackObjectValue)) return fallbackObjectValue;
+
+            var fallbackValue = localizedFieldValue(entity, field, fallbackLocale);
+            if (hasLocalizedValue(fallbackValue)) return fallbackValue;
+        }
+
+        return '';
+    }
+
+    window.LongxiangI18n = {
+        config: LOCALE_CONFIG,
+        normalizeLocale: normalizeLocale,
+        currentLocale: currentLocale,
+        inferLocaleFromPath: inferLocaleFromPath,
+        isRtl: isRtl,
+        localized: localized
+    };
+
     var navbar = document.querySelector('.navbar');
     var hamburger = document.querySelector('.hamburger');
     var navLinks = document.querySelector('.nav-links');
     var mobileOverlay = document.querySelector('.mobile-menu-overlay');
-    var isArabic = /\/ar\//.test(window.location.pathname.replace(/\\/g, '/'));
+    var locale = window.LongxiangI18n.currentLocale();
+    var isArabic = locale === 'ar';
     var assetPrefix = isArabic ? '../' : '';
     var companyCache = null;
     var globalShellCache = null;
@@ -55,6 +167,10 @@
 
     function localizedArabicValue(item, key) {
         if (!item || !isArabic) return '';
+        if (window.LongxiangI18n && window.LongxiangI18n.localized) {
+            var value = window.LongxiangI18n.localized(item, key, locale);
+            if (value && value !== item[key]) return value;
+        }
         if (item[key + 'Ar']) return item[key + 'Ar'];
         if (item[camelToSnake(key) + '_ar']) return item[camelToSnake(key) + '_ar'];
         if (item[key + '_ar']) return item[key + '_ar'];

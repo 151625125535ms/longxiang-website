@@ -4,7 +4,10 @@
     var container = document.getElementById('products-container');
     if (!container) return;
 
-    var isArabic = /\/ar\//.test(window.location.pathname.replace(/\\/g, '/'));
+    var locale = window.LongxiangI18n && window.LongxiangI18n.currentLocale
+        ? window.LongxiangI18n.currentLocale()
+        : (/\/ar\//.test(window.location.pathname.replace(/\\/g, '/')) ? 'ar' : 'en');
+    var isArabic = locale === 'ar';
     var assetPrefix = isArabic ? '../' : '';
     var selectedCompare = [];
     var productsCache = [];
@@ -36,6 +39,10 @@
     }
 
     function localize(product, field) {
+        if (window.LongxiangI18n && window.LongxiangI18n.localized) {
+            var value = window.LongxiangI18n.localized(product, field, locale);
+            if (value) return value;
+        }
         if (isArabic) {
             var arabicField = field + 'Ar';
             if (product[arabicField]) return product[arabicField];

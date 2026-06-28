@@ -2,7 +2,10 @@
     'use strict';
 
     var pageRoot = document.querySelector('[data-education-page]');
-    var isArabic = /\/ar\//.test(window.location.pathname.replace(/\\/g, '/'));
+    var locale = window.LongxiangI18n && window.LongxiangI18n.currentLocale
+        ? window.LongxiangI18n.currentLocale()
+        : (/\/ar\//.test(window.location.pathname.replace(/\\/g, '/')) ? 'ar' : 'en');
+    var isArabic = locale === 'ar';
     var assetPrefix = isArabic ? '../' : '';
 
     if (!pageRoot) return;
@@ -69,12 +72,20 @@
 
     function localized(item, key) {
         if (!item) return '';
+        if (window.LongxiangI18n && window.LongxiangI18n.localized) {
+            var value = window.LongxiangI18n.localized(item, key, locale);
+            if (value) return value;
+        }
         if (isArabic && item[key + 'Ar']) return item[key + 'Ar'];
         return item[key] || '';
     }
 
     function localizedList(item, key) {
         if (!item) return [];
+        if (window.LongxiangI18n && window.LongxiangI18n.localized) {
+            var value = window.LongxiangI18n.localized(item, key, locale);
+            if (Array.isArray(value) && value.length) return value;
+        }
         if (isArabic && item[key + 'Ar'] && item[key + 'Ar'].length) return item[key + 'Ar'];
         return item[key] || [];
     }

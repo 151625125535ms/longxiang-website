@@ -4,7 +4,10 @@
     var container = document.getElementById('comparison-container');
     if (!container) return;
 
-    var isArabic = /\/ar\//.test(window.location.pathname.replace(/\\/g, '/'));
+    var locale = window.LongxiangI18n && window.LongxiangI18n.currentLocale
+        ? window.LongxiangI18n.currentLocale()
+        : (/\/ar\//.test(window.location.pathname.replace(/\\/g, '/')) ? 'ar' : 'en');
+    var isArabic = locale === 'ar';
     var assetPrefix = isArabic ? '../' : '';
     var contentPromise = window.longxiangContentPagePromise || Promise.resolve(null);
     var ARABIC_TEXT_FALLBACKS = {
@@ -59,6 +62,10 @@
     }
 
     function localize(product, field) {
+        if (window.LongxiangI18n && window.LongxiangI18n.localized) {
+            var value = window.LongxiangI18n.localized(product, field, locale);
+            if (value) return value;
+        }
         if (isArabic) {
             var arField = field + 'Ar';
             if (product[arField]) return product[arField];
@@ -76,6 +83,10 @@
 
     function localized(item, key) {
         if (!item) return '';
+        if (window.LongxiangI18n && window.LongxiangI18n.localized) {
+            var value = window.LongxiangI18n.localized(item, key, locale);
+            if (value && (!isArabic || value !== item[key])) return value;
+        }
         if (isArabic && item[key + 'Ar']) return item[key + 'Ar'];
         if (isArabic && typeof item[key] === 'string' && ARABIC_TEXT_FALLBACKS[item[key].trim()]) {
             return ARABIC_TEXT_FALLBACKS[item[key].trim()];
