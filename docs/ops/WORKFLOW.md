@@ -60,7 +60,7 @@ git diff --stat
 5. 提交：
 
 ```powershell
-git add .
+git add <changed-files>
 git commit -m "简短描述本次修改"
 ```
 
@@ -73,28 +73,22 @@ git push origin main
 7. 部署到服务器：
 
 ```powershell
-ssh longxiang "cd /home/ubuntu/longxiang-website && git pull origin main"
+ssh longxiang "cd /home/ubuntu/longxiang-website && git pull --ff-only origin main"
 ```
 
-## 服务器紧急修改流程
+## 服务器紧急处理原则
 
-原则上不要在服务器直接改代码。服务器只负责运行和部署。
+服务器不得直接改代码。服务器只负责运行和部署。
 
-如果必须在服务器临时修改，修完后立刻执行：
+如果线上出现紧急问题，也应先在本机通过 Git 生成可追溯提交，再推送 GitHub，最后让服务器 pull。不要在服务器执行 `git add`、`git commit` 或 `git push`。
 
-```bash
-cd /home/ubuntu/longxiang-website
-git status
-git add .
-git commit -m "描述服务器临时修改"
-git push origin main
-```
-
-然后本机马上同步：
+回滚优先使用本机的 `git revert`：
 
 ```powershell
 cd D:\Projects\longxiang-website
-git pull origin main
+git revert <commit>
+git push origin main
+ssh longxiang "cd /home/ubuntu/longxiang-website && git pull --ff-only origin main"
 ```
 
 ## 启动本机项目
@@ -126,8 +120,8 @@ http://127.0.0.1:3300/
 ## 禁止事项
 
 - 不要本机和服务器同时改同一个项目。
-- 不要服务器 `commit` 后不 `push`。
 - 不要本机 `commit` 后不 `push`。
+- 不要在服务器执行 `git add`、`git commit` 或 `git push`。
 - 不要在有未提交改动时直接 `git pull`。
 - 不要把 `node_modules/`、`.agents/`、`backups/`、`.env` 提交进 Git。
 
@@ -142,7 +136,11 @@ http://127.0.0.1:3300/
 服务器紧急修复：
 
 ```text
-服务器修改 -> commit -> push GitHub -> 本机 pull
+本机 revert 或修复 -> commit -> push GitHub -> 服务器 pull
 ```
 
 不要两边同时独立修改。
+
+## 生产部署基线
+
+本地验证、GitHub 推送、生产服务器拉取、PM2 健康检查和回滚清单见 `docs/ops/DEPLOYMENT_BASELINE.md`。
