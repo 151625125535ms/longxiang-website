@@ -1,7 +1,166 @@
 (function () {
     'use strict';
 
-    var API_BASE = '/api';
+    var adminRoot = window.LongxiangAdmin = window.LongxiangAdmin || {};
+    var isLoginShell = !!document.getElementById('login-page');
+    var isAdminShell = !!document.getElementById('admin-page');
+    var fallbackCore = {
+        escapeHtml: function (value) {
+            return String(value == null ? '' : value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        },
+        getToken: function () {
+            return localStorage.getItem('admin_token');
+        },
+        setToken: function (token) {
+            localStorage.setItem('admin_token', token);
+        },
+        removeToken: function () {
+            localStorage.removeItem('admin_token');
+        },
+        getUsername: function () {
+            return localStorage.getItem('admin_username') || 'admin';
+        },
+        setUsername: function (name) {
+            localStorage.setItem('admin_username', name);
+        }
+    };
+    var fallbackApi = {
+        API_BASE: '/api',
+        apiRequest: function (url, options) {
+            options = options || {};
+            var headers = options.headers || {};
+            var token = adminCore.getToken();
+            if (token) headers.Authorization = 'Bearer ' + token;
+
+            if (options.body && !(options.body instanceof FormData)) {
+                headers['Content-Type'] = 'application/json';
+                options.body = JSON.stringify(options.body);
+            }
+            options.headers = headers;
+
+            return fetch(fallbackApi.API_BASE + url, options).then(function (res) {
+                if (res.status === 401 || res.status === 403) {
+                    adminCore.removeToken();
+                    window.location.href = 'login.html';
+                    return Promise.reject(new Error('登录已失效，请重新登录'));
+                }
+
+                return res.text().then(function (text) {
+                    var data = text ? JSON.parse(text) : {};
+                    if (!res.ok) {
+                        var message = data.message || (data.error && data.error.message) || data.error || '请求失败';
+                        var err = new Error(message);
+                        err.status = res.status;
+                        err.code = data.error && data.error.code;
+                        err.data = data;
+                        err.details = data && data.data;
+                        throw err;
+                    }
+                    return data;
+                });
+            });
+        },
+        unwrapDataResponse: function (response) {
+            if (response && response.ok && response.data !== undefined) return response.data;
+            return response;
+        },
+        unwrapListResponse: function (response) {
+            if (response && response.ok && response.data && response.data.items) return response.data.items;
+            if (response && response.ok && Array.isArray(response.data)) return response.data;
+            if (response && response.items) return response.items;
+            if (Array.isArray(response)) return response;
+            return [];
+        }
+    };
+    var fallbackUi = {
+        showToast: function (message, type) {
+            type = type || 'success';
+            var container = document.getElementById('toast-container');
+            if (!container) return;
+
+            var toast = document.createElement('div');
+            toast.className = 'toast ' + type;
+            toast.textContent = message;
+            container.appendChild(toast);
+
+            setTimeout(function () {
+                toast.style.animation = 'toastOut 0.3s ease forwards';
+                setTimeout(function () {
+                    if (toast.parentNode) toast.parentNode.removeChild(toast);
+                }, 300);
+            }, 3000);
+        },
+        trapFocus: function (modalEl, onEscape) {
+            if (!modalEl) return;
+            this.releaseFocusTrap(modalEl);
+            var selector = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+            function getFocusable() {
+                return Array.prototype.slice.call(modalEl.querySelectorAll(selector)).filter(function (el) {
+                    return !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length);
+                });
+            }
+
+            function onKeydown(e) {
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    if (onEscape) onEscape();
+                    return;
+                }
+                if (e.key !== 'Tab') return;
+                var focusable = getFocusable();
+                if (!focusable.length) return;
+                var first = focusable[0];
+                var last = focusable[focusable.length - 1];
+                if (e.shiftKey && document.activeElement === first) {
+                    e.preventDefault();
+                    last.focus();
+                } else if (!e.shiftKey && document.activeElement === last) {
+                    e.preventDefault();
+                    first.focus();
+                }
+            }
+
+            modalEl.__focusTrapHandler = onKeydown;
+            modalEl.addEventListener('keydown', onKeydown);
+            setTimeout(function () {
+                var focusable = getFocusable();
+                if (focusable.length) focusable[0].focus();
+            }, 0);
+        },
+        releaseFocusTrap: function (modalEl) {
+            if (modalEl && modalEl.__focusTrapHandler) {
+                modalEl.removeEventListener('keydown', modalEl.__focusTrapHandler);
+                modalEl.__focusTrapHandler = null;
+            }
+        }
+    };
+    var missingAdminModules = isAdminShell && (!adminRoot.core || !adminRoot.api || !adminRoot.ui);
+    if (missingAdminModules) {
+        console.error('Longxiang admin modules failed to load. Check admin-core.js, admin-api.js and admin-ui.js load order.');
+        return;
+    }
+
+    var adminCore = adminRoot.core || (isLoginShell ? fallbackCore : null);
+    var adminApi = adminRoot.api || (isLoginShell ? fallbackApi : null);
+    var adminUi = adminRoot.ui || (isLoginShell ? fallbackUi : null);
+    if (!adminCore || !adminApi || !adminUi) {
+        console.error('Longxiang admin runtime is not available.');
+        return;
+    }
+
+    if (isLoginShell) {
+        adminRoot.core = adminCore;
+        adminRoot.api = adminApi;
+        adminRoot.ui = adminUi;
+    }
+
+    var API_BASE = adminApi.API_BASE;
     var CATEGORIES = [
         { value: 'oil-immersed', group: 'transformer', subCategory: 'oil-immersed', label: 'Oil Immersed Transformer', labelAr: 'محول مغمور بالزيت' },
         { value: 'dry-type', group: 'transformer', subCategory: 'dry-type', label: 'Dry Type Transformer', labelAr: 'محول جاف' },
@@ -61,32 +220,27 @@
     var ICON_VIEW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
 
     function getToken() {
-        return localStorage.getItem('admin_token');
+        return adminCore.getToken();
     }
 
     function setToken(token) {
-        localStorage.setItem('admin_token', token);
+        adminCore.setToken(token);
     }
 
     function removeToken() {
-        localStorage.removeItem('admin_token');
+        adminCore.removeToken();
     }
 
     function getUsername() {
-        return localStorage.getItem('admin_username') || 'admin';
+        return adminCore.getUsername();
     }
 
     function setUsername(name) {
-        localStorage.setItem('admin_username', name);
+        adminCore.setUsername(name);
     }
 
     function escapeHtml(value) {
-        return String(value == null ? '' : value)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
+        return adminCore.escapeHtml(value);
     }
 
     function adminProductNameCn(product) {
@@ -102,115 +256,27 @@
     }
 
     function apiRequest(url, options) {
-        options = options || {};
-        var headers = options.headers || {};
-        var token = getToken();
-        if (token) headers.Authorization = 'Bearer ' + token;
-
-        if (options.body && !(options.body instanceof FormData)) {
-            headers['Content-Type'] = 'application/json';
-            options.body = JSON.stringify(options.body);
-        }
-        options.headers = headers;
-
-        return fetch(API_BASE + url, options).then(function (res) {
-            if (res.status === 401 || res.status === 403) {
-                removeToken();
-                window.location.href = 'login.html';
-                return Promise.reject(new Error('登录已失效，请重新登录'));
-            }
-
-            return res.text().then(function (text) {
-                var data = text ? JSON.parse(text) : {};
-                if (!res.ok) {
-                    var message = data.message || (data.error && data.error.message) || data.error || '请求失败';
-                    var err = new Error(message);
-                    err.status = res.status;
-                    err.code = data.error && data.error.code;
-                    err.data = data;
-                    err.details = data && data.data;
-                    throw err;
-                }
-                return data;
-            });
-        });
+        return adminApi.apiRequest(url, options);
     }
 
     function unwrapDataResponse(response) {
-        if (response && response.ok && response.data !== undefined) return response.data;
-        return response;
+        return adminApi.unwrapDataResponse(response);
     }
 
     function unwrapListResponse(response) {
-        if (response && response.ok && response.data && response.data.items) return response.data.items;
-        if (response && response.ok && Array.isArray(response.data)) return response.data;
-        if (response && response.items) return response.items;
-        if (Array.isArray(response)) return response;
-        return [];
+        return adminApi.unwrapListResponse(response);
     }
 
     function showToast(message, type) {
-        type = type || 'success';
-        var container = document.getElementById('toast-container');
-        if (!container) return;
-
-        var toast = document.createElement('div');
-        toast.className = 'toast ' + type;
-        toast.textContent = message;
-        container.appendChild(toast);
-
-        setTimeout(function () {
-            toast.style.animation = 'toastOut 0.3s ease forwards';
-            setTimeout(function () {
-                if (toast.parentNode) toast.parentNode.removeChild(toast);
-            }, 300);
-        }, 3000);
+        adminUi.showToast(message, type);
     }
 
     function trapFocus(modalEl, onEscape) {
-        if (!modalEl) return;
-        releaseFocusTrap(modalEl);
-        var selector = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
-
-        function getFocusable() {
-            return Array.prototype.slice.call(modalEl.querySelectorAll(selector)).filter(function (el) {
-                return !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length);
-            });
-        }
-
-        function onKeydown(e) {
-            if (e.key === 'Escape') {
-                e.preventDefault();
-                if (onEscape) onEscape();
-                return;
-            }
-            if (e.key !== 'Tab') return;
-            var focusable = getFocusable();
-            if (!focusable.length) return;
-            var first = focusable[0];
-            var last = focusable[focusable.length - 1];
-            if (e.shiftKey && document.activeElement === first) {
-                e.preventDefault();
-                last.focus();
-            } else if (!e.shiftKey && document.activeElement === last) {
-                e.preventDefault();
-                first.focus();
-            }
-        }
-
-        modalEl.__focusTrapHandler = onKeydown;
-        modalEl.addEventListener('keydown', onKeydown);
-        setTimeout(function () {
-            var focusable = getFocusable();
-            if (focusable.length) focusable[0].focus();
-        }, 0);
+        adminUi.trapFocus(modalEl, onEscape);
     }
 
     function releaseFocusTrap(modalEl) {
-        if (modalEl && modalEl.__focusTrapHandler) {
-            modalEl.removeEventListener('keydown', modalEl.__focusTrapHandler);
-            modalEl.__focusTrapHandler = null;
-        }
+        adminUi.releaseFocusTrap(modalEl);
     }
 
     function showConfirm(title, message) {

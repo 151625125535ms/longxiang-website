@@ -1,5 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;500;600;700&display=swap');
 
+/* Stage 6 boundary: admin-base.css and admin-components.css now provide the
+   admin shell and reusable controls for admin/index.html. This file remains
+   last in the cascade for login-page compatibility and view-specific overrides.
+   Some legacy overlap stays here until admin/login.html can load the split CSS. */
+
 :root {
     --color-navy: #071a33;
     --color-steel: #102a4a;
