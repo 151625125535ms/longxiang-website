@@ -15,7 +15,7 @@
     "sitemap:generate": "node scripts/generate-sitemap.js",
     "sitemap:dry-run": "npm run sitemap:generate -- --dry-run",
     "check:js": "node --check scripts/generate-sitemap.js && node --check scripts/verify-seo-i18n.js && node --check js/main.js && node --check js/content-pages.js && node --check js/products-list.js && node --check js/product-detail.js && node --check js/education.js && node --check js/compare.js",
-    "check:admin": "node --check admin/js/pagination.js && node --check admin/js/admin-core.js && node --check admin/js/admin-api.js && node --check admin/js/admin-ui.js && node --check admin/js/modules/admin-inquiries.js && node --check admin/js/admin.js",
+    "check:admin": "node --check admin/js/pagination.js && node --check admin/js/admin-core.js && node --check admin/js/admin-api.js && node --check admin/js/admin-ui.js && node --check admin/js/modules/admin-inquiries.js && node --check admin/js/modules/admin-products.js && node --check admin/js/admin.js",
     "check:server": "node --check server/app.js && node scripts/test-acceptance.js",
     "check:all": "npm run seo:verify && npm run sitemap:dry-run && npm run check:js && npm run check:admin && npm run check:server",
     "start": "node server/app.js",

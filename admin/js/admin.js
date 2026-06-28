@@ -397,7 +397,6 @@
                 window.location.href = 'login.html';
             });
 
-        var products = [];
         var inquiries = [];
         var certifications = [];
         var certificationCategoryMap = {};
@@ -409,26 +408,19 @@
         var trashedProducts = [];
         var trashedCerts = [];
         var educationContent = null;
-        var editingProductId = null;
-        var editingProductVersion = null;
-        var uploadedImagePath = '';
-        var productGalleryPaths = [];
-        var productImageUploading = false;
         var productCategories = [];
-        var productSearchTimer = null;
         var editingInquiryId = null;
         var openedInquiry = null;
         var activeInquiryId = null;
         var editingCertificationId = null;
         var uploadedCertificationPath = '';
         var currentView = 'dashboard';
-        var productPage = 1;
-        var productMeta = { page: 1, pageSize: 20, total: 0 };
         var inquiryPage = 1;
         var inquiryMeta = { page: 1, pageSize: 20, total: 0 };
         var inquirySearchTimer = null;
         var inquiryUnreadOnly = false;
         var inquiryModule = null;
+        var productModule = null;
         var certPageByView = {};
         var certMetaByView = {};
         var certSearchTimers = {};
@@ -1078,6 +1070,56 @@
             return inquiryModule;
         }
 
+
+        function getProductModule() {
+            if (!productModule) {
+                var productFactory = window.LongxiangAdminModules && window.LongxiangAdminModules.products;
+                if (!productFactory) throw new Error('产品模块未加载');
+
+                productModule = productFactory({
+                    apiRequest: apiRequest,
+                    unwrapDataResponse: unwrapDataResponse,
+                    unwrapListResponse: unwrapListResponse,
+                    escapeHtml: escapeHtml,
+                    showToast: showToast,
+                    showConfirm: showConfirm,
+                    skeletonRows: skeletonRows,
+                    emptyRow: emptyRow,
+                    clearErrorBanner: clearErrorBanner,
+                    showErrorBanner: showErrorBanner,
+                    formatDate: formatDate,
+                    bindModalClose: bindModalClose,
+                    showModal: showModal,
+                    closeModal: closeModal,
+                    switchView: switchView,
+                    resetFormDirty: resetFormDirty,
+                    markFormDirty: markFormDirty,
+                    showDraftRecovery: showDraftRecovery,
+                    draftKey: draftKey,
+                    restoreFormDraft: restoreFormDraft,
+                    collectFormDraft: collectFormDraft,
+                    safeSessionRemove: safeSessionRemove,
+                    safeSessionSet: safeSessionSet,
+                    showConflictNotice: showConflictNotice,
+                    adminProductNameCn: adminProductNameCn,
+                    assetPreviewSrc: assetPreviewSrc,
+                    uploadAdminAssetFile: uploadAdminAssetFile,
+                    openAssetPicker: openAssetPicker,
+                    loadProductCategories: loadProductCategories,
+                    populateProductCategorySelects: populateProductCategorySelects,
+                    buildVersionMap: buildVersionMap,
+                    runBatchAction: runBatchAction,
+                    batchActionLabel: batchActionLabel,
+                    setActiveModalTrigger: function (element) { activeModalTrigger = element; },
+                    getActiveElement: function () { return document.activeElement; },
+                    ICON_VIEW: ICON_VIEW,
+                    ICON_EDIT: ICON_EDIT,
+                    ICON_DELETE: ICON_DELETE
+                });
+            }
+            return productModule;
+        }
+
         function bindNavigation() {
             initNavGroups();
 
@@ -1300,26 +1342,23 @@
                 else field.value = draft[id] == null ? '' : draft[id];
             });
             if (formId === 'product-form') {
-                setProductCoverPath(draft['field-cover-image'] || uploadedImagePath || '');
-                if (uploadedImagePath) showImagePreview('../' + uploadedImagePath);
+                setProductCoverPath(draft['field-cover-image'] || getProductUploadedImagePath() || '');
+                if (getProductUploadedImagePath()) showImagePreview('../' + getProductUploadedImagePath());
             }
             if (formId === 'certification-form') uploadedCertificationPath = (draft['cert-image'] || uploadedCertificationPath || '');
             markFormDirty();
         }
 
         function setProductCoverPath(path) {
-            uploadedImagePath = path || '';
-            var coverField = document.getElementById('field-cover-image');
-            if (coverField) coverField.value = uploadedImagePath;
+            return getProductModule().setProductCoverPath(path);
         }
 
         function getProductUploadPath(response) {
-            var uploaded = response && (response.data || response);
-            var path = uploaded && (uploaded.path || uploaded.public_path || uploaded.url || uploaded.location);
-            if (!path) return '';
-            path = String(path).trim().replace(/\\/g, '/');
-            path = path.replace(/^https?:\/\/[^/]+\//i, '');
-            return path.replace(/^\/+/, '');
+            return getProductModule().getProductUploadPath(response);
+        }
+
+        function getProductUploadedImagePath() {
+            return getProductModule().getUploadedImagePath();
         }
 
         function assetPreviewSrc(path) {
@@ -1352,8 +1391,7 @@
         }
 
         function setProductSubmitDisabled(disabled) {
-            var submit = document.getElementById('modal-submit');
-            if (submit) submit.disabled = !!disabled;
+            return getProductModule().setProductSubmitDisabled(disabled);
         }
 
         function showDraftRecovery(host, key, restoreFn) {
@@ -2020,180 +2058,47 @@
         }
 
         function loadProducts() {
-            document.getElementById('products-tbody').innerHTML = skeletonRows(9, 5);
-            clearErrorBanner('view-products');
-            updateProductBatchBar();
-            updateProductsResultCount(null);
-            var searchVal = ((document.getElementById('product-search') || {}).value || '').trim();
-            var catVal = (document.getElementById('product-category-filter') || {}).value || '';
-            var statusVal = (document.getElementById('product-status-filter') || {}).value || '';
-            var featuredVal = (document.getElementById('product-featured-filter') || {}).value || '';
-            var issueVal = (document.getElementById('product-issue-filter') || {}).value || '';
-            var url = '/admin/products?page=' + encodeURIComponent(productPage) + '&pageSize=' + encodeURIComponent(productMeta.pageSize || 20);
-            if (searchVal) url += '&q=' + encodeURIComponent(searchVal);
-            if (catVal) url += '&category=' + encodeURIComponent(catVal);
-            if (statusVal) url += '&status=' + encodeURIComponent(statusVal);
-            if (featuredVal !== '') url += '&featured=' + encodeURIComponent(featuredVal);
-            if (issueVal) url += '&issue=' + encodeURIComponent(issueVal);
-            updateProductClearFilters();
-
-            apiRequest(url).then(function (response) {
-                products = unwrapListResponse(response);
-                productMeta = response && response.meta ? response.meta : { page: productPage, pageSize: productMeta.pageSize || 20, total: products.length };
-                renderProductsTable();
-                renderProductsPagination();
-            }).catch(function (err) {
-                document.getElementById('products-tbody').innerHTML = emptyRow(9, '加载失败，请刷新重试');
-                updateProductsResultCount(0);
-                showErrorBanner('view-products', '产品数据加载失败，请稍后重试', loadProducts);
-                renderProductsPagination({ page: 1, pageSize: productMeta.pageSize || 20, total: 0 });
-                showToast('加载产品失败：' + err.message, 'error');
-            });
+            return getProductModule().loadProducts();
         }
 
         function renderProductsPagination(metaOverride) {
-            var pagination = document.getElementById('products-pagination');
-            if (!window.renderPagination || !pagination) return;
-            window.renderPagination(pagination, metaOverride || productMeta, function (nextPage) {
-                productPage = nextPage;
-                loadProducts();
-            });
+            return getProductModule().renderProductsPagination(metaOverride);
         }
 
         function updateProductClearFilters() {
-            var btn = document.getElementById('product-clear-filters');
-            if (!btn) return;
-            var hasFilters = [
-                ((document.getElementById('product-search') || {}).value || '').trim(),
-                (document.getElementById('product-category-filter') || {}).value || '',
-                (document.getElementById('product-status-filter') || {}).value || '',
-                (document.getElementById('product-featured-filter') || {}).value || '',
-                (document.getElementById('product-issue-filter') || {}).value || ''
-            ].some(Boolean);
-            btn.style.display = hasFilters ? '' : 'none';
+            return getProductModule().updateProductClearFilters();
         }
 
         function updateProductsResultCount(totalOverride) {
-            var el = document.getElementById('products-result-count');
-            if (!el) return;
-            if (totalOverride == null) {
-                el.textContent = '正在加载产品...';
-                return;
-            }
-            el.textContent = '共 ' + totalOverride + ' 个产品';
+            return getProductModule().updateProductsResultCount(totalOverride);
         }
 
         function syncProductStatusTabs() {
-            var status = (document.getElementById('product-status-filter') || {}).value || '';
-            document.querySelectorAll('[data-product-status]').forEach(function (btn) {
-                var active = btn.getAttribute('data-product-status') === status;
-                btn.classList.toggle('active', active);
-                btn.setAttribute('aria-pressed', active ? 'true' : 'false');
-            });
+            return getProductModule().syncProductStatusTabs();
         }
 
         function setProductStatusFilter(status, issue) {
-            var statusFilter = document.getElementById('product-status-filter');
-            if (statusFilter) statusFilter.value = status || '';
-            var issueFilter = document.getElementById('product-issue-filter');
-            if (issueFilter) issueFilter.value = issue || '';
-            syncProductStatusTabs();
-            productPage = 1;
-            loadProducts();
+            return getProductModule().setProductStatusFilter(status, issue);
         }
 
         function renderProductSeoBadges(product) {
-            var hasTitle = !!String(product.seo_title || '').trim();
-            var hasDescription = !!String(product.seo_description || '').trim();
-            var badges = [];
-
-            if (hasTitle && hasDescription) {
-                badges.push('<span class="product-seo-badge product-seo-badge-ok">SEO完整</span>');
-            } else {
-                if (!hasTitle) badges.push('<span class="product-seo-badge product-seo-badge-warn">缺SEO标题</span>');
-                if (!hasDescription) badges.push('<span class="product-seo-badge product-seo-badge-warn">缺SEO描述</span>');
-            }
-            if (productValueIsTrue(product.missing_arabic)) badges.push('<span class="product-seo-badge product-seo-badge-danger">缺阿语内容</span>');
-            if (productValueIsTrue(product.missing_cover)) badges.push('<span class="product-seo-badge product-seo-badge-warn">缺封面图</span>');
-            if (productValueIsTrue(product.missing_specs)) badges.push('<span class="product-seo-badge product-seo-badge-warn">缺产品参数</span>');
-            if (productValueIsTrue(product.missing_public_url)) badges.push('<span class="product-seo-badge product-seo-badge-danger">未进Sitemap</span>');
-
-            return '<div class="product-meta-badges">' + badges.join('') + '</div>';
+            return getProductModule().renderProductSeoBadges(product);
         }
 
         function renderProductsTable() {
-            var tbody = document.getElementById('products-tbody');
-            if (!tbody) return;
-            updateProductsResultCount(productMeta && productMeta.total != null ? productMeta.total : products.length);
-
-            if (!products.length) {
-                tbody.innerHTML = emptyRow(9, '暂无产品');
-                updateProductBatchBar();
-                return;
-            }
-
-            tbody.innerHTML = products.map(function (product) {
-                var productId = product.id;
-                var displayId = product.legacy_id || product.slug || product.id;
-                var chineseName = adminProductNameCn(product);
-                var name = product.name_en || product.name || '';
-                var model = product.model || product.legacy_id || product.slug || product.id || '—';
-                var categoryName = product.category_name || product.category_name_en || product.category || '—';
-                var status = product.status || 'draft';
-                var statusClass = status === 'published' ? 'badge-green' : (status === 'deleted' ? 'badge-navy' : 'badge-gold');
-                var statusLabel = status === 'published' ? '已发布' : (status === 'deleted' ? '已删除' : '草稿');
-                var featured = productValueIsTrue(product.featured);
-                var intro = compactText(product.short_desc_en || product.short_desc_ar || product.description_en || product.description_ar || '—', 72);
-                var updatedAt = formatDate(product.updated_at);
-                var cover = product.cover_image || product.image || '';
-                var thumb = cover
-                    ? '<img class="product-thumb" src="../' + escapeHtml(cover) + '" alt="">'
-                    : '<div class="product-thumb" style="background:#eef1f5;border:1px solid #d8dee8;"></div>';
-                return '<tr data-product-row="' + escapeHtml(productId) + '">' +
-                    '<td><input type="checkbox" class="product-row-check" data-id="' + escapeHtml(productId) + '" data-version="' + escapeHtml(product.version) + '"></td>' +
-                    '<td><div class="product-name-cell">' + thumb + '<div><div class="product-name-text">' + escapeHtml(chineseName || name || displayId) + '</div><div class="product-id-text">' + escapeHtml(name || displayId) + '</div>' + renderProductSeoBadges(product) + '</div></div></td>' +
-                    '<td class="cell-muted product-model-cell">' + escapeHtml(model) + '</td>' +
-                    '<td class="product-category-cell" title="' + escapeHtml(categoryName) + '"><span class="badge badge-blue product-category-badge">' + escapeHtml(categoryName) + '</span></td>' +
-                    '<td class="product-status-cell"><span class="badge ' + statusClass + ' product-status-badge">' + statusLabel + '</span></td>' +
-                    '<td><span class="table-switch ' + (featured ? 'is-on' : '') + '" aria-label="' + (featured ? '已推荐' : '未推荐') + '"></span></td>' +
-                    '<td class="cell-muted product-intro-cell" title="' + escapeHtml(intro) + '">' + escapeHtml(intro) + '</td>' +
-                    '<td class="cell-muted product-date-cell">' + escapeHtml(updatedAt) + '</td>' +
-                    '<td><div class="actions-cell"><button class="btn btn-icon btn-icon-view" aria-label="预览产品" data-preview-product="' + escapeHtml(displayId) + '">' + ICON_VIEW + '</button><button class="btn btn-icon btn-icon-edit" aria-label="编辑产品" data-edit-product="' + escapeHtml(productId) + '">' + ICON_EDIT + '</button><button class="btn btn-icon btn-icon-delete" aria-label="删除产品" data-delete-product="' + escapeHtml(productId) + '">' + ICON_DELETE + '</button></div></td>' +
-                    '</tr>';
-            }).join('');
-
-            tbody.querySelectorAll('[data-preview-product]').forEach(function (btn) {
-                btn.addEventListener('click', function () {
-                    window.open('../products/' + encodeURIComponent(btn.getAttribute('data-preview-product')), '_blank', 'noopener');
-                });
-            });
-            tbody.querySelectorAll('[data-edit-product]').forEach(function (btn) {
-                btn.addEventListener('click', function () { openProductModal(btn.getAttribute('data-edit-product')); });
-            });
-            tbody.querySelectorAll('[data-delete-product]').forEach(function (btn) {
-                btn.addEventListener('click', function () { deleteProduct(btn.getAttribute('data-delete-product')); });
-            });
-            tbody.querySelectorAll('.product-row-check').forEach(function (checkbox) {
-                checkbox.addEventListener('change', updateProductBatchBar);
-            });
-            updateProductBatchBar();
+            return getProductModule().renderProductsTable();
         }
 
         function productValueIsTrue(value) {
-            return value === true || value === 1 || value === '1' || value === 'true';
+            return getProductModule().productValueIsTrue(value);
         }
 
         function compactText(value, maxLength) {
-            var text = String(value == null ? '' : value).replace(/\s+/g, ' ').trim();
-            if (!text) return '—';
-            return text.length > maxLength ? text.slice(0, maxLength - 1) + '…' : text;
+            return getProductModule().compactText(value, maxLength);
         }
 
         function findProductById(productId) {
-            for (var i = 0; i < products.length; i++) {
-                if (String(products[i].id) === String(productId)) return products[i];
-            }
-            return null;
+            return getProductModule().findProductById(productId);
         }
 
         function buildVersionMap(ids, list) {
@@ -2247,65 +2152,23 @@
         }
 
         function bindProductBatchButton(id, action) {
-            var btn = document.getElementById(id);
-            if (btn) btn.addEventListener('click', function () { batchProductAction(action); });
+            return getProductModule().bindProductBatchButton(id, action);
         }
 
         function getSelectedProductIds() {
-            var ids = [];
-            document.querySelectorAll('.product-row-check:checked').forEach(function (checkbox) {
-                var id = parseInt(checkbox.getAttribute('data-id'), 10);
-                if (!isNaN(id)) ids.push(id);
-            });
-            return ids;
+            return getProductModule().getSelectedProductIds();
         }
 
         function updateProductBatchBar() {
-            var selected = document.querySelectorAll('.product-row-check:checked');
-            var all = document.querySelectorAll('.product-row-check');
-            var bar = document.getElementById('product-batch-bar');
-            var count = document.getElementById('product-batch-count');
-            var selectAll = document.getElementById('product-select-all');
-            if (count) count.textContent = '已选 ' + selected.length + ' 条';
-            if (bar) bar.style.display = selected.length ? '' : 'none';
-            all.forEach(function (checkbox) {
-                var row = checkbox.closest ? checkbox.closest('tr') : null;
-                if (row) row.classList.toggle('row-selected', checkbox.checked);
-            });
-            if (selectAll) {
-                selectAll.checked = all.length > 0 && selected.length === all.length;
-                selectAll.indeterminate = selected.length > 0 && selected.length < all.length;
-            }
+            return getProductModule().updateProductBatchBar();
         }
 
         function clearProductSelection() {
-            document.querySelectorAll('.product-row-check').forEach(function (checkbox) {
-                checkbox.checked = false;
-            });
-            var selectAll = document.getElementById('product-select-all');
-            if (selectAll) {
-                selectAll.checked = false;
-                selectAll.indeterminate = false;
-            }
-            updateProductBatchBar();
+            return getProductModule().clearProductSelection();
         }
 
         function batchProductAction(action) {
-            var ids = getSelectedProductIds();
-            if (!ids.length) {
-                showToast('请先选择产品', 'error');
-                return;
-            }
-            var requireConfirm = action === 'hard_delete';
-            var message = '确定永久删除这 ' + ids.length + ' 条产品吗？此操作不可恢复，将同时删除规格和媒体数据。';
-            runBatchAction('/admin/products/batch', action, ids, buildVersionMap(ids, products), requireConfirm, message).then(function () {
-                showToast('已对 ' + ids.length + ' 条产品执行：' + batchActionLabel(action));
-                loadProducts();
-                var bar = document.getElementById('product-batch-bar');
-                if (bar) bar.style.display = 'none';
-            }).catch(function (err) {
-                if (err && err.message === 'cancelled') return;
-            });
+            return getProductModule().batchProductAction(action);
         }
 
         function loadProductCategories(callback) {
@@ -2670,514 +2533,87 @@
         }
 
         function bindProductEvents() {
-            var btnAddProduct = document.getElementById('btn-add-product');
-            if (btnAddProduct) btnAddProduct.addEventListener('click', function () { openProductModal(null); });
-
-            var btnRefreshProducts = document.getElementById('btn-refresh-products');
-            if (btnRefreshProducts) {
-                btnRefreshProducts.addEventListener('click', function () {
-                    productPage = 1;
-                    loadProductCategories();
-                    loadProducts();
-                });
-            }
-
-            var btnImportProducts = document.getElementById('btn-import-products');
-            if (btnImportProducts) {
-                btnImportProducts.addEventListener('click', function () {
-                    showToast('批量导入入口已预留，当前后端未提供导入接口', 'error');
-                });
-            }
-
-            document.querySelectorAll('[data-product-status]').forEach(function (btn) {
-                btn.addEventListener('click', function () {
-                    var statusFilter = document.getElementById('product-status-filter');
-                    if (statusFilter) statusFilter.value = btn.getAttribute('data-product-status') || '';
-                    syncProductStatusTabs();
-                    productPage = 1;
-                    loadProducts();
-                });
-            });
-            syncProductStatusTabs();
-
-            var productSearch = document.getElementById('product-search');
-            if (productSearch) productSearch.addEventListener('input', function () {
-                clearTimeout(productSearchTimer);
-                productSearchTimer = setTimeout(function () {
-                    productPage = 1;
-                    loadProducts();
-                }, 250);
-            });
-            ['product-category-filter', 'product-status-filter', 'product-featured-filter', 'product-issue-filter'].forEach(function (id) {
-                var filter = document.getElementById(id);
-                if (filter) {
-                    filter.addEventListener('change', function () {
-                        productPage = 1;
-                        loadProducts();
-                    });
-                }
-            });
-            var clearProductFilters = document.getElementById('product-clear-filters');
-            if (clearProductFilters) {
-                clearProductFilters.addEventListener('click', function () {
-                    ['product-search', 'product-category-filter', 'product-status-filter', 'product-featured-filter', 'product-issue-filter'].forEach(function (id) {
-                        var field = document.getElementById(id);
-                        if (field) field.value = '';
-                    });
-                    syncProductStatusTabs();
-                    productPage = 1;
-                    loadProducts();
-                });
-            }
-
-            var productSelectAll = document.getElementById('product-select-all');
-            if (productSelectAll) {
-                productSelectAll.addEventListener('change', function () {
-                    document.querySelectorAll('.product-row-check').forEach(function (checkbox) {
-                        checkbox.checked = productSelectAll.checked;
-                    });
-                    updateProductBatchBar();
-                });
-            }
-            bindProductBatchButton('btn-batch-publish-products', 'publish');
-            bindProductBatchButton('btn-batch-draft-products', 'draft');
-            bindProductBatchButton('btn-batch-delete-products', 'soft_delete');
-            bindProductBatchButton('btn-batch-hard-delete-products', 'hard_delete');
-            var clearProductSelectionBtn = document.getElementById('btn-clear-product-selection');
-            if (clearProductSelectionBtn) clearProductSelectionBtn.addEventListener('click', clearProductSelection);
-            var closeProductBatchBtn = document.getElementById('btn-close-product-batch');
-            if (closeProductBatchBtn) closeProductBatchBtn.addEventListener('click', clearProductSelection);
-
-            bindModalClose('product-modal', ['modal-close', 'modal-cancel']);
-
-            var imageInput = document.getElementById('field-image');
-            if (imageInput) imageInput.addEventListener('change', uploadProductImage);
-            var selectProductAsset = document.getElementById('btn-product-select-asset');
-            if (selectProductAsset) selectProductAsset.addEventListener('click', openProductAssetPicker);
-            var clearProductImage = document.getElementById('btn-product-clear-image');
-            if (clearProductImage) clearProductImage.addEventListener('click', clearProductCoverImage);
-            var galleryUploadBtn = document.getElementById('btn-product-gallery-upload');
-            var galleryUploadInput = document.getElementById('product-gallery-upload-input');
-            if (galleryUploadBtn && galleryUploadInput) galleryUploadBtn.addEventListener('click', function () { galleryUploadInput.click(); });
-            if (galleryUploadInput) galleryUploadInput.addEventListener('change', uploadProductGalleryFiles);
-            var gallerySelectBtn = document.getElementById('btn-product-gallery-select');
-            if (gallerySelectBtn) gallerySelectBtn.addEventListener('click', openProductGalleryAssetPicker);
-
-            var btnAddSpec = document.getElementById('btn-add-spec');
-            if (btnAddSpec) btnAddSpec.addEventListener('click', function () { addSpecRow('', ''); });
-
-            var featuredField = document.getElementById('field-featured');
-            if (featuredField) featuredField.addEventListener('change', syncProductFeaturedSwitch);
-
-            var form = document.getElementById('product-form');
-            if (form) form.addEventListener('submit', saveProduct);
-
-            [['field-id','input'],['field-name','input'],['field-category','change'],['field-status','change']].forEach(function (pair) {
-                var el = document.getElementById(pair[0]);
-                if (el) el.addEventListener(pair[1], function () { clearFieldError(pair[0]); });
-            });
-
-            var certificationShortcut = document.getElementById('product-cert-selector');
-            if (certificationShortcut) {
-                certificationShortcut.addEventListener('click', function (event) {
-                    var button = event.target && event.target.closest ? event.target.closest('[data-action]') : null;
-                    if (!button) return;
-                    var target = button.getAttribute('data-action') || '';
-                    closeModal('product-modal', true);
-                    if (target.indexOf('view-') === 0) switchView(target.slice(5));
-                });
-            }
+            return getProductModule().bindProductEvents();
         }
 
         function openProductModal(productId) {
-            activeModalTrigger = document.activeElement;
-            resetFormDirty();
-            editingProductId = productId;
-            editingProductVersion = null;
-            productImageUploading = false;
-            setProductSubmitDisabled(false);
-            setProductCoverPath('');
-            productGalleryPaths = [];
-            var modal = document.getElementById('product-modal');
-            var title = document.getElementById('modal-title');
-            var form = document.getElementById('product-form');
-            form.reset();
-            document.getElementById('image-preview').style.display = 'none';
-            document.getElementById('image-preview').innerHTML = '';
-            document.getElementById('upload-area').style.display = '';
-            setFieldValue('field-status', 'published');
-            renderProductSpecs([]);
-            renderProductGallery({});
-            renderProductCertifications({});
-            syncProductFeaturedSwitch();
-            document.getElementById('field-id').disabled = !!productId;
-            populateProductCategorySelects();
-
-            if (productId) {
-                title.textContent = '编辑产品';
-                var listed = findProductById(productId);
-                editingProductVersion = listed ? listed.version : null;
-                apiRequest('/admin/products/' + encodeURIComponent(productId)).then(function (response) {
-                    var product = unwrapDataResponse(response) || {};
-                    if (editingProductVersion == null) editingProductVersion = product.version;
-                    fillProductForm(product);
-                    showDraftRecovery(document.querySelector('#product-modal .modal-body'), draftKey('product', productId), function (draft) {
-                        restoreFormDraft('product-form', draft);
-                    });
-                }).catch(function (err) { showToast('加载产品失败：' + err.message, 'error'); });
-            } else {
-                title.textContent = '新增产品';
-            }
-            showModal('product-modal');
-            if (!productId) {
-                showDraftRecovery(document.querySelector('#product-modal .modal-body'), draftKey('product', 'new'), function (draft) {
-                    restoreFormDraft('product-form', draft);
-                });
-            }
+            return getProductModule().openProductModal(productId);
         }
 
         function fillProductForm(product) {
-            var fields = {
-                'field-id': product.legacy_id || product.slug || product.id || '',
-                'field-nameCn': adminProductNameCn(product),
-                'field-name': product.name_en || '',
-                'field-nameAr': product.name_ar || '',
-                'field-shortDesc': product.short_desc_en || '',
-                'field-shortDescAr': product.short_desc_ar || '',
-                'field-description': product.description_en || '',
-                'field-descriptionAr': product.description_ar || '',
-                'field-status': product.status || 'published',
-                'field-seo-title': product.seo_title || '',
-                'field-seo-description': product.seo_description || '',
-                'field-seo-keywords': product.seo_keywords || ''
-            };
-            Object.keys(fields).forEach(function (id) {
-                setFieldValue(id, fields[id]);
-            });
-            var categoryField = document.getElementById('field-category');
-            if (categoryField) categoryField.value = product.category_id || '';
-            document.getElementById('field-featured').checked = productValueIsTrue(product.featured);
-            syncProductFeaturedSwitch();
-            setProductCoverPath(product.cover_image || '');
-            if (uploadedImagePath) showImagePreview('../' + uploadedImagePath);
-            renderProductSpecs(product.specs || []);
-            renderProductGallery(product);
-            renderProductCertifications(product);
+            return getProductModule().fillProductForm(product);
         }
 
         function setFieldValue(id, value) {
-            var field = document.getElementById(id);
-            if (field) field.value = value == null ? '' : value;
+            return getProductModule().setFieldValue(id, value);
         }
 
         function getFieldValue(id) {
-            var field = document.getElementById(id);
-            return field ? field.value.trim() : '';
+            return getProductModule().getFieldValue(id);
         }
 
         function syncProductFeaturedSwitch() {
-            var field = document.getElementById('field-featured');
-            if (!field || !field.closest) return;
-            var label = field.closest('.switch-field');
-            if (label) label.classList.toggle('is-on', field.checked);
+            return getProductModule().syncProductFeaturedSwitch();
         }
 
         function renderProductSpecs(specs) {
-            var list = document.getElementById('specs-list');
-            if (!list) return;
-            list.innerHTML = '';
-            if (!specs || !specs.length) {
-                list.innerHTML = '<div class="form-empty-note">暂无参数</div>';
-                return;
-            }
-            specs.forEach(function (spec) {
-                addSpecRow(spec.spec_key || spec.key || '', spec.spec_value || spec.value || '');
-            });
+            return getProductModule().renderProductSpecs(specs);
         }
 
         function renderProductGallery(product) {
-            var container = document.getElementById('product-gallery-preview');
-            if (!container) return;
-            if (product && Array.isArray(product.media)) {
-                productGalleryPaths = product.media
-                    .filter(function (item) { return item && !productValueIsTrue(item.is_cover) && (item.path || item.url); })
-                    .map(function (item) { return String(item.path || item.url || '').trim(); })
-                    .filter(Boolean);
-            }
-            if (!productGalleryPaths.length) {
-                container.innerHTML = '<div class="gallery-empty">暂无图库图片</div>';
-                return;
-            }
-            container.innerHTML = productGalleryPaths.map(function (path, index) {
-                return '<div class="gallery-item">' +
-                    '<img src="' + escapeHtml(assetPreviewSrc(path)) + '" alt="">' +
-                    '<button class="gallery-remove-btn" type="button" data-remove-gallery-image="' + index + '" aria-label="移除图库图片">×</button>' +
-                    '</div>';
-            }).join('') || '<div class="gallery-empty">暂无图库图片</div>';
-            container.querySelectorAll('[data-remove-gallery-image]').forEach(function (btn) {
-                btn.addEventListener('click', function () {
-                    var index = parseInt(btn.getAttribute('data-remove-gallery-image'), 10);
-                    if (!isNaN(index)) {
-                        productGalleryPaths.splice(index, 1);
-                        renderProductGallery();
-                        markFormDirty();
-                    }
-                });
-            });
+            return getProductModule().renderProductGallery(product);
         }
 
         function addProductGalleryPath(path) {
-            path = String(path || '').trim();
-            if (!path) return;
-            if (productGalleryPaths.indexOf(path) === -1) productGalleryPaths.push(path);
-            renderProductGallery();
-            markFormDirty();
+            return getProductModule().addProductGalleryPath(path);
         }
 
         function uploadProductGalleryFiles() {
-            var input = document.getElementById('product-gallery-upload-input');
-            var files = Array.prototype.slice.call((input && input.files) || []);
-            if (input) input.value = '';
-            var images = files.filter(function (file) { return /^image\/(jpeg|png|webp|gif)$/.test(file.type || ''); });
-            if (!images.length) {
-                showToast('请选择 JPG、PNG、WebP 或 GIF 图片。', 'error');
-                return;
-            }
-            productImageUploading = true;
-            setProductSubmitDisabled(true);
-            Promise.all(images.map(function (file) {
-                return uploadAdminAssetFile(file, {
-                    module: 'products',
-                    entity_type: 'product',
-                    entity_id: editingProductId || ''
-                });
-            })).then(function (responses) {
-                responses.forEach(function (response) {
-                    addProductGalleryPath(getProductUploadPath(response));
-                });
-                showToast('图库图片已上传');
-            }).catch(function (err) {
-                showToast('图库上传失败：' + err.message, 'error');
-            }).finally(function () {
-                productImageUploading = false;
-                setProductSubmitDisabled(false);
-            });
+            return getProductModule().uploadProductGalleryFiles();
         }
 
         function openProductGalleryAssetPicker() {
-            openAssetPicker({
-                title: '添加产品图库图片',
-                subtitle: '选择资源库中的图片加入当前产品图库。',
-                module: 'products',
-                entityType: 'product',
-                entityId: editingProductId || '',
-                onSelect: function (asset) {
-                    addProductGalleryPath(asset && asset.path ? asset.path : '');
-                    showToast('已添加到产品图库');
-                }
-            });
+            return getProductModule().openProductGalleryAssetPicker();
         }
 
         function renderProductCertifications(product) {
-            var container = document.getElementById('product-cert-selector');
-            if (!container) return;
-            var items = product && (product.certifications || product.related_certifications || product.certification_ids);
-            var chips = Array.isArray(items) ? items : [];
-            var chipsHtml = chips.length
-                ? chips.map(function (item) {
-                    var label = item.name || item.title || item.id || item;
-                    return '<span class="relation-chip">' + escapeHtml(label) + '</span>';
-                }).join('')
-                : '<span>暂未关联证书</span>';
-            container.innerHTML = '<div class="relation-chip-row">' + chipsHtml + '</div><button class="btn btn-secondary btn-sm" type="button" data-action="view-cert-qualifications">打开证书库</button>';
+            return getProductModule().renderProductCertifications(product);
         }
 
         function uploadProductImage() {
-            var file = this.files[0];
-            if (!file) return;
-            showImagePreview(URL.createObjectURL(file));
-            productImageUploading = true;
-            setProductSubmitDisabled(true);
-
-            uploadAdminAssetFile(file, {
-                module: 'products',
-                entity_type: 'product',
-                entity_id: editingProductId || ''
-            })
-                .then(function (data) {
-                    if (data.error) throw new Error(data.error);
-                    setProductCoverPath(getProductUploadPath(data));
-                    if (!uploadedImagePath) throw new Error('上传接口未返回图片路径');
-                    markFormDirty();
-                    showToast('图片上传成功');
-                })
-                .catch(function (err) { showToast('图片上传失败：' + err.message, 'error'); })
-                .finally(function () {
-                    productImageUploading = false;
-                    setProductSubmitDisabled(false);
-                });
+            return getProductModule().uploadProductImage.call(this);
         }
 
         function openProductAssetPicker() {
-            openAssetPicker({
-                title: '选择产品封面',
-                subtitle: '从资源库复用已有图片，或上传新图片作为当前产品封面。',
-                module: 'products',
-                entityType: 'product',
-                entityId: editingProductId || '',
-                onSelect: function (asset) {
-                    var path = asset && asset.path ? asset.path : '';
-                    if (!path) return;
-                    setProductCoverPath(path);
-                    showImagePreview(assetPreviewSrc(path));
-                    markFormDirty();
-                    showToast('已选择产品封面');
-                }
-            });
+            return getProductModule().openProductAssetPicker();
         }
 
         function clearProductCoverImage() {
-            setProductCoverPath('');
-            var preview = document.getElementById('image-preview');
-            var uploadArea = document.getElementById('upload-area');
-            if (preview) {
-                preview.style.display = 'none';
-                preview.innerHTML = '';
-            }
-            if (uploadArea) uploadArea.style.display = '';
-            markFormDirty();
+            return getProductModule().clearProductCoverImage();
         }
 
         function showImagePreview(src) {
-            var preview = document.getElementById('image-preview');
-            var uploadArea = document.getElementById('upload-area');
-            uploadArea.style.display = 'none';
-            preview.style.display = '';
-            preview.innerHTML = '<img src="' + src + '" alt="Preview"><span class="remove-image" id="remove-image">&times;</span>';
-            document.getElementById('remove-image').addEventListener('click', function () {
-                setProductCoverPath('');
-                preview.innerHTML = '';
-                preview.style.display = 'none';
-                uploadArea.style.display = '';
-                document.getElementById('field-image').value = '';
-                markFormDirty();
-            });
+            return getProductModule().showImagePreview(src);
         }
 
         function addSpecRow(key, value) {
-            var list = document.getElementById('specs-list');
-            if (!list) return;
-            var empty = list.querySelector('.form-empty-note');
-            if (empty) empty.remove();
-            var row = document.createElement('div');
-            row.className = 'spec-row';
-            row.innerHTML = '<input type="text" class="spec-key bidi-field" dir="auto" placeholder="参数名" value="' + escapeHtml(key) + '"><input type="text" class="spec-value bidi-field" dir="auto" placeholder="参数值" value="' + escapeHtml(value) + '"><button type="button" class="btn-remove-spec">×</button>';
-            row.querySelector('.btn-remove-spec').addEventListener('click', function () { row.remove(); });
-            list.appendChild(row);
+            return getProductModule().addSpecRow(key, value);
         }
 
         function getSpecsFromForm() {
-            var specs = [];
-            document.querySelectorAll('#specs-list .spec-row').forEach(function (row) {
-                var key = row.querySelector('.spec-key').value.trim();
-                var value = row.querySelector('.spec-value').value.trim();
-                if (key || value) specs.push([key, value]);
-            });
-            return specs;
+            return getProductModule().getSpecsFromForm();
         }
 
         function showFieldError(fieldId, message) {
-            var field = document.getElementById(fieldId);
-            if (!field) return;
-            field.classList.add('input-error');
-            field.setAttribute('aria-invalid', 'true');
-            var existing = field.parentNode.querySelector('.field-error-msg');
-            if (!existing) {
-                existing = document.createElement('span');
-                existing.className = 'field-error-msg';
-                existing.setAttribute('role', 'alert');
-                field.parentNode.appendChild(existing);
-            }
-            existing.textContent = message;
+            return getProductModule().showFieldError(fieldId, message);
         }
 
         function clearFieldError(fieldId) {
-            var field = document.getElementById(fieldId);
-            if (!field) return;
-            field.classList.remove('input-error');
-            field.removeAttribute('aria-invalid');
-            var msg = field.parentNode.querySelector('.field-error-msg');
-            if (msg) msg.parentNode.removeChild(msg);
+            return getProductModule().clearFieldError(fieldId);
         }
 
         function saveProduct(e) {
-            e.preventDefault();
-            if (productImageUploading) {
-                showToast('图片仍在上传，请上传完成后再保存。', 'error');
-                return;
-            }
-            var id = getFieldValue('field-id');
-            var name = getFieldValue('field-name');
-            var nameAr = getFieldValue('field-nameAr');
-            var category = getFieldValue('field-category');
-            var status = getFieldValue('field-status') || 'published';
-
-            ['field-id', 'field-name', 'field-category', 'field-status'].forEach(clearFieldError);
-            var valid = true;
-            if (!name && !nameAr) { showFieldError('field-name', '请填写产品名称'); valid = false; }
-            if (!category) { showFieldError('field-category', '请选择分类'); valid = false; }
-            if (!valid) return;
-
-            var payload = {
-                legacy_id: id,
-                name_en: name || nameAr,
-                name_ar: nameAr,
-                category_id: parseInt(category, 10),
-                status: status,
-                short_desc_en: getFieldValue('field-shortDesc'),
-                short_desc_ar: getFieldValue('field-shortDescAr'),
-                description_en: getFieldValue('field-description'),
-                description_ar: getFieldValue('field-descriptionAr'),
-                featured: document.getElementById('field-featured').checked,
-                cover_image: getFieldValue('field-cover-image') || uploadedImagePath,
-                seo_title: getFieldValue('field-seo-title'),
-                seo_description: getFieldValue('field-seo-description'),
-                seo_keywords: getFieldValue('field-seo-keywords'),
-                specs: getSpecsFromForm(),
-                gallery: productGalleryPaths.slice(0)
-            };
-            if (editingProductId) payload.version = editingProductVersion;
-            var submittedCoverImage = payload.cover_image || '';
-
-            var wasEditing = !!editingProductId;
-            var request = editingProductId
-                ? apiRequest('/admin/products/' + encodeURIComponent(editingProductId), { method: 'PUT', body: payload })
-                : apiRequest('/admin/products', { method: 'POST', body: payload });
-
-            request.then(function (response) {
-                var saved = unwrapDataResponse(response) || {};
-                if (Object.prototype.hasOwnProperty.call(saved, 'cover_image')) {
-                    var savedCoverImage = saved.cover_image == null ? '' : String(saved.cover_image).trim();
-                    if (savedCoverImage !== submittedCoverImage) {
-                        showToast('产品图片保存校验失败：后端返回路径与提交路径不一致，请刷新后重试。', 'error');
-                        return;
-                    }
-                }
-                if (!editingProductId && saved.id) editingProductId = saved.id;
-                safeSessionRemove(draftKey('product', editingProductId || 'new'));
-                if (!wasEditing) safeSessionRemove(draftKey('product', 'new'));
-                showToast(wasEditing ? '产品已更新' : '产品已新增');
-                resetFormDirty();
-                closeModal('product-modal', true);
-                loadProducts();
-            }).catch(function (err) {
-                if (err.status === 409 || err.code === 'VERSION_CONFLICT') {
-                    safeSessionSet(draftKey('product', editingProductId || 'new'), collectFormDraft('product-form'));
-                    showConflictNotice('内容已被他人修改，请重新加载后再编辑', loadProducts);
-                    return;
-                }
-                showToast('保存产品失败：' + err.message, 'error');
-            });
+            return getProductModule().saveProduct(e);
         }
 
         function splitList(value) {
@@ -3185,14 +2621,11 @@
         }
 
         function deleteProduct(productId) {
-            var product = findProductById(productId);
-            showConfirm('删除产品', '确定删除 "' + (product ? (product.name_en || product.name || productId) : productId) + '" 吗？').then(function (ok) {
-                if (!ok) return;
-                apiRequest('/admin/products/' + encodeURIComponent(productId), { method: 'DELETE' }).then(function () {
-                    showToast('产品已删除');
-                    loadProducts();
-                }).catch(function (err) { showToast('删除失败：' + err.message, 'error'); });
-            });
+            return getProductModule().deleteProduct(productId);
+        }
+
+        function resetProductModalState() {
+            return getProductModule().resetModalState();
         }
 
         function loadInquiries() {
@@ -7859,7 +7292,7 @@
                 releaseFocusTrap(modal);
                 modal.classList.remove('show');
             }
-            if (modalId === 'product-modal') editingProductId = null;
+            if (modalId === 'product-modal') resetProductModalState();
             if (modalId === 'certification-modal') editingCertificationId = null;
             if (modalId === 'inquiry-modal') resetInquiryModalState();
             if (activeModalTrigger && activeModalTrigger.focus) activeModalTrigger.focus();
