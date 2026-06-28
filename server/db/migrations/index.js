@@ -1,0 +1,52 @@
+'use strict';
+
+const migrations = [
+    require('./0002_runtime_schema_baseline')
+];
+
+function ensureMigrationTable(db) {
+    db.prepare(`
+        CREATE TABLE IF NOT EXISTS schema_migrations (
+            version INTEGER PRIMARY KEY,
+            name TEXT NOT NULL,
+            applied_at INTEGER NOT NULL
+        )
+    `).run();
+}
+
+function appliedVersions(db) {
+    ensureMigrationTable(db);
+    return new Set(
+        db.prepare('SELECT version FROM schema_migrations').all().map(function (row) {
+            return row.version;
+        })
+    );
+}
+
+function runMigrations(db) {
+    ensureMigrationTable(db);
+    const applied = appliedVersions(db);
+    const sorted = migrations
+        .slice()
+        .sort(function (a, b) { return a.version - b.version; });
+    const pending = sorted.filter(function (migration) { return !applied.has(migration.version); });
+
+    pending.forEach(function (migration) {
+        db.transaction(function () {
+            migration.up(db);
+            db.prepare('INSERT INTO schema_migrations (version, name, applied_at) VALUES (?, ?, ?)')
+                .run(migration.version, migration.name, Date.now());
+        })();
+    });
+
+    return {
+        checked: migrations.length,
+        applied: pending.length,
+        latest: sorted.length ? sorted[sorted.length - 1].version : 1
+    };
+}
+
+module.exports = {
+    runMigrations,
+    ensureMigrationTable
+};

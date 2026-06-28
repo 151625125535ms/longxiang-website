@@ -2,13 +2,14 @@ const fs = require('fs');
 const path = require('path');
 const { getDb } = require('../lib/db');
 const { ensureContentBlockSeeds } = require('../lib/contentBlockSeeds');
+const { runMigrations } = require('./migrations');
 
 const SCHEMA_VERSION = 1;
 const SCHEMA_NAME = 'initial_schema';
 const schemaPath = path.join(__dirname, 'schema.sql');
 
 function init() {
-    const db = getDb();
+    const db = getDb({ skipMigrations: true });
     const schemaSql = fs.readFileSync(schemaPath, 'utf8');
 
     db.exec(schemaSql);
@@ -22,9 +23,11 @@ function init() {
             .run(SCHEMA_VERSION, SCHEMA_NAME, Date.now());
     }
 
+    const migrationResult = runMigrations(db);
     const seedResult = ensureContentBlockSeeds(db);
 
     console.log('SQLite initialized, schema version: ' + SCHEMA_VERSION);
+    console.log('Migrations checked: ' + migrationResult.checked + ', applied: ' + migrationResult.applied + ', latest: ' + migrationResult.latest);
     console.log('Content block seeds checked: ' + seedResult.checked + ', inserted: ' + seedResult.inserted + ', updated: ' + seedResult.updated);
 }
 
