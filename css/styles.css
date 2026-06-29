@@ -9052,6 +9052,7 @@ p:last-child {
     .hero-hex-panel {
         width: min(760px, 56vw);
         align-items: flex-start;
+        margin-top: clamp(46px, 7vh, 72px);
         padding: 0 0 0 22px;
         gap: 22px;
         border-left: 4px solid var(--color-gold);
@@ -9059,6 +9060,7 @@ p:last-child {
         backdrop-filter: none;
         box-shadow: none;
         text-align: left;
+        transform: translateY(clamp(30px, 5vh, 52px));
     }
 
     .hero-hex .hero-hex-logo {
