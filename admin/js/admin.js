@@ -3008,12 +3008,11 @@
                 var status = item.status || 'draft';
                 var statusMeta = certificationStatusMeta(status);
                 var active = String(activeCertByView[viewName]) === String(item.id);
-                var path = item.image_path || '';
                 return '<tr class="' + (active ? 'row-active' : '') + '" data-cert-row="' + escapeHtml(item.id) + '" data-cert-view="' + escapeHtml(viewName) + '">' +
                     '<td><input type="checkbox" class="cert-row-check" data-id="' + escapeHtml(item.id) + '" data-version="' + escapeHtml(item.version) + '" data-view="' + escapeHtml(viewName) + '"></td>' +
-                    '<td><div class="cert-name-cell">' + renderCertificationThumb(item) + '<div><strong title="' + escapeHtml(certificationTitle(item)) + '">' + escapeHtml(certificationTitle(item)) + '</strong><span>ID #' + escapeHtml(item.id) + ' · ' + escapeHtml(formatDate(item.updated_at || item.created_at)) + '</span></div></div></td>' +
+                    '<td>' + renderCertificationThumb(item) + '</td>' +
+                    '<td><div class="cert-title-cell"><strong title="' + escapeHtml(certificationTitle(item)) + '">' + escapeHtml(certificationTitle(item)) + '</strong><span>ID #' + escapeHtml(item.id) + ' · ' + escapeHtml(formatDate(item.updated_at || item.created_at)) + '</span></div></td>' +
                     '<td>' + escapeHtml(item.category_name_en || certViewTitle(viewName)) + '</td>' +
-                    '<td class="cell-muted cert-path-cell" title="' + escapeHtml(path || '未设置') + '">' + escapeHtml(path || '未设置') + '</td>' +
                     '<td><span class="badge ' + statusMeta.className + '">' + statusMeta.label + '</span></td>' +
                     '<td><div class="actions-cell"><button class="btn btn-icon btn-icon-view" aria-label="查看证书" data-cert-view="' + escapeHtml(viewName) + '" data-view-cert="' + escapeHtml(item.id) + '">' + ICON_VIEW + '</button><button class="btn btn-icon btn-icon-edit" aria-label="编辑证书" data-cert-view="' + escapeHtml(viewName) + '" data-edit-cert="' + escapeHtml(item.id) + '">' + ICON_EDIT + '</button><button class="btn btn-icon btn-icon-delete" aria-label="删除证书" data-cert-view="' + escapeHtml(viewName) + '" data-delete-cert="' + escapeHtml(item.id) + '">' + ICON_DELETE + '</button></div></td>' +
                     '</tr>';

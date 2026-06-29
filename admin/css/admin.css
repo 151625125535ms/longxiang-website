@@ -5072,57 +5072,66 @@ h1, h2, h3, h4, h5, h6 {
     min-width: 0;
 }
 
+.cert-table-panel .data-table-wrapper {
+    overflow-x: auto;
+}
+
 .cert-table {
+    min-width: 720px;
     table-layout: fixed;
 }
 
 .cert-table th:first-child,
 .cert-table td:first-child {
-    width: 42px;
+    width: 48px;
 }
 
 .cert-table th:nth-child(2),
 .cert-table td:nth-child(2) {
-    width: 300px;
+    width: 72px;
 }
 
 .cert-table th:nth-child(3),
 .cert-table td:nth-child(3) {
-    width: 132px;
+    width: auto;
+}
+
+.cert-table th:nth-child(4),
+.cert-table td:nth-child(4) {
+    width: 150px;
 }
 
 .cert-table th:nth-child(5),
 .cert-table td:nth-child(5) {
-    width: 92px;
+    width: 96px;
 }
 
 .cert-table th:nth-child(6),
 .cert-table td:nth-child(6) {
-    width: 128px;
-}
-
-.cert-path-cell {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    width: 156px;
 }
 
 .cert-table tr.row-active {
     background: rgba(11, 102, 216, 0.06);
 }
 
-.cert-name-cell {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+.cert-table td:nth-child(2) .cert-thumb {
+    margin-inline: auto;
+}
+
+.cert-table .actions-cell {
+    flex-wrap: nowrap;
+}
+
+.cert-table .badge {
+    white-space: nowrap;
+}
+
+.cert-title-cell {
     min-width: 0;
 }
 
-.cert-name-cell > div:last-child {
-    min-width: 0;
-}
-
-.cert-name-cell strong {
+.cert-title-cell strong {
     display: block;
     overflow: hidden;
     color: var(--color-navy);
@@ -5130,7 +5139,7 @@ h1, h2, h3, h4, h5, h6 {
     white-space: nowrap;
 }
 
-.cert-name-cell span {
+.cert-title-cell span {
     display: block;
     overflow: hidden;
     margin-top: 3px;
@@ -5216,6 +5225,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .cert-detail-preview img {
     width: 100%;
+    max-width: 100%;
     max-height: 260px;
     object-fit: contain;
 }
@@ -5378,14 +5388,19 @@ h1, h2, h3, h4, h5, h6 {
     line-height: 1.55;
 }
 
-@media (max-width: 1024px) {
-    .cert-workspace,
-    .cert-editor-grid {
+@media (max-width: 1439px) {
+    .cert-workspace {
         grid-template-columns: 1fr;
     }
 
     .cert-detail-panel {
         position: static;
+    }
+}
+
+@media (max-width: 1024px) {
+    .cert-editor-grid {
+        grid-template-columns: 1fr;
     }
 }
 
@@ -5397,6 +5412,18 @@ h1, h2, h3, h4, h5, h6 {
 
     .cert-type-tab {
         width: 100%;
+    }
+
+    .cert-table {
+        min-width: 680px;
+    }
+
+    .cert-detail-preview {
+        min-height: 160px;
+    }
+
+    .cert-detail-preview img {
+        max-height: 220px;
     }
 }
 
