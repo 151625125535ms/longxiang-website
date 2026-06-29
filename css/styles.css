@@ -4670,14 +4670,7 @@ p:last-child {
     height: 28px;
 }
 
-.contact-social-icons a[data-company-instagram-link] svg circle,
-.contact-social-icons a[data-company-instagram-link] svg rect + circle {
-    fill: none;
-    stroke: var(--color-white-pure);
-    stroke-width: 1.8;
-}
-
-.contact-social-icons a[data-company-youtube-link] svg {
+.contact-social-icons .youtube-brand-icon {
     width: 32px;
     height: 32px;
 }
@@ -4740,13 +4733,47 @@ p:last-child {
     fill: none;
 }
 
+.social-brand-icon {
+    display: block;
+    overflow: hidden;
+}
+
+.instagram-brand-icon {
+    border-radius: 26%;
+    background:
+        radial-gradient(circle at 30% 107%, #fdf497 0 8%, #fd5949 43%, #d6249f 62%, #285aeb 100%);
+}
+
+.instagram-brand-icon .instagram-glyph {
+    fill: none;
+    stroke: var(--color-white-pure);
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.instagram-brand-icon .instagram-dot {
+    fill: var(--color-white-pure);
+    stroke: none;
+}
+
+.youtube-brand-icon .youtube-back {
+    fill: #ff0000;
+    stroke: #ff0000;
+}
+
+.youtube-brand-icon .youtube-play {
+    fill: var(--color-white-pure);
+    stroke: none;
+}
+
 .messenger-link.youtube svg rect {
-    fill: currentColor;
-    stroke: currentColor;
+    fill: #ff0000;
+    stroke: #ff0000;
 }
 
 .messenger-link.youtube svg path {
-    fill: var(--color-navy);
+    fill: var(--color-white-pure);
     stroke: none;
 }
 

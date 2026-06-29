@@ -1253,8 +1253,8 @@
     }
 
     var SOCIAL_ICON_SVG = {
-        instagram: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4" y="4" width="16" height="16" rx="5"></rect><circle cx="12" cy="12" r="3.4"></circle><circle cx="17.2" cy="6.8" r="1"></circle></svg>',
-        youtube: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="6.5" width="18" height="11" rx="3.2"></rect><path d="M10.4 9.4L15.2 12l-4.8 2.6z"></path></svg>'
+        instagram: '<svg class="social-brand-icon instagram-brand-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect class="instagram-glyph" x="5" y="5" width="14" height="14" rx="4"></rect><circle class="instagram-glyph" cx="12" cy="12" r="3.2"></circle><circle class="instagram-dot" cx="16.8" cy="7.2" r="1.05"></circle></svg>',
+        youtube: '<svg class="social-brand-icon youtube-brand-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect class="youtube-back" x="3" y="6.5" width="18" height="11" rx="3.2"></rect><path class="youtube-play" d="M10.4 9.4L15.2 12l-4.8 2.6z"></path></svg>'
     };
 
     function createMessengerLink(label, href, className, trackingName, iconName) {

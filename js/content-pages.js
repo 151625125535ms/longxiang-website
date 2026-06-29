@@ -824,9 +824,9 @@
 
     function socialSvg(name) {
         if (name === 'youtube') {
-            return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22.5 12s0-3.5-.45-5.12a3.02 3.02 0 0 0-2.13-2.13C18.3 4.3 12 4.3 12 4.3s-6.3 0-7.92.45a3.02 3.02 0 0 0-2.13 2.13C1.5 8.5 1.5 12 1.5 12s0 3.5.45 5.12a3.02 3.02 0 0 0 2.13 2.13c1.62.45 7.92.45 7.92.45s6.3 0 7.92-.45a3.02 3.02 0 0 0 2.13-2.13C22.5 15.5 22.5 12 22.5 12z" fill="#ff0000"></path><path d="M10 15.4V8.6l6 3.4z" fill="#fff"></path></svg>';
+            return '<svg class="social-brand-icon youtube-brand-icon" viewBox="0 0 24 24" aria-hidden="true"><path class="youtube-back" d="M22.5 12s0-3.5-.45-5.12a3.02 3.02 0 0 0-2.13-2.13C18.3 4.3 12 4.3 12 4.3s-6.3 0-7.92.45a3.02 3.02 0 0 0-2.13 2.13C1.5 8.5 1.5 12 1.5 12s0 3.5.45 5.12a3.02 3.02 0 0 0 2.13 2.13c1.62.45 7.92.45 7.92.45s6.3 0 7.92-.45a3.02 3.02 0 0 0 2.13-2.13C22.5 15.5 22.5 12 22.5 12z"></path><path class="youtube-play" d="M10 15.4V8.6l6 3.4z"></path></svg>';
         }
-        return '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17" cy="7" r="1.2" fill="currentColor" stroke="none"></circle></svg>';
+        return '<svg class="social-brand-icon instagram-brand-icon" viewBox="0 0 24 24" aria-hidden="true"><rect class="instagram-glyph" x="5" y="5" width="14" height="14" rx="4"></rect><circle class="instagram-glyph" cx="12" cy="12" r="3.2"></circle><circle class="instagram-dot" cx="16.8" cy="7.2" r="1.05"></circle></svg>';
     }
 
     function renderContactPrimary(body) {
