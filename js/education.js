@@ -153,7 +153,14 @@
             document.head.appendChild(link);
         }
         var canonicalPath = String(path || '').trim();
-        if (isArabic && canonicalPath === 'education.html') canonicalPath = 'ar/education.html';
+        if (window.LongxiangI18n && window.LongxiangI18n.baseStaticPathFromLocalizedPath && window.LongxiangI18n.localizedStaticPath) {
+            canonicalPath = window.LongxiangI18n.localizedStaticPath(
+                window.LongxiangI18n.baseStaticPathFromLocalizedPath('/' + canonicalPath.replace(/^\/+/, '')),
+                locale
+            );
+        } else if (isArabic && canonicalPath === 'education.html') {
+            canonicalPath = 'ar/education.html';
+        }
         try {
             link.setAttribute('href', new URL(canonicalPath.replace(/^\/+/, ''), window.location.origin + '/').href);
         } catch (err) {

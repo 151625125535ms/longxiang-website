@@ -362,6 +362,18 @@ function verifyContentPagesRuntimeSeoJs() {
     assertSourceNotContains(source, /paths\.ar/, 'js/content-pages.js 的 alternate 仍直接使用 paths.ar。');
 }
 
+function verifyEducationCompareRuntimeI18nJs() {
+    const educationSource = readText('js/education.js');
+    const compareSource = readText('js/compare.js');
+    const educationCanonicalSource = functionSource(educationSource, 'setCanonicalLink');
+
+    assertSourceContains(educationSource, /LongxiangI18n\.currentLocale\s*\(/, 'js/education.js 应优先使用 LongxiangI18n.currentLocale() 识别语言。');
+    assertSourceContains(compareSource, /LongxiangI18n\.currentLocale\s*\(/, 'js/compare.js 应优先使用 LongxiangI18n.currentLocale() 识别语言。');
+    assertSourceContains(educationCanonicalSource, /baseStaticPathFromLocalizedPath\s*\(/, 'js/education.js 的 canonical 应使用 baseStaticPathFromLocalizedPath() 计算基础路径。');
+    assertSourceContains(educationCanonicalSource, /localizedStaticPath\s*\(/, 'js/education.js 的 canonical 应使用 localizedStaticPath() 生成当前语言路径。');
+    assertSourceNotContains(educationCanonicalSource, /isArabic\s*&&\s*canonicalPath\s*===\s*['"]education\.html['"]\)\s*canonicalPath\s*=/, 'js/education.js 的 canonical 仍只通过 isArabic 特判生成阿语路径。');
+}
+
 function verifyServerI18nRoutesJs() {
     const appSource = readText('server/app.js');
     assertSourceContains(appSource, /require\(['"]\.\/lib\/i18nRoutes['"]\)/, 'server/app.js 应导入 server/lib/i18nRoutes.js。');
@@ -582,6 +594,7 @@ function main() {
     verifyFrontendRuntimeI18nJs();
     verifyProductListRuntimeI18nJs();
     verifyContentPagesRuntimeSeoJs();
+    verifyEducationCompareRuntimeI18nJs();
     verifyServerI18nRoutesJs();
     verifyPendingRuntimeHardcodingWarnings();
     verifySitemap();
