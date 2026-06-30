@@ -19,11 +19,48 @@ const xhtmlNamespace = 'http://www.w3.org/1999/xhtml';
 const failures = [];
 const warnings = [];
 
-const localeConfig = loadLocaleConfig(path.join(root, 'config', 'locales.json'));
+const localeConfigPath = path.join(root, 'config', 'locales.json');
+const rawLocaleConfig = JSON.parse(fs.readFileSync(localeConfigPath, 'utf8'));
+const localeConfig = loadLocaleConfig(localeConfigPath);
 const sitemapLocales = sitemapLocaleEntries(localeConfig);
 const defaultLocale = localeEntry(localeConfig, localeConfig.defaultLocale);
 const sitemapAlternateLanguages = sitemapLocales.map((locale) => locale.hreflang).concat(['x-default']);
 const htmlPages = htmlPagesForVerification(localeConfig);
+const expectedPlannedLocales = {
+    ru: {
+        label: 'Russian',
+        nativeLabel: '\u0420\u0443\u0441\u0441\u043a\u0438\u0439',
+        htmlLang: 'ru',
+        hreflang: 'ru',
+        dir: 'ltr',
+        pathPrefix: '/ru',
+        homePath: '/ru/index.html',
+        fallbackLocale: 'en',
+        includeInSitemap: false
+    },
+    pt: {
+        label: 'Portuguese',
+        nativeLabel: 'Portugu\u00eas',
+        htmlLang: 'pt',
+        hreflang: 'pt',
+        dir: 'ltr',
+        pathPrefix: '/pt',
+        homePath: '/pt/index.html',
+        fallbackLocale: 'en',
+        includeInSitemap: false
+    },
+    fr: {
+        label: 'French',
+        nativeLabel: 'Fran\u00e7ais',
+        htmlLang: 'fr',
+        hreflang: 'fr',
+        dir: 'ltr',
+        pathPrefix: '/fr',
+        homePath: '/fr/index.html',
+        fallbackLocale: 'en',
+        includeInSitemap: false
+    }
+};
 
 function fail(message) {
     failures.push(message);
@@ -101,6 +138,46 @@ function assertJsonEqual(actual, expected, label) {
     assert(JSON.stringify(actual) === JSON.stringify(expected), label + ' 与 config/locales.json 不一致。');
 }
 
+function plannedLocaleCodes() {
+    return Object.keys(expectedPlannedLocales);
+}
+
+function plannedLocaleSnapshot(entry) {
+    const pathPrefix = normalizePathPrefixForVerification(entry && entry.pathPrefix);
+    return {
+        label: entry && entry.label || '',
+        nativeLabel: entry && entry.nativeLabel || '',
+        htmlLang: entry && entry.htmlLang || '',
+        hreflang: entry && entry.hreflang || '',
+        dir: entry && entry.dir || '',
+        pathPrefix,
+        homePath: entry && entry.homePath || (pathPrefix ? pathPrefix + '/index.html' : '/'),
+        fallbackLocale: entry && entry.fallbackLocale || null,
+        includeInSitemap: Boolean(entry && entry.includeInSitemap)
+    };
+}
+
+function verifyPlannedLocaleConfig(frontendConfig) {
+    const plannedLocales = rawLocaleConfig.plannedLocales || {};
+    const sitemapXml = readText('sitemap.xml');
+
+    plannedLocaleCodes().forEach((code) => {
+        const expected = expectedPlannedLocales[code];
+        const planned = plannedLocales[code];
+
+        assert(Boolean(planned), 'config/locales.json 缺少 plannedLocales.' + code + '。');
+        if (planned) {
+            assertJsonEqual(plannedLocaleSnapshot(planned), expected, 'config/locales.json plannedLocales.' + code);
+        }
+
+        assert(localeConfig.supportedLocales.indexOf(code) === -1, 'planned locale ' + code + ' 不应进入 supportedLocales。');
+        assert(!localeConfig.locales[code], 'planned locale ' + code + ' 不应进入 active locales。');
+        assert(frontendConfig.supportedLocales.indexOf(code) === -1, 'planned locale ' + code + ' 不应进入 js/main.js LOCALE_CONFIG.supportedLocales。');
+        assert(!frontendConfig.locales[code], 'planned locale ' + code + ' 不应进入 js/main.js LOCALE_CONFIG.locales。');
+        assert(sitemapXml.indexOf(siteOrigin + expected.pathPrefix + '/') === -1, 'sitemap.xml 不应包含 planned locale 路径：' + expected.pathPrefix + '。');
+    });
+}
+
 function verifyFrontendLocaleConfigSync() {
     const frontendConfig = extractFrontendLocaleConfig();
     if (!frontendConfig) return;
@@ -113,6 +190,8 @@ function verifyFrontendLocaleConfigSync() {
     expected.supportedLocales.forEach((code) => {
         assertJsonEqual(actual.locales[code], expected.locales[code], 'js/main.js LOCALE_CONFIG.locales.' + code);
     });
+
+    verifyPlannedLocaleConfig(frontendConfig);
 }
 
 function verifyPageShellFiles() {
