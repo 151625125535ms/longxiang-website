@@ -1,5 +1,14 @@
 const fs = require('fs');
 const path = require('path');
+const {
+    loadLocaleConfig,
+    localeEntry,
+    allLocaleEntries,
+    sitemapLocaleEntries,
+    localizedStaticPath,
+    localizedProductPath,
+    htmlPagesForVerification
+} = require('./i18n-page-model');
 
 const root = path.resolve(__dirname, '..');
 const siteOrigin = 'https://www.lxenelectric.com';
@@ -7,96 +16,11 @@ const sitemapNamespace = 'http://www.sitemaps.org/schemas/sitemap/0.9';
 const xhtmlNamespace = 'http://www.w3.org/1999/xhtml';
 const failures = [];
 
-function loadLocaleConfig() {
-    const parsed = JSON.parse(readText('config/locales.json'));
-    const localeMap = parsed.locales || {};
-    const supportedLocales = Array.isArray(parsed.supportedLocales) && parsed.supportedLocales.length
-        ? parsed.supportedLocales
-        : Object.keys(localeMap);
-
-    return {
-        defaultLocale: parsed.defaultLocale || supportedLocales[0] || 'en',
-        supportedLocales: supportedLocales,
-        locales: localeMap
-    };
-}
-
-function normalizePathPrefix(value) {
-    const prefix = String(value || '').trim().replace(/\/+$/, '');
-    if (!prefix || prefix === '/') return '';
-    return prefix.charAt(0) === '/' ? prefix : '/' + prefix;
-}
-
-function localeEntry(code) {
-    const locale = localeConfig.locales[code] || {};
-    const prefix = normalizePathPrefix(locale.pathPrefix);
-
-    return {
-        code: code,
-        htmlLang: locale.htmlLang || code,
-        hreflang: locale.hreflang || locale.htmlLang || code,
-        dir: locale.dir || '',
-        pathPrefix: prefix,
-        homePath: locale.homePath || (prefix ? prefix + '/index.html' : '/'),
-        includeInSitemap: locale.includeInSitemap !== false
-    };
-}
-
-function sitemapLocaleEntries() {
-    return localeConfig.supportedLocales
-        .map(localeEntry)
-        .filter((locale) => locale.includeInSitemap);
-}
-
-const localeConfig = loadLocaleConfig();
-const sitemapLocales = sitemapLocaleEntries();
-const defaultLocale = localeEntry(localeConfig.defaultLocale);
+const localeConfig = loadLocaleConfig(path.join(root, 'config', 'locales.json'));
+const sitemapLocales = sitemapLocaleEntries(localeConfig);
+const defaultLocale = localeEntry(localeConfig, localeConfig.defaultLocale);
 const sitemapAlternateLanguages = sitemapLocales.map((locale) => locale.hreflang).concat(['x-default']);
-
-function localizedStaticPath(basePath, locale) {
-    if (basePath === '/') return locale.homePath;
-    return locale.pathPrefix + basePath;
-}
-
-function localizedProductPath(productId, locale) {
-    return locale.pathPrefix + '/products/' + productId;
-}
-
-function alternatePathMap(basePath) {
-    return sitemapLocales.reduce((acc, locale) => {
-        acc[locale.hreflang] = localizedStaticPath(basePath, locale);
-        return acc;
-    }, {
-        'x-default': localizedStaticPath(basePath, defaultLocale)
-    });
-}
-
-const htmlPages = [
-    {
-        file: 'products.html',
-        lang: localeEntry('en').htmlLang,
-        dir: localeEntry('en').dir,
-        canonicalPath: '/products.html',
-        alternates: alternatePathMap('/products.html')
-    },
-    {
-        file: 'ar/products.html',
-        lang: localeEntry('ar').htmlLang,
-        dir: localeEntry('ar').dir,
-        canonicalPath: '/ar/products.html',
-        alternates: alternatePathMap('/products.html')
-    },
-    {
-        file: 'product-detail.html',
-        lang: localeEntry('en').htmlLang,
-        dir: localeEntry('en').dir
-    },
-    {
-        file: 'ar/product-detail.html',
-        lang: localeEntry('ar').htmlLang,
-        dir: localeEntry('ar').dir
-    }
-];
+const htmlPages = htmlPagesForVerification(localeConfig);
 
 function fail(message) {
     failures.push(message);
@@ -108,6 +32,10 @@ function assert(condition, message) {
 
 function readText(relativePath) {
     return fs.readFileSync(path.join(root, relativePath), 'utf8');
+}
+
+function fileExists(relativePath) {
+    return fs.existsSync(path.join(root, relativePath));
 }
 
 function buildUrl(pathname) {
@@ -202,6 +130,9 @@ function findHeadLinks(html, rel) {
 }
 
 function verifyHtmlPage(page) {
+    assert(fileExists(page.file), page.file + ' 文件不存在，但对应语言已启用 sitemap。');
+    if (!fileExists(page.file)) return;
+
     const html = readText(page.file);
     const htmlTag = collectTags(html, 'html')[0];
     const title = firstElementText(html, 'title');
@@ -274,8 +205,6 @@ function verifyProductDetailJs() {
     const alternateObjects = collectUpsertHeadLinkObjects(source, 'alternate');
 
     assert(/function\s+productCanonicalUrls\s*\(/.test(source), 'js/product-detail.js 缺少动态 productCanonicalUrls()。');
-    assert(/productPublicPath\s*\(\s*product\s*,\s*['"]en['"]\s*\)/.test(source), 'js/product-detail.js 动态 canonical 缺少英文产品 URL。');
-    assert(/productPublicPath\s*\(\s*product\s*,\s*['"]ar['"]\s*\)/.test(source), 'js/product-detail.js 动态 canonical 缺少阿语产品 URL。');
     assert(canonicalObjects.some((objectSource) => hasIdentifierProperty(objectSource, 'href', 'canonicalUrl')), 'js/product-detail.js 缺少写入 canonicalUrl 的动态 canonical。');
 
     sitemapLocales.map((locale) => ({
@@ -424,6 +353,16 @@ function verifySitemap() {
     });
 }
 
+function verifyDisabledLocalesNotInSitemap() {
+    const xml = readText('sitemap.xml');
+    allLocaleEntries(localeConfig)
+        .filter((locale) => !locale.includeInSitemap && locale.pathPrefix)
+        .forEach((locale) => {
+            assert(xml.indexOf(siteOrigin + locale.pathPrefix + '/') === -1,
+                'sitemap.xml 不应包含 includeInSitemap=false 的语言路径前缀：' + locale.pathPrefix + '。');
+        });
+}
+
 function parseRobotsDirectives(source) {
     return source.split(/\r?\n/)
         .map((line) => line.replace(/#.*/, '').trim())
@@ -460,6 +399,7 @@ function main() {
     htmlPages.forEach(verifyHtmlPage);
     verifyProductDetailJs();
     verifySitemap();
+    verifyDisabledLocalesNotInSitemap();
     verifyRobots();
 
     if (failures.length) {

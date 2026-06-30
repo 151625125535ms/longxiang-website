@@ -2,30 +2,19 @@ const fs = require('fs');
 const path = require('path');
 const Database = require('better-sqlite3');
 const { resolveDbPath } = require('../server/lib/db');
+const {
+    loadLocaleConfig,
+    localeEntry,
+    sitemapLocaleEntries,
+    localizedStaticPath,
+    localizedProductPath,
+    staticPagesForSitemap
+} = require('./i18n-page-model');
 
 const SITE_ORIGIN = (process.env.SITE_ORIGIN || 'https://www.lxenelectric.com').replace(/\/+$/, '');
 const PROJECT_ROOT = path.join(__dirname, '..');
 const OUTPUT_PATH = path.join(PROJECT_ROOT, 'sitemap.xml');
 const LOCALE_CONFIG_PATH = path.join(PROJECT_ROOT, 'config', 'locales.json');
-
-const STATIC_PAGES = [
-    { path: '/', changefreq: 'weekly', priority: '1.0', file: 'index.html' },
-    { path: '/about.html', changefreq: 'monthly', priority: '0.8', file: 'about.html', block: 'about-us' },
-    { path: '/products.html', changefreq: 'weekly', priority: '0.9', file: 'products.html', block: 'product-pages' },
-    { path: '/solutions.html', changefreq: 'monthly', priority: '0.8', file: 'solutions.html', block: 'solutions' },
-    { path: '/education.html', changefreq: 'monthly', priority: '0.5', file: 'education.html', block: 'education' },
-    { path: '/certifications.html', changefreq: 'monthly', priority: '0.7', file: 'certifications.html', block: 'certifications' },
-    { path: '/compare.html', changefreq: 'monthly', priority: '0.5', file: 'compare.html', block: 'compare' },
-    { path: '/contact.html', changefreq: 'monthly', priority: '0.8', file: 'contact.html', block: 'contact' },
-    { path: '/ar/index.html', changefreq: 'weekly', priority: '0.8', file: 'ar/index.html' },
-    { path: '/ar/about.html', changefreq: 'monthly', priority: '0.6', file: 'ar/about.html', block: 'about-us' },
-    { path: '/ar/products.html', changefreq: 'weekly', priority: '0.7', file: 'ar/products.html', block: 'product-pages' },
-    { path: '/ar/solutions.html', changefreq: 'monthly', priority: '0.6', file: 'ar/solutions.html', block: 'solutions' },
-    { path: '/ar/education.html', changefreq: 'monthly', priority: '0.4', file: 'ar/education.html', block: 'education' },
-    { path: '/ar/certifications.html', changefreq: 'monthly', priority: '0.5', file: 'ar/certifications.html', block: 'certifications' },
-    { path: '/ar/compare.html', changefreq: 'monthly', priority: '0.5', file: 'ar/compare.html', block: 'compare' },
-    { path: '/ar/contact.html', changefreq: 'monthly', priority: '0.6', file: 'ar/contact.html', block: 'contact' }
-];
 
 function toIsoDate(value) {
     let timestamp = Number(value);
@@ -63,51 +52,10 @@ function openReadonlyDb() {
     return db;
 }
 
-function loadLocaleConfig() {
-    const parsed = JSON.parse(fs.readFileSync(LOCALE_CONFIG_PATH, 'utf8'));
-    const localeMap = parsed.locales || {};
-    const supportedLocales = Array.isArray(parsed.supportedLocales) && parsed.supportedLocales.length
-        ? parsed.supportedLocales
-        : Object.keys(localeMap);
-
-    return {
-        defaultLocale: parsed.defaultLocale || supportedLocales[0] || 'en',
-        supportedLocales: supportedLocales,
-        locales: localeMap
-    };
-}
-
-function normalizePathPrefix(value) {
-    const prefix = String(value || '').trim().replace(/\/+$/, '');
-    if (!prefix || prefix === '/') return '';
-    return prefix.charAt(0) === '/' ? prefix : '/' + prefix;
-}
-
-const LOCALE_CONFIG = loadLocaleConfig();
-
-function localeEntry(code) {
-    const locale = LOCALE_CONFIG.locales[code] || {};
-    const prefix = normalizePathPrefix(locale.pathPrefix);
-
-    return {
-        code: code,
-        hreflang: locale.hreflang || locale.htmlLang || code,
-        pathPrefix: prefix,
-        homePath: locale.homePath || (prefix ? prefix + '/index.html' : '/'),
-        includeInSitemap: locale.includeInSitemap !== false
-    };
-}
-
-function sitemapLocaleEntries() {
-    return LOCALE_CONFIG.supportedLocales
-        .map(localeEntry)
-        .filter(function (locale) {
-            return locale.includeInSitemap;
-        });
-}
-
-const SITEMAP_LOCALES = sitemapLocaleEntries();
-const DEFAULT_LOCALE = localeEntry(LOCALE_CONFIG.defaultLocale);
+const LOCALE_CONFIG = loadLocaleConfig(LOCALE_CONFIG_PATH);
+const SITEMAP_LOCALES = sitemapLocaleEntries(LOCALE_CONFIG);
+const DEFAULT_LOCALE = localeEntry(LOCALE_CONFIG, LOCALE_CONFIG.defaultLocale);
+const STATIC_PAGES = staticPagesForSitemap(LOCALE_CONFIG);
 
 function localeForPath(pathname) {
     const normalized = String(pathname || '/');
@@ -135,15 +83,6 @@ function baseStaticPath(pathname) {
         return '/' + normalized.slice(locale.pathPrefix.length + 1);
     }
     return normalized;
-}
-
-function localizedStaticPath(basePath, locale) {
-    if (basePath === '/') return locale.homePath;
-    return locale.pathPrefix + basePath;
-}
-
-function localizedProductPath(encodedId, locale) {
-    return locale.pathPrefix + '/products/' + encodedId;
 }
 
 function alternateLinks(defaultHref, entries) {
