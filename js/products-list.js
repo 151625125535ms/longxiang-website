@@ -9,7 +9,6 @@
         : (/\/ar\//.test(window.location.pathname.replace(/\\/g, '/')) ? 'ar' : 'en');
     var isArabic = locale === 'ar';
     var assetPrefix = isArabic ? '../' : '';
-    var selectedCompare = [];
     var productsCache = [];
     var pageSize = 9;
 
@@ -122,11 +121,7 @@
             '<div class="product-card-footer">' +
                 '<a href="' + href + '" class="product-card-action details">' + (isArabic ? 'عرض التفاصيل' : 'View Details') + '</a>' +
                 '<button type="button" class="product-card-action inquiry" data-inquiry-product data-product-id="' + escapeHtml(product.id) + '" data-product-name="' + escapeHtml(name) + '">' + (isArabic ? 'استعلام السعر' : 'Price Inquiry') + '</button>' +
-            '</div>' +
-            '<label class="product-compare-control">' +
-                '<input type="checkbox" data-compare-product="' + escapeHtml(product.id) + '"' + (selectedCompare.indexOf(product.id) !== -1 ? ' checked' : '') + '>' +
-                '<span>' + (isArabic ? 'إضافة للمقارنة' : 'Compare') + '</span>' +
-            '</label>';
+            '</div>';
 
         return card;
     }
@@ -296,7 +291,6 @@
         if (!list.length) {
             renderEmpty(filter.group, filter.sub, filter.search);
             renderPagination(0, 1);
-            renderCompareBar();
             return;
         }
 
@@ -310,9 +304,7 @@
             container.querySelectorAll('.fade-in').forEach(function (el) { el.classList.add('visible'); });
         }
 
-        initProductCompareControls();
         renderPagination(list.length, currentPage);
-        renderCompareBar();
     }
 
     function updateFilter(group, sub) {
@@ -459,65 +451,6 @@
 
     function showError() {
         container.innerHTML = '<div class="empty-state">' + (isArabic ? 'تعذر تحميل المنتجات. يرجى المحاولة لاحقاً.' : 'Unable to load products. Please try again later or contact us directly.') + '</div>';
-    }
-
-    function comparePageHref() {
-        return 'compare.html?ids=' + encodeURIComponent(selectedCompare.join(','));
-    }
-
-    function renderCompareBar() {
-        var bar = document.getElementById('compare-bar');
-        if (!bar) {
-            bar = document.createElement('div');
-            bar.id = 'compare-bar';
-            bar.className = 'compare-bar';
-            document.body.appendChild(bar);
-        }
-
-        if (!selectedCompare.length) {
-            bar.classList.remove('show');
-            bar.innerHTML = '';
-            bar.hidden = true;
-            bar.style.display = 'none';
-            bar.setAttribute('aria-hidden', 'true');
-            return;
-        }
-
-        bar.hidden = false;
-        bar.style.display = '';
-        bar.setAttribute('aria-hidden', 'false');
-        bar.innerHTML =
-            '<div><strong>' + selectedCompare.length + '/3</strong> ' + (isArabic ? 'منتجات محددة للمقارنة' : 'products selected for comparison') + '</div>' +
-            '<div class="compare-bar-actions">' +
-                '<button type="button" class="btn btn-secondary btn-sm" id="compare-clear">' + (isArabic ? 'مسح' : 'Clear') + '</button>' +
-                '<a class="btn btn-primary btn-sm" href="' + comparePageHref() + '">' + (isArabic ? 'قارن الآن' : 'Compare Now') + '</a>' +
-            '</div>';
-        bar.classList.add('show');
-
-        document.getElementById('compare-clear').addEventListener('click', function () {
-            selectedCompare = [];
-            container.querySelectorAll('[data-compare-product]').forEach(function (input) { input.checked = false; });
-            renderCompareBar();
-        });
-    }
-
-    function initProductCompareControls() {
-        container.querySelectorAll('[data-compare-product]').forEach(function (input) {
-            input.addEventListener('change', function () {
-                var id = input.getAttribute('data-compare-product');
-                if (input.checked) {
-                    if (selectedCompare.indexOf(id) === -1) selectedCompare.push(id);
-                    if (selectedCompare.length > 3) {
-                        selectedCompare = selectedCompare.filter(function (item) { return item !== id; });
-                        input.checked = false;
-                        alert(isArabic ? 'يمكن مقارنة ثلاثة منتجات كحد أقصى.' : 'You can compare up to 3 products.');
-                    }
-                } else {
-                    selectedCompare = selectedCompare.filter(function (item) { return item !== id; });
-                }
-                renderCompareBar();
-            });
-        });
     }
 
     function normalizeTaxonomyResponse(payload) {
