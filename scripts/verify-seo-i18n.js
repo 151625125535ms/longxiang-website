@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const vm = require('vm');
 const {
     loadLocaleConfig,
     localeEntry,
@@ -7,7 +8,8 @@ const {
     sitemapLocaleEntries,
     localizedStaticPath,
     localizedProductPath,
-    htmlPagesForVerification
+    htmlPagesForVerification,
+    pageShellsForVerification
 } = require('./i18n-page-model');
 
 const root = path.resolve(__dirname, '..');
@@ -15,6 +17,7 @@ const siteOrigin = 'https://www.lxenelectric.com';
 const sitemapNamespace = 'http://www.sitemaps.org/schemas/sitemap/0.9';
 const xhtmlNamespace = 'http://www.w3.org/1999/xhtml';
 const failures = [];
+const warnings = [];
 
 const localeConfig = loadLocaleConfig(path.join(root, 'config', 'locales.json'));
 const sitemapLocales = sitemapLocaleEntries(localeConfig);
@@ -24,6 +27,10 @@ const htmlPages = htmlPagesForVerification(localeConfig);
 
 function fail(message) {
     failures.push(message);
+}
+
+function warn(message) {
+    warnings.push(message);
 }
 
 function assert(condition, message) {
@@ -36,6 +43,82 @@ function readText(relativePath) {
 
 function fileExists(relativePath) {
     return fs.existsSync(path.join(root, relativePath));
+}
+
+function normalizePathPrefixForVerification(value) {
+    const prefix = String(value || '').trim().replace(/\/+$/, '');
+    if (!prefix || prefix === '/') return '';
+    return prefix.charAt(0) === '/' ? prefix : '/' + prefix;
+}
+
+function localeConfigSnapshot(value) {
+    const localeMap = value && value.locales ? value.locales : {};
+    const supportedLocales = Array.isArray(value && value.supportedLocales) && value.supportedLocales.length
+        ? value.supportedLocales.slice()
+        : Object.keys(localeMap);
+    const defaultLocaleCode = value && value.defaultLocale ? value.defaultLocale : (supportedLocales[0] || 'en');
+    const locales = {};
+
+    supportedLocales.forEach((code) => {
+        const entry = localeMap[code] || {};
+        const pathPrefix = normalizePathPrefixForVerification(entry.pathPrefix);
+        locales[code] = {
+            label: entry.label || code,
+            nativeLabel: entry.nativeLabel || entry.label || code,
+            htmlLang: entry.htmlLang || code,
+            hreflang: entry.hreflang || entry.htmlLang || code,
+            dir: entry.dir || '',
+            pathPrefix,
+            homePath: entry.homePath || (pathPrefix ? pathPrefix + '/index.html' : '/'),
+            fallbackLocale: entry.fallbackLocale || null,
+            includeInSitemap: entry.includeInSitemap !== false
+        };
+    });
+
+    return {
+        defaultLocale: defaultLocaleCode,
+        supportedLocales,
+        locales
+    };
+}
+
+function extractFrontendLocaleConfig() {
+    const source = readText('js/main.js');
+    const match = source.match(/var\s+LOCALE_CONFIG\s*=\s*({[\s\S]*?})\s*;\s*\r?\n\s*var\s+STATIC_PAGE_BASE_PATHS/);
+
+    assert(Boolean(match), 'js/main.js 缺少可校验的 LOCALE_CONFIG 定义。');
+    if (!match) return null;
+
+    try {
+        return vm.runInNewContext('(' + match[1] + ')', Object.create(null), { timeout: 1000 });
+    } catch (err) {
+        fail('js/main.js 的 LOCALE_CONFIG 无法解析：' + err.message);
+        return null;
+    }
+}
+
+function assertJsonEqual(actual, expected, label) {
+    assert(JSON.stringify(actual) === JSON.stringify(expected), label + ' 与 config/locales.json 不一致。');
+}
+
+function verifyFrontendLocaleConfigSync() {
+    const frontendConfig = extractFrontendLocaleConfig();
+    if (!frontendConfig) return;
+
+    const expected = localeConfigSnapshot(localeConfig);
+    const actual = localeConfigSnapshot(frontendConfig);
+
+    assertJsonEqual(actual.defaultLocale, expected.defaultLocale, 'js/main.js LOCALE_CONFIG.defaultLocale');
+    assertJsonEqual(actual.supportedLocales, expected.supportedLocales, 'js/main.js LOCALE_CONFIG.supportedLocales');
+    expected.supportedLocales.forEach((code) => {
+        assertJsonEqual(actual.locales[code], expected.locales[code], 'js/main.js LOCALE_CONFIG.locales.' + code);
+    });
+}
+
+function verifyPageShellFiles() {
+    pageShellsForVerification(localeConfig, root).forEach((shell) => {
+        assert(shell.exists, shell.file + ' 页面壳不存在，但对应语言已启用 sitemap。');
+    });
 }
 
 function buildUrl(pathname) {
@@ -269,6 +352,29 @@ function verifyServerI18nRoutesJs() {
     }
 }
 
+function verifyPendingRuntimeHardcodingWarnings() {
+    const mainSource = readText('js/main.js');
+    const appSource = readText('server/app.js');
+    const educationSource = readText('js/education.js');
+    const compareSource = readText('js/compare.js');
+
+    if (/function\s+injectAlternateSeoLinks\s*\([^)]*\)\s*\{[\s\S]*?\bhreflang\s*:\s*['"]en['"][\s\S]*?\bhreflang\s*:\s*['"]ar['"]/.test(mainSource)) {
+        warn('js/main.js 的 injectAlternateSeoLinks() 仍存在固定 en/ar alternate 输出，Stage B1 需要泛化。');
+    }
+
+    if (/function\s+sendNotFoundShell\s*\([^)]*\)\s*\{[\s\S]*?req\.path\.indexOf\(['"]\/ar\/['"]\)/.test(appSource)) {
+        warn('server/app.js 的 sendNotFoundShell() 仍存在固定 /ar/ 404 语言判断，Stage B1 需要泛化。');
+    }
+
+    if (!/LongxiangI18n\.currentLocale\s*\(/.test(educationSource) && /\/\\\/ar\\\//.test(educationSource)) {
+        warn('js/education.js 仍完全依赖 /ar/ 推断语言，Stage B2 需要泛化。');
+    }
+
+    if (!/LongxiangI18n\.currentLocale\s*\(/.test(compareSource) && /\/\\\/ar\\\//.test(compareSource)) {
+        warn('js/compare.js 仍完全依赖 /ar/ 推断语言，Stage B2 需要泛化。');
+    }
+}
+
 function parseSitemapUrl(value) {
     try {
         return new URL(value);
@@ -440,15 +546,23 @@ function verifyRobots() {
 }
 
 function main() {
+    verifyFrontendLocaleConfigSync();
+    verifyPageShellFiles();
     htmlPages.forEach(verifyHtmlPage);
     verifyProductDetailJs();
     verifyFrontendRuntimeI18nJs();
     verifyProductListRuntimeI18nJs();
     verifyContentPagesRuntimeSeoJs();
     verifyServerI18nRoutesJs();
+    verifyPendingRuntimeHardcodingWarnings();
     verifySitemap();
     verifyDisabledLocalesNotInSitemap();
     verifyRobots();
+
+    if (warnings.length) {
+        console.warn('SEO i18n 校验警告：');
+        warnings.forEach((message) => console.warn('- ' + message));
+    }
 
     if (failures.length) {
         console.error('SEO i18n 校验失败：');

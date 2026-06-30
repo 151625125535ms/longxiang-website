@@ -19,6 +19,11 @@ const PRODUCT_DETAIL_SHELL = {
     file: 'product-detail.html'
 };
 
+const NOT_FOUND_SHELL = {
+    basePath: '/404.html',
+    file: '404.html'
+};
+
 function loadLocaleConfig(configPath) {
     const parsed = JSON.parse(fs.readFileSync(configPath || DEFAULT_LOCALE_CONFIG_PATH, 'utf8'));
     const localeMap = parsed.locales || {};
@@ -85,6 +90,28 @@ function localizedStaticFile(baseFile, locale) {
     const normalizedFile = String(baseFile || '').replace(/\\/g, '/').replace(/^\/+/, '');
     if (!locale.pathPrefix) return normalizedFile;
     return locale.pathPrefix.replace(/^\/+/, '') + '/' + normalizedFile;
+}
+
+function localizedHtmlFileExists(projectRoot, baseFile, locale) {
+    return fs.existsSync(path.join(projectRoot, localizedStaticFile(baseFile, locale)));
+}
+
+function pageShellsForVerification(config, projectRoot) {
+    const shellPages = BASE_STATIC_PAGES.concat([PRODUCT_DETAIL_SHELL, NOT_FOUND_SHELL]);
+
+    return sitemapLocaleEntries(config).reduce(function (shells, locale) {
+        shellPages.forEach(function (page) {
+            const file = localizedStaticFile(page.file, locale);
+            shells.push({
+                basePath: page.basePath,
+                path: localizedStaticPath(page.basePath, locale),
+                file: file,
+                locale: locale.code,
+                exists: Boolean(projectRoot) && localizedHtmlFileExists(projectRoot, page.file, locale)
+            });
+        });
+        return shells;
+    }, []);
 }
 
 function localizedProductPath(productId, locale) {
@@ -156,6 +183,7 @@ function alternatePathMap(config, basePath) {
 module.exports = {
     BASE_STATIC_PAGES,
     PRODUCT_DETAIL_SHELL,
+    NOT_FOUND_SHELL,
     loadLocaleConfig,
     normalizePathPrefix,
     localeEntry,
@@ -163,7 +191,9 @@ module.exports = {
     sitemapLocaleEntries,
     localizedStaticPath,
     localizedStaticFile,
+    localizedHtmlFileExists,
     localizedProductPath,
+    pageShellsForVerification,
     staticPagesForSitemap,
     htmlPagesForVerification
 };
