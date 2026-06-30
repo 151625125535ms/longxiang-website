@@ -306,7 +306,7 @@ function buildEnglish(product, bundle) {
         '- ' + (voltage ? 'Selectable ' + voltage + ' supports coordination with site distribution systems.' : 'Electrical configuration can be confirmed around the site distribution scheme.'),
         '- ' + feature + ' gives engineers a clear basis for technical comparison and specification review.',
         '- The product can be coordinated with Longxiang switchgear, transformer, new-energy equipment or project accessories for packaged delivery.',
-        '- English and Arabic product data support clearer communication for overseas tendering, distributor quotation and technical review.',
+        '- Product data support clearer communication for overseas tendering, distributor quotation and technical review.',
         '',
         'Before quotation:',
         'Please confirm ' + profile.enQuote + '.'
@@ -335,7 +335,7 @@ function buildArabic(product, bundle) {
         '- ' + (voltage ? voltage + ' يدعم التنسيق مع نظام التوزيع في الموقع.' : 'يمكن تأكيد التكوين الكهربائي حسب مخطط التوزيع في الموقع.'),
         '- ' + feature + ' يعطي المهندسين أساسا واضحا للمقارنة الفنية ومراجعة المواصفات.',
         '- يمكن تنسيقه مع محولات أو معدات مفاتيح أو معدات طاقة جديدة أو ملحقات مشروعات من لونغشيانغ للتسليم كحزمة واحدة.',
-        '- توفر بيانات المنتج بالإنجليزية والعربية تواصلا أوضح للمناقصات الخارجية وعروض الموزعين والمراجعة الفنية.',
+        '- توفر بيانات المنتج تواصلا أوضح للمناقصات الخارجية وعروض الموزعين والمراجعة الفنية.',
         '',
         'قبل عرض السعر:',
         'يرجى تأكيد ' + profile.arQuote + '.'
