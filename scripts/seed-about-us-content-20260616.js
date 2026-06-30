@@ -55,7 +55,7 @@ const aboutBody = {
             { value: '2003', label: 'Founded in Henan', labelAr: 'تأسست في خنان' },
             { value: '836070', label: 'NEEQ stock code', labelAr: 'رمز السهم في NEEQ' },
             { value: '10,000+', label: 'm2 modern workshop', labelAr: 'م2 ورشة حديثة' },
-            { value: '85 mu', label: 'Huaiyang production base', labelAr: 'قاعدة إنتاج هوايانغ' },
+            { value: '5.67 ha', label: 'Huaiyang production base', labelAr: 'قاعدة إنتاج هوايانغ' },
             { value: '100+', label: 'patents and certifications', labelAr: 'براءات وشهادات' },
             { value: '20+', label: 'research partners', labelAr: 'شركاء بحث' }
         ]
