@@ -30,6 +30,54 @@
         }
     };
 
+    var STATIC_PAGE_BASE_PATHS = ['/', '/about.html', '/products.html', '/solutions.html', '/education.html', '/certifications.html', '/compare.html', '/contact.html'];
+
+    function normalizePathPrefix(value) {
+        var prefix = String(value || '').trim().replace(/\/+$/, '');
+        if (!prefix || prefix === '/') return '';
+        return prefix.charAt(0) === '/' ? prefix : '/' + prefix;
+    }
+
+    function normalizeBasePath(value) {
+        var path = String(value || '/').trim().split('#')[0].split('?')[0];
+        if (!path || path === '/' || path === '/index.html') return '/';
+        path = '/' + path.replace(/^\/+/, '');
+        if (/\/index\.html$/i.test(path)) return path.replace(/\/index\.html$/i, '/');
+        return path;
+    }
+
+    function localeEntry(code) {
+        code = normalizeLocale(code);
+        var config = LOCALE_CONFIG.locales[code] || {};
+        var prefix = normalizePathPrefix(config.pathPrefix);
+        return {
+            code: code,
+            label: config.label || code,
+            nativeLabel: config.nativeLabel || config.label || code,
+            htmlLang: config.htmlLang || code,
+            hreflang: config.hreflang || config.htmlLang || code,
+            dir: config.dir || '',
+            pathPrefix: prefix,
+            homePath: config.homePath || (prefix ? prefix + '/index.html' : '/'),
+            fallbackLocale: config.fallbackLocale || null,
+            includeInSitemap: config.includeInSitemap !== false
+        };
+    }
+
+    function localeEntries() {
+        return LOCALE_CONFIG.supportedLocales.map(function (code) {
+            return localeEntry(code);
+        });
+    }
+
+    function nonDefaultLocaleEntriesByPrefix() {
+        return localeEntries().filter(function (entry) {
+            return entry.code !== LOCALE_CONFIG.defaultLocale && entry.pathPrefix;
+        }).sort(function (a, b) {
+            return b.pathPrefix.length - a.pathPrefix.length;
+        });
+    }
+
     function hasLocalizedValue(value) {
         if (value == null || value === '') return false;
         if (Array.isArray(value)) return value.length > 0;
@@ -43,16 +91,73 @@
 
     function inferLocaleFromPath(pathname) {
         var path = String(pathname || window.location.pathname || '').replace(/\\/g, '/');
-        return path === '/ar' || path.indexOf('/ar/') === 0 ? 'ar' : LOCALE_CONFIG.defaultLocale;
+        path = '/' + path.replace(/^\/+/, '');
+        var matches = nonDefaultLocaleEntriesByPrefix();
+        for (var i = 0; i < matches.length; i += 1) {
+            var prefix = matches[i].pathPrefix;
+            if (path === prefix || path.indexOf(prefix + '/') === 0) return matches[i].code;
+        }
+        return LOCALE_CONFIG.defaultLocale;
     }
 
     function currentLocale() {
         return inferLocaleFromPath(window.location.pathname);
     }
 
+    function currentLocaleEntry() {
+        return localeEntry(currentLocale());
+    }
+
     function isRtl(locale) {
-        locale = normalizeLocale(locale || currentLocale());
-        return LOCALE_CONFIG.locales[locale].dir === 'rtl';
+        return localeEntry(locale || currentLocale()).dir === 'rtl';
+    }
+
+    function localizedStaticPath(basePath, locale) {
+        var entry = localeEntry(locale);
+        var normalized = normalizeBasePath(basePath);
+        if (normalized === '/') return entry.homePath;
+        return entry.pathPrefix + normalized;
+    }
+
+    function localizedProductPath(productId, locale) {
+        var entry = localeEntry(locale);
+        return entry.pathPrefix + '/products/' + encodeURIComponent(String(productId || '').trim());
+    }
+
+    function baseStaticPathFromLocalizedPath(pathname) {
+        var path = normalizeBasePath(pathname || window.location.pathname || '/');
+        var entry = localeEntry(inferLocaleFromPath(path));
+        if (path === entry.homePath || path === entry.pathPrefix + '/') return '/';
+        if (entry.pathPrefix && path.indexOf(entry.pathPrefix + '/') === 0) {
+            return normalizeBasePath('/' + path.slice(entry.pathPrefix.length + 1));
+        }
+        return path;
+    }
+
+    function productIdentifierFromLocalizedPath(pathname) {
+        var path = String(pathname || window.location.pathname || '').replace(/\\/g, '/');
+        path = '/' + path.replace(/^\/+/, '');
+        var entries = localeEntries().sort(function (a, b) {
+            return b.pathPrefix.length - a.pathPrefix.length;
+        });
+        for (var i = 0; i < entries.length; i += 1) {
+            var prefix = entries[i].pathPrefix + '/products/';
+            if (path.indexOf(prefix) === 0) {
+                return decodeURIComponent(path.slice(prefix.length).replace(/\/+$/, ''));
+            }
+        }
+        return '';
+    }
+
+    function runtimePageExists(basePath, locale) {
+        normalizeLocale(locale);
+        return STATIC_PAGE_BASE_PATHS.indexOf(normalizeBasePath(basePath)) !== -1;
+    }
+
+    function seoLocales() {
+        return localeEntries().filter(function (entry) {
+            return entry.includeInSitemap;
+        });
     }
 
     function localeFieldSuffix(locale) {
@@ -110,10 +215,19 @@
     window.LongxiangI18n = {
         config: LOCALE_CONFIG,
         normalizeLocale: normalizeLocale,
+        localeEntry: localeEntry,
+        localeEntries: localeEntries,
         currentLocale: currentLocale,
+        currentLocaleEntry: currentLocaleEntry,
         inferLocaleFromPath: inferLocaleFromPath,
         isRtl: isRtl,
-        localized: localized
+        localized: localized,
+        localizedStaticPath: localizedStaticPath,
+        localizedProductPath: localizedProductPath,
+        baseStaticPathFromLocalizedPath: baseStaticPathFromLocalizedPath,
+        productIdentifierFromLocalizedPath: productIdentifierFromLocalizedPath,
+        runtimePageExists: runtimePageExists,
+        seoLocales: seoLocales
     };
 
     var navbar = document.querySelector('.navbar');
@@ -529,33 +643,35 @@
     }
 
     function currentPageName() {
-        var path = window.location.pathname.replace(/\\/g, '/');
-        if (/^\/(?:ar\/)?products\/[^/]+\/?$/.test(path)) return 'product-detail.html';
-        var name = path.split('/').pop();
-        return name || 'index.html';
+        var productId = window.LongxiangI18n.productIdentifierFromLocalizedPath(window.location.pathname);
+        if (productId) return 'product-detail.html';
+        var basePath = window.LongxiangI18n.baseStaticPathFromLocalizedPath(window.location.pathname);
+        if (basePath === '/') return 'index.html';
+        return basePath.split('/').pop() || 'index.html';
     }
 
-    function supportsArabicPage(pageName) {
-        return ['index.html', 'about.html', 'products.html', 'product-detail.html', 'contact.html', 'compare.html', 'solutions.html', 'education.html', 'certifications.html'].indexOf(pageName) !== -1;
+    function pageNameToBasePath(pageName) {
+        pageName = pageName || 'index.html';
+        return pageName === 'index.html' ? '/' : '/' + pageName.replace(/^\/+/, '');
+    }
+
+    function supportsLocalizedPage(pageName, localeCode) {
+        if (pageName === 'product-detail.html') return true;
+        return window.LongxiangI18n.runtimePageExists(pageNameToBasePath(pageName), localeCode);
     }
 
     function languageUrl(lang) {
-        var path = window.location.pathname.replace(/\\/g, '/');
-        var productMatch = path.match(/^\/(?:ar\/)?products\/([^/]+)\/?$/);
-        if (productMatch) {
-            return (lang === 'ar' ? '/ar/products/' : '/products/') + productMatch[1] + window.location.search + window.location.hash;
-        }
-        var pageName = currentPageName();
-        var targetPage = supportsArabicPage(pageName) ? pageName : 'index.html';
-        var targetPath;
-
-        if (lang === 'ar') {
-            targetPath = isArabic ? path.replace(pageName, targetPage) : path.replace(/[^/]*$/, 'ar/' + targetPage);
-        } else {
-            targetPath = isArabic ? path.replace(/\/ar\//, '/') : path.replace(/[^/]*$/, targetPage);
+        var targetLocale = window.LongxiangI18n.normalizeLocale(lang);
+        var productId = window.LongxiangI18n.productIdentifierFromLocalizedPath(window.location.pathname);
+        if (productId) {
+            return window.LongxiangI18n.localizedProductPath(productId, targetLocale) + window.location.search + window.location.hash;
         }
 
-        return targetPath + window.location.search + window.location.hash;
+        var basePath = window.LongxiangI18n.baseStaticPathFromLocalizedPath(window.location.pathname);
+        if (!window.LongxiangI18n.runtimePageExists(basePath, targetLocale)) {
+            return window.LongxiangI18n.localeEntry(targetLocale).homePath + window.location.search + window.location.hash;
+        }
+        return window.LongxiangI18n.localizedStaticPath(basePath, targetLocale) + window.location.search + window.location.hash;
     }
 
     function pageHref(page, hash) {
@@ -597,18 +713,15 @@
     function applyLanguagePreference() {
         if (new URLSearchParams(window.location.search).has('visualPreview')) return false;
         var pageName = currentPageName();
-        if (!supportsArabicPage(pageName)) return false;
 
         var stored = localStorage.getItem('site_lang');
         var preferred = stored || (/^ar/i.test(navigator.language || '') ? 'ar' : '');
         if (!preferred) return false;
+        preferred = window.LongxiangI18n.normalizeLocale(preferred);
+        if (!supportsLocalizedPage(pageName, preferred)) return false;
 
-        if (preferred === 'ar' && !isArabic) {
-            window.location.replace(languageUrl('ar'));
-            return true;
-        }
-        if (preferred === 'en' && isArabic) {
-            window.location.replace(languageUrl('en'));
+        if (preferred !== locale) {
+            window.location.replace(languageUrl(preferred));
             return true;
         }
         return false;
@@ -623,10 +736,12 @@
         switcher.setAttribute('aria-label', isArabic ? 'اختيار اللغة' : 'Choose language');
 
         var select = document.createElement('select');
-        select.innerHTML =
-            '<option value="en">English</option>' +
-            '<option value="ar">العربية</option>';
-        select.value = isArabic ? 'ar' : 'en';
+        select.innerHTML = window.LongxiangI18n.localeEntries().filter(function (entry) {
+            return supportsLocalizedPage(currentPageName(), entry.code);
+        }).map(function (entry) {
+            return '<option value="' + escapeHtml(entry.code) + '">' + escapeHtml(entry.nativeLabel) + '</option>';
+        }).join('');
+        select.value = locale;
         select.addEventListener('change', function () {
             localStorage.setItem('site_lang', select.value);
             window.location.href = languageUrl(select.value);
@@ -1714,7 +1829,7 @@
             card.setAttribute('data-delay', (index * 100).toString());
             var name = isArabic ? (product.nameAr || product.name) : product.name;
             var desc = isArabic ? (product.shortDescAr || product.shortDesc || '') : (product.shortDesc || '');
-            var detail = (isArabic ? '/ar/products/' : '/products/') + encodeURIComponent(product.slug || product.id);
+            var detail = window.LongxiangI18n.localizedProductPath(product.slug || product.id, locale);
             var imagePath = resolveAssetPath(product.image);
             var textAttrs = isArabic ? ' dir="rtl" lang="ar" class="rtl-product-text"' : '';
             card.innerHTML =

@@ -148,13 +148,16 @@
         return String(product && (product.slug || product.id) || '').trim();
     }
 
-    function productPublicPath(product, lang) {
-        var slug = encodeURIComponent(productSlug(product));
-        return (lang === 'ar' ? '/ar/products/' : '/products/') + slug;
+    function productPublicPath(product, localeCode) {
+        var slug = productSlug(product);
+        if (window.LongxiangI18n && window.LongxiangI18n.localizedProductPath) {
+            return window.LongxiangI18n.localizedProductPath(slug, localeCode || locale);
+        }
+        return (localeCode === 'ar' ? '/ar/products/' : '/products/') + encodeURIComponent(slug);
     }
 
     function detailHref(product) {
-        return productPublicPath(product, isArabic ? 'ar' : 'en');
+        return productPublicPath(product, locale);
     }
 
     function firstValue(values) {
@@ -224,6 +227,9 @@
     }
 
     function productIdentifierFromPath() {
+        if (window.LongxiangI18n && window.LongxiangI18n.productIdentifierFromLocalizedPath) {
+            return window.LongxiangI18n.productIdentifierFromLocalizedPath(window.location.pathname);
+        }
         var path = window.location.pathname.replace(/\\/g, '/');
         var match = path.match(/^\/(?:ar\/)?products\/([^/]+)\/?$/);
         return match ? decodeURIComponent(match[1]) : '';
@@ -268,10 +274,14 @@
     }
 
     function productCanonicalUrls(product) {
-        return {
-            en: window.location.origin + productPublicPath(product, 'en'),
-            ar: window.location.origin + productPublicPath(product, 'ar')
-        };
+        var urls = {};
+        var entries = window.LongxiangI18n && window.LongxiangI18n.seoLocales
+            ? window.LongxiangI18n.seoLocales()
+            : [{ code: 'en', hreflang: 'en' }, { code: 'ar', hreflang: 'ar' }];
+        entries.forEach(function (entry) {
+            urls[entry.code] = window.location.origin + productPublicPath(product, entry.code);
+        });
+        return urls;
     }
 
     function productSeoTitle(product, name) {
@@ -297,7 +307,13 @@
 
     function injectProductSeo(product, name, desc) {
         var urls = productCanonicalUrls(product);
-        var canonicalUrl = isArabic ? urls.ar : urls.en;
+        var entries = window.LongxiangI18n && window.LongxiangI18n.seoLocales
+            ? window.LongxiangI18n.seoLocales()
+            : [{ code: 'en', hreflang: 'en' }, { code: 'ar', hreflang: 'ar' }];
+        var defaultLocale = window.LongxiangI18n && window.LongxiangI18n.config
+            ? window.LongxiangI18n.config.defaultLocale
+            : 'en';
+        var canonicalUrl = urls[locale] || urls[defaultLocale] || urls.en;
         var title = productSeoTitle(product, name);
         var description = productSeoDescription(product, desc);
         var image = absoluteImageUrl(product.image);
@@ -310,9 +326,14 @@
         upsertMeta('', 'og:url', canonicalUrl);
         upsertMeta('', 'og:image', image);
         upsertHeadLink('canonical', { href: canonicalUrl });
-        upsertHeadLink('alternate', { hreflang: 'en', href: urls.en });
-        upsertHeadLink('alternate', { hreflang: 'ar', href: urls.ar });
-        upsertHeadLink('alternate', { hreflang: 'x-default', href: urls.en });
+        entries.forEach(function (entry) {
+            if (urls[entry.code]) {
+                upsertHeadLink('alternate', { hreflang: entry.hreflang, href: urls[entry.code] });
+            }
+        });
+        if (urls[defaultLocale]) {
+            upsertHeadLink('alternate', { hreflang: 'x-default', href: urls[defaultLocale] });
+        }
         return canonicalUrl;
     }
 
@@ -576,7 +597,9 @@
                     '@type': 'ListItem',
                     position: 1,
                     name: text('Products', 'المنتجات'),
-                    item: window.location.origin + (isArabic ? '/ar/products.html' : '/products.html')
+                    item: window.location.origin + (window.LongxiangI18n && window.LongxiangI18n.localizedStaticPath
+                        ? window.LongxiangI18n.localizedStaticPath('/products.html', locale)
+                        : (isArabic ? '/ar/products.html' : '/products.html'))
                 },
                 {
                     '@type': 'ListItem',

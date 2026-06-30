@@ -18,6 +18,12 @@ const { ensureDirectory, resolveUploadDir } = require('./lib/fileStore');
 const { getDb } = require('./lib/db');
 const { ensureContentBlockSeeds } = require('./lib/contentBlockSeeds');
 const { buildSitemap } = require('../scripts/generate-sitemap');
+const {
+    localeForRequestPath,
+    localizedHtmlShellPath,
+    baseHrefForLocale,
+    productDetailRoutePatterns
+} = require('./lib/i18nRoutes');
 
 let compression = null;
 try { compression = require('compression'); } catch (err) { compression = null; }
@@ -231,8 +237,8 @@ function sendNotFoundShell(req, res, next) {
 }
 
 function sendProductDetailShell(req, res, next) {
-    const isArabicProduct = req.path.indexOf('/ar/') === 0;
-    const filePath = path.join(__dirname, '..', isArabicProduct ? 'ar/product-detail.html' : 'product-detail.html');
+    const locale = localeForRequestPath(req.path);
+    const filePath = localizedHtmlShellPath('product-detail.html', locale);
     const identifier = String(req.params.slug || '').trim();
     try {
         if (!identifier || !activeProductExists(identifier)) {
@@ -241,10 +247,10 @@ function sendProductDetailShell(req, res, next) {
     } catch (err) {
         return next(err);
     }
-    sendHtmlShell(res, next, filePath, isArabicProduct ? '/ar/' : '/', 200);
+    sendHtmlShell(res, next, filePath, baseHrefForLocale(locale), 200);
 }
 
-app.get(['/products/:slug', '/ar/products/:slug'], sendProductDetailShell);
+app.get(productDetailRoutePatterns(), sendProductDetailShell);
 
 app.use(express.static(path.join(__dirname, '..'), {
     maxAge: '7d',

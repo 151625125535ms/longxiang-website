@@ -202,27 +202,71 @@ function hasIdentifierProperty(objectSource, key, value) {
 function verifyProductDetailJs() {
     const source = readText('js/product-detail.js');
     const canonicalObjects = collectUpsertHeadLinkObjects(source, 'canonical');
-    const alternateObjects = collectUpsertHeadLinkObjects(source, 'alternate');
-
     assert(/function\s+productCanonicalUrls\s*\(/.test(source), 'js/product-detail.js 缺少动态 productCanonicalUrls()。');
     assert(canonicalObjects.some((objectSource) => hasIdentifierProperty(objectSource, 'href', 'canonicalUrl')), 'js/product-detail.js 缺少写入 canonicalUrl 的动态 canonical。');
+    assert(/seoLocales\s*\(/.test(source), 'js/product-detail.js 应使用 LongxiangI18n.seoLocales() 生成产品详情 alternate。');
+    assert(/entries\.forEach\s*\(/.test(source), 'js/product-detail.js 应按语言列表循环写入产品详情 alternate。');
+    assert(/hreflang\s*:\s*entry\.hreflang/.test(source), 'js/product-detail.js 的产品详情 alternate 应使用语言配置 hreflang。');
+    assert(/href\s*:\s*urls\[entry\.code\]/.test(source), 'js/product-detail.js 的产品详情 alternate 应使用语言代码 URL map。');
+    assert(/hreflang\s*:\s*['"]x-default['"]\s*,\s*href\s*:\s*urls\[defaultLocale\]/.test(source), 'js/product-detail.js 应把 x-default 指向默认语言产品 URL。');
+    assert(/upsertMeta\s*\(\s*['"][^'"]*['"]\s*,\s*['"]og:type['"]\s*,\s*['"]product['"]\s*\)/.test(source), 'js/product-detail.js 缺少 og:type product。');
+}
 
-    sitemapLocales.map((locale) => ({
-        lang: locale.hreflang,
-        href: 'urls.' + locale.code
-    })).concat([{
-        lang: 'x-default',
-        href: 'urls.' + defaultLocale.code
-    }]).forEach((expected) => {
-        const found = alternateObjects.some((objectSource) => (
-            hasStringProperty(objectSource, 'hreflang', expected.lang)
-            && hasIdentifierProperty(objectSource, 'href', expected.href)
-        ));
+function assertSourceContains(source, pattern, message) {
+    assert(pattern.test(source), message);
+}
 
-        assert(found, 'js/product-detail.js 缺少 hreflang="' + expected.lang + '" 的动态 alternate。');
+function assertSourceNotContains(source, pattern, message) {
+    assert(!pattern.test(source), message);
+}
+
+function verifyFrontendRuntimeI18nJs() {
+    const source = readText('js/main.js');
+
+    [
+        'localeEntry',
+        'localeEntries',
+        'currentLocaleEntry',
+        'localizedStaticPath',
+        'localizedProductPath',
+        'baseStaticPathFromLocalizedPath',
+        'productIdentifierFromLocalizedPath',
+        'seoLocales'
+    ].forEach((name) => {
+        assertSourceContains(source, new RegExp('\\b' + name + '\\b'), 'js/main.js 缺少运行时 i18n helper：' + name + '。');
     });
 
-    assert(/upsertMeta\s*\(\s*['"][^'"]*['"]\s*,\s*['"]og:type['"]\s*,\s*['"]product['"]\s*\)/.test(source), 'js/product-detail.js 缺少 og:type product。');
+    assertSourceNotContains(source, /return\s+path\s*===\s*['"]\/ar['"]\s*\|\|\s*path\.indexOf\(['"]\/ar\/['"]\)\s*===\s*0\s*\?\s*['"]ar['"]/, 'js/main.js 的 inferLocaleFromPath() 仍写死 /ar。');
+    assertSourceNotContains(source, /lang\s*===\s*['"]ar['"]\s*\?\s*['"]\/ar\/products\/['"]\s*:\s*['"]\/products\/['"]/, 'js/main.js 的 languageUrl() 仍写死产品详情语言路径。');
+    assertSourceNotContains(source, /<option value="en">English<\/option>\s*['"]\s*\+\s*['"]<option value="ar">/, 'js/main.js 的语言选择器仍写死 en/ar option。');
+    assertSourceNotContains(source, /var\s+detail\s*=\s*\(isArabic\s*\?\s*['"]\/ar\/products\/['"]\s*:\s*['"]\/products\/['"]\)/, 'js/main.js 首页产品详情链接仍写死 en/ar。');
+}
+
+function verifyProductListRuntimeI18nJs() {
+    const source = readText('js/products-list.js');
+    assertSourceContains(source, /localizedProductPath\s*\(/, 'js/products-list.js 应使用 LongxiangI18n.localizedProductPath() 生成产品详情链接。');
+}
+
+function verifyContentPagesRuntimeSeoJs() {
+    const source = readText('js/content-pages.js');
+    assertSourceContains(source, /seoLocales\s*\(/, 'js/content-pages.js 应按 LongxiangI18n.seoLocales() 生成 alternate。');
+    assertSourceNotContains(source, /paths\.en/, 'js/content-pages.js 的 alternate 仍直接使用 paths.en。');
+    assertSourceNotContains(source, /paths\.ar/, 'js/content-pages.js 的 alternate 仍直接使用 paths.ar。');
+}
+
+function verifyServerI18nRoutesJs() {
+    const appSource = readText('server/app.js');
+    assertSourceContains(appSource, /require\(['"]\.\/lib\/i18nRoutes['"]\)/, 'server/app.js 应导入 server/lib/i18nRoutes.js。');
+    assertSourceContains(appSource, /productDetailRoutePatterns\s*\(\s*\)/, 'server/app.js 应使用 productDetailRoutePatterns() 注册产品详情路由。');
+    assertSourceNotContains(appSource, /app\.get\(\s*\[\s*['"]\/products\/:slug['"]\s*,\s*['"]\/ar\/products\/:slug['"]\s*\]/, 'server/app.js 仍写死 en/ar 产品详情路由数组。');
+
+    assert(fileExists('server/lib/i18nRoutes.js'), '缺少 server/lib/i18nRoutes.js。');
+    if (fileExists('server/lib/i18nRoutes.js')) {
+        const routeSource = readText('server/lib/i18nRoutes.js');
+        ['localeEntries', 'localeForRequestPath', 'localizedHtmlShellPath', 'baseHrefForLocale', 'productDetailRoutePatterns'].forEach((name) => {
+            assertSourceContains(routeSource, new RegExp('\\b' + name + '\\b'), 'server/lib/i18nRoutes.js 缺少函数：' + name + '。');
+        });
+    }
 }
 
 function parseSitemapUrl(value) {
@@ -398,6 +442,10 @@ function verifyRobots() {
 function main() {
     htmlPages.forEach(verifyHtmlPage);
     verifyProductDetailJs();
+    verifyFrontendRuntimeI18nJs();
+    verifyProductListRuntimeI18nJs();
+    verifyContentPagesRuntimeSeoJs();
+    verifyServerI18nRoutesJs();
     verifySitemap();
     verifyDisabledLocalesNotInSitemap();
     verifyRobots();

@@ -328,45 +328,37 @@
     }
 
     function alternatePathsForCanonical(pathname) {
-        var path = String(pathname || window.location.pathname || '/').split('#')[0].split('?')[0];
-        if (/^https?:\/\//i.test(path)) {
-            var parser = document.createElement('a');
-            parser.href = path;
-            path = parser.pathname || '/';
-        }
-        path = '/' + path.replace(/^\/+/, '');
-        if (path === '/index.html') path = '/';
-        if (path === '/ar' || path === '/ar/') path = '/ar/index.html';
-
-        if (path === '/' || path === '/ar/index.html') {
+        var basePath = window.LongxiangI18n && window.LongxiangI18n.baseStaticPathFromLocalizedPath
+            ? window.LongxiangI18n.baseStaticPathFromLocalizedPath(pathname)
+            : String(pathname || window.location.pathname || '/').split('#')[0].split('?')[0];
+        var entries = window.LongxiangI18n && window.LongxiangI18n.seoLocales
+            ? window.LongxiangI18n.seoLocales()
+            : [{ code: 'en', hreflang: 'en' }, { code: 'ar', hreflang: 'ar' }];
+        return entries.map(function (entry) {
             return {
-                en: '/',
-                ar: '/ar/index.html',
-                xDefault: '/'
+                locale: entry.code,
+                hreflang: entry.hreflang,
+                path: window.LongxiangI18n && window.LongxiangI18n.localizedStaticPath
+                    ? window.LongxiangI18n.localizedStaticPath(basePath, entry.code)
+                    : (entry.code === 'ar' ? '/ar' + basePath : basePath)
             };
-        }
-
-        if (path.indexOf('/ar/') === 0) {
-            var englishPath = path.replace(/^\/ar\//, '/');
-            return {
-                en: englishPath,
-                ar: path,
-                xDefault: englishPath
-            };
-        }
-
-        return {
-            en: path,
-            ar: '/ar' + path,
-            xDefault: path
-        };
+        });
     }
 
     function upsertAlternateLinks(canonicalPath) {
         var paths = alternatePathsForCanonical(canonicalPath);
-        upsertHeadLink('alternate', { hreflang: 'en', href: window.location.origin + paths.en });
-        upsertHeadLink('alternate', { hreflang: 'ar', href: window.location.origin + paths.ar });
-        upsertHeadLink('alternate', { hreflang: 'x-default', href: window.location.origin + paths.xDefault });
+        var defaultLocale = window.LongxiangI18n && window.LongxiangI18n.config
+            ? window.LongxiangI18n.config.defaultLocale
+            : 'en';
+        paths.forEach(function (entry) {
+            upsertHeadLink('alternate', { hreflang: entry.hreflang, href: window.location.origin + entry.path });
+        });
+        var xDefault = paths.filter(function (entry) {
+            return entry.locale === defaultLocale;
+        })[0] || paths[0];
+        if (xDefault) {
+            upsertHeadLink('alternate', { hreflang: 'x-default', href: window.location.origin + xDefault.path });
+        }
     }
 
     function absoluteAssetUrl(path) {

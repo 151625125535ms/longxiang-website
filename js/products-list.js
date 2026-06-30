@@ -70,7 +70,11 @@
     }
 
     function detailHref(product) {
-        return (isArabic ? '/ar/products/' : '/products/') + encodeURIComponent(product.slug || product.id);
+        var id = product && (product.slug || product.id);
+        if (window.LongxiangI18n && window.LongxiangI18n.localizedProductPath) {
+            return window.LongxiangI18n.localizedProductPath(id, locale);
+        }
+        return (isArabic ? '/ar/products/' : '/products/') + encodeURIComponent(id || '');
     }
 
     function productSearchText(product) {
