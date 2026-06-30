@@ -31,6 +31,7 @@
     };
 
     var STATIC_PAGE_BASE_PATHS = ['/', '/about.html', '/products.html', '/solutions.html', '/education.html', '/certifications.html', '/compare.html', '/contact.html'];
+    var PLANNED_LOCALE_PATH_PREFIXES = ['/fr', '/pt', '/ru'];
 
     function normalizePathPrefix(value) {
         var prefix = String(value || '').trim().replace(/\/+$/, '');
@@ -44,6 +45,31 @@
         path = '/' + path.replace(/^\/+/, '');
         if (/\/index\.html$/i.test(path)) return path.replace(/\/index\.html$/i, '/');
         return path;
+    }
+
+    function plannedLocalePathInfo(pathname) {
+        var path = normalizeBasePath(pathname || window.location.pathname || '/');
+        for (var i = 0; i < PLANNED_LOCALE_PATH_PREFIXES.length; i += 1) {
+            var prefix = normalizePathPrefix(PLANNED_LOCALE_PATH_PREFIXES[i]);
+            if (!prefix) continue;
+            if (path === prefix || path === prefix + '/') {
+                return {
+                    pathPrefix: prefix,
+                    basePath: '/'
+                };
+            }
+            if (path.indexOf(prefix + '/') === 0) {
+                return {
+                    pathPrefix: prefix,
+                    basePath: normalizeBasePath('/' + path.slice(prefix.length + 1))
+                };
+            }
+        }
+        return null;
+    }
+
+    function isPlannedLocalePath(pathname) {
+        return Boolean(plannedLocalePathInfo(pathname));
     }
 
     function localeEntry(code) {
@@ -125,6 +151,9 @@
     }
 
     function baseStaticPathFromLocalizedPath(pathname) {
+        var planned = plannedLocalePathInfo(pathname);
+        if (planned) return planned.basePath;
+
         var path = normalizeBasePath(pathname || window.location.pathname || '/');
         var entry = localeEntry(inferLocaleFromPath(path));
         if (path === entry.homePath || path === entry.pathPrefix || path === entry.pathPrefix + '/') return '/';
@@ -225,6 +254,8 @@
         localizedStaticPath: localizedStaticPath,
         localizedProductPath: localizedProductPath,
         baseStaticPathFromLocalizedPath: baseStaticPathFromLocalizedPath,
+        plannedLocalePathInfo: plannedLocalePathInfo,
+        isPlannedLocalePath: isPlannedLocalePath,
         productIdentifierFromLocalizedPath: productIdentifierFromLocalizedPath,
         runtimePageExists: runtimePageExists,
         seoLocales: seoLocales
@@ -1108,14 +1139,16 @@
     function injectAlternateSeoLinks(currentUrl) {
         var origin = window.location.origin;
         var search = window.location.search || '';
+        var plannedPath = window.LongxiangI18n.plannedLocalePathInfo(window.location.pathname);
         var productId = window.LongxiangI18n.productIdentifierFromLocalizedPath(window.location.pathname);
         var basePath = window.LongxiangI18n.baseStaticPathFromLocalizedPath(window.location.pathname);
         var defaultLocale = window.LongxiangI18n.config.defaultLocale;
         var defaultPath = productId
             ? window.LongxiangI18n.localizedProductPath(productId, defaultLocale)
             : window.LongxiangI18n.localizedStaticPath(basePath, defaultLocale);
+        var canonicalUrl = plannedPath ? origin + defaultPath + search : currentUrl;
 
-        upsertLink('canonical', { href: currentUrl });
+        upsertLink('canonical', { href: canonicalUrl });
         window.LongxiangI18n.seoLocales().forEach(function (entry) {
             var localizedPath = productId
                 ? window.LongxiangI18n.localizedProductPath(productId, entry.code)

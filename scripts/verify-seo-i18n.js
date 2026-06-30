@@ -139,6 +139,24 @@ function extractFrontendLocaleConfig() {
     }
 }
 
+function extractFrontendPlannedLocalePathPrefixes() {
+    const source = readText('js/main.js');
+    const match = source.match(/var\s+PLANNED_LOCALE_PATH_PREFIXES\s*=\s*(\[[\s\S]*?\])\s*;/);
+
+    assert(Boolean(match), 'js/main.js is missing PLANNED_LOCALE_PATH_PREFIXES.');
+    if (!match) return [];
+
+    try {
+        const prefixes = vm.runInNewContext(match[1], Object.create(null), { timeout: 1000 });
+        assert(Array.isArray(prefixes), 'js/main.js PLANNED_LOCALE_PATH_PREFIXES must be an array.');
+        if (!Array.isArray(prefixes)) return [];
+        return prefixes.map(normalizePathPrefixForVerification).filter(Boolean).sort();
+    } catch (err) {
+        fail('js/main.js PLANNED_LOCALE_PATH_PREFIXES cannot be parsed: ' + err.message);
+        return [];
+    }
+}
+
 function assertJsonEqual(actual, expected, label) {
     assert(JSON.stringify(actual) === JSON.stringify(expected), label + ' 与 config/locales.json 不一致。');
 }
@@ -149,6 +167,13 @@ function assertArrayEqual(actual, expected, message) {
 
 function plannedLocaleCodes() {
     return Object.keys(expectedPlannedLocales);
+}
+
+function plannedLocalePathPrefixes() {
+    return plannedLocaleEntries(localeConfig)
+        .map((locale) => normalizePathPrefixForVerification(locale.pathPrefix))
+        .filter(Boolean)
+        .sort();
 }
 
 function configuredPlannedLocaleCodes() {
@@ -259,6 +284,45 @@ function verifyPageShellFiles() {
     });
 }
 
+function verifyPlannedLocaleShellHtml(shell, locale) {
+    const html = readText(shell.file);
+    const htmlTag = collectTags(html, 'html')[0];
+    const robots = findMetaByName(html, 'robots');
+    const canonicalLinks = findHeadLinks(html, 'canonical');
+    const alternateLinks = findHeadLinks(html, 'alternate');
+    const plannedLocales = plannedLocaleEntries(localeConfig);
+
+    assert(Boolean(htmlTag), shell.file + ' planned page shell is missing <html>.');
+    if (htmlTag) {
+        const attrs = htmlTag.attrs;
+        assert(String(attrs.lang || '').toLowerCase() === locale.htmlLang.toLowerCase(),
+            shell.file + ' planned page shell html lang must be "' + locale.htmlLang + '".');
+        assert(!attrs.dir || String(attrs.dir).toLowerCase() === 'ltr',
+            shell.file + ' planned page shell must not use a non-ltr dir.');
+    }
+
+    assert(Boolean(robots), shell.file + ' planned page shell is missing robots noindex.');
+    if (robots) {
+        const content = String(robots.content || '').toLowerCase();
+        assert(content.indexOf('noindex') !== -1, shell.file + ' planned page shell robots must include noindex.');
+        assert(content.indexOf('follow') !== -1, shell.file + ' planned page shell robots must include follow.');
+    }
+
+    plannedLocales.forEach((plannedLocale) => {
+        canonicalLinks.forEach((attrs) => {
+            assert(!urlUsesLocalePrefix(attrs.href, plannedLocale),
+                shell.file + ' planned page shell canonical must not point to planned locale path: ' + attrs.href + '.');
+        });
+
+        alternateLinks.forEach((attrs) => {
+            assert(String(attrs.hreflang || '').toLowerCase() !== plannedLocale.hreflang.toLowerCase(),
+                shell.file + ' planned page shell must not include hreflang="' + plannedLocale.hreflang + '".');
+            assert(!urlUsesLocalePrefix(attrs.href, plannedLocale),
+                shell.file + ' planned page shell alternate must not point to planned locale path: ' + attrs.href + '.');
+        });
+    });
+}
+
 function verifyPlannedLocaleModelIsolation() {
     const plannedLocales = plannedLocaleEntries(localeConfig);
     const activeLocaleCodes = allLocaleEntries(localeConfig).map((locale) => locale.code);
@@ -274,8 +338,6 @@ function verifyPlannedLocaleModelIsolation() {
         assert(sitemapLocaleCodes.indexOf(locale.code) === -1, 'planned locale ' + locale.code + ' 不应进入 sitemap locale helper。');
         assert(sitemapAlternateLanguages.indexOf(locale.hreflang) === -1,
             'planned locale ' + locale.code + ' 不应进入 sitemap alternate 语言集合。');
-        assert(!plannedLocaleDirectoryExists(locale), '本阶段不应新增 planned locale 页面目录：' + locale.pathPrefix + '。');
-
         staticPages.forEach((page) => {
             assert(page.locale !== locale.code, 'staticPagesForSitemap() 不应输出 planned locale：' + locale.code + '。');
             assert(page.hreflang !== locale.hreflang, 'staticPagesForSitemap() 不应输出 planned hreflang：' + locale.hreflang + '。');
@@ -308,7 +370,12 @@ function verifyPlannedLocaleModelIsolation() {
                 'planned locale ' + locale.code + ' 的未来页面壳文件路径应带语言目录：' + shell.file + '。');
             assert(pathUsesLocalePrefix(shell.path, locale),
                 'planned locale ' + locale.code + ' 的未来页面壳公开路径应带语言前缀：' + shell.path + '。');
-            assert(!shell.exists, '本阶段不应已经生成 planned locale 页面壳：' + shell.file + '。');
+            if (plannedLocaleDirectoryExists(locale)) {
+                assert(shell.exists, 'planned locale ' + locale.code + ' directory exists, so page shell is required: ' + shell.file + '.');
+                if (shell.exists) verifyPlannedLocaleShellHtml(shell, locale);
+            } else {
+                assert(!shell.exists, 'planned locale ' + locale.code + ' page shell exists without its directory: ' + shell.file + '.');
+            }
         });
     });
 }
@@ -539,6 +606,24 @@ function functionSource(source, name) {
     return source.slice(match.index);
 }
 
+function verifyFrontendPlannedLocaleRuntimeSeoGuards(source) {
+    const expectedPrefixes = plannedLocalePathPrefixes();
+    const actualPrefixes = extractFrontendPlannedLocalePathPrefixes();
+    const basePathSource = functionSource(source, 'baseStaticPathFromLocalizedPath');
+    const alternateSource = functionSource(source, 'injectAlternateSeoLinks');
+
+    assertArrayEqual(actualPrefixes, expectedPrefixes, 'js/main.js PLANNED_LOCALE_PATH_PREFIXES must match config/locales.json plannedLocales pathPrefix values.');
+    assertSourceContains(source, /function\s+plannedLocalePathInfo\s*\(/, 'js/main.js is missing plannedLocalePathInfo().');
+    assertSourceContains(source, /function\s+isPlannedLocalePath\s*\(/, 'js/main.js is missing isPlannedLocalePath().');
+    assertSourceContains(basePathSource, /plannedLocalePathInfo\s*\(/, 'js/main.js baseStaticPathFromLocalizedPath() must normalize planned locale paths first.');
+    assertSourceContains(alternateSource, /plannedLocalePathInfo\s*\(/, 'js/main.js injectAlternateSeoLinks() must detect planned locale paths.');
+    assertSourceContains(alternateSource, /canonicalUrl/, 'js/main.js injectAlternateSeoLinks() must compute a guarded canonicalUrl.');
+    assertSourceContains(alternateSource, /href\s*:\s*canonicalUrl/, 'js/main.js injectAlternateSeoLinks() must write canonicalUrl to canonical.');
+    assertSourceContains(alternateSource, /defaultPath/, 'js/main.js injectAlternateSeoLinks() must use default locale path for planned canonical fallback.');
+    assertSourceNotContains(alternateSource, /upsertLink\s*\(\s*['"]canonical['"]\s*,\s*\{\s*href\s*:\s*currentUrl\s*\}\s*\)/,
+        'js/main.js injectAlternateSeoLinks() must not write currentUrl directly to canonical.');
+}
+
 function verifyFrontendRuntimeI18nJs() {
     const source = readText('js/main.js');
 
@@ -549,6 +634,8 @@ function verifyFrontendRuntimeI18nJs() {
         'localizedStaticPath',
         'localizedProductPath',
         'baseStaticPathFromLocalizedPath',
+        'plannedLocalePathInfo',
+        'isPlannedLocalePath',
         'productIdentifierFromLocalizedPath',
         'seoLocales'
     ].forEach((name) => {
@@ -566,6 +653,7 @@ function verifyFrontendRuntimeI18nJs() {
     assertSourceContains(alternateSource, /localizedStaticPath\s*\(/, 'js/main.js 的 injectAlternateSeoLinks() 应使用 localizedStaticPath() 生成静态页 alternate。');
     assertSourceNotContains(alternateSource, /hreflang\s*:\s*['"]en['"]/, 'js/main.js 的 injectAlternateSeoLinks() 仍写死 hreflang=en。');
     assertSourceNotContains(alternateSource, /hreflang\s*:\s*['"]ar['"]/, 'js/main.js 的 injectAlternateSeoLinks() 仍写死 hreflang=ar。');
+    verifyFrontendPlannedLocaleRuntimeSeoGuards(source);
 }
 
 function verifyProductListRuntimeI18nJs() {
