@@ -24,9 +24,12 @@ const NOT_FOUND_SHELL = {
     file: '404.html'
 };
 
+const PAGE_SHELLS = BASE_STATIC_PAGES.concat([PRODUCT_DETAIL_SHELL, NOT_FOUND_SHELL]);
+
 function loadLocaleConfig(configPath) {
     const parsed = JSON.parse(fs.readFileSync(configPath || DEFAULT_LOCALE_CONFIG_PATH, 'utf8'));
     const localeMap = parsed.locales || {};
+    const plannedLocaleMap = parsed.plannedLocales || {};
     const supportedLocales = Array.isArray(parsed.supportedLocales) && parsed.supportedLocales.length
         ? parsed.supportedLocales
         : Object.keys(localeMap);
@@ -34,7 +37,8 @@ function loadLocaleConfig(configPath) {
     return {
         defaultLocale: parsed.defaultLocale || supportedLocales[0] || 'en',
         supportedLocales: supportedLocales,
-        locales: localeMap
+        locales: localeMap,
+        plannedLocales: plannedLocaleMap
     };
 }
 
@@ -68,9 +72,33 @@ function localeEntry(config, code) {
     };
 }
 
+function plannedLocaleEntry(config, code) {
+    const localeConfig = config && config.plannedLocales ? config.plannedLocales[code] || {} : {};
+    const prefix = normalizePathPrefix(localeConfig.pathPrefix);
+
+    return {
+        code: code,
+        label: localeConfig.label || code,
+        nativeLabel: localeConfig.nativeLabel || localeConfig.label || code,
+        htmlLang: localeConfig.htmlLang || code,
+        hreflang: localeConfig.hreflang || localeConfig.htmlLang || code,
+        dir: localeConfig.dir || '',
+        pathPrefix: prefix,
+        homePath: localeConfig.homePath || (prefix ? prefix + '/index.html' : '/'),
+        fallbackLocale: localeConfig.fallbackLocale || null,
+        includeInSitemap: localeConfig.includeInSitemap === true
+    };
+}
+
 function allLocaleEntries(config) {
     return (config.supportedLocales || []).map(function (code) {
         return localeEntry(config, code);
+    });
+}
+
+function plannedLocaleEntries(config) {
+    return Object.keys(config && config.plannedLocales ? config.plannedLocales : {}).map(function (code) {
+        return plannedLocaleEntry(config, code);
     });
 }
 
@@ -96,11 +124,9 @@ function localizedHtmlFileExists(projectRoot, baseFile, locale) {
     return fs.existsSync(path.join(projectRoot, localizedStaticFile(baseFile, locale)));
 }
 
-function pageShellsForVerification(config, projectRoot) {
-    const shellPages = BASE_STATIC_PAGES.concat([PRODUCT_DETAIL_SHELL, NOT_FOUND_SHELL]);
-
-    return sitemapLocaleEntries(config).reduce(function (shells, locale) {
-        shellPages.forEach(function (page) {
+function pageShellsForLocales(locales, projectRoot) {
+    return (locales || []).reduce(function (shells, locale) {
+        PAGE_SHELLS.forEach(function (page) {
             const file = localizedStaticFile(page.file, locale);
             shells.push({
                 basePath: page.basePath,
@@ -112,6 +138,14 @@ function pageShellsForVerification(config, projectRoot) {
         });
         return shells;
     }, []);
+}
+
+function pageShellsForVerification(config, projectRoot) {
+    return pageShellsForLocales(sitemapLocaleEntries(config), projectRoot);
+}
+
+function plannedPageShellsForVerification(config, projectRoot) {
+    return pageShellsForLocales(plannedLocaleEntries(config), projectRoot);
 }
 
 function localizedProductPath(productId, locale) {
@@ -187,13 +221,16 @@ module.exports = {
     loadLocaleConfig,
     normalizePathPrefix,
     localeEntry,
+    plannedLocaleEntry,
     allLocaleEntries,
+    plannedLocaleEntries,
     sitemapLocaleEntries,
     localizedStaticPath,
     localizedStaticFile,
     localizedHtmlFileExists,
     localizedProductPath,
     pageShellsForVerification,
+    plannedPageShellsForVerification,
     staticPagesForSitemap,
     htmlPagesForVerification
 };

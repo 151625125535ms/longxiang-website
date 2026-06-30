@@ -5,17 +5,21 @@ const {
     loadLocaleConfig,
     localeEntry,
     allLocaleEntries,
+    plannedLocaleEntries,
     sitemapLocaleEntries,
     localizedStaticPath,
     localizedProductPath,
+    staticPagesForSitemap,
     htmlPagesForVerification,
-    pageShellsForVerification
+    pageShellsForVerification,
+    plannedPageShellsForVerification
 } = require('./i18n-page-model');
 
 const root = path.resolve(__dirname, '..');
 const siteOrigin = 'https://www.lxenelectric.com';
 const sitemapNamespace = 'http://www.sitemaps.org/schemas/sitemap/0.9';
 const xhtmlNamespace = 'http://www.w3.org/1999/xhtml';
+const expectedSitemapUrlCount = 96;
 const failures = [];
 const warnings = [];
 
@@ -25,6 +29,7 @@ const localeConfig = loadLocaleConfig(localeConfigPath);
 const sitemapLocales = sitemapLocaleEntries(localeConfig);
 const defaultLocale = localeEntry(localeConfig, localeConfig.defaultLocale);
 const sitemapAlternateLanguages = sitemapLocales.map((locale) => locale.hreflang).concat(['x-default']);
+const staticPages = staticPagesForSitemap(localeConfig);
 const htmlPages = htmlPagesForVerification(localeConfig);
 const expectedPlannedLocales = {
     ru: {
@@ -138,8 +143,16 @@ function assertJsonEqual(actual, expected, label) {
     assert(JSON.stringify(actual) === JSON.stringify(expected), label + ' 与 config/locales.json 不一致。');
 }
 
+function assertArrayEqual(actual, expected, message) {
+    assert(JSON.stringify(actual) === JSON.stringify(expected), message);
+}
+
 function plannedLocaleCodes() {
     return Object.keys(expectedPlannedLocales);
+}
+
+function configuredPlannedLocaleCodes() {
+    return Object.keys(rawLocaleConfig.plannedLocales || {});
 }
 
 function plannedLocaleSnapshot(entry) {
@@ -157,9 +170,55 @@ function plannedLocaleSnapshot(entry) {
     };
 }
 
+function relativeFileUsesLocalePrefix(file, locale) {
+    const normalized = String(file || '').replace(/\\/g, '/').replace(/^\/+/, '');
+    const prefix = String(locale.pathPrefix || '').replace(/^\/+/, '').replace(/\/+$/, '');
+    return Boolean(prefix) && (normalized === prefix || normalized.indexOf(prefix + '/') === 0);
+}
+
+function pathUsesLocalePrefix(pathname, locale) {
+    const normalized = String(pathname || '');
+    const prefix = String(locale.pathPrefix || '');
+    return Boolean(prefix) && (normalized === prefix || normalized.indexOf(prefix + '/') === 0);
+}
+
+function urlUsesLocalePrefix(value, locale) {
+    const href = String(value || '').trim();
+    if (!href) return false;
+
+    const parsed = parseSitemapUrl(href);
+    if (parsed) return parsed.origin === siteOrigin && pathUsesLocalePrefix(parsed.pathname, locale);
+
+    return pathUsesLocalePrefix(href, locale) || href.indexOf(siteOrigin + locale.pathPrefix + '/') !== -1;
+}
+
+function plannedLocaleDirectoryExists(locale) {
+    const prefix = String(locale.pathPrefix || '').replace(/^\/+/, '').replace(/\/+$/, '');
+    return Boolean(prefix) && fs.existsSync(path.join(root, prefix));
+}
+
+function assertXmlExcludesPlannedLocale(xml, label, locale) {
+    const urls = collectElementContents(xml, 'loc')
+        .concat(collectTags(xml, 'xhtml:link').map((tag) => tag.attrs.href).filter(hasText));
+
+    urls.forEach((url) => {
+        assert(!urlUsesLocalePrefix(url, locale),
+            label + ' 不应包含 planned locale URL：' + url + '。');
+    });
+
+    assert(xml.indexOf('hreflang="' + locale.hreflang + '"') === -1,
+        label + ' 不应包含 planned locale hreflang="' + locale.hreflang + '"。');
+    assert(xml.indexOf("hreflang='" + locale.hreflang + "'") === -1,
+        label + ' 不应包含 planned locale hreflang=\'' + locale.hreflang + '\'。');
+}
+
 function verifyPlannedLocaleConfig(frontendConfig) {
     const plannedLocales = rawLocaleConfig.plannedLocales || {};
     const sitemapXml = readText('sitemap.xml');
+    const configuredCodes = configuredPlannedLocaleCodes().sort();
+    const expectedCodes = plannedLocaleCodes().sort();
+
+    assertArrayEqual(configuredCodes, expectedCodes, 'config/locales.json plannedLocales 语言清单应只包含 ru/pt/fr。');
 
     plannedLocaleCodes().forEach((code) => {
         const expected = expectedPlannedLocales[code];
@@ -174,7 +233,7 @@ function verifyPlannedLocaleConfig(frontendConfig) {
         assert(!localeConfig.locales[code], 'planned locale ' + code + ' 不应进入 active locales。');
         assert(frontendConfig.supportedLocales.indexOf(code) === -1, 'planned locale ' + code + ' 不应进入 js/main.js LOCALE_CONFIG.supportedLocales。');
         assert(!frontendConfig.locales[code], 'planned locale ' + code + ' 不应进入 js/main.js LOCALE_CONFIG.locales。');
-        assert(sitemapXml.indexOf(siteOrigin + expected.pathPrefix + '/') === -1, 'sitemap.xml 不应包含 planned locale 路径：' + expected.pathPrefix + '。');
+        assertXmlExcludesPlannedLocale(sitemapXml, 'sitemap.xml', Object.assign({ code }, expected));
     });
 }
 
@@ -197,6 +256,60 @@ function verifyFrontendLocaleConfigSync() {
 function verifyPageShellFiles() {
     pageShellsForVerification(localeConfig, root).forEach((shell) => {
         assert(shell.exists, shell.file + ' 页面壳不存在，但对应语言已启用 sitemap。');
+    });
+}
+
+function verifyPlannedLocaleModelIsolation() {
+    const plannedLocales = plannedLocaleEntries(localeConfig);
+    const activeLocaleCodes = allLocaleEntries(localeConfig).map((locale) => locale.code);
+    const sitemapLocaleCodes = sitemapLocales.map((locale) => locale.code);
+    const activeShells = pageShellsForVerification(localeConfig, root);
+    const plannedShells = plannedPageShellsForVerification(localeConfig, root);
+
+    plannedLocales.forEach((locale) => {
+        assert(locale.includeInSitemap === false, 'planned locale ' + locale.code + ' 必须保持 includeInSitemap=false。');
+        assert(!locale.fallbackLocale || activeLocaleCodes.indexOf(locale.fallbackLocale) !== -1,
+            'planned locale ' + locale.code + ' 的 fallbackLocale 必须指向已启用语言。');
+        assert(activeLocaleCodes.indexOf(locale.code) === -1, 'planned locale ' + locale.code + ' 不应进入 active locale helper。');
+        assert(sitemapLocaleCodes.indexOf(locale.code) === -1, 'planned locale ' + locale.code + ' 不应进入 sitemap locale helper。');
+        assert(sitemapAlternateLanguages.indexOf(locale.hreflang) === -1,
+            'planned locale ' + locale.code + ' 不应进入 sitemap alternate 语言集合。');
+        assert(!plannedLocaleDirectoryExists(locale), '本阶段不应新增 planned locale 页面目录：' + locale.pathPrefix + '。');
+
+        staticPages.forEach((page) => {
+            assert(page.locale !== locale.code, 'staticPagesForSitemap() 不应输出 planned locale：' + locale.code + '。');
+            assert(page.hreflang !== locale.hreflang, 'staticPagesForSitemap() 不应输出 planned hreflang：' + locale.hreflang + '。');
+            assert(!pathUsesLocalePrefix(page.path, locale), 'staticPagesForSitemap() 不应输出 planned 路径：' + page.path + '。');
+            assert(!relativeFileUsesLocalePrefix(page.file, locale), 'staticPagesForSitemap() 不应输出 planned 文件：' + page.file + '。');
+        });
+
+        activeShells.forEach((shell) => {
+            assert(shell.locale !== locale.code, 'pageShellsForVerification() active 输出不应包含 planned locale：' + locale.code + '。');
+            assert(!pathUsesLocalePrefix(shell.path, locale), 'pageShellsForVerification() active 输出不应包含 planned 路径：' + shell.path + '。');
+            assert(!relativeFileUsesLocalePrefix(shell.file, locale), 'pageShellsForVerification() active 输出不应包含 planned 文件：' + shell.file + '。');
+        });
+
+        htmlPages.forEach((page) => {
+            assert(!relativeFileUsesLocalePrefix(page.file, locale), 'htmlPagesForVerification() 不应输出 planned 文件：' + page.file + '。');
+            assert(!pathUsesLocalePrefix(page.canonicalPath, locale), 'htmlPagesForVerification() 不应输出 planned canonical：' + page.canonicalPath + '。');
+            if (page.alternates) {
+                Object.keys(page.alternates).forEach((lang) => {
+                    assert(lang !== locale.hreflang, 'htmlPagesForVerification() 不应输出 planned hreflang：' + lang + '。');
+                    assert(!pathUsesLocalePrefix(page.alternates[lang], locale),
+                        'htmlPagesForVerification() 不应输出 planned alternate：' + page.alternates[lang] + '。');
+                });
+            }
+        });
+
+        const localeShells = plannedShells.filter((shell) => shell.locale === locale.code);
+        assert(localeShells.length > 0, 'planned locale ' + locale.code + ' 缺少未来页面壳枚举 helper 输出。');
+        localeShells.forEach((shell) => {
+            assert(relativeFileUsesLocalePrefix(shell.file, locale),
+                'planned locale ' + locale.code + ' 的未来页面壳文件路径应带语言目录：' + shell.file + '。');
+            assert(pathUsesLocalePrefix(shell.path, locale),
+                'planned locale ' + locale.code + ' 的未来页面壳公开路径应带语言前缀：' + shell.path + '。');
+            assert(!shell.exists, '本阶段不应已经生成 planned locale 页面壳：' + shell.file + '。');
+        });
     });
 }
 
@@ -289,6 +402,32 @@ function findHeadLinks(html, rel) {
     return collectTags(html, 'link')
         .map((tag) => tag.attrs)
         .filter((attrs) => hasRel(attrs, rel));
+}
+
+function verifyPlannedLocalesNotInStaticHeadLinks() {
+    const plannedLocales = plannedLocaleEntries(localeConfig);
+
+    htmlPages.forEach((page) => {
+        if (!fileExists(page.file)) return;
+
+        const html = readText(page.file);
+        const canonicalLinks = findHeadLinks(html, 'canonical');
+        const alternateLinks = findHeadLinks(html, 'alternate');
+
+        plannedLocales.forEach((locale) => {
+            canonicalLinks.forEach((attrs) => {
+                assert(!urlUsesLocalePrefix(attrs.href, locale),
+                    page.file + ' 的 canonical 不应指向 planned locale 路径：' + attrs.href + '。');
+            });
+
+            alternateLinks.forEach((attrs) => {
+                assert(String(attrs.hreflang || '').toLowerCase() !== locale.hreflang.toLowerCase(),
+                    page.file + ' 不应包含 planned locale hreflang="' + locale.hreflang + '"。');
+                assert(!urlUsesLocalePrefix(attrs.href, locale),
+                    page.file + ' 的 alternate 不应指向 planned locale 路径：' + attrs.href + '。');
+            });
+        });
+    });
 }
 
 function verifyHtmlPage(page) {
@@ -608,6 +747,8 @@ function verifySitemap() {
 
     const urlEntries = collectElementContents(xml, 'url');
     assert(urlEntries.length > 0, 'sitemap.xml 缺少 url 条目。');
+    assert(urlEntries.length === expectedSitemapUrlCount,
+        'sitemap.xml URL count 应保持 ' + expectedSitemapUrlCount + '，当前为 ' + urlEntries.length + '。');
 
     urlEntries.forEach((entry, index) => {
         const loc = firstElementText(entry, 'loc');
@@ -620,6 +761,25 @@ function verifySitemap() {
         if (hasText(loc)) {
             verifySitemapAlternateSet(loc, alternateLinks);
         }
+    });
+}
+
+function verifyGeneratedSitemapDryRunGuards() {
+    let generatedXml = '';
+
+    try {
+        generatedXml = require('./generate-sitemap').buildSitemap();
+    } catch (err) {
+        fail('generate-sitemap dry-run 校验无法生成 sitemap：' + err.message);
+        return;
+    }
+
+    const urlEntries = collectElementContents(generatedXml, 'url');
+    assert(urlEntries.length === expectedSitemapUrlCount,
+        'generate-sitemap dry-run URL count 应保持 ' + expectedSitemapUrlCount + '，当前为 ' + urlEntries.length + '。');
+
+    plannedLocaleEntries(localeConfig).forEach((locale) => {
+        assertXmlExcludesPlannedLocale(generatedXml, 'generate-sitemap dry-run 输出', locale);
     });
 }
 
@@ -668,6 +828,8 @@ function verifyRobots() {
 function main() {
     verifyFrontendLocaleConfigSync();
     verifyPageShellFiles();
+    verifyPlannedLocaleModelIsolation();
+    verifyPlannedLocalesNotInStaticHeadLinks();
     htmlPages.forEach(verifyHtmlPage);
     verifyProductDetailJs();
     verifyFrontendRuntimeI18nJs();
@@ -677,6 +839,7 @@ function main() {
     verifyServerI18nRoutesJs();
     verifyPendingRuntimeHardcodingWarnings();
     verifySitemap();
+    verifyGeneratedSitemapDryRunGuards();
     verifyDisabledLocalesNotInSitemap();
     verifyRobots();
 
