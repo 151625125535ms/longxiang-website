@@ -81,6 +81,26 @@ function baseHrefForLocale(locale) {
     return locale.pathPrefix ? locale.pathPrefix + '/' : '/';
 }
 
+function defaultLocaleEntry() {
+    const entries = localeEntries();
+    return entries.filter(function (locale) {
+        return !locale.pathPrefix;
+    })[0] || entries[0];
+}
+
+function notFoundShellForRequestPath(pathname) {
+    const requestedLocale = localeForRequestPath(pathname);
+    const fallbackLocale = defaultLocaleEntry();
+    const requestedFilePath = localizedHtmlShellPath('404.html', requestedLocale);
+    const locale = fs.existsSync(requestedFilePath) ? requestedLocale : fallbackLocale;
+
+    return {
+        filePath: localizedHtmlShellPath('404.html', locale),
+        baseHref: baseHrefForLocale(locale),
+        locale: locale.code
+    };
+}
+
 function productDetailRoutePatterns() {
     return localeEntries().filter(function (locale) {
         return fs.existsSync(localizedHtmlShellPath('product-detail.html', locale));
@@ -94,5 +114,6 @@ module.exports = {
     localeForRequestPath,
     localizedHtmlShellPath,
     baseHrefForLocale,
+    notFoundShellForRequestPath,
     productDetailRoutePatterns
 };

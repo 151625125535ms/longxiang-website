@@ -303,6 +303,24 @@ function assertSourceNotContains(source, pattern, message) {
     assert(!pattern.test(source), message);
 }
 
+function functionSource(source, name) {
+    const pattern = new RegExp('function\\s+' + escapeRegExp(name) + '\\s*\\([^)]*\\)\\s*\\{');
+    const match = pattern.exec(source || '');
+    if (!match) return '';
+
+    let depth = 0;
+    for (let index = match.index; index < source.length; index += 1) {
+        const char = source[index];
+        if (char === '{') depth += 1;
+        if (char === '}') {
+            depth -= 1;
+            if (depth === 0) return source.slice(match.index, index + 1);
+        }
+    }
+
+    return source.slice(match.index);
+}
+
 function verifyFrontendRuntimeI18nJs() {
     const source = readText('js/main.js');
 
@@ -323,6 +341,13 @@ function verifyFrontendRuntimeI18nJs() {
     assertSourceNotContains(source, /lang\s*===\s*['"]ar['"]\s*\?\s*['"]\/ar\/products\/['"]\s*:\s*['"]\/products\/['"]/, 'js/main.js 的 languageUrl() 仍写死产品详情语言路径。');
     assertSourceNotContains(source, /<option value="en">English<\/option>\s*['"]\s*\+\s*['"]<option value="ar">/, 'js/main.js 的语言选择器仍写死 en/ar option。');
     assertSourceNotContains(source, /var\s+detail\s*=\s*\(isArabic\s*\?\s*['"]\/ar\/products\/['"]\s*:\s*['"]\/products\/['"]\)/, 'js/main.js 首页产品详情链接仍写死 en/ar。');
+
+    const alternateSource = functionSource(source, 'injectAlternateSeoLinks');
+    assertSourceContains(alternateSource, /seoLocales\s*\(/, 'js/main.js 的 injectAlternateSeoLinks() 应使用 LongxiangI18n.seoLocales()。');
+    assertSourceContains(alternateSource, /baseStaticPathFromLocalizedPath\s*\(/, 'js/main.js 的 injectAlternateSeoLinks() 应从当前路径计算基础静态路径。');
+    assertSourceContains(alternateSource, /localizedStaticPath\s*\(/, 'js/main.js 的 injectAlternateSeoLinks() 应使用 localizedStaticPath() 生成静态页 alternate。');
+    assertSourceNotContains(alternateSource, /hreflang\s*:\s*['"]en['"]/, 'js/main.js 的 injectAlternateSeoLinks() 仍写死 hreflang=en。');
+    assertSourceNotContains(alternateSource, /hreflang\s*:\s*['"]ar['"]/, 'js/main.js 的 injectAlternateSeoLinks() 仍写死 hreflang=ar。');
 }
 
 function verifyProductListRuntimeI18nJs() {
@@ -341,14 +366,18 @@ function verifyServerI18nRoutesJs() {
     const appSource = readText('server/app.js');
     assertSourceContains(appSource, /require\(['"]\.\/lib\/i18nRoutes['"]\)/, 'server/app.js 应导入 server/lib/i18nRoutes.js。');
     assertSourceContains(appSource, /productDetailRoutePatterns\s*\(\s*\)/, 'server/app.js 应使用 productDetailRoutePatterns() 注册产品详情路由。');
+    assertSourceContains(appSource, /notFoundShellForRequestPath\s*\(/, 'server/app.js 应使用 notFoundShellForRequestPath() 处理 404 页面壳。');
     assertSourceNotContains(appSource, /app\.get\(\s*\[\s*['"]\/products\/:slug['"]\s*,\s*['"]\/ar\/products\/:slug['"]\s*\]/, 'server/app.js 仍写死 en/ar 产品详情路由数组。');
+    assertSourceNotContains(functionSource(appSource, 'sendNotFoundShell'), /\/ar\//, 'server/app.js 的 sendNotFoundShell() 仍写死 /ar/ 语言判断。');
 
     assert(fileExists('server/lib/i18nRoutes.js'), '缺少 server/lib/i18nRoutes.js。');
     if (fileExists('server/lib/i18nRoutes.js')) {
         const routeSource = readText('server/lib/i18nRoutes.js');
-        ['localeEntries', 'localeForRequestPath', 'localizedHtmlShellPath', 'baseHrefForLocale', 'productDetailRoutePatterns'].forEach((name) => {
+        ['localeEntries', 'localeForRequestPath', 'localizedHtmlShellPath', 'baseHrefForLocale', 'notFoundShellForRequestPath', 'productDetailRoutePatterns'].forEach((name) => {
             assertSourceContains(routeSource, new RegExp('\\b' + name + '\\b'), 'server/lib/i18nRoutes.js 缺少函数：' + name + '。');
         });
+        assertSourceContains(functionSource(routeSource, 'notFoundShellForRequestPath'), /localeForRequestPath\s*\(/, 'server/lib/i18nRoutes.js 的 404 helper 应按请求路径识别语言。');
+        assertSourceContains(functionSource(routeSource, 'notFoundShellForRequestPath'), /fs\.existsSync\s*\(/, 'server/lib/i18nRoutes.js 的 404 helper 应检查页面壳是否存在。');
     }
 }
 

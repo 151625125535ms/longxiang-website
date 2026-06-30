@@ -22,6 +22,7 @@ const {
     localeForRequestPath,
     localizedHtmlShellPath,
     baseHrefForLocale,
+    notFoundShellForRequestPath,
     productDetailRoutePatterns
 } = require('./lib/i18nRoutes');
 
@@ -231,9 +232,8 @@ function sendHtmlShell(res, next, filePath, baseHref, statusCode) {
 }
 
 function sendNotFoundShell(req, res, next) {
-    const isArabic = req.path.indexOf('/ar/') === 0 || req.path === '/ar';
-    const filePath = path.join(__dirname, '..', isArabic ? 'ar/404.html' : '404.html');
-    sendHtmlShell(res, next, filePath, isArabic ? '/ar/' : '/', 404);
+    const shell = notFoundShellForRequestPath(req.path);
+    sendHtmlShell(res, next, shell.filePath, shell.baseHref, 404);
 }
 
 function sendProductDetailShell(req, res, next) {

@@ -127,7 +127,7 @@
     function baseStaticPathFromLocalizedPath(pathname) {
         var path = normalizeBasePath(pathname || window.location.pathname || '/');
         var entry = localeEntry(inferLocaleFromPath(path));
-        if (path === entry.homePath || path === entry.pathPrefix + '/') return '/';
+        if (path === entry.homePath || path === entry.pathPrefix || path === entry.pathPrefix + '/') return '/';
         if (entry.pathPrefix && path.indexOf(entry.pathPrefix + '/') === 0) {
             return normalizeBasePath('/' + path.slice(entry.pathPrefix.length + 1));
         }
@@ -1107,14 +1107,22 @@
 
     function injectAlternateSeoLinks(currentUrl) {
         var origin = window.location.origin;
-        var path = window.location.pathname.replace(/\\/g, '/');
         var search = window.location.search || '';
-        var enPath = path.replace(/^\/ar\//, '/');
-        var arPath = /^\/ar\//.test(path) ? path : '/ar' + (path.charAt(0) === '/' ? path : '/' + path);
+        var productId = window.LongxiangI18n.productIdentifierFromLocalizedPath(window.location.pathname);
+        var basePath = window.LongxiangI18n.baseStaticPathFromLocalizedPath(window.location.pathname);
+        var defaultLocale = window.LongxiangI18n.config.defaultLocale;
+        var defaultPath = productId
+            ? window.LongxiangI18n.localizedProductPath(productId, defaultLocale)
+            : window.LongxiangI18n.localizedStaticPath(basePath, defaultLocale);
+
         upsertLink('canonical', { href: currentUrl });
-        upsertLink('alternate', { hreflang: 'en', href: origin + enPath + search });
-        upsertLink('alternate', { hreflang: 'ar', href: origin + arPath + search });
-        upsertLink('alternate', { hreflang: 'x-default', href: origin + enPath + search });
+        window.LongxiangI18n.seoLocales().forEach(function (entry) {
+            var localizedPath = productId
+                ? window.LongxiangI18n.localizedProductPath(productId, entry.code)
+                : window.LongxiangI18n.localizedStaticPath(basePath, entry.code);
+            upsertLink('alternate', { hreflang: entry.hreflang, href: origin + localizedPath + search });
+        });
+        upsertLink('alternate', { hreflang: 'x-default', href: origin + defaultPath + search });
     }
 
     function injectGa(trackingId) {
