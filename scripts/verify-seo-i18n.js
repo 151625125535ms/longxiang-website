@@ -633,6 +633,8 @@ function verifyFrontendRuntimeI18nJs() {
         'currentLocaleEntry',
         'localizedStaticPath',
         'localizedProductPath',
+        'assetBasePrefix',
+        'localizedAssetPath',
         'baseStaticPathFromLocalizedPath',
         'plannedLocalePathInfo',
         'isPlannedLocalePath',
@@ -654,6 +656,32 @@ function verifyFrontendRuntimeI18nJs() {
     assertSourceNotContains(alternateSource, /hreflang\s*:\s*['"]en['"]/, 'js/main.js 的 injectAlternateSeoLinks() 仍写死 hreflang=en。');
     assertSourceNotContains(alternateSource, /hreflang\s*:\s*['"]ar['"]/, 'js/main.js 的 injectAlternateSeoLinks() 仍写死 hreflang=ar。');
     verifyFrontendPlannedLocaleRuntimeSeoGuards(source);
+}
+
+function verifyFrontendAssetPathRuntimeJs() {
+    const mainSource = readText('js/main.js');
+    const assetBaseSource = functionSource(mainSource, 'assetBasePrefix');
+    const localizedAssetSource = functionSource(mainSource, 'localizedAssetPath');
+    const pageScripts = [
+        'js/content-pages.js',
+        'js/products-list.js',
+        'js/product-detail.js',
+        'js/education.js',
+        'js/compare.js'
+    ];
+
+    assertSourceContains(assetBaseSource, /pathPrefix\s*\?\s*['"]\.\.\/['"]\s*:\s*['"]['"]/, 'js/main.js assetBasePrefix() must derive asset prefix from locale pathPrefix.');
+    assertSourceContains(localizedAssetSource, /assetBasePrefix\s*\(/, 'js/main.js localizedAssetPath() must use assetBasePrefix().');
+    assertSourceContains(localizedAssetSource, /replace\s*\(\s*\/\\\\\/g\s*,\s*['"]\/['"]\s*\)/, 'js/main.js localizedAssetPath() must normalize backslashes.');
+    assertSourceContains(localizedAssetSource, /\^\(https\?:\)\?\\\/\\\//, 'js/main.js localizedAssetPath() must preserve absolute URLs.');
+    assertSourceNotContains(mainSource, /var\s+assetPrefix\s*=\s*isArabic\s*\?\s*['"]\.\.\/['"]\s*:\s*['"]['"]\s*;/, 'js/main.js assetPrefix must not be based on isArabic.');
+
+    pageScripts.forEach((file) => {
+        const source = readText(file);
+        assertSourceContains(source, /LongxiangI18n\.assetBasePrefix\s*\(/, file + ' must use LongxiangI18n.assetBasePrefix().');
+        assertSourceContains(source, /LongxiangI18n\.localizedAssetPath\s*\(/, file + ' must use LongxiangI18n.localizedAssetPath().');
+        assertSourceNotContains(source, /var\s+assetPrefix\s*=\s*isArabic\s*\?\s*['"]\.\.\/['"]\s*:\s*['"]['"]\s*;/, file + ' assetPrefix must not be based on isArabic.');
+    });
 }
 
 function verifyProductListRuntimeI18nJs() {
@@ -921,6 +949,7 @@ function main() {
     htmlPages.forEach(verifyHtmlPage);
     verifyProductDetailJs();
     verifyFrontendRuntimeI18nJs();
+    verifyFrontendAssetPathRuntimeJs();
     verifyProductListRuntimeI18nJs();
     verifyContentPagesRuntimeSeoJs();
     verifyEducationCompareRuntimeI18nJs();

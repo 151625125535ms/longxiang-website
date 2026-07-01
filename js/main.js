@@ -150,6 +150,18 @@
         return entry.pathPrefix + '/products/' + encodeURIComponent(String(productId || '').trim());
     }
 
+    function assetBasePrefix(locale) {
+        var entry = localeEntry(locale || currentLocale());
+        return entry.pathPrefix ? '../' : '';
+    }
+
+    function localizedAssetPath(path, locale) {
+        path = String(path || '').trim().replace(/\\/g, '/');
+        if (!path) return '';
+        if (/^(https?:)?\/\//i.test(path) || path.charAt(0) === '/' || /^data:/i.test(path) || /^blob:/i.test(path)) return path;
+        return assetBasePrefix(locale) + path.replace(/^\/+/, '');
+    }
+
     function baseStaticPathFromLocalizedPath(pathname) {
         var planned = plannedLocalePathInfo(pathname);
         if (planned) return planned.basePath;
@@ -253,6 +265,8 @@
         localized: localized,
         localizedStaticPath: localizedStaticPath,
         localizedProductPath: localizedProductPath,
+        assetBasePrefix: assetBasePrefix,
+        localizedAssetPath: localizedAssetPath,
         baseStaticPathFromLocalizedPath: baseStaticPathFromLocalizedPath,
         plannedLocalePathInfo: plannedLocalePathInfo,
         isPlannedLocalePath: isPlannedLocalePath,
@@ -267,7 +281,7 @@
     var mobileOverlay = document.querySelector('.mobile-menu-overlay');
     var locale = window.LongxiangI18n.currentLocale();
     var isArabic = locale === 'ar';
-    var assetPrefix = isArabic ? '../' : '';
+    var assetPrefix = window.LongxiangI18n.assetBasePrefix(locale);
     var companyCache = null;
     var globalShellCache = null;
     var consentDocumentClickBound = false;
@@ -1442,9 +1456,7 @@
     }
 
     function resolveAssetPath(path) {
-        if (!path) return '';
-        if (/^(https?:)?\/\//.test(path) || path.charAt(0) === '/' || /^data:/.test(path)) return path;
-        return assetPrefix + path;
+        return window.LongxiangI18n.localizedAssetPath(path, locale);
     }
 
     function renderCommunicationWidgets(company) {

@@ -8,7 +8,9 @@
         ? window.LongxiangI18n.currentLocale()
         : (/\/ar\//.test(window.location.pathname.replace(/\\/g, '/')) ? 'ar' : 'en');
     var isArabic = locale === 'ar';
-    var assetPrefix = isArabic ? '../' : '';
+    var assetPrefix = window.LongxiangI18n && window.LongxiangI18n.assetBasePrefix
+        ? window.LongxiangI18n.assetBasePrefix(locale)
+        : (isArabic ? '../' : '');
     var contentPromise = window.longxiangContentPagePromise || Promise.resolve(null);
     var ARABIC_TEXT_FALLBACKS = {
         'Product Comparison': 'مقارنة المنتجات',
@@ -76,6 +78,9 @@
     function normalizeImagePath(path) {
         path = String(path || '').trim().replace(/\\/g, '/');
         if (!path) return '';
+        if (window.LongxiangI18n && window.LongxiangI18n.localizedAssetPath) {
+            return window.LongxiangI18n.localizedAssetPath(path, locale);
+        }
         if (/^(https?:)?\/\//i.test(path) || /^data:/i.test(path) || /^blob:/i.test(path)) return path;
         path = path.replace(/^\/+/, '');
         return assetPrefix + path;

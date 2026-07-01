@@ -9,7 +9,9 @@
         ? window.LongxiangI18n.currentLocale()
         : (/\/ar\//.test(window.location.pathname.replace(/\\/g, '/')) ? 'ar' : 'en');
     var isArabic = locale === 'ar';
-    var assetPrefix = isArabic ? '../' : '';
+    var assetPrefix = window.LongxiangI18n && window.LongxiangI18n.assetBasePrefix
+        ? window.LongxiangI18n.assetBasePrefix(locale)
+        : (isArabic ? '../' : '');
     var ARABIC_CHAT_APP_NAME = '\u0648\u0627\u062a\u0633\u0627\u0628';
     var ARABIC_TEXT_FALLBACKS = {
         'Home': 'الرئيسية',
@@ -142,6 +144,9 @@
     function resolveAsset(path) {
         path = String(path || '').trim();
         if (!path) return '';
+        if (window.LongxiangI18n && window.LongxiangI18n.localizedAssetPath) {
+            return window.LongxiangI18n.localizedAssetPath(path, locale);
+        }
         if (/^(https?:)?\/\//i.test(path) || path.charAt(0) === '/' || /^data:/i.test(path)) return path;
         return assetPrefix + path.replace(/^\/+/, '');
     }

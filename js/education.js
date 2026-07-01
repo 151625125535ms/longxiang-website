@@ -6,7 +6,9 @@
         ? window.LongxiangI18n.currentLocale()
         : (/\/ar\//.test(window.location.pathname.replace(/\\/g, '/')) ? 'ar' : 'en');
     var isArabic = locale === 'ar';
-    var assetPrefix = isArabic ? '../' : '';
+    var assetPrefix = window.LongxiangI18n && window.LongxiangI18n.assetBasePrefix
+        ? window.LongxiangI18n.assetBasePrefix(locale)
+        : (isArabic ? '../' : '');
 
     if (!pageRoot) return;
 
@@ -21,6 +23,9 @@
 
     function resolveAsset(path) {
         if (!path) return '';
+        if (window.LongxiangI18n && window.LongxiangI18n.localizedAssetPath) {
+            return window.LongxiangI18n.localizedAssetPath(path, locale);
+        }
         if (/^(https?:)?\/\//.test(path) || path.charAt(0) === '/') return path;
         return assetPrefix + path;
     }
