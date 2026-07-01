@@ -3163,6 +3163,8 @@
                 var item = findCertificationInView(id, viewName);
                 if (item) {
                     document.getElementById('cert-name').value = item.name_en || '';
+                    document.getElementById('cert-name-fr').value = item.name_fr || '';
+                    document.getElementById('cert-name-ru').value = item.name_ru || '';
                     document.getElementById('cert-image').value = item.image_path || '';
                     document.getElementById('cert-editing-version').value = item.version || '';
                     uploadedCertificationPath = item.image_path || '';
@@ -3172,10 +3174,16 @@
                     var detail = unwrapDataResponse(response) || {};
                     openedCertification = detail;
                     document.getElementById('cert-name').value = detail.name_en || '';
+                    document.getElementById('cert-name-fr').value = detail.name_fr || '';
+                    document.getElementById('cert-name-ru').value = detail.name_ru || '';
                     document.getElementById('cert-issuer').value = detail.issuer_en || '';
+                    document.getElementById('cert-issuer-fr').value = detail.issuer_fr || '';
+                    document.getElementById('cert-issuer-ru').value = detail.issuer_ru || '';
                     document.getElementById('cert-expiryDate').value = detail.expiry_date || '';
                     document.getElementById('cert-image').value = detail.image_path || '';
                     document.getElementById('cert-description').value = detail.description_en || '';
+                    document.getElementById('cert-description-fr').value = detail.description_fr || '';
+                    document.getElementById('cert-description-ru').value = detail.description_ru || '';
                     if (!document.getElementById('cert-editing-version').value) {
                         document.getElementById('cert-editing-version').value = detail.version || '';
                     }
@@ -3270,10 +3278,16 @@
             var imagePath = document.getElementById('cert-image').value.trim() || uploadedCertificationPath;
             var payload = {
                 name_en: document.getElementById('cert-name').value.trim(),
+                name_fr: document.getElementById('cert-name-fr').value.trim(),
+                name_ru: document.getElementById('cert-name-ru').value.trim(),
                 issuer_en: document.getElementById('cert-issuer').value.trim(),
+                issuer_fr: document.getElementById('cert-issuer-fr').value.trim(),
+                issuer_ru: document.getElementById('cert-issuer-ru').value.trim(),
                 expiry_date: document.getElementById('cert-expiryDate').value.trim(),
                 image_path: imagePath,
                 description_en: document.getElementById('cert-description').value.trim(),
+                description_fr: document.getElementById('cert-description-fr').value.trim(),
+                description_ru: document.getElementById('cert-description-ru').value.trim(),
                 category_id: parseInt(document.getElementById('cert-category-id').value, 10),
                 status: 'published'
             };

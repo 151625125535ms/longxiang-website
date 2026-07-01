@@ -28,6 +28,10 @@ function firstText() {
     return '';
 }
 
+function optionalText(value) {
+    return value == null ? '' : String(value).trim();
+}
+
 function titleFromPath(value) {
     const text = String(value || '').trim().replace(/\\/g, '/');
     if (!text) return '';
@@ -46,10 +50,11 @@ function getCertification(db, id) {
         SELECT
             cert.id, cert.legacy_id, cert.category_id, c.name_en AS category_name_en,
             cert.legacy_category, cert.status, cert.sort_order,
-            cert.name_en, cert.name_ar, cert.category_label_en, cert.category_label_ar,
+            cert.name_en, cert.name_ar, cert.name_fr, cert.name_ru,
+            cert.category_label_en, cert.category_label_ar,
             cert.image_path, cert.asset_id, cert.source_type, cert.pages, cert.width, cert.height,
-            cert.issuer_en, cert.issuer_ar, cert.expiry_date,
-            cert.description_en, cert.description_ar,
+            cert.issuer_en, cert.issuer_ar, cert.issuer_fr, cert.issuer_ru, cert.expiry_date,
+            cert.description_en, cert.description_ar, cert.description_fr, cert.description_ru,
             cert.version, cert.created_at, cert.updated_at
         FROM certifications cert
         LEFT JOIN categories c ON c.id = cert.category_id
@@ -80,7 +85,7 @@ function buildListQuery(query) {
 
     const q = String(query.q || '').trim();
     if (q) {
-        where.push('(cert.name_en LIKE @q OR cert.name_ar LIKE @q)');
+        where.push('(cert.name_en LIKE @q OR cert.name_ar LIKE @q OR cert.name_fr LIKE @q OR cert.name_ru LIKE @q)');
         params.q = '%' + q + '%';
     }
 
@@ -109,8 +114,11 @@ router.get('/', function (req, res, next) {
             SELECT
                 cert.id, cert.legacy_id, cert.category_id, c.name_en AS category_name_en,
                 cert.legacy_category, cert.status, cert.sort_order,
-                cert.name_en, cert.name_ar, cert.image_path, cert.asset_id, cert.source_type,
-                cert.pages, cert.version, cert.created_at, cert.updated_at
+                cert.name_en, cert.name_ar, cert.name_fr, cert.name_ru,
+                cert.image_path, cert.asset_id, cert.source_type,
+                cert.pages, cert.issuer_en, cert.issuer_ar, cert.issuer_fr, cert.issuer_ru,
+                cert.description_en, cert.description_ar, cert.description_fr, cert.description_ru,
+                cert.version, cert.created_at, cert.updated_at
             FROM certifications cert
             LEFT JOIN categories c ON c.id = cert.category_id
             ${built.whereSql}
@@ -154,16 +162,16 @@ router.post('/', function (req, res, next) {
                 INSERT INTO certifications
                     (
                         legacy_id, category_id, legacy_category, status,
-                        sort_order, name_en, name_ar, image_path, asset_id, source_type,
-                        pages, width, height, issuer_en, issuer_ar, expiry_date,
-                        description_en, description_ar, version, created_at, updated_at
+                        sort_order, name_en, name_ar, name_fr, name_ru, image_path, asset_id, source_type,
+                        pages, width, height, issuer_en, issuer_ar, issuer_fr, issuer_ru, expiry_date,
+                        description_en, description_ar, description_fr, description_ru, version, created_at, updated_at
                     )
                 VALUES
                     (
                         @legacy_id, @category_id, @legacy_category, @status,
-                        @sort_order, @name_en, @name_ar, @image_path, @asset_id, @source_type,
-                        @pages, @width, @height, @issuer_en, @issuer_ar, @expiry_date,
-                        @description_en, @description_ar, 1, @created_at, @updated_at
+                        @sort_order, @name_en, @name_ar, @name_fr, @name_ru, @image_path, @asset_id, @source_type,
+                        @pages, @width, @height, @issuer_en, @issuer_ar, @issuer_fr, @issuer_ru, @expiry_date,
+                        @description_en, @description_ar, @description_fr, @description_ru, 1, @created_at, @updated_at
                     )
             `).run({
                 legacy_id: body.legacy_id ? String(body.legacy_id).trim() : null,
@@ -173,6 +181,8 @@ router.post('/', function (req, res, next) {
                 sort_order: parseInteger(body.sort_order, 0),
                 name_en: nameEn,
                 name_ar: body.name_ar ? String(body.name_ar).trim() : '',
+                name_fr: optionalText(body.name_fr),
+                name_ru: optionalText(body.name_ru),
                 image_path: body.image_path ? String(body.image_path).trim() : '',
                 asset_id: resolveAssetIdByPath(db, body.image_path ? String(body.image_path).trim() : ''),
                 source_type: body.source_type ? String(body.source_type).trim() : '',
@@ -181,9 +191,13 @@ router.post('/', function (req, res, next) {
                 height: body.height == null || body.height === '' ? null : parseInteger(body.height, null),
                 issuer_en: body.issuer_en ? String(body.issuer_en).trim() : '',
                 issuer_ar: body.issuer_ar ? String(body.issuer_ar).trim() : '',
+                issuer_fr: optionalText(body.issuer_fr),
+                issuer_ru: optionalText(body.issuer_ru),
                 expiry_date: body.expiry_date ? String(body.expiry_date).trim() : '',
                 description_en: body.description_en ? String(body.description_en).trim() : '',
                 description_ar: body.description_ar ? String(body.description_ar).trim() : '',
+                description_fr: optionalText(body.description_fr),
+                description_ru: optionalText(body.description_ru),
                 created_at: now,
                 updated_at: now
             });
@@ -232,6 +246,8 @@ router.put('/:id', function (req, res, next) {
                     sort_order = @sort_order,
                     name_en = @name_en,
                     name_ar = @name_ar,
+                    name_fr = @name_fr,
+                    name_ru = @name_ru,
                     image_path = @image_path,
                     asset_id = @asset_id,
                     source_type = @source_type,
@@ -240,9 +256,13 @@ router.put('/:id', function (req, res, next) {
                     height = @height,
                     issuer_en = @issuer_en,
                     issuer_ar = @issuer_ar,
+                    issuer_fr = @issuer_fr,
+                    issuer_ru = @issuer_ru,
                     expiry_date = @expiry_date,
                     description_en = @description_en,
                     description_ar = @description_ar,
+                    description_fr = @description_fr,
+                    description_ru = @description_ru,
                     version = version + 1,
                     updated_at = @updated_at
                 WHERE id = @id
@@ -254,6 +274,8 @@ router.put('/:id', function (req, res, next) {
                 sort_order: body.sort_order == null ? before.sort_order : parseInteger(body.sort_order, before.sort_order),
                 name_en: body.name_en == null ? before.name_en : firstText(body.name_en, body.name_ar, before.name_en, titleFromPath(body.image_path)),
                 name_ar: body.name_ar == null ? before.name_ar : String(body.name_ar).trim(),
+                name_fr: body.name_fr == null ? before.name_fr : optionalText(body.name_fr),
+                name_ru: body.name_ru == null ? before.name_ru : optionalText(body.name_ru),
                 image_path: nextImagePath,
                 asset_id: nextAssetId,
                 source_type: body.source_type == null ? before.source_type : String(body.source_type).trim(),
@@ -262,9 +284,13 @@ router.put('/:id', function (req, res, next) {
                 height: body.height === undefined ? before.height : (body.height == null || body.height === '' ? null : parseInteger(body.height, null)),
                 issuer_en: body.issuer_en == null ? before.issuer_en : String(body.issuer_en).trim(),
                 issuer_ar: body.issuer_ar == null ? before.issuer_ar : String(body.issuer_ar).trim(),
+                issuer_fr: body.issuer_fr == null ? before.issuer_fr : optionalText(body.issuer_fr),
+                issuer_ru: body.issuer_ru == null ? before.issuer_ru : optionalText(body.issuer_ru),
                 expiry_date: body.expiry_date == null ? before.expiry_date : String(body.expiry_date).trim(),
                 description_en: body.description_en == null ? before.description_en : String(body.description_en).trim(),
                 description_ar: body.description_ar == null ? before.description_ar : String(body.description_ar).trim(),
+                description_fr: body.description_fr == null ? before.description_fr : optionalText(body.description_fr),
+                description_ru: body.description_ru == null ? before.description_ru : optionalText(body.description_ru),
                 updated_at: Date.now()
             });
 

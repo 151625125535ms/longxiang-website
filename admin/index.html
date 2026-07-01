@@ -1048,8 +1048,16 @@
                                     <h3 class="form-section-title">基础信息</h3>
                                     <div class="form-group"><label for="cert-name">证书名称</label><input type="text" id="cert-name" placeholder="留空时使用上传文件名"></div>
                                     <div class="form-row">
+                                        <div class="form-group"><label for="cert-name-fr">法语名称</label><input type="text" id="cert-name-fr" class="bidi-field" dir="auto" lang="fr"></div>
+                                        <div class="form-group"><label for="cert-name-ru">俄语名称</label><input type="text" id="cert-name-ru" class="bidi-field" dir="auto" lang="ru"></div>
+                                    </div>
+                                    <div class="form-row">
                                         <div class="form-group"><label for="cert-issuer">发证机构</label><input type="text" id="cert-issuer"></div>
                                         <div class="form-group"><label for="cert-expiryDate">有效期</label><input type="text" id="cert-expiryDate" placeholder="长期有效或 2028-12-31"></div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group"><label for="cert-issuer-fr">法语发证机构</label><input type="text" id="cert-issuer-fr" class="bidi-field" dir="auto" lang="fr"></div>
+                                        <div class="form-group"><label for="cert-issuer-ru">俄语发证机构</label><input type="text" id="cert-issuer-ru" class="bidi-field" dir="auto" lang="ru"></div>
                                     </div>
                                 </section>
                                 <section class="form-section cert-form-section">
@@ -1060,6 +1068,10 @@
                                         <button class="btn btn-secondary btn-sm" id="btn-cert-clear-image" type="button">清空文件</button>
                                     </div>
                                     <div class="form-group"><label for="cert-description">说明</label><textarea id="cert-description" rows="5"></textarea></div>
+                                    <div class="form-row">
+                                        <div class="form-group"><label for="cert-description-fr">法语说明</label><textarea id="cert-description-fr" rows="4" class="bidi-field" dir="auto" lang="fr"></textarea></div>
+                                        <div class="form-group"><label for="cert-description-ru">俄语说明</label><textarea id="cert-description-ru" rows="4" class="bidi-field" dir="auto" lang="ru"></textarea></div>
+                                    </div>
                                 </section>
                             </div>
                             <aside class="cert-editor-side">
@@ -1216,6 +1228,6 @@
     <script src="js/admin-ui.js?v=20260628-stage6"></script>
     <script src="js/modules/admin-inquiries.js?v=20260628-stage7b1"></script>
     <script src="js/modules/admin-products.js?v=20260702-e8c1-product-i18n"></script>
-    <script src="js/admin.js?v=20260702-e8c2-category-i18n"></script>
+    <script src="js/admin.js?v=20260702-e8c3-cert-i18n"></script>
 </body>
 </html>
