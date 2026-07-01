@@ -11,6 +11,8 @@ const CATEGORY_FIELDS = `
     c.slug,
     c.name_en,
     c.name_ar,
+    c.name_fr,
+    c.name_ru,
     c.sort_order,
     c.is_active,
     c.created_at,
@@ -18,6 +20,8 @@ const CATEGORY_FIELDS = `
     parent.slug AS parent_slug,
     parent.name_en AS parent_name_en,
     parent.name_ar AS parent_name_ar,
+    parent.name_fr AS parent_name_fr,
+    parent.name_ru AS parent_name_ru,
     parent.sort_order AS parent_sort_order,
     (
         SELECT COUNT(*)
@@ -200,15 +204,17 @@ router.post('/', function (req, res, next) {
         const createCategory = db.transaction(function () {
             const result = db.prepare(`
                 INSERT INTO categories
-                    (type, parent_id, slug, name_en, name_ar, sort_order, is_active, created_at, updated_at)
+                    (type, parent_id, slug, name_en, name_ar, name_fr, name_ru, sort_order, is_active, created_at, updated_at)
                 VALUES
-                    (@type, @parent_id, @slug, @name_en, @name_ar, @sort_order, 1, @created_at, @updated_at)
+                    (@type, @parent_id, @slug, @name_en, @name_ar, @name_fr, @name_ru, @sort_order, 1, @created_at, @updated_at)
             `).run({
                 type,
                 parent_id: parentResult.parentId,
                 slug: makeUniqueCategorySlug(db, type, body.slug || body.name_en || body.name_ar),
                 name_en: String(body.name_en || body.name_ar).trim(),
                 name_ar: body.name_ar == null ? '' : String(body.name_ar).trim(),
+                name_fr: body.name_fr == null ? '' : String(body.name_fr).trim(),
+                name_ru: body.name_ru == null ? '' : String(body.name_ru).trim(),
                 sort_order: normalizeSortOrder(body.sort_order),
                 created_at: now,
                 updated_at: now
@@ -256,6 +262,8 @@ router.put('/:id', function (req, res, next) {
                     parent_id = @parent_id,
                     name_en = @name_en,
                     name_ar = @name_ar,
+                    name_fr = @name_fr,
+                    name_ru = @name_ru,
                     sort_order = @sort_order,
                     is_active = @is_active,
                     updated_at = @updated_at
@@ -265,6 +273,8 @@ router.put('/:id', function (req, res, next) {
                 parent_id: nextParentId,
                 name_en: body.name_en == null ? before.name_en : String(body.name_en).trim(),
                 name_ar: body.name_ar == null ? before.name_ar : String(body.name_ar).trim(),
+                name_fr: body.name_fr == null ? before.name_fr : String(body.name_fr).trim(),
+                name_ru: body.name_ru == null ? before.name_ru : String(body.name_ru).trim(),
                 sort_order: body.sort_order == null ? before.sort_order : normalizeSortOrder(body.sort_order),
                 is_active: body.is_active == null ? before.is_active : normalizeActive(body.is_active),
                 updated_at: Date.now()

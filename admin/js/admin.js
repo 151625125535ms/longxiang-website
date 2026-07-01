@@ -2460,6 +2460,8 @@
                     slug.value = category.slug || '';
                     document.getElementById('cat-name-en').value = category.name_en || '';
                     document.getElementById('cat-name-ar').value = category.name_ar || '';
+                    document.getElementById('cat-name-fr').value = category.name_fr || '';
+                    document.getElementById('cat-name-ru').value = category.name_ru || '';
                     document.getElementById('cat-sort-order').value = category.sort_order || 0;
                     document.getElementById('cat-is-active').checked = category.is_active !== 0;
                     populateCategoryParentSelect(category.parent_id, id);
@@ -2477,6 +2479,8 @@
             var slug = document.getElementById('cat-slug').value.trim();
             var nameEn = document.getElementById('cat-name-en').value.trim();
             var nameAr = document.getElementById('cat-name-ar').value.trim();
+            var nameFr = document.getElementById('cat-name-fr').value.trim();
+            var nameRu = document.getElementById('cat-name-ru').value.trim();
             var sortOrder = parseInt(document.getElementById('cat-sort-order').value, 10);
             var parentId = document.getElementById('cat-parent-id').value || null;
             if (!nameEn && !nameAr) {
@@ -2488,6 +2492,8 @@
             var payload = id ? {
                 name_en: nameEn || nameAr,
                 name_ar: nameAr,
+                name_fr: nameFr,
+                name_ru: nameRu,
                 parent_id: parentId,
                 sort_order: sortOrder,
                 is_active: document.getElementById('cat-is-active').checked
@@ -2496,6 +2502,8 @@
                 slug: slug,
                 name_en: nameEn || nameAr,
                 name_ar: nameAr,
+                name_fr: nameFr,
+                name_ru: nameRu,
                 parent_id: parentId,
                 sort_order: sortOrder
             };
