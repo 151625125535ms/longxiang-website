@@ -689,6 +689,57 @@ function verifyProductListRuntimeI18nJs() {
     assertSourceContains(source, /localizedProductPath\s*\(/, 'js/products-list.js 应使用 LongxiangI18n.localizedProductPath() 生成产品详情链接。');
 }
 
+function verifyPublicApiI18nFieldMapping() {
+    const productsSource = readText('server/routes/products.js');
+    const categoriesSource = readText('server/routes/product-categories.js');
+    const certificationsSource = readText('server/routes/certifications.js');
+
+    [
+        'nameFr', 'nameRu',
+        'shortDescFr', 'shortDescRu',
+        'descriptionFr', 'descriptionRu',
+        'seoTitleFr', 'seoTitleRu',
+        'seoDescriptionFr', 'seoDescriptionRu',
+        'seoKeywordsFr', 'seoKeywordsRu',
+        'categoryLabelFr', 'categoryLabelRu',
+        'groupLabelFr', 'groupLabelRu',
+        'subCategoryLabelFr', 'subCategoryLabelRu'
+    ].forEach((field) => {
+        assertSourceContains(productsSource, new RegExp('\\b' + field + '\\b'), 'server/routes/products.js 缺少公开产品字段：' + field + '。');
+    });
+
+    ['labelFr', 'labelRu'].forEach((field) => {
+        assertSourceContains(categoriesSource, new RegExp('\\b' + field + '\\b'), 'server/routes/product-categories.js 缺少公开分类字段：' + field + '。');
+    });
+
+    [
+        'nameFr', 'nameRu',
+        'categoryLabelFr', 'categoryLabelRu',
+        'issuerFr', 'issuerRu',
+        'descriptionFr', 'descriptionRu'
+    ].forEach((field) => {
+        assertSourceContains(certificationsSource, new RegExp('\\b' + field + '\\b'), 'server/routes/certifications.js 缺少公开证书字段：' + field + '。');
+    });
+}
+
+function verifyFrontendI18nFieldReaders() {
+    const mainSource = readText('js/main.js');
+    const productsListSource = readText('js/products-list.js');
+    const productDetailSource = readText('js/product-detail.js');
+
+    assertSourceContains(mainSource, /function\s+localizedApiValue\s*\(/, 'js/main.js 缺少 localizedApiValue() 读取公开 API 多语言字段。');
+    assertSourceContains(mainSource, /localizedApiValue\s*\(\s*product\s*,\s*['"]name['"]\s*\)/, 'js/main.js 首页产品名称应使用 localizedApiValue()。');
+    assertSourceContains(mainSource, /localizedApiValue\s*\(\s*cert\s*,\s*['"]name['"]\s*\)/, 'js/main.js 证书名称应使用 localizedApiValue()。');
+    assertSourceContains(mainSource, /labelFr\s*:\s*category\.labelFr/, 'js/main.js apiHomeCategories() 应透传 labelFr。');
+    assertSourceContains(mainSource, /labelRu\s*:\s*category\.labelRu/, 'js/main.js apiHomeCategories() 应透传 labelRu。');
+    assertSourceContains(productsListSource, /localize\s*\(\s*parent\s*,\s*['"]label['"]\s*\)/, 'js/products-list.js 分类父级标签应使用 localize()。');
+    assertSourceContains(productsListSource, /labelFr/, 'js/products-list.js 应保留 product-categories 的 labelFr 字段。');
+    assertSourceContains(productsListSource, /labelFr\s*:\s*item\.labelFr/, 'js/products-list.js deriveTaxonomyFromProducts() 应返回父级 labelFr。');
+    assertSourceContains(productsListSource, /labelRu\s*:\s*item\.labelRu/, 'js/products-list.js deriveTaxonomyFromProducts() 应返回父级 labelRu。');
+    assertSourceContains(productDetailSource, /localize\s*\(\s*product\s*,\s*['"]seoTitle['"]\s*\)/, 'js/product-detail.js 应准备读取 locale-specific SEO title。');
+    assertSourceContains(productDetailSource, /localize\s*\(\s*product\s*,\s*['"]seoDescription['"]\s*\)/, 'js/product-detail.js 应准备读取 locale-specific SEO description。');
+}
+
 function verifyContentPagesRuntimeSeoJs() {
     const source = readText('js/content-pages.js');
     assertSourceContains(source, /seoLocales\s*\(/, 'js/content-pages.js 应按 LongxiangI18n.seoLocales() 生成 alternate。');
@@ -951,6 +1002,8 @@ function main() {
     verifyFrontendRuntimeI18nJs();
     verifyFrontendAssetPathRuntimeJs();
     verifyProductListRuntimeI18nJs();
+    verifyPublicApiI18nFieldMapping();
+    verifyFrontendI18nFieldReaders();
     verifyContentPagesRuntimeSeoJs();
     verifyEducationCompareRuntimeI18nJs();
     verifyServerI18nRoutesJs();

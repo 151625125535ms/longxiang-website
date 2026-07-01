@@ -25,6 +25,8 @@ function createGroup(group) {
         group: group,
         label: labels.label,
         labelAr: labels.labelAr,
+        labelFr: labels.labelFr || '',
+        labelRu: labels.labelRu || '',
         children: []
     };
 }
@@ -34,6 +36,8 @@ function addChild(group, row, mapping) {
         sub: mapping.subCategory,
         label: row.name_en || row.slug,
         labelAr: row.name_ar || row.name_en || row.slug,
+        labelFr: row.name_fr || '',
+        labelRu: row.name_ru || '',
         sourceSlug: row.slug
     };
     const existingIndex = group.children.findIndex(function (item) {
@@ -55,11 +59,15 @@ function serializeGroup(group) {
         group: group.group,
         label: group.label,
         labelAr: group.labelAr,
+        labelFr: group.labelFr || '',
+        labelRu: group.labelRu || '',
         children: group.children.map(function (child) {
             return {
                 sub: child.sub,
                 label: child.label,
-                labelAr: child.labelAr
+                labelAr: child.labelAr,
+                labelFr: child.labelFr || '',
+                labelRu: child.labelRu || ''
             };
         })
     };
@@ -84,7 +92,9 @@ function serializeHierarchy(rows) {
                 return {
                     sub: child.slug,
                     label: child.name_en || child.slug,
-                    labelAr: child.name_ar || child.name_en || child.slug
+                    labelAr: child.name_ar || child.name_en || child.slug,
+                    labelFr: child.name_fr || '',
+                    labelRu: child.name_ru || ''
                 };
             });
 
@@ -92,6 +102,8 @@ function serializeHierarchy(rows) {
                 group: parent.slug,
                 label: parent.name_en || parent.slug,
                 labelAr: parent.name_ar || parent.name_en || parent.slug,
+                labelFr: parent.name_fr || '',
+                labelRu: parent.name_ru || '',
                 children
             };
         })
@@ -101,7 +113,7 @@ function serializeHierarchy(rows) {
 router.get('/', function (req, res, next) {
     try {
         const rows = getDb().prepare(`
-            SELECT c.id, c.parent_id, c.slug, c.name_en, c.name_ar, c.sort_order
+            SELECT c.id, c.parent_id, c.slug, c.name_en, c.name_ar, c.name_fr, c.name_ru, c.sort_order
             FROM categories c
             LEFT JOIN categories parent ON parent.id = c.parent_id
             WHERE c.type = 'product'

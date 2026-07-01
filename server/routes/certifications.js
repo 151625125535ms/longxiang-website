@@ -90,8 +90,14 @@ const qualificationNames = {
 };
 
 function publicCertificationName(certification, lang) {
-    const sourceName = lang === 'ar' ? certification.name_ar : certification.name_en;
+    const localizedNames = {
+        ar: certification.name_ar,
+        fr: certification.name_fr,
+        ru: certification.name_ru
+    };
+    const sourceName = lang === 'en' ? certification.name_en : localizedNames[lang];
     if (sourceName && !containsCjk(sourceName)) return sourceName;
+    if (lang === 'fr' || lang === 'ru') return '';
 
     const id = String(certification.legacy_id || '');
     const number = legacyNumber(certification);
@@ -118,9 +124,23 @@ router.get('/', function (req, res) {
                 id: certification.legacy_id,
                 name: publicCertificationName(certification, 'en'),
                 nameAr: publicCertificationName(certification, 'ar'),
+                nameFr: publicCertificationName(certification, 'fr'),
+                nameRu: publicCertificationName(certification, 'ru'),
                 category: certification.legacy_category || '',
+                categoryLabel: certification.category_label_en || '',
+                categoryLabelAr: certification.category_label_ar || '',
+                categoryLabelFr: certification.category_label_fr || '',
+                categoryLabelRu: certification.category_label_ru || '',
                 image: certification.image_path || '',
                 type: certification.source_type || '',
+                issuer: certification.issuer_en || '',
+                issuerAr: certification.issuer_ar || '',
+                issuerFr: certification.issuer_fr || '',
+                issuerRu: certification.issuer_ru || '',
+                description: certification.description_en || '',
+                descriptionAr: certification.description_ar || '',
+                descriptionFr: certification.description_fr || '',
+                descriptionRu: certification.description_ru || '',
                 pages: certification.pages || 1,
                 width: certification.width,
                 height: certification.height

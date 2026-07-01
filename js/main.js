@@ -1459,6 +1459,15 @@
         return window.LongxiangI18n.localizedAssetPath(path, locale);
     }
 
+    function localizedApiValue(item, field) {
+        if (window.LongxiangI18n && window.LongxiangI18n.localized) {
+            var value = window.LongxiangI18n.localized(item, field, locale);
+            if (value) return value;
+        }
+        if (isArabic && item && item[field + 'Ar']) return item[field + 'Ar'];
+        return item && item[field] || '';
+    }
+
     function renderCommunicationWidgets(company) {
         var links = [];
         if (company.line) {
@@ -1839,6 +1848,8 @@
                     group: category.group,
                     label: category.label,
                     labelAr: category.labelAr,
+                    labelFr: category.labelFr || '',
+                    labelRu: category.labelRu || '',
                     href: 'products.html?group=' + encodeURIComponent(category.group),
                     icon: category.icon || category.image || ''
                 };
@@ -1858,7 +1869,7 @@
             if (!homeCategories.length) homeCategories = apiHomeCategories(apiCategories, products);
             homeCategories.forEach(function (category, index) {
                 var sample = sampleForCategory(products, category);
-                var label = isArabic ? (category.labelAr || category.label) : category.label;
+                var label = localizedApiValue(category, 'label') || category.label || category.group || '';
                 var link = document.createElement('a');
                 link.className = 'home-product-category fade-in';
                 link.href = pageHref(category.href);
@@ -1880,8 +1891,8 @@
             var card = document.createElement('div');
             card.className = 'product-card product-card-v2 fade-in';
             card.setAttribute('data-delay', (index * 100).toString());
-            var name = isArabic ? (product.nameAr || product.name) : product.name;
-            var desc = isArabic ? (product.shortDescAr || product.shortDesc || '') : (product.shortDesc || '');
+            var name = localizedApiValue(product, 'name');
+            var desc = localizedApiValue(product, 'shortDesc');
             var detail = window.LongxiangI18n.localizedProductPath(product.slug || product.id, locale);
             var imagePath = resolveAssetPath(product.image);
             var textAttrs = isArabic ? ' dir="rtl" lang="ar" class="rtl-product-text"' : '';
@@ -1988,15 +1999,15 @@
         function categoryLabel(category, data) {
             var match = data.find(function (item) { return item.category === category; });
             if (!match) return category;
-            return isArabic ? (match.categoryLabelAr || match.categoryLabel || category) : (match.categoryLabel || category);
+            return localizedApiValue(match, 'categoryLabel') || category;
         }
 
         function certName(cert) {
-            return isArabic ? (cert.nameAr || cert.name || '') : (cert.name || '');
+            return localizedApiValue(cert, 'name');
         }
 
         function certDescription(cert) {
-            return isArabic ? (cert.descriptionAr || cert.description || '') : (cert.description || '');
+            return localizedApiValue(cert, 'description');
         }
 
         function sourceLabel(cert) {
@@ -2055,10 +2066,16 @@
                 return [
                     cert.name,
                     cert.nameAr,
+                    cert.nameFr,
+                    cert.nameRu,
                     cert.categoryLabel,
                     cert.categoryLabelAr,
+                    cert.categoryLabelFr,
+                    cert.categoryLabelRu,
                     cert.description,
-                    cert.descriptionAr
+                    cert.descriptionAr,
+                    cert.descriptionFr,
+                    cert.descriptionRu
                 ].join(' ').toLowerCase().indexOf(query) !== -1;
             });
             visibleCount = pageSize;
@@ -2078,7 +2095,7 @@
                 var image = cert.image ? resolveAssetPath(cert.image) : '';
                 var name = certName(cert);
                 var description = certDescription(cert);
-                var category = isArabic ? (cert.categoryLabelAr || cert.categoryLabel || '') : (cert.categoryLabel || '');
+                var category = localizedApiValue(cert, 'categoryLabel');
                 var meta = sourceLabel(cert) + (cert.category && cert.category.indexOf('test-reports') === 0 ? ' · ' + pagesLabel(cert) : '');
                 return '<button type="button" class="cert-card fade-in" data-cert-id="' + escapeHtml(cert.id) + '">' +
                     '<span class="cert-media">' +
@@ -2143,7 +2160,7 @@
             image.alt = name || labels.imageAlt;
             title.textContent = name;
             description.textContent = sourceLabel(cert) + ' · ' + pagesLabel(cert);
-            category.textContent = isArabic ? (cert.categoryLabelAr || cert.categoryLabel || '') : (cert.categoryLabel || '');
+            category.textContent = localizedApiValue(cert, 'categoryLabel');
             modal.classList.add('show');
             document.body.style.overflow = 'hidden';
         }

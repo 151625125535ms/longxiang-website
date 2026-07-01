@@ -85,9 +85,13 @@
         var parts = [
             product.id,
             product.name,
+            localize(product, 'name'),
             product.shortDesc,
+            localize(product, 'shortDesc'),
             product.description,
+            localize(product, 'description'),
             product.categoryLabel,
+            localize(product, 'categoryLabel'),
             product.group,
             product.subCategory
         ];
@@ -179,9 +183,9 @@
     function taxonomyLabel(group, sub) {
         var parent = findTaxonomyGroup(group) || taxonomy[0];
         if (!parent) return sub || group || '';
-        if (!sub) return isArabic ? (parent.labelAr || parent.label) : parent.label;
+        if (!sub) return localize(parent, 'label') || parent.label;
         var child = parent.children.find(function (item) { return item.sub === sub; });
-        return child ? (isArabic ? (child.labelAr || child.label) : child.label) : (isArabic ? (parent.labelAr || parent.label) : parent.label);
+        return child ? (localize(child, 'label') || child.label) : (localize(parent, 'label') || parent.label);
     }
 
     function filterProducts(products, group, sub, keyword) {
@@ -466,11 +470,15 @@
                 group: parent.group || '',
                 label: parent.label || parent.group || '',
                 labelAr: parent.labelAr || parent.label || parent.group || '',
+                labelFr: parent.labelFr || '',
+                labelRu: parent.labelRu || '',
                 children: Array.isArray(parent.children) ? parent.children.map(function (child) {
                     return {
                         sub: child.sub || '',
                         label: child.label || child.sub || '',
-                        labelAr: child.labelAr || child.label || child.sub || ''
+                        labelAr: child.labelAr || child.label || child.sub || '',
+                        labelFr: child.labelFr || '',
+                        labelRu: child.labelRu || ''
                     };
                 }).filter(function (child) { return child.sub; }) : []
             };
@@ -502,6 +510,8 @@
                     group: group,
                     label: product.groupLabel || group,
                     labelAr: product.groupLabelAr || product.groupLabel || group,
+                    labelFr: product.groupLabelFr || '',
+                    labelRu: product.groupLabelRu || '',
                     childrenMap: {}
                 };
             }
@@ -510,7 +520,9 @@
                 groups[group].childrenMap[sub] = {
                     sub: sub,
                     label: product.subCategoryLabel || product.categoryLabel || sub,
-                    labelAr: product.subCategoryLabelAr || product.categoryLabelAr || product.subCategoryLabel || product.categoryLabel || sub
+                    labelAr: product.subCategoryLabelAr || product.categoryLabelAr || product.subCategoryLabel || product.categoryLabel || sub,
+                    labelFr: product.subCategoryLabelFr || product.categoryLabelFr || '',
+                    labelRu: product.subCategoryLabelRu || product.categoryLabelRu || ''
                 };
             }
         });
@@ -520,6 +532,8 @@
                 group: item.group,
                 label: item.label,
                 labelAr: item.labelAr,
+                labelFr: item.labelFr,
+                labelRu: item.labelRu,
                 children: Object.keys(item.childrenMap).map(function (sub) { return item.childrenMap[sub]; })
             };
         });

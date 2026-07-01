@@ -226,9 +226,10 @@
     }
 
     function productCategoryLabel(product) {
-        return isArabic
-            ? (product.subCategoryLabelAr || product.categoryLabelAr || product.groupLabelAr || product.subCategoryLabel || product.categoryLabel || product.groupLabel || '')
-            : (product.subCategoryLabel || product.categoryLabel || product.groupLabel || '');
+        return localize(product, 'subCategoryLabel')
+            || localize(product, 'categoryLabel')
+            || localize(product, 'groupLabel')
+            || '';
     }
 
     function productIdentifierFromPath() {
@@ -290,7 +291,8 @@
     }
 
     function productSeoTitle(product, name) {
-        if (!isArabic && product.seoTitle) return product.seoTitle;
+        var localizedSeoTitle = isArabic ? '' : localize(product, 'seoTitle');
+        if (localizedSeoTitle) return localizedSeoTitle;
         var titleSuffix = detailLabel('titleSuffix');
         return titleSuffix ? name + ' | ' + titleSuffix : name;
     }
@@ -304,7 +306,7 @@
 
     function productSeoDescription(product, desc) {
         var value = '';
-        if (!isArabic && product.seoDescription) value = product.seoDescription;
+        if (!isArabic && localize(product, 'seoDescription')) value = localize(product, 'seoDescription');
         else if (isArabic) value = localize(product, 'shortDesc') || desc;
         else value = desc || localize(product, 'shortDesc');
         return cleanMetaDescription(value);

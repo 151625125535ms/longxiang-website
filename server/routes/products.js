@@ -101,29 +101,47 @@ function mapSqliteProduct(row, specsByProduct, coverByProduct) {
         slug: row.slug || '',
         name: row.name_en,
         nameAr: row.name_ar || '',
+        nameFr: row.name_fr || '',
+        nameRu: row.name_ru || '',
         image: coverByProduct[row.id] || '',
         cardImage: resolveProductCardImage(row, coverByProduct[row.id] || ''),
         category: row.category_slug || '',
         categoryLabel: row.category_label || '',
         categoryLabelAr: row.category_label_ar || '',
+        categoryLabelFr: row.category_label_fr || '',
+        categoryLabelRu: row.category_label_ru || '',
         groupLabel: row.parent_label || '',
         groupLabelAr: row.parent_label_ar || '',
+        groupLabelFr: row.parent_label_fr || '',
+        groupLabelRu: row.parent_label_ru || '',
         subCategoryLabel: row.category_label || '',
         subCategoryLabelAr: row.category_label_ar || '',
+        subCategoryLabelFr: row.category_label_fr || '',
+        subCategoryLabelRu: row.category_label_ru || '',
         group,
         subCategory,
         shortDesc: row.short_desc_en || '',
         shortDescAr: row.short_desc_ar || '',
+        shortDescFr: row.short_desc_fr || '',
+        shortDescRu: row.short_desc_ru || '',
         description: row.description_en || '',
         descriptionAr: row.description_ar || '',
+        descriptionFr: row.description_fr || '',
+        descriptionRu: row.description_ru || '',
         capacities: specs.filter(item => item.spec_group === 'capacity').map(item => item.spec_value),
         voltages: specs.filter(item => item.spec_group === 'voltage').map(item => item.spec_value),
         specs: specs.filter(item => item.spec_group === 'technical').map(item => [item.spec_key, item.spec_value]),
         featured: row.featured === 1,
         aliases: parseJsonArray(row.aliases_json),
         seoTitle: row.seo_title || '',
+        seoTitleFr: row.seo_title_fr || '',
+        seoTitleRu: row.seo_title_ru || '',
         seoDescription: row.seo_description || '',
-        seoKeywords: row.seo_keywords || ''
+        seoDescriptionFr: row.seo_description_fr || '',
+        seoDescriptionRu: row.seo_description_ru || '',
+        seoKeywords: row.seo_keywords || '',
+        seoKeywordsFr: row.seo_keywords_fr || '',
+        seoKeywordsRu: row.seo_keywords_ru || ''
     };
 }
 
@@ -162,9 +180,13 @@ function readSqliteProducts(id) {
             c.slug AS category_slug,
             c.name_en AS category_label,
             c.name_ar AS category_label_ar,
+            c.name_fr AS category_label_fr,
+            c.name_ru AS category_label_ru,
             parent.slug AS parent_slug,
             parent.name_en AS parent_label,
-            parent.name_ar AS parent_label_ar
+            parent.name_ar AS parent_label_ar,
+            parent.name_fr AS parent_label_fr,
+            parent.name_ru AS parent_label_ru
         FROM products p
         LEFT JOIN categories c ON c.id = p.category_id
         LEFT JOIN categories parent ON parent.id = c.parent_id
