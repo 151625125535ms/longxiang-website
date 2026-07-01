@@ -740,6 +740,263 @@ function verifyFrontendI18nFieldReaders() {
     assertSourceContains(productDetailSource, /localize\s*\(\s*product\s*,\s*['"]seoDescription['"]\s*\)/, 'js/product-detail.js 应准备读取 locale-specific SEO description。');
 }
 
+function assertAdminFormIds(source, ids, label) {
+    ids.forEach((id) => {
+        assertSourceContains(source, new RegExp('id=["\\\']' + escapeRegExp(id) + '["\\\']'), label + ' 缺少表单字段：' + id + '。');
+    });
+}
+
+function collectSelectClauses(source, fromPattern) {
+    const clauses = [];
+    const pattern = new RegExp('SELECT\\s+([\\s\\S]*?)' + fromPattern, 'gi');
+    let match;
+
+    while ((match = pattern.exec(source || '')) !== null) {
+        clauses.push(match[1]);
+    }
+
+    return clauses;
+}
+
+function tokenPattern(token) {
+    const suffix = /\*$/.test(token) ? '' : '\\b';
+    return new RegExp('\\b' + escapeRegExp(token) + suffix);
+}
+
+function sourceBetween(source, startPattern, endPattern, label) {
+    const startMatch = startPattern.exec(source || '');
+    assert(Boolean(startMatch), label + ' 缺少起始片段。');
+
+    const startIndex = startMatch.index;
+    const afterStart = source.slice(startIndex + startMatch[0].length);
+    const endMatch = endPattern.exec(afterStart);
+    assert(Boolean(endMatch), label + ' 缺少结束片段。');
+
+    return source.slice(startIndex, startIndex + startMatch[0].length + endMatch.index);
+}
+
+function assertSelectClauseContainsAll(source, fromPattern, fieldTokens, label) {
+    const clauses = collectSelectClauses(source, fromPattern);
+    assert(clauses.length > 0, label + ' 缺少可校验的 SELECT 片段。');
+
+    const completeClause = clauses.find((clause) => {
+        return fieldTokens.every((token) => tokenPattern(token).test(clause));
+    });
+    assert(Boolean(completeClause), label + ' 缺少同一个 SELECT 片段内的字段：' + fieldTokens.join(', ') + '。');
+}
+
+function templateConstantSource(source, name, label) {
+    const pattern = new RegExp('const\\s+' + escapeRegExp(name) + '\\s*=\\s*`([\\s\\S]*?)`;');
+    const match = pattern.exec(source || '');
+    assert(Boolean(match), label + ' 缺少常量：' + name + '。');
+    return match ? match[1] : '';
+}
+
+function assertTemplateConstantContains(source, name, fieldTokens, label) {
+    const value = templateConstantSource(source, name, label);
+
+    fieldTokens.forEach((token) => {
+        assertSourceContains(value, new RegExp('\\b' + escapeRegExp(token) + '\\b', 'i'), label + ' ' + name + ' 缺少字段：' + token + '。');
+    });
+}
+
+function collectInsertStatementParts(source, tableName) {
+    const pattern = new RegExp('INSERT\\s+INTO\\s+' + escapeRegExp(tableName) + '\\s*\\(([\\s\\S]*?)\\)\\s*VALUES\\s*\\(([\\s\\S]*?)\\)', 'gi');
+    const candidates = [];
+    let match;
+
+    while ((match = pattern.exec(source || '')) !== null) {
+        candidates.push({ columns: match[1], values: match[2] });
+    }
+
+    return candidates;
+}
+
+function insertStatementParts(source, tableName, fields, label) {
+    const candidates = collectInsertStatementParts(source, tableName);
+    assert(candidates.length > 0, label + ' 缺少可校验的 INSERT 片段。');
+
+    const completeCandidate = candidates.find((candidate) => {
+        return fields.every((field) => {
+            return tokenPattern(field).test(candidate.columns)
+                && new RegExp('@' + escapeRegExp(field) + '\\b').test(candidate.values);
+        });
+    });
+
+    assert(Boolean(completeCandidate), label + ' 缺少完整包含 ' + fields.join(', ') + ' 的 INSERT 片段。');
+    return completeCandidate || { columns: '', values: '' };
+}
+
+function collectUpdateSetClauses(source, tableName) {
+    const pattern = new RegExp('UPDATE\\s+' + escapeRegExp(tableName) + '\\s+SET\\s+([\\s\\S]*?)\\s+WHERE\\s+id\\s*=', 'gi');
+    const clauses = [];
+    let match;
+
+    while ((match = pattern.exec(source || '')) !== null) {
+        clauses.push(match[1]);
+    }
+
+    return clauses;
+}
+
+function updateSetClause(source, tableName, fields, label) {
+    const clauses = collectUpdateSetClauses(source, tableName);
+    assert(clauses.length > 0, label + ' 缺少可校验的 UPDATE 片段。');
+
+    const completeClause = clauses.find((clause) => {
+        return fields.every((field) => {
+            return new RegExp('\\b' + escapeRegExp(field) + '\\s*=\\s*@' + escapeRegExp(field) + '\\b').test(clause);
+        });
+    });
+
+    assert(Boolean(completeClause), label + ' 缺少完整包含 ' + fields.join(', ') + ' 的 UPDATE 片段。');
+    return completeClause || '';
+}
+
+function assertRouteWrites(source, tableName, fields, label) {
+    const insertParts = insertStatementParts(source, tableName, fields, label);
+    const updateSource = updateSetClause(source, tableName, fields, label);
+
+    fields.forEach((field) => {
+        assertSourceContains(insertParts.columns, tokenPattern(field), label + ' INSERT column 缺少字段：' + field + '。');
+        assertSourceContains(insertParts.values, new RegExp('@' + escapeRegExp(field) + '\\b'), label + ' INSERT value 缺少字段：' + field + '。');
+        assertSourceContains(updateSource, new RegExp('\\b' + escapeRegExp(field) + '\\s*=\\s*@' + escapeRegExp(field) + '\\b'), label + ' UPDATE 缺少字段：' + field + '。');
+    });
+}
+
+function assertProductAdminMappings(source, mappings, label) {
+    mappings.forEach(([field, id]) => {
+        assertSourceContains(source, new RegExp('["\\\']' + escapeRegExp(id) + '["\\\']\\s*:\\s*product\\.' + escapeRegExp(field) + '\\b'),
+            label + ' 回填缺少映射：' + id + ' <- product.' + field + '。');
+        assertSourceContains(source, new RegExp('\\b' + escapeRegExp(field) + '\\s*:\\s*getFieldValue\\(\\s*["\\\']' + escapeRegExp(id) + '["\\\']\\s*\\)'),
+            label + ' payload 缺少映射：' + field + ' <- ' + id + '。');
+    });
+}
+
+function assertDomValueMapping(source, id, objectName, field, label) {
+    assertSourceContains(source, new RegExp('document\\.getElementById\\(\\s*["\\\']' + escapeRegExp(id) + '["\\\']\\s*\\)\\.value\\s*=\\s*'
+        + escapeRegExp(objectName) + '\\.' + escapeRegExp(field) + '\\b'),
+        label + ' 回填缺少映射：' + id + ' <- ' + objectName + '.' + field + '。');
+}
+
+function assertVariableFromDom(source, variableName, id, label) {
+    assertSourceContains(source, new RegExp('\\bvar\\s+' + escapeRegExp(variableName) + '\\s*=\\s*document\\.getElementById\\(\\s*["\\\']'
+        + escapeRegExp(id) + '["\\\']\\s*\\)\\.value\\.trim\\(\\)'),
+        label + ' 缺少表单读取变量：' + variableName + ' <- ' + id + '。');
+}
+
+function assertPayloadVariable(source, field, variableName, label) {
+    assertSourceContains(source, new RegExp('\\b' + escapeRegExp(field) + '\\s*:\\s*' + escapeRegExp(variableName) + '\\b'),
+        label + ' payload 缺少映射：' + field + ' <- ' + variableName + '。');
+}
+
+function assertPayloadDomValue(source, field, id, label) {
+    assertSourceContains(source, new RegExp('\\b' + escapeRegExp(field) + '\\s*:\\s*document\\.getElementById\\(\\s*["\\\']'
+        + escapeRegExp(id) + '["\\\']\\s*\\)\\.value\\.trim\\(\\)'),
+        label + ' payload 缺少映射：' + field + ' <- ' + id + '。');
+}
+
+function assertCategoryAdminMappings(source) {
+    [
+        ['name_fr', 'cat-name-fr', 'nameFr'],
+        ['name_ru', 'cat-name-ru', 'nameRu']
+    ].forEach(([field, id, variableName]) => {
+        assertDomValueMapping(source, id, 'category', field, 'admin/js/admin.js 分类后台');
+        assertVariableFromDom(source, variableName, id, 'admin/js/admin.js 分类后台');
+        assertPayloadVariable(source, field, variableName, 'admin/js/admin.js 分类后台');
+    });
+}
+
+function assertCertificationAdminMappings(source) {
+    [
+        ['name_fr', 'cert-name-fr'],
+        ['name_ru', 'cert-name-ru'],
+        ['issuer_fr', 'cert-issuer-fr'],
+        ['issuer_ru', 'cert-issuer-ru'],
+        ['description_fr', 'cert-description-fr'],
+        ['description_ru', 'cert-description-ru']
+    ].forEach(([field, id]) => {
+        assertDomValueMapping(source, id, 'detail', field, 'admin/js/admin.js 证书后台');
+        assertPayloadDomValue(source, field, id, 'admin/js/admin.js 证书后台');
+    });
+}
+
+function verifyAdminI18nEditingEntrypoints() {
+    const adminHtml = readText('admin/index.html');
+    const productAdminSource = readText('admin/js/modules/admin-products.js');
+    const adminSource = readText('admin/js/admin.js');
+    const productRouteSource = readText('server/routes/admin/products.js');
+    const categoryRouteSource = readText('server/routes/admin/categories.js');
+    const certificationRouteSource = readText('server/routes/admin/certifications.js');
+
+    const productMappings = [
+        ['name_fr', 'field-nameFr'], ['name_ru', 'field-nameRu'],
+        ['short_desc_fr', 'field-shortDescFr'], ['short_desc_ru', 'field-shortDescRu'],
+        ['description_fr', 'field-descriptionFr'], ['description_ru', 'field-descriptionRu'],
+        ['seo_title_fr', 'field-seo-title-fr'], ['seo_title_ru', 'field-seo-title-ru'],
+        ['seo_description_fr', 'field-seo-description-fr'], ['seo_description_ru', 'field-seo-description-ru'],
+        ['seo_keywords_fr', 'field-seo-keywords-fr'], ['seo_keywords_ru', 'field-seo-keywords-ru']
+    ];
+    const categoryFields = ['name_fr', 'name_ru'];
+    const certificationFields = [
+        'name_fr', 'name_ru',
+        'issuer_fr', 'issuer_ru',
+        'description_fr', 'description_ru'
+    ];
+    const productFields = productMappings.map((mapping) => mapping[0]);
+    const productListRouteSource = sourceBetween(productRouteSource,
+        /router\.get\(\s*['"]\/['"]\s*,\s*function\b/,
+        /router\.get\(\s*['"]\/:id['"]\s*,\s*function\b/,
+        'server/routes/admin/products.js 产品列表路由');
+    const productDetailRouteSource = sourceBetween(productRouteSource,
+        /router\.get\(\s*['"]\/:id['"]\s*,\s*function\b/,
+        /router\.post\(\s*['"]\/upload['"]\s*,\s*function\b/,
+        'server/routes/admin/products.js 产品详情路由');
+    const productBaseSource = functionSource(productRouteSource, 'getProductBase');
+    const productFullSource = functionSource(productRouteSource, 'getFullProduct');
+    const certificationListRouteSource = sourceBetween(certificationRouteSource,
+        /router\.get\(\s*['"]\/['"]\s*,\s*function\b/,
+        /router\.get\(\s*['"]\/:id['"]\s*,\s*function\b/,
+        'server/routes/admin/certifications.js 证书列表路由');
+    const certificationDetailSource = functionSource(certificationRouteSource, 'getCertification');
+
+    assertAdminFormIds(adminHtml, [
+        'field-nameFr', 'field-nameRu',
+        'field-shortDescFr', 'field-shortDescRu',
+        'field-descriptionFr', 'field-descriptionRu',
+        'field-seo-title-fr', 'field-seo-title-ru',
+        'field-seo-description-fr', 'field-seo-description-ru',
+        'field-seo-keywords-fr', 'field-seo-keywords-ru'
+    ], 'admin/index.html 产品后台');
+    assertAdminFormIds(adminHtml, ['cat-name-fr', 'cat-name-ru'], 'admin/index.html 分类后台');
+    assertAdminFormIds(adminHtml, [
+        'cert-name-fr', 'cert-name-ru',
+        'cert-issuer-fr', 'cert-issuer-ru',
+        'cert-description-fr', 'cert-description-ru'
+    ], 'admin/index.html 证书后台');
+
+    assertProductAdminMappings(productAdminSource, productMappings, 'admin/js/modules/admin-products.js 产品后台');
+    assertCategoryAdminMappings(adminSource);
+    assertCertificationAdminMappings(adminSource);
+
+    assertSelectClauseContainsAll(productListRouteSource, 'FROM\\s+products\\s+p\\b', productFields.map((field) => 'p.' + field), 'server/routes/admin/products.js 产品列表后台');
+    assertSourceContains(productDetailRouteSource, /getFullProduct\s*\(/, 'server/routes/admin/products.js 产品详情路由应读取完整产品。');
+    assertSourceContains(productFullSource, /getProductBase\s*\(/, 'server/routes/admin/products.js getFullProduct() 应复用 getProductBase()。');
+    assertSelectClauseContainsAll(productBaseSource, 'FROM\\s+products\\s+p\\b', ['p.*'], 'server/routes/admin/products.js 产品详情后台');
+    assertRouteWrites(productRouteSource, 'products', productFields, 'server/routes/admin/products.js 产品后台');
+
+    assertSourceContains(categoryRouteSource, /SELECT\s+\$\{CATEGORY_FIELDS\}/, 'server/routes/admin/categories.js 分类后台应使用 CATEGORY_FIELDS 查询分类。');
+    assertTemplateConstantContains(categoryRouteSource, 'CATEGORY_FIELDS', categoryFields.map((field) => 'c.' + field), 'server/routes/admin/categories.js 分类后台');
+    assertTemplateConstantContains(categoryRouteSource, 'CATEGORY_FIELDS', ['parent.name_fr AS parent_name_fr', 'parent.name_ru AS parent_name_ru'], 'server/routes/admin/categories.js 分类后台');
+    assertRouteWrites(categoryRouteSource, 'categories', categoryFields, 'server/routes/admin/categories.js 分类后台');
+
+    assertSelectClauseContainsAll(certificationListRouteSource, 'FROM\\s+certifications\\s+cert\\b', certificationFields.map((field) => 'cert.' + field), 'server/routes/admin/certifications.js 证书列表后台');
+    assertSelectClauseContainsAll(certificationDetailSource, 'FROM\\s+certifications\\s+cert\\b', certificationFields.map((field) => 'cert.' + field), 'server/routes/admin/certifications.js 证书详情后台');
+    assertRouteWrites(certificationRouteSource, 'certifications', certificationFields, 'server/routes/admin/certifications.js 证书后台');
+    assertSourceNotContains(certificationRouteSource, /category_label_fr\s*=\s*@category_label_fr/, 'server/routes/admin/certifications.js 不应在 E8c 开放 category_label_fr 编辑。');
+    assertSourceNotContains(certificationRouteSource, /category_label_ru\s*=\s*@category_label_ru/, 'server/routes/admin/certifications.js 不应在 E8c 开放 category_label_ru 编辑。');
+}
+
 function verifyContentPagesRuntimeSeoJs() {
     const source = readText('js/content-pages.js');
     assertSourceContains(source, /seoLocales\s*\(/, 'js/content-pages.js 应按 LongxiangI18n.seoLocales() 生成 alternate。');
@@ -1004,6 +1261,7 @@ function main() {
     verifyProductListRuntimeI18nJs();
     verifyPublicApiI18nFieldMapping();
     verifyFrontendI18nFieldReaders();
+    verifyAdminI18nEditingEntrypoints();
     verifyContentPagesRuntimeSeoJs();
     verifyEducationCompareRuntimeI18nJs();
     verifyServerI18nRoutesJs();
