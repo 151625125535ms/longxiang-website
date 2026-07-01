@@ -1,7 +1,8 @@
 'use strict';
 
 const migrations = [
-    require('./0002_runtime_schema_baseline')
+    require('./0002_runtime_schema_baseline'),
+    require('./0003_i18n_fr_ru_fields')
 ];
 
 function ensureMigrationTable(db) {

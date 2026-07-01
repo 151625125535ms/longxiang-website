@@ -21,6 +21,25 @@ const defaultTargetLocales = ['fr', 'ru'];
 const defaultPlannedOnlyLocales = ['pt'];
 const allowedTargetLocales = ['fr', 'ru'];
 const requiredPlannedOnlyLocales = ['pt'];
+const requiredLocaleColumns = {
+    products: [
+        'name',
+        'short_desc',
+        'description',
+        'seo_title',
+        'seo_description',
+        'seo_keywords'
+    ],
+    categories: [
+        'name'
+    ],
+    certifications: [
+        'name',
+        'category_label',
+        'issuer',
+        'description'
+    ]
+};
 
 const failures = [];
 const warnings = [];
@@ -305,6 +324,21 @@ function hasLocaleColumn(columns, locale) {
     return columns.some((name) => new RegExp('(^|_)' + locale + '$', 'i').test(name));
 }
 
+function requiredColumnsForLocale(tableName, locale) {
+    return (requiredLocaleColumns[tableName] || []).map((field) => field + '_' + locale);
+}
+
+function localeColumnReadiness(tableName, columns, locale) {
+    const required = requiredColumnsForLocale(tableName, locale);
+    const missing = required.filter((column) => columns.indexOf(column) === -1);
+
+    return {
+        hasAny: hasLocaleColumn(columns, locale),
+        complete: required.length ? missing.length === 0 : hasLocaleColumn(columns, locale),
+        missing
+    };
+}
+
 function safeJsonParse(value) {
     if (!value) return null;
     try {
@@ -372,9 +406,18 @@ function auditDatabase(targetLocales) {
         ['products', 'categories', 'certifications', 'content_blocks'].forEach((table) => {
             const columns = tableColumns(db, table);
             summary.columns[table] = targetLocales.reduce((acc, locale) => {
-                acc[locale] = hasLocaleColumn(columns, locale);
+                acc[locale] = localeColumnReadiness(table, columns, locale);
                 return acc;
             }, {});
+        });
+
+        ['products', 'categories', 'certifications'].forEach((table) => {
+            targetLocales.forEach((locale) => {
+                const readiness = summary.columns[table] && summary.columns[table][locale];
+                if (readiness && !readiness.complete) {
+                    fail(table + ' is missing required ' + locale + ' columns: ' + readiness.missing.join(', '));
+                }
+            });
         });
 
         if (tableExists(db, 'content_blocks')) {
@@ -473,7 +516,13 @@ function renderDatabaseSection(databaseSummary, targetLocales) {
     ];
 
     Object.keys(databaseSummary.columns).forEach((table) => {
-        lines.push('| `' + table + '` | ' + targetLocales.map((locale) => databaseSummary.columns[table][locale] ? '有' : '无').join(' | ') + ' |');
+        lines.push('| `' + table + '` | ' + targetLocales.map((locale) => {
+            const readiness = databaseSummary.columns[table][locale];
+            if (!readiness) return '无';
+            if (readiness.complete) return '完整';
+            if (readiness.hasAny) return '缺失: ' + readiness.missing.join(', ');
+            return '无';
+        }).join(' | ') + ' |');
     });
 
     lines.push('', '### content_blocks locale key 迹象', '');
