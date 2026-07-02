@@ -65,11 +65,13 @@ function parseArgs(argv) {
         dryRun: false,
         apply: false,
         requireCleanBoundary: false,
+        skipContentBlocks: false,
         input: defaultInputPath,
         db: defaultDbPath,
-        report: defaultReportPath
+        report: defaultReportPath,
+        backup: ''
     };
-    const valueOptions = new Set(['input', 'db', 'report']);
+    const valueOptions = new Set(['input', 'db', 'report', 'backup']);
 
     for (let index = 2; index < argv.length; index += 1) {
         const arg = argv[index];
@@ -79,6 +81,8 @@ function parseArgs(argv) {
             args.apply = true;
         } else if (arg === '--require-clean-boundary') {
             args.requireCleanBoundary = true;
+        } else if (arg === '--skip-content-blocks') {
+            args.skipContentBlocks = true;
         } else if (arg.startsWith('--')) {
             const eqIndex = arg.indexOf('=');
             const name = arg.slice(2, eqIndex === -1 ? undefined : eqIndex);
@@ -101,6 +105,7 @@ function parseArgs(argv) {
     args.input = path.resolve(args.input);
     args.db = path.resolve(args.db);
     args.report = path.resolve(args.report);
+    args.backup = args.backup ? path.resolve(args.backup) : '';
     return args;
 }
 
@@ -260,7 +265,7 @@ function summarizePaths(paths, limit) {
     return selected.join(', ') + (paths.length > limit ? ' ... +' + (paths.length - limit) : '');
 }
 
-function validateFilledData(data, errors) {
+function validateFilledData(data, errors, collectionNames) {
     if (!data || typeof data !== 'object' || Array.isArray(data)) {
         errors.push('Input JSON must be an object.');
         return;
@@ -277,7 +282,7 @@ function validateFilledData(data, errors) {
         errors.push('meta.counts must exist and be an object.');
     }
 
-    Object.keys(expectedCounts).forEach((key) => {
+    collectionNames.forEach((key) => {
         const value = data[key];
         if (!Array.isArray(value)) {
             errors.push(key + ' must be an array.');
@@ -319,6 +324,7 @@ function analyzeCollection(db, data, collectionName, tableColumnsByName, errors,
     const unmatched = [];
     const matchedBy = {};
     const contentBlockPreview = [];
+    const applyRecords = [];
     let matched = 0;
 
     rows.forEach((item) => {
@@ -384,6 +390,19 @@ function analyzeCollection(db, data, collectionName, tableColumnsByName, errors,
                 patchPaths,
                 mergedTopLevelKeys: Object.keys(merged).sort()
             });
+        } else {
+            const target = item.target || {};
+            const values = {};
+            spec.fields.forEach((field) => {
+                values[field] = target[field] == null ? null : target[field];
+            });
+            applyRecords.push({
+                table: spec.table,
+                rowId: match.row.id,
+                itemId: item.id == null ? '' : item.id,
+                slug: item.slug || item.legacyId || '',
+                fields: values
+            });
         }
     });
 
@@ -402,6 +421,7 @@ function analyzeCollection(db, data, collectionName, tableColumnsByName, errors,
         unmatched,
         matchedBy,
         fields: spec.fields,
+        applyRecords,
         contentBlockPreview
     };
 }
@@ -517,8 +537,8 @@ function validateCleanBoundary(errors) {
     return boundary;
 }
 
-function validateDatabase(db, errors) {
-    const requiredTables = ['products', 'categories', 'certifications', 'content_blocks'];
+function validateDatabase(db, errors, collectionNames) {
+    const requiredTables = Array.from(new Set(collectionNames.map((name) => collectionSpecs[name].table)));
     const requiredColumns = {
         products: collectionSpecs.products.fields,
         categories: collectionSpecs.productCategories.fields,
@@ -550,22 +570,103 @@ function renderMatchedBy(value) {
     return keys.length ? keys.map((key) => key + ': ' + value[key]).join(', ') : 'none';
 }
 
+function normalizedFilePath(value) {
+    const resolved = path.resolve(value);
+    return process.platform === 'win32' ? resolved.toLowerCase() : resolved;
+}
+
+function backupPathError(backupPath, dbPath) {
+    if (normalizedFilePath(backupPath) === normalizedFilePath(dbPath)) {
+        return '--backup must not point to the active database file.';
+    }
+
+    if (fs.existsSync(backupPath)) {
+        const stat = fs.statSync(backupPath);
+        if (stat.isDirectory()) {
+            return '--backup must point to a new database backup file, not an existing directory.';
+        }
+        return '--backup must point to a new file so an existing recovery point is not overwritten.';
+    }
+
+    return '';
+}
+
+function activeCollectionNames(args) {
+    return Object.keys(collectionSpecs).filter((collectionName) => {
+        return !(args.skipContentBlocks && collectionName === 'contentBlocks');
+    });
+}
+
+function assertSafeIdentifier(value, label) {
+    if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(value)) {
+        throw new Error(label + ' contains unsafe SQL identifier: ' + value);
+    }
+    return value;
+}
+
+async function createDatabaseBackup(db, backupPath) {
+    fs.mkdirSync(path.dirname(backupPath), { recursive: true });
+    await db.backup(backupPath);
+    const stat = fs.statSync(backupPath);
+    return {
+        path: backupPath,
+        sizeBytes: stat.size
+    };
+}
+
+function applyImportRecords(db, collectionSummaries) {
+    const appliedCounts = {};
+    const applyableSummaries = collectionSummaries.filter((summary) => summary.collectionName !== 'contentBlocks');
+
+    const transaction = db.transaction(() => {
+        applyableSummaries.forEach((summary) => {
+            const table = assertSafeIdentifier(summary.table, summary.collectionName + ' table');
+            const fields = summary.fields.map((field) => assertSafeIdentifier(field, summary.collectionName + ' field'));
+            if (!fields.length) return;
+
+            const assignments = fields.map((field) => field + ' = @' + field).join(', ');
+            const statement = db.prepare('UPDATE ' + table + ' SET ' + assignments + ' WHERE id = @__rowId');
+            let changed = 0;
+
+            summary.applyRecords.forEach((record) => {
+                const params = Object.assign({ __rowId: record.rowId }, record.fields);
+                const result = statement.run(params);
+                if (result.changes !== 1) {
+                    throw new Error(summary.collectionName + ' item ' + (record.itemId || record.slug || record.rowId)
+                        + ' expected to update exactly one row, changed ' + result.changes + '.');
+                }
+                changed += result.changes;
+            });
+
+            appliedCounts[summary.collectionName] = changed;
+        });
+    });
+
+    transaction();
+    return appliedCounts;
+}
+
 function renderReport(report) {
     const lines = [
-        '# E8g-3 French import dry-run report',
+        '# E8g French import report',
         '',
         '- Generated at: ' + report.generatedAt,
         '- Project root: `' + root + '`',
         '- Input file: `' + report.inputPath + '`',
         '- Database path: `' + report.dbPath + '`',
-        '- Dry run only: yes',
-        '- Database changed: no',
+        '- Mode: ' + report.mode,
+        '- Dry run only: ' + (report.mode === 'dry-run' ? 'yes' : 'no'),
+        '- Database changed: ' + (report.databaseChanged ? 'yes' : 'no'),
         '- Filled file changed: no',
         '- Clean boundary required: ' + (report.requireCleanBoundary ? 'yes' : 'no'),
+        '- contentBlocks skipped: ' + (report.contentBlocksSkipped ? 'yes' : 'no'),
+        '- Active import collections: ' + report.activeCollections.join(', '),
+        '- Backup path: ' + (report.backupPath ? '`' + report.backupPath + '`' : 'none'),
+        '- Backup size: ' + (report.backupSizeBytes == null ? 'not created' : report.backupSizeBytes + ' bytes'),
         '- sitemap.xml URL count: ' + (report.boundary.sitemapXmlUrlCount == null ? 'not checked' : report.boundary.sitemapXmlUrlCount),
         '- Generated sitemap URL count: ' + (report.boundary.generatedSitemapUrlCount == null ? 'not checked' : report.boundary.generatedSitemapUrlCount),
         '- Apply blockers: ' + report.blockers.length,
-        '- May enter E8g-4: ' + (report.errors.length || report.blockers.length ? 'no' : 'yes'),
+        '- May enter next import step: ' + (report.errors.length || report.blockers.length ? 'no' : 'yes'),
         '',
         '## Input counts',
         '',
@@ -609,7 +710,9 @@ function renderReport(report) {
 
     lines.push('', '## content_blocks merge preview', '');
     const contentSummary = report.collectionSummaries.find((item) => item.collectionName === 'contentBlocks');
-    if (contentSummary && contentSummary.contentBlockPreview.length) {
+    if (report.contentBlocksSkipped) {
+        lines.push('Skipped by --skip-content-blocks. No content_blocks patch was analyzed or applied in this mode.');
+    } else if (contentSummary && contentSummary.contentBlockPreview.length) {
         lines.push('| ID | Slug | Matched by | Patch paths | Merged top-level keys |');
         lines.push('| --- | --- | --- | ---: | --- |');
         contentSummary.contentBlockPreview.forEach((item) => {
@@ -625,11 +728,23 @@ function renderReport(report) {
         lines.push('No matched content block patches.');
     }
 
+    lines.push('', '## Applied records', '');
+    const appliedKeys = Object.keys(report.appliedCounts || {});
+    if (appliedKeys.length) {
+        lines.push('| Collection | Rows updated |');
+        lines.push('| --- | ---: |');
+        appliedKeys.forEach((key) => {
+            lines.push('| ' + key + ' | ' + report.appliedCounts[key] + ' |');
+        });
+    } else {
+        lines.push('None. This was a dry-run or validation-only execution.');
+    }
+
     lines.push(
         '',
         '## staticPages',
         '',
-        '- staticPages records are intentionally skipped by this database dry-run.',
+        '- staticPages records are intentionally skipped by this database import script.',
         '- Static page HTML translation remains a separate future stage.',
         '',
         '## Clean boundary',
@@ -671,7 +786,7 @@ function renderReport(report) {
     return lines.join('\n') + '\n';
 }
 
-function main() {
+async function main() {
     const errors = [];
     const warnings = [];
     let args;
@@ -683,13 +798,36 @@ function main() {
         process.exit(1);
     }
 
-    if (args.apply) {
-        console.error('Real import is not authorized in this stage.');
+    if (args.dryRun && args.apply) {
+        console.error('--dry-run and --apply cannot be used together.');
         process.exit(1);
     }
 
-    if (!args.dryRun) {
-        console.error('This stage only supports --dry-run. Real import is not authorized.');
+    if (!args.dryRun && !args.apply) {
+        console.error('Use either --dry-run or --apply.');
+        process.exit(1);
+    }
+
+    if (args.apply) {
+        if (!args.skipContentBlocks) {
+            console.error('--apply requires --skip-content-blocks in this stage.');
+            process.exit(1);
+        }
+        if (!args.backup) {
+            console.error('--apply requires --backup <path>.');
+            process.exit(1);
+        }
+        const backupError = backupPathError(args.backup, args.db);
+        if (backupError) {
+            console.error(backupError);
+            process.exit(1);
+        }
+        args.requireCleanBoundary = true;
+    }
+
+    const selectedCollectionNames = activeCollectionNames(args);
+    if (!selectedCollectionNames.length) {
+        console.error('No active collections selected.');
         process.exit(1);
     }
 
@@ -697,7 +835,14 @@ function main() {
         generatedAt: new Date().toISOString(),
         inputPath: args.input,
         dbPath: args.db,
+        mode: args.apply ? 'apply' : 'dry-run',
         requireCleanBoundary: args.requireCleanBoundary,
+        contentBlocksSkipped: args.skipContentBlocks,
+        activeCollections: selectedCollectionNames,
+        databaseChanged: false,
+        backupPath: '',
+        backupSizeBytes: null,
+        appliedCounts: {},
         inputCounts: {},
         collectionSummaries: [],
         boundary: {
@@ -724,7 +869,7 @@ function main() {
     if (!errors.length) {
         try {
             data = readJsonFile(args.input);
-            validateFilledData(data, errors);
+            validateFilledData(data, errors, selectedCollectionNames);
             Object.keys(expectedCounts).forEach((key) => {
                 report.inputCounts[key] = Array.isArray(data[key]) ? data[key].length : 0;
             });
@@ -740,13 +885,21 @@ function main() {
     if (data && fs.existsSync(args.db)) {
         let db = null;
         try {
-            db = new Database(args.db, { readonly: true, fileMustExist: true });
-            const tableColumnsByName = validateDatabase(db, errors);
-            Object.keys(collectionSpecs).forEach((collectionName) => {
+            db = new Database(args.db, { readonly: !args.apply, fileMustExist: true });
+            const tableColumnsByName = validateDatabase(db, errors, selectedCollectionNames);
+            selectedCollectionNames.forEach((collectionName) => {
                 report.collectionSummaries.push(analyzeCollection(db, data, collectionName, tableColumnsByName, errors, report.blockers));
             });
+
+            if (args.apply && !errors.length && !report.blockers.length) {
+                const backup = await createDatabaseBackup(db, args.backup);
+                report.backupPath = backup.path;
+                report.backupSizeBytes = backup.sizeBytes;
+                report.appliedCounts = applyImportRecords(db, report.collectionSummaries);
+                report.databaseChanged = true;
+            }
         } catch (err) {
-            errors.push('Database dry-run failed: ' + err.message);
+            errors.push('Database ' + report.mode + ' failed: ' + err.message);
         } finally {
             if (db) db.close();
         }
@@ -761,20 +914,25 @@ function main() {
     }
 
     if (errors.length) {
-        console.error('Dry-run failed. Report: ' + args.report);
+        console.error('French import ' + report.mode + ' failed. Report: ' + args.report);
         errors.forEach((message) => console.error('- ' + message));
         process.exit(1);
     }
 
     if (report.blockers.length) {
         console.warn('French import dry-run completed with apply blockers.');
+    } else if (args.apply) {
+        console.log('French import apply passed.');
     } else {
         console.log('French import dry-run passed.');
     }
     console.log('Report: ' + args.report);
-    console.log('Database changed: no');
+    console.log('Database changed: ' + (report.databaseChanged ? 'yes' : 'no'));
 }
 
 if (require.main === module) {
-    main();
+    main().catch((err) => {
+        console.error(err && err.stack ? err.stack : err.message);
+        process.exit(1);
+    });
 }
