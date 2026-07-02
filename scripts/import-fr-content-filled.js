@@ -13,8 +13,6 @@ if (fs.existsSync(envPath)) {
 
 const homeDir = process.env.USERPROFILE || os.homedir();
 const stageDir = path.join(homeDir || root, 'Desktop', 'new', 'stage');
-const defaultInputPath = path.join(stageDir, 'fr-content-entry-filled.json');
-const defaultReportPath = path.join(stageDir, 'e8g3-fr-import-dry-run.md');
 const defaultDbPath = process.env.DB_PATH
     ? (path.isAbsolute(process.env.DB_PATH) ? process.env.DB_PATH : path.join(root, process.env.DB_PATH))
     : path.join(root, 'data', 'longxiang.db');
@@ -25,53 +23,90 @@ const expectedCounts = {
     staticPages: 10,
     contentBlocks: 14
 };
-const expectedSupportedLocales = ['en', 'ar'];
-const expectedPlannedOnlyLocales = ['pt'];
-const plannedLocaleCodes = ['fr', 'ru', 'pt'];
-const contentBlockLocalePathPattern = /(^|[._])(fr)([._]|$)|(^|[a-z0-9])(Fr)([A-Z0-9_]|$)/;
-const contentBlockNonTargetLocalePathPattern = /(^|[._])(en|ar)([._]|$)|(^|[a-z0-9])(En|Ar)([A-Z0-9_]|$)/;
-const collectionSpecs = {
-    productCategories: {
-        table: 'categories',
-        label: 'product categories',
-        fields: ['name_fr']
-    },
-    products: {
-        table: 'products',
-        label: 'products',
-        fields: [
-            'name_fr',
-            'short_desc_fr',
-            'description_fr',
-            'seo_title_fr',
-            'seo_description_fr',
-            'seo_keywords_fr'
-        ]
-    },
-    certifications: {
-        table: 'certifications',
-        label: 'certifications',
-        fields: ['name_fr', 'issuer_fr', 'description_fr']
-    },
-    contentBlocks: {
-        table: 'content_blocks',
-        label: 'content blocks',
-        fields: ['body_json']
+const defaultLocale = 'fr';
+const importableLocales = ['fr', 'ru'];
+const knownLocaleCodes = ['en', 'ar', 'fr', 'ru', 'pt'];
+let targetLocale = defaultLocale;
+let collectionSpecs = buildCollectionSpecs(targetLocale);
+
+function defaultInputPathFor(locale) {
+    return path.join(stageDir, locale + '-content-entry-filled.json');
+}
+
+function defaultReportPathFor(locale) {
+    if (locale === 'fr') return path.join(stageDir, 'e8g3-fr-import-dry-run.md');
+    return path.join(stageDir, locale + '-content-import-dry-run.md');
+}
+
+function localeSuffix(locale) {
+    return String(locale || '').charAt(0).toUpperCase() + String(locale || '').slice(1);
+}
+
+function escapeRegExp(value) {
+    return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function localePathPattern(locale) {
+    const code = escapeRegExp(locale);
+    const suffix = escapeRegExp(localeSuffix(locale));
+    return new RegExp('(^|[._])(' + code + ')([._]|$)|(^|[a-z0-9])(' + suffix + ')([A-Z0-9_]|$)');
+}
+
+function buildCollectionSpecs(locale) {
+    return {
+        productCategories: {
+            table: 'categories',
+            label: 'product categories',
+            fields: ['name_' + locale]
+        },
+        products: {
+            table: 'products',
+            label: 'products',
+            fields: [
+                'name_' + locale,
+                'short_desc_' + locale,
+                'description_' + locale,
+                'seo_title_' + locale,
+                'seo_description_' + locale,
+                'seo_keywords_' + locale
+            ]
+        },
+        certifications: {
+            table: 'certifications',
+            label: 'certifications',
+            fields: ['name_' + locale, 'issuer_' + locale, 'description_' + locale]
+        },
+        contentBlocks: {
+            table: 'content_blocks',
+            label: 'content blocks',
+            fields: ['body_json']
+        }
+    };
+}
+
+function configureTargetLocale(locale) {
+    targetLocale = String(locale || defaultLocale).trim().toLowerCase();
+    if (!importableLocales.includes(targetLocale)) {
+        throw new Error('Unsupported import locale: ' + targetLocale + '. Allowed: ' + importableLocales.join(', ') + '.');
     }
-};
+    collectionSpecs = buildCollectionSpecs(targetLocale);
+}
 
 function parseArgs(argv) {
     const args = {
+        locale: defaultLocale,
         dryRun: false,
         apply: false,
         requireCleanBoundary: false,
         skipContentBlocks: false,
-        input: defaultInputPath,
+        input: '',
         db: defaultDbPath,
-        report: defaultReportPath,
+        report: '',
         backup: ''
     };
-    const valueOptions = new Set(['input', 'db', 'report', 'backup']);
+    const valueOptions = new Set(['locale', 'input', 'db', 'report', 'backup']);
+    let inputProvided = false;
+    let reportProvided = false;
 
     for (let index = 2; index < argv.length; index += 1) {
         const arg = argv[index];
@@ -97,11 +132,16 @@ function parseArgs(argv) {
                 args[name] = value;
                 index += 1;
             }
+            if (name === 'input') inputProvided = true;
+            if (name === 'report') reportProvided = true;
         } else {
             throw new Error('Unexpected argument: ' + arg);
         }
     }
 
+    args.locale = String(args.locale || defaultLocale).trim().toLowerCase();
+    if (!inputProvided) args.input = defaultInputPathFor(args.locale);
+    if (!reportProvided) args.report = defaultReportPathFor(args.locale);
     args.input = path.resolve(args.input);
     args.db = path.resolve(args.db);
     args.report = path.resolve(args.report);
@@ -253,11 +293,14 @@ function collectPatchPaths(value, prefix, paths) {
 }
 
 function isLocaleScopedContentBlockPath(patchPath) {
-    return contentBlockLocalePathPattern.test(String(patchPath || ''));
+    return localePathPattern(targetLocale).test(String(patchPath || ''));
 }
 
 function isExplicitNonTargetLocaleContentBlockPath(patchPath) {
-    return contentBlockNonTargetLocalePathPattern.test(String(patchPath || ''));
+    const value = String(patchPath || '');
+    return knownLocaleCodes
+        .filter((code) => code !== targetLocale)
+        .some((code) => localePathPattern(code).test(value));
 }
 
 function summarizePaths(paths, limit) {
@@ -265,17 +308,21 @@ function summarizePaths(paths, limit) {
     return selected.join(', ') + (paths.length > limit ? ' ... +' + (paths.length - limit) : '');
 }
 
-function validateFilledData(data, errors, collectionNames) {
+function validateFilledData(data, errors, collectionNames, locale) {
     if (!data || typeof data !== 'object' || Array.isArray(data)) {
         errors.push('Input JSON must be an object.');
         return;
     }
 
-    if (!data.meta || data.meta.locale !== 'fr') errors.push('meta.locale must be fr.');
-    if (!arraysEqual(data.meta && data.meta.supportedLocales, expectedSupportedLocales)) {
-        errors.push('meta.supportedLocales must stay ["en","ar"].');
+    if (!data.meta || data.meta.locale !== locale) errors.push('meta.locale must be ' + locale + '.');
+    const currentSupportedLocales = ['en', 'ar', 'fr'];
+    const allowedSupportedSnapshots = [currentSupportedLocales];
+    if (locale === 'fr') allowedSupportedSnapshots.push(['en', 'ar']);
+    if (!allowedSupportedSnapshots.some((expected) => arraysEqual(data.meta && data.meta.supportedLocales, expected))) {
+        errors.push('meta.supportedLocales must match current supported locales ["en","ar","fr"]'
+            + (locale === 'fr' ? ' or legacy ["en","ar"] for the historical French filled file.' : '.'));
     }
-    if (!arraysEqual(data.meta && data.meta.plannedOnlyLocales, expectedPlannedOnlyLocales)) {
+    if (!arraysEqual(data.meta && data.meta.plannedOnlyLocales, ['pt'])) {
         errors.push('meta.plannedOnlyLocales must stay ["pt"].');
     }
     if (!data.meta || !data.meta.counts || typeof data.meta.counts !== 'object' || Array.isArray(data.meta.counts)) {
@@ -335,8 +382,8 @@ function analyzeCollection(db, data, collectionName, tableColumnsByName, errors,
         validateTargetFields(collectionName, item, allowedFields, errors);
 
         if (collectionName === 'contentBlocks') {
-            if (item.target && item.target.locale !== 'fr') {
-                errors.push('contentBlocks item ' + item.id + ' target.locale must be fr.');
+            if (item.target && item.target.locale !== targetLocale) {
+                errors.push('contentBlocks item ' + item.id + ' target.locale must be ' + targetLocale + '.');
             }
             if (!item.target || !item.target.body_json_patch || typeof item.target.body_json_patch !== 'object' || Array.isArray(item.target.body_json_patch)) {
                 errors.push('contentBlocks item ' + item.id + ' target.body_json_patch must be an object.');
@@ -375,7 +422,7 @@ function analyzeCollection(db, data, collectionName, tableColumnsByName, errors,
 
             if (nonTargetLocalePaths.length) {
                 blockers.push('contentBlocks item ' + item.id + ' (' + (item.slug || match.row.slug || '')
-                    + ') patch targets en/ar paths: ' + summarizePaths(nonTargetLocalePaths, 8) + '.');
+                    + ') patch targets non-target locale paths: ' + summarizePaths(nonTargetLocalePaths, 8) + '.');
             }
             if (neutralPaths.length) {
                 blockers.push('contentBlocks item ' + item.id + ' (' + (item.slug || match.row.slug || '')
@@ -445,8 +492,14 @@ function collectUrlEntries(xml) {
     return matches || [];
 }
 
+function currentPlannedLocaleCodes() {
+    const localeConfigPath = path.join(root, 'config', 'locales.json');
+    const localeConfig = readJsonFile(localeConfigPath);
+    return Object.keys(localeConfig.plannedLocales || {});
+}
+
 function assertXmlExcludesPlannedLocale(xml, label, errors) {
-    plannedLocaleCodes.forEach((code) => {
+    currentPlannedLocaleCodes().forEach((code) => {
         const prefix = '/' + code + '/';
         if (xml.includes('https://www.lxenelectric.com' + prefix) || xml.includes(prefix)) {
             errors.push(label + ' must not contain planned locale path ' + prefix + '.');
@@ -488,10 +541,10 @@ function validateCleanBoundary(errors, warnings, args) {
         errors.push('Dynamic sitemap URL count model failed: ' + err.message);
     }
 
-    if (!arraysEqual(localeConfig.supportedLocales, expectedSupportedLocales)) {
-        errors.push('config/locales.json supportedLocales must stay ["en","ar"].');
+    if (!arraysEqual(localeConfig.supportedLocales, ['en', 'ar', 'fr'])) {
+        errors.push('config/locales.json supportedLocales must stay ["en","ar","fr"] in this stage.');
     }
-    plannedLocaleCodes.forEach((code) => {
+    Object.keys(localeConfig.plannedLocales || {}).forEach((code) => {
         const planned = localeConfig.plannedLocales && localeConfig.plannedLocales[code];
         if (!planned) errors.push(code + ' must remain in config/locales.json plannedLocales.');
         if (planned && planned.includeInSitemap !== false) {
@@ -505,7 +558,7 @@ function validateCleanBoundary(errors, warnings, args) {
 
     const frontendConfig = extractFrontendLocaleConfig(fs.readFileSync(frontendPath, 'utf8'), errors);
     if (frontendConfig) {
-        plannedLocaleCodes.forEach((code) => {
+        Object.keys(localeConfig.plannedLocales || {}).forEach((code) => {
             if (frontendConfig.supportedLocales && frontendConfig.supportedLocales.includes(code)) {
                 errors.push(code + ' must not enter js/main.js LOCALE_CONFIG.supportedLocales.');
             }
@@ -668,9 +721,10 @@ function applyImportRecords(db, collectionSummaries) {
 
 function renderReport(report) {
     const lines = [
-        '# E8g French import report',
+        '# ' + report.locale + ' content import report',
         '',
         '- Generated at: ' + report.generatedAt,
+        '- Locale: ' + report.locale,
         '- Project root: `' + root + '`',
         '- Input file: `' + report.inputPath + '`',
         '- Database path: `' + report.dbPath + '`',
@@ -818,6 +872,7 @@ async function main() {
 
     try {
         args = parseArgs(process.argv);
+        configureTargetLocale(args.locale);
     } catch (err) {
         console.error(err.message);
         process.exit(1);
@@ -858,6 +913,7 @@ async function main() {
 
     const report = {
         generatedAt: new Date().toISOString(),
+        locale: targetLocale,
         inputPath: args.input,
         dbPath: args.db,
         mode: args.apply ? 'apply' : 'dry-run',
@@ -899,7 +955,7 @@ async function main() {
     if (!errors.length) {
         try {
             data = readJsonFile(args.input);
-            validateFilledData(data, errors, selectedCollectionNames);
+            validateFilledData(data, errors, selectedCollectionNames, targetLocale);
             Object.keys(expectedCounts).forEach((key) => {
                 report.inputCounts[key] = Array.isArray(data[key]) ? data[key].length : 0;
             });
@@ -944,17 +1000,17 @@ async function main() {
     }
 
     if (errors.length) {
-        console.error('French import ' + report.mode + ' failed. Report: ' + args.report);
+        console.error(targetLocale + ' import ' + report.mode + ' failed. Report: ' + args.report);
         errors.forEach((message) => console.error('- ' + message));
         process.exit(1);
     }
 
     if (report.blockers.length) {
-        console.warn('French import dry-run completed with apply blockers.');
+        console.warn(targetLocale + ' import dry-run completed with apply blockers.');
     } else if (args.apply) {
-        console.log('French import apply passed.');
+        console.log(targetLocale + ' import apply passed.');
     } else {
-        console.log('French import dry-run passed.');
+        console.log(targetLocale + ' import dry-run passed.');
     }
     console.log('Report: ' + args.report);
     console.log('Database changed: ' + (report.databaseChanged ? 'yes' : 'no'));

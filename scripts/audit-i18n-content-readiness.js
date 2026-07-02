@@ -18,9 +18,9 @@ const siteOrigin = 'https://www.lxenelectric.com';
 const siteHost = new URL(siteOrigin).hostname;
 const expectedSupportedLocales = ['en', 'ar', 'fr'];
 const defaultTargetLocales = ['fr'];
-const defaultPlannedOnlyLocales = ['ru', 'pt'];
-const allowedTargetLocales = ['fr'];
-const requiredPlannedOnlyLocales = ['ru', 'pt'];
+const defaultPlannedOnlyLocales = ['pt'];
+const allowedTargetLocales = ['fr', 'ru'];
+const requiredPlannedOnlyLocales = ['pt'];
 const requiredLocaleColumns = {
     products: [
         'name',
@@ -193,10 +193,19 @@ function validateLocaleConfig(config, targetLocales, plannedOnlyLocales) {
 
     targetLocales.forEach((code) => {
         const locale = config.locales && config.locales[code];
-        assert(Boolean(locale), code + ' must be configured as an active locale.');
-        assert(config.supportedLocales.indexOf(code) !== -1, code + ' must enter supportedLocales.');
-        assert(plannedCodes.indexOf(code) === -1, code + ' must not remain in plannedLocales.');
-        if (locale) assert(locale.includeInSitemap === true, code + ' active locale must keep includeInSitemap=true.');
+        const planned = configuredPlanned.find((entry) => entry.code === code);
+
+        assert(Boolean(locale || planned), code + ' must be configured as active or planned locale.');
+        if (locale) {
+            assert(config.supportedLocales.indexOf(code) !== -1, code + ' active locale must enter supportedLocales.');
+            assert(plannedCodes.indexOf(code) === -1, code + ' active locale must not remain in plannedLocales.');
+            assert(locale.includeInSitemap === true, code + ' active locale must keep includeInSitemap=true.');
+        }
+        if (planned) {
+            assert(planned.includeInSitemap === false, code + ' activation candidate must keep includeInSitemap=false while planned.');
+            assert(config.supportedLocales.indexOf(code) === -1, code + ' activation candidate must not enter supportedLocales yet.');
+            assert(!config.locales[code], code + ' activation candidate must not enter active locales yet.');
+        }
     });
 
     plannedOnlyLocales.forEach((code) => {
@@ -228,7 +237,10 @@ function validateRequestedLocales(targetLocales, plannedOnlyLocales) {
 
 function auditPlannedShells(config, targetLocales, plannedOnlyLocales) {
     const plannedLocales = plannedLocaleEntries(config);
-    const requestedCodes = unique(plannedOnlyLocales);
+    const plannedCodes = plannedLocales.map((locale) => locale.code);
+    const requestedCodes = unique(plannedOnlyLocales.concat(
+        targetLocales.filter((code) => plannedCodes.indexOf(code) !== -1)
+    ));
     const plannedPrefixes = plannedLocales
         .filter((locale) => requestedCodes.indexOf(locale.code) !== -1)
         .map((locale) => locale.pathPrefix)
@@ -555,7 +567,7 @@ function renderReport(targetLocales, plannedOnlyLocales, shellSummary, databaseS
         '- 正式准备目标: ' + targetLocales.join(', '),
         '- planned 预留位: ' + plannedOnlyLocales.join(', '),
         '- 本报告只读项目文件和数据库，未写数据库、未改后台、未导入翻译。',
-        '- ru/pt 只作为 planned 保护对象，不生成 ru/pt 翻译模板。',
+        '- pt 只作为 planned 保护对象，不生成 pt 翻译模板；ru 仅在显式指定时生成待启用候选模板。',
         '',
         '## planned 页面壳保护状态',
         '',
@@ -565,9 +577,9 @@ function renderReport(targetLocales, plannedOnlyLocales, shellSummary, databaseS
         '',
         '## 后续提示',
         '',
-        '- fr 已作为当前 active 语言启用；ru/pt 仍不应启用。',
+        '- fr 已作为当前 active 语言启用；ru 可作为待启用候选目标；pt 仍不应启用。',
         '- sitemap URL count 必须等于当前数据库和 active sitemap locale 动态计算值。',
-        '- ru/pt 不参与当前内容准备。'
+        '- pt 不参与当前内容准备。'
     ].join('\n');
 }
 

@@ -6,6 +6,7 @@ const {
     loadLocaleConfig,
     pageShellsForVerification,
     plannedLocaleEntries,
+    plannedPageShellsForVerification,
 } = require('./i18n-page-model');
 
 const root = path.resolve(__dirname, '..');
@@ -16,8 +17,8 @@ const stageDir = path.join(homeDir, 'Desktop', 'new', 'stage');
 const localeConfigPath = path.join(root, 'config', 'locales.json');
 const dbPath = path.join(root, 'data', 'longxiang.db');
 const expectedSupportedLocales = ['en', 'ar', 'fr'];
-const allowedTargetLocales = ['fr'];
-const requiredPlannedOnlyLocales = ['ru', 'pt'];
+const allowedTargetLocales = ['fr', 'ru'];
+const requiredPlannedOnlyLocales = ['pt'];
 const expectedCounts = {
     productCategories: 13,
     products: 40,
@@ -193,10 +194,18 @@ function validateLocaleConfig(config, targetLocale, plannedOnlyLocales) {
     const plannedCodes = plannedLocales.map((locale) => locale.code);
 
     const activeLocale = config.locales && config.locales[targetLocale];
-    assert(Boolean(activeLocale), targetLocale + ' must be configured as an active locale.');
-    assert(config.supportedLocales.indexOf(targetLocale) !== -1, targetLocale + ' must enter supportedLocales.');
-    assert(plannedCodes.indexOf(targetLocale) === -1, targetLocale + ' must not remain in plannedLocales.');
-    if (activeLocale) assert(activeLocale.includeInSitemap === true, targetLocale + ' active locale must keep includeInSitemap=true.');
+    const plannedTargetLocale = plannedLocales.find((entry) => entry.code === targetLocale);
+    assert(Boolean(activeLocale || plannedTargetLocale), targetLocale + ' must be configured as active or planned locale.');
+    if (activeLocale) {
+        assert(config.supportedLocales.indexOf(targetLocale) !== -1, targetLocale + ' active locale must enter supportedLocales.');
+        assert(plannedCodes.indexOf(targetLocale) === -1, targetLocale + ' active locale must not remain in plannedLocales.');
+        assert(activeLocale.includeInSitemap === true, targetLocale + ' active locale must keep includeInSitemap=true.');
+    }
+    if (plannedTargetLocale) {
+        assert(config.supportedLocales.indexOf(targetLocale) === -1, targetLocale + ' activation candidate must not enter supportedLocales yet.');
+        assert(!config.locales[targetLocale], targetLocale + ' activation candidate must not enter active locales yet.');
+        assert(plannedTargetLocale.includeInSitemap === false, targetLocale + ' activation candidate must keep includeInSitemap=false while planned.');
+    }
 
     plannedOnlyLocales.forEach((code) => {
         const locale = plannedLocales.find((entry) => entry.code === code);
@@ -217,7 +226,9 @@ function validateLocaleConfig(config, targetLocale, plannedOnlyLocales) {
 }
 
 function collectStaticPages(config, targetLocale) {
-    return pageShellsForVerification(config, root)
+    const activeShells = pageShellsForVerification(config, root);
+    const plannedShells = plannedPageShellsForVerification(config, root);
+    return activeShells.concat(plannedShells)
         .filter((shell) => shell.locale === targetLocale)
         .map((shell) => {
             assert(shell.exists, shell.file + ' must exist before exporting a content template.');
