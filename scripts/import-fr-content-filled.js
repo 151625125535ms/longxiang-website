@@ -3,6 +3,7 @@ const os = require('os');
 const path = require('path');
 const vm = require('vm');
 const Database = require('better-sqlite3');
+const { expectedSitemapUrlCount } = require('./sitemap-count-model');
 
 const root = path.resolve(__dirname, '..');
 const envPath = path.join(root, '.env');
@@ -27,7 +28,6 @@ const expectedCounts = {
 const expectedSupportedLocales = ['en', 'ar'];
 const expectedPlannedOnlyLocales = ['pt'];
 const plannedLocaleCodes = ['fr', 'ru', 'pt'];
-const expectedSitemapUrlCount = 96;
 const contentBlockLocalePathPattern = /(^|[._])(fr)([._]|$)|(^|[a-z0-9])(Fr)([A-Z0-9_]|$)/;
 const contentBlockNonTargetLocalePathPattern = /(^|[._])(en|ar)([._]|$)|(^|[a-z0-9])(En|Ar)([A-Z0-9_]|$)/;
 const collectionSpecs = {
@@ -457,19 +457,36 @@ function assertXmlExcludesPlannedLocale(xml, label, errors) {
     });
 }
 
-function validateCleanBoundary(errors) {
+function validateCleanBoundary(errors, warnings, args) {
     const boundary = {
         localeConfig: false,
         frontendConfig: false,
         sitemapXml: false,
         sitemapXmlUrlCount: null,
         generatedSitemap: false,
-        generatedSitemapUrlCount: null
+        generatedSitemapUrlCount: null,
+        expectedSitemapUrlCount: null,
+        sitemapStaticUrlCount: null,
+        sitemapEligibleProductCount: null,
+        sitemapLocaleCount: null,
+        sitemapProductUrlCount: null
     };
     const localeConfigPath = path.join(root, 'config', 'locales.json');
     const frontendPath = path.join(root, 'js', 'main.js');
     const sitemapPath = path.join(root, 'sitemap.xml');
     const localeConfig = readJsonFile(localeConfigPath);
+    let sitemapCountModel = null;
+
+    try {
+        sitemapCountModel = expectedSitemapUrlCount({ dbPath: args && args.db });
+        boundary.expectedSitemapUrlCount = sitemapCountModel.expectedUrlCount;
+        boundary.sitemapStaticUrlCount = sitemapCountModel.staticUrlCount;
+        boundary.sitemapEligibleProductCount = sitemapCountModel.eligibleProductCount;
+        boundary.sitemapLocaleCount = sitemapCountModel.sitemapLocaleCount;
+        boundary.sitemapProductUrlCount = sitemapCountModel.productUrlCount;
+    } catch (err) {
+        errors.push('Dynamic sitemap URL count model failed: ' + err.message);
+    }
 
     if (!arraysEqual(localeConfig.supportedLocales, expectedSupportedLocales)) {
         errors.push('config/locales.json supportedLocales must stay ["en","ar"].');
@@ -503,8 +520,10 @@ function validateCleanBoundary(errors) {
         const sitemapXml = fs.readFileSync(sitemapPath, 'utf8');
         const urlCount = collectUrlEntries(sitemapXml).length;
         boundary.sitemapXmlUrlCount = urlCount;
-        if (urlCount !== expectedSitemapUrlCount) {
-            errors.push('sitemap.xml URL count must be ' + expectedSitemapUrlCount + ', current: ' + urlCount + '.');
+        if (sitemapCountModel && urlCount !== sitemapCountModel.expectedUrlCount) {
+            warnings.push('sitemap.xml URL count current: ' + urlCount
+                + ', dynamic expected: ' + sitemapCountModel.expectedUrlCount
+                + '. Static sitemap.xml is not used as the production runtime sitemap hard gate.');
         }
         assertXmlExcludesPlannedLocale(sitemapXml, 'sitemap.xml', errors);
         boundary.sitemapXml = true;
@@ -525,8 +544,9 @@ function validateCleanBoundary(errors) {
         }
         const urlCount = collectUrlEntries(generatedXml).length;
         boundary.generatedSitemapUrlCount = urlCount;
-        if (urlCount !== expectedSitemapUrlCount) {
-            errors.push('Generated sitemap URL count must be ' + expectedSitemapUrlCount + ', current: ' + urlCount + '.');
+        if (sitemapCountModel && urlCount !== sitemapCountModel.expectedUrlCount) {
+            errors.push('Generated sitemap URL count must be dynamic expected '
+                + sitemapCountModel.expectedUrlCount + ', current: ' + urlCount + '.');
         }
         assertXmlExcludesPlannedLocale(generatedXml, 'generated sitemap', errors);
         boundary.generatedSitemap = true;
@@ -663,8 +683,13 @@ function renderReport(report) {
         '- Active import collections: ' + report.activeCollections.join(', '),
         '- Backup path: ' + (report.backupPath ? '`' + report.backupPath + '`' : 'none'),
         '- Backup size: ' + (report.backupSizeBytes == null ? 'not created' : report.backupSizeBytes + ' bytes'),
+        '- Expected sitemap URL count: ' + (report.boundary.expectedSitemapUrlCount == null ? 'not checked' : report.boundary.expectedSitemapUrlCount),
         '- sitemap.xml URL count: ' + (report.boundary.sitemapXmlUrlCount == null ? 'not checked' : report.boundary.sitemapXmlUrlCount),
         '- Generated sitemap URL count: ' + (report.boundary.generatedSitemapUrlCount == null ? 'not checked' : report.boundary.generatedSitemapUrlCount),
+        '- Sitemap static URLs: ' + (report.boundary.sitemapStaticUrlCount == null ? 'not checked' : report.boundary.sitemapStaticUrlCount),
+        '- Sitemap eligible products: ' + (report.boundary.sitemapEligibleProductCount == null ? 'not checked' : report.boundary.sitemapEligibleProductCount),
+        '- Sitemap locale count: ' + (report.boundary.sitemapLocaleCount == null ? 'not checked' : report.boundary.sitemapLocaleCount),
+        '- Sitemap product URLs: ' + (report.boundary.sitemapProductUrlCount == null ? 'not checked' : report.boundary.sitemapProductUrlCount),
         '- Apply blockers: ' + report.blockers.length,
         '- May enter next import step: ' + (report.errors.length || report.blockers.length ? 'no' : 'yes'),
         '',
@@ -851,7 +876,12 @@ async function main() {
             sitemapXml: false,
             sitemapXmlUrlCount: null,
             generatedSitemap: false,
-            generatedSitemapUrlCount: null
+            generatedSitemapUrlCount: null,
+            expectedSitemapUrlCount: null,
+            sitemapStaticUrlCount: null,
+            sitemapEligibleProductCount: null,
+            sitemapLocaleCount: null,
+            sitemapProductUrlCount: null
         },
         blockers: [],
         errors,
@@ -879,7 +909,7 @@ async function main() {
     }
 
     if (args.requireCleanBoundary) {
-        report.boundary = validateCleanBoundary(errors);
+        report.boundary = validateCleanBoundary(errors, warnings, args);
     }
 
     if (data && fs.existsSync(args.db)) {

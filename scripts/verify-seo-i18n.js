@@ -14,12 +14,12 @@ const {
     pageShellsForVerification,
     plannedPageShellsForVerification
 } = require('./i18n-page-model');
+const { expectedSitemapUrlCount } = require('./sitemap-count-model');
 
 const root = path.resolve(__dirname, '..');
 const siteOrigin = 'https://www.lxenelectric.com';
 const sitemapNamespace = 'http://www.sitemaps.org/schemas/sitemap/0.9';
 const xhtmlNamespace = 'http://www.w3.org/1999/xhtml';
-const expectedSitemapUrlCount = 96;
 const failures = [];
 const warnings = [];
 
@@ -31,6 +31,7 @@ const defaultLocale = localeEntry(localeConfig, localeConfig.defaultLocale);
 const sitemapAlternateLanguages = sitemapLocales.map((locale) => locale.hreflang).concat(['x-default']);
 const staticPages = staticPagesForSitemap(localeConfig);
 const htmlPages = htmlPagesForVerification(localeConfig);
+const sitemapCountModel = expectedSitemapUrlCount({ localeConfig });
 const expectedPlannedLocales = {
     ru: {
         label: 'Russian',
@@ -1171,8 +1172,11 @@ function verifySitemap() {
 
     const urlEntries = collectElementContents(xml, 'url');
     assert(urlEntries.length > 0, 'sitemap.xml 缺少 url 条目。');
-    assert(urlEntries.length === expectedSitemapUrlCount,
-        'sitemap.xml URL count 应保持 ' + expectedSitemapUrlCount + '，当前为 ' + urlEntries.length + '。');
+    if (urlEntries.length !== sitemapCountModel.expectedUrlCount) {
+        warn('sitemap.xml URL count 当前为 ' + urlEntries.length
+            + '，动态期望为 ' + sitemapCountModel.expectedUrlCount
+            + '。当前站点由 server/app.js 动态响应 /sitemap.xml，静态文件 count 不作为生产写库 hard gate。');
+    }
 
     urlEntries.forEach((entry, index) => {
         const loc = firstElementText(entry, 'loc');
@@ -1199,8 +1203,13 @@ function verifyGeneratedSitemapDryRunGuards() {
     }
 
     const urlEntries = collectElementContents(generatedXml, 'url');
-    assert(urlEntries.length === expectedSitemapUrlCount,
-        'generate-sitemap dry-run URL count 应保持 ' + expectedSitemapUrlCount + '，当前为 ' + urlEntries.length + '。');
+    assert(urlEntries.length === sitemapCountModel.expectedUrlCount,
+        'generate-sitemap dry-run URL count 应为动态期望 '
+        + sitemapCountModel.expectedUrlCount
+        + '（静态页 ' + sitemapCountModel.staticUrlCount
+        + ' + eligible 产品 ' + sitemapCountModel.eligibleProductCount
+        + ' * sitemap locale ' + sitemapCountModel.sitemapLocaleCount
+        + '），当前为 ' + urlEntries.length + '。');
 
     plannedLocaleEntries(localeConfig).forEach((locale) => {
         assertXmlExcludesPlannedLocale(generatedXml, 'generate-sitemap dry-run 输出', locale);

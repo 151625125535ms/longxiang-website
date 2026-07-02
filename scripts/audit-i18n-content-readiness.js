@@ -559,7 +559,7 @@ function renderReport(targetLocales, plannedOnlyLocales, shellSummary, databaseS
         '## 后续提示',
         '',
         '- fr/ru 目前仍不应启用。',
-        '- sitemap URL count 必须继续保持 96，直到正式启用阶段单独确认。',
+        '- sitemap URL count 必须等于当前数据库和 active sitemap locale 动态计算值。',
         '- pt 不参与当前内容准备。'
     ].join('\n');
 }
