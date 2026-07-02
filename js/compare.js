@@ -174,7 +174,7 @@
 
         var rows = [
             { label: compareLabel(content, 'imageLabel', isArabic ? 'الصورة' : 'Image'), html: function (p) { var imagePath = normalizeImagePath(p.image); return imagePath ? '<img src="' + escapeHtml(imagePath) + '" alt="' + escapeHtml(localize(p, 'name')) + '" loading="lazy" decoding="async" width="120" height="86" style="width:120px;height:86px;object-fit:cover;border-radius:8px;">' : '-'; } },
-            { label: compareLabel(content, 'categoryLabel', isArabic ? 'الفئة' : 'Category'), html: function (p) { return escapeHtml(isArabic ? (p.categoryLabelAr || p.categoryLabel) : (p.categoryLabel || p.category)); } },
+            { label: compareLabel(content, 'categoryLabel', isArabic ? 'الفئة' : 'Category'), html: function (p) { return escapeHtml(localize(p, 'categoryLabel') || localize(p, 'category')); } },
             { label: compareLabel(content, 'capacitiesLabel', isArabic ? 'السعات' : 'Capacities'), html: function (p) { return valueList(p.capacities); } },
             { label: compareLabel(content, 'voltagesLabel', isArabic ? 'الجهود' : 'Voltages'), html: function (p) { return valueList(p.voltages); } },
             { label: compareLabel(content, 'descriptionLabel', isArabic ? 'الوصف' : 'Description'), html: function (p) { return escapeHtml(localize(p, 'shortDesc') || localize(p, 'description')); } }

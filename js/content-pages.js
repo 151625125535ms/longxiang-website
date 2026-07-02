@@ -326,10 +326,25 @@
     }
 
     function absoluteSiteUrl(pathname) {
+        if (/^https?:\/\//i.test(String(pathname || ''))) return pathname;
         var path = String(pathname || window.location.pathname || '/').split('#')[0].split('?')[0];
         if (path === '/index.html') path = '/';
         if (/\/index\.html$/i.test(path)) path = path.replace(/index\.html$/i, '');
         return window.location.origin + path;
+    }
+
+    function localizedCanonicalPath(pathname) {
+        var path = String(pathname || '').trim();
+        if (/^https?:\/\//i.test(path)) return path;
+        path = path || window.location.pathname || '/';
+        if (window.LongxiangI18n && window.LongxiangI18n.baseStaticPathFromLocalizedPath && window.LongxiangI18n.localizedStaticPath) {
+            return window.LongxiangI18n.localizedStaticPath(
+                window.LongxiangI18n.baseStaticPathFromLocalizedPath(path),
+                locale
+            );
+        }
+        if (isArabic && path.charAt(0) !== '/') return '/ar/' + path.replace(/^\/+/, '');
+        return path.charAt(0) === '/' ? path : '/' + path;
     }
 
     function alternatePathsForCanonical(pathname) {
@@ -433,7 +448,8 @@
         if (shouldUseDefaultSeo(title, defaults.title)) title = defaults.title;
         if (shouldUseDefaultSeo(description, defaults.description)) description = defaults.description;
         var image = seo.image || (hero && hero.backgroundImage);
-        var canonicalUrl = absoluteSiteUrl(seo.canonicalPath || defaults.canonicalPath);
+        var canonicalPath = localizedCanonicalPath(seo.canonicalPath || defaults.canonicalPath);
+        var canonicalUrl = absoluteSiteUrl(canonicalPath);
         if (title) document.title = title;
         upsertMeta('description', '', description);
         upsertMeta('', 'og:title', title);
@@ -444,7 +460,7 @@
         upsertMeta('twitter:title', '', title);
         upsertMeta('twitter:description', '', description);
         upsertHeadLink('canonical', { href: canonicalUrl });
-        upsertAlternateLinks(seo.canonicalPath || defaults.canonicalPath);
+        upsertAlternateLinks(canonicalPath);
         if (image) {
             var imageUrl = encodeURI(absoluteAssetUrl(image));
             upsertMeta('', 'og:image', imageUrl);

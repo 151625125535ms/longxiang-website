@@ -1,6 +1,6 @@
 {
   "defaultLocale": "en",
-  "supportedLocales": ["en", "ar"],
+  "supportedLocales": ["en", "ar", "fr"],
   "plannedLocales": {
     "ru": {
       "label": "Russian",
@@ -21,17 +21,6 @@
       "dir": "ltr",
       "pathPrefix": "/pt",
       "homePath": "/pt/index.html",
-      "fallbackLocale": "en",
-      "includeInSitemap": false
-    },
-    "fr": {
-      "label": "French",
-      "nativeLabel": "Fran\u00e7ais",
-      "htmlLang": "fr",
-      "hreflang": "fr",
-      "dir": "ltr",
-      "pathPrefix": "/fr",
-      "homePath": "/fr/index.html",
       "fallbackLocale": "en",
       "includeInSitemap": false
     }
@@ -56,6 +45,17 @@
       "dir": "rtl",
       "pathPrefix": "/ar",
       "homePath": "/ar/index.html",
+      "fallbackLocale": "en",
+      "includeInSitemap": true
+    },
+    "fr": {
+      "label": "French",
+      "nativeLabel": "Fran\u00e7ais",
+      "htmlLang": "fr",
+      "hreflang": "fr",
+      "dir": "ltr",
+      "pathPrefix": "/fr",
+      "homePath": "/fr/index.html",
       "fallbackLocale": "en",
       "includeInSitemap": true
     }

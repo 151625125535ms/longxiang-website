@@ -3,7 +3,7 @@
 
     var LOCALE_CONFIG = {
         defaultLocale: 'en',
-        supportedLocales: ['en', 'ar'],
+        supportedLocales: ['en', 'ar', 'fr'],
         locales: {
             en: {
                 label: 'English',
@@ -26,12 +26,23 @@
                 homePath: '/ar/index.html',
                 fallbackLocale: 'en',
                 includeInSitemap: true
+            },
+            fr: {
+                label: 'French',
+                nativeLabel: 'Fran\u00e7ais',
+                htmlLang: 'fr',
+                hreflang: 'fr',
+                dir: 'ltr',
+                pathPrefix: '/fr',
+                homePath: '/fr/index.html',
+                fallbackLocale: 'en',
+                includeInSitemap: true
             }
         }
     };
 
     var STATIC_PAGE_BASE_PATHS = ['/', '/about.html', '/products.html', '/solutions.html', '/education.html', '/certifications.html', '/compare.html', '/contact.html'];
-    var PLANNED_LOCALE_PATH_PREFIXES = ['/fr', '/pt', '/ru'];
+    var PLANNED_LOCALE_PATH_PREFIXES = ['/pt', '/ru'];
 
     function normalizePathPrefix(value) {
         var prefix = String(value || '').trim().replace(/\/+$/, '');
@@ -720,10 +731,21 @@
     }
 
     function pageHref(page, hash) {
-        var path = window.location.pathname.replace(/\\/g, '/');
-        var prefix = '';
-        if (!isArabic && !/(\/$|\/[^/]+\.html$)/.test(path)) prefix = '/';
-        return prefix + page + (hash || '');
+        var value = String(page || 'index.html');
+        var hashIndex = value.indexOf('#');
+        var embeddedHash = '';
+        if (hashIndex !== -1) {
+            embeddedHash = value.slice(hashIndex);
+            value = value.slice(0, hashIndex);
+        }
+        var queryIndex = value.indexOf('?');
+        var query = '';
+        if (queryIndex !== -1) {
+            query = value.slice(queryIndex);
+            value = value.slice(0, queryIndex);
+        }
+        var basePath = pageNameToBasePath(value || 'index.html');
+        return window.LongxiangI18n.localizedStaticPath(basePath, locale) + query + (hash || embeddedHash || '');
     }
 
     function navLink(page, label, extraClass, hash) {

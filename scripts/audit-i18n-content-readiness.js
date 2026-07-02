@@ -16,11 +16,11 @@ const localeConfigPath = path.join(root, 'config', 'locales.json');
 const dbPath = path.join(root, 'data', 'longxiang.db');
 const siteOrigin = 'https://www.lxenelectric.com';
 const siteHost = new URL(siteOrigin).hostname;
-const expectedSupportedLocales = ['en', 'ar'];
-const defaultTargetLocales = ['fr', 'ru'];
-const defaultPlannedOnlyLocales = ['pt'];
-const allowedTargetLocales = ['fr', 'ru'];
-const requiredPlannedOnlyLocales = ['pt'];
+const expectedSupportedLocales = ['en', 'ar', 'fr'];
+const defaultTargetLocales = ['fr'];
+const defaultPlannedOnlyLocales = ['ru', 'pt'];
+const allowedTargetLocales = ['fr'];
+const requiredPlannedOnlyLocales = ['ru', 'pt'];
 const requiredLocaleColumns = {
     products: [
         'name',
@@ -186,13 +186,20 @@ function localeDirectoryExists(locale) {
 
 function validateLocaleConfig(config, targetLocales, plannedOnlyLocales) {
     assert(JSON.stringify(config.supportedLocales) === JSON.stringify(expectedSupportedLocales),
-        'supportedLocales must remain en/ar. Current: ' + formatList(config.supportedLocales));
+        'supportedLocales must be en/ar/fr. Current: ' + formatList(config.supportedLocales || []));
 
     const configuredPlanned = plannedLocaleEntries(config);
     const plannedCodes = configuredPlanned.map((locale) => locale.code);
-    const allRequested = unique(targetLocales.concat(plannedOnlyLocales));
 
-    allRequested.forEach((code) => {
+    targetLocales.forEach((code) => {
+        const locale = config.locales && config.locales[code];
+        assert(Boolean(locale), code + ' must be configured as an active locale.');
+        assert(config.supportedLocales.indexOf(code) !== -1, code + ' must enter supportedLocales.');
+        assert(plannedCodes.indexOf(code) === -1, code + ' must not remain in plannedLocales.');
+        if (locale) assert(locale.includeInSitemap === true, code + ' active locale must keep includeInSitemap=true.');
+    });
+
+    plannedOnlyLocales.forEach((code) => {
         const locale = configuredPlanned.find((entry) => entry.code === code);
         assert(Boolean(locale), code + ' must remain in plannedLocales.');
         if (!locale) return;
@@ -221,7 +228,7 @@ function validateRequestedLocales(targetLocales, plannedOnlyLocales) {
 
 function auditPlannedShells(config, targetLocales, plannedOnlyLocales) {
     const plannedLocales = plannedLocaleEntries(config);
-    const requestedCodes = unique(targetLocales.concat(plannedOnlyLocales));
+    const requestedCodes = unique(plannedOnlyLocales);
     const plannedPrefixes = plannedLocales
         .filter((locale) => requestedCodes.indexOf(locale.code) !== -1)
         .map((locale) => locale.pathPrefix)
@@ -548,7 +555,7 @@ function renderReport(targetLocales, plannedOnlyLocales, shellSummary, databaseS
         '- 正式准备目标: ' + targetLocales.join(', '),
         '- planned 预留位: ' + plannedOnlyLocales.join(', '),
         '- 本报告只读项目文件和数据库，未写数据库、未改后台、未导入翻译。',
-        '- pt 只作为 planned 保护对象，不生成 pt 翻译模板。',
+        '- ru/pt 只作为 planned 保护对象，不生成 ru/pt 翻译模板。',
         '',
         '## planned 页面壳保护状态',
         '',
@@ -558,9 +565,9 @@ function renderReport(targetLocales, plannedOnlyLocales, shellSummary, databaseS
         '',
         '## 后续提示',
         '',
-        '- fr/ru 目前仍不应启用。',
+        '- fr 已作为当前 active 语言启用；ru/pt 仍不应启用。',
         '- sitemap URL count 必须等于当前数据库和 active sitemap locale 动态计算值。',
-        '- pt 不参与当前内容准备。'
+        '- ru/pt 不参与当前内容准备。'
     ].join('\n');
 }
 
@@ -614,7 +621,7 @@ function renderTemplate(locale, productRows, databaseSummary) {
 function assertNoPlannedOnlyTemplate(plannedOnlyLocales) {
     plannedOnlyLocales.forEach((locale) => {
         const templatePath = path.join(stageDir, 'e5-' + locale + '-translation-template.md');
-        assert(!fs.existsSync(templatePath), locale + ' is planned-only, but template exists: ' + templatePath);
+        if (fs.existsSync(templatePath)) warn(locale + ' is planned-only, but a historical template exists: ' + templatePath);
     });
 }
 

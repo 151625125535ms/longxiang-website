@@ -4,8 +4,8 @@ const path = require('path');
 const Database = require('better-sqlite3');
 const {
     loadLocaleConfig,
+    pageShellsForVerification,
     plannedLocaleEntries,
-    plannedPageShellsForVerification
 } = require('./i18n-page-model');
 
 const root = path.resolve(__dirname, '..');
@@ -15,9 +15,9 @@ if (!homeDir) throw new Error('Unable to resolve user home directory for desktop
 const stageDir = path.join(homeDir, 'Desktop', 'new', 'stage');
 const localeConfigPath = path.join(root, 'config', 'locales.json');
 const dbPath = path.join(root, 'data', 'longxiang.db');
-const expectedSupportedLocales = ['en', 'ar'];
+const expectedSupportedLocales = ['en', 'ar', 'fr'];
 const allowedTargetLocales = ['fr'];
-const requiredPlannedOnlyLocales = ['pt'];
+const requiredPlannedOnlyLocales = ['ru', 'pt'];
 const expectedCounts = {
     productCategories: 13,
     products: 40,
@@ -184,15 +184,21 @@ function bodySummary(body) {
 
 function validateLocaleConfig(config, targetLocale, plannedOnlyLocales) {
     assert(JSON.stringify(config.supportedLocales) === JSON.stringify(expectedSupportedLocales),
-        'supportedLocales must remain en/ar. Current: ' + formatList(config.supportedLocales || []));
+        'supportedLocales must be en/ar/fr. Current: ' + formatList(config.supportedLocales || []));
 
     assert(allowedTargetLocales.indexOf(targetLocale) !== -1,
         targetLocale + ' is not an allowed target locale. Allowed: ' + allowedTargetLocales.join(', '));
 
     const plannedLocales = plannedLocaleEntries(config);
-    const requestedCodes = unique([targetLocale].concat(plannedOnlyLocales));
+    const plannedCodes = plannedLocales.map((locale) => locale.code);
 
-    requestedCodes.forEach((code) => {
+    const activeLocale = config.locales && config.locales[targetLocale];
+    assert(Boolean(activeLocale), targetLocale + ' must be configured as an active locale.');
+    assert(config.supportedLocales.indexOf(targetLocale) !== -1, targetLocale + ' must enter supportedLocales.');
+    assert(plannedCodes.indexOf(targetLocale) === -1, targetLocale + ' must not remain in plannedLocales.');
+    if (activeLocale) assert(activeLocale.includeInSitemap === true, targetLocale + ' active locale must keep includeInSitemap=true.');
+
+    plannedOnlyLocales.forEach((code) => {
         const locale = plannedLocales.find((entry) => entry.code === code);
         assert(Boolean(locale), code + ' must remain in plannedLocales.');
         assert(config.supportedLocales.indexOf(code) === -1, code + ' must not enter supportedLocales.');
@@ -211,7 +217,7 @@ function validateLocaleConfig(config, targetLocale, plannedOnlyLocales) {
 }
 
 function collectStaticPages(config, targetLocale) {
-    return plannedPageShellsForVerification(config, root)
+    return pageShellsForVerification(config, root)
         .filter((shell) => shell.locale === targetLocale)
         .map((shell) => {
             assert(shell.exists, shell.file + ' must exist before exporting a content template.');

@@ -54,17 +54,6 @@ const expectedPlannedLocales = {
         homePath: '/pt/index.html',
         fallbackLocale: 'en',
         includeInSitemap: false
-    },
-    fr: {
-        label: 'French',
-        nativeLabel: 'Fran\u00e7ais',
-        htmlLang: 'fr',
-        hreflang: 'fr',
-        dir: 'ltr',
-        pathPrefix: '/fr',
-        homePath: '/fr/index.html',
-        fallbackLocale: 'en',
-        includeInSitemap: false
     }
 };
 
@@ -244,7 +233,7 @@ function verifyPlannedLocaleConfig(frontendConfig) {
     const configuredCodes = configuredPlannedLocaleCodes().sort();
     const expectedCodes = plannedLocaleCodes().sort();
 
-    assertArrayEqual(configuredCodes, expectedCodes, 'config/locales.json plannedLocales 语言清单应只包含 ru/pt/fr。');
+    assertArrayEqual(configuredCodes, expectedCodes, 'config/locales.json plannedLocales 语言清单应只包含 ru/pt。');
 
     plannedLocaleCodes().forEach((code) => {
         const expected = expectedPlannedLocales[code];
@@ -506,6 +495,7 @@ function verifyHtmlPage(page) {
     const htmlTag = collectTags(html, 'html')[0];
     const title = firstElementText(html, 'title');
     const description = findMetaByName(html, 'description');
+    const robots = findMetaByName(html, 'robots');
     const canonicalLinks = findHeadLinks(html, 'canonical');
     const alternateLinks = findHeadLinks(html, 'alternate');
     const h1Texts = collectElementContents(html, 'h1').map(stripTags).filter(hasText);
@@ -523,6 +513,10 @@ function verifyHtmlPage(page) {
 
     assert(hasText(title) && title.toLowerCase() !== 'longxiang', page.file + ' 缺少页面专属 title。');
     assert(description && hasText(description.content), page.file + ' 缺少 meta description。');
+    if (robots) {
+        assert(String(robots.content || '').toLowerCase().indexOf('noindex') === -1,
+            page.file + ' 已启用页面不应包含 noindex。');
+    }
 
     if (page.canonicalPath) {
         assert(canonicalLinks.length === 1, page.file + ' 应包含且只包含 1 个 canonical 链接。');
@@ -1171,8 +1165,9 @@ function verifySitemap() {
     }
 
     const urlEntries = collectElementContents(xml, 'url');
+    const staticSitemapMatchesDynamic = urlEntries.length === sitemapCountModel.expectedUrlCount;
     assert(urlEntries.length > 0, 'sitemap.xml 缺少 url 条目。');
-    if (urlEntries.length !== sitemapCountModel.expectedUrlCount) {
+    if (!staticSitemapMatchesDynamic) {
         warn('sitemap.xml URL count 当前为 ' + urlEntries.length
             + '，动态期望为 ' + sitemapCountModel.expectedUrlCount
             + '。当前站点由 server/app.js 动态响应 /sitemap.xml，静态文件 count 不作为生产写库 hard gate。');
@@ -1186,7 +1181,7 @@ function verifySitemap() {
             .filter((attrs) => hasRel(attrs, 'alternate'));
 
         assert(hasText(loc), 'sitemap.xml 的 ' + locLabel + ' 缺少 loc。');
-        if (hasText(loc)) {
+        if (staticSitemapMatchesDynamic && hasText(loc)) {
             verifySitemapAlternateSet(loc, alternateLinks);
         }
     });
@@ -1210,6 +1205,19 @@ function verifyGeneratedSitemapDryRunGuards() {
         + ' + eligible 产品 ' + sitemapCountModel.eligibleProductCount
         + ' * sitemap locale ' + sitemapCountModel.sitemapLocaleCount
         + '），当前为 ' + urlEntries.length + '。');
+
+    urlEntries.forEach((entry, index) => {
+        const loc = firstElementText(entry, 'loc');
+        const locLabel = loc || '第 ' + (index + 1) + ' 个 url';
+        const alternateLinks = collectTags(entry, 'xhtml:link')
+            .map((tag) => tag.attrs)
+            .filter((attrs) => hasRel(attrs, 'alternate'));
+
+        assert(hasText(loc), 'generate-sitemap dry-run 的 ' + locLabel + ' 缺少 loc。');
+        if (hasText(loc)) {
+            verifySitemapAlternateSet(loc, alternateLinks);
+        }
+    });
 
     plannedLocaleEntries(localeConfig).forEach((locale) => {
         assertXmlExcludesPlannedLocale(generatedXml, 'generate-sitemap dry-run 输出', locale);
