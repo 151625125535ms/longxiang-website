@@ -657,14 +657,31 @@
 
     function localizedSectionValue(sectionName, key, fallback) {
         var section = shellSection(sectionName);
-        var arabicValue = localizedArabicValue(section, key);
-        if (arabicValue) return arabicValue;
-        if (section[key]) return localizeFallback(section[key]);
+        if (isArabic) {
+            var arabicValue = localizedArabicValue(section, key);
+            if (arabicValue) return arabicValue;
+        } else if (section && locale !== 'en' && window.LongxiangI18n && typeof window.LongxiangI18n.localized === 'function') {
+            var localizedValue = window.LongxiangI18n.localized(section, key, locale);
+            if (localizedValue && localizedValue !== section[key]) return localizedValue;
+        }
+        if (section[key] && (locale === 'en' || isArabic)) return localizeFallback(section[key]);
         return localizeFallback(fallback);
     }
 
     function embedConsentText() {
-        var fallback = isArabic ? {
+        var localizedFallbacks = {
+            fr: {
+                title: 'Consentement fonctionnel requis',
+                intro: 'Les cartes et vidéos de tiers sont bloquées tant que vous n’autorisez pas les cookies fonctionnels.',
+                allow: 'Autoriser les cookies fonctionnels'
+            },
+            ru: {
+                title: 'Требуется функциональное согласие',
+                intro: 'Карты и видео сторонних сервисов заблокированы, пока вы не разрешите функциональные cookie.',
+                allow: 'Разрешить функциональные cookie'
+            }
+        };
+        var fallback = localizedFallbacks[locale] || (isArabic ? {
             title: 'يتطلب هذا المحتوى موافقة وظيفية',
             intro: 'يتم حظر الخرائط والفيديو من أطراف خارجية حتى تسمح بملفات تعريف الارتباط الوظيفية.',
             allow: 'السماح بملفات تعريف الارتباط الوظيفية'
@@ -672,7 +689,7 @@
             title: 'Functional consent required',
             intro: 'Maps and videos from third parties are blocked until you allow functional cookies.',
             allow: 'Allow functional cookies'
-        };
+        });
         return {
             title: localizedSectionValue('embedConsent', 'title', fallback.title),
             intro: localizedSectionValue('embedConsent', 'intro', fallback.intro),
@@ -705,7 +722,39 @@
     }
 
     function consentText() {
-        var fallback = isArabic ? {
+        var localizedFallbacks = {
+            fr: {
+                title: 'Paramètres des cookies',
+                intro: 'Nous utilisons le stockage nécessaire au fonctionnement du site. Les analyses, cartes et vidéos ne sont chargées qu’après votre accord.',
+                necessary: 'Nécessaire',
+                necessaryDesc: 'Requis pour la langue, la sécurité et les fonctions principales du site.',
+                analytics: 'Analyses',
+                analyticsDesc: 'Nous aide à comprendre l’utilisation du site avec Google Analytics.',
+                functional: 'Fonctionnel',
+                functionalDesc: 'Permet de charger les vidéos YouTube et les cartes Google.',
+                accept: 'Tout accepter',
+                reject: 'Tout refuser',
+                customize: 'Personnaliser',
+                save: 'Enregistrer les paramètres',
+                close: 'Fermer'
+            },
+            ru: {
+                title: 'Настройки cookie',
+                intro: 'Мы используем необходимое хранилище для работы сайта. Аналитика, карты и видео загружаются только после вашего согласия.',
+                necessary: 'Необходимые',
+                necessaryDesc: 'Требуются для языка, безопасности и основных функций сайта.',
+                analytics: 'Аналитика',
+                analyticsDesc: 'Помогает нам понимать использование сайта через Google Analytics.',
+                functional: 'Функциональные',
+                functionalDesc: 'Позволяют загружать видео YouTube и карты Google.',
+                accept: 'Принять все',
+                reject: 'Отклонить все',
+                customize: 'Настроить',
+                save: 'Сохранить настройки',
+                close: 'Закрыть'
+            }
+        };
+        var fallback = localizedFallbacks[locale] || (isArabic ? {
             title: 'إعدادات ملفات تعريف الارتباط',
             intro: 'نستخدم التخزين الضروري لتشغيل الموقع. لا يتم تحميل التحليلات أو الخرائط أو الفيديو إلا بعد موافقتك.',
             necessary: 'ضروري',
@@ -733,7 +782,7 @@
             customize: 'Customize',
             save: 'Save settings',
             close: 'Close'
-        };
+        });
         var text = {};
         Object.keys(fallback).forEach(function (key) {
             text[key] = localizedSectionValue('cookieConsent', key, fallback[key]);
