@@ -45,6 +45,76 @@ const expectedPlannedLocales = {
         includeInSitemap: false
     }
 };
+const localizedStaticShellExpectations = {
+    fr: {
+        'index.html': {
+            title: "Fabricant de transformateurs et d'appareillages | Longxiang",
+            description: "Longxiang Electrical fabrique des transformateurs, appareillages, bornes de recharge EV et systèmes de stockage d'énergie pour les projets industriels et d'énergies renouvelables."
+        },
+        'about.html': {
+            title: 'À propos | Henan Longxiang Electrical Co., Ltd.',
+            description: "Découvrez Henan Longxiang Electrical, fabricant high-tech coté d'équipements intelligents et bas carbone pour la distribution électrique."
+        },
+        'products.html': {
+            title: 'Transformateurs, appareillages et bornes EV | Longxiang',
+            description: "Parcourez les transformateurs, appareillages, bornes de recharge EV, systèmes de stockage et équipements PV Longxiang pour projets industriels et énergétiques."
+        },
+        'solutions.html': {
+            title: 'Solutions de distribution électrique | Henan Longxiang Electrical',
+            description: "Solutions Longxiang pour transformateurs, appareillages, recharge EV, solaire PV, stockage, micro-réseaux, EPC et maintenance de lignes électriques."
+        },
+        'education.html': {
+            title: 'Coopération éducative | Henan Longxiang Electrical Co., Ltd.',
+            description: "Programmes de coopération école-entreprise Longxiang pour collèges industriels, formation des talents, équipements pédagogiques et coopération internationale."
+        },
+        'certifications.html': {
+            title: 'Certificats | Henan Longxiang Electrical Co., Ltd.',
+            description: 'Certificats, qualifications, brevets et rapports d’essai de Henan Longxiang Electrical pour la revue technique et fournisseur.'
+        },
+        'compare.html': {
+            title: 'Comparaison de produits | Henan Longxiang Electrical Co., Ltd.',
+            description: 'Comparez côte à côte les modèles Longxiang sélectionnés et leurs principales spécifications techniques.'
+        },
+        'contact.html': {
+            title: 'Contactez-nous | Henan Longxiang Electrical Co., Ltd.',
+            description: "Contactez Henan Longxiang Electrical pour devis, sélection technique et support de projet sur transformateurs, appareillages, bornes EV et distribution électrique."
+        }
+    },
+    ru: {
+        'index.html': {
+            title: 'Производитель трансформаторов и КРУ | Longxiang',
+            description: 'Longxiang Electrical производит трансформаторы, распределительные устройства, зарядные станции EV и системы накопления энергии для промышленных и энергетических проектов.'
+        },
+        'about.html': {
+            title: 'О компании | Henan Longxiang Electrical Co., Ltd.',
+            description: 'О Henan Longxiang Electrical: высокотехнологичный производитель интеллектуального низкоуглеродного оборудования для распределения электроэнергии.'
+        },
+        'products.html': {
+            title: 'Трансформаторы, КРУ и зарядные станции EV | Longxiang',
+            description: 'Каталог трансформаторов, распределительных устройств, зарядных станций EV, систем накопления энергии и PV-оборудования Longxiang.'
+        },
+        'solutions.html': {
+            title: 'Решения для электроснабжения | Henan Longxiang Electrical',
+            description: 'Решения Longxiang для трансформаторов, распределительных устройств, зарядки EV, солнечной энергетики, накопителей, микросетей, EPC и обслуживания линий.'
+        },
+        'education.html': {
+            title: 'Образовательное сотрудничество | Henan Longxiang Electrical Co., Ltd.',
+            description: 'Программы сотрудничества Longxiang с учебными заведениями для промышленных колледжей, подготовки специалистов, учебного оборудования и международных проектов.'
+        },
+        'certifications.html': {
+            title: 'Сертификаты | Henan Longxiang Electrical Co., Ltd.',
+            description: 'Сертификаты, квалификации, патенты и отчеты испытаний Henan Longxiang Electrical для технической проверки и оценки поставщика.'
+        },
+        'compare.html': {
+            title: 'Сравнение продукции | Henan Longxiang Electrical Co., Ltd.',
+            description: 'Сравните выбранные модели оборудования Longxiang и их основные технические характеристики.'
+        },
+        'contact.html': {
+            title: 'Свяжитесь с нами | Henan Longxiang Electrical Co., Ltd.',
+            description: 'Свяжитесь с Henan Longxiang Electrical для запроса цены, технического подбора и поддержки проектов по трансформаторам, КРУ, зарядке EV и распределению энергии.'
+        }
+    }
+};
 
 function fail(message) {
     failures.push(message);
@@ -444,6 +514,13 @@ function findMetaByName(html, name) {
         .find((attrs) => String(attrs.name || '').toLowerCase() === expected);
 }
 
+function findMetaByProperty(html, property) {
+    const expected = property.toLowerCase();
+    return collectTags(html, 'meta')
+        .map((tag) => tag.attrs)
+        .find((attrs) => String(attrs.property || '').toLowerCase() === expected);
+}
+
 function findHeadLinks(html, rel) {
     return collectTags(html, 'link')
         .map((tag) => tag.attrs)
@@ -527,6 +604,41 @@ function verifyHtmlPage(page) {
     }
 
     assert(h1Texts.length > 0, page.file + ' 缺少可读的 H1 fallback 文案。');
+}
+
+function verifyLocalizedStaticShellText() {
+    staticPages
+        .filter((page) => Object.prototype.hasOwnProperty.call(localizedStaticShellExpectations, page.locale))
+        .forEach((page) => {
+            const fileName = path.basename(page.file);
+            const expected = localizedStaticShellExpectations[page.locale][fileName];
+            if (!expected) return;
+
+            assert(fileExists(page.file), page.file + ' 启用语言静态页面壳不存在。');
+            if (!fileExists(page.file)) return;
+
+            const html = readText(page.file);
+            const title = firstElementText(html, 'title');
+            const description = findMetaByName(html, 'description');
+            const ogTitle = findMetaByProperty(html, 'og:title');
+            const ogDescription = findMetaByProperty(html, 'og:description');
+            const twitterTitle = findMetaByName(html, 'twitter:title');
+            const twitterDescription = findMetaByName(html, 'twitter:description');
+            const canonicalLinks = findHeadLinks(html, 'canonical');
+
+            assert(title === expected.title, page.file + ' title 应为 "' + expected.title + '"，当前为 "' + title + '"。');
+            assert(description && description.content === expected.description,
+                page.file + ' meta description 应为 "' + expected.description + '"。');
+            if (ogTitle) assert(ogTitle.content === expected.title, page.file + ' og:title 应同步为本语言 title。');
+            if (ogDescription) assert(ogDescription.content === expected.description, page.file + ' og:description 应同步为本语言 description。');
+            if (twitterTitle) assert(twitterTitle.content === expected.title, page.file + ' twitter:title 应同步为本语言 title。');
+            if (twitterDescription) assert(twitterDescription.content === expected.description, page.file + ' twitter:description 应同步为本语言 description。');
+            assert(canonicalLinks.length === 1, page.file + ' 应包含且只包含 1 个静态 canonical。');
+            if (canonicalLinks.length === 1) {
+                assert(canonicalLinks[0].href === buildUrl(page.path),
+                    page.file + ' canonical href 应为 ' + buildUrl(page.path) + '。');
+            }
+        });
 }
 
 function collectUpsertHeadLinkObjects(source, rel) {
@@ -919,6 +1031,15 @@ function assertCertificationAdminMappings(source) {
     });
 }
 
+function assertVisualBuilderLanguageSupport(source) {
+    assertSourceContains(source, /key:\s*['"]fr['"]/, 'admin/js/admin.js 可视化内容编辑器缺少法语语言按钮。');
+    assertSourceContains(source, /key:\s*['"]ru['"]/, 'admin/js/admin.js 可视化内容编辑器缺少俄语语言按钮。');
+    assertSourceContains(source, /visualLanguageSuffix\s*\(/, 'admin/js/admin.js 可视化内容编辑器应使用通用语言后缀生成 Fr/Ru/Ar 字段。');
+    assertSourceContains(source, /field\.localizedKeyByLanguage/, 'admin/js/admin.js 可视化内容编辑器应支持字段级语言键映射。');
+    assertSourceNotContains(source, /if\s*\(\s*!visualIsArabicLanguage\s*\(\s*\)\s*\|\|\s*!visualFieldSupportsLanguage\s*\(\s*field\s*\)\s*\)\s*return\s+key\s*;/,
+        'admin/js/admin.js 可视化内容编辑器仍只按阿语生成本地化字段。');
+}
+
 function verifyAdminI18nEditingEntrypoints() {
     const adminHtml = readText('admin/index.html');
     const productAdminSource = readText('admin/js/modules/admin-products.js');
@@ -976,6 +1097,7 @@ function verifyAdminI18nEditingEntrypoints() {
     assertProductAdminMappings(productAdminSource, productMappings, 'admin/js/modules/admin-products.js 产品后台');
     assertCategoryAdminMappings(adminSource);
     assertCertificationAdminMappings(adminSource);
+    assertVisualBuilderLanguageSupport(adminSource);
 
     assertSelectClauseContainsAll(productListRouteSource, 'FROM\\s+products\\s+p\\b', productFields.map((field) => 'p.' + field), 'server/routes/admin/products.js 产品列表后台');
     assertSourceContains(productDetailRouteSource, /getFullProduct\s*\(/, 'server/routes/admin/products.js 产品详情路由应读取完整产品。');
@@ -1280,6 +1402,7 @@ function main() {
     verifyPlannedLocaleModelIsolation();
     verifyPlannedLocalesNotInStaticHeadLinks();
     htmlPages.forEach(verifyHtmlPage);
+    verifyLocalizedStaticShellText();
     verifyProductDetailJs();
     verifyFrontendRuntimeI18nJs();
     verifyFrontendAssetPathRuntimeJs();

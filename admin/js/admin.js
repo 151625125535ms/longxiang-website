@@ -503,8 +503,10 @@
         };
 
         var VISUAL_BUILDER_LANGUAGES = [
-            { key: 'default', label: '英文/默认', shortLabel: '英', previewLabel: '英文页面' },
-            { key: 'ar', label: '阿拉伯语', shortLabel: '阿', previewLabel: '阿语页面' }
+            { key: 'default', code: 'en', suffix: '', label: '英文/默认', shortLabel: '英', previewLabel: '英文页面', fieldLabel: '英文/默认' },
+            { key: 'fr', code: 'fr', suffix: 'Fr', label: '法语', shortLabel: '法', previewLabel: '法语页面', fieldLabel: '法语', dir: 'ltr' },
+            { key: 'ru', code: 'ru', suffix: 'Ru', label: '俄语', shortLabel: '俄', previewLabel: '俄语页面', fieldLabel: '俄语', dir: 'ltr' },
+            { key: 'ar', code: 'ar', suffix: 'Ar', label: '阿拉伯语', shortLabel: '阿', previewLabel: '阿语页面', fieldLabel: '阿语', dir: 'rtl' }
         ];
 
         function visualSolutionFeatureFields(imageCount) {
@@ -4325,8 +4327,24 @@
             return visualLanguageByKey(visualBuilderState.activeLanguage);
         }
 
+        function visualIsDefaultLanguage() {
+            return visualActiveLanguage().key === 'default';
+        }
+
         function visualIsArabicLanguage() {
-            return visualBuilderState.activeLanguage === 'ar';
+            return visualActiveLanguage().key === 'ar';
+        }
+
+        function visualLanguageSuffix() {
+            return visualActiveLanguage().suffix || '';
+        }
+
+        function visualLanguageCode() {
+            return visualActiveLanguage().code || 'en';
+        }
+
+        function visualLanguageDir() {
+            return visualActiveLanguage().dir || 'ltr';
         }
 
         function visualFieldSupportsLanguage(field) {
@@ -4343,23 +4361,30 @@
 
         function visualLanguageFieldKey(field) {
             var key = field && field.key ? field.key : '';
-            if (!visualIsArabicLanguage() || !visualFieldSupportsLanguage(field)) return key;
-            if (field.arKey) return field.arKey;
+            var suffix = visualLanguageSuffix();
+            if (visualIsDefaultLanguage() || !suffix || !visualFieldSupportsLanguage(field)) return key;
+            if (field.localizedKeyByLanguage && field.localizedKeyByLanguage[visualActiveLanguage().key]) {
+                return field.localizedKeyByLanguage[visualActiveLanguage().key];
+            }
+            if (field[visualActiveLanguage().key + 'Key']) return field[visualActiveLanguage().key + 'Key'];
             var parts = key.split('.');
             var last = parts.pop();
-            parts.push(last + 'Ar');
+            parts.push(last + suffix);
             return parts.join('.');
         }
 
         function visualLanguageFieldLabel(field, path) {
             var label = (field && field.label) || path;
-            if (visualIsArabicLanguage() && visualFieldSupportsLanguage(field)) return label + '（阿语）';
+            if (!visualIsDefaultLanguage() && visualFieldSupportsLanguage(field)) {
+                return label + '（' + (visualActiveLanguage().fieldLabel || visualActiveLanguage().label) + '）';
+            }
             return label;
         }
 
         function visualArrayItemTitle(item, module, index) {
             if (!item) return (module.itemLabel || '项目') + ' ' + (index + 1);
-            var keys = visualIsArabicLanguage() ? ['titleAr', 'labelAr', 'title', 'label', 'year', 'date', 'value', 'href'] : ['title', 'label', 'year', 'date', 'value', 'href'];
+            var suffix = visualLanguageSuffix();
+            var keys = suffix ? ['title' + suffix, 'label' + suffix, 'title', 'label', 'year', 'date', 'value', 'href'] : ['title', 'label', 'year', 'date', 'value', 'href'];
             for (var i = 0; i < keys.length; i += 1) {
                 if (item[keys[i]]) return item[keys[i]];
             }
@@ -4648,7 +4673,9 @@
             var id = visualFieldId(path);
             var label = visualLanguageFieldLabel(field, path);
             var valueText = Array.isArray(value) ? value.join('\n') : (value == null ? '' : String(value));
-            var languageAttrs = visualIsArabicLanguage() && visualFieldSupportsLanguage(field) ? ' dir="rtl" lang="ar"' : '';
+            var languageAttrs = !visualIsDefaultLanguage() && visualFieldSupportsLanguage(field)
+                ? ' lang="' + escapeHtml(visualLanguageCode()) + '"' + (visualLanguageDir() === 'rtl' ? ' dir="rtl"' : '')
+                : '';
             if (field.type === 'toggle') {
                 return '<label class="visual-switch-field"><input type="checkbox" data-visual-field="' + escapeHtml(path) + '"' + (value !== false ? ' checked' : '') + '><span></span><strong>' + escapeHtml(label) + '</strong></label>';
             }
@@ -4738,7 +4765,7 @@
                 ? '<div class="visual-composite-editor">' + sections.join('') + '</div>'
                 : renderVisualModuleFields(page, module, block);
             var language = visualActiveLanguage();
-            var languageNote = visualIsArabicLanguage() ? '<span>图片、链接、开关为中英阿共用字段</span>' : '';
+            var languageNote = !visualIsDefaultLanguage() ? '<span>图片、链接、开关为所有语言共用字段</span>' : '';
             var meta = '<div class="visual-editor-meta"><span>数据源：' + escapeHtml(block.slug || page.slug) + '</span><span>编辑语言：' + escapeHtml(language.label) + '</span><span>版本：v' + escapeHtml(block.version || 1) + '</span><span id="visual-save-status">' + (block.updated_at ? '已加载：' + escapeHtml(formatDate(block.updated_at)) : '已加载') + '</span>' + languageNote + '</div>';
             return header + meta + body;
         }
@@ -4784,15 +4811,26 @@
             var language = visualActiveLanguage();
             if (editor) editor.innerHTML = renderVisualModuleEditor(page, module, block);
             if (title) title.textContent = page.label + ' / ' + module.label + ' / ' + language.label;
-            if (subtitle) subtitle.textContent = (visualIsArabicLanguage() ? '当前编辑阿语字段；' : '当前编辑英文/默认字段；') + '修改会保存到 ' + page.slug + ' 内容块，并同步影响对应前台页面。';
+            if (subtitle) subtitle.textContent = '当前编辑' + language.label + '字段；修改会保存到 ' + page.slug + ' 内容块，并同步影响对应前台页面。';
             syncVisualNavActive();
             syncVisualLanguageSwitch();
             refreshVisualPreview(false);
         }
 
+        function visualLanguageFromPath(pathname) {
+            var normalized = String(pathname || '').replace(/\\/g, '/');
+            for (var i = 0; i < VISUAL_BUILDER_LANGUAGES.length; i += 1) {
+                var language = VISUAL_BUILDER_LANGUAGES[i];
+                if (!language.code || language.key === 'default') continue;
+                if (new RegExp('(^|/)' + language.code + '(/|$)').test(normalized)) return language.key;
+            }
+            return 'default';
+        }
+
         function visualPreviewUrl(page, module) {
             var baseUrl = (module && module.previewUrl) || (page && page.previewUrl) || '../index.html';
-            if (!visualIsArabicLanguage()) return baseUrl;
+            var language = visualActiveLanguage();
+            if (language.key === 'default') return baseUrl;
             var hash = '';
             var query = '';
             var path = baseUrl;
@@ -4806,8 +4844,10 @@
                 query = path.slice(queryIndex);
                 path = path.slice(0, queryIndex);
             }
-            if (/^(https?:)?\/\//i.test(path) || path.indexOf('/ar/') !== -1 || path.indexOf('../ar/') !== -1) return baseUrl;
-            path = path.replace(/([^/]+\.html)$/i, 'ar/$1');
+            if (/^(https?:)?\/\//i.test(path)) return baseUrl;
+            path = path.replace(/^(\.\.\/)?(ar|fr|ru)\//i, '');
+            path = path.replace(/^\.\.\//, '');
+            path = '../' + language.code + '/' + path;
             return path + query + hash;
         }
 
@@ -4815,7 +4855,7 @@
             try {
                 var pathname = frame.contentWindow && frame.contentWindow.location && frame.contentWindow.location.pathname;
                 if (!pathname) return false;
-                var nextLanguage = /\/ar\//.test(pathname.replace(/\\/g, '/')) ? 'ar' : 'default';
+                var nextLanguage = visualLanguageFromPath(pathname);
                 if (nextLanguage === visualBuilderState.activeLanguage) return false;
                 cacheCurrentVisualDraft();
                 visualBuilderState.activeLanguage = nextLanguage;
