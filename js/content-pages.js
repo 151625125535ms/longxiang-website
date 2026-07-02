@@ -1248,8 +1248,14 @@
         var section = pageRoot.querySelector('[data-home-features]');
         var features = body.features || [];
         if (!section || !features.length) return;
+        var titleText = {
+            en: 'Why Choose Longxiang',
+            ar: 'لماذا Longxiang',
+            fr: 'Pourquoi choisir Longxiang',
+            ru: 'Почему выбирают Longxiang'
+        }[locale] || 'Why Choose Longxiang';
         section.innerHTML = '<div class="container">' +
-            '<div class="section-header fade-in"><h2>' + escapeHtml(isArabic ? 'لماذا Longxiang' : 'Why Choose Longxiang') + '</h2></div>' +
+            '<div class="section-header fade-in"><h2>' + escapeHtml(titleText) + '</h2></div>' +
             '<div class="features-grid" data-stagger="150">' +
             features.map(function (feature) {
                 return '<div class="feature-card fade-in"><div class="feature-icon">' + (feature.icon || '') + '</div>' +

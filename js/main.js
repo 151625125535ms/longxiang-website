@@ -2049,6 +2049,24 @@
             });
         }
 
+        function productActionLabel(key) {
+            var labels = {
+                viewDetails: {
+                    en: 'View Details',
+                    ar: 'عرض التفاصيل',
+                    fr: 'Voir les détails',
+                    ru: 'Подробнее'
+                },
+                priceInquiry: {
+                    en: 'Price Inquiry',
+                    ar: 'استعلام السعر',
+                    fr: 'Demander un prix',
+                    ru: 'Запросить цену'
+                }
+            };
+            return (labels[key] && labels[key][locale]) || (labels[key] && labels[key].en) || '';
+        }
+
         function renderFeaturedCategories(products, homeContent, apiCategories) {
             if (!categoryContainer) return;
             categoryContainer.innerHTML = '';
@@ -2094,8 +2112,8 @@
                     '</div>' +
                 '</a>' +
                 '<div class="product-card-footer">' +
-                    '<a href="' + detail + '" class="product-card-action details">' + (isArabic ? 'عرض التفاصيل' : 'View Details') + '</a>' +
-                    '<button type="button" class="product-card-action inquiry" data-inquiry-product data-product-id="' + escapeHtml(product.id) + '" data-product-name="' + escapeHtml(name) + '">' + (isArabic ? 'استعلام السعر' : 'Price Inquiry') + '</button>' +
+                    '<a href="' + detail + '" class="product-card-action details">' + escapeHtml(productActionLabel('viewDetails')) + '</a>' +
+                    '<button type="button" class="product-card-action inquiry" data-inquiry-product data-product-id="' + escapeHtml(product.id) + '" data-product-name="' + escapeHtml(name) + '">' + escapeHtml(productActionLabel('priceInquiry')) + '</button>' +
                 '</div>';
             return card;
         }

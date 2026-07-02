@@ -796,7 +796,35 @@ function verifyFrontendAssetPathRuntimeJs() {
 
 function verifyProductListRuntimeI18nJs() {
     const source = readText('js/products-list.js');
+    ['Voir les détails', 'Demander un prix', 'Подробнее', 'Запросить цену'].forEach((text) => {
+        assertSourceContains(source, new RegExp(escapeRegExp(text)), 'js/products-list.js 缺少产品目录 fr/ru 运行时文案：' + text);
+    });
+    ['localizeCatalogStaticUi', 'productCategories', 'clearFilters', 'searchPlaceholder'].forEach((name) => {
+        assertSourceContains(source, new RegExp('\\b' + name + '\\b'), 'js/products-list.js 缺少产品目录静态控件本地化能力：' + name);
+    });
     assertSourceContains(source, /localizedProductPath\s*\(/, 'js/products-list.js 应使用 LongxiangI18n.localizedProductPath() 生成产品详情链接。');
+}
+
+function verifyStaticHtmlRuntimeCacheVersions() {
+    const oldVersionPatterns = [
+        /20260702-i18n-patch/,
+        /js\/\.js\?v=/,
+        /js\/main\.js\?v=20260702-i18n-patch/,
+        /js\/content-pages\.js\?v=20260702-i18n-patch/,
+        /js\/products-list\.js\?v=20260701-remove-compare/
+    ];
+    const roots = ['', 'ar', 'fr', 'ru', 'pt'];
+    roots.forEach((dir) => {
+        fs.readdirSync(path.join(root, dir || '.'))
+            .filter((name) => name.endsWith('.html'))
+            .forEach((name) => {
+                const relativePath = dir ? path.join(dir, name) : name;
+                const source = readText(relativePath);
+                oldVersionPatterns.forEach((pattern) => {
+                    assertSourceNotContains(source, pattern, relativePath + ' 仍引用旧 JS 缓存版本，可能导致 fr/ru runtime 不生效。');
+                });
+            });
+    });
 }
 
 function verifyPublicApiI18nFieldMapping() {
@@ -1407,6 +1435,7 @@ function main() {
     verifyFrontendRuntimeI18nJs();
     verifyFrontendAssetPathRuntimeJs();
     verifyProductListRuntimeI18nJs();
+    verifyStaticHtmlRuntimeCacheVersions();
     verifyPublicApiI18nFieldMapping();
     verifyFrontendI18nFieldReaders();
     verifyAdminI18nEditingEntrypoints();

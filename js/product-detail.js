@@ -51,6 +51,42 @@
         'Enclosure': 'الغلاف',
         'Installation': 'طريقة التركيب'
     };
+    var TEXT_FALLBACKS = {
+        fr: {
+            'Category': 'Catégorie',
+            'Power Equipment': 'Équipement électrique',
+            'Voltage': 'Tension',
+            'Project-specific': 'Selon le projet',
+            'Capacity': 'Capacité',
+            'Confirm by requirement': 'À confirmer selon le besoin',
+            'Request Configuration Quote': 'Demander un devis de configuration',
+            'Application Scenarios': 'Scénarios d’application',
+            'Selection & Delivery Notes': 'Notes de sélection et de livraison',
+            'Confirm the required voltage level, rated capacity, frequency, and installation environment.': 'Confirmez le niveau de tension, la capacité nominale, la fréquence et l’environnement d’installation requis.',
+            'Share the destination country, quantity, project schedule, and whether drawings or technical documents are required.': 'Indiquez le pays de destination, la quantité, le calendrier du projet et les documents techniques nécessaires.',
+            'Use the inquiry form on this page so the sales and engineering team can reply with a matched configuration.': 'Utilisez le formulaire de cette page afin que les équipes commerciale et technique répondent avec une configuration adaptée.',
+            'Voltage: ': 'Tension : ',
+            'Capacity: ': 'Capacité : ',
+            'Standard: ': 'Norme : '
+        },
+        ru: {
+            'Category': 'Категория',
+            'Power Equipment': 'Электрооборудование',
+            'Voltage': 'Напряжение',
+            'Project-specific': 'По требованиям проекта',
+            'Capacity': 'Мощность',
+            'Confirm by requirement': 'Уточняется по запросу',
+            'Request Configuration Quote': 'Запросить расчет конфигурации',
+            'Application Scenarios': 'Сценарии применения',
+            'Selection & Delivery Notes': 'Примечания по подбору и поставке',
+            'Confirm the required voltage level, rated capacity, frequency, and installation environment.': 'Подтвердите требуемый уровень напряжения, номинальную мощность, частоту и условия установки.',
+            'Share the destination country, quantity, project schedule, and whether drawings or technical documents are required.': 'Укажите страну назначения, количество, график проекта и необходимость чертежей или технических документов.',
+            'Use the inquiry form on this page so the sales and engineering team can reply with a matched configuration.': 'Используйте форму запроса на этой странице, чтобы отдел продаж и инженеры ответили с подходящей конфигурацией.',
+            'Voltage: ': 'Напряжение: ',
+            'Capacity: ': 'Мощность: ',
+            'Standard: ': 'Стандарт: '
+        }
+    };
 
     function getQueryParam(name) {
         return new URLSearchParams(window.location.search).get(name);
@@ -142,7 +178,9 @@
     }
 
     function text(en, ar) {
-        return isArabic ? ar : en;
+        if (isArabic) return ar;
+        var pack = TEXT_FALLBACKS[locale] || {};
+        return pack[en] || en;
     }
 
     function rtlAttrs(className) {

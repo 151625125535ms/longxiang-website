@@ -13,6 +13,96 @@
         : (isArabic ? '../' : '');
     var productsCache = [];
     var pageSize = 9;
+    var UI_TEXT = {
+        en: {
+            viewDetails: 'View Details',
+            priceInquiry: 'Price Inquiry',
+            productsAvailable: 'products available',
+            productsUpdatedSoon: 'Products to be updated.',
+            pageOf: function (page, total) { return 'Page ' + page + ' of ' + total; },
+            keyword: 'Keyword',
+            unableToLoad: 'Unable to load products. Please try again later or contact us directly.',
+            noResultsPrefix: 'No results for "',
+            noResultsMiddle: '" in ',
+            noResultsSuffix: '.',
+            updatedSoonSuffix: ' products will be updated soon.',
+            allCategories: 'All Categories',
+            closeCategories: 'Close product categories',
+            productCategories: 'Product Categories',
+            loading: 'Loading...',
+            searchPlaceholder: 'Search products by name or model',
+            searchButton: 'Search',
+            currentFilter: 'Current filter:',
+            clearFilters: 'Clear filters',
+            productPagination: 'Product pagination'
+        },
+        ar: {
+            viewDetails: 'عرض التفاصيل',
+            priceInquiry: 'استعلام السعر',
+            productsAvailable: 'منتج متاح',
+            productsUpdatedSoon: 'سيتم تحديث المنتجات قريباً.',
+            pageOf: function (page, total) { return 'الصفحة ' + page + ' من ' + total; },
+            keyword: 'كلمة البحث',
+            unableToLoad: 'تعذر تحميل المنتجات. يرجى المحاولة لاحقاً.',
+            noResultsPrefix: 'لا توجد نتائج لـ "',
+            noResultsMiddle: '" ضمن ',
+            noResultsSuffix: '.',
+            updatedSoonSuffix: ' سيتم تحديث المنتجات قريباً.',
+            allCategories: 'جميع الفئات',
+            closeCategories: 'إغلاق فئات المنتجات',
+            productCategories: 'فئات المنتجات',
+            loading: 'جارٍ التحميل...',
+            searchPlaceholder: 'ابحث باسم المنتج أو الطراز',
+            searchButton: 'بحث',
+            currentFilter: 'الفلتر الحالي:',
+            clearFilters: 'مسح الفلاتر',
+            productPagination: 'ترقيم صفحات المنتجات'
+        },
+        fr: {
+            viewDetails: 'Voir les détails',
+            priceInquiry: 'Demander un prix',
+            productsAvailable: 'produits disponibles',
+            productsUpdatedSoon: 'Les produits seront mis à jour prochainement.',
+            pageOf: function (page, total) { return 'Page ' + page + ' sur ' + total; },
+            keyword: 'Mot-clé',
+            unableToLoad: 'Impossible de charger les produits. Veuillez réessayer plus tard ou nous contacter directement.',
+            noResultsPrefix: 'Aucun résultat pour "',
+            noResultsMiddle: '" dans ',
+            noResultsSuffix: '.',
+            updatedSoonSuffix: ' seront mis à jour prochainement.',
+            allCategories: 'Toutes les catégories',
+            closeCategories: 'Fermer les catégories de produits',
+            productCategories: 'Catégories de produits',
+            loading: 'Chargement...',
+            searchPlaceholder: 'Rechercher par nom ou modèle',
+            searchButton: 'Rechercher',
+            currentFilter: 'Filtre actuel :',
+            clearFilters: 'Effacer les filtres',
+            productPagination: 'Pagination des produits'
+        },
+        ru: {
+            viewDetails: 'Подробнее',
+            priceInquiry: 'Запросить цену',
+            productsAvailable: 'товаров доступно',
+            productsUpdatedSoon: 'Продукция будет обновлена в ближайшее время.',
+            pageOf: function (page, total) { return 'Страница ' + page + ' из ' + total; },
+            keyword: 'Ключевое слово',
+            unableToLoad: 'Не удалось загрузить продукцию. Повторите попытку позже или свяжитесь с нами напрямую.',
+            noResultsPrefix: 'Нет результатов по запросу "',
+            noResultsMiddle: '" в ',
+            noResultsSuffix: '.',
+            updatedSoonSuffix: ' будут обновлены в ближайшее время.',
+            allCategories: 'Все категории',
+            closeCategories: 'Закрыть категории продукции',
+            productCategories: 'Категории продукции',
+            loading: 'Загрузка...',
+            searchPlaceholder: 'Поиск по названию или модели',
+            searchButton: 'Поиск',
+            currentFilter: 'Текущий фильтр:',
+            clearFilters: 'Сбросить фильтры',
+            productPagination: 'Пагинация продукции'
+        }
+    };
 
     var taxonomy = [];
 
@@ -49,6 +139,36 @@
             if (product[arabicField]) return product[arabicField];
         }
         return product[field] || '';
+    }
+
+    function t(key) {
+        var pack = UI_TEXT[locale] || UI_TEXT.en;
+        return pack[key] || UI_TEXT.en[key] || '';
+    }
+
+    function setText(selector, value) {
+        var el = document.querySelector(selector);
+        if (el && value) el.textContent = value;
+    }
+
+    function setAttr(selector, name, value) {
+        var el = document.querySelector(selector);
+        if (el && value) el.setAttribute(name, value);
+    }
+
+    function localizeCatalogStaticUi() {
+        setText('.product-category-toggle', t('allCategories'));
+        setText('.product-category-close', '\u00d7');
+        setAttr('.product-category-close', 'aria-label', t('closeCategories'));
+        setText('.product-tree-title', t('productCategories'));
+        setText('.product-tree-body .loading-placeholder', t('loading'));
+        setAttr('.product-tree', 'aria-label', t('productCategories'));
+        setAttr('#catalog-search', 'placeholder', t('searchPlaceholder'));
+        setAttr('#catalog-search', 'aria-label', t('searchPlaceholder'));
+        setText('.catalog-search-submit', t('searchButton'));
+        setText('.catalog-filter-label', t('currentFilter'));
+        setText('.catalog-clear-filters', t('clearFilters'));
+        setAttr('.catalog-pagination', 'aria-label', t('productPagination'));
     }
 
     function rtlTextAttrs(className) {
@@ -128,8 +248,8 @@
                 '</div>' +
             '</a>' +
             '<div class="product-card-footer">' +
-                '<a href="' + href + '" class="product-card-action details">' + (isArabic ? 'عرض التفاصيل' : 'View Details') + '</a>' +
-                '<button type="button" class="product-card-action inquiry" data-inquiry-product data-product-id="' + escapeHtml(product.id) + '" data-product-name="' + escapeHtml(name) + '">' + (isArabic ? 'استعلام السعر' : 'Price Inquiry') + '</button>' +
+                '<a href="' + href + '" class="product-card-action details">' + escapeHtml(t('viewDetails')) + '</a>' +
+                '<button type="button" class="product-card-action inquiry" data-inquiry-product data-product-id="' + escapeHtml(product.id) + '" data-product-name="' + escapeHtml(name) + '">' + escapeHtml(t('priceInquiry')) + '</button>' +
             '</div>';
 
         return card;
@@ -203,14 +323,12 @@
         var keyword = (search || '').trim();
         if (keyword) {
             container.innerHTML = '<div class="empty-state">' +
-                (isArabic
-                    ? 'لا توجد نتائج لـ "' + escapeHtml(keyword) + '" ضمن ' + escapeHtml(label) + '.'
-                    : 'No results for "' + escapeHtml(keyword) + '" in ' + escapeHtml(label) + '.') +
+                escapeHtml(t('noResultsPrefix')) + escapeHtml(keyword) + escapeHtml(t('noResultsMiddle')) + escapeHtml(label) + escapeHtml(t('noResultsSuffix')) +
                 '</div>';
             return;
         }
         container.innerHTML = '<div class="empty-state">' +
-            escapeHtml(label) + (isArabic ? ' سيتم تحديث المنتجات قريباً.' : ' products will be updated soon.') +
+            escapeHtml(label) + escapeHtml(t('updatedSoonSuffix')) +
             '</div>';
     }
 
@@ -219,7 +337,7 @@
         var current = document.getElementById('catalog-current-filter');
         if (!status || !current) return;
         var parts = [taxonomyLabel(filter.group, filter.sub)];
-        if (filter.search) parts.push((isArabic ? 'كلمة البحث: "' : 'Keyword: "') + filter.search + '"');
+        if (filter.search) parts.push(t('keyword') + ': "' + filter.search + '"');
         current.textContent = parts.join(' / ') + ' (' + total + ')';
         status.hidden = false;
     }
@@ -279,15 +397,13 @@
         if (title) title.textContent = taxonomyLabel(filter.group, filter.sub);
         if (summary) {
             summary.textContent = list.length
-                ? list.length + (isArabic ? ' منتج متاح' : ' products available')
-                : (isArabic ? 'سيتم تحديث المنتجات قريباً.' : 'Products to be updated.');
+                ? list.length + ' ' + t('productsAvailable')
+                : t('productsUpdatedSoon');
         }
 
         renderFilterStatus(filter, list.length);
         if (summary && list.length && pageCount > 1) {
-            summary.textContent += isArabic
-                ? ' / الصفحة ' + currentPage + ' من ' + pageCount
-                : ' / Page ' + currentPage + ' of ' + pageCount;
+            summary.textContent += ' / ' + t('pageOf')(currentPage, pageCount);
         }
 
         document.querySelectorAll('[data-product-filter]').forEach(function (button) {
@@ -459,7 +575,7 @@
     }
 
     function showError() {
-        container.innerHTML = '<div class="empty-state">' + (isArabic ? 'تعذر تحميل المنتجات. يرجى المحاولة لاحقاً.' : 'Unable to load products. Please try again later or contact us directly.') + '</div>';
+        container.innerHTML = '<div class="empty-state">' + escapeHtml(t('unableToLoad')) + '</div>';
     }
 
     function normalizeTaxonomyResponse(payload) {
@@ -552,6 +668,7 @@
     }
 
     function initCatalog() {
+        localizeCatalogStaticUi();
         Promise.all([loadCategories(), loadProducts()])
             .then(function (results) {
                 productsCache = results[1].map(normalizeProduct);
