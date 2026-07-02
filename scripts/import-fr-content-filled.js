@@ -16,13 +16,7 @@ const stageDir = path.join(homeDir || root, 'Desktop', 'new', 'stage');
 const defaultDbPath = process.env.DB_PATH
     ? (path.isAbsolute(process.env.DB_PATH) ? process.env.DB_PATH : path.join(root, process.env.DB_PATH))
     : path.join(root, 'data', 'longxiang.db');
-const expectedCounts = {
-    productCategories: 13,
-    products: 40,
-    certifications: 76,
-    staticPages: 10,
-    contentBlocks: 14
-};
+const requiredCollections = ['productCategories', 'products', 'certifications', 'staticPages', 'contentBlocks'];
 const defaultLocale = 'fr';
 const importableLocales = ['fr', 'ru'];
 const knownLocaleCodes = ['en', 'ar', 'fr', 'ru', 'pt'];
@@ -240,6 +234,70 @@ function matchRecord(db, tableName, columns, item, collectionName) {
     return { row: null, matchedBy: '' };
 }
 
+function expectedRowsForCollection(db, collectionName) {
+    if (collectionName === 'productCategories') {
+        return db.prepare(`
+            SELECT id
+            FROM categories
+            WHERE type = 'product'
+                AND COALESCE(is_active, 1) = 1
+            ORDER BY sort_order ASC, id ASC
+        `).all();
+    }
+
+    if (collectionName === 'products') {
+        return db.prepare(`
+            SELECT id
+            FROM products
+            WHERE status = 'published'
+            ORDER BY sort_order ASC, id ASC
+        `).all();
+    }
+
+    if (collectionName === 'certifications') {
+        return db.prepare(`
+            SELECT id
+            FROM certifications
+            WHERE status = 'published'
+            ORDER BY sort_order ASC, id ASC
+        `).all();
+    }
+
+    if (collectionName === 'contentBlocks') {
+        return db.prepare(`
+            SELECT id
+            FROM content_blocks
+            WHERE status = 'published'
+            ORDER BY sort_order ASC, slug ASC
+        `).all();
+    }
+
+    return [];
+}
+
+function expectedCoverageForCollection(db, collectionName, errors) {
+    try {
+        const rows = expectedRowsForCollection(db, collectionName);
+        return {
+            collectionName,
+            count: rows.length,
+            rowIds: new Set(rows.map((row) => String(row.id)))
+        };
+    } catch (err) {
+        errors.push(collectionName + ' expected coverage query failed: ' + err.message);
+        return {
+            collectionName,
+            count: 0,
+            rowIds: new Set()
+        };
+    }
+}
+
+function summarizeIds(ids, limit) {
+    const selected = ids.slice(0, limit);
+    return selected.join(', ') + (ids.length > limit ? ' ... +' + (ids.length - limit) : '');
+}
+
 function parseObjectJson(value, label, errors) {
     try {
         const parsed = JSON.parse(value || '{}');
@@ -335,11 +393,11 @@ function validateFilledData(data, errors, collectionNames, locale) {
             errors.push(key + ' must be an array.');
             return;
         }
-        if (value.length !== expectedCounts[key]) {
-            errors.push(key + ' count must be ' + expectedCounts[key] + ', current: ' + value.length + '.');
+        if (value.length <= 0) {
+            errors.push(key + ' must contain at least one item.');
         }
-        if (data.meta && data.meta.counts && data.meta.counts[key] !== expectedCounts[key]) {
-            errors.push('meta.counts.' + key + ' must be ' + expectedCounts[key] + '.');
+        if (data.meta && data.meta.counts && data.meta.counts[key] !== value.length) {
+            errors.push('meta.counts.' + key + ' must match ' + key + ' length ' + value.length + '.');
         }
     });
 }
@@ -364,12 +422,16 @@ function validateTargetFields(collectionName, item, allowedFields, errors) {
     });
 }
 
-function analyzeCollection(db, data, collectionName, tableColumnsByName, errors, blockers) {
+function analyzeCollection(db, data, collectionName, tableColumnsByName, expectedCoverage, errors, blockers) {
     const spec = collectionSpecs[collectionName];
     const columns = tableColumnsByName[spec.table] || [];
     const rows = Array.isArray(data[collectionName]) ? data[collectionName] : [];
+    const expectedCount = expectedCoverage && Number.isInteger(expectedCoverage.count) ? expectedCoverage.count : rows.length;
+    const expectedRowIds = expectedCoverage && expectedCoverage.rowIds ? expectedCoverage.rowIds : new Set();
     const unmatched = [];
     const matchedBy = {};
+    const matchedRowIds = new Set();
+    const duplicateMatchedRowIds = [];
     const contentBlockPreview = [];
     const applyRecords = [];
     let matched = 0;
@@ -402,6 +464,12 @@ function analyzeCollection(db, data, collectionName, tableColumnsByName, errors,
 
         matched += 1;
         matchedBy[match.matchedBy] = (matchedBy[match.matchedBy] || 0) + 1;
+        const matchedRowId = String(match.row.id);
+        if (matchedRowIds.has(matchedRowId)) {
+            duplicateMatchedRowIds.push(matchedRowId);
+        } else {
+            matchedRowIds.add(matchedRowId);
+        }
 
         if (collectionName === 'contentBlocks') {
             const currentJson = parseObjectJson(match.row.body_json, 'content_blocks ' + item.id + ' body_json', errors);
@@ -457,12 +525,32 @@ function analyzeCollection(db, data, collectionName, tableColumnsByName, errors,
         errors.push(collectionName + ' has unmatched records: '
             + unmatched.map((item) => item.id || item.slug || item.label || 'unknown').join(', ') + '.');
     }
+    if (rows.length !== expectedCount) {
+        errors.push(collectionName + ' input count must match current database eligible count '
+            + expectedCount + ', current: ' + rows.length + '.');
+    }
+    if (duplicateMatchedRowIds.length) {
+        errors.push(collectionName + ' maps multiple input records to the same database rows: '
+            + summarizeIds(duplicateMatchedRowIds, 12) + '.');
+    }
+    if (expectedRowIds.size) {
+        const unexpectedMatchedIds = Array.from(matchedRowIds).filter((id) => !expectedRowIds.has(id));
+        const missingExpectedIds = Array.from(expectedRowIds).filter((id) => !matchedRowIds.has(id));
+        if (unexpectedMatchedIds.length) {
+            errors.push(collectionName + ' input contains records outside the current database eligible set: '
+                + summarizeIds(unexpectedMatchedIds, 12) + '.');
+        }
+        if (missingExpectedIds.length) {
+            errors.push(collectionName + ' input is missing current database eligible rows: '
+                + summarizeIds(missingExpectedIds, 12) + '.');
+        }
+    }
 
     return {
         collectionName,
         label: spec.label,
         table: spec.table,
-        expected: expectedCounts[collectionName],
+        expected: expectedCount,
         input: rows.length,
         matched,
         unmatched,
@@ -638,6 +726,14 @@ function validateDatabase(db, errors, collectionNames) {
     return tableColumnsByName;
 }
 
+function activeExpectedCoverages(db, collectionNames, errors) {
+    const output = {};
+    collectionNames.forEach((collectionName) => {
+        output[collectionName] = expectedCoverageForCollection(db, collectionName, errors);
+    });
+    return output;
+}
+
 function renderMatchedBy(value) {
     const keys = Object.keys(value || {});
     return keys.length ? keys.map((key) => key + ': ' + value[key]).join(', ') : 'none';
@@ -749,12 +845,15 @@ function renderReport(report) {
         '',
         '## Input counts',
         '',
-        '| Collection | Expected | Current |',
-        '| --- | ---: | ---: |'
+        '| Collection | Expected from current DB/model | Input array | meta.counts |',
+        '| --- | ---: | ---: | ---: |'
     ];
 
-    Object.keys(expectedCounts).forEach((key) => {
-        lines.push('| ' + key + ' | ' + expectedCounts[key] + ' | ' + report.inputCounts[key] + ' |');
+    requiredCollections.forEach((key) => {
+        const expected = report.expectedCounts[key] == null ? 'not checked' : report.expectedCounts[key];
+        const current = report.inputCounts[key] == null ? 0 : report.inputCounts[key];
+        const metaCount = report.metaCounts[key] == null ? 'not provided' : report.metaCounts[key];
+        lines.push('| ' + key + ' | ' + expected + ' | ' + current + ' | ' + metaCount + ' |');
     });
 
     lines.push('', '## Mapping preview', '');
@@ -924,7 +1023,9 @@ async function main() {
         backupPath: '',
         backupSizeBytes: null,
         appliedCounts: {},
+        expectedCounts: {},
         inputCounts: {},
+        metaCounts: {},
         collectionSummaries: [],
         boundary: {
             localeConfig: false,
@@ -955,9 +1056,10 @@ async function main() {
     if (!errors.length) {
         try {
             data = readJsonFile(args.input);
-            validateFilledData(data, errors, selectedCollectionNames, targetLocale);
-            Object.keys(expectedCounts).forEach((key) => {
+            validateFilledData(data, errors, requiredCollections, targetLocale);
+            requiredCollections.forEach((key) => {
                 report.inputCounts[key] = Array.isArray(data[key]) ? data[key].length : 0;
+                report.metaCounts[key] = data.meta && data.meta.counts ? data.meta.counts[key] : null;
             });
         } catch (err) {
             errors.push('Input JSON cannot be parsed: ' + err.message);
@@ -973,8 +1075,28 @@ async function main() {
         try {
             db = new Database(args.db, { readonly: !args.apply, fileMustExist: true });
             const tableColumnsByName = validateDatabase(db, errors, selectedCollectionNames);
+            const expectedCoverages = activeExpectedCoverages(db, selectedCollectionNames, errors);
+            requiredCollections.forEach((key) => {
+                if (key === 'staticPages') {
+                    report.expectedCounts[key] = 'not database-backed';
+                } else if (expectedCoverages[key]) {
+                    report.expectedCounts[key] = expectedCoverages[key].count;
+                } else if (key === 'contentBlocks' && args.skipContentBlocks) {
+                    report.expectedCounts[key] = 'skipped';
+                } else {
+                    report.expectedCounts[key] = 'not checked';
+                }
+            });
             selectedCollectionNames.forEach((collectionName) => {
-                report.collectionSummaries.push(analyzeCollection(db, data, collectionName, tableColumnsByName, errors, report.blockers));
+                report.collectionSummaries.push(analyzeCollection(
+                    db,
+                    data,
+                    collectionName,
+                    tableColumnsByName,
+                    expectedCoverages[collectionName],
+                    errors,
+                    report.blockers
+                ));
             });
 
             if (args.apply && !errors.length && !report.blockers.length) {

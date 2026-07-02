@@ -19,13 +19,6 @@ const dbPath = path.join(root, 'data', 'longxiang.db');
 const expectedSupportedLocales = ['en', 'ar', 'fr'];
 const allowedTargetLocales = ['fr', 'ru'];
 const requiredPlannedOnlyLocales = ['pt'];
-const expectedCounts = {
-    productCategories: 13,
-    products: 40,
-    certifications: 76,
-    staticPages: 10,
-    contentBlocks: 14
-};
 
 function argValue(name, fallback) {
     const prefix = '--' + name + '=';
@@ -433,9 +426,9 @@ function validateCounts(template) {
     const counts = template.meta.counts;
     const failures = [];
 
-    Object.keys(expectedCounts).forEach((key) => {
-        if (counts[key] !== expectedCounts[key]) {
-            failures.push(key + ' expected ' + expectedCounts[key] + ', got ' + counts[key]);
+    ['productCategories', 'products', 'certifications', 'staticPages', 'contentBlocks'].forEach((key) => {
+        if (!Number.isInteger(counts[key]) || counts[key] <= 0) {
+            failures.push(key + ' must have at least one exported item, got ' + counts[key]);
         }
     });
 
