@@ -634,7 +634,13 @@ function verifyFrontendRuntimeI18nJs() {
         'plannedLocalePathInfo',
         'isPlannedLocalePath',
         'productIdentifierFromLocalizedPath',
-        'seoLocales'
+        'seoLocales',
+        'normalizeContentLocale',
+        'localizedPatchValue',
+        'applyArrayPatch',
+        'contentPatchBaseFields',
+        'snakeToCamel',
+        'localizeContentTree'
     ].forEach((name) => {
         assertSourceContains(source, new RegExp('\\b' + name + '\\b'), 'js/main.js 缺少运行时 i18n helper：' + name + '。');
     });
@@ -645,11 +651,19 @@ function verifyFrontendRuntimeI18nJs() {
     assertSourceNotContains(source, /var\s+detail\s*=\s*\(isArabic\s*\?\s*['"]\/ar\/products\/['"]\s*:\s*['"]\/products\/['"]\)/, 'js/main.js 首页产品详情链接仍写死 en/ar。');
 
     const alternateSource = functionSource(source, 'injectAlternateSeoLinks');
+    const shellLabelSource = functionSource(source, 'shellLabel');
+    const mergePatchSource = functionSource(source, 'mergeContentPatch');
+    const localizeTreeSource = functionSource(source, 'localizeContentTree');
     assertSourceContains(alternateSource, /seoLocales\s*\(/, 'js/main.js 的 injectAlternateSeoLinks() 应使用 LongxiangI18n.seoLocales()。');
     assertSourceContains(alternateSource, /baseStaticPathFromLocalizedPath\s*\(/, 'js/main.js 的 injectAlternateSeoLinks() 应从当前路径计算基础静态路径。');
     assertSourceContains(alternateSource, /localizedStaticPath\s*\(/, 'js/main.js 的 injectAlternateSeoLinks() 应使用 localizedStaticPath() 生成静态页 alternate。');
     assertSourceNotContains(alternateSource, /hreflang\s*:\s*['"]en['"]/, 'js/main.js 的 injectAlternateSeoLinks() 仍写死 hreflang=en。');
     assertSourceNotContains(alternateSource, /hreflang\s*:\s*['"]ar['"]/, 'js/main.js 的 injectAlternateSeoLinks() 仍写死 hreflang=ar。');
+    assertSourceContains(mergePatchSource, /applyArrayPatch\s*\(/, 'js/main.js mergeContentPatch() must preserve nested arrays with patch objects.');
+    assertSourceContains(localizeTreeSource, /normalizeContentLocale\s*\(/, 'js/main.js localizeContentTree() must allow planned locale patch suffixes without exposing planned locales.');
+    assertSourceContains(source, /field\s*\+\s*['"]Patch['"]\s*\+\s*suffix/, 'js/main.js localizeContentTree() must support PatchFr/PatchRu content block patches.');
+    assertSourceContains(source, /snakeToCamel\s*\(\s*baseField\s*\)/, 'js/main.js localizeContentTree() must map snake-case patch fields back to camelCase base fields.');
+    assertSourceContains(shellLabelSource, /LongxiangI18n\.localized\s*\(/, 'js/main.js shellLabel() must read localized labels after PatchFr/PatchRu merge.');
     verifyFrontendPlannedLocaleRuntimeSeoGuards(source);
 }
 
@@ -994,15 +1008,20 @@ function verifyAdminI18nEditingEntrypoints() {
 
 function verifyContentPagesRuntimeSeoJs() {
     const source = readText('js/content-pages.js');
+    const productDetailSource = readText('js/product-detail.js');
     assertSourceContains(source, /seoLocales\s*\(/, 'js/content-pages.js 应按 LongxiangI18n.seoLocales() 生成 alternate。');
     assertSourceNotContains(source, /paths\.en/, 'js/content-pages.js 的 alternate 仍直接使用 paths.en。');
     assertSourceNotContains(source, /paths\.ar/, 'js/content-pages.js 的 alternate 仍直接使用 paths.ar。');
+    assertSourceContains(source, /localizeContentTree\s*\(/, 'js/content-pages.js must localize content block PatchFr/PatchRu before rendering.');
+    assertSourceContains(productDetailSource, /localizeContentTree\s*\(/, 'js/product-detail.js must localize product-page content block PatchFr/PatchRu before rendering.');
 }
 
 function verifyEducationCompareRuntimeI18nJs() {
     const educationSource = readText('js/education.js');
     const compareSource = readText('js/compare.js');
     const educationCanonicalSource = functionSource(educationSource, 'setCanonicalLink');
+    assertSourceContains(educationSource, /localizeContentTree\s*\(/, 'js/education.js must localize content block PatchFr/PatchRu before rendering.');
+    assertSourceContains(compareSource, /localizeContentTree\s*\(/, 'js/compare.js must localize content block PatchFr/PatchRu before rendering.');
 
     assertSourceContains(educationSource, /LongxiangI18n\.currentLocale\s*\(/, 'js/education.js 应优先使用 LongxiangI18n.currentLocale() 识别语言。');
     assertSourceContains(compareSource, /LongxiangI18n\.currentLocale\s*\(/, 'js/compare.js 应优先使用 LongxiangI18n.currentLocale() 识别语言。');

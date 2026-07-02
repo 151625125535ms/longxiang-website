@@ -106,7 +106,11 @@
     function getCompareContent() {
         return contentPromise
             .then(function (block) {
-                return block && block.body ? block.body : {};
+                var body = block && block.body ? block.body : {};
+                if (window.LongxiangI18n && window.LongxiangI18n.localizeContentTree) {
+                    body = window.LongxiangI18n.localizeContentTree(body, locale);
+                }
+                return body;
             })
             .catch(function () {
                 return {};

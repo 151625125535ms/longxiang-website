@@ -121,9 +121,78 @@
         return true;
     }
 
+    function cloneContentValue(value) {
+        if (!value || typeof value !== 'object') return value;
+        if (Array.isArray(value)) {
+            return value.map(function (item) { return cloneContentValue(item); });
+        }
+        var output = {};
+        Object.keys(value).forEach(function (key) {
+            output[key] = cloneContentValue(value[key]);
+        });
+        return output;
+    }
+
+    function mergeContentPatch(base, patch) {
+        if (!patch || typeof patch !== 'object') return cloneContentValue(patch);
+        if (Array.isArray(base)) {
+            return Array.isArray(patch) ? cloneContentValue(patch) : applyArrayPatch(base, patch);
+        }
+        if (!base || typeof base !== 'object' || Array.isArray(patch)) {
+            return cloneContentValue(patch);
+        }
+        var output = cloneContentValue(base);
+        Object.keys(patch).forEach(function (key) {
+            output[key] = mergeContentPatch(output[key], patch[key]);
+        });
+        return output;
+    }
+
+    function normalizePatchMatchKey(value) {
+        return String(value || '')
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '');
+    }
+
+    function patchTargetIndex(items, key) {
+        var indexMatch = /^index_(\d+)$/i.exec(String(key || ''));
+        if (indexMatch) {
+            var index = parseInt(indexMatch[1], 10);
+            return index >= 0 && index < items.length ? index : -1;
+        }
+        var normalizedKey = normalizePatchMatchKey(key);
+        for (var i = 0; i < items.length; i += 1) {
+            var item = items[i];
+            if (!item || typeof item !== 'object') continue;
+            if (String(item.id || '') === String(key)) return i;
+            if (item.slug === key || item.key === key || item.name === key || item.href === key || item.hash === '#' + key) return i;
+            if (normalizePatchMatchKey(item.label) === normalizedKey || normalizePatchMatchKey(item.title) === normalizedKey) return i;
+        }
+        return -1;
+    }
+
+    function applyArrayPatch(items, patch) {
+        if (!Array.isArray(items) || !patch || typeof patch !== 'object' || Array.isArray(patch)) return items;
+        var output = items.map(function (item) { return cloneContentValue(item); });
+        Object.keys(patch).forEach(function (key) {
+            var index = patchTargetIndex(output, key);
+            if (index < 0) return;
+            output[index] = mergeContentPatch(output[index], patch[key]);
+        });
+        return output;
+    }
+
     function normalizeLocale(locale) {
         locale = String(locale || '').toLowerCase();
         return LOCALE_CONFIG.locales[locale] ? locale : LOCALE_CONFIG.defaultLocale;
+    }
+
+    function normalizeContentLocale(locale) {
+        locale = String(locale || '').toLowerCase();
+        if (LOCALE_CONFIG.locales[locale]) return locale;
+        if (PLANNED_LOCALE_PATH_PREFIXES.indexOf('/' + locale) !== -1) return locale;
+        return LOCALE_CONFIG.defaultLocale;
     }
 
     function inferLocaleFromPath(pathname) {
@@ -213,7 +282,7 @@
     }
 
     function localeFieldSuffix(locale) {
-        locale = normalizeLocale(locale);
+        locale = normalizeContentLocale(locale);
         return locale.charAt(0).toUpperCase() + locale.slice(1);
     }
 
@@ -231,6 +300,22 @@
         return '';
     }
 
+    function localizedPatchValue(entity, field, locale) {
+        if (!entity || !field) return '';
+        locale = normalizeContentLocale(locale);
+        var suffix = locale.charAt(0).toUpperCase() + locale.slice(1);
+        var snakeField = camelToSnake(field);
+        var candidates = [
+            field + 'Patch' + suffix,
+            snakeField + '_patch_' + locale,
+            field + '_patch_' + locale
+        ];
+        for (var i = 0; i < candidates.length; i += 1) {
+            if (hasLocalizedValue(entity[candidates[i]])) return entity[candidates[i]];
+        }
+        return '';
+    }
+
     function localizedObjectValue(value, locale) {
         if (!value || typeof value !== 'object' || Array.isArray(value)) return '';
         if (hasLocalizedValue(value[locale])) return value[locale];
@@ -239,7 +324,7 @@
 
     function localized(entity, field, locale) {
         if (!entity || !field) return '';
-        locale = normalizeLocale(locale || currentLocale());
+        locale = normalizeContentLocale(locale || currentLocale());
 
         var directValue = entity[field];
         var objectValue = localizedObjectValue(directValue, locale);
@@ -248,11 +333,18 @@
         var localeValue = localizedFieldValue(entity, field, locale);
         if (hasLocalizedValue(localeValue)) return localeValue;
 
+        if (Array.isArray(directValue)) {
+            var patchValue = localizedPatchValue(entity, field, locale);
+            var patchedValue = applyArrayPatch(directValue, patchValue);
+            if (hasLocalizedValue(patchedValue)) return patchedValue;
+        }
+
         if (hasLocalizedValue(directValue) && (typeof directValue !== 'object' || Array.isArray(directValue))) {
             return directValue;
         }
 
-        var fallbackLocale = LOCALE_CONFIG.locales[locale].fallbackLocale;
+        var localeConfig = LOCALE_CONFIG.locales[locale] || {};
+        var fallbackLocale = localeConfig.fallbackLocale;
         if (fallbackLocale) {
             var fallbackObjectValue = localizedObjectValue(directValue, fallbackLocale);
             if (hasLocalizedValue(fallbackObjectValue)) return fallbackObjectValue;
@@ -262,6 +354,53 @@
         }
 
         return '';
+    }
+
+    function contentPatchBaseFields(key, locale) {
+        locale = normalizeContentLocale(locale);
+        var suffix = locale.charAt(0).toUpperCase() + locale.slice(1);
+        var value = String(key || '');
+        var baseField = '';
+        if (value.slice(-('Patch' + suffix).length) === 'Patch' + suffix) {
+            baseField = value.slice(0, -('Patch' + suffix).length);
+            return [baseField];
+        }
+        var snakeSuffix = '_patch_' + locale;
+        if (value.slice(-snakeSuffix.length) === snakeSuffix) {
+            baseField = value.slice(0, -snakeSuffix.length);
+            return [baseField, snakeToCamel(baseField)];
+        }
+        return [];
+    }
+
+    function localizeContentTree(value, locale) {
+        locale = normalizeContentLocale(locale || currentLocale());
+        if (!value || typeof value !== 'object') return value;
+        if (Array.isArray(value)) {
+            return value.map(function (item) { return localizeContentTree(item, locale); });
+        }
+
+        var output = {};
+        Object.keys(value).forEach(function (key) {
+            output[key] = localizeContentTree(value[key], locale);
+        });
+        Object.keys(value).forEach(function (key) {
+            var baseFields = contentPatchBaseFields(key, locale);
+            var baseField = '';
+            for (var i = 0; i < baseFields.length; i += 1) {
+                if (output[baseFields[i]]) {
+                    baseField = baseFields[i];
+                    break;
+                }
+            }
+            if (!baseField) return;
+            if (Array.isArray(output[baseField])) {
+                output[baseField] = applyArrayPatch(output[baseField], value[key]);
+            } else if (output[baseField] && typeof output[baseField] === 'object' && value[key] && typeof value[key] === 'object') {
+                output[baseField] = mergeContentPatch(output[baseField], value[key]);
+            }
+        });
+        return output;
     }
 
     window.LongxiangI18n = {
@@ -283,7 +422,8 @@
         isPlannedLocalePath: isPlannedLocalePath,
         productIdentifierFromLocalizedPath: productIdentifierFromLocalizedPath,
         runtimePageExists: runtimePageExists,
-        seoLocales: seoLocales
+        seoLocales: seoLocales,
+        localizeContentTree: localizeContentTree
     };
 
     var navbar = document.querySelector('.navbar');
@@ -332,6 +472,12 @@
 
     function camelToSnake(value) {
         return String(value || '').replace(/([a-z0-9])([A-Z])/g, '$1_$2').toLowerCase();
+    }
+
+    function snakeToCamel(value) {
+        return String(value || '').replace(/_([a-z0-9])/g, function (_, char) {
+            return char.toUpperCase();
+        });
     }
 
     function arabicTextFallback(value) {
@@ -1335,6 +1481,10 @@
 
     function shellValue(sectionName, key, fallback) {
         var section = shellSection(sectionName);
+        if (window.LongxiangI18n && window.LongxiangI18n.localized) {
+            var localizedValue = window.LongxiangI18n.localized(section, key, locale);
+            if (localizedValue) return localizedValue;
+        }
         var arabicValue = localizedArabicValue(section, key);
         if (arabicValue) return arabicValue;
         return localizeFallback(section[key] || fallback);
@@ -1342,6 +1492,10 @@
 
     function shellLabel(item, fallback) {
         if (!item) return localizeFallback(fallback);
+        if (window.LongxiangI18n && window.LongxiangI18n.localized) {
+            var localizedValue = window.LongxiangI18n.localized(item, 'label', locale);
+            if (localizedValue) return localizedValue;
+        }
         var arabicValue = localizedArabicValue(item, 'label');
         if (arabicValue) return arabicValue;
         return localizeFallback(item.label || fallback);
@@ -1550,7 +1704,7 @@
     function initGlobalShellContent() {
         return fetchJson('/api/content-blocks/global-shell')
             .then(function (block) {
-                globalShellCache = block && block.body ? block.body : {};
+                globalShellCache = block && block.body ? window.LongxiangI18n.localizeContentTree(block.body, locale) : {};
                 ensureConsentUi();
                 applyFunctionalEmbeds();
                 updateMainNavigation();
@@ -1952,7 +2106,7 @@
         function fetchHomeContent() {
             var promise = window.longxiangContentPagePromise || fetchJson('/api/content-blocks/home');
             return promise.then(function (block) {
-                return block && block.body ? block.body : {};
+                return block && block.body ? window.LongxiangI18n.localizeContentTree(block.body, locale) : {};
             }).catch(function () {
                 return {};
             });

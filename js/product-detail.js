@@ -710,6 +710,9 @@
         }
         (window.longxiangContentPagePromise || Promise.resolve(null)).then(function (block) {
             productPageContent = block && block.body ? block.body : {};
+            if (window.LongxiangI18n && window.LongxiangI18n.localizeContentTree) {
+                productPageContent = window.LongxiangI18n.localizeContentTree(productPageContent, locale);
+            }
             loadProduct(productId);
         }).catch(function () {
             loadProduct(productId);

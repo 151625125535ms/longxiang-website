@@ -407,6 +407,9 @@
     }
 
     function renderPage(data) {
+        if (window.LongxiangI18n && window.LongxiangI18n.localizeContentTree) {
+            data = window.LongxiangI18n.localizeContentTree(data || {}, locale);
+        }
         var philosophy = findSection(data, 'cooperation-philosophy');
         var gallery = findSection(data, 'gallery');
         var sections = cooperationSections(data);

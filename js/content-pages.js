@@ -1392,6 +1392,9 @@
 
     function renderPage(block) {
         var body = block && block.body ? block.body : {};
+        if (window.LongxiangI18n && window.LongxiangI18n.localizeContentTree) {
+            body = window.LongxiangI18n.localizeContentTree(body, locale);
+        }
         if (pageSlug === 'solutions') renderSolutions(body);
         if (pageSlug === 'about-us') renderAbout(body);
         if (pageSlug === 'contact') renderContact(body);
