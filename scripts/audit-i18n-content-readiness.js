@@ -16,7 +16,7 @@ const localeConfigPath = path.join(root, 'config', 'locales.json');
 const dbPath = path.join(root, 'data', 'longxiang.db');
 const siteOrigin = 'https://www.lxenelectric.com';
 const siteHost = new URL(siteOrigin).hostname;
-const expectedSupportedLocales = ['en', 'ar', 'fr'];
+const expectedSupportedLocales = ['en', 'ar', 'fr', 'ru'];
 const defaultTargetLocales = ['fr'];
 const defaultPlannedOnlyLocales = ['pt'];
 const allowedTargetLocales = ['fr', 'ru'];
@@ -186,7 +186,7 @@ function localeDirectoryExists(locale) {
 
 function validateLocaleConfig(config, targetLocales, plannedOnlyLocales) {
     assert(JSON.stringify(config.supportedLocales) === JSON.stringify(expectedSupportedLocales),
-        'supportedLocales must be en/ar/fr. Current: ' + formatList(config.supportedLocales || []));
+        'supportedLocales must be en/ar/fr/ru. Current: ' + formatList(config.supportedLocales || []));
 
     const configuredPlanned = plannedLocaleEntries(config);
     const plannedCodes = configuredPlanned.map((locale) => locale.code);

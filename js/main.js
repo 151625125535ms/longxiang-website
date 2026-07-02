@@ -3,7 +3,7 @@
 
     var LOCALE_CONFIG = {
         defaultLocale: 'en',
-        supportedLocales: ['en', 'ar', 'fr'],
+        supportedLocales: ['en', 'ar', 'fr', 'ru'],
         locales: {
             en: {
                 label: 'English',
@@ -37,12 +37,23 @@
                 homePath: '/fr/index.html',
                 fallbackLocale: 'en',
                 includeInSitemap: true
+            },
+            ru: {
+                label: 'Russian',
+                nativeLabel: '\u0420\u0443\u0441\u0441\u043a\u0438\u0439',
+                htmlLang: 'ru',
+                hreflang: 'ru',
+                dir: 'ltr',
+                pathPrefix: '/ru',
+                homePath: '/ru/index.html',
+                fallbackLocale: 'en',
+                includeInSitemap: true
             }
         }
     };
 
     var STATIC_PAGE_BASE_PATHS = ['/', '/about.html', '/products.html', '/solutions.html', '/education.html', '/certifications.html', '/compare.html', '/contact.html'];
-    var PLANNED_LOCALE_PATH_PREFIXES = ['/pt', '/ru'];
+    var PLANNED_LOCALE_PATH_PREFIXES = ['/pt'];
 
     function normalizePathPrefix(value) {
         var prefix = String(value || '').trim().replace(/\/+$/, '');

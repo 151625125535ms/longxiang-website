@@ -33,17 +33,6 @@ const staticPages = staticPagesForSitemap(localeConfig);
 const htmlPages = htmlPagesForVerification(localeConfig);
 const sitemapCountModel = expectedSitemapUrlCount({ localeConfig });
 const expectedPlannedLocales = {
-    ru: {
-        label: 'Russian',
-        nativeLabel: '\u0420\u0443\u0441\u0441\u043a\u0438\u0439',
-        htmlLang: 'ru',
-        hreflang: 'ru',
-        dir: 'ltr',
-        pathPrefix: '/ru',
-        homePath: '/ru/index.html',
-        fallbackLocale: 'en',
-        includeInSitemap: false
-    },
     pt: {
         label: 'Portuguese',
         nativeLabel: 'Portugu\u00eas',
@@ -233,7 +222,7 @@ function verifyPlannedLocaleConfig(frontendConfig) {
     const configuredCodes = configuredPlannedLocaleCodes().sort();
     const expectedCodes = plannedLocaleCodes().sort();
 
-    assertArrayEqual(configuredCodes, expectedCodes, 'config/locales.json plannedLocales 语言清单应只包含 ru/pt。');
+    assertArrayEqual(configuredCodes, expectedCodes, 'config/locales.json plannedLocales must only contain pt.');
 
     plannedLocaleCodes().forEach((code) => {
         const expected = expectedPlannedLocales[code];

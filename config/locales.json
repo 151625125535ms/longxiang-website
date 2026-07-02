@@ -1,18 +1,7 @@
 {
   "defaultLocale": "en",
-  "supportedLocales": ["en", "ar", "fr"],
+  "supportedLocales": ["en", "ar", "fr", "ru"],
   "plannedLocales": {
-    "ru": {
-      "label": "Russian",
-      "nativeLabel": "\u0420\u0443\u0441\u0441\u043a\u0438\u0439",
-      "htmlLang": "ru",
-      "hreflang": "ru",
-      "dir": "ltr",
-      "pathPrefix": "/ru",
-      "homePath": "/ru/index.html",
-      "fallbackLocale": "en",
-      "includeInSitemap": false
-    },
     "pt": {
       "label": "Portuguese",
       "nativeLabel": "Portugu\u00eas",
@@ -56,6 +45,17 @@
       "dir": "ltr",
       "pathPrefix": "/fr",
       "homePath": "/fr/index.html",
+      "fallbackLocale": "en",
+      "includeInSitemap": true
+    },
+    "ru": {
+      "label": "Russian",
+      "nativeLabel": "\u0420\u0443\u0441\u0441\u043a\u0438\u0439",
+      "htmlLang": "ru",
+      "hreflang": "ru",
+      "dir": "ltr",
+      "pathPrefix": "/ru",
+      "homePath": "/ru/index.html",
       "fallbackLocale": "en",
       "includeInSitemap": true
     }
