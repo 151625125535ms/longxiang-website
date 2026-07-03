@@ -512,6 +512,46 @@
         return arabicTextFallback(value) || value || '';
     }
 
+    var FORM_TEXT_FALLBACKS = {
+        fr: {
+            enterName: 'Veuillez saisir votre nom.',
+            enterEmail: 'Veuillez saisir une adresse e-mail valide.',
+            selectSubject: 'Veuillez sélectionner un sujet.',
+            enterMessage: 'Veuillez saisir votre message.',
+            sending: 'Envoi en cours...',
+            sent: 'Votre message a bien été envoyé. Nous vous contacterons bientôt.',
+            failed: 'Échec de l’envoi. Veuillez réessayer plus tard.'
+        },
+        ru: {
+            enterName: 'Пожалуйста, укажите ваше имя.',
+            enterEmail: 'Пожалуйста, укажите корректный адрес электронной почты.',
+            selectSubject: 'Пожалуйста, выберите тему.',
+            enterMessage: 'Пожалуйста, введите сообщение.',
+            sending: 'Отправка...',
+            sent: 'Ваше сообщение успешно отправлено. Мы скоро свяжемся с вами.',
+            failed: 'Не удалось отправить сообщение. Повторите попытку позже.'
+        }
+    };
+
+    function formText(key, english, arabic) {
+        if (isArabic) return arabic;
+        var pack = FORM_TEXT_FALLBACKS[locale] || {};
+        return pack[key] || english;
+    }
+
+    function localizedItemValue(item, key, fallback) {
+        if (!item) return localizeFallback(fallback);
+        if (isArabic) {
+            var arabicValue = localizedArabicValue(item, key);
+            if (arabicValue) return arabicValue;
+        }
+        if (window.LongxiangI18n && window.LongxiangI18n.localized) {
+            var localizedValue = window.LongxiangI18n.localized(item, key, locale);
+            if (localizedValue) return localizedValue;
+        }
+        return localizeFallback(item[key] || fallback);
+    }
+
     function escapeHtml(value) {
         return String(value == null ? '' : value)
             .replace(/&/g, '&amp;')
@@ -1556,9 +1596,7 @@
             var localizedValue = window.LongxiangI18n.localized(item, 'label', locale);
             if (localizedValue) return localizedValue;
         }
-        var arabicValue = localizedArabicValue(item, 'label');
-        if (arabicValue) return arabicValue;
-        return localizeFallback(item.label || fallback);
+        return localizedItemValue(item, 'label', fallback);
     }
 
     function renderShellLinks(items, fallbackItems) {
@@ -1806,7 +1844,7 @@
         var readonly = field.readonly ? ' readonly' : '';
         var displayAttr = field.productContextDisplay ? ' data-product-context-display' : '';
         var attrs = ' id="' + escapeHtml(id) + '" name="' + escapeHtml(field.name || '') + '"' + required + readonly + displayAttr;
-        var placeholder = localizedArabicValue(field, 'placeholder') || localizeFallback(field.placeholder);
+        var placeholder = localizedItemValue(field, 'placeholder', field.placeholder);
         if (field.type === 'textarea') {
             return '<div class="form-group"><label for="' + escapeHtml(id) + '">' + escapeHtml(label) + '</label><textarea' + attrs + ' rows="' + escapeHtml(field.rows || 5) + '"></textarea></div>';
         }
@@ -1830,17 +1868,17 @@
         });
 
         [
-            { name: 'productContextDisplay', label: 'Interested Product', labelAr: 'المنتج المطلوب', type: 'text', readonly: true, productContextDisplay: true },
-            { name: 'name', label: 'Name', labelAr: 'الاسم', type: 'text', required: true, row: 'contact' },
-            { name: 'email', label: 'Email', labelAr: 'البريد الإلكتروني', type: 'email', required: true, row: 'contact' },
-            { name: 'phone', label: 'Phone', labelAr: 'رقم الهاتف', type: 'text', row: 'company' },
-            { name: 'company', label: 'Company', labelAr: 'الشركة', type: 'text', row: 'company' },
-            { name: 'country', label: 'Destination Country', labelAr: 'بلد المشروع', type: 'text', row: 'project', placeholder: 'Country or region', placeholderAr: 'الدولة أو المنطقة' },
-            { name: 'productType', label: 'Product Type', labelAr: 'نوع المنتج', type: 'text', row: 'project', placeholder: 'Transformer, switchgear, EV charger...', placeholderAr: 'محول، مفاتيح كهربائية، شاحن مركبات...' },
-            { name: 'requiredVoltageOrCapacity', label: 'Required Voltage / Capacity', labelAr: 'الجهد / السعة المطلوبة', type: 'text', row: 'requirement', placeholder: 'Voltage, capacity, power rating', placeholderAr: 'الجهد أو السعة أو القدرة' },
-            { name: 'quantityOrScale', label: 'Quantity / Project Scale', labelAr: 'الكمية / حجم المشروع', type: 'text', row: 'requirement', placeholder: 'Quantity or project scale', placeholderAr: 'الكمية أو حجم المشروع' },
-            { name: 'applicationScenario', label: 'Application Scenario', labelAr: 'سيناريو الاستخدام', type: 'text', placeholder: 'Factory, PV project, charging station...', placeholderAr: 'مصنع، مشروع شمسي، محطة شحن...' },
-            { name: 'message', label: 'Message', labelAr: 'الرسالة', type: 'textarea', required: true, rows: 5 }
+            { name: 'productContextDisplay', label: 'Interested Product', labelAr: 'المنتج المطلوب', labelFr: 'Produit demandé', labelRu: 'Интересующий продукт', type: 'text', readonly: true, productContextDisplay: true },
+            { name: 'name', label: 'Name', labelAr: 'الاسم', labelFr: 'Nom', labelRu: 'Имя', type: 'text', required: true, row: 'contact' },
+            { name: 'email', label: 'Email', labelAr: 'البريد الإلكتروني', labelFr: 'E-mail', labelRu: 'Электронная почта', type: 'email', required: true, row: 'contact' },
+            { name: 'phone', label: 'Phone', labelAr: 'رقم الهاتف', labelFr: 'Téléphone', labelRu: 'Телефон', type: 'text', row: 'company' },
+            { name: 'company', label: 'Company', labelAr: 'الشركة', labelFr: 'Entreprise', labelRu: 'Компания', type: 'text', row: 'company' },
+            { name: 'country', label: 'Destination Country', labelAr: 'بلد المشروع', labelFr: 'Pays de destination', labelRu: 'Страна назначения', type: 'text', row: 'project', placeholder: 'Country or region', placeholderAr: 'الدولة أو المنطقة', placeholderFr: 'Pays ou région', placeholderRu: 'Страна или регион' },
+            { name: 'productType', label: 'Product Type', labelAr: 'نوع المنتج', labelFr: 'Type de produit', labelRu: 'Тип продукта', type: 'text', row: 'project', placeholder: 'Transformer, switchgear, EV charger...', placeholderAr: 'محول، مفاتيح كهربائية، شاحن مركبات...', placeholderFr: 'Transformateur, appareillage, borne de recharge...', placeholderRu: 'Трансформатор, КРУ, зарядная станция...' },
+            { name: 'requiredVoltageOrCapacity', label: 'Required Voltage / Capacity', labelAr: 'الجهد / السعة المطلوبة', labelFr: 'Tension / capacité requise', labelRu: 'Требуемое напряжение / мощность', type: 'text', row: 'requirement', placeholder: 'Voltage, capacity, power rating', placeholderAr: 'الجهد أو السعة أو القدرة', placeholderFr: 'Tension, capacité ou puissance', placeholderRu: 'Напряжение, емкость или мощность' },
+            { name: 'quantityOrScale', label: 'Quantity / Project Scale', labelAr: 'الكمية / حجم المشروع', labelFr: 'Quantité / taille du projet', labelRu: 'Количество / масштаб проекта', type: 'text', row: 'requirement', placeholder: 'Quantity or project scale', placeholderAr: 'الكمية أو حجم المشروع', placeholderFr: 'Quantité ou taille du projet', placeholderRu: 'Количество или масштаб проекта' },
+            { name: 'applicationScenario', label: 'Application Scenario', labelAr: 'سيناريو الاستخدام', labelFr: 'Scénario d’application', labelRu: 'Сценарий применения', type: 'text', placeholder: 'Factory, PV project, charging station...', placeholderAr: 'مصنع، مشروع شمسي، محطة شحن...', placeholderFr: 'Usine, projet photovoltaïque, station de recharge...', placeholderRu: 'Завод, солнечный проект, зарядная станция...' },
+            { name: 'message', label: 'Message', labelAr: 'الرسالة', labelFr: 'Message', labelRu: 'Сообщение', type: 'textarea', required: true, rows: 5 }
         ].forEach(function (field) {
             if (!existing[field.name]) {
                 source.push(field);
@@ -1992,10 +2030,10 @@
             };
 
             var errors = [];
-            if (!payload.name) errors.push(isArabic ? 'يرجى إدخال الاسم.' : 'Please enter your name.');
-            if (!payload.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.email)) errors.push(isArabic ? 'يرجى إدخال بريد إلكتروني صحيح.' : 'Please enter a valid email address.');
-            if (!payload.subject) errors.push(isArabic ? 'يرجى اختيار الموضوع.' : 'Please select a subject.');
-            if (!payload.message) errors.push(isArabic ? 'يرجى إدخال الرسالة.' : 'Please enter your message.');
+            if (!payload.name) errors.push(formText('enterName', 'Please enter your name.', 'يرجى إدخال الاسم.'));
+            if (!payload.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.email)) errors.push(formText('enterEmail', 'Please enter a valid email address.', 'يرجى إدخال بريد إلكتروني صحيح.'));
+            if (!payload.subject) errors.push(formText('selectSubject', 'Please select a subject.', 'يرجى اختيار الموضوع.'));
+            if (!payload.message) errors.push(formText('enterMessage', 'Please enter your message.', 'يرجى إدخال الرسالة.'));
 
             if (errors.length) {
                 setFormStatus(form, errors.join(' '), 'error');
@@ -2007,7 +2045,7 @@
             isSubmitting = true;
             if (submitBtn) {
                 submitBtn.disabled = true;
-                submitBtn.textContent = isArabic ? 'جار الإرسال...' : 'Sending...';
+                submitBtn.textContent = formText('sending', 'Sending...', 'جار الإرسال...');
             }
 
             fetch('/api/inquiries', {
@@ -2020,12 +2058,14 @@
                     return data;
                 });
             }).then(function () {
-                setFormStatus(form, isArabic ? 'تم إرسال رسالتك بنجاح. سنتواصل معك قريباً.' : 'Your message has been sent successfully. We will contact you soon.', 'success');
+                setFormStatus(form, formText('sent', 'Your message has been sent successfully. We will contact you soon.', 'تم إرسال رسالتك بنجاح. سنتواصل معك قريباً.'), 'success');
                 trackEvent('generate_lead', { form_name: 'contact_form' });
                 form.reset();
                 if (form.closest('#inquiry-modal')) setTimeout(closeInquiryModal, 700);
             }).catch(function (err) {
-                setFormStatus(form, err.message || (isArabic ? 'فشل الإرسال، يرجى المحاولة لاحقاً.' : 'Failed to send. Please try again later.'), 'error');
+                var fallbackError = formText('failed', 'Failed to send. Please try again later.', 'فشل الإرسال، يرجى المحاولة لاحقاً.');
+                var localizeGenericError = err.message === 'Submit failed' && (locale === 'fr' || locale === 'ru');
+                setFormStatus(form, err.message && !localizeGenericError ? err.message : fallbackError, 'error');
             }).finally(function () {
                 isSubmitting = false;
                 if (submitBtn) {
@@ -2226,29 +2266,57 @@
         var certifications = [];
         var filtered = [];
 
-        var labels = isArabic ? {
-            all: 'الكل',
-            loadMore: 'تحميل المزيد',
-            noResults: 'لا توجد سجلات مطابقة.',
-            showing: 'عرض {shown} من {total} سجل',
-            imageAlt: 'معاينة الشهادة',
-            close: 'إغلاق',
-            sourceImage: 'صورة',
-            sourcePdf: 'غلاف PDF',
-            pages: '{count} صفحات',
-            onePage: 'صفحة واحدة'
-        } : {
-            all: 'All',
-            loadMore: 'Load More',
-            noResults: 'No matching records.',
-            showing: 'Showing {shown} of {total} records',
-            imageAlt: 'Certificate preview',
-            close: 'Close',
-            sourceImage: 'Image',
-            sourcePdf: 'PDF cover',
-            pages: '{count} pages',
-            onePage: '1 page'
+        var labelPacks = {
+            en: {
+                all: 'All',
+                loadMore: 'Load More',
+                noResults: 'No matching records.',
+                showing: 'Showing {shown} of {total} records',
+                imageAlt: 'Certificate preview',
+                close: 'Close',
+                sourceImage: 'Image',
+                sourcePdf: 'PDF cover',
+                pages: '{count} pages',
+                onePage: '1 page'
+            },
+            ar: {
+                all: 'الكل',
+                loadMore: 'تحميل المزيد',
+                noResults: 'لا توجد سجلات مطابقة.',
+                showing: 'عرض {shown} من {total} سجل',
+                imageAlt: 'معاينة الشهادة',
+                close: 'إغلاق',
+                sourceImage: 'صورة',
+                sourcePdf: 'غلاف PDF',
+                pages: '{count} صفحات',
+                onePage: 'صفحة واحدة'
+            },
+            fr: {
+                all: 'Tous',
+                loadMore: 'Charger plus',
+                noResults: 'Aucun résultat correspondant.',
+                showing: 'Affichage de {shown} sur {total} dossiers',
+                imageAlt: 'Aperçu du certificat',
+                close: 'Fermer',
+                sourceImage: 'Image',
+                sourcePdf: 'Couverture PDF',
+                pages: '{count} pages',
+                onePage: '1 page'
+            },
+            ru: {
+                all: 'Все',
+                loadMore: 'Загрузить ещё',
+                noResults: 'Совпадающих записей нет.',
+                showing: 'Показано {shown} из {total} записей',
+                imageAlt: 'Предпросмотр сертификата',
+                close: 'Закрыть',
+                sourceImage: 'Изображение',
+                sourcePdf: 'Обложка PDF',
+                pages: '{count} стр.',
+                onePage: '1 страница'
+            }
         };
+        var labels = labelPacks[locale] || labelPacks.en;
 
         function categoryLabel(category, data) {
             var match = data.find(function (item) { return item.category === category; });

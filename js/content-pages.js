@@ -127,6 +127,134 @@
         'Can Longxiang support model selection?': 'هل يمكن للونغشيانغ دعم اختيار الطراز؟',
         'Yes. Our team can provide product matching suggestions based on your project requirements.': 'نعم. يمكن لفريقنا تقديم اقتراحات مطابقة المنتجات بناءً على متطلبات مشروعك.'
     };
+    var PAGE_TEXT_FALLBACKS = {
+        fr: {
+            productDetailTitle: 'Détails du produit',
+            productDetailSubtitle: 'Consultez les informations produit, les spécifications et les détails de demande.',
+            productDetailSpecsTitle: 'Spécifications',
+            productDetailSupportTitle: 'Support produit',
+            productDetailFaqTitle: 'Questions fréquentes',
+            productInquiryTitle: 'Demande produit',
+            productInquiryNote: 'Laissez vos coordonnées et les exigences du projet.',
+            productInquirySubmit: 'Envoyer la demande',
+            contactSeoTitle: 'Contactez Longxiang | Henan Longxiang Electrical',
+            contactSeoDescription: 'Contactez Longxiang pour une sélection de modèles, un devis et un support de projet.',
+            contactHeroTitle: 'Contactez-nous',
+            contactHeroSubtitle: 'Parlez-nous de vos besoins en équipements électriques et de votre calendrier de projet.',
+            contactInfoTitle: 'Coordonnées',
+            contactOfficeLabel: 'Téléphone',
+            contactEmailLabel: 'E-mail',
+            contactAddressLabel: 'Adresse',
+            contactSocialTitle: 'Réseaux sociaux',
+            contactMapTitle: 'Carte de Longxiang',
+            contactFormTitle: 'Envoyer une demande',
+            contactFormNote: 'Laissez vos coordonnées et les exigences du projet.',
+            contactFormFooterText: 'Nous vous répondrons après réception de votre message.',
+            contactFormSubmit: 'Envoyer',
+            contactFaqTitle: 'Questions fréquentes',
+            contactFaqText: 'Réponses rapides pour les premières demandes de projet.',
+            productDetailSupportLoading: 'Chargement du support produit...',
+            productDetailFaqLoading: 'Chargement des questions fréquentes...',
+            productDetailInquiryLoading: 'Chargement du formulaire de demande...',
+            compareTitle: 'Comparaison de produits',
+            compareSubtitle: 'Comparez les modèles sélectionnés et leurs principales spécifications.',
+            compareSeoTitle: 'Comparaison de produits | Longxiang Electrical',
+            compareSeoDescription: 'Comparez côte à côte les modèles d’équipements Longxiang sélectionnés.',
+            compareBack: 'Retour',
+            comparePrint: 'Imprimer',
+            compareLoading: 'Chargement de la comparaison...'
+        },
+        ru: {
+            productDetailTitle: 'Информация о продукте',
+            productDetailSubtitle: 'Просмотрите информацию о продукте, характеристики и форму запроса.',
+            productDetailSpecsTitle: 'Характеристики',
+            productDetailSupportTitle: 'Поддержка продукта',
+            productDetailFaqTitle: 'Частые вопросы',
+            productInquiryTitle: 'Запрос по продукту',
+            productInquiryNote: 'Оставьте контактные данные и требования проекта.',
+            productInquirySubmit: 'Отправить запрос',
+            contactSeoTitle: 'Свяжитесь с Longxiang | Henan Longxiang Electrical',
+            contactSeoDescription: 'Свяжитесь с Longxiang для подбора модели, расчета стоимости и поддержки проекта.',
+            contactHeroTitle: 'Свяжитесь с нами',
+            contactHeroSubtitle: 'Расскажите нам о потребностях в электрооборудовании и графике проекта.',
+            contactInfoTitle: 'Контактная информация',
+            contactOfficeLabel: 'Телефон',
+            contactEmailLabel: 'Электронная почта',
+            contactAddressLabel: 'Адрес',
+            contactSocialTitle: 'Социальные сети',
+            contactMapTitle: 'Карта Longxiang',
+            contactFormTitle: 'Отправить запрос',
+            contactFormNote: 'Оставьте контактные данные и требования проекта.',
+            contactFormFooterText: 'Мы ответим после получения вашего сообщения.',
+            contactFormSubmit: 'Отправить',
+            contactFaqTitle: 'Частые вопросы',
+            contactFaqText: 'Краткие ответы для первичных запросов по проектам.',
+            productDetailSupportLoading: 'Загрузка поддержки продукта...',
+            productDetailFaqLoading: 'Загрузка часто задаваемых вопросов...',
+            productDetailInquiryLoading: 'Загрузка формы запроса...',
+            compareTitle: 'Сравнение продукции',
+            compareSubtitle: 'Сравните выбранные модели и основные технические характеристики.',
+            compareSeoTitle: 'Сравнение продукции | Longxiang Electrical',
+            compareSeoDescription: 'Сравните выбранные модели оборудования Longxiang рядом друг с другом.',
+            compareBack: 'Назад',
+            comparePrint: 'Печать',
+            compareLoading: 'Загрузка сравнения...'
+        }
+    };
+    var CONTACT_FIELD_TEXT_FALLBACKS = {
+        fr: {
+            label: {
+                name: 'Nom complet',
+                phone: 'Téléphone',
+                productType: 'Type de produit',
+                quantityOrScale: 'Quantité / taille du projet',
+                message: 'Message',
+                applicationScenario: 'Scénario d’application',
+                email: 'Adresse e-mail',
+                company: 'Nom de l’entreprise',
+                country: 'Pays',
+                requiredVoltageOrCapacity: 'Tension / capacité requise'
+            },
+            placeholder: {
+                name: 'Votre nom',
+                phone: 'Votre numéro de téléphone',
+                productType: 'Transformateur, appareillage, borne de recharge...',
+                quantityOrScale: 'Quantité ou taille du projet',
+                message: 'Décrivez vos besoins de projet',
+                applicationScenario: 'Usine, projet photovoltaïque, station de recharge...',
+                email: 'Votre adresse e-mail',
+                company: 'Votre entreprise',
+                country: 'Pays ou région',
+                requiredVoltageOrCapacity: 'Tension, capacité ou puissance'
+            }
+        },
+        ru: {
+            label: {
+                name: 'Полное имя',
+                phone: 'Телефон',
+                productType: 'Тип продукта',
+                quantityOrScale: 'Количество / масштаб проекта',
+                message: 'Сообщение',
+                applicationScenario: 'Сценарий применения',
+                email: 'Электронная почта',
+                company: 'Название компании',
+                country: 'Страна',
+                requiredVoltageOrCapacity: 'Требуемое напряжение / мощность'
+            },
+            placeholder: {
+                name: 'Ваше имя',
+                phone: 'Ваш номер телефона',
+                productType: 'Трансформатор, КРУ, зарядная станция...',
+                quantityOrScale: 'Количество или масштаб проекта',
+                message: 'Опишите требования проекта',
+                applicationScenario: 'Завод, солнечный проект, зарядная станция...',
+                email: 'Ваш адрес электронной почты',
+                company: 'Ваша компания',
+                country: 'Страна или регион',
+                requiredVoltageOrCapacity: 'Напряжение, емкость или мощность'
+            }
+        }
+    };
 
     function camelToSnake(value) {
         return String(value || '').replace(/([a-z0-9])([A-Z])/g, '$1_$2').toLowerCase();
@@ -231,6 +359,11 @@
         return value || '';
     }
 
+    function pageTextFallback(key, fallback) {
+        var pack = PAGE_TEXT_FALLBACKS[locale] || {};
+        return pack[key] || fallback || '';
+    }
+
     function localized(item, key) {
         if (!item) return '';
         if (window.LongxiangI18n && window.LongxiangI18n.localized) {
@@ -244,6 +377,24 @@
             return localizedText(item[key]);
         }
         return item[key] || '';
+    }
+
+    function localizedOrPageFallback(item, key, fallbackKey, fallback) {
+        var value = localized(item, key);
+        if ((locale === 'fr' || locale === 'ru') && item && value && value === item[key]) {
+            return pageTextFallback(fallbackKey, fallback);
+        }
+        return value || pageTextFallback(fallbackKey, fallback);
+    }
+
+    function localizedContactField(field, key) {
+        var value = localized(field, key);
+        var pack = CONTACT_FIELD_TEXT_FALLBACKS[locale] || {};
+        var fallback = pack[key] && field ? pack[key][field.name] : '';
+        if ((locale === 'fr' || locale === 'ru') && field && value && value === field[key]) {
+            return fallback || value;
+        }
+        return value || fallback || '';
     }
 
     function localizedList(item, key) {
@@ -403,6 +554,20 @@
                 canonicalPath: isArabic ? '/ar/products.html' : '/products.html'
             };
         }
+        if (pageSlug === 'compare' && (locale === 'fr' || locale === 'ru')) {
+            return {
+                title: pageTextFallback('compareSeoTitle'),
+                description: pageTextFallback('compareSeoDescription'),
+                canonicalPath: '/compare.html'
+            };
+        }
+        if (pageSlug === 'contact' && (locale === 'fr' || locale === 'ru')) {
+            return {
+                title: pageTextFallback('contactSeoTitle'),
+                description: pageTextFallback('contactSeoDescription'),
+                canonicalPath: '/contact.html'
+            };
+        }
         return {};
     }
 
@@ -418,7 +583,13 @@
             'Products | Longxiang Electrical',
             'Product list of Longxiang Electrical.',
             'Products | Henan Longxiang Electrical Co., Ltd.',
-            'Explore Longxiang transformers, switchgear, EV chargers, and power distribution equipment for industrial parks, PV projects, charging stations, and utility applications.'
+            'Explore Longxiang transformers, switchgear, EV chargers, and power distribution equipment for industrial parks, PV projects, charging stations, and utility applications.',
+            'Product Comparison | Longxiang Electrical',
+            'Product Comparison | Henan Longxiang Electrical Co., Ltd.',
+            'Compare Longxiang Electrical products.',
+            'Compare selected Longxiang power equipment models side by side.',
+            'Contact Us | Henan Longxiang Electrical Co., Ltd.',
+            'Contact Longxiang for model selection, quotation, and project support.'
         ].indexOf(text) !== -1;
     }
 
@@ -849,32 +1020,39 @@
             { key: 'instagram', label: 'Instagram' },
             { key: 'youtube', label: 'YouTube' }
         ].filter(function (item) { return body[item.key]; });
+        var infoTitle = localizedOrPageFallback(page, 'infoTitle', 'contactInfoTitle', localized(page, 'infoTitle'));
+        var officeLabel = localizedOrPageFallback(page, 'officeLabel', 'contactOfficeLabel', localized(page, 'officeLabel'));
+        var emailLabel = localizedOrPageFallback(page, 'emailLabel', 'contactEmailLabel', localized(page, 'emailLabel'));
+        var addressLabel = localizedOrPageFallback(page, 'factoryAddressLabel', 'contactAddressLabel', localized(page, 'factoryAddressLabel'));
+        var socialTitle = localizedOrPageFallback(page, 'socialTitle', 'contactSocialTitle', localized(page, 'socialTitle'));
+        var mapTitle = localizedOrPageFallback(page, 'mapTitle', 'contactMapTitle', localized(page, 'mapTitle'));
 
         return '<section class="section bg-light contact-primary-section"><div class="container"><div class="contact-section">' +
             '<div class="contact-info-card fade-in-left">' +
-            '<div class="contact-section-heading"><span>' + escapeHtml(localized(page, 'companyName')) + '</span><h2>' + escapeHtml(localized(page, 'infoTitle')) + '</h2></div>' +
+            '<div class="contact-section-heading"><span>' + escapeHtml(localized(page, 'companyName')) + '</span><h2>' + escapeHtml(infoTitle) + '</h2></div>' +
             '<div class="contact-info-list">' +
-            '<div class="contact-info-row"><span>&#9742;</span><div><strong>' + escapeHtml(localized(page, 'officeLabel')) + '</strong><a href="' + escapeHtml(phoneHref(body.phone)) + '">' + escapeHtml(body.phone || '') + '</a></div></div>' +
-            '<div class="contact-info-row"><span>&#9993;</span><div><strong>' + escapeHtml(localized(page, 'emailLabel')) + '</strong><a href="' + escapeHtml(emailHref(body.email)) + '">' + escapeHtml(body.email || '') + '</a></div></div>' +
-            '<div class="contact-info-row contact-address-row"><span>&#8982;</span><div><strong>' + escapeHtml(localized(page, 'factoryAddressLabel')) + '</strong><span>' + escapeHtml(localized(body, 'headquarters') || localized(body, 'address')) + '</span></div></div>' +
-            '<div class="contact-info-row contact-address-row"><span>&#9635;</span><div><strong>' + escapeHtml(localized(page, 'factoryAddressLabel')) + '</strong><span>' + escapeHtml(localized(body, 'huaiyangBase')) + '</span></div></div>' +
+            '<div class="contact-info-row"><span>&#9742;</span><div><strong>' + escapeHtml(officeLabel) + '</strong><a href="' + escapeHtml(phoneHref(body.phone)) + '">' + escapeHtml(body.phone || '') + '</a></div></div>' +
+            '<div class="contact-info-row"><span>&#9993;</span><div><strong>' + escapeHtml(emailLabel) + '</strong><a href="' + escapeHtml(emailHref(body.email)) + '">' + escapeHtml(body.email || '') + '</a></div></div>' +
+            '<div class="contact-info-row contact-address-row"><span>&#8982;</span><div><strong>' + escapeHtml(addressLabel) + '</strong><span>' + escapeHtml(localized(body, 'headquarters') || localized(body, 'address')) + '</span></div></div>' +
+            '<div class="contact-info-row contact-address-row"><span>&#9635;</span><div><strong>' + escapeHtml(addressLabel) + '</strong><span>' + escapeHtml(localized(body, 'huaiyangBase')) + '</span></div></div>' +
             '</div>' +
-            (socials.length ? '<div class="contact-social-block"><h4>' + escapeHtml(localized(page, 'socialTitle')) + '</h4><div class="contact-social-icons">' +
+            (socials.length ? '<div class="contact-social-block"><h4>' + escapeHtml(socialTitle) + '</h4><div class="contact-social-icons">' +
                 socials.map(function (item) {
                     return '<a href="' + escapeHtml(body[item.key]) + '" aria-label="' + escapeHtml(item.label) + '" target="_blank" rel="noopener">' + socialSvg(item.key) + '</a>';
                 }).join('') +
                 '</div></div>' : '') +
             '</div>' +
             '<div class="map-placeholder contact-location-panel contact-npc-map-panel fade-in-right">' +
-            (mapSrc ? '<iframe class="contact-map-frame" title="' + escapeHtml(localized(page, 'mapTitle')) + '" data-consent-category="functional" data-consent-src="' + escapeHtml(mapSrc) + '" width="640" height="480" loading="eager" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>' : '') +
+            (mapSrc ? '<iframe class="contact-map-frame" title="' + escapeHtml(mapTitle) + '" data-consent-category="functional" data-consent-src="' + escapeHtml(mapSrc) + '" width="640" height="480" loading="eager" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>' : '') +
             '</div></div></div></section>';
     }
 
     function renderContactField(field) {
         var id = escapeHtml(field.name || '');
         var required = field.required ? ' required' : '';
-        var label = escapeHtml(localized(field, 'label')) + (field.required && localized(field, 'label').indexOf('*') === -1 ? ' *' : '');
-        var placeholder = escapeHtml(localized(field, 'placeholder'));
+        var fieldLabel = localizedContactField(field, 'label');
+        var label = escapeHtml(fieldLabel) + (field.required && fieldLabel.indexOf('*') === -1 ? ' *' : '');
+        var placeholder = escapeHtml(localizedContactField(field, 'placeholder'));
         if (field.type === 'textarea') {
             return '<div class="form-group form-group-message"><label for="' + id + '">' + label + '</label><textarea id="' + id + '" name="' + id + '" rows="' + escapeHtml(field.rows || 5) + '"' + required + ' placeholder="' + placeholder + '"></textarea></div>';
         }
@@ -897,12 +1075,12 @@
             if (field && field.name) existing[field.name] = true;
         });
         [
-            { name: 'company', label: 'Company', labelAr: 'الشركة', type: 'text' },
-            { name: 'country', label: 'Destination Country', labelAr: 'بلد المشروع', type: 'text', placeholder: 'Country or region', placeholderAr: 'الدولة أو المنطقة' },
-            { name: 'productType', label: 'Product Type', labelAr: 'نوع المنتج', type: 'text', placeholder: 'Transformer, switchgear, EV charger...', placeholderAr: 'محول، مفاتيح كهربائية، شاحن مركبات...' },
-            { name: 'requiredVoltageOrCapacity', label: 'Required Voltage / Capacity', labelAr: 'الجهد / السعة المطلوبة', type: 'text', column: 'right', placeholder: 'Voltage, capacity, power rating', placeholderAr: 'الجهد أو السعة أو القدرة' },
-            { name: 'quantityOrScale', label: 'Quantity / Project Scale', labelAr: 'الكمية / حجم المشروع', type: 'text', column: 'right', placeholder: 'Quantity or project scale', placeholderAr: 'الكمية أو حجم المشروع' },
-            { name: 'applicationScenario', label: 'Application Scenario', labelAr: 'سيناريو الاستخدام', type: 'text', column: 'right', placeholder: 'Factory, PV project, charging station...', placeholderAr: 'مصنع، مشروع شمسي، محطة شحن...' }
+            { name: 'company', label: 'Company', labelAr: 'الشركة', labelFr: 'Entreprise', labelRu: 'Компания', type: 'text' },
+            { name: 'country', label: 'Destination Country', labelAr: 'بلد المشروع', labelFr: 'Pays de destination', labelRu: 'Страна назначения', type: 'text', placeholder: 'Country or region', placeholderAr: 'الدولة أو المنطقة', placeholderFr: 'Pays ou région', placeholderRu: 'Страна или регион' },
+            { name: 'productType', label: 'Product Type', labelAr: 'نوع المنتج', labelFr: 'Type de produit', labelRu: 'Тип продукта', type: 'text', placeholder: 'Transformer, switchgear, EV charger...', placeholderAr: 'محول، مفاتيح كهربائية، شاحن مركبات...', placeholderFr: 'Transformateur, appareillage, borne de recharge...', placeholderRu: 'Трансформатор, КРУ, зарядная станция...' },
+            { name: 'requiredVoltageOrCapacity', label: 'Required Voltage / Capacity', labelAr: 'الجهد / السعة المطلوبة', labelFr: 'Tension / capacité requise', labelRu: 'Требуемое напряжение / мощность', type: 'text', column: 'right', placeholder: 'Voltage, capacity, power rating', placeholderAr: 'الجهد أو السعة أو القدرة', placeholderFr: 'Tension, capacité ou puissance', placeholderRu: 'Напряжение, емкость или мощность' },
+            { name: 'quantityOrScale', label: 'Quantity / Project Scale', labelAr: 'الكمية / حجم المشروع', labelFr: 'Quantité / taille du projet', labelRu: 'Количество / масштаб проекта', type: 'text', column: 'right', placeholder: 'Quantity or project scale', placeholderAr: 'الكمية أو حجم المشروع', placeholderFr: 'Quantité ou taille du projet', placeholderRu: 'Количество или масштаб проекта' },
+            { name: 'applicationScenario', label: 'Application Scenario', labelAr: 'سيناريو الاستخدام', labelFr: 'Scénario d’application', labelRu: 'Сценарий применения', type: 'text', column: 'right', placeholder: 'Factory, PV project, charging station...', placeholderAr: 'مصنع، مشروع شمسي، محطة شحن...', placeholderFr: 'Usine, projet photovoltaïque, station de recharge...', placeholderRu: 'Завод, солнечный проект, зарядная станция...' }
         ].forEach(function (field) {
             if (!existing[field.name]) {
                 source.splice(Math.max(0, source.length - 1), 0, field);
@@ -922,22 +1100,28 @@
         var fields = contactInquiryDefaultFields(form.fields);
         var left = fields.filter(function (field) { return field.column !== 'right'; });
         var right = fields.filter(function (field) { return field.column === 'right'; });
+        var title = localizedOrPageFallback(form, 'title', 'contactFormTitle', localized(form, 'title'));
+        var note = localizedOrPageFallback(form, 'note', 'contactFormNote', localized(form, 'note'));
+        var footerText = localizedOrPageFallback(form, 'footerText', 'contactFormFooterText', localized(form, 'footerText'));
+        var submitLabel = localizedOrPageFallback(form, 'submitLabel', 'contactFormSubmit', localized(form, 'submitLabel'));
         return '<section class="section contact-form-section"><div class="container">' +
-            '<div class="contact-form-heading fade-in"><h2>' + escapeHtml(localized(form, 'title')) + '</h2><p>' + escapeHtml(localized(form, 'note')) + '</p></div>' +
+            '<div class="contact-form-heading fade-in"><h2>' + escapeHtml(title) + '</h2><p>' + escapeHtml(note) + '</p></div>' +
             '<div class="contact-form contact-page-form fade-in"><form id="contactForm">' +
             '<input type="hidden" name="subject" value="quote">' +
             '<div class="contact-inquiry-columns">' +
             '<div class="contact-inquiry-column">' + left.map(renderContactField).join('') + '</div>' +
             '<div class="contact-inquiry-column">' + right.map(renderContactField).join('') + '</div>' +
             '</div>' +
-            '<div class="contact-form-footer"><p>' + escapeHtml(localized(form, 'footerText')) + '</p><button type="submit" class="btn btn-primary">' + escapeHtml(localized(form, 'submitLabel')) + '</button></div>' +
+            '<div class="contact-form-footer"><p>' + escapeHtml(footerText) + '</p><button type="submit" class="btn btn-primary">' + escapeHtml(submitLabel) + '</button></div>' +
             '</form></div></div></section>';
     }
 
     function renderContactFaq(faq) {
         if (!faq || !faq.items || !faq.items.length) return '';
+        var title = localizedOrPageFallback(faq, 'title', 'contactFaqTitle', localized(faq, 'title'));
+        var text = localizedOrPageFallback(faq, 'text', 'contactFaqText', localized(faq, 'text'));
         return '<section class="section bg-light faq-block"><div class="container">' +
-            '<div class="section-header"><h2>' + escapeHtml(localized(faq, 'title')) + '</h2><p>' + escapeHtml(localized(faq, 'text')) + '</p></div>' +
+            '<div class="section-header"><h2>' + escapeHtml(title) + '</h2><p>' + escapeHtml(text) + '</p></div>' +
             faq.items.map(function (item) {
                 return '<details><summary>' + escapeHtml(localized(item, 'question')) + '</summary><p>' + escapeHtml(localized(item, 'answer')) + '</p></details>';
             }).join('') +
@@ -946,6 +1130,10 @@
 
     function renderContact(body) {
         updateHero(body.hero);
+        var heroTitle = document.querySelector('.page-hero h1');
+        var heroSubtitle = document.querySelector('.page-hero p:not(.page-hero-title)');
+        if (heroTitle) heroTitle.textContent = localizedOrPageFallback(body.hero || {}, 'title', 'contactHeroTitle', heroTitle.textContent);
+        if (heroSubtitle) heroSubtitle.textContent = localizedOrPageFallback(body.hero || {}, 'subtitle', 'contactHeroSubtitle', heroSubtitle.textContent);
         updateSeo(body.seo, body.hero);
         var page = body.contactPage || {};
         pageRoot.innerHTML =
@@ -974,19 +1162,19 @@
 
     function defaultProductDetailSupportItems() {
         return [
-            { title: 'Parameter Review', titleAr: 'مراجعة المعايير', text: 'Confirm voltage, capacity, protection level, and project conditions before quotation.', textAr: 'تأكيد الجهد والسعة ومستوى الحماية وظروف المشروع قبل عرض السعر.' },
-            { title: 'Project Configuration', titleAr: 'تكوين المشروع', text: 'Match products with transformers, switchgear, charging, PV, or storage systems.', textAr: 'مطابقة المنتجات مع المحولات والمفاتيح والشحن والطاقة الشمسية أو التخزين.' },
-            { title: 'Export Delivery', titleAr: 'تسليم التصدير', text: 'Support packaging, documents, delivery schedule, and destination requirements.', textAr: 'دعم التغليف والمستندات وجدول التسليم ومتطلبات بلد الوصول.' },
-            { title: 'After-sales Support', titleAr: 'دعم ما بعد البيع', text: 'Provide technical communication for installation, operation, and maintenance.', textAr: 'توفير تواصل فني للتركيب والتشغيل والصيانة.' }
+            { title: 'Parameter Review', titleAr: 'مراجعة المعايير', titleFr: 'Revue des paramètres', titleRu: 'Проверка параметров', text: 'Confirm voltage, capacity, protection level, and project conditions before quotation.', textAr: 'تأكيد الجهد والسعة ومستوى الحماية وظروف المشروع قبل عرض السعر.', textFr: 'Confirmer la tension, la capacité, le niveau de protection et les conditions du projet avant le devis.', textRu: 'Перед расчетом подтвердите напряжение, мощность, уровень защиты и условия проекта.' },
+            { title: 'Project Configuration', titleAr: 'تكوين المشروع', titleFr: 'Configuration du projet', titleRu: 'Конфигурация проекта', text: 'Match products with transformers, switchgear, charging, PV, or storage systems.', textAr: 'مطابقة المنتجات مع المحولات والمفاتيح والشحن والطاقة الشمسية أو التخزين.', textFr: 'Associer les produits aux transformateurs, appareillages, systèmes de recharge, photovoltaïques ou de stockage.', textRu: 'Подобрать продукцию для трансформаторов, КРУ, зарядных, солнечных или накопительных систем.' },
+            { title: 'Export Delivery', titleAr: 'تسليم التصدير', titleFr: 'Livraison export', titleRu: 'Экспортная поставка', text: 'Support packaging, documents, delivery schedule, and destination requirements.', textAr: 'دعم التغليف والمستندات وجدول التسليم ومتطلبات بلد الوصول.', textFr: 'Accompagnement pour l’emballage, les documents, le calendrier de livraison et les exigences de destination.', textRu: 'Поддержка по упаковке, документам, графику поставки и требованиям страны назначения.' },
+            { title: 'After-sales Support', titleAr: 'دعم ما بعد البيع', titleFr: 'Support après-vente', titleRu: 'Послепродажная поддержка', text: 'Provide technical communication for installation, operation, and maintenance.', textAr: 'توفير تواصل فني للتركيب والتشغيل والصيانة.', textFr: 'Assurer les échanges techniques pour l’installation, l’exploitation et la maintenance.', textRu: 'Техническое сопровождение по монтажу, эксплуатации и обслуживанию.' }
         ];
     }
 
     function defaultProductDetailFaqItems() {
         return [
-            { question: 'What information is needed for a quotation?', questionAr: 'ما المعلومات المطلوبة لعرض السعر؟', answer: 'Please provide product type, voltage or capacity, quantity, destination country, and application scenario.', answerAr: 'يرجى تزويد نوع المنتج والجهد أو السعة والكمية وبلد المشروع وسيناريو الاستخدام.' },
-            { question: 'Can Longxiang help with product selection?', questionAr: 'هل يمكن لونغشيانغ المساعدة في اختيار المنتج؟', answer: 'Yes. Our team can review parameters and recommend a suitable configuration for the project.', answerAr: 'نعم، يمكن لفريقنا مراجعة المعايير واقتراح تكوين مناسب للمشروع.' },
-            { question: 'Are drawings or technical documents available?', questionAr: 'هل تتوفر الرسومات أو المستندات الفنية؟', answer: 'Technical documents can be provided according to the product model and project requirements.', answerAr: 'يمكن توفير المستندات الفنية حسب طراز المنتج ومتطلبات المشروع.' },
-            { question: 'Can products be supplied for overseas projects?', questionAr: 'هل يمكن توريد المنتجات للمشاريع الخارجية؟', answer: 'Yes. Please share the destination country and delivery requirements so we can confirm packaging and documents.', answerAr: 'نعم. يرجى مشاركة بلد الوصول ومتطلبات التسليم لتأكيد التغليف والمستندات.' }
+            { question: 'What information is needed for a quotation?', questionAr: 'ما المعلومات المطلوبة لعرض السعر؟', questionFr: 'Quelles informations sont nécessaires pour un devis ?', questionRu: 'Какие данные нужны для расчета?', answer: 'Please provide product type, voltage or capacity, quantity, destination country, and application scenario.', answerAr: 'يرجى تزويد نوع المنتج والجهد أو السعة والكمية وبلد المشروع وسيناريو الاستخدام.', answerFr: 'Merci d’indiquer le type de produit, la tension ou la capacité, la quantité, le pays de destination et le scénario d’application.', answerRu: 'Укажите тип продукта, напряжение или мощность, количество, страну назначения и сценарий применения.' },
+            { question: 'Can Longxiang help with product selection?', questionAr: 'هل يمكن لونغشيانغ المساعدة في اختيار المنتج؟', questionFr: 'Longxiang peut-il aider au choix du produit ?', questionRu: 'Может ли Longxiang помочь с подбором продукта?', answer: 'Yes. Our team can review parameters and recommend a suitable configuration for the project.', answerAr: 'نعم، يمكن لفريقنا مراجعة المعايير واقتراح تكوين مناسب للمشروع.', answerFr: 'Oui. Notre équipe peut examiner les paramètres et recommander une configuration adaptée au projet.', answerRu: 'Да. Наша команда проверит параметры и предложит подходящую конфигурацию для проекта.' },
+            { question: 'Are drawings or technical documents available?', questionAr: 'هل تتوفر الرسومات أو المستندات الفنية؟', questionFr: 'Des plans ou documents techniques sont-ils disponibles ?', questionRu: 'Доступны ли чертежи или технические документы?', answer: 'Technical documents can be provided according to the product model and project requirements.', answerAr: 'يمكن توفير المستندات الفنية حسب طراز المنتج ومتطلبات المشروع.', answerFr: 'Les documents techniques peuvent être fournis selon le modèle du produit et les exigences du projet.', answerRu: 'Технические документы могут быть предоставлены в зависимости от модели продукта и требований проекта.' },
+            { question: 'Can products be supplied for overseas projects?', questionAr: 'هل يمكن توريد المنتجات للمشاريع الخارجية؟', questionFr: 'Les produits peuvent-ils être fournis pour des projets à l’étranger ?', questionRu: 'Можно ли поставлять продукцию для зарубежных проектов?', answer: 'Yes. Please share the destination country and delivery requirements so we can confirm packaging and documents.', answerAr: 'نعم. يرجى مشاركة بلد الوصول ومتطلبات التسليم لتأكيد التغليف والمستندات.', answerFr: 'Oui. Merci d’indiquer le pays de destination et les exigences de livraison afin de confirmer l’emballage et les documents.', answerRu: 'Да. Сообщите страну назначения и требования к поставке, чтобы мы подтвердили упаковку и документы.' }
         ];
     }
 
@@ -995,7 +1183,8 @@
         if (!target) return;
         section = section || {};
         var items = Array.isArray(section.items) && section.items.length ? section.items : defaultProductDetailSupportItems();
-        target.innerHTML = '<h2>' + escapeHtml(localized(section, 'title')) + '</h2><div class="export-support-grid">' +
+        var title = localizedOrPageFallback(section, 'title', 'productDetailSupportTitle', localized(section, 'title'));
+        target.innerHTML = '<h2>' + escapeHtml(title) + '</h2><div class="export-support-grid">' +
             items.map(function (item) {
                 return '<div><strong>' + escapeHtml(localized(item, 'title')) + '</strong><span>' + escapeHtml(localized(item, 'text')) + '</span></div>';
             }).join('') +
@@ -1006,7 +1195,8 @@
         var target = pageRoot.querySelector('[data-product-detail-faq]');
         if (!target) return;
         items = Array.isArray(items) && items.length ? items : defaultProductDetailFaqItems();
-        target.innerHTML = '<h2>' + escapeHtml(localized(labels, 'faqTitle')) + '</h2>' +
+        var title = localizedOrPageFallback(labels, 'faqTitle', 'productDetailFaqTitle', localized(labels, 'faqTitle'));
+        target.innerHTML = '<h2>' + escapeHtml(title) + '</h2>' +
             items.map(function (item) {
                 return '<details><summary>' + escapeHtml(localized(item, 'question')) + '</summary><p>' + escapeHtml(localized(item, 'answer')) + '</p></details>';
             }).join('');
@@ -1024,19 +1214,19 @@
             heroEl.style.backgroundImage = "url('" + resolveAsset(detailHero.backgroundImage).replace(/'/g, "\\'") + "')";
         }
         renderHeroBreadcrumb(detailHero);
-        setDetailText('#page-title', localized(detailHero, 'title'));
-        setDetailText('#page-subtitle', localized(detailHero, 'subtitle'));
+        setDetailText('#page-title', localizedOrPageFallback(detailHero, 'title', 'productDetailTitle', localized(detailHero, 'title')));
+        setDetailText('#page-subtitle', localizedOrPageFallback(detailHero, 'subtitle', 'productDetailSubtitle', localized(detailHero, 'subtitle')));
         updateSeo(body.detailSeo || body.seo, detailHero);
     }
 
     function renderProductDetailLabels(labels) {
         if (!labels) return;
-        setDetailText('[data-product-specs-title]', localized(labels, 'specsTitle'));
-        setDetailText('#product-title', localized(labels, 'loadingTitle'));
-        setDetailText('#product-desc', localized(labels, 'loadingText'));
-        setDetailText('[data-product-detail-support] .empty-state', localized(labels, 'supportLoading'));
-        setDetailText('[data-product-detail-faq] .empty-state', localized(labels, 'faqLoading'));
-        setDetailText('[data-product-detail-inquiry] .empty-state', localized(labels, 'inquiryLoading'));
+        setDetailText('[data-product-specs-title]', localizedOrPageFallback(labels, 'specsTitle', 'productDetailSpecsTitle', localized(labels, 'specsTitle')));
+        setDetailText('#product-title', localizedOrPageFallback(labels, 'loadingTitle', 'productDetailTitle', localized(labels, 'loadingTitle')));
+        setDetailText('#product-desc', localizedOrPageFallback(labels, 'loadingText', 'productDetailSubtitle', localized(labels, 'loadingText')));
+        setDetailText('[data-product-detail-support] .empty-state', localizedOrPageFallback(labels, 'supportLoading', 'productDetailSupportLoading', localized(labels, 'supportLoading')));
+        setDetailText('[data-product-detail-faq] .empty-state', localizedOrPageFallback(labels, 'faqLoading', 'productDetailFaqLoading', localized(labels, 'faqLoading')));
+        setDetailText('[data-product-detail-inquiry] .empty-state', localizedOrPageFallback(labels, 'inquiryLoading', 'productDetailInquiryLoading', localized(labels, 'inquiryLoading')));
     }
 
     function productFieldId(name) {
@@ -1073,17 +1263,17 @@
             if (field && field.name) existing[field.name] = true;
         });
         [
-            { name: 'productContextDisplay', label: 'Interested Product', labelAr: 'المنتج المطلوب', type: 'text', readonly: true, productContextDisplay: true },
-            { name: 'name', label: 'Name', labelAr: 'الاسم', type: 'text', required: true },
-            { name: 'email', label: 'Email', labelAr: 'البريد الإلكتروني', type: 'email', required: true },
-            { name: 'phone', label: 'Phone', labelAr: 'رقم الهاتف', type: 'text' },
-            { name: 'company', label: 'Company', labelAr: 'الشركة', type: 'text' },
-            { name: 'country', label: 'Destination Country', labelAr: 'بلد المشروع', type: 'text', placeholder: 'Country or region', placeholderAr: 'الدولة أو المنطقة' },
-            { name: 'productType', label: 'Product Type', labelAr: 'نوع المنتج', type: 'text', placeholder: 'Transformer, switchgear, EV charger...', placeholderAr: 'محول، مفاتيح كهربائية، شاحن مركبات...' },
-            { name: 'requiredVoltageOrCapacity', label: 'Required Voltage / Capacity', labelAr: 'الجهد / السعة المطلوبة', type: 'text', placeholder: 'Voltage, capacity, power rating', placeholderAr: 'الجهد أو السعة أو القدرة' },
-            { name: 'quantityOrScale', label: 'Quantity / Project Scale', labelAr: 'الكمية / حجم المشروع', type: 'text', placeholder: 'Quantity or project scale', placeholderAr: 'الكمية أو حجم المشروع' },
-            { name: 'applicationScenario', label: 'Application Scenario', labelAr: 'سيناريو الاستخدام', type: 'text', placeholder: 'Factory, PV project, charging station...', placeholderAr: 'مصنع، مشروع شمسي، محطة شحن...' },
-            { name: 'message', label: 'Message', labelAr: 'الرسالة', type: 'textarea', required: true, rows: 5, productMessage: true }
+            { name: 'productContextDisplay', label: 'Interested Product', labelAr: 'المنتج المطلوب', labelFr: 'Produit demandé', labelRu: 'Интересующий продукт', type: 'text', readonly: true, productContextDisplay: true },
+            { name: 'name', label: 'Name', labelAr: 'الاسم', labelFr: 'Nom', labelRu: 'Имя', type: 'text', required: true },
+            { name: 'email', label: 'Email', labelAr: 'البريد الإلكتروني', labelFr: 'E-mail', labelRu: 'Электронная почта', type: 'email', required: true },
+            { name: 'phone', label: 'Phone', labelAr: 'رقم الهاتف', labelFr: 'Téléphone', labelRu: 'Телефон', type: 'text' },
+            { name: 'company', label: 'Company', labelAr: 'الشركة', labelFr: 'Entreprise', labelRu: 'Компания', type: 'text' },
+            { name: 'country', label: 'Destination Country', labelAr: 'بلد المشروع', labelFr: 'Pays de destination', labelRu: 'Страна назначения', type: 'text', placeholder: 'Country or region', placeholderAr: 'الدولة أو المنطقة', placeholderFr: 'Pays ou région', placeholderRu: 'Страна или регион' },
+            { name: 'productType', label: 'Product Type', labelAr: 'نوع المنتج', labelFr: 'Type de produit', labelRu: 'Тип продукта', type: 'text', placeholder: 'Transformer, switchgear, EV charger...', placeholderAr: 'محول، مفاتيح كهربائية، شاحن مركبات...', placeholderFr: 'Transformateur, appareillage, borne de recharge...', placeholderRu: 'Трансформатор, КРУ, зарядная станция...' },
+            { name: 'requiredVoltageOrCapacity', label: 'Required Voltage / Capacity', labelAr: 'الجهد / السعة المطلوبة', labelFr: 'Tension / capacité requise', labelRu: 'Требуемое напряжение / мощность', type: 'text', placeholder: 'Voltage, capacity, power rating', placeholderAr: 'الجهد أو السعة أو القدرة', placeholderFr: 'Tension, capacité ou puissance', placeholderRu: 'Напряжение, емкость или мощность' },
+            { name: 'quantityOrScale', label: 'Quantity / Project Scale', labelAr: 'الكمية / حجم المشروع', labelFr: 'Quantité / taille du projet', labelRu: 'Количество / масштаб проекта', type: 'text', placeholder: 'Quantity or project scale', placeholderAr: 'الكمية أو حجم المشروع', placeholderFr: 'Quantité ou taille du projet', placeholderRu: 'Количество или масштаб проекта' },
+            { name: 'applicationScenario', label: 'Application Scenario', labelAr: 'سيناريو الاستخدام', labelFr: 'Scénario d’application', labelRu: 'Сценарий применения', type: 'text', placeholder: 'Factory, PV project, charging station...', placeholderAr: 'مصنع، مشروع شمسي، محطة شحن...', placeholderFr: 'Usine, projet photovoltaïque, station de recharge...', placeholderRu: 'Завод, солнечный проект, зарядная станция...' },
+            { name: 'message', label: 'Message', labelAr: 'الرسالة', labelFr: 'Message', labelRu: 'Сообщение', type: 'textarea', required: true, rows: 5, productMessage: true }
         ].forEach(function (field) {
             if (!existing[field.name]) {
                 fields.push(field);
@@ -1103,13 +1293,19 @@
         if (!target) return;
         form = form || {};
         var fields = productInquiryDefaultFields(form);
-        target.innerHTML = '<h3>' + escapeHtml(localized(form, 'title') || (isArabic ? 'استفسار عن المنتج' : 'Product Inquiry')) + '</h3>' +
-            (localized(form, 'note') ? '<p class="product-inquiry-note">' + escapeHtml(localized(form, 'note')) + '</p>' : '') +
+        var fallbackTitle = locale === 'fr' ? 'Demande produit' : (locale === 'ru' ? 'Запрос по продукту' : (isArabic ? 'استفسار عن المنتج' : 'Product Inquiry'));
+        var fallbackNote = locale === 'fr' ? 'Laissez vos coordonnées et les exigences du projet.' : (locale === 'ru' ? 'Оставьте контактные данные и требования проекта.' : '');
+        var fallbackSubmit = locale === 'fr' ? 'Envoyer la demande' : (locale === 'ru' ? 'Отправить запрос' : (isArabic ? 'إرسال الاستفسار' : 'Submit Inquiry'));
+        var title = localizedOrPageFallback(form, 'title', 'productInquiryTitle', fallbackTitle);
+        var note = localizedOrPageFallback(form, 'note', 'productInquiryNote', fallbackNote);
+        var submitLabel = localizedOrPageFallback(form, 'submitLabel', 'productInquirySubmit', fallbackSubmit);
+        target.innerHTML = '<h3>' + escapeHtml(title) + '</h3>' +
+            (note ? '<p class="product-inquiry-note">' + escapeHtml(note) + '</p>' : '') +
             '<form class="inquiry-form" data-inquiry-form>' +
             '<input type="hidden" name="subject" value="quote">' +
             '<input type="hidden" name="productContext" data-product-context value="">' +
             fields.map(renderProductInquiryField).join('') +
-            '<button type="submit" class="btn btn-primary">' + escapeHtml(localized(form, 'submitLabel') || (isArabic ? 'إرسال الاستفسار' : 'Submit Inquiry')) + '</button>' +
+            '<button type="submit" class="btn btn-primary">' + escapeHtml(submitLabel) + '</button>' +
             '</form>';
     }
 
@@ -1346,17 +1542,22 @@
         updateHero(body.hero);
         updateSeo(body.seo, body.hero);
         renderHeroBreadcrumb(body.hero);
+        var hero = body.hero || {};
+        var heroTitle = document.querySelector('.page-hero h1');
+        var heroSubtitle = document.querySelector('.page-hero p:not(.page-hero-title)');
+        if (heroTitle) heroTitle.textContent = localizedOrPageFallback(hero, 'title', 'compareTitle', heroTitle.textContent);
+        if (heroSubtitle) heroSubtitle.textContent = localizedOrPageFallback(hero, 'subtitle', 'compareSubtitle', heroSubtitle.textContent);
 
         var toolbar = body.toolbar || {};
         var back = pageRoot.querySelector('[data-compare-back]');
         var print = pageRoot.querySelector('[data-compare-print]');
         var empty = pageRoot.querySelector('#comparison-container .empty-state');
-        if (back && localized(toolbar, 'backLabel')) {
-            back.textContent = localized(toolbar, 'backLabel');
+        if (back) {
+            back.textContent = localizedOrPageFallback(toolbar, 'backLabel', 'compareBack', back.textContent);
             back.href = pageHref(toolbar.backHref || 'products.html');
         }
-        if (print && localized(toolbar, 'printLabel')) print.textContent = localized(toolbar, 'printLabel');
-        if (empty && localized(body.emptyState, 'text')) empty.textContent = localized(body.emptyState, 'text');
+        if (print) print.textContent = localizedOrPageFallback(toolbar, 'printLabel', 'comparePrint', print.textContent);
+        if (empty) empty.textContent = localizedOrPageFallback(body.emptyState, 'text', 'compareLoading', empty.textContent);
 
         refreshDynamicUi();
     }
