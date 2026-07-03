@@ -96,6 +96,16 @@ function readJsonFile(filePath) {
     return JSON.parse(fs.readFileSync(filePath, 'utf8'));
 }
 
+function readLocaleConfig() {
+    const configPath = path.join(root, 'config', 'locales.json');
+    const config = readJsonFile(configPath);
+    const supportedLocales = Array.isArray(config.supportedLocales) ? config.supportedLocales : [];
+    const plannedLocales = config.plannedLocales && typeof config.plannedLocales === 'object'
+        ? Object.keys(config.plannedLocales)
+        : [];
+    return { supportedLocales, plannedLocales };
+}
+
 function parseObjectJson(value, label, errors) {
     try {
         const parsed = JSON.parse(value || '{}');
@@ -223,11 +233,12 @@ function validateInput(data, args, errors) {
     if (data.meta && data.meta.counts && data.meta.counts.contentBlocks !== data.contentBlocks.length) {
         errors.push('meta.counts.contentBlocks must match contentBlocks length ' + data.contentBlocks.length + '.');
     }
-    if (data.meta && JSON.stringify(data.meta.supportedLocales) !== JSON.stringify(['en', 'ar', 'fr'])) {
-        errors.push('meta.supportedLocales must match ["en","ar","fr"].');
+    const localeConfig = readLocaleConfig();
+    if (data.meta && JSON.stringify(data.meta.supportedLocales) !== JSON.stringify(localeConfig.supportedLocales)) {
+        errors.push('meta.supportedLocales must match ' + JSON.stringify(localeConfig.supportedLocales) + '.');
     }
-    if (data.meta && JSON.stringify(data.meta.plannedOnlyLocales) !== JSON.stringify(['pt'])) {
-        errors.push('meta.plannedOnlyLocales must stay ["pt"].');
+    if (data.meta && JSON.stringify(data.meta.plannedOnlyLocales) !== JSON.stringify(localeConfig.plannedLocales)) {
+        errors.push('meta.plannedOnlyLocales must stay ' + JSON.stringify(localeConfig.plannedLocales) + '.');
     }
 }
 
