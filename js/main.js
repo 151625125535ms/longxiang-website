@@ -487,6 +487,12 @@
             'Enterprise Qualifications': 'Qualifications de l\u2019entreprise',
             'Patent Certificates': 'Certificats de brevet',
             'Qualification materials': 'Documents de qualification'
+        },
+        ru: {
+            'Certificates': '\u0421\u0435\u0440\u0442\u0438\u0444\u0438\u043a\u0430\u0442\u044b',
+            'Enterprise Qualifications': '\u041a\u0432\u0430\u043b\u0438\u0444\u0438\u043a\u0430\u0446\u0438\u0438 \u043f\u0440\u0435\u0434\u043f\u0440\u0438\u044f\u0442\u0438\u044f',
+            'Patent Certificates': '\u041f\u0430\u0442\u0435\u043d\u0442\u043d\u044b\u0435 \u0441\u0435\u0440\u0442\u0438\u0444\u0438\u043a\u0430\u0442\u044b',
+            'Qualification materials': '\u041a\u0432\u0430\u043b\u0438\u0444\u0438\u043a\u0430\u0446\u0438\u043e\u043d\u043d\u044b\u0435 \u043c\u0430\u0442\u0435\u0440\u0438\u0430\u043b\u044b'
         }
     };
 

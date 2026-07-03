@@ -81,6 +81,18 @@
             'Industrial College': 'Institut industriel',
             'Models': 'Mod\u00e8les',
             'Teaching Equipment': '\u00c9quipements p\u00e9dagogiques'
+        },
+        ru: {
+            'Choose a cooperation path that can be shown, operated, and scaled.': '\u0412\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u0444\u043e\u0440\u043c\u0430\u0442 \u0441\u043e\u0442\u0440\u0443\u0434\u043d\u0438\u0447\u0435\u0441\u0442\u0432\u0430, \u043a\u043e\u0442\u043e\u0440\u044b\u0439 \u043c\u043e\u0436\u043d\u043e \u043f\u043e\u043a\u0430\u0437\u0430\u0442\u044c, \u0432\u043d\u0435\u0434\u0440\u0438\u0442\u044c \u0438 \u043c\u0430\u0441\u0448\u0442\u0430\u0431\u0438\u0440\u043e\u0432\u0430\u0442\u044c.',
+            'Industrial College': '\u0418\u043d\u0434\u0443\u0441\u0442\u0440\u0438\u0430\u043b\u044c\u043d\u044b\u0439 \u043a\u043e\u043b\u043b\u0435\u0434\u0436',
+            'Models': '\u041c\u043e\u0434\u0435\u043b\u0438',
+            'Teaching Equipment': '\u0423\u0447\u0435\u0431\u043d\u043e\u0435 \u043e\u0431\u043e\u0440\u0443\u0434\u043e\u0432\u0430\u043d\u0438\u0435',
+            'Education Cooperation': '\u041e\u0431\u0440\u0430\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044c\u043d\u043e\u0435 \u0441\u043e\u0442\u0440\u0443\u0434\u043d\u0438\u0447\u0435\u0441\u0442\u0432\u043e',
+            'Education Cooperation | Henan Longxiang Electrical Co., Ltd.': '\u041e\u0431\u0440\u0430\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044c\u043d\u043e\u0435 \u0441\u043e\u0442\u0440\u0443\u0434\u043d\u0438\u0447\u0435\u0441\u0442\u0432\u043e | Henan Longxiang Electrical Co., Ltd.',
+            'Four cooperation models': '\u0427\u0435\u0442\u044b\u0440\u0435 \u043c\u043e\u0434\u0435\u043b\u0438 \u0441\u043e\u0442\u0440\u0443\u0434\u043d\u0438\u0447\u0435\u0441\u0442\u0432\u0430',
+            'FOUR COOPERATION MODELS': '\u0427\u0435\u0442\u044b\u0440\u0435 \u043c\u043e\u0434\u0435\u043b\u0438 \u0441\u043e\u0442\u0440\u0443\u0434\u043d\u0438\u0447\u0435\u0441\u0442\u0432\u0430',
+            'Industrial college planning and cooperation framework': '\u041f\u043b\u0430\u043d\u0438\u0440\u043e\u0432\u0430\u043d\u0438\u0435 \u0438\u043d\u0434\u0443\u0441\u0442\u0440\u0438\u0430\u043b\u044c\u043d\u043e\u0433\u043e \u043a\u043e\u043b\u043b\u0435\u0434\u0436\u0430 \u0438 \u0444\u043e\u0440\u043c\u0430\u0442 \u0441\u043e\u0442\u0440\u0443\u0434\u043d\u0438\u0447\u0435\u0441\u0442\u0432\u0430',
+            'Longxiang integrates university and research institute resources to support technical innovation, achievement transformation, and international industry-education cooperation.': 'Longxiang \u043e\u0431\u044a\u0435\u0434\u0438\u043d\u044f\u0435\u0442 \u0440\u0435\u0441\u0443\u0440\u0441\u044b \u0443\u043d\u0438\u0432\u0435\u0440\u0441\u0438\u0442\u0435\u0442\u043e\u0432 \u0438 \u043d\u0430\u0443\u0447\u043d\u043e-\u0438\u0441\u0441\u043b\u0435\u0434\u043e\u0432\u0430\u0442\u0435\u043b\u044c\u0441\u043a\u0438\u0445 \u0438\u043d\u0441\u0442\u0438\u0442\u0443\u0442\u043e\u0432 \u0434\u043b\u044f \u043f\u043e\u0434\u0434\u0435\u0440\u0436\u043a\u0438 \u0442\u0435\u0445\u043d\u0438\u0447\u0435\u0441\u043a\u0438\u0445 \u0438\u043d\u043d\u043e\u0432\u0430\u0446\u0438\u0439, \u0442\u0440\u0430\u043d\u0441\u0444\u0435\u0440\u0430 \u0440\u0435\u0437\u0443\u043b\u044c\u0442\u0430\u0442\u043e\u0432 \u0438 \u043c\u0435\u0436\u0434\u0443\u043d\u0430\u0440\u043e\u0434\u043d\u043e\u0433\u043e \u043e\u0442\u0440\u0430\u0441\u043b\u0435\u0432\u043e-\u043e\u0431\u0440\u0430\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044c\u043d\u043e\u0433\u043e \u0441\u043e\u0442\u0440\u0443\u0434\u043d\u0438\u0447\u0435\u0441\u0442\u0432\u0430.'
         }
     };
 
@@ -106,10 +118,17 @@
         if (!item) return [];
         if (window.LongxiangI18n && window.LongxiangI18n.localized) {
             var value = window.LongxiangI18n.localized(item, key, locale);
-            if (Array.isArray(value) && value.length) return value;
+            if (Array.isArray(value) && value.length) {
+                if (locale !== 'ru') return value;
+                return value.map(function (entry) {
+                    return typeof entry === 'string' ? (textFallback(entry) || entry) : entry;
+                });
+            }
         }
         if (isArabic && item[key + 'Ar'] && item[key + 'Ar'].length) return item[key + 'Ar'];
-        return item[key] || [];
+        return (item[key] || []).map(function (entry) {
+            return typeof entry === 'string' ? (textFallback(entry) || entry) : entry;
+        });
     }
 
     function t(key) {
