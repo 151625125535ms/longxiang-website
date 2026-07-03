@@ -481,6 +481,15 @@
         '© Henan Longxiang Electrical Co., Ltd. All rights reserved.': '© شركة خنان لونغشيانغ إلكتريكال المحدودة. جميع الحقوق محفوظة.'
     };
 
+    var TEXT_FALLBACKS = {
+        fr: {
+            'Certificates': 'Certificats',
+            'Enterprise Qualifications': 'Qualifications de l\u2019entreprise',
+            'Patent Certificates': 'Certificats de brevet',
+            'Qualification materials': 'Documents de qualification'
+        }
+    };
+
     function camelToSnake(value) {
         return String(value || '').replace(/([a-z0-9])([A-Z])/g, '$1_$2').toLowerCase();
     }
@@ -496,6 +505,12 @@
         return ARABIC_TEXT_FALLBACKS[value.trim()] || '';
     }
 
+    function textFallback(value) {
+        if (typeof value !== 'string') return '';
+        var pack = TEXT_FALLBACKS[locale] || {};
+        return pack[value.trim()] || '';
+    }
+
     function localizedArabicValue(item, key) {
         if (!item || !isArabic) return '';
         if (window.LongxiangI18n && window.LongxiangI18n.localized) {
@@ -509,7 +524,7 @@
     }
 
     function localizeFallback(value) {
-        return arabicTextFallback(value) || value || '';
+        return arabicTextFallback(value) || textFallback(value) || value || '';
     }
 
     var FORM_TEXT_FALLBACKS = {
@@ -547,7 +562,12 @@
         }
         if (window.LongxiangI18n && window.LongxiangI18n.localized) {
             var localizedValue = window.LongxiangI18n.localized(item, key, locale);
-            if (localizedValue) return localizedValue;
+            if (localizedValue) {
+                if ((locale === 'fr' || locale === 'ru') && localizedValue === item[key]) {
+                    return localizeFallback(localizedValue);
+                }
+                return localizedValue;
+            }
         }
         return localizeFallback(item[key] || fallback);
     }
@@ -1583,7 +1603,12 @@
         var section = shellSection(sectionName);
         if (window.LongxiangI18n && window.LongxiangI18n.localized) {
             var localizedValue = window.LongxiangI18n.localized(section, key, locale);
-            if (localizedValue) return localizedValue;
+            if (localizedValue) {
+                if ((locale === 'fr' || locale === 'ru') && localizedValue === section[key]) {
+                    return localizeFallback(localizedValue);
+                }
+                return localizedValue;
+            }
         }
         var arabicValue = localizedArabicValue(section, key);
         if (arabicValue) return arabicValue;
@@ -1594,7 +1619,12 @@
         if (!item) return localizeFallback(fallback);
         if (window.LongxiangI18n && window.LongxiangI18n.localized) {
             var localizedValue = window.LongxiangI18n.localized(item, 'label', locale);
-            if (localizedValue) return localizedValue;
+            if (localizedValue) {
+                if ((locale === 'fr' || locale === 'ru') && localizedValue === item.label) {
+                    return localizeFallback(localizedValue);
+                }
+                return localizedValue;
+            }
         }
         return localizedItemValue(item, 'label', fallback);
     }
@@ -1736,7 +1766,12 @@
     function localizedApiValue(item, field) {
         if (window.LongxiangI18n && window.LongxiangI18n.localized) {
             var value = window.LongxiangI18n.localized(item, field, locale);
-            if (value) return value;
+            if (value) {
+                if ((locale === 'fr' || locale === 'ru') && item && value === item[field]) {
+                    return localizeFallback(value);
+                }
+                return value;
+            }
         }
         if (isArabic && item && item[field + 'Ar']) return item[field + 'Ar'];
         return item && item[field] || '';

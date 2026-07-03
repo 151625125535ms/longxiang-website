@@ -116,26 +116,28 @@
     function localize(product, field) {
         if (window.LongxiangI18n && window.LongxiangI18n.localized) {
             var value = window.LongxiangI18n.localized(product, field, locale);
-            if (value) return value;
+            if (value) return textFallback(value) || value;
         }
         if (isArabic) {
             var arField = field + 'Ar';
             if (product[arField]) return product[arField];
         }
-        return product[field] || '';
+        return textFallback(product[field]) || product[field] || '';
     }
 
     function localizedContent(item, field) {
         if (!item) return '';
         if (window.LongxiangI18n && window.LongxiangI18n.localized) {
             var value = window.LongxiangI18n.localized(item, field, locale);
+            var fallbackValue = textFallback(value);
+            if (fallbackValue) return fallbackValue;
             if (value && (!isArabic || value !== item[field])) return value;
         }
         if (isArabic && item[field + 'Ar']) return item[field + 'Ar'];
         if (isArabic && typeof item[field] === 'string' && ARABIC_TEXT_FALLBACKS[item[field].trim()]) {
             return ARABIC_TEXT_FALLBACKS[item[field].trim()];
         }
-        return item[field] || '';
+        return textFallback(item[field]) || item[field] || '';
     }
 
     function translatedSpecLabel(label) {
@@ -193,6 +195,12 @@
         if (isArabic) return ar;
         var pack = TEXT_FALLBACKS[locale] || {};
         return pack[en] || en;
+    }
+
+    function textFallback(value) {
+        if (typeof value !== 'string') return '';
+        var pack = TEXT_FALLBACKS[locale] || {};
+        return pack[value.trim()] || '';
     }
 
     function rtlAttrs(className) {

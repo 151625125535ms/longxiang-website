@@ -167,8 +167,18 @@ function stripAllowedEnglish(value) {
     return output;
 }
 
+function escapeRegExp(value) {
+    return String(value || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 function containsPhrase(text, phrase) {
-    return normalizeText(text).toLowerCase().indexOf(String(phrase || '').toLowerCase()) !== -1;
+    const value = normalizeText(phrase);
+    if (!value) return false;
+    const isAllCapsPhrase = value === value.toUpperCase() && /[A-Z]/.test(value);
+    const prefix = /^[A-Za-z0-9]/.test(value) ? '\\b' : '';
+    const suffix = /[A-Za-z0-9]$/.test(value) ? '\\b' : '';
+    const flags = isAllCapsPhrase ? '' : 'i';
+    return new RegExp(prefix + escapeRegExp(value) + suffix, flags).test(normalizeText(text));
 }
 
 function phraseHits(text, phrases) {

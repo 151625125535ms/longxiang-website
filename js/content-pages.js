@@ -127,6 +127,24 @@
         'Can Longxiang support model selection?': 'هل يمكن للونغشيانغ دعم اختيار الطراز؟',
         'Yes. Our team can provide product matching suggestions based on your project requirements.': 'نعم. يمكن لفريقنا تقديم اقتراحات مطابقة المنتجات بناءً على متطلبات مشروعك.'
     };
+    var TEXT_FALLBACKS = {
+        fr: {
+            'About Longxiang': '\u00c0 propos de Longxiang',
+            'Certificates': 'Certificats',
+            'Certificates & Qualification Archive': 'Archives des certificats et qualifications',
+            'Enterprise Qualifications': 'Qualifications de l\u2019entreprise',
+            'EXPLORE SOLUTIONS': 'Explorer les solutions',
+            'Integrated Smart Energy': '\u00c9nergie intelligente int\u00e9gr\u00e9e',
+            'Integrated Smart Energy & Power Distribution Solutions': 'Solutions d\u2019\u00e9nergie intelligente int\u00e9gr\u00e9e et de distribution \u00e9lectrique',
+            'Integrated Smart Energy & distribution \u00e9lectrique Solutions': 'Solutions d\u2019\u00e9nergie intelligente int\u00e9gr\u00e9e et de distribution \u00e9lectrique',
+            'Patent Certificates': 'Certificats de brevet',
+            'Qualification materials': 'Documents de qualification',
+            'Qualification materials for procurement and technical due diligence': 'Documents de qualification pour les achats et la revue technique',
+            'Solutions by Project Scenario': 'Solutions par sc\u00e9nario de projet',
+            'Solutions by projet Scenario': 'Solutions par sc\u00e9nario de projet',
+            '*Your information is protected and used only for Longxiang technical consultation and quotation follow-up.': '*Vos informations sont prot\u00e9g\u00e9es et utilis\u00e9es uniquement pour la consultation technique Longxiang et le suivi des devis.'
+        }
+    };
     var PAGE_TEXT_FALLBACKS = {
         fr: {
             productDetailTitle: 'Détails du produit',
@@ -352,7 +370,15 @@
         }
     }
 
+    function textFallback(value) {
+        if (typeof value !== 'string') return '';
+        var pack = TEXT_FALLBACKS[locale] || {};
+        return pack[value.trim()] || '';
+    }
+
     function localizedText(value) {
+        var fallback = textFallback(value);
+        if (fallback) return fallback;
         if (isArabic && typeof value === 'string' && ARABIC_TEXT_FALLBACKS[value.trim()]) {
             return ARABIC_TEXT_FALLBACKS[value.trim()];
         }
@@ -368,6 +394,8 @@
         if (!item) return '';
         if (window.LongxiangI18n && window.LongxiangI18n.localized) {
             var value = window.LongxiangI18n.localized(item, key, locale);
+            var fallbackValue = textFallback(value);
+            if (fallbackValue) return fallbackValue;
             if (value && (!isArabic || value !== item[key])) return value;
         }
         if (isArabic) {

@@ -75,14 +75,31 @@
         return path ? ' style="--' + escapeHtml(name) + ': url(&quot;' + escapeHtml(path) + '&quot;);"' : '';
     }
 
+    var TEXT_FALLBACKS = {
+        fr: {
+            'Choose a cooperation path that can be shown, operated, and scaled.': 'Choisissez un parcours de coop\u00e9ration visible, exploitable et \u00e9volutif.',
+            'Industrial College': 'Institut industriel',
+            'Models': 'Mod\u00e8les',
+            'Teaching Equipment': '\u00c9quipements p\u00e9dagogiques'
+        }
+    };
+
+    function textFallback(value) {
+        if (typeof value !== 'string') return '';
+        var pack = TEXT_FALLBACKS[locale] || {};
+        return pack[value.trim()] || '';
+    }
+
     function localized(item, key) {
         if (!item) return '';
         if (window.LongxiangI18n && window.LongxiangI18n.localized) {
             var value = window.LongxiangI18n.localized(item, key, locale);
+            var fallbackValue = textFallback(value);
+            if (fallbackValue) return fallbackValue;
             if (value) return value;
         }
         if (isArabic && item[key + 'Ar']) return item[key + 'Ar'];
-        return item[key] || '';
+        return textFallback(item[key]) || item[key] || '';
     }
 
     function localizedList(item, key) {
