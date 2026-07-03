@@ -124,25 +124,35 @@
     var SPEC_VALUE_TEXT = {
         fr: {
             'Card swiping and QR-code payment': 'Paiement par carte et QR code',
+            'Charging by energy or by time': 'Facturation à l’énergie ou au temps',
             'Charging by time/power/amount/quantity': 'Facturation au temps, à la puissance, au montant ou à la quantité',
             'Mobile QR code scanning, card swiping (optional)': 'Scan du QR code mobile, paiement par carte en option',
             'QR code scanning, VIN, card swiping (optional)': 'Scan du QR code, VIN et paiement par carte en option',
+            'Sheet-metal housing, oxidized black sheet-metal panel': 'Boîtier en tôle, panneau noir oxydé en tôle',
             'Three-color indicator strip: standby, charging and alarm status': 'Bande lumineuse tricolore : veille, recharge et alarme',
             'Wall-mounted': 'Montage mural',
             'Floor-mounted': 'Montage au sol',
             'Column-mounted': 'Montage sur colonne',
-            'Color LCD': 'Écran LCD couleur'
+            'Color LCD': 'Écran LCD couleur',
+            'Color LCD display': 'Écran LCD couleur',
+            'Class 2': 'Classe 2',
+            '550 x 220 x 1500 mm (L x W x H)': '550 x 220 x 1500 mm (L x l x H)'
         },
         ru: {
             'Card swiping and QR-code payment': 'Оплата картой и QR-кодом',
+            'Charging by energy or by time': 'Тарификация по энергии или по времени',
             'Charging by time/power/amount/quantity': 'Тарификация по времени, мощности, сумме или количеству',
             'Mobile QR code scanning, card swiping (optional)': 'Сканирование мобильного QR-кода, оплата картой опционально',
             'QR code scanning, VIN, card swiping (optional)': 'Сканирование QR-кода, VIN и оплата картой опционально',
+            'Sheet-metal housing, oxidized black sheet-metal panel': 'Корпус из листового металла, оксидированная черная панель',
             'Three-color indicator strip: standby, charging and alarm status': 'Трехцветная индикация: ожидание, зарядка и авария',
             'Wall-mounted': 'Настенный монтаж',
             'Floor-mounted': 'Напольный монтаж',
             'Column-mounted': 'Монтаж на колонне',
-            'Color LCD': 'Цветной LCD-дисплей'
+            'Color LCD': 'Цветной LCD-дисплей',
+            'Color LCD display': 'Цветной LCD-дисплей',
+            'Class 2': 'Класс 2',
+            '550 x 220 x 1500 mm (L x W x H)': '550 x 220 x 1500 mm (Д x Ш x В)'
         }
     };
     var TEXT_FALLBACKS = {
