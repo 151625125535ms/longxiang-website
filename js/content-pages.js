@@ -134,15 +134,20 @@
             'Certificates & Qualification Archive': 'Archives des certificats et qualifications',
             'Enterprise Qualifications': 'Qualifications de l\u2019entreprise',
             'EXPLORE SOLUTIONS': 'Explorer les solutions',
+            'Explore Solutions': 'Explorer les solutions',
             'Integrated Smart Energy': '\u00c9nergie intelligente int\u00e9gr\u00e9e',
             'Integrated Smart Energy & Power Distribution Solutions': 'Solutions d\u2019\u00e9nergie intelligente int\u00e9gr\u00e9e et de distribution \u00e9lectrique',
+            'Integrated Smart Energy & Power Distribution Solutions | Longxiang': 'Solutions d\u2019\u00e9nergie intelligente int\u00e9gr\u00e9e et de distribution \u00e9lectrique | Longxiang',
             'Integrated Smart Energy & distribution \u00e9lectrique Solutions': 'Solutions d\u2019\u00e9nergie intelligente int\u00e9gr\u00e9e et de distribution \u00e9lectrique',
+            'Integrated Smart Energy & distribution \u00e9lectrique Solutions | Longxiang': 'Solutions d\u2019\u00e9nergie intelligente int\u00e9gr\u00e9e et de distribution \u00e9lectrique | Longxiang',
             'Patent Certificates': 'Certificats de brevet',
             'Qualification materials': 'Documents de qualification',
             'Qualification materials for procurement and technical due diligence': 'Documents de qualification pour les achats et la revue technique',
             'Solutions by Project Scenario': 'Solutions par sc\u00e9nario de projet',
             'Solutions by projet Scenario': 'Solutions par sc\u00e9nario de projet',
-            '*Your information is protected and used only for Longxiang technical consultation and quotation follow-up.': '*Vos informations sont prot\u00e9g\u00e9es et utilis\u00e9es uniquement pour la consultation technique Longxiang et le suivi des devis.'
+            '*Your information is protected and used only for Longxiang technical consultation and quotation follow-up.': '*Vos informations sont prot\u00e9g\u00e9es et utilis\u00e9es uniquement pour la consultation technique Longxiang et le suivi des devis.',
+            '*Your information is protected and used only for Longxiang consultation technique and quotation follow-up.': '*Vos informations sont prot\u00e9g\u00e9es et utilis\u00e9es uniquement pour la consultation technique Longxiang et le suivi des devis.',
+            'Verified test reports, enterprise qualifications, honors, patent certificates, and compliance materials for power \u00e9quipements supplier review.': 'Rapports d\u2019essai v\u00e9rifi\u00e9s, qualifications de l\u2019entreprise, distinctions, certificats de brevet et documents de conformit\u00e9 pour la revue fournisseur d\u2019\u00e9quipements \u00e9lectriques.'
         }
     };
     var PAGE_TEXT_FALLBACKS = {
