@@ -51,6 +51,76 @@
         'Enclosure': 'الغلاف',
         'Installation': 'طريقة التركيب'
     };
+    var SPEC_LABELS = {
+        fr: {
+            'PRODUCT MODEL': 'Mod\u00e8le du produit',
+            'MODEL': 'Mod\u00e8le',
+            'INPUT / OUTPUT VOLTAGE': 'Tension d\u2019entr\u00e9e / sortie',
+            'INPUT VOLTAGE': 'Tension d\u2019entr\u00e9e',
+            'OUTPUT VOLTAGE': 'Tension de sortie',
+            'SINGLE-GUN MAXIMUM POWER': 'Puissance maximale par connecteur',
+            'TOTAL MAXIMUM POWER': 'Puissance maximale totale',
+            'STANDBY POWER': 'Puissance en veille',
+            'BILLING METHOD': 'Mode de facturation',
+            'PAYMENT METHOD': 'Mode de paiement',
+            'ENCLOSURE MATERIAL': 'Mat\u00e9riau du bo\u00eetier',
+            'DISPLAY': 'Affichage',
+            'CABLE LENGTH': 'Longueur du c\u00e2ble',
+            'METERING ACCURACY CLASS': 'Classe de pr\u00e9cision du comptage',
+            'OPERATING TEMPERATURE': 'Temp\u00e9rature de fonctionnement',
+            'OPERATING HUMIDITY': 'Humidit\u00e9 de fonctionnement',
+            'OPERATING ALTITUDE': 'Altitude de fonctionnement',
+            'PROTECTION RATING': 'Indice de protection',
+            'INSTALLATION METHOD': 'Mode d\u2019installation',
+            'PRODUCT WEIGHT': 'Poids du produit',
+            'DIMENSIONS': 'Dimensions',
+            'RATED CAPACITY': 'Capacit\u00e9 nominale',
+            'RATED VOLTAGE': 'Tension nominale',
+            'VOLTAGE': 'Tension',
+            'CAPACITY': 'Capacit\u00e9',
+            'STANDARD': 'Norme',
+            'FREQUENCY': 'Fr\u00e9quence',
+            'COOLING METHOD': 'Mode de refroidissement',
+            'PROTECTION LEVEL': 'Niveau de protection',
+            'APPLICATION': 'Application',
+            'MATERIAL': 'Mat\u00e9riau',
+            'INSTALLATION': 'Installation'
+        },
+        ru: {
+            'PRODUCT MODEL': '\u041c\u043e\u0434\u0435\u043b\u044c \u043f\u0440\u043e\u0434\u0443\u043a\u0442\u0430',
+            'MODEL': '\u041c\u043e\u0434\u0435\u043b\u044c',
+            'INPUT / OUTPUT VOLTAGE': '\u0412\u0445\u043e\u0434\u043d\u043e\u0435 / \u0432\u044b\u0445\u043e\u0434\u043d\u043e\u0435 \u043d\u0430\u043f\u0440\u044f\u0436\u0435\u043d\u0438\u0435',
+            'INPUT VOLTAGE': '\u0412\u0445\u043e\u0434\u043d\u043e\u0435 \u043d\u0430\u043f\u0440\u044f\u0436\u0435\u043d\u0438\u0435',
+            'OUTPUT VOLTAGE': '\u0412\u044b\u0445\u043e\u0434\u043d\u043e\u0435 \u043d\u0430\u043f\u0440\u044f\u0436\u0435\u043d\u0438\u0435',
+            'SINGLE-GUN MAXIMUM POWER': '\u041c\u0430\u043a\u0441. \u043c\u043e\u0449\u043d\u043e\u0441\u0442\u044c \u043e\u0434\u043d\u043e\u0433\u043e \u043f\u0438\u0441\u0442\u043e\u043b\u0435\u0442\u0430',
+            'TOTAL MAXIMUM POWER': '\u041e\u0431\u0449\u0430\u044f \u043c\u0430\u043a\u0441. \u043c\u043e\u0449\u043d\u043e\u0441\u0442\u044c',
+            'STANDBY POWER': '\u041f\u043e\u0442\u0440\u0435\u0431\u043b\u0435\u043d\u0438\u0435 \u0432 \u0440\u0435\u0436\u0438\u043c\u0435 \u043e\u0436\u0438\u0434\u0430\u043d\u0438\u044f',
+            'BILLING METHOD': '\u0421\u043f\u043e\u0441\u043e\u0431 \u0442\u0430\u0440\u0438\u0444\u0438\u043a\u0430\u0446\u0438\u0438',
+            'PAYMENT METHOD': '\u0421\u043f\u043e\u0441\u043e\u0431 \u043e\u043f\u043b\u0430\u0442\u044b',
+            'ENCLOSURE MATERIAL': '\u041c\u0430\u0442\u0435\u0440\u0438\u0430\u043b \u043a\u043e\u0440\u043f\u0443\u0441\u0430',
+            'DISPLAY': '\u0414\u0438\u0441\u043f\u043b\u0435\u0439',
+            'CABLE LENGTH': '\u0414\u043b\u0438\u043d\u0430 \u043a\u0430\u0431\u0435\u043b\u044f',
+            'METERING ACCURACY CLASS': '\u041a\u043b\u0430\u0441\u0441 \u0442\u043e\u0447\u043d\u043e\u0441\u0442\u0438 \u0443\u0447\u0435\u0442\u0430',
+            'OPERATING TEMPERATURE': '\u0420\u0430\u0431\u043e\u0447\u0430\u044f \u0442\u0435\u043c\u043f\u0435\u0440\u0430\u0442\u0443\u0440\u0430',
+            'OPERATING HUMIDITY': '\u0420\u0430\u0431\u043e\u0447\u0430\u044f \u0432\u043b\u0430\u0436\u043d\u043e\u0441\u0442\u044c',
+            'OPERATING ALTITUDE': '\u0420\u0430\u0431\u043e\u0447\u0430\u044f \u0432\u044b\u0441\u043e\u0442\u0430',
+            'PROTECTION RATING': '\u0421\u0442\u0435\u043f\u0435\u043d\u044c \u0437\u0430\u0449\u0438\u0442\u044b',
+            'INSTALLATION METHOD': '\u0421\u043f\u043e\u0441\u043e\u0431 \u0443\u0441\u0442\u0430\u043d\u043e\u0432\u043a\u0438',
+            'PRODUCT WEIGHT': '\u0412\u0435\u0441 \u043f\u0440\u043e\u0434\u0443\u043a\u0442\u0430',
+            'DIMENSIONS': '\u0413\u0430\u0431\u0430\u0440\u0438\u0442\u044b',
+            'RATED CAPACITY': '\u041d\u043e\u043c\u0438\u043d\u0430\u043b\u044c\u043d\u0430\u044f \u043c\u043e\u0449\u043d\u043e\u0441\u0442\u044c',
+            'RATED VOLTAGE': '\u041d\u043e\u043c\u0438\u043d\u0430\u043b\u044c\u043d\u043e\u0435 \u043d\u0430\u043f\u0440\u044f\u0436\u0435\u043d\u0438\u0435',
+            'VOLTAGE': '\u041d\u0430\u043f\u0440\u044f\u0436\u0435\u043d\u0438\u0435',
+            'CAPACITY': '\u041c\u043e\u0449\u043d\u043e\u0441\u0442\u044c',
+            'STANDARD': '\u0421\u0442\u0430\u043d\u0434\u0430\u0440\u0442',
+            'FREQUENCY': '\u0427\u0430\u0441\u0442\u043e\u0442\u0430',
+            'COOLING METHOD': '\u0421\u043f\u043e\u0441\u043e\u0431 \u043e\u0445\u043b\u0430\u0436\u0434\u0435\u043d\u0438\u044f',
+            'PROTECTION LEVEL': '\u0423\u0440\u043e\u0432\u0435\u043d\u044c \u0437\u0430\u0449\u0438\u0442\u044b',
+            'APPLICATION': '\u041f\u0440\u0438\u043c\u0435\u043d\u0435\u043d\u0438\u0435',
+            'MATERIAL': '\u041c\u0430\u0442\u0435\u0440\u0438\u0430\u043b',
+            'INSTALLATION': '\u0423\u0441\u0442\u0430\u043d\u043e\u0432\u043a\u0430'
+        }
+    };
     var TEXT_FALLBACKS = {
         fr: {
             'Category': 'Catégorie',
@@ -141,9 +211,10 @@
     }
 
     function translatedSpecLabel(label) {
-        if (!isArabic) return label || '';
         label = String(label || '').trim();
-        return ARABIC_SPEC_LABELS[label] || label;
+        if (isArabic) return ARABIC_SPEC_LABELS[label] || label;
+        var labels = SPEC_LABELS[locale] || {};
+        return labels[label.toUpperCase().replace(/\s+/g, ' ')] || label;
     }
 
     function specLabelAttrs() {
