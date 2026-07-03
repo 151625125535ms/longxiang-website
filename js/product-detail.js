@@ -121,6 +121,30 @@
             'INSTALLATION': '\u0423\u0441\u0442\u0430\u043d\u043e\u0432\u043a\u0430'
         }
     };
+    var SPEC_VALUE_TEXT = {
+        fr: {
+            'Card swiping and QR-code payment': 'Paiement par carte et QR code',
+            'Charging by time/power/amount/quantity': 'Facturation au temps, à la puissance, au montant ou à la quantité',
+            'Mobile QR code scanning, card swiping (optional)': 'Scan du QR code mobile, paiement par carte en option',
+            'QR code scanning, VIN, card swiping (optional)': 'Scan du QR code, VIN et paiement par carte en option',
+            'Three-color indicator strip: standby, charging and alarm status': 'Bande lumineuse tricolore : veille, recharge et alarme',
+            'Wall-mounted': 'Montage mural',
+            'Floor-mounted': 'Montage au sol',
+            'Column-mounted': 'Montage sur colonne',
+            'Color LCD': 'Écran LCD couleur'
+        },
+        ru: {
+            'Card swiping and QR-code payment': 'Оплата картой и QR-кодом',
+            'Charging by time/power/amount/quantity': 'Тарификация по времени, мощности, сумме или количеству',
+            'Mobile QR code scanning, card swiping (optional)': 'Сканирование мобильного QR-кода, оплата картой опционально',
+            'QR code scanning, VIN, card swiping (optional)': 'Сканирование QR-кода, VIN и оплата картой опционально',
+            'Three-color indicator strip: standby, charging and alarm status': 'Трехцветная индикация: ожидание, зарядка и авария',
+            'Wall-mounted': 'Настенный монтаж',
+            'Floor-mounted': 'Напольный монтаж',
+            'Column-mounted': 'Монтаж на колонне',
+            'Color LCD': 'Цветной LCD-дисплей'
+        }
+    };
     var TEXT_FALLBACKS = {
         fr: {
             'Category': 'Catégorie',
@@ -215,6 +239,12 @@
         if (isArabic) return ARABIC_SPEC_LABELS[label] || label;
         var labels = SPEC_LABELS[locale] || {};
         return labels[label.toUpperCase().replace(/\s+/g, ' ')] || label;
+    }
+
+    function translatedSpecValue(value) {
+        value = String(value || '').trim();
+        var values = SPEC_VALUE_TEXT[locale] || {};
+        return values[value] || textFallback(value) || value;
     }
 
     function specLabelAttrs() {
@@ -790,7 +820,7 @@
             specsBody.innerHTML = '';
             displaySpecRows(product).forEach(function (spec) {
                 var row = document.createElement('tr');
-                row.innerHTML = '<td' + specLabelAttrs() + '>' + escapeHtml(translatedSpecLabel(spec[0])) + '</td><td' + specValueAttrs() + '>' + escapeHtml(spec[1]) + '</td>';
+                row.innerHTML = '<td' + specLabelAttrs() + '>' + escapeHtml(translatedSpecLabel(spec[0])) + '</td><td' + specValueAttrs() + '>' + escapeHtml(translatedSpecValue(spec[1])) + '</td>';
                 specsBody.appendChild(row);
             });
         }
