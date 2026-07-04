@@ -145,6 +145,9 @@
             'Qualification materials for procurement and technical due diligence': 'Documents de qualification pour les achats et la revue technique',
             'Solutions by Project Scenario': 'Solutions par sc\u00e9nario de projet',
             'Solutions by projet Scenario': 'Solutions par sc\u00e9nario de projet',
+            'distribution \u00e9lectrique Integration': 'Int\u00e9gration de la distribution \u00e9lectrique',
+            'distribution \u00e9lectrique System Integration': 'Int\u00e9gration du syst\u00e8me de distribution \u00e9lectrique',
+            'Single-line diagram for distribution \u00e9lectrique system integration': 'Sch\u00e9ma unifilaire pour l\u2019int\u00e9gration du syst\u00e8me de distribution \u00e9lectrique',
             '*Your information is protected and used only for Longxiang technical consultation and quotation follow-up.': '*Vos informations sont prot\u00e9g\u00e9es et utilis\u00e9es uniquement pour la consultation technique Longxiang et le suivi des devis.',
             '*Your information is protected and used only for Longxiang consultation technique and quotation follow-up.': '*Vos informations sont prot\u00e9g\u00e9es et utilis\u00e9es uniquement pour la consultation technique Longxiang et le suivi des devis.',
             'Verified test reports, enterprise qualifications, honors, patent certificates, and compliance materials for power \u00e9quipements supplier review.': 'Rapports d\u2019essai v\u00e9rifi\u00e9s, qualifications de l\u2019entreprise, distinctions, certificats de brevet et documents de conformit\u00e9 pour la revue fournisseur d\u2019\u00e9quipements \u00e9lectriques.'
