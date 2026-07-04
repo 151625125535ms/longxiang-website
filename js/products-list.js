@@ -239,7 +239,7 @@
         card.setAttribute('data-group', product.group);
         card.setAttribute('data-sub-category', product.subCategory || '');
 
-        var name = localize(product, 'name');
+        var name = localizedProductSummary(localize(product, 'name'));
         var desc = localizedProductSummary(localize(product, 'shortDesc'));
         var href = detailHref(product);
         var imagePath = normalizeImagePath(product.cardImage || product.image);
