@@ -84,6 +84,16 @@ function createFixture() {
             {
                 id: 1,
                 slug: 'global-shell',
+                expected: {
+                    body_json_current: {
+                        navigation: {
+                            mainLinks: [
+                                { label: 'Home', children: [{ label: 'Overview' }, { label: 'Factory' }] },
+                                { label: 'Products' }
+                            ]
+                        }
+                    }
+                },
                 target: {
                     locale: 'ru',
                     body_json_patch: {
@@ -198,8 +208,29 @@ function testCleanBoundaryRejectsNeutralAncestorOverwrite() {
     assert.match(result.stderr + result.stdout, /non-locale-scoped|Apply blockers/i);
 }
 
+function testExpectedCurrentMismatchBlocksPatch() {
+    const fixture = createFixture();
+    const input = JSON.parse(fs.readFileSync(fixture.inputPath, 'utf8'));
+    input.contentBlocks[0].expected.body_json_current.navigation.mainLinks[0].label = 'Changed Home';
+    fs.writeFileSync(fixture.inputPath, JSON.stringify(input, null, 2), 'utf8');
+
+    const result = runNode([
+        scriptPath,
+        '--dry-run',
+        '--locale', 'ru',
+        '--input', fixture.inputPath,
+        '--db', fixture.dbPath,
+        '--report', fixture.reportPath,
+        '--require-clean-boundary'
+    ]);
+
+    assert.notStrictEqual(result.status, 0, 'expected current mismatch should block patch');
+    assert.match(result.stderr + result.stdout, /expected value mismatch|Apply blockers/i);
+}
+
 testDryRunDoesNotChangeDatabase();
 testApplyMergesOnlyLocalePatchAndBacksUpDatabase();
 testCleanBoundaryRejectsNeutralPatchPath();
 testCleanBoundaryRejectsNeutralAncestorOverwrite();
+testExpectedCurrentMismatchBlocksPatch();
 console.log('content block safe patch tests passed');

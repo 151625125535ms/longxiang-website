@@ -166,6 +166,34 @@ function collectPatchPaths(value, prefix, paths) {
     });
 }
 
+function collectExpectedValues(value, prefix, values) {
+    if (!value || typeof value !== 'object') return;
+    if (Array.isArray(value)) {
+        values.push({ path: prefix || '[]', value });
+        return;
+    }
+    Object.keys(value).forEach((key) => {
+        const next = prefix ? prefix + '.' + key : key;
+        const child = value[key];
+        if (child && typeof child === 'object' && !Array.isArray(child)) {
+            collectExpectedValues(child, next, values);
+        } else {
+            values.push({ path: next, value: child });
+        }
+    });
+}
+
+function readObjectPath(value, patchPath) {
+    return String(patchPath || '').split('.').filter(Boolean).reduce((current, key) => {
+        if (current == null) return undefined;
+        return current[key];
+    }, value);
+}
+
+function sameJsonValue(left, right) {
+    return JSON.stringify(left) === JSON.stringify(right);
+}
+
 function isLocaleScopedPath(patchPath, locale) {
     return localePathPattern(locale).test(String(patchPath || ''));
 }
@@ -217,6 +245,24 @@ function collectCleanBoundaryIssues(base, patch, args, prefix, insideTargetLocal
 function summarize(values, limit) {
     const selected = values.slice(0, limit);
     return selected.join(', ') + (values.length > limit ? ' ... +' + (values.length - limit) : '');
+}
+
+function validateExpectedCurrent(row, current, item, errors, blockers) {
+    if (!item.expected || item.expected.body_json_current == null) return;
+    const expected = item.expected.body_json_current;
+    if (!isPlainObject(expected)) {
+        errors.push('contentBlocks item ' + row.slug + ' expected.body_json_current must be an object.');
+        return;
+    }
+
+    const expectedValues = [];
+    collectExpectedValues(expected, '', expectedValues);
+    expectedValues.forEach((entry) => {
+        const actual = readObjectPath(current, entry.path);
+        if (!sameJsonValue(actual, entry.value)) {
+            blockers.push('contentBlocks item ' + row.slug + ' body_json.' + entry.path + ' expected value mismatch.');
+        }
+    });
 }
 
 function validateInput(data, args, errors) {
@@ -296,6 +342,7 @@ function analyzeContentBlocks(db, data, args, errors, blockers) {
         seenIds.add(rowId);
 
         const current = parseObjectJson(row.body_json, 'content_blocks ' + row.slug + ' body_json', errors);
+        validateExpectedCurrent(row, current, item, errors, blockers);
         const merged = deepMerge(current, patch);
         const patchPaths = [];
         collectPatchPaths(patch, '', patchPaths);
