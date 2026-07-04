@@ -66,7 +66,10 @@ function createFixture() {
                 mainLinks: [
                     { label: 'Home', children: [{ label: 'Overview' }, { label: 'Factory' }] },
                     { label: 'Products' }
-                ]
+                ],
+                footer_links_patch_ru: {
+                    itemsRu: ['Old footer', 'Old contact']
+                }
             }
         })
     });
@@ -90,7 +93,12 @@ function createFixture() {
                             mainLinks: [
                                 { label: 'Home', children: [{ label: 'Overview' }, { label: 'Factory' }] },
                                 { label: 'Products' }
-                            ]
+                            ],
+                            footer_links_patch_ru: {
+                                itemsRu: {
+                                    index_1: 'Old contact'
+                                }
+                            }
                         }
                     }
                 },
@@ -106,6 +114,11 @@ function createFixture() {
                                     }
                                 },
                                 index_1: { labelRu: 'Продукция' }
+                            },
+                            footer_links_patch_ru: {
+                                itemsRu: {
+                                    index_1: 'Contacts'
+                                }
                             }
                         }
                     }
@@ -158,6 +171,7 @@ function testApplyMergesOnlyLocalePatchAndBacksUpDatabase() {
     assert.strictEqual(after.body.navigation.mainLinks[0].label, 'Home');
     assert.strictEqual(after.body.navigation.main_links_patch_ru.index_0.labelRu, 'Главная');
     assert.strictEqual(after.body.navigation.main_links_patch_ru.index_0.children.index_1.labelRu, 'Завод');
+    assert.deepStrictEqual(after.body.navigation.footer_links_patch_ru.itemsRu, ['Old footer', 'Contacts']);
 }
 
 function testCleanBoundaryRejectsNeutralPatchPath() {

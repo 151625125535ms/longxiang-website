@@ -120,19 +120,48 @@ function parseObjectJson(value, label, errors) {
     }
 }
 
+function isArrayPatchKey(key) {
+    return /^index_\d+$/.test(String(key || ''));
+}
+
 function deepMerge(base, patch) {
+    if (Array.isArray(base) && patch && typeof patch === 'object' && !Array.isArray(patch)) {
+        const patchKeys = Object.keys(patch);
+        if (patchKeys.length && patchKeys.every(isArrayPatchKey)) {
+            const output = base.slice();
+            patchKeys.forEach((key) => {
+                const index = Number(key.slice('index_'.length));
+                const baseValue = output[index];
+                const patchValue = patch[key];
+                if (
+                    patchValue
+                    && typeof patchValue === 'object'
+                    && !Array.isArray(patchValue)
+                    && baseValue
+                    && typeof baseValue === 'object'
+                    && !Array.isArray(baseValue)
+                ) {
+                    output[index] = deepMerge(baseValue, patchValue);
+                } else {
+                    output[index] = patchValue;
+                }
+            });
+            return output;
+        }
+        return patch;
+    }
+
     const output = Array.isArray(base) ? base.slice() : Object.assign({}, base || {});
     Object.keys(patch || {}).forEach((key) => {
         const patchValue = patch[key];
         const baseValue = output[key];
         if (
-            patchValue
-            && typeof patchValue === 'object'
-            && !Array.isArray(patchValue)
-            && baseValue
-            && typeof baseValue === 'object'
-            && !Array.isArray(baseValue)
-        ) {
+                    patchValue
+                    && typeof patchValue === 'object'
+                    && !Array.isArray(patchValue)
+                    && baseValue
+                    && typeof baseValue === 'object'
+                ) {
             output[key] = deepMerge(baseValue, patchValue);
         } else {
             output[key] = patchValue;
@@ -186,6 +215,7 @@ function collectExpectedValues(value, prefix, values) {
 function readObjectPath(value, patchPath) {
     return String(patchPath || '').split('.').filter(Boolean).reduce((current, key) => {
         if (current == null) return undefined;
+        if (Array.isArray(current) && isArrayPatchKey(key)) return current[Number(key.slice('index_'.length))];
         return current[key];
     }, value);
 }
