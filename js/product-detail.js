@@ -89,16 +89,29 @@
         ru: {
             'PRODUCT MODEL': '\u041c\u043e\u0434\u0435\u043b\u044c \u043f\u0440\u043e\u0434\u0443\u043a\u0442\u0430',
             'MODEL': '\u041c\u043e\u0434\u0435\u043b\u044c',
+            'CORE TYPE': '\u0422\u0438\u043f \u0441\u0435\u0440\u0434\u0435\u0447\u043d\u0438\u043a\u0430',
+            'PHASE': '\u0424\u0430\u0437\u043d\u043e\u0441\u0442\u044c',
             'INPUT / OUTPUT VOLTAGE': '\u0412\u0445\u043e\u0434\u043d\u043e\u0435 / \u0432\u044b\u0445\u043e\u0434\u043d\u043e\u0435 \u043d\u0430\u043f\u0440\u044f\u0436\u0435\u043d\u0438\u0435',
             'INPUT VOLTAGE': '\u0412\u0445\u043e\u0434\u043d\u043e\u0435 \u043d\u0430\u043f\u0440\u044f\u0436\u0435\u043d\u0438\u0435',
+            'INPUT VOLTAGE RANGE': '\u0414\u0438\u0430\u043f\u0430\u0437\u043e\u043d \u0432\u0445\u043e\u0434\u043d\u043e\u0433\u043e \u043d\u0430\u043f\u0440\u044f\u0436\u0435\u043d\u0438\u044f',
             'OUTPUT VOLTAGE': '\u0412\u044b\u0445\u043e\u0434\u043d\u043e\u0435 \u043d\u0430\u043f\u0440\u044f\u0436\u0435\u043d\u0438\u0435',
+            'OUTPUT VOLTAGE RANGE': '\u0414\u0438\u0430\u043f\u0430\u0437\u043e\u043d \u0432\u044b\u0445\u043e\u0434\u043d\u043e\u0433\u043e \u043d\u0430\u043f\u0440\u044f\u0436\u0435\u043d\u0438\u044f',
+            'POWER RANGE': '\u0414\u0438\u0430\u043f\u0430\u0437\u043e\u043d \u043c\u043e\u0449\u043d\u043e\u0441\u0442\u0438',
             'SINGLE-GUN MAXIMUM POWER': '\u041c\u0430\u043a\u0441. \u043c\u043e\u0449\u043d\u043e\u0441\u0442\u044c \u043e\u0434\u043d\u043e\u0433\u043e \u043f\u0438\u0441\u0442\u043e\u043b\u0435\u0442\u0430',
+            'SINGLE-GUN MAXIMUM CURRENT': '\u041c\u0430\u043a\u0441. \u0442\u043e\u043a \u043e\u0434\u043d\u043e\u0433\u043e \u0440\u0430\u0437\u044a\u0435\u043c\u0430',
             'TOTAL MAXIMUM POWER': '\u041e\u0431\u0449\u0430\u044f \u043c\u0430\u043a\u0441. \u043c\u043e\u0449\u043d\u043e\u0441\u0442\u044c',
+            'SPECIFIC MODELS': '\u041a\u043e\u043d\u043a\u0440\u0435\u0442\u043d\u044b\u0435 \u043c\u043e\u0434\u0435\u043b\u0438',
+            'PEAK EFFICIENCY': '\u041f\u0438\u043a\u043e\u0432\u044b\u0439 \u041a\u041f\u0414',
+            'START MODE': '\u0421\u043f\u043e\u0441\u043e\u0431 \u0437\u0430\u043f\u0443\u0441\u043a\u0430',
+            'NETWORK CONNECTION': '\u0421\u0435\u0442\u0435\u0432\u043e\u0435 \u043f\u043e\u0434\u043a\u043b\u044e\u0447\u0435\u043d\u0438\u0435',
+            'CHARGING CONNECTOR': '\u0417\u0430\u0440\u044f\u0434\u043d\u044b\u0439 \u0440\u0430\u0437\u044a\u0435\u043c',
             'STANDBY POWER': '\u041f\u043e\u0442\u0440\u0435\u0431\u043b\u0435\u043d\u0438\u0435 \u0432 \u0440\u0435\u0436\u0438\u043c\u0435 \u043e\u0436\u0438\u0434\u0430\u043d\u0438\u044f',
             'BILLING METHOD': '\u0421\u043f\u043e\u0441\u043e\u0431 \u0442\u0430\u0440\u0438\u0444\u0438\u043a\u0430\u0446\u0438\u0438',
             'PAYMENT METHOD': '\u0421\u043f\u043e\u0441\u043e\u0431 \u043e\u043f\u043b\u0430\u0442\u044b',
             'ENCLOSURE MATERIAL': '\u041c\u0430\u0442\u0435\u0440\u0438\u0430\u043b \u043a\u043e\u0440\u043f\u0443\u0441\u0430',
             'DISPLAY': '\u0414\u0438\u0441\u043f\u043b\u0435\u0439',
+            'WORKING INDICATOR': '\u0418\u043d\u0434\u0438\u043a\u0430\u0442\u043e\u0440 \u0440\u0430\u0431\u043e\u0442\u044b',
+            'NOISE': '\u0423\u0440\u043e\u0432\u0435\u043d\u044c \u0448\u0443\u043c\u0430',
             'CABLE LENGTH': '\u0414\u043b\u0438\u043d\u0430 \u043a\u0430\u0431\u0435\u043b\u044f',
             'METERING ACCURACY CLASS': '\u041a\u043b\u0430\u0441\u0441 \u0442\u043e\u0447\u043d\u043e\u0441\u0442\u0438 \u0443\u0447\u0435\u0442\u0430',
             'OPERATING TEMPERATURE': '\u0420\u0430\u0431\u043e\u0447\u0430\u044f \u0442\u0435\u043c\u043f\u0435\u0440\u0430\u0442\u0443\u0440\u0430',
@@ -108,6 +121,7 @@
             'INSTALLATION METHOD': '\u0421\u043f\u043e\u0441\u043e\u0431 \u0443\u0441\u0442\u0430\u043d\u043e\u0432\u043a\u0438',
             'PRODUCT WEIGHT': '\u0412\u0435\u0441 \u043f\u0440\u043e\u0434\u0443\u043a\u0442\u0430',
             'DIMENSIONS': '\u0413\u0430\u0431\u0430\u0440\u0438\u0442\u044b',
+            'DIMENSIONS (W X H X D)': '\u0413\u0430\u0431\u0430\u0440\u0438\u0442\u044b (\u0428 x \u0412 x \u0413)',
             'RATED CAPACITY': '\u041d\u043e\u043c\u0438\u043d\u0430\u043b\u044c\u043d\u0430\u044f \u043c\u043e\u0449\u043d\u043e\u0441\u0442\u044c',
             'RATED VOLTAGE': '\u041d\u043e\u043c\u0438\u043d\u0430\u043b\u044c\u043d\u043e\u0435 \u043d\u0430\u043f\u0440\u044f\u0436\u0435\u043d\u0438\u0435',
             'VOLTAGE': '\u041d\u0430\u043f\u0440\u044f\u0436\u0435\u043d\u0438\u0435',
@@ -115,7 +129,10 @@
             'STANDARD': '\u0421\u0442\u0430\u043d\u0434\u0430\u0440\u0442',
             'FREQUENCY': '\u0427\u0430\u0441\u0442\u043e\u0442\u0430',
             'COOLING METHOD': '\u0421\u043f\u043e\u0441\u043e\u0431 \u043e\u0445\u043b\u0430\u0436\u0434\u0435\u043d\u0438\u044f',
+            'SHORT-CIRCUIT WITHSTAND': '\u0421\u0442\u043e\u0439\u043a\u043e\u0441\u0442\u044c \u043a \u043a\u043e\u0440\u043e\u0442\u043a\u043e\u043c\u0443 \u0437\u0430\u043c\u044b\u043a\u0430\u043d\u0438\u044e',
+            'INSULATION LEVEL': '\u0423\u0440\u043e\u0432\u0435\u043d\u044c \u0438\u0437\u043e\u043b\u044f\u0446\u0438\u0438',
             'PROTECTION LEVEL': '\u0423\u0440\u043e\u0432\u0435\u043d\u044c \u0437\u0430\u0449\u0438\u0442\u044b',
+            'PROTECTION FEATURES': '\u0417\u0430\u0449\u0438\u0442\u043d\u044b\u0435 \u0444\u0443\u043d\u043a\u0446\u0438\u0438',
             'APPLICATION': '\u041f\u0440\u0438\u043c\u0435\u043d\u0435\u043d\u0438\u0435',
             'MATERIAL': '\u041c\u0430\u0442\u0435\u0440\u0438\u0430\u043b',
             'INSTALLATION': '\u0423\u0441\u0442\u0430\u043d\u043e\u0432\u043a\u0430'
@@ -141,6 +158,17 @@
             '550 x 220 x 1500 mm (L x W x H)': '550 x 220 x 1500 mm (L x l x H)'
         },
         ru: {
+            'S(B)H15-M Series (Anti-Short-Circuit)': '\u0421\u0435\u0440\u0438\u044f S(B)H15-M (\u0441\u0442\u043e\u0439\u043a\u043e\u0441\u0442\u044c \u043a \u043a\u043e\u0440\u043e\u0442\u043a\u043e\u043c\u0443 \u0437\u0430\u043c\u044b\u043a\u0430\u043d\u0438\u044e)',
+            'Amorphous Alloy': '\u0410\u043c\u043e\u0440\u0444\u043d\u044b\u0439 \u0441\u043f\u043b\u0430\u0432',
+            'Three Phase': '\u0422\u0440\u0435\u0445\u0444\u0430\u0437\u043d\u044b\u0439',
+            'Enhanced design': '\u0423\u0441\u0438\u043b\u0435\u043d\u043d\u0430\u044f \u043a\u043e\u043d\u0441\u0442\u0440\u0443\u043a\u0446\u0438\u044f',
+            'Grid with high fault current': '\u0421\u0435\u0442\u044c \u0441 \u0432\u044b\u0441\u043e\u043a\u0438\u043c \u0442\u043e\u043a\u043e\u043c \u043a\u043e\u0440\u043e\u0442\u043a\u043e\u0433\u043e \u0437\u0430\u043c\u044b\u043a\u0430\u043d\u0438\u044f',
+            'LXDC integrated dual-gun charging station': '\u0418\u043d\u0442\u0435\u0433\u0440\u0438\u0440\u043e\u0432\u0430\u043d\u043d\u0430\u044f \u0437\u0430\u0440\u044f\u0434\u043d\u0430\u044f \u0441\u0442\u0430\u043d\u0446\u0438\u044f LXDC \u0441 \u0434\u0432\u0443\u043c\u044f \u0440\u0430\u0437\u044a\u0435\u043c\u0430\u043c\u0438',
+            'AC380V \u00b115%, three-phase five-wire': 'AC380V \u00b115%, \u0442\u0440\u0435\u0445\u0444\u0430\u0437\u043d\u0430\u044f \u043f\u044f\u0442\u0438\u043f\u0440\u043e\u0432\u043e\u0434\u043d\u0430\u044f \u0441\u0435\u0442\u044c',
+            '250A (300A for 400kW single gun)': '250 A (300 A \u0434\u043b\u044f \u043e\u0434\u043d\u043e\u0433\u043e \u0437\u0430\u0440\u044f\u0434\u043d\u043e\u0433\u043e \u0440\u0430\u0437\u044a\u0435\u043c\u0430 400 kW)',
+            '7-inch touch screen': '7-\u0434\u044e\u0439\u043c\u043e\u0432\u044b\u0439 \u0441\u0435\u043d\u0441\u043e\u0440\u043d\u044b\u0439 \u044d\u043a\u0440\u0430\u043d',
+            'Air cooling': '\u0412\u043e\u0437\u0434\u0443\u0448\u043d\u043e\u0435 \u043e\u0445\u043b\u0430\u0436\u0434\u0435\u043d\u0438\u0435',
+            'Input over-voltage, input under-voltage, output over-voltage, output short-circuit, over-temperature and communication protection': '\u0417\u0430\u0449\u0438\u0442\u0430 \u043e\u0442 \u043f\u0435\u0440\u0435\u043d\u0430\u043f\u0440\u044f\u0436\u0435\u043d\u0438\u044f \u043d\u0430 \u0432\u0445\u043e\u0434\u0435, \u043f\u043e\u043d\u0438\u0436\u0435\u043d\u043d\u043e\u0433\u043e \u0432\u0445\u043e\u0434\u043d\u043e\u0433\u043e \u043d\u0430\u043f\u0440\u044f\u0436\u0435\u043d\u0438\u044f, \u043f\u0435\u0440\u0435\u043d\u0430\u043f\u0440\u044f\u0436\u0435\u043d\u0438\u044f \u043d\u0430 \u0432\u044b\u0445\u043e\u0434\u0435, \u043a\u043e\u0440\u043e\u0442\u043a\u043e\u0433\u043e \u0437\u0430\u043c\u044b\u043a\u0430\u043d\u0438\u044f \u043d\u0430 \u0432\u044b\u0445\u043e\u0434\u0435, \u043f\u0435\u0440\u0435\u0433\u0440\u0435\u0432\u0430 \u0438 \u0441\u0431\u043e\u0435\u0432 \u0441\u0432\u044f\u0437\u0438',
             'Card swiping and QR-code payment': 'Оплата картой и QR-кодом',
             'Charging by energy or by time': 'Тарификация по энергии или по времени',
             'Charging by time/power/amount/quantity': 'Тарификация по времени, мощности, сумме или количеству',
@@ -192,6 +220,12 @@
             'Confirm by requirement': 'Уточняется по запросу',
             'Request Configuration Quote': 'Запросить расчет конфигурации',
             'Application Scenarios': 'Сценарии применения',
+            'Power Distribution': '\u0420\u0430\u0441\u043f\u0440\u0435\u0434\u0435\u043b\u0435\u043d\u0438\u0435 \u044d\u043b\u0435\u043a\u0442\u0440\u043e\u044d\u043d\u0435\u0440\u0433\u0438\u0438',
+            'For factories, parks, utilities, and project power rooms.': '\u0414\u043b\u044f \u0437\u0430\u0432\u043e\u0434\u043e\u0432, \u043f\u0440\u043e\u043c\u044b\u0448\u043b\u0435\u043d\u043d\u044b\u0445 \u043f\u0430\u0440\u043a\u043e\u0432, \u044d\u043d\u0435\u0440\u0433\u043e\u0441\u043d\u0430\u0431\u0436\u0430\u044e\u0449\u0438\u0445 \u043e\u0431\u044a\u0435\u043a\u0442\u043e\u0432 \u0438 \u043f\u0440\u043e\u0435\u043a\u0442\u043d\u044b\u0445 \u044d\u043b\u0435\u043a\u0442\u0440\u043e\u0449\u0438\u0442\u043e\u0432\u044b\u0445.',
+            'Industrial Loads': '\u041f\u0440\u043e\u043c\u044b\u0448\u043b\u0435\u043d\u043d\u044b\u0435 \u043d\u0430\u0433\u0440\u0443\u0437\u043a\u0438',
+            'Supports stable voltage conversion for continuous production loads.': '\u041f\u043e\u0434\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u0435\u0442 \u0441\u0442\u0430\u0431\u0438\u043b\u044c\u043d\u043e\u0435 \u043f\u0440\u0435\u043e\u0431\u0440\u0430\u0437\u043e\u0432\u0430\u043d\u0438\u0435 \u043d\u0430\u043f\u0440\u044f\u0436\u0435\u043d\u0438\u044f \u0434\u043b\u044f \u043d\u0435\u043f\u0440\u0435\u0440\u044b\u0432\u043d\u044b\u0445 \u043f\u0440\u043e\u0438\u0437\u0432\u043e\u0434\u0441\u0442\u0432\u0435\u043d\u043d\u044b\u0445 \u043d\u0430\u0433\u0440\u0443\u0437\u043e\u043a.',
+            'Project Delivery': '\u041f\u0440\u043e\u0435\u043a\u0442\u043d\u0430\u044f \u043f\u043e\u0441\u0442\u0430\u0432\u043a\u0430',
+            'Suitable for packaged delivery with switchgear and site accessories.': '\u041f\u043e\u0434\u0445\u043e\u0434\u0438\u0442 \u0434\u043b\u044f \u043a\u043e\u043c\u043f\u043b\u0435\u043a\u0442\u043d\u043e\u0439 \u043f\u043e\u0441\u0442\u0430\u0432\u043a\u0438 \u0432\u043c\u0435\u0441\u0442\u0435 \u0441 \u041a\u0420\u0423 \u0438 \u0430\u043a\u0441\u0435\u0441\u0441\u0443\u0430\u0440\u0430\u043c\u0438 \u043f\u043b\u043e\u0449\u0430\u0434\u043a\u0438.',
             'Selection & Delivery Notes': 'Примечания по подбору и поставке',
             'PV Projects': 'Фотоэлектрические проекты',
             'For photovoltaic access, grid connection, combiner, and distribution scenarios.': 'Для подключения фотоэлектрических систем, сетевого присоединения, объединительных шкафов и распределительных сценариев.',
@@ -205,6 +239,14 @@
             'Voltage: ': 'Напряжение: ',
             'Capacity: ': 'Мощность: ',
             'Standard: ': 'Стандарт: '
+        }
+    };
+    var INLINE_TEXT_FALLBACKS = {
+        ru: {
+            'S(B)H15-M Series (Anti-Short-Circuit), Amorphous Alloy, ONAN cooling': '\u0441\u0435\u0440\u0438\u044f S(B)H15-M (\u0441\u0442\u043e\u0439\u043a\u043e\u0441\u0442\u044c \u043a \u043a\u043e\u0440\u043e\u0442\u043a\u043e\u043c\u0443 \u0437\u0430\u043c\u044b\u043a\u0430\u043d\u0438\u044e), \u0430\u043c\u043e\u0440\u0444\u043d\u044b\u0439 \u0441\u043f\u043b\u0430\u0432, \u043e\u0445\u043b\u0430\u0436\u0434\u0435\u043d\u0438\u0435 ONAN',
+            'LXDC integrated dual-gun charging station, Air cooling cooling, IP54 protection': '\u0438\u043d\u0442\u0435\u0433\u0440\u0438\u0440\u043e\u0432\u0430\u043d\u043d\u0430\u044f \u0434\u0432\u0443\u0445\u0440\u0430\u0437\u044a\u0435\u043c\u043d\u0430\u044f \u0437\u0430\u0440\u044f\u0434\u043d\u0430\u044f \u0441\u0442\u0430\u043d\u0446\u0438\u044f LXDC, \u0432\u043e\u0437\u0434\u0443\u0448\u043d\u043e\u0435 \u043e\u0445\u043b\u0430\u0436\u0434\u0435\u043d\u0438\u0435, \u0441\u0442\u0435\u043f\u0435\u043d\u044c \u0437\u0430\u0449\u0438\u0442\u044b IP54',
+            'AC380V \u00b115%, three-phase five-wire and 200-1000V DC': 'AC380V \u00b115%, \u0442\u0440\u0435\u0445\u0444\u0430\u0437\u043d\u0430\u044f \u043f\u044f\u0442\u0438\u043f\u0440\u043e\u0432\u043e\u0434\u043d\u0430\u044f \u0441\u0435\u0442\u044c \u0438 200-1000V DC',
+            'three-phase five-wire': '\u0442\u0440\u0435\u0445\u0444\u0430\u0437\u043d\u0430\u044f \u043f\u044f\u0442\u0438\u043f\u0440\u043e\u0432\u043e\u0434\u043d\u0430\u044f \u0441\u0435\u0442\u044c'
         }
     };
 
@@ -224,13 +266,13 @@
     function localize(product, field) {
         if (window.LongxiangI18n && window.LongxiangI18n.localized) {
             var value = window.LongxiangI18n.localized(product, field, locale);
-            if (value) return textFallback(value) || value;
+            if (value) return applyInlineTextFallbacks(textFallback(value) || value);
         }
         if (isArabic) {
             var arField = field + 'Ar';
             if (product[arField]) return product[arField];
         }
-        return textFallback(product[field]) || product[field] || '';
+        return applyInlineTextFallbacks(textFallback(product[field]) || product[field] || '');
     }
 
     function localizedContent(item, field) {
@@ -238,14 +280,14 @@
         if (window.LongxiangI18n && window.LongxiangI18n.localized) {
             var value = window.LongxiangI18n.localized(item, field, locale);
             var fallbackValue = textFallback(value);
-            if (fallbackValue) return fallbackValue;
-            if (value && (!isArabic || value !== item[field])) return value;
+            if (fallbackValue) return applyInlineTextFallbacks(fallbackValue);
+            if (value && (!isArabic || value !== item[field])) return applyInlineTextFallbacks(value);
         }
         if (isArabic && item[field + 'Ar']) return item[field + 'Ar'];
         if (isArabic && typeof item[field] === 'string' && ARABIC_TEXT_FALLBACKS[item[field].trim()]) {
             return ARABIC_TEXT_FALLBACKS[item[field].trim()];
         }
-        return textFallback(item[field]) || item[field] || '';
+        return applyInlineTextFallbacks(textFallback(item[field]) || item[field] || '');
     }
 
     function translatedSpecLabel(label) {
@@ -258,7 +300,7 @@
     function translatedSpecValue(value) {
         value = String(value || '').trim();
         var values = SPEC_VALUE_TEXT[locale] || {};
-        return values[value] || textFallback(value) || value;
+        return values[value] || textFallback(value) || applyInlineTextFallbacks(value) || value;
     }
 
     function specLabelAttrs() {
@@ -318,6 +360,16 @@
         return pack[value.trim()] || '';
     }
 
+    function applyInlineTextFallbacks(value) {
+        if (typeof value !== 'string' || !value) return value || '';
+        var replacements = INLINE_TEXT_FALLBACKS[locale] || {};
+        return Object.keys(replacements)
+            .sort(function (a, b) { return b.length - a.length; })
+            .reduce(function (textValue, key) {
+                return textValue.split(key).join(replacements[key]);
+            }, value);
+    }
+
     function rtlAttrs(className) {
         return isArabic ? ' dir="rtl" lang="ar" class="' + (className || 'rtl-product-text') + '"' : '';
     }
@@ -340,7 +392,7 @@
 
     function firstValue(values) {
         if (!Array.isArray(values)) return '';
-        return values.filter(Boolean).slice(0, 3).join(' / ');
+        return applyInlineTextFallbacks(values.filter(Boolean).slice(0, 3).join(' / '));
     }
 
     function findSpecValue(product, pattern) {
@@ -349,7 +401,7 @@
             var row = specs[i];
             if (!Array.isArray(row)) continue;
             var label = String(row[0] || '');
-            if (pattern.test(label)) return row[1] || '';
+            if (pattern.test(label)) return applyInlineTextFallbacks(row[1] || '');
         }
         return '';
     }
