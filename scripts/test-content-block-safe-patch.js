@@ -8,6 +8,17 @@ const Database = require('better-sqlite3');
 const root = path.resolve(__dirname, '..');
 const nodeBin = process.execPath;
 const scriptPath = path.join(root, 'scripts', 'apply-content-block-safe-patch.js');
+const localeConfigPath = path.join(root, 'config', 'locales.json');
+
+function readLocaleMeta() {
+    const config = JSON.parse(fs.readFileSync(localeConfigPath, 'utf8'));
+    return {
+        supportedLocales: Array.isArray(config.supportedLocales) ? config.supportedLocales : [],
+        plannedOnlyLocales: config.plannedLocales && typeof config.plannedLocales === 'object'
+            ? Object.keys(config.plannedLocales)
+            : []
+    };
+}
 
 function runNode(args, options) {
     return childProcess.spawnSync(nodeBin, args, Object.assign({
@@ -61,11 +72,12 @@ function createFixture() {
     });
     db.close();
 
+    const localeMeta = readLocaleMeta();
     const input = {
         meta: {
             locale: 'ru',
-            supportedLocales: ['en', 'ar', 'fr'],
-            plannedOnlyLocales: ['pt'],
+            supportedLocales: localeMeta.supportedLocales,
+            plannedOnlyLocales: localeMeta.plannedOnlyLocales,
             counts: { contentBlocks: 1 }
         },
         contentBlocks: [
