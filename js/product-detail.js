@@ -136,6 +136,7 @@
             'Color LCD': 'Écran LCD couleur',
             'Color LCD display': 'Écran LCD couleur',
             'Class 2': 'Classe 2',
+            '-30°C to +55°C': '-30 °C à +55 °C',
             '550 x 220 x 1500 mm (L x W x H)': '550 x 220 x 1500 mm (L x l x H)'
         },
         ru: {
@@ -152,6 +153,7 @@
             'Color LCD': 'Цветной LCD-дисплей',
             'Color LCD display': 'Цветной LCD-дисплей',
             'Class 2': 'Класс 2',
+            '-30°C to +55°C': 'от -30 °C до +55 °C',
             '550 x 220 x 1500 mm (L x W x H)': '550 x 220 x 1500 mm (Д x Ш x В)'
         }
     };
