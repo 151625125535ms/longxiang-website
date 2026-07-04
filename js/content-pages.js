@@ -427,13 +427,41 @@
         return pack[value.trim()] || '';
     }
 
+    function repairFrenchAccentQuestionMarks(value) {
+        if (locale !== 'fr' || typeof value !== 'string' || value.indexOf('?') === -1) return value;
+        return value
+            .replace(/\?lectrique/g, 'électrique')
+            .replace(/c\?blage/g, 'câblage')
+            .replace(/\? valider/g, 'À valider')
+            .replace(/p\?rim\?tre/g, 'périmètre')
+            .replace(/b\?timents/g, 'bâtiments')
+            .replace(/immerg\?s/g, 'immergés')
+            .replace(/l\?huile/g, 'l’huile')
+            .replace(/d\?usine/g, 'd’usine')
+            .replace(/Bo\?te/g, 'Boîte')
+            .replace(/\?quipements/g, 'équipements')
+            .replace(/capacit\?/g, 'capacité')
+            .replace(/r\?seau/g, 'réseau')
+            .replace(/\?nerg\?tiques/g, 'énergétiques')
+            .replace(/d\?exploitation/g, 'd’exploitation')
+            .replace(/\?les/g, 'îles')
+            .replace(/contr\?le/g, 'contrôle')
+            .replace(/dur\?e/g, 'durée')
+            .replace(/priorit\?/g, 'priorité')
+            .replace(/d\?extension/g, 'd’extension')
+            .replace(/personnalis\?e/g, 'personnalisée')
+            .replace(/\?quipement/g, 'équipement')
+            .replace(/adapt\?/g, 'adapté')
+            .replace(/\?tre/g, 'être');
+    }
+
     function localizedText(value) {
         var fallback = textFallback(value);
         if (fallback) return fallback;
         if (isArabic && typeof value === 'string' && ARABIC_TEXT_FALLBACKS[value.trim()]) {
             return ARABIC_TEXT_FALLBACKS[value.trim()];
         }
-        return value || '';
+        return repairFrenchAccentQuestionMarks(value || '');
     }
 
     function pageTextFallback(key, fallback) {
@@ -447,7 +475,7 @@
             var value = window.LongxiangI18n.localized(item, key, locale);
             var fallbackValue = textFallback(value);
             if (fallbackValue) return fallbackValue;
-            if (value && (!isArabic || value !== item[key])) return value;
+            if (value && (!isArabic || value !== item[key])) return repairFrenchAccentQuestionMarks(value);
         }
         if (isArabic) {
             if (item[key + 'Ar']) return item[key + 'Ar'];
@@ -455,7 +483,7 @@
             if (item[key + '_ar']) return item[key + '_ar'];
             return localizedText(item[key]);
         }
-        return item[key] || '';
+        return localizedText(item[key] || '');
     }
 
     function localizedOrPageFallback(item, key, fallbackKey, fallback) {
@@ -481,10 +509,12 @@
         if (window.LongxiangI18n && window.LongxiangI18n.localized) {
             var value = window.LongxiangI18n.localized(item, key, locale);
             if (Array.isArray(value) && value.length && (!isArabic || value !== item[key])) {
-                if (locale !== 'ru') return value;
-                return value.map(function (entry) {
-                    return typeof entry === 'string' ? localizedText(entry) : entry;
-                });
+                if (locale === 'fr' || locale === 'ru') {
+                    return value.map(function (entry) {
+                        return typeof entry === 'string' ? localizedText(entry) : entry;
+                    });
+                }
+                return value;
             }
         }
         if (isArabic) {
@@ -493,7 +523,7 @@
             if (Array.isArray(item[key + '_ar']) && item[key + '_ar'].length) return item[key + '_ar'];
         }
         var list = Array.isArray(item[key]) ? item[key] : [];
-        if (locale === 'ru') {
+        if (locale === 'fr' || locale === 'ru') {
             return list.map(function (entry) {
                 return typeof entry === 'string' ? localizedText(entry) : entry;
             });
