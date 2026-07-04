@@ -241,6 +241,44 @@
         return entry.pathPrefix + '/products/' + encodeURIComponent(String(productId || '').trim());
     }
 
+    var FR_PRODUCT_SUMMARY_REPLACEMENTS = [
+        ['S(B)H15-M Series (Anti-Short-Circuit)', 's\u00e9rie S(B)H15-M (anti-court-circuit)'],
+        ['S(B)H15 (Vegetable Oil)', 'S(B)H15 (huile v\u00e9g\u00e9tale)'],
+        ['S11/S13 Series (Aluminum)', 's\u00e9rie S11/S13 (aluminium)'],
+        ['SCBH15 Series (Three-Limb)', 's\u00e9rie SCBH15 (trois colonnes)'],
+        ['SCBH15 Series (Five-Limb)', 's\u00e9rie SCBH15 (cinq colonnes)'],
+        ['ZGSBH15-ZG Series', 's\u00e9rie ZGSBH15-ZG'],
+        ['ZGS13-ZG Series', 's\u00e9rie ZGS13-ZG'],
+        ['GCS Series', 's\u00e9rie GCS'],
+        ['Amorphous Alloy', 'alliage amorphe'],
+        ['Silicon Steel', 'acier au silicium'],
+        ['Silicon steel', 'acier au silicium'],
+        ['ONAN cooling', 'refroidissement ONAN'],
+        ['AN / AF cooling', 'refroidissement AN / AF'],
+        ['Oil immersed self-cooling cooling', 'refroidissement naturel en bain d\u2019huile'],
+        ['Air cooling cooling', 'refroidissement par air'],
+        ['Intelligent air cooling / liquid cooling cooling', 'refroidissement intelligent par air/liquide'],
+        ['AC380V \u00b115%, three-phase five-wire and 200-1000V DC', 'AC380V \u00b115%, r\u00e9seau triphas\u00e9 \u00e0 cinq fils et 200-1000V DC'],
+        ['three-phase five-wire and 200-1000V DC', 'r\u00e9seau triphas\u00e9 \u00e0 cinq fils et 200-1000V DC'],
+        ['three-phase five-wire', 'r\u00e9seau triphas\u00e9 \u00e0 cinq fils'],
+        ['LXDC integrated dual-gun charging station', 'station de recharge LXDC int\u00e9gr\u00e9e \u00e0 deux connecteurs'],
+        ['LXDC DC charging stack', 'pile de recharge DC LXDC'],
+        ['IP30 / IP40 protection', 'protection IP30 / IP40'],
+        ['IP54 protection', 'protection IP54'],
+        ['IP55 protection', 'protection IP55'],
+        ['380V, 660V and 380V / 660V', '380V, 660V et 380V / 660V'],
+        ['Param\u00e8tres techniques source \u00e0 valide', 'Param\u00e8tres techniques \u00e0 valider']
+    ];
+
+    function localizedProductSummary(value, locale) {
+        var text = String(value == null ? '' : value);
+        if (normalizeContentLocale(locale || currentLocale()) !== 'fr') return text;
+        FR_PRODUCT_SUMMARY_REPLACEMENTS.forEach(function (replacement) {
+            text = text.split(replacement[0]).join(replacement[1]);
+        });
+        return text;
+    }
+
     function assetBasePrefix(locale) {
         var entry = localeEntry(locale || currentLocale());
         return entry.pathPrefix ? '../' : '';
@@ -426,6 +464,7 @@
         localized: localized,
         localizedStaticPath: localizedStaticPath,
         localizedProductPath: localizedProductPath,
+        localizedProductSummary: localizedProductSummary,
         assetBasePrefix: assetBasePrefix,
         localizedAssetPath: localizedAssetPath,
         baseStaticPathFromLocalizedPath: baseStaticPathFromLocalizedPath,
@@ -2227,7 +2266,7 @@
             card.className = 'product-card product-card-v2 fade-in';
             card.setAttribute('data-delay', (index * 100).toString());
             var name = localizedApiValue(product, 'name');
-            var desc = localizedApiValue(product, 'shortDesc');
+            var desc = localizedProductSummary(localizedApiValue(product, 'shortDesc'), locale);
             var detail = window.LongxiangI18n.localizedProductPath(product.slug || product.id, locale);
             var imagePath = resolveAssetPath(product.image);
             var textAttrs = isArabic ? ' dir="rtl" lang="ar" class="rtl-product-text"' : '';
