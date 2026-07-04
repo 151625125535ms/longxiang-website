@@ -2289,8 +2289,8 @@
             var card = document.createElement('div');
             card.className = 'product-card product-card-v2 fade-in';
             card.setAttribute('data-delay', (index * 100).toString());
-            var name = localizedProductSummary(localizedApiValue(product, 'name'), locale);
-            var desc = localizedProductSummary(localizedApiValue(product, 'shortDesc'), locale);
+            var name = localizedApiValue(product, 'name');
+            var desc = localizedApiValue(product, 'shortDesc');
             var detail = window.LongxiangI18n.localizedProductPath(product.slug || product.id, locale);
             var imagePath = resolveAssetPath(product.image);
             var textAttrs = isArabic ? ' dir="rtl" lang="ar" class="rtl-product-text"' : '';

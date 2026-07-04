@@ -141,13 +141,6 @@
         return product[field] || '';
     }
 
-    function localizedProductSummary(value) {
-        if (window.LongxiangI18n && window.LongxiangI18n.localizedProductSummary) {
-            return window.LongxiangI18n.localizedProductSummary(value, locale);
-        }
-        return value || '';
-    }
-
     function t(key) {
         var pack = UI_TEXT[locale] || UI_TEXT.en;
         return pack[key] || UI_TEXT.en[key] || '';
@@ -239,8 +232,8 @@
         card.setAttribute('data-group', product.group);
         card.setAttribute('data-sub-category', product.subCategory || '');
 
-        var name = localizedProductSummary(localize(product, 'name'));
-        var desc = localizedProductSummary(localize(product, 'shortDesc'));
+        var name = localize(product, 'name');
+        var desc = localize(product, 'shortDesc');
         var href = detailHref(product);
         var imagePath = normalizeImagePath(product.cardImage || product.image);
 
