@@ -241,66 +241,8 @@
         return entry.pathPrefix + '/products/' + encodeURIComponent(String(productId || '').trim());
     }
 
-    var FR_PRODUCT_SUMMARY_REPLACEMENTS = [
-        ['photovolta\u00f9ques', 'photovolta\u00efques'],
-        ['photovolta\u00f9que', 'photovolta\u00efque'],
-        ['S(B)H15-M Series (Anti-Short-Circuit)', 's\u00e9rie S(B)H15-M (anti-court-circuit)'],
-        ['S(B)H15 (Vegetable Oil)', 'S(B)H15 (huile v\u00e9g\u00e9tale)'],
-        ['S11/S13 Series (Aluminum)', 's\u00e9rie S11/S13 (aluminium)'],
-        ['SCBH15 Series (Three-Limb)', 's\u00e9rie SCBH15 (trois colonnes)'],
-        ['SCBH15 Series (Five-Limb)', 's\u00e9rie SCBH15 (cinq colonnes)'],
-        ['ZGSBH15-ZG Series', 's\u00e9rie ZGSBH15-ZG'],
-        ['ZGS13-ZG Series', 's\u00e9rie ZGS13-ZG'],
-        ['GCS Series', 's\u00e9rie GCS'],
-        ['Energy-saving cooling compact box-type transformer', 'transformateur compact en poste pr\u00e9fabriqu\u00e9 \u00e0 refroidissement \u00e9conome en \u00e9nergie'],
-        ['High-efficiency amorphous alloy transformer', 'transformateur en alliage amorphe \u00e0 haut rendement'],
-        ['6kV class and 6-10kV distribution class', 'classe 6kV et classe de distribution 6-10kV'],
-        ['10kV class and 6kV class', 'classe 10kV et classe 6kV'],
-        ['10kV and 35kV', '10kV et 35kV'],
-        ['10kV and below', '10kV et moins'],
-        ['10kV class', 'classe 10kV'],
-        ['classe 10kV and 6kV class', 'classe 10kV et classe 6kV'],
-        ['Customized voltage class', 'classe de tension personnalis\u00e9e'],
-        ['Project-specific', 'selon le projet'],
-        ['Oil tank IP68', 'cuve \u00e0 huile IP68'],
-        ['high-voltage room IP45 protection', 'compartiment haute tension avec protection IP45'],
-        ['Amorphous alloy core', 'noyau en alliage amorphe'],
-        ['Amorphous alloy', 'alliage amorphe'],
-        ['Amorphous Alloy', 'alliage amorphe'],
-        ['amorphous alloy', 'alliage amorphe'],
-        ['Silicon Steel', 'acier au silicium'],
-        ['Silicon steel', 'acier au silicium'],
-        ['laminated core', 'noyau feuillet\u00e9'],
-        ['3D wound core', 'noyau bobin\u00e9 3D'],
-        ['ONAN cooling', 'refroidissement ONAN'],
-        ['AN / AF optional cooling', 'refroidissement AN / AF en option'],
-        ['AN / AF cooling', 'refroidissement AN / AF'],
-        ['Oil immersed self-cooling cooling', 'refroidissement naturel en bain d\u2019huile'],
-        ['Air cooling cooling', 'refroidissement par air'],
-        ['Intelligent air cooling / liquid cooling cooling', 'refroidissement intelligent par air/liquide'],
-        ['AC380V \u00b115%, three-phase five-wire and 200-1000V DC', 'AC380V \u00b115%, r\u00e9seau triphas\u00e9 \u00e0 cinq fils et 200-1000V DC'],
-        ['three-phase five-wire and 200-1000V DC', 'r\u00e9seau triphas\u00e9 \u00e0 cinq fils et 200-1000V DC'],
-        ['three-phase five-wire', 'r\u00e9seau triphas\u00e9 \u00e0 cinq fils'],
-        ['LXDC integrated dual-gun charging station', 'station de recharge LXDC int\u00e9gr\u00e9e \u00e0 deux connecteurs'],
-        ['LXDC DC charging stack', 'pile de recharge DC LXDC'],
-        ['IP30 / IP40 protection', 'protection IP30 / IP40'],
-        ['IP54 protection', 'protection IP54'],
-        ['IP55 protection', 'protection IP55'],
-        ['380V, 660V and 380V / 660V', '380V, 660V et 380V / 660V'],
-        ['options de tension: 230Vac (single-phase), 25. Param\u00e8tres techniques source \u00e0 valide', 'options de tension: 230Vac (monophas\u00e9). Param\u00e8tres techniques \u00e0 valider'],
-        ['230Vac (single-phase)', '230Vac (monophas\u00e9)'],
-        ['gives engineers a clear basis for technical comparison and specification review.', 'offre aux ing\u00e9nieurs une base claire pour la comparaison technique et la revue des sp\u00e9cifications.'],
-        ['The product can be coordinated with Longxiang switchgear, transformer.', 'Le produit peut \u00eatre coordonn\u00e9 avec les appareillages et transformateurs Longxiang.'],
-        ['Param\u00e8tres techniques source \u00e0 valide', 'Param\u00e8tres techniques \u00e0 valider']
-    ];
-
-    function localizedProductSummary(value, locale) {
-        var text = String(value == null ? '' : value);
-        if (normalizeContentLocale(locale || currentLocale()) !== 'fr') return text;
-        FR_PRODUCT_SUMMARY_REPLACEMENTS.forEach(function (replacement) {
-            text = text.split(replacement[0]).join(replacement[1]);
-        });
-        return text;
+    function localizedProductSummary(value) {
+        return String(value == null ? '' : value);
     }
 
     function assetBasePrefix(locale) {
