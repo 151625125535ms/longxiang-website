@@ -278,6 +278,7 @@
     };
     var INLINE_TEXT_FALLBACKS = {
         fr: {
+            'S(B)H15-M Series (Anti-Short-Circuit), Amorphous Alloy, ONAN cooling': 'S(B)H15-M (anti-court-circuit), alliage amorphe, refroidissement ONAN',
             'AC380V \u00b115%, three-phase five-wire and 200-1000V DC': 'AC380V \u00b115%, r\u00e9seau triphas\u00e9 \u00e0 cinq fils et 200-1000V DC',
             'AC380V \u00b115%, three-phase five-wire': 'AC380V \u00b115%, r\u00e9seau triphas\u00e9 \u00e0 cinq fils'
         },
@@ -407,6 +408,13 @@
             .reduce(function (textValue, key) {
                 return textValue.split(key).join(replacements[key]);
             }, value);
+    }
+
+    function localizedProductCardText(value) {
+        if (window.LongxiangI18n && window.LongxiangI18n.localizedProductSummary) {
+            return window.LongxiangI18n.localizedProductSummary(value, locale);
+        }
+        return value || '';
     }
 
     function rtlAttrs(className) {
@@ -718,8 +726,8 @@
         target.hidden = false;
         target.innerHTML = '<h2>' + escapeHtml(detailLabel('relatedTitle', 'Related Products')) + '</h2>' +
             '<div class="product-related-grid">' + related.map(function (product) {
-                var name = localize(product, 'name');
-                var desc = localize(product, 'shortDesc') || localize(product, 'description');
+                var name = localizedProductCardText(localize(product, 'name'));
+                var desc = localizedProductCardText(localize(product, 'shortDesc') || localize(product, 'description'));
                 var imagePath = normalizeImagePath(product.image);
                 return '<article class="product-related-card">' +
                     '<a href="' + escapeHtml(detailHref(product)) + '">' +
