@@ -143,6 +143,8 @@
             'Patent Certificates': 'Certificats de brevet',
             'Qualification materials': 'Documents de qualification',
             'Qualification materials for procurement and technical due diligence': 'Documents de qualification pour les achats et la revue technique',
+            'Can these products be supplied for Middle East, Africa, or Southeast Asia projects?': 'Ces produits peuvent-ils \u00eatre fournis pour des projets au Moyen-Orient, en Afrique ou en Asie du Sud-Est ?',
+            'Can these products be supplied for Moyen-Orient, Afrique, or Asie du Sud-Est projects?': 'Ces produits peuvent-ils \u00eatre fournis pour des projets au Moyen-Orient, en Afrique ou en Asie du Sud-Est ?',
             'Solutions by Project Scenario': 'Solutions par sc\u00e9nario de projet',
             'Solutions by projet Scenario': 'Solutions par sc\u00e9nario de projet',
             'C&I Photovoltaic': 'Photovolta\u00efque C&I',
