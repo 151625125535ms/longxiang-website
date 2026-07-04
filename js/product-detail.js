@@ -306,13 +306,27 @@
     function localize(product, field) {
         if (window.LongxiangI18n && window.LongxiangI18n.localized) {
             var value = window.LongxiangI18n.localized(product, field, locale);
-            if (value) return applyInlineTextFallbacks(textFallback(value) || value);
+            if (value) {
+                if (hasLocaleProductField(product, field, locale)) return value;
+                return applyInlineTextFallbacks(textFallback(value) || value);
+            }
         }
         if (isArabic) {
             var arField = field + 'Ar';
             if (product[arField]) return product[arField];
         }
         return applyInlineTextFallbacks(textFallback(product[field]) || product[field] || '');
+    }
+
+    function localeProductFieldName(field, localeCode) {
+        localeCode = String(localeCode || '').trim().toLowerCase();
+        if (!field || !localeCode || localeCode === 'en') return '';
+        return field + localeCode.charAt(0).toUpperCase() + localeCode.slice(1);
+    }
+
+    function hasLocaleProductField(product, field, localeCode) {
+        var key = localeProductFieldName(field, localeCode);
+        return Boolean(key && product && typeof product[key] === 'string' && product[key].trim());
     }
 
     function localizedContent(item, field) {
@@ -408,13 +422,6 @@
             .reduce(function (textValue, key) {
                 return textValue.split(key).join(replacements[key]);
             }, value);
-    }
-
-    function localizedProductCardText(value) {
-        if (window.LongxiangI18n && window.LongxiangI18n.localizedProductSummary) {
-            return window.LongxiangI18n.localizedProductSummary(value, locale);
-        }
-        return value || '';
     }
 
     function rtlAttrs(className) {
@@ -726,8 +733,8 @@
         target.hidden = false;
         target.innerHTML = '<h2>' + escapeHtml(detailLabel('relatedTitle', 'Related Products')) + '</h2>' +
             '<div class="product-related-grid">' + related.map(function (product) {
-                var name = localizedProductCardText(localize(product, 'name'));
-                var desc = localizedProductCardText(localize(product, 'shortDesc') || localize(product, 'description'));
+                var name = localize(product, 'name');
+                var desc = localize(product, 'shortDesc') || localize(product, 'description');
                 var imagePath = normalizeImagePath(product.image);
                 return '<article class="product-related-card">' +
                     '<a href="' + escapeHtml(detailHref(product)) + '">' +
