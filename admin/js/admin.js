@@ -670,6 +670,11 @@
                         { key: 'inquiryForm.title', label: '询盘表单标题', type: 'text' },
                         { key: 'inquiryForm.note', label: '询盘表单说明', type: 'textarea' },
                         { key: 'inquiryForm.submitLabel', label: '提交按钮文字', type: 'text' }
+                    ], children: [
+                        { key: 'detailFaqItems', label: '详情 FAQ', path: 'detailFaq', previewSelector: '[data-product-detail-faq]', array: true, itemLabel: 'FAQ', fields: [
+                            { key: 'question', label: '问题', type: 'text' },
+                            { key: 'answer', label: '答案', type: 'textarea' }
+                        ] }
                     ] }
                 ]
             },
@@ -958,6 +963,11 @@
                     { key: 'faq', label: '常见问题', path: 'contactPage.faq', previewSelector: '.faq-block', fields: [
                         { key: 'title', label: 'FAQ 标题', type: 'text' },
                         { key: 'text', label: 'FAQ 说明', type: 'textarea' }
+                    ], children: [
+                        { key: 'contactFaqItems', label: 'FAQ 条目', path: 'contactPage.faq.items', previewSelector: '.faq-block', array: true, itemLabel: 'FAQ', fields: [
+                            { key: 'question', label: '问题', type: 'text' },
+                            { key: 'answer', label: '答案', type: 'textarea' }
+                        ] }
                     ] }
                 ]
             },
@@ -3489,6 +3499,17 @@
             }, obj || {});
         }
 
+        function hasPathValue(obj, path) {
+            var current = obj || {};
+            var parts = String(path || '').split('.').filter(Boolean);
+            for (var i = 0; i < parts.length; i += 1) {
+                var key = parts[i];
+                if (!current || current[key] === undefined) return false;
+                current = current[key];
+            }
+            return true;
+        }
+
         function isPathIndex(key) {
             return /^\d+$/.test(String(key || ''));
         }
@@ -4480,6 +4501,86 @@
             return basePath + '.' + key;
         }
 
+        function visualUsesPatchFields() {
+            var key = visualActiveLanguage().key;
+            return key === 'fr' || key === 'ru';
+        }
+
+        function visualPatchSuffix() {
+            return 'Patch' + visualLanguageSuffix();
+        }
+
+        function visualPatchCollectionKey(baseKey) {
+            return String(baseKey || '') + visualPatchSuffix();
+        }
+
+        function visualPathParent(path) {
+            var parts = String(path || '').split('.').filter(Boolean);
+            parts.pop();
+            return parts.join('.');
+        }
+
+        function visualPathLast(path) {
+            var parts = String(path || '').split('.').filter(Boolean);
+            return parts[parts.length - 1] || '';
+        }
+
+        function visualJoinPath() {
+            return Array.prototype.slice.call(arguments).filter(Boolean).join('.');
+        }
+
+        function visualSectionTargetKey(module, body) {
+            if (!module || !(module.sectionId || module.sectionTitle || /^sections\./.test(String(module.path || '')))) return '';
+            if (module.sectionId) return module.sectionId;
+            var modulePath = visualModulePath(module, body, { createMissing: false }) || module.path || '';
+            var match = /^sections\.(\d+)/.exec(modulePath);
+            return match ? 'index_' + match[1] : '';
+        }
+
+        function visualSectionPatchBasePath(module, body) {
+            var targetKey = visualSectionTargetKey(module, body);
+            if (!targetKey) return '';
+            var basePath = visualJoinPath(visualPatchCollectionKey('sections'), targetKey);
+            var sectionPathParent = visualPathParent(module.sectionPath || '');
+            return visualJoinPath(basePath, sectionPathParent);
+        }
+
+        function visualLocalizedFieldKey(field) {
+            return visualLanguageFieldKey(field);
+        }
+
+        function visualLocalizedModuleFieldPath(module, field, body) {
+            var fieldKey = visualLocalizedFieldKey(field);
+            if (!visualUsesPatchFields() || !visualFieldSupportsLanguage(field)) {
+                return visualPath(module, fieldKey, body, { createMissing: true });
+            }
+            var sectionPatchBase = visualSectionPatchBasePath(module, body);
+            if (sectionPatchBase) return visualJoinPath(sectionPatchBase, fieldKey);
+            return visualPath(module, fieldKey, body, { createMissing: true });
+        }
+
+        function visualLocalizedArrayFieldPath(module, field, body, index) {
+            var fieldKey = visualLocalizedFieldKey(field);
+            var arrayPath = visualModulePath(module, body, { createMissing: true });
+            if (!visualUsesPatchFields() || !visualFieldSupportsLanguage(field)) {
+                return visualJoinPath(arrayPath, String(index), fieldKey);
+            }
+            var arrayKey = visualPathLast(arrayPath);
+            var patchKey = visualPatchCollectionKey(arrayKey);
+            var sectionPatchBase = visualSectionPatchBasePath(module, body);
+            if (sectionPatchBase) {
+                return visualJoinPath(sectionPatchBase, patchKey, 'index_' + index, fieldKey);
+            }
+            return visualJoinPath(visualPathParent(arrayPath), patchKey, 'index_' + index, fieldKey);
+        }
+
+        function visualFirstPathValue(body, paths) {
+            for (var i = 0; i < paths.length; i += 1) {
+                if (hasPathValue(body, paths[i])) return getPathValue(body, paths[i]);
+            }
+            return '';
+        }
+
         function visualFieldId(path) {
             return 'visual-field-' + String(path || '').replace(/[^a-zA-Z0-9_-]/g, '-');
         }
@@ -4493,7 +4594,9 @@
 
         function visualFieldValue(block, module, field) {
             var body = block && block.body_json ? block.body_json : {};
-            return getPathValue(body, visualPath(module, visualLanguageFieldKey(field), body));
+            var primaryPath = visualLocalizedModuleFieldPath(module, field, body);
+            var legacyPath = visualPath(module, visualLanguageFieldKey(field), body);
+            return visualFirstPathValue(body, [primaryPath, legacyPath]);
         }
 
         function visualNewArrayItem(module) {
@@ -4714,19 +4817,27 @@
             var arrayPath = visualModulePath(module, body, { createMissing: true });
             var items = getPathValue(body, arrayPath);
             if (!Array.isArray(items)) items = [];
+            var canChangeStructure = !visualUsesPatchFields();
+            var structureAction = canChangeStructure
+                ? '<button type="button" class="btn btn-secondary btn-sm" data-visual-array-action="add" data-page="' + escapeHtml(page.key) + '" data-module="' + escapeHtml(module.key) + '">新增' + escapeHtml(module.itemLabel || '项目') + '</button>'
+                : '<small>当前语言只编辑已有项目的本地化字段，不调整数组结构。</small>';
             return '<div class="visual-array-editor" data-visual-array="' + escapeHtml(arrayPath) + '">' +
-                '<div class="visual-array-head"><span>共 ' + items.length + ' 项</span><button type="button" class="btn btn-secondary btn-sm" data-visual-array-action="add" data-page="' + escapeHtml(page.key) + '" data-module="' + escapeHtml(module.key) + '">新增' + escapeHtml(module.itemLabel || '项目') + '</button></div>' +
+                '<div class="visual-array-head"><span>共 ' + items.length + ' 项</span>' + structureAction + '</div>' +
                 '<div class="visual-array-list">' + items.map(function (item, index) {
                     var title = visualArrayItemTitle(item, module, index);
-                    return '<details class="visual-array-item" open data-visual-array-item="' + index + '">' +
-                        '<summary><strong>' + escapeHtml(title) + '</strong><span>' +
+                    var itemActions = canChangeStructure
+                        ? '<span>' +
                             '<button type="button" class="btn btn-secondary btn-sm" data-visual-array-action="up" data-page="' + escapeHtml(page.key) + '" data-module="' + escapeHtml(module.key) + '" data-index="' + index + '">上移</button>' +
                             '<button type="button" class="btn btn-secondary btn-sm" data-visual-array-action="down" data-page="' + escapeHtml(page.key) + '" data-module="' + escapeHtml(module.key) + '" data-index="' + index + '">下移</button>' +
                             '<button type="button" class="btn btn-danger btn-sm" data-visual-array-action="remove" data-page="' + escapeHtml(page.key) + '" data-module="' + escapeHtml(module.key) + '" data-index="' + index + '">删除</button>' +
-                        '</span></summary>' +
+                        '</span>'
+                        : '<span><small>结构锁定</small></span>';
+                    return '<details class="visual-array-item" open data-visual-array-item="' + index + '">' +
+                        '<summary><strong>' + escapeHtml(title) + '</strong>' + itemActions + '</summary>' +
                         '<div class="visual-array-body">' + (module.fields || []).map(function (field) {
-                            var fieldKey = visualLanguageFieldKey(field);
-                            return renderVisualField(field, arrayPath + '.' + index + '.' + fieldKey, getPathValue(item, fieldKey));
+                            var fieldPath = visualLocalizedArrayFieldPath(module, field, body, index);
+                            var legacyFieldPath = arrayPath + '.' + index + '.' + visualLanguageFieldKey(field);
+                            return renderVisualField(field, fieldPath, visualFirstPathValue(body, [fieldPath, legacyFieldPath]));
                         }).join('') + '</div>' +
                     '</details>';
                 }).join('') + '</div>' +
@@ -4737,8 +4848,9 @@
             if (module.array) return renderVisualArrayEditor(page, module, block);
             return '<div class="visual-field-grid">' + (module.fields || []).map(function (field) {
                 var blockBody = block && block.body_json ? block.body_json : {};
-                var path = visualPath(module, visualLanguageFieldKey(field), blockBody, { createMissing: true });
-                return renderVisualField(field, path, getPathValue(blockBody, path));
+                var path = visualLocalizedModuleFieldPath(module, field, blockBody);
+                var legacyPath = visualPath(module, visualLanguageFieldKey(field), blockBody, { createMissing: true });
+                return renderVisualField(field, path, visualFirstPathValue(blockBody, [path, legacyPath]));
             }).join('') + '</div>';
         }
 
@@ -5029,8 +5141,13 @@
         function mutateVisualArray(pageKey, moduleKey, action, index) {
             var page = visualPageByKey(pageKey);
             var module = visualModuleByKey(page, moduleKey);
+            if (!page || !module) return;
             var block = visualBuilderState.blocks[page.slug];
-            if (!page || !module || !block) return;
+            if (!block) return;
+            if (visualUsesPatchFields()) {
+                showToast('法语/俄语模式只维护已有项目的本地化内容，不能调整数组结构。', 'error');
+                return;
+            }
             var body = collectVisualBody(page, module);
             var arrayPath = visualModulePath(module, body, { createMissing: true });
             var items = getPathValue(body, arrayPath);

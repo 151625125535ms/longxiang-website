@@ -1064,6 +1064,13 @@ function assertVisualBuilderLanguageSupport(source) {
     assertSourceContains(source, /key:\s*['"]ru['"]/, 'admin/js/admin.js 可视化内容编辑器缺少俄语语言按钮。');
     assertSourceContains(source, /visualLanguageSuffix\s*\(/, 'admin/js/admin.js 可视化内容编辑器应使用通用语言后缀生成 Fr/Ru/Ar 字段。');
     assertSourceContains(source, /field\.localizedKeyByLanguage/, 'admin/js/admin.js 可视化内容编辑器应支持字段级语言键映射。');
+    assertSourceContains(source, /visualUsesPatchFields\s*\(/, 'admin/js/admin.js 可视化编辑器必须区分 Fr/Ru Patch 字段模式。');
+    assertSourceContains(source, /visualPatchCollectionKey\s*\(/, 'admin/js/admin.js 可视化编辑器必须能生成 cardsPatchFr/sectionsPatchRu 等 Patch 集合路径。');
+    assertSourceContains(source, /visualSectionPatchBasePath\s*\(/, 'admin/js/admin.js 可视化编辑器必须能把 section 字段写入 sectionsPatchFr/sectionsPatchRu。');
+    assertSourceContains(source, /visualLocalizedArrayFieldPath\s*\(/, 'admin/js/admin.js 可视化编辑器必须能把数组项字段写入 itemsPatchFr/detailFaqPatchRu 等路径。');
+    assertSourceContains(source, /key:\s*['"]detailFaqItems['"]/, 'admin/js/admin.js 可视化编辑器必须开放 product-pages detailFaq 条目维护入口。');
+    assertSourceContains(source, /key:\s*['"]contactFaqItems['"]/, 'admin/js/admin.js 可视化编辑器必须开放 contact FAQ items 条目维护入口。');
+    assertSourceContains(source, /法语\/俄语模式只维护已有项目的本地化内容/, 'admin/js/admin.js Fr/Ru 模式必须禁止调整中性数组结构。');
     assertSourceNotContains(source, /if\s*\(\s*!visualIsArabicLanguage\s*\(\s*\)\s*\|\|\s*!visualFieldSupportsLanguage\s*\(\s*field\s*\)\s*\)\s*return\s+key\s*;/,
         'admin/js/admin.js 可视化内容编辑器仍只按阿语生成本地化字段。');
 }
