@@ -8,7 +8,7 @@
     <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png?v=20260615-lxdq">
     <link rel="stylesheet" href="css/admin-base.css?v=20260628-stage6">
     <link rel="stylesheet" href="css/admin-components.css?v=20260628-stage6">
-    <link rel="stylesheet" href="css/admin.css?v=20260705-product-editor-stage1">
+    <link rel="stylesheet" href="css/admin.css?v=20260705-product-preview-seo">
 </head>
 <body>
     <div class="admin-layout" id="admin-page">
@@ -965,16 +965,16 @@
 
                                 <section class="form-section product-form-section" id="product-section-seo">
                                     <h3 class="form-section-title">SEO 信息</h3>
-                                    <div class="form-group"><label>SEO 标题</label><input type="text" id="field-seo-title" class="bidi-field" dir="auto"></div>
-                                    <div class="form-group"><label>SEO 描述</label><textarea id="field-seo-description" class="bidi-field" rows="3" dir="auto"></textarea></div>
+                                    <div class="form-group"><label>SEO 标题</label><input type="text" id="field-seo-title" class="bidi-field" dir="auto"><span class="seo-length-hint" data-seo-count-for="field-seo-title"></span></div>
+                                    <div class="form-group"><label>SEO 描述</label><textarea id="field-seo-description" class="bidi-field" rows="3" dir="auto"></textarea><span class="seo-length-hint" data-seo-count-for="field-seo-description"></span></div>
                                     <div class="form-group"><label>SEO 关键词</label><input type="text" id="field-seo-keywords" class="bidi-field" dir="auto" placeholder="多个关键词用逗号分隔"></div>
                                     <div class="form-row">
-                                        <div class="form-group"><label>法语 SEO 标题</label><input type="text" id="field-seo-title-fr" class="bidi-field" dir="auto" lang="fr"></div>
-                                        <div class="form-group"><label>俄语 SEO 标题</label><input type="text" id="field-seo-title-ru" class="bidi-field" dir="auto" lang="ru"></div>
+                                        <div class="form-group"><label>法语 SEO 标题</label><input type="text" id="field-seo-title-fr" class="bidi-field" dir="auto" lang="fr"><span class="seo-length-hint" data-seo-count-for="field-seo-title-fr"></span></div>
+                                        <div class="form-group"><label>俄语 SEO 标题</label><input type="text" id="field-seo-title-ru" class="bidi-field" dir="auto" lang="ru"><span class="seo-length-hint" data-seo-count-for="field-seo-title-ru"></span></div>
                                     </div>
                                     <div class="form-row">
-                                        <div class="form-group"><label>法语 SEO 描述</label><textarea id="field-seo-description-fr" class="bidi-field" rows="3" dir="auto" lang="fr"></textarea></div>
-                                        <div class="form-group"><label>俄语 SEO 描述</label><textarea id="field-seo-description-ru" class="bidi-field" rows="3" dir="auto" lang="ru"></textarea></div>
+                                        <div class="form-group"><label>法语 SEO 描述</label><textarea id="field-seo-description-fr" class="bidi-field" rows="3" dir="auto" lang="fr"></textarea><span class="seo-length-hint" data-seo-count-for="field-seo-description-fr"></span></div>
+                                        <div class="form-group"><label>俄语 SEO 描述</label><textarea id="field-seo-description-ru" class="bidi-field" rows="3" dir="auto" lang="ru"></textarea><span class="seo-length-hint" data-seo-count-for="field-seo-description-ru"></span></div>
                                     </div>
                                     <div class="form-row">
                                         <div class="form-group"><label>法语 SEO 关键词</label><input type="text" id="field-seo-keywords-fr" class="bidi-field" dir="auto" lang="fr"></div>
@@ -1025,6 +1025,17 @@
                                         <span>保存后同步产品列表和前台产品详情页。</span>
                                         <span>图片、名称、简介会影响搜索结果展示。</span>
                                     </div>
+                                </section>
+
+                                <section class="form-section product-form-section">
+                                    <h3 class="form-section-title">前台预览</h3>
+                                    <div class="product-preview-actions" id="product-preview-actions">
+                                        <button class="btn btn-secondary btn-sm" type="button" data-product-preview-locale="en">英文</button>
+                                        <button class="btn btn-secondary btn-sm" type="button" data-product-preview-locale="ar">阿语</button>
+                                        <button class="btn btn-secondary btn-sm" type="button" data-product-preview-locale="fr">法语</button>
+                                        <button class="btn btn-secondary btn-sm" type="button" data-product-preview-locale="ru">俄语</button>
+                                    </div>
+                                    <p class="form-help-text" id="product-preview-hint">保存后可打开四语产品详情页预览。</p>
                                 </section>
                             </aside>
                         </div>
@@ -1251,7 +1262,7 @@
     <script src="js/admin-api.js?v=20260628-stage6"></script>
     <script src="js/admin-ui.js?v=20260628-stage6"></script>
     <script src="js/modules/admin-inquiries.js?v=20260628-stage7b1"></script>
-    <script src="js/modules/admin-products.js?v=20260705-product-basic-fields"></script>
+    <script src="js/modules/admin-products.js?v=20260705-product-preview-seo"></script>
     <script src="js/admin.js?v=20260704-fr-ru-patch-builder"></script>
 </body>
 </html>

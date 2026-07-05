@@ -56,9 +56,19 @@
         var uploadedImagePath = '';
         var productGalleryPaths = [];
         var productImageUploading = false;
+        var productPreviewIdentifier = '';
         var productSearchTimer = null;
         var productPage = 1;
         var productMeta = { page: 1, pageSize: 20, total: 0 };
+
+        var SEO_LENGTH_RULES = {
+            'field-seo-title': { min: 20, max: 70, label: 'SEO 标题' },
+            'field-seo-title-fr': { min: 20, max: 70, label: '法语 SEO 标题' },
+            'field-seo-title-ru': { min: 20, max: 70, label: '俄语 SEO 标题' },
+            'field-seo-description': { min: 70, max: 170, label: 'SEO 描述' },
+            'field-seo-description-fr': { min: 70, max: 170, label: '法语 SEO 描述' },
+            'field-seo-description-ru': { min: 70, max: 170, label: '俄语 SEO 描述' }
+        };
 
         function setProductCoverPath(path) {
             uploadedImagePath = path || '';
@@ -73,6 +83,71 @@
             path = String(path).trim().replace(/\\/g, '/');
             path = path.replace(/^https?:\/\/[^/]+\//i, '');
             return path.replace(/^\/+/, '');
+        }
+
+        function productPreviewPath(localeCode) {
+            if (!productPreviewIdentifier) return '';
+            var encoded = encodeURIComponent(productPreviewIdentifier);
+            if (localeCode === 'ar') return '../ar/products/' + encoded;
+            if (localeCode === 'fr') return '../fr/products/' + encoded;
+            if (localeCode === 'ru') return '../ru/products/' + encoded;
+            return '../products/' + encoded;
+        }
+
+        function updateProductPreviewState() {
+            document.querySelectorAll('[data-product-preview-locale]').forEach(function (button) {
+                button.disabled = !productPreviewIdentifier;
+            });
+            var hint = document.getElementById('product-preview-hint');
+            if (hint) {
+                hint.textContent = productPreviewIdentifier
+                    ? '将打开当前产品的四语前台详情页；如刚保存内容，请刷新前台确认。'
+                    : '新增产品保存后才会生成可预览的产品详情页。';
+            }
+        }
+
+        function openProductPreview(localeCode) {
+            var path = productPreviewPath(localeCode);
+            if (!path) {
+                showToast('请先保存产品后再预览。', 'error');
+                return;
+            }
+            window.open(path, '_blank', 'noopener');
+        }
+
+        function updateSeoLengthHint(fieldId) {
+            var field = document.getElementById(fieldId);
+            var hint = document.querySelector('[data-seo-count-for="' + fieldId + '"]');
+            var rule = SEO_LENGTH_RULES[fieldId];
+            if (!field || !hint || !rule) return;
+
+            var length = String(field.value || '').trim().length;
+            var status = 'ok';
+            var suffix = '长度合适';
+            if (!length) {
+                status = 'empty';
+                suffix = '未填写';
+            } else if (length < rule.min) {
+                status = 'warn';
+                suffix = '偏短';
+            } else if (length > rule.max) {
+                status = 'warn';
+                suffix = '偏长';
+            }
+            hint.className = 'seo-length-hint is-' + status;
+            hint.textContent = rule.label + '：' + length + ' 字，建议 ' + rule.min + '-' + rule.max + ' 字，' + suffix + '。';
+        }
+
+        function updateSeoLengthHints() {
+            Object.keys(SEO_LENGTH_RULES).forEach(updateSeoLengthHint);
+        }
+
+        function bindSeoLengthHints() {
+            Object.keys(SEO_LENGTH_RULES).forEach(function (fieldId) {
+                var field = document.getElementById(fieldId);
+                if (field) field.addEventListener('input', function () { updateSeoLengthHint(fieldId); });
+            });
+            updateSeoLengthHints();
         }
 
 
@@ -422,11 +497,18 @@
             var btnAddSpec = document.getElementById('btn-add-spec');
             if (btnAddSpec) btnAddSpec.addEventListener('click', function () { addSpecRow('', ''); });
 
+            document.querySelectorAll('[data-product-preview-locale]').forEach(function (button) {
+                button.addEventListener('click', function () {
+                    openProductPreview(button.getAttribute('data-product-preview-locale'));
+                });
+            });
+
             var featuredField = document.getElementById('field-featured');
             if (featuredField) featuredField.addEventListener('change', syncProductFeaturedSwitch);
 
             var form = document.getElementById('product-form');
             if (form) form.addEventListener('submit', saveProduct);
+            bindSeoLengthHints();
 
             [['field-id','input'],['field-name','input'],['field-category','change'],['field-status','change']].forEach(function (pair) {
                 var el = document.getElementById(pair[0]);
@@ -490,6 +572,7 @@
             resetFormDirty();
             editingProductId = productId;
             editingProductVersion = null;
+            productPreviewIdentifier = '';
             productImageUploading = false;
             setProductSubmitDisabled(false);
             setProductCoverPath('');
@@ -509,6 +592,8 @@
             syncProductFeaturedSwitch();
             document.getElementById('field-id').disabled = !!productId;
             populateProductCategorySelects();
+            updateProductPreviewState();
+            updateSeoLengthHints();
 
             if (productId) {
                 title.textContent = '编辑产品';
@@ -573,6 +658,9 @@
             renderProductSpecs(product.specs || []);
             renderProductGallery(product);
             renderProductCertifications(product);
+            productPreviewIdentifier = product.slug || product.legacy_id || product.id || '';
+            updateProductPreviewState();
+            updateSeoLengthHints();
         }
 
         function setFieldValue(id, value) {
@@ -888,6 +976,8 @@
                     }
                 }
                 if (!editingProductId && saved.id) editingProductId = saved.id;
+                productPreviewIdentifier = saved.slug || saved.legacy_id || productPreviewIdentifier;
+                updateProductPreviewState();
                 safeSessionRemove(draftKey('product', editingProductId || 'new'));
                 if (!wasEditing) safeSessionRemove(draftKey('product', 'new'));
                 showToast(wasEditing ? '产品已更新' : '产品已新增');

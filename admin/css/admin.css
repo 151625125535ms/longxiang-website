@@ -2183,6 +2183,33 @@ h1, h2, h3, h4, h5, h6 {
     line-height: 1.5;
 }
 
+.product-preview-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.product-preview-actions .btn {
+    width: 100%;
+}
+
+.seo-length-hint {
+    display: block;
+    margin-top: 6px;
+    color: var(--color-gray-500);
+    font-size: 0.78rem;
+    line-height: 1.45;
+}
+
+.seo-length-hint.is-ok {
+    color: var(--color-success);
+}
+
+.seo-length-hint.is-warn,
+.seo-length-hint.is-empty {
+    color: var(--color-warning);
+}
+
 .product-description-editor {
     margin-top: 18px;
     border: 1px solid var(--color-gray-200);
