@@ -763,6 +763,113 @@
         }
     }
 
+    function upsertJsonLd(key, data) {
+        if (!key || !data) return;
+        var script = document.querySelector('script[data-schema-auto="' + key + '"]');
+        if (!script) {
+            script = document.createElement('script');
+            script.type = 'application/ld+json';
+            script.setAttribute('data-schema-auto', key);
+            document.head.appendChild(script);
+        }
+        script.textContent = JSON.stringify(data);
+    }
+
+    function stripBrandSuffix(value) {
+        return String(value || '')
+            .replace(/\s+\|\s+(Longxiang|Longxiang Electrical|Henan Longxiang Electrical).*$/i, '')
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+
+    function localizedHomeLabel() {
+        return {
+            en: 'Home',
+            ar: '\u0627\u0644\u0631\u0626\u064a\u0633\u064a\u0629',
+            fr: 'Accueil',
+            ru: '\u0413\u043b\u0430\u0432\u043d\u0430\u044f'
+        }[locale] || 'Home';
+    }
+
+    function localizedHomePath() {
+        if (window.LongxiangI18n && window.LongxiangI18n.localizedStaticPath) {
+            return window.LongxiangI18n.localizedStaticPath('/', locale);
+        }
+        if (locale === 'ar') return '/ar/';
+        if (locale === 'fr') return '/fr/';
+        if (locale === 'ru') return '/ru/';
+        return '/';
+    }
+
+    function contentPageSchemaType() {
+        return {
+            'about-us': 'AboutPage',
+            solutions: 'WebPage',
+            education: 'WebPage',
+            certifications: 'CollectionPage',
+            compare: 'WebPage'
+        }[pageSlug] || '';
+    }
+
+    function visiblePageName(title) {
+        var heading = document.querySelector('.page-hero h1');
+        var headingText = heading ? String(heading.textContent || '').replace(/\s+/g, ' ').trim() : '';
+        return headingText || stripBrandSuffix(title) || document.title || 'Longxiang Electrical';
+    }
+
+    function injectContentPageSchema(title, description, canonicalUrl) {
+        var supportedSchemaLocales = ['en', 'ar', 'fr', 'ru'];
+        var schemaType = contentPageSchemaType();
+        if (!schemaType || supportedSchemaLocales.indexOf(locale) === -1 || !canonicalUrl) return;
+
+        var name = visiblePageName(title);
+        var language = document.documentElement.getAttribute('lang') || locale;
+        var pageSchema = {
+            '@context': 'https://schema.org',
+            '@type': schemaType,
+            name: name,
+            description: description || stripBrandSuffix(title),
+            url: canonicalUrl,
+            inLanguage: language,
+            isPartOf: {
+                '@type': 'WebSite',
+                name: 'Longxiang Electrical',
+                url: window.location.origin + '/'
+            }
+        };
+        var homeUrl = window.location.origin + localizedHomePath();
+        upsertJsonLd('content-page', pageSchema);
+        upsertJsonLd('content-breadcrumb', {
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+                {
+                    '@type': 'ListItem',
+                    position: 1,
+                    name: localizedHomeLabel(),
+                    item: homeUrl
+                },
+                {
+                    '@type': 'ListItem',
+                    position: 2,
+                    name: name,
+                    item: canonicalUrl
+                }
+            ]
+        });
+    }
+
+    function currentCanonicalUrl() {
+        var canonical = document.querySelector('link[rel="canonical"]');
+        if (canonical && canonical.href) return canonical.href;
+        return absoluteSiteUrl(window.location.pathname);
+    }
+
+    function currentMetaDescription() {
+        var meta = document.querySelector('meta[name="description"]');
+        return meta ? meta.getAttribute('content') || '' : '';
+    }
+
     function absoluteAssetUrl(path) {
         path = resolveAsset(path || '').replace(/^\.\.\//, '');
         if (!path) return '';
@@ -885,6 +992,7 @@
             upsertMeta('', 'og:image', imageUrl);
             upsertMeta('twitter:image', '', imageUrl);
         }
+        injectContentPageSchema(title, description, canonicalUrl);
     }
 
     function listHtml(items) {
@@ -1859,6 +1967,8 @@
         if (pageSlug === 'compare') renderCompare(body);
         if (pageSlug === 'not-found') renderNotFound(body);
     }
+
+    injectContentPageSchema(document.title, currentMetaDescription(), currentCanonicalUrl());
 
     var contentPromise = fetch('/api/content-blocks/' + encodeURIComponent(pageSlug))
         .then(function (res) {

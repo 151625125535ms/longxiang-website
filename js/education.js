@@ -227,6 +227,97 @@
         meta.setAttribute('content', value);
     }
 
+    function upsertJsonLd(key, data) {
+        if (!key || !data) return;
+        var script = document.querySelector('script[data-schema-auto="' + key + '"]');
+        if (!script) {
+            script = document.createElement('script');
+            script.type = 'application/ld+json';
+            script.setAttribute('data-schema-auto', key);
+            document.head.appendChild(script);
+        }
+        script.textContent = JSON.stringify(data);
+    }
+
+    function stripBrandSuffix(value) {
+        return String(value || '')
+            .replace(/\s+\|\s+(Longxiang|Longxiang Electrical|Henan Longxiang Electrical).*$/i, '')
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+
+    function localizedHomeLabel() {
+        return {
+            en: 'Home',
+            ar: '\u0627\u0644\u0631\u0626\u064a\u0633\u064a\u0629',
+            fr: 'Accueil',
+            ru: '\u0413\u043b\u0430\u0432\u043d\u0430\u044f'
+        }[locale] || 'Home';
+    }
+
+    function localizedHomePath() {
+        if (window.LongxiangI18n && window.LongxiangI18n.localizedStaticPath) {
+            return window.LongxiangI18n.localizedStaticPath('/', locale);
+        }
+        if (locale === 'ar') return '/ar/';
+        if (locale === 'fr') return '/fr/';
+        if (locale === 'ru') return '/ru/';
+        return '/';
+    }
+
+    function currentCanonicalUrl() {
+        var canonical = document.querySelector('link[rel="canonical"]');
+        if (canonical && canonical.href) return canonical.href;
+        return window.location.origin + window.location.pathname;
+    }
+
+    function currentMetaDescription() {
+        var meta = document.querySelector('meta[name="description"]');
+        return meta ? meta.getAttribute('content') || '' : '';
+    }
+
+    function injectEducationSchema(data) {
+        var supportedSchemaLocales = ['en', 'ar', 'fr', 'ru'];
+        if (supportedSchemaLocales.indexOf(locale) === -1) return;
+        var seo = data && data.seo ? data.seo : {};
+        var heading = document.querySelector('.education-page-hero h1');
+        var title = heading && heading.textContent ? heading.textContent : stripBrandSuffix(localized(seo, 'title') || document.title);
+        var description = cleanMetaDescription(localized(seo, 'description') || currentMetaDescription());
+        var canonicalUrl = currentCanonicalUrl();
+        var language = document.documentElement.getAttribute('lang') || locale;
+        upsertJsonLd('education-page', {
+            '@context': 'https://schema.org',
+            '@type': 'WebPage',
+            name: title,
+            description: description,
+            url: canonicalUrl,
+            inLanguage: language,
+            isPartOf: {
+                '@type': 'WebSite',
+                name: 'Longxiang Electrical',
+                url: window.location.origin + '/'
+            }
+        });
+        upsertJsonLd('education-breadcrumb', {
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+                {
+                    '@type': 'ListItem',
+                    position: 1,
+                    name: localizedHomeLabel(),
+                    item: window.location.origin + localizedHomePath()
+                },
+                {
+                    '@type': 'ListItem',
+                    position: 2,
+                    name: title,
+                    item: canonicalUrl
+                }
+            ]
+        });
+    }
+
     function setCanonicalLink(path) {
         if (!path) return;
         var link = document.querySelector('link[rel="canonical"]');
@@ -522,6 +613,7 @@
 
         applyEducationSeo(data);
         renderHero(data);
+        injectEducationSchema(data);
         pageRoot.innerHTML =
             renderPageNav() +
             renderStats(data) +
@@ -543,9 +635,12 @@
         }
     }
 
-    fetchJson('/api/education')
+    injectEducationSchema(null);
+
+    var educationPromise = fetchJson('/api/education')
         .then(renderPage)
         .catch(function () {
             pageRoot.setAttribute('data-education-fallback', 'static');
         });
+    window.longxiangEducationPromise = educationPromise;
 })();
