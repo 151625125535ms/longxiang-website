@@ -403,6 +403,8 @@
             if (closeProductBatchBtn) closeProductBatchBtn.addEventListener('click', clearProductSelection);
 
             bindModalClose('product-modal', ['modal-close', 'modal-cancel']);
+            bindProductEditorNavigation();
+            bindProductDescriptionTabs();
 
             var imageInput = document.getElementById('field-image');
             if (imageInput) imageInput.addEventListener('change', uploadProductImage);
@@ -443,6 +445,46 @@
             }
         }
 
+        function bindProductEditorNavigation() {
+            document.querySelectorAll('[data-product-editor-scroll]').forEach(function (button) {
+                button.addEventListener('click', function () {
+                    var targetId = button.getAttribute('data-product-editor-scroll');
+                    var target = targetId ? document.getElementById(targetId) : null;
+                    if (!target) return;
+                    document.querySelectorAll('[data-product-editor-scroll]').forEach(function (item) {
+                        item.classList.toggle('active', item === button);
+                    });
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+            });
+        }
+
+        function bindProductDescriptionTabs() {
+            document.querySelectorAll('[data-product-detail-tab]').forEach(function (button) {
+                button.addEventListener('click', function () {
+                    activateProductDetailTab(button.getAttribute('data-product-detail-tab'));
+                });
+            });
+        }
+
+        function activateProductDetailTab(locale) {
+            locale = locale || 'en';
+            document.querySelectorAll('[data-product-detail-tab]').forEach(function (button) {
+                var active = button.getAttribute('data-product-detail-tab') === locale;
+                button.classList.toggle('active', active);
+                button.setAttribute('aria-selected', active ? 'true' : 'false');
+            });
+            document.querySelectorAll('[data-product-detail-panel]').forEach(function (panel) {
+                var active = panel.getAttribute('data-product-detail-panel') === locale;
+                panel.classList.toggle('active', active);
+                if (active) {
+                    panel.removeAttribute('hidden');
+                } else {
+                    panel.setAttribute('hidden', 'hidden');
+                }
+            });
+        }
+
         function openProductModal(productId) {
             setActiveModalTrigger(getActiveElement());
             resetFormDirty();
@@ -463,6 +505,7 @@
             renderProductSpecs([]);
             renderProductGallery({});
             renderProductCertifications({});
+            activateProductDetailTab('en');
             syncProductFeaturedSwitch();
             document.getElementById('field-id').disabled = !!productId;
             populateProductCategorySelects();

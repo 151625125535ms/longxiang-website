@@ -8,7 +8,7 @@
     <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png?v=20260615-lxdq">
     <link rel="stylesheet" href="css/admin-base.css?v=20260628-stage6">
     <link rel="stylesheet" href="css/admin-components.css?v=20260628-stage6">
-    <link rel="stylesheet" href="css/admin.css?v=20260629-cert-small-screen">
+    <link rel="stylesheet" href="css/admin.css?v=20260705-product-editor-stage1">
 </head>
 <body>
     <div class="admin-layout" id="admin-page">
@@ -874,12 +874,19 @@
                 </div>
                 <div class="modal-body">
                     <form id="product-form">
+                        <nav class="product-editor-nav" aria-label="产品编辑区块">
+                            <button type="button" class="product-editor-nav-btn active" data-product-editor-scroll="product-section-basic">基础信息</button>
+                            <button type="button" class="product-editor-nav-btn" data-product-editor-scroll="product-section-names">多语言名称</button>
+                            <button type="button" class="product-editor-nav-btn" data-product-editor-scroll="product-section-copy">简介与详情</button>
+                            <button type="button" class="product-editor-nav-btn" data-product-editor-scroll="product-section-specs">产品参数</button>
+                            <button type="button" class="product-editor-nav-btn" data-product-editor-scroll="product-section-seo">SEO 信息</button>
+                        </nav>
                         <div class="product-editor-grid">
                             <div class="product-editor-main">
-                                <section class="form-section product-form-section">
+                                <section class="form-section product-form-section" id="product-section-basic">
                                     <h3 class="form-section-title">基础信息</h3>
                                     <div class="form-row">
-                                        <div class="form-group"><label>型号/产品编号</label><input type="text" id="field-id" placeholder="留空自动生成"></div>
+                                        <div class="form-group"><label>产品编号 / 型号识别</label><input type="text" id="field-id" placeholder="留空自动生成"><p class="form-help-text">当前没有独立型号字段，已有产品不开放编号修改；列表型号由产品编号、URL 或 ID 兜底显示。</p></div>
                                         <div class="form-group">
                                             <label>分类 <span class="required">*</span></label>
                                             <select id="field-category">
@@ -902,10 +909,10 @@
                                     </div>
                                 </section>
 
-                                <section class="form-section product-form-section">
+                                <section class="form-section product-form-section" id="product-section-names">
                                     <h3 class="form-section-title">多语言名称</h3>
                                     <div class="form-row">
-                                        <div class="form-group"><label>中文名称</label><input type="text" id="field-nameCn" placeholder="按产品编号自动匹配，可留空" readonly></div>
+                                        <div class="form-group"><label>中文名称</label><input type="text" id="field-nameCn" placeholder="当前数据库未建中文名称字段" readonly><p class="form-help-text">只读识别信息，本阶段不新增中文名称保存能力。</p></div>
                                         <div class="form-group"><label>英文名称 <span class="required">*</span></label><input type="text" id="field-name"></div>
                                     </div>
                                     <div class="form-group"><label>阿拉伯语名称</label><input type="text" id="field-nameAr" class="rtl-field" dir="rtl" lang="ar"></div>
@@ -915,7 +922,7 @@
                                     </div>
                                 </section>
 
-                                <section class="form-section product-form-section">
+                                <section class="form-section product-form-section" id="product-section-copy">
                                     <h3 class="form-section-title">简介与详情</h3>
                                     <div class="form-row">
                                         <div class="form-group"><label>英文短描述</label><input type="text" id="field-shortDesc"></div>
@@ -925,13 +932,29 @@
                                         <div class="form-group"><label>法语短描述</label><input type="text" id="field-shortDescFr" class="bidi-field" dir="auto" lang="fr"></div>
                                         <div class="form-group"><label>俄语短描述</label><input type="text" id="field-shortDescRu" class="bidi-field" dir="auto" lang="ru"></div>
                                     </div>
-                                    <div class="form-group"><label>英文详情</label><textarea id="field-description" rows="4"></textarea></div>
-                                    <div class="form-group"><label>阿拉伯语详情</label><textarea id="field-descriptionAr" class="rtl-field" rows="4" dir="rtl" lang="ar"></textarea></div>
-                                    <div class="form-group"><label>法语详情</label><textarea id="field-descriptionFr" class="bidi-field" rows="4" dir="auto" lang="fr"></textarea></div>
-                                    <div class="form-group"><label>俄语详情</label><textarea id="field-descriptionRu" class="bidi-field" rows="4" dir="auto" lang="ru"></textarea></div>
+                                    <div class="product-description-editor">
+                                        <div class="product-description-tabs" role="tablist" aria-label="产品详情语言">
+                                            <button type="button" class="product-description-tab active" id="product-detail-tab-en" data-product-detail-tab="en" role="tab" aria-selected="true" aria-controls="product-detail-panel-en">英文</button>
+                                            <button type="button" class="product-description-tab" id="product-detail-tab-ar" data-product-detail-tab="ar" role="tab" aria-selected="false" aria-controls="product-detail-panel-ar">阿语</button>
+                                            <button type="button" class="product-description-tab" id="product-detail-tab-fr" data-product-detail-tab="fr" role="tab" aria-selected="false" aria-controls="product-detail-panel-fr">法语</button>
+                                            <button type="button" class="product-description-tab" id="product-detail-tab-ru" data-product-detail-tab="ru" role="tab" aria-selected="false" aria-controls="product-detail-panel-ru">俄语</button>
+                                        </div>
+                                        <div class="product-description-panel active" id="product-detail-panel-en" data-product-detail-panel="en" role="tabpanel" aria-labelledby="product-detail-tab-en">
+                                            <div class="form-group"><label>英文详情</label><textarea id="field-description" class="product-detail-textarea" rows="12"></textarea></div>
+                                        </div>
+                                        <div class="product-description-panel" id="product-detail-panel-ar" data-product-detail-panel="ar" role="tabpanel" aria-labelledby="product-detail-tab-ar" hidden>
+                                            <div class="form-group"><label>阿拉伯语详情</label><textarea id="field-descriptionAr" class="rtl-field product-detail-textarea" rows="12" dir="rtl" lang="ar"></textarea></div>
+                                        </div>
+                                        <div class="product-description-panel" id="product-detail-panel-fr" data-product-detail-panel="fr" role="tabpanel" aria-labelledby="product-detail-tab-fr" hidden>
+                                            <div class="form-group"><label>法语详情</label><textarea id="field-descriptionFr" class="bidi-field product-detail-textarea" rows="12" dir="auto" lang="fr"></textarea></div>
+                                        </div>
+                                        <div class="product-description-panel" id="product-detail-panel-ru" data-product-detail-panel="ru" role="tabpanel" aria-labelledby="product-detail-tab-ru" hidden>
+                                            <div class="form-group"><label>俄语详情</label><textarea id="field-descriptionRu" class="bidi-field product-detail-textarea" rows="12" dir="auto" lang="ru"></textarea></div>
+                                        </div>
+                                    </div>
                                 </section>
 
-                                <section class="form-section product-form-section">
+                                <section class="form-section product-form-section" id="product-section-specs">
                                     <div class="form-section-heading">
                                         <h3 class="form-section-title">产品参数</h3>
                                         <button class="btn btn-secondary btn-sm" type="button" id="btn-add-spec">新增参数</button>
@@ -939,7 +962,7 @@
                                     <div class="specs-list" id="specs-list"></div>
                                 </section>
 
-                                <section class="form-section product-form-section">
+                                <section class="form-section product-form-section" id="product-section-seo">
                                     <h3 class="form-section-title">SEO 信息</h3>
                                     <div class="form-group"><label>SEO 标题</label><input type="text" id="field-seo-title" class="bidi-field" dir="auto"></div>
                                     <div class="form-group"><label>SEO 描述</label><textarea id="field-seo-description" class="bidi-field" rows="3" dir="auto"></textarea></div>
@@ -1227,7 +1250,7 @@
     <script src="js/admin-api.js?v=20260628-stage6"></script>
     <script src="js/admin-ui.js?v=20260628-stage6"></script>
     <script src="js/modules/admin-inquiries.js?v=20260628-stage7b1"></script>
-    <script src="js/modules/admin-products.js?v=20260702-e8c1-product-i18n"></script>
+    <script src="js/modules/admin-products.js?v=20260705-product-editor-stage1"></script>
     <script src="js/admin.js?v=20260704-fr-ru-patch-builder"></script>
 </body>
 </html>
