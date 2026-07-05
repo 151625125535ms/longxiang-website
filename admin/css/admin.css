@@ -1874,13 +1874,15 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .spec-row {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(120px, 0.7fr) minmax(160px, 1.2fr) minmax(160px, 1.2fr) minmax(90px, 0.6fr) 32px;
     gap: 8px;
     align-items: center;
 }
 
-.spec-row input {
-    flex: 1;
+.spec-row input,
+.spec-row select {
+    width: 100%;
     padding: 8px 12px;
     background: var(--color-gray-100);
     border: 2px solid transparent;
@@ -1889,7 +1891,8 @@ h1, h2, h3, h4, h5, h6 {
     transition: all var(--transition-fast);
 }
 
-.spec-row input:focus {
+.spec-row input:focus,
+.spec-row select:focus {
     background: var(--color-white-pure);
     border-color: var(--color-blue);
     box-shadow: 0 0 0 4px rgba(0, 163, 224, 0.1);

@@ -495,7 +495,7 @@
             if (gallerySelectBtn) gallerySelectBtn.addEventListener('click', openProductGalleryAssetPicker);
 
             var btnAddSpec = document.getElementById('btn-add-spec');
-            if (btnAddSpec) btnAddSpec.addEventListener('click', function () { addSpecRow('', ''); });
+            if (btnAddSpec) btnAddSpec.addEventListener('click', function () { addSpecRow({ spec_group: 'technical' }); });
 
             document.querySelectorAll('[data-product-preview-locale]').forEach(function (button) {
                 button.addEventListener('click', function () {
@@ -689,7 +689,7 @@
                 return;
             }
             specs.forEach(function (spec) {
-                addSpecRow(spec.spec_key || spec.key || '', spec.spec_value || spec.value || '');
+                addSpecRow(spec);
             });
         }
 
@@ -862,24 +862,62 @@
             });
         }
 
-        function addSpecRow(key, value) {
+        function normalizeSpecGroup(value) {
+            value = String(value || '').trim();
+            if (value === 'capacity' || value === 'voltage' || value === 'technical') return value;
+            return 'technical';
+        }
+
+        function addSpecRow(spec, legacyValue) {
+            if (arguments.length > 1) {
+                spec = {
+                    spec_group: 'technical',
+                    spec_key: spec,
+                    spec_value: legacyValue
+                };
+            }
+            spec = spec || {};
+            var group = normalizeSpecGroup(spec.spec_group || spec.group);
+            var key = spec.spec_key || spec.key || spec.name || spec.label || '';
+            var value = spec.spec_value || spec.value || spec.text || '';
+            var unit = spec.unit || '';
             var list = document.getElementById('specs-list');
             if (!list) return;
             var empty = list.querySelector('.form-empty-note');
             if (empty) empty.remove();
             var row = document.createElement('div');
             row.className = 'spec-row';
-            row.innerHTML = '<input type="text" class="spec-key bidi-field" dir="auto" placeholder="参数名" value="' + escapeHtml(key) + '"><input type="text" class="spec-value bidi-field" dir="auto" placeholder="参数值" value="' + escapeHtml(value) + '"><button type="button" class="btn-remove-spec">×</button>';
+            row.innerHTML = '<select class="spec-group" aria-label="参数分组">' +
+                '<option value="technical">技术参数</option>' +
+                '<option value="capacity">容量</option>' +
+                '<option value="voltage">电压</option>' +
+                '</select>' +
+                '<input type="text" class="spec-key bidi-field" dir="auto" placeholder="参数名" value="' + escapeHtml(key) + '">' +
+                '<input type="text" class="spec-value bidi-field" dir="auto" placeholder="参数值" value="' + escapeHtml(value) + '">' +
+                '<input type="text" class="spec-unit bidi-field" dir="auto" placeholder="单位" value="' + escapeHtml(unit) + '">' +
+                '<button type="button" class="btn-remove-spec">×</button>';
+            row.querySelector('.spec-group').value = group;
             row.querySelector('.btn-remove-spec').addEventListener('click', function () { row.remove(); });
             list.appendChild(row);
         }
 
         function getSpecsFromForm() {
             var specs = [];
-            document.querySelectorAll('#specs-list .spec-row').forEach(function (row) {
+            document.querySelectorAll('#specs-list .spec-row').forEach(function (row, index) {
+                var group = normalizeSpecGroup(row.querySelector('.spec-group').value);
                 var key = row.querySelector('.spec-key').value.trim();
                 var value = row.querySelector('.spec-value').value.trim();
-                if (key || value) specs.push([key, value]);
+                var unitField = row.querySelector('.spec-unit');
+                var unit = unitField ? unitField.value.trim() : '';
+                if (key || value) {
+                    specs.push({
+                        spec_group: group,
+                        spec_key: key,
+                        spec_value: value,
+                        unit: unit,
+                        sort_order: index
+                    });
+                }
             });
             return specs;
         }
