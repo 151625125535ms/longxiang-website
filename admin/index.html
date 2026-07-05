@@ -8,7 +8,7 @@
     <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png?v=20260615-lxdq">
     <link rel="stylesheet" href="css/admin-base.css?v=20260628-stage6">
     <link rel="stylesheet" href="css/admin-components.css?v=20260628-stage6">
-    <link rel="stylesheet" href="css/admin.css?v=20260705-product-content-guidance">
+    <link rel="stylesheet" href="css/admin.css?v=20260705-product-editor-trim">
 </head>
 <body>
     <div class="admin-layout" id="admin-page">
@@ -879,7 +879,6 @@
                             <button type="button" class="product-editor-nav-btn" data-product-editor-scroll="product-section-names">多语言名称</button>
                             <button type="button" class="product-editor-nav-btn" data-product-editor-scroll="product-section-copy">简介与详情</button>
                             <button type="button" class="product-editor-nav-btn" data-product-editor-scroll="product-section-specs">产品参数</button>
-                            <button type="button" class="product-editor-nav-btn" data-product-editor-scroll="product-section-structured">场景与 FAQ</button>
                             <button type="button" class="product-editor-nav-btn" data-product-editor-scroll="product-section-seo">SEO 信息</button>
                         </nav>
                         <div class="product-editor-grid">
@@ -887,8 +886,7 @@
                                 <section class="form-section product-form-section" id="product-section-basic">
                                     <h3 class="form-section-title">基础信息</h3>
                                     <div class="form-row">
-                                        <div class="form-group"><label>产品编号 / URL 识别</label><input type="text" id="field-id" placeholder="留空自动生成"><p class="form-help-text">已有产品不开放编号修改；该字段关联后台识别与前台 URL。</p></div>
-                                        <div class="form-group"><label>产品型号</label><input type="text" id="field-model" placeholder="例如 LXAC-14KW"><p class="form-help-text">仅用于后台识别和列表展示，不改变产品编号、URL 或前台路由。</p></div>
+                                        <div class="form-group"><label>产品型号</label><input type="text" id="field-model" placeholder="例如 LXAC-14KW"><p class="form-help-text">仅用于后台识别和列表展示，不影响前台页面地址。</p></div>
                                         <div class="form-group">
                                             <label>分类 <span class="required">*</span></label>
                                             <select id="field-category">
@@ -961,24 +959,8 @@
                                         <h3 class="form-section-title">产品参数</h3>
                                         <button class="btn btn-secondary btn-sm" type="button" id="btn-add-spec">新增参数</button>
                                     </div>
-                                    <p class="form-help-text">分组会影响前台容量、电压和技术参数区域展示；保存时会保留分组、单位和排序。</p>
+                                    <p class="form-help-text">只填写参数名和参数值；型号、标准、单位等可直接写入参数值中。</p>
                                     <div class="specs-list" id="specs-list"></div>
-                                </section>
-
-                                <section class="form-section product-form-section" id="product-section-structured">
-                                    <h3 class="form-section-title">应用场景与 FAQ</h3>
-                                    <div class="product-guidance-grid" data-product-editor-shortcuts>
-                                        <div class="product-guidance-card">
-                                            <strong>应用场景</strong>
-                                            <p>当前产品详情页的应用场景由产品分类和前台模板自动生成，尚未建立产品级独立字段。</p>
-                                            <span>如果需要按产品单独维护应用场景，需单独设计数据模型和迁移方案。</span>
-                                        </div>
-                                        <div class="product-guidance-card">
-                                            <strong>产品详情 FAQ</strong>
-                                            <p>当前 FAQ 属于“产品中心 > 详情页公共文案”，可在可视化管理里维护公共问答。</p>
-                                            <button class="btn btn-secondary btn-sm" type="button" data-action="view-visual-builder">打开可视化管理</button>
-                                        </div>
-                                    </div>
                                 </section>
 
                                 <section class="form-section product-form-section" id="product-section-seo">
@@ -1281,7 +1263,7 @@
     <script src="js/admin-api.js?v=20260628-stage6"></script>
     <script src="js/admin-ui.js?v=20260628-stage6"></script>
     <script src="js/modules/admin-inquiries.js?v=20260628-stage7b1"></script>
-    <script src="js/modules/admin-products.js?v=20260705-product-content-guidance"></script>
+    <script src="js/modules/admin-products.js?v=20260705-product-editor-trim"></script>
     <script src="js/admin.js?v=20260704-fr-ru-patch-builder"></script>
 </body>
 </html>

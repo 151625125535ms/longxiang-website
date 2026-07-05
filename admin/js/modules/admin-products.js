@@ -557,7 +557,7 @@
             if (gallerySelectBtn) gallerySelectBtn.addEventListener('click', openProductGalleryAssetPicker);
 
             var btnAddSpec = document.getElementById('btn-add-spec');
-            if (btnAddSpec) btnAddSpec.addEventListener('click', function () { addSpecRow({ spec_group: 'technical' }); });
+            if (btnAddSpec) btnAddSpec.addEventListener('click', function () { addSpecRow({}); });
 
             document.querySelectorAll('[data-product-preview-locale]').forEach(function (button) {
                 button.addEventListener('click', function () {
@@ -573,7 +573,7 @@
             bindSeoLengthHints();
             bindProductCompletenessSummary();
 
-            [['field-id','input'],['field-name','input'],['field-category','change'],['field-status','change']].forEach(function (pair) {
+            [['field-name','input'],['field-category','change'],['field-status','change']].forEach(function (pair) {
                 var el = document.getElementById(pair[0]);
                 if (el) el.addEventListener(pair[1], function () { clearFieldError(pair[0]); });
             });
@@ -652,7 +652,6 @@
             renderProductCertifications({});
             activateProductDetailTab('en');
             syncProductFeaturedSwitch();
-            document.getElementById('field-id').disabled = !!productId;
             populateProductCategorySelects();
             updateProductPreviewState();
             updateSeoLengthHints();
@@ -683,7 +682,6 @@
 
         function fillProductForm(product) {
             var fields = {
-                'field-id': product.legacy_id || product.slug || product.id || '',
                 'field-model': product.model || '',
                 'field-nameCn': product.name_cn || adminProductNameCn(product),
                 'field-name': product.name_en || '',
@@ -927,42 +925,26 @@
             });
         }
 
-        function normalizeSpecGroup(value) {
-            value = String(value || '').trim();
-            if (value === 'capacity' || value === 'voltage' || value === 'technical') return value;
-            return 'technical';
-        }
-
         function addSpecRow(spec, legacyValue) {
             if (arguments.length > 1) {
                 spec = {
-                    spec_group: 'technical',
                     spec_key: spec,
                     spec_value: legacyValue
                 };
             }
             spec = spec || {};
-            var group = normalizeSpecGroup(spec.spec_group || spec.group);
             var key = spec.spec_key || spec.key || spec.name || spec.label || '';
             var value = spec.spec_value || spec.value || spec.text || '';
-            var unit = spec.unit || '';
             var list = document.getElementById('specs-list');
             if (!list) return;
             var empty = list.querySelector('.form-empty-note');
             if (empty) empty.remove();
             var row = document.createElement('div');
             row.className = 'spec-row';
-            row.innerHTML = '<select class="spec-group" aria-label="参数分组">' +
-                '<option value="technical">技术参数</option>' +
-                '<option value="capacity">容量</option>' +
-                '<option value="voltage">电压</option>' +
-                '</select>' +
-                '<input type="text" class="spec-key bidi-field" dir="auto" placeholder="参数名" value="' + escapeHtml(key) + '">' +
+            row.innerHTML = '<input type="text" class="spec-key bidi-field" dir="auto" placeholder="参数名" value="' + escapeHtml(key) + '">' +
                 '<input type="text" class="spec-value bidi-field" dir="auto" placeholder="参数值" value="' + escapeHtml(value) + '">' +
-                '<input type="text" class="spec-unit bidi-field" dir="auto" placeholder="单位" value="' + escapeHtml(unit) + '">' +
                 '<button type="button" class="btn-remove-spec">×</button>';
-            row.querySelector('.spec-group').value = group;
-            row.querySelectorAll('input, select').forEach(function (field) {
+            row.querySelectorAll('input').forEach(function (field) {
                 field.addEventListener('input', updateProductCompletenessSummary);
                 field.addEventListener('change', updateProductCompletenessSummary);
             });
@@ -976,19 +958,13 @@
 
         function getSpecsFromForm() {
             var specs = [];
-            document.querySelectorAll('#specs-list .spec-row').forEach(function (row, index) {
-                var group = normalizeSpecGroup(row.querySelector('.spec-group').value);
+            document.querySelectorAll('#specs-list .spec-row').forEach(function (row) {
                 var key = row.querySelector('.spec-key').value.trim();
                 var value = row.querySelector('.spec-value').value.trim();
-                var unitField = row.querySelector('.spec-unit');
-                var unit = unitField ? unitField.value.trim() : '';
                 if (key || value) {
                     specs.push({
-                        spec_group: group,
                         spec_key: key,
-                        spec_value: value,
-                        unit: unit,
-                        sort_order: index
+                        spec_value: value
                     });
                 }
             });
@@ -1025,20 +1001,18 @@
                 showToast('图片仍在上传，请上传完成后再保存。', 'error');
                 return;
             }
-            var id = getFieldValue('field-id');
             var name = getFieldValue('field-name');
             var nameAr = getFieldValue('field-nameAr');
             var category = getFieldValue('field-category');
             var status = getFieldValue('field-status') || 'published';
 
-            ['field-id', 'field-name', 'field-category', 'field-status'].forEach(clearFieldError);
+            ['field-name', 'field-category', 'field-status'].forEach(clearFieldError);
             var valid = true;
             if (!name && !nameAr) { showFieldError('field-name', '请填写产品名称'); valid = false; }
             if (!category) { showFieldError('field-category', '请选择分类'); valid = false; }
             if (!valid) return;
 
             var payload = {
-                legacy_id: id,
                 model: getFieldValue('field-model'),
                 name_cn: getFieldValue('field-nameCn'),
                 name_en: name || nameAr,
