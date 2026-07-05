@@ -2196,6 +2196,46 @@ h1, h2, h3, h4, h5, h6 {
     width: 100%;
 }
 
+.product-completeness-list {
+    display: grid;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.product-completeness-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: var(--radius-md);
+    background: var(--color-gray-100);
+    color: var(--color-gray-700);
+    font-size: 0.84rem;
+}
+
+.product-completeness-list strong {
+    font-weight: 600;
+}
+
+.product-completeness-list span {
+    flex-shrink: 0;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.product-completeness-list .is-ok {
+    color: var(--color-success);
+}
+
+.product-completeness-list .is-warn {
+    color: var(--color-warning);
+}
+
+.product-completeness-list .is-danger {
+    color: var(--color-danger);
+}
+
 .seo-length-hint {
     display: block;
     margin-top: 6px;

@@ -74,6 +74,7 @@
             uploadedImagePath = path || '';
             var coverField = document.getElementById('field-cover-image');
             if (coverField) coverField.value = uploadedImagePath;
+            updateProductCompletenessSummary();
         }
 
         function getProductUploadPath(response) {
@@ -148,6 +149,67 @@
                 if (field) field.addEventListener('input', function () { updateSeoLengthHint(fieldId); });
             });
             updateSeoLengthHints();
+        }
+
+        function hasTextField(id) {
+            return !!getFieldValue(id);
+        }
+
+        function hasAnyTextField(ids) {
+            return ids.some(function (id) { return hasTextField(id); });
+        }
+
+        function hasProductSpecs() {
+            return Array.prototype.some.call(document.querySelectorAll('#specs-list .spec-row'), function (row) {
+                var key = row.querySelector('.spec-key');
+                var value = row.querySelector('.spec-value');
+                return !!((key && key.value.trim()) || (value && value.value.trim()));
+            });
+        }
+
+        function completenessItem(label, ok, required) {
+            return {
+                label: label,
+                ok: !!ok,
+                status: ok ? 'is-ok' : (required ? 'is-danger' : 'is-warn'),
+                text: ok ? '已填写' : (required ? '必填缺失' : '建议补齐')
+            };
+        }
+
+        function updateProductCompletenessSummary() {
+            var list = document.getElementById('product-completeness-list');
+            if (!list) return;
+            var checks = [
+                completenessItem('英文名称', hasTextField('field-name'), true),
+                completenessItem('产品分类', hasTextField('field-category'), true),
+                completenessItem('封面图', hasTextField('field-cover-image'), false),
+                completenessItem('英文简介或详情', hasAnyTextField(['field-shortDesc', 'field-description']), false),
+                completenessItem('阿语内容', hasAnyTextField(['field-nameAr', 'field-shortDescAr', 'field-descriptionAr']), false),
+                completenessItem('法语内容', hasAnyTextField(['field-nameFr', 'field-shortDescFr', 'field-descriptionFr']), false),
+                completenessItem('俄语内容', hasAnyTextField(['field-nameRu', 'field-shortDescRu', 'field-descriptionRu']), false),
+                completenessItem('产品参数', hasProductSpecs(), false),
+                completenessItem('SEO 标题与描述', hasTextField('field-seo-title') && hasTextField('field-seo-description'), false)
+            ];
+            list.innerHTML = checks.map(function (item) {
+                return '<li><strong>' + escapeHtml(item.label) + '</strong><span class="' + item.status + '">' + escapeHtml(item.text) + '</span></li>';
+            }).join('');
+        }
+
+        function bindProductCompletenessSummary() {
+            [
+                'field-name', 'field-category', 'field-cover-image',
+                'field-shortDesc', 'field-description',
+                'field-nameAr', 'field-shortDescAr', 'field-descriptionAr',
+                'field-nameFr', 'field-shortDescFr', 'field-descriptionFr',
+                'field-nameRu', 'field-shortDescRu', 'field-descriptionRu',
+                'field-seo-title', 'field-seo-description'
+            ].forEach(function (id) {
+                var field = document.getElementById(id);
+                if (!field) return;
+                field.addEventListener('input', updateProductCompletenessSummary);
+                field.addEventListener('change', updateProductCompletenessSummary);
+            });
+            updateProductCompletenessSummary();
         }
 
 
@@ -509,6 +571,7 @@
             var form = document.getElementById('product-form');
             if (form) form.addEventListener('submit', saveProduct);
             bindSeoLengthHints();
+            bindProductCompletenessSummary();
 
             [['field-id','input'],['field-name','input'],['field-category','change'],['field-status','change']].forEach(function (pair) {
                 var el = document.getElementById(pair[0]);
@@ -594,6 +657,7 @@
             populateProductCategorySelects();
             updateProductPreviewState();
             updateSeoLengthHints();
+            updateProductCompletenessSummary();
 
             if (productId) {
                 title.textContent = '编辑产品';
@@ -661,6 +725,7 @@
             productPreviewIdentifier = product.slug || product.legacy_id || product.id || '';
             updateProductPreviewState();
             updateSeoLengthHints();
+            updateProductCompletenessSummary();
         }
 
         function setFieldValue(id, value) {
@@ -686,6 +751,7 @@
             list.innerHTML = '';
             if (!specs || !specs.length) {
                 list.innerHTML = '<div class="form-empty-note">暂无参数</div>';
+                updateProductCompletenessSummary();
                 return;
             }
             specs.forEach(function (spec) {
@@ -897,8 +963,16 @@
                 '<input type="text" class="spec-unit bidi-field" dir="auto" placeholder="单位" value="' + escapeHtml(unit) + '">' +
                 '<button type="button" class="btn-remove-spec">×</button>';
             row.querySelector('.spec-group').value = group;
-            row.querySelector('.btn-remove-spec').addEventListener('click', function () { row.remove(); });
+            row.querySelectorAll('input, select').forEach(function (field) {
+                field.addEventListener('input', updateProductCompletenessSummary);
+                field.addEventListener('change', updateProductCompletenessSummary);
+            });
+            row.querySelector('.btn-remove-spec').addEventListener('click', function () {
+                row.remove();
+                updateProductCompletenessSummary();
+            });
             list.appendChild(row);
+            updateProductCompletenessSummary();
         }
 
         function getSpecsFromForm() {
