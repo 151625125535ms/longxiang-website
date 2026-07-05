@@ -35,6 +35,8 @@ CREATE TABLE IF NOT EXISTS products (
     sort_order INTEGER DEFAULT 0,
     featured INTEGER DEFAULT 0,
     views INTEGER DEFAULT 0,
+    name_cn TEXT,
+    model TEXT,
     name_en TEXT NOT NULL,
     name_ar TEXT,
     name_fr TEXT,
