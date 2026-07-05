@@ -261,10 +261,38 @@
         }
     }
 
+    function clipSeoText(value, maxLength) {
+        var textValue = String(value || '').replace(/\s+/g, ' ').trim();
+        var chars = Array.from(textValue);
+        if (chars.length <= maxLength) return textValue;
+        var clipped = chars.slice(0, Math.max(0, maxLength - 3)).join('').replace(/[\s,;:.-]+\S*$/, '').trim();
+        return (clipped || chars.slice(0, Math.max(0, maxLength - 3)).join('').trim()) + '...';
+    }
+
+    function cleanSeoTitle(value) {
+        var textValue = String(value || '').replace(/\s+/g, ' ').trim();
+        var maxLength = 90;
+        if (Array.from(textValue).length <= maxLength) return textValue;
+        var separator = ' | ';
+        var index = textValue.lastIndexOf(separator);
+        if (index > 0) {
+            var suffix = textValue.slice(index + separator.length);
+            var suffixLength = Array.from(suffix).length + separator.length;
+            if (suffixLength < maxLength - 24) {
+                return clipSeoText(textValue.slice(0, index), maxLength - suffixLength) + separator + suffix;
+            }
+        }
+        return clipSeoText(textValue, maxLength);
+    }
+
+    function cleanMetaDescription(value) {
+        return clipSeoText(value, 170);
+    }
+
     function applyEducationSeo(data) {
         var seo = data && data.seo ? data.seo : {};
-        var title = localized(seo, 'title');
-        var description = localized(seo, 'description');
+        var title = cleanSeoTitle(localized(seo, 'title'));
+        var description = cleanMetaDescription(localized(seo, 'description'));
         var image = absoluteAssetUrl(seo.image);
 
         if (title) {

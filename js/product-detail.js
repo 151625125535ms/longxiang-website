@@ -278,6 +278,7 @@
     };
     var INLINE_TEXT_FALLBACKS = {
         fr: {
+            'Bo{ic}tier': 'Bo\u00eetier',
             'S(B)H15-M Series (Anti-Short-Circuit), Amorphous Alloy, ONAN cooling': 'S(B)H15-M (anti-court-circuit), alliage amorphe, refroidissement ONAN',
             'AC380V \u00b115%, three-phase five-wire and 200-1000V DC': 'AC380V \u00b115%, r\u00e9seau triphas\u00e9 \u00e0 cinq fils et 200-1000V DC',
             'AC380V \u00b115%, three-phase five-wire': 'AC380V \u00b115%, r\u00e9seau triphas\u00e9 \u00e0 cinq fils'
@@ -307,7 +308,7 @@
         if (window.LongxiangI18n && window.LongxiangI18n.localized) {
             var value = window.LongxiangI18n.localized(product, field, locale);
             if (value) {
-                if (hasLocaleProductField(product, field, locale)) return value;
+                if (hasLocaleProductField(product, field, locale)) return applyInlineTextFallbacks(value);
                 return applyInlineTextFallbacks(textFallback(value) || value);
             }
         }
@@ -571,9 +572,33 @@
 
     function productSeoTitle(product, name) {
         var localizedSeoTitle = isArabic ? '' : localize(product, 'seoTitle');
-        if (localizedSeoTitle) return localizedSeoTitle;
+        if (localizedSeoTitle) return cleanSeoTitle(localizedSeoTitle);
         var titleSuffix = detailLabel('titleSuffix');
-        return titleSuffix ? name + ' | ' + titleSuffix : name;
+        return cleanSeoTitle(titleSuffix ? name + ' | ' + titleSuffix : name);
+    }
+
+    function clipSeoText(value, maxLength) {
+        var textValue = String(value || '').replace(/\s+/g, ' ').trim();
+        var chars = Array.from(textValue);
+        if (chars.length <= maxLength) return textValue;
+        var clipped = chars.slice(0, Math.max(0, maxLength - 3)).join('').replace(/[\s,;:.-]+\S*$/, '').trim();
+        return (clipped || chars.slice(0, Math.max(0, maxLength - 3)).join('').trim()) + '...';
+    }
+
+    function cleanSeoTitle(value) {
+        var textValue = String(value || '').replace(/\s+/g, ' ').trim();
+        var maxLength = 90;
+        if (Array.from(textValue).length <= maxLength) return textValue;
+        var separator = ' | ';
+        var index = textValue.lastIndexOf(separator);
+        if (index > 0) {
+            var suffix = textValue.slice(index + separator.length);
+            var suffixLength = Array.from(suffix).length + separator.length;
+            if (suffixLength < maxLength - 24) {
+                return clipSeoText(textValue.slice(0, index), maxLength - suffixLength) + separator + suffix;
+            }
+        }
+        return clipSeoText(textValue, maxLength);
     }
 
     function cleanMetaDescription(value) {

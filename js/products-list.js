@@ -103,6 +103,11 @@
             productPagination: 'Пагинация продукции'
         }
     };
+    var INLINE_TEXT_FALLBACKS = {
+        fr: {
+            'Bo{ic}tier': 'Bo\u00eetier'
+        }
+    };
 
     var taxonomy = [];
 
@@ -119,6 +124,16 @@
         return new URLSearchParams(window.location.search).get(name);
     }
 
+    function applyInlineTextFallbacks(value) {
+        if (typeof value !== 'string' || !value) return value || '';
+        var replacements = INLINE_TEXT_FALLBACKS[locale] || {};
+        return Object.keys(replacements)
+            .sort(function (a, b) { return b.length - a.length; })
+            .reduce(function (textValue, key) {
+                return textValue.split(key).join(replacements[key]);
+            }, value);
+    }
+
     function setQueryParams(params) {
         var url = new URL(window.location.href);
         Object.keys(params).forEach(function (key) {
@@ -132,13 +147,13 @@
     function localize(product, field) {
         if (window.LongxiangI18n && window.LongxiangI18n.localized) {
             var value = window.LongxiangI18n.localized(product, field, locale);
-            if (value) return value;
+            if (value) return applyInlineTextFallbacks(value);
         }
         if (isArabic) {
             var arabicField = field + 'Ar';
             if (product[arabicField]) return product[arabicField];
         }
-        return product[field] || '';
+        return applyInlineTextFallbacks(product[field] || '');
     }
 
     function t(key) {
