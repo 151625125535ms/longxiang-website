@@ -578,16 +578,15 @@
                 if (el) el.addEventListener(pair[1], function () { clearFieldError(pair[0]); });
             });
 
-            var certificationShortcut = document.getElementById('product-cert-selector');
-            if (certificationShortcut) {
-                certificationShortcut.addEventListener('click', function (event) {
+            document.querySelectorAll('[data-product-editor-shortcuts]').forEach(function (container) {
+                container.addEventListener('click', function (event) {
                     var button = event.target && event.target.closest ? event.target.closest('[data-action]') : null;
                     if (!button) return;
                     var target = button.getAttribute('data-action') || '';
                     closeModal('product-modal', true);
                     if (target.indexOf('view-') === 0) switchView(target.slice(5));
                 });
-            }
+            });
         }
 
         function bindProductEditorNavigation() {

@@ -8,7 +8,7 @@
     <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png?v=20260615-lxdq">
     <link rel="stylesheet" href="css/admin-base.css?v=20260628-stage6">
     <link rel="stylesheet" href="css/admin-components.css?v=20260628-stage6">
-    <link rel="stylesheet" href="css/admin.css?v=20260705-product-completeness">
+    <link rel="stylesheet" href="css/admin.css?v=20260705-product-content-guidance">
 </head>
 <body>
     <div class="admin-layout" id="admin-page">
@@ -879,6 +879,7 @@
                             <button type="button" class="product-editor-nav-btn" data-product-editor-scroll="product-section-names">多语言名称</button>
                             <button type="button" class="product-editor-nav-btn" data-product-editor-scroll="product-section-copy">简介与详情</button>
                             <button type="button" class="product-editor-nav-btn" data-product-editor-scroll="product-section-specs">产品参数</button>
+                            <button type="button" class="product-editor-nav-btn" data-product-editor-scroll="product-section-structured">场景与 FAQ</button>
                             <button type="button" class="product-editor-nav-btn" data-product-editor-scroll="product-section-seo">SEO 信息</button>
                         </nav>
                         <div class="product-editor-grid">
@@ -964,6 +965,22 @@
                                     <div class="specs-list" id="specs-list"></div>
                                 </section>
 
+                                <section class="form-section product-form-section" id="product-section-structured">
+                                    <h3 class="form-section-title">应用场景与 FAQ</h3>
+                                    <div class="product-guidance-grid" data-product-editor-shortcuts>
+                                        <div class="product-guidance-card">
+                                            <strong>应用场景</strong>
+                                            <p>当前产品详情页的应用场景由产品分类和前台模板自动生成，尚未建立产品级独立字段。</p>
+                                            <span>如果需要按产品单独维护应用场景，需单独设计数据模型和迁移方案。</span>
+                                        </div>
+                                        <div class="product-guidance-card">
+                                            <strong>产品详情 FAQ</strong>
+                                            <p>当前 FAQ 属于“产品中心 > 详情页公共文案”，可在可视化管理里维护公共问答。</p>
+                                            <button class="btn btn-secondary btn-sm" type="button" data-action="view-visual-builder">打开可视化管理</button>
+                                        </div>
+                                    </div>
+                                </section>
+
                                 <section class="form-section product-form-section" id="product-section-seo">
                                     <h3 class="form-section-title">SEO 信息</h3>
                                     <div class="form-group"><label>SEO 标题</label><input type="text" id="field-seo-title" class="bidi-field" dir="auto"><span class="seo-length-hint" data-seo-count-for="field-seo-title"></span></div>
@@ -1014,7 +1031,7 @@
 
                                 <section class="form-section product-form-section">
                                     <h3 class="form-section-title">关联证书</h3>
-                                    <div class="relation-picker" id="product-cert-selector">
+                                    <div class="relation-picker" id="product-cert-selector" data-product-editor-shortcuts>
                                         <span>暂未关联证书</span>
                                         <button class="btn btn-secondary btn-sm" type="button" data-action="view-cert-qualifications">打开证书库</button>
                                     </div>
@@ -1264,7 +1281,7 @@
     <script src="js/admin-api.js?v=20260628-stage6"></script>
     <script src="js/admin-ui.js?v=20260628-stage6"></script>
     <script src="js/modules/admin-inquiries.js?v=20260628-stage7b1"></script>
-    <script src="js/modules/admin-products.js?v=20260705-product-completeness"></script>
+    <script src="js/modules/admin-products.js?v=20260705-product-content-guidance"></script>
     <script src="js/admin.js?v=20260704-fr-ru-patch-builder"></script>
 </body>
 </html>
