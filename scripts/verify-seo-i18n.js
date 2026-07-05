@@ -828,9 +828,13 @@ function verifyStaticHtmlRuntimeCacheVersions() {
 }
 
 function verifyPublicApiI18nFieldMapping() {
-    const productsSource = readText('server/routes/products.js');
+    const productsRouteSource = readText('server/routes/products.js');
+    const productsSource = productsRouteSource + '\n' + readText('server/lib/publicProducts.js');
     const categoriesSource = readText('server/routes/product-categories.js');
     const certificationsSource = readText('server/routes/certifications.js');
+
+    assertSourceContains(productsRouteSource, /readPublicProducts\s*\(/, 'server/routes/products.js 应复用 server/lib/publicProducts.js 的公开产品列表读取。');
+    assertSourceContains(productsRouteSource, /readPublicProduct\s*\(/, 'server/routes/products.js 应复用 server/lib/publicProducts.js 的公开产品详情读取。');
 
     [
         'nameFr', 'nameRu',
@@ -843,7 +847,7 @@ function verifyPublicApiI18nFieldMapping() {
         'groupLabelFr', 'groupLabelRu',
         'subCategoryLabelFr', 'subCategoryLabelRu'
     ].forEach((field) => {
-        assertSourceContains(productsSource, new RegExp('\\b' + field + '\\b'), 'server/routes/products.js 缺少公开产品字段：' + field + '。');
+        assertSourceContains(productsSource, new RegExp('\\b' + field + '\\b'), 'server/lib/publicProducts.js 缺少公开产品字段：' + field + '。');
     });
 
     ['labelFr', 'labelRu'].forEach((field) => {

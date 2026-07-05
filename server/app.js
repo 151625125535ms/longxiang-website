@@ -17,6 +17,8 @@ const adminRoutes = require('./routes/admin/index');
 const { ensureDirectory, resolveUploadDir } = require('./lib/fileStore');
 const { getDb } = require('./lib/db');
 const { ensureContentBlockSeeds } = require('./lib/contentBlockSeeds');
+const { readPublicProduct } = require('./lib/publicProducts');
+const { renderProductDetailSeoHtml } = require('./lib/productDetailSeoRenderer');
 const { buildSitemap } = require('../scripts/generate-sitemap');
 const {
     localeForRequestPath,
@@ -175,51 +177,6 @@ app.get('/sitemap.xml', function (req, res, next) {
     }
 });
 
-function parseJsonArray(value) {
-    try {
-        const parsed = JSON.parse(value || '[]');
-        return Array.isArray(parsed) ? parsed : [];
-    } catch (err) {
-        return [];
-    }
-}
-
-function activeProductExists(identifier) {
-    const db = getDb();
-    const direct = db.prepare(`
-        SELECT p.id
-        FROM products p
-        LEFT JOIN categories c ON c.id = p.category_id
-        LEFT JOIN categories parent ON parent.id = c.parent_id
-        WHERE p.status = 'published'
-            AND p.category_id IS NOT NULL
-            AND c.id IS NOT NULL
-            AND c.is_active = 1
-            AND (c.parent_id IS NULL OR parent.is_active = 1)
-            AND (p.slug = ? OR p.legacy_id = ?)
-        LIMIT 1
-    `).get(identifier, identifier);
-    if (direct) return true;
-
-    const rows = db.prepare(`
-        SELECT p.aliases_json
-        FROM products p
-        LEFT JOIN categories c ON c.id = p.category_id
-        LEFT JOIN categories parent ON parent.id = c.parent_id
-        WHERE p.status = 'published'
-            AND p.category_id IS NOT NULL
-            AND c.id IS NOT NULL
-            AND c.is_active = 1
-            AND (c.parent_id IS NULL OR parent.is_active = 1)
-            AND p.aliases_json IS NOT NULL
-            AND p.aliases_json != ''
-    `).all();
-
-    return rows.some(function (row) {
-        return parseJsonArray(row.aliases_json).indexOf(identifier) !== -1;
-    });
-}
-
 function sendHtmlShell(res, next, filePath, baseHref, statusCode) {
     fs.readFile(filePath, 'utf8', function (err, html) {
         if (err) return next(err);
@@ -231,6 +188,24 @@ function sendHtmlShell(res, next, filePath, baseHref, statusCode) {
     });
 }
 
+function sendHtmlString(res, html, statusCode) {
+    res.status(statusCode || 200);
+    res.type('html');
+    res.setHeader('Cache-Control', 'public, max-age=300');
+    res.send(html);
+}
+
+function requestOrigin(req) {
+    const host = String(req.get('host') || '').toLowerCase().split(':')[0];
+    if (host === 'www.lxenelectric.com' || host === 'lxenelectric.com') {
+        return 'https://www.lxenelectric.com';
+    }
+    const forwardedProto = String(req.get('x-forwarded-proto') || '').split(',')[0].trim();
+    const protocol = forwardedProto || req.protocol || 'http';
+    const requestHost = req.get('host') || '127.0.0.1:' + PORT;
+    return protocol + '://' + requestHost;
+}
+
 function sendNotFoundShell(req, res, next) {
     const shell = notFoundShellForRequestPath(req.path);
     sendHtmlShell(res, next, shell.filePath, shell.baseHref, 404);
@@ -240,14 +215,21 @@ function sendProductDetailShell(req, res, next) {
     const locale = localeForRequestPath(req.path);
     const filePath = localizedHtmlShellPath('product-detail.html', locale);
     const identifier = String(req.params.slug || '').trim();
+    let product = null;
     try {
-        if (!identifier || !activeProductExists(identifier)) {
+        product = identifier ? readPublicProduct(identifier) : null;
+        if (!product) {
             return sendNotFoundShell(req, res, next);
         }
     } catch (err) {
         return next(err);
     }
-    sendHtmlShell(res, next, filePath, baseHrefForLocale(locale), 200);
+    fs.readFile(filePath, 'utf8', function (err, html) {
+        if (err) return next(err);
+        const withBase = html.replace(/<head>/i, '<head>\n    <base href="' + baseHrefForLocale(locale) + '">');
+        const withSeo = renderProductDetailSeoHtml(withBase, product, locale, requestOrigin(req));
+        sendHtmlString(res, withSeo, 200);
+    });
 }
 
 app.get(productDetailRoutePatterns(), sendProductDetailShell);
