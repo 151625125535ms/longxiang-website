@@ -406,7 +406,7 @@ function buildListQuery(query) {
 
     const q = String(query.q || '').trim();
     if (q) {
-        where.push('(p.name_en LIKE @q OR p.name_ar LIKE @q)');
+        where.push('(p.name_en LIKE @q OR p.name_ar LIKE @q OR p.name_fr LIKE @q OR p.name_ru LIKE @q OR p.name_cn LIKE @q OR p.model LIKE @q OR p.legacy_id LIKE @q OR p.slug LIKE @q)');
         params.q = '%' + q + '%';
     }
 
@@ -435,7 +435,7 @@ router.get('/', function (req, res, next) {
 
         const rows = db.prepare(`
             SELECT
-                p.id, p.legacy_id, p.slug, p.category_id, c.name_en AS category_name_en,
+                p.id, p.legacy_id, p.slug, p.name_cn, p.model, p.category_id, c.name_en AS category_name_en,
                 p.product_group, p.sub_category, p.status, p.sort_order, p.featured,
                 p.name_en, p.name_ar, p.name_fr, p.name_ru,
                 p.short_desc_en, p.short_desc_ar, p.short_desc_fr, p.short_desc_ru,
@@ -611,7 +611,7 @@ router.post('/', function (req, res, next) {
             const result = db.prepare(`
                 INSERT INTO products
                     (
-                        legacy_id, slug, category_id, product_group, sub_category, aliases_json,
+                        legacy_id, slug, name_cn, model, category_id, product_group, sub_category, aliases_json,
                         status, sort_order, featured, views,
                         name_en, name_ar, name_fr, name_ru,
                         short_desc_en, short_desc_ar, short_desc_fr, short_desc_ru,
@@ -623,7 +623,7 @@ router.post('/', function (req, res, next) {
                     )
                 VALUES
                     (
-                        @legacy_id, @slug, @category_id, @product_group, @sub_category, @aliases_json,
+                        @legacy_id, @slug, @name_cn, @model, @category_id, @product_group, @sub_category, @aliases_json,
                         @status, @sort_order, @featured, 0,
                         @name_en, @name_ar, @name_fr, @name_ru,
                         @short_desc_en, @short_desc_ar, @short_desc_fr, @short_desc_ru,
@@ -636,6 +636,8 @@ router.post('/', function (req, res, next) {
             `).run({
                 legacy_id: legacyId,
                 slug,
+                name_cn: body.name_cn ? String(body.name_cn).trim() : '',
+                model: body.model ? String(body.model).trim() : '',
                 category_id: categoryMapping.categoryId,
                 product_group: categoryMapping.productGroup,
                 sub_category: categoryMapping.subCategory,
@@ -736,6 +738,8 @@ router.put('/:id', function (req, res, next) {
                     status = @status,
                     sort_order = @sort_order,
                     featured = @featured,
+                    name_cn = @name_cn,
+                    model = @model,
                     name_en = @name_en,
                     name_ar = @name_ar,
                     name_fr = @name_fr,
@@ -769,6 +773,8 @@ router.put('/:id', function (req, res, next) {
                 status,
                 sort_order: body.sort_order == null ? before.sort_order : parseInteger(body.sort_order, before.sort_order),
                 featured: body.featured == null ? before.featured : normalizeBool(body.featured, before.featured),
+                name_cn: body.name_cn == null ? before.name_cn : String(body.name_cn).trim(),
+                model: body.model == null ? before.model : String(body.model).trim(),
                 name_en: body.name_en == null ? before.name_en : firstText(body.name_en, body.name_ar, before.name_en, before.legacy_id),
                 name_ar: body.name_ar == null ? before.name_ar : String(body.name_ar).trim(),
                 name_fr: body.name_fr == null ? before.name_fr : String(body.name_fr).trim(),

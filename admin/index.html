@@ -886,7 +886,8 @@
                                 <section class="form-section product-form-section" id="product-section-basic">
                                     <h3 class="form-section-title">基础信息</h3>
                                     <div class="form-row">
-                                        <div class="form-group"><label>产品编号 / 型号识别</label><input type="text" id="field-id" placeholder="留空自动生成"><p class="form-help-text">当前没有独立型号字段，已有产品不开放编号修改；列表型号由产品编号、URL 或 ID 兜底显示。</p></div>
+                                        <div class="form-group"><label>产品编号 / URL 识别</label><input type="text" id="field-id" placeholder="留空自动生成"><p class="form-help-text">已有产品不开放编号修改；该字段关联后台识别与前台 URL。</p></div>
+                                        <div class="form-group"><label>产品型号</label><input type="text" id="field-model" placeholder="例如 LXAC-14KW"><p class="form-help-text">仅用于后台识别和列表展示，不改变产品编号、URL 或前台路由。</p></div>
                                         <div class="form-group">
                                             <label>分类 <span class="required">*</span></label>
                                             <select id="field-category">
@@ -912,7 +913,7 @@
                                 <section class="form-section product-form-section" id="product-section-names">
                                     <h3 class="form-section-title">多语言名称</h3>
                                     <div class="form-row">
-                                        <div class="form-group"><label>中文名称</label><input type="text" id="field-nameCn" placeholder="当前数据库未建中文名称字段" readonly><p class="form-help-text">只读识别信息，本阶段不新增中文名称保存能力。</p></div>
+                                        <div class="form-group"><label>中文名称</label><input type="text" id="field-nameCn" placeholder="用于后台识别，可留空"><p class="form-help-text">仅用于后台管理识别，不改变前台多语言页面内容。</p></div>
                                         <div class="form-group"><label>英文名称 <span class="required">*</span></label><input type="text" id="field-name"></div>
                                     </div>
                                     <div class="form-group"><label>阿拉伯语名称</label><input type="text" id="field-nameAr" class="rtl-field" dir="rtl" lang="ar"></div>
@@ -1250,7 +1251,7 @@
     <script src="js/admin-api.js?v=20260628-stage6"></script>
     <script src="js/admin-ui.js?v=20260628-stage6"></script>
     <script src="js/modules/admin-inquiries.js?v=20260628-stage7b1"></script>
-    <script src="js/modules/admin-products.js?v=20260705-product-editor-stage1"></script>
+    <script src="js/modules/admin-products.js?v=20260705-product-basic-fields"></script>
     <script src="js/admin.js?v=20260704-fr-ru-patch-builder"></script>
 </body>
 </html>

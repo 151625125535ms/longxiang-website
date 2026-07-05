@@ -198,7 +198,7 @@
             tbody.innerHTML = products.map(function (product) {
                 var productId = product.id;
                 var displayId = product.legacy_id || product.slug || product.id;
-                var chineseName = adminProductNameCn(product);
+                var chineseName = product.name_cn || adminProductNameCn(product);
                 var name = product.name_en || product.name || '';
                 var model = product.model || product.legacy_id || product.slug || product.id || '—';
                 var categoryName = product.category_name || product.category_name_en || product.category || '—';
@@ -536,7 +536,8 @@
         function fillProductForm(product) {
             var fields = {
                 'field-id': product.legacy_id || product.slug || product.id || '',
-                'field-nameCn': adminProductNameCn(product),
+                'field-model': product.model || '',
+                'field-nameCn': product.name_cn || adminProductNameCn(product),
                 'field-name': product.name_en || '',
                 'field-nameAr': product.name_ar || '',
                 'field-nameFr': product.name_fr || '',
@@ -839,6 +840,8 @@
 
             var payload = {
                 legacy_id: id,
+                model: getFieldValue('field-model'),
+                name_cn: getFieldValue('field-nameCn'),
                 name_en: name || nameAr,
                 name_ar: nameAr,
                 name_fr: getFieldValue('field-nameFr'),
