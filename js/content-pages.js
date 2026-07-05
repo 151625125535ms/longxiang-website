@@ -792,6 +792,18 @@
                 canonicalPath: '/compare.html'
             };
         }
+        if (pageSlug === 'compare' && locale === 'ar') {
+            return {
+                description: 'قارن نماذج معدات الطاقة المختارة من Longxiang جنباً إلى جنب، وراجع الفئات والمواصفات الأساسية قبل اختيار التكوين المناسب لمشروعك.',
+                canonicalPath: '/compare.html'
+            };
+        }
+        if (pageSlug === 'certifications' && locale === 'ar') {
+            return {
+                description: 'استعرض شهادات الجودة والاعتمادات الفنية وبراءات الاختراع ووثائق التأهيل الخاصة بشركة Henan Longxiang Electrical لدعم مراجعة المشروعات والتوريد.',
+                canonicalPath: '/certifications.html'
+            };
+        }
         if (pageSlug === 'contact' && (locale === 'fr' || locale === 'ru')) {
             return {
                 title: pageTextFallback('contactSeoTitle'),
@@ -849,6 +861,9 @@
         var description = localized(seo, 'description');
         if (shouldUseDefaultSeo(title, defaults.title)) title = defaults.title;
         if (shouldUseDefaultSeo(description, defaults.description)) description = defaults.description;
+        if (defaults.description && Array.from(String(description || '').trim()).length < 50) {
+            description = defaults.description;
+        }
         title = cleanSeoTitle(title);
         description = cleanMetaDescription(description);
         var image = seo.image || (hero && hero.backgroundImage);
