@@ -37,10 +37,60 @@ function validateInquiry(inquiry) {
     return errors;
 }
 
+function firstHeaderValue(req, name) {
+    const value = req.get ? req.get(name) : req.headers[String(name).toLowerCase()];
+    if (Array.isArray(value)) return value[0] || '';
+    return value == null ? '' : String(value);
+}
+
+function normalizeIpValue(value) {
+    const ip = String(value || '').split(',')[0].trim();
+    return ip.replace(/^::ffff:/i, '');
+}
+
 function getClientIp(req) {
-    const forwarded = req.headers['x-forwarded-for'];
-    if (forwarded) return String(forwarded).split(',')[0].trim();
-    return req.socket && req.socket.remoteAddress ? req.socket.remoteAddress : '';
+    const candidates = [
+        firstHeaderValue(req, 'cf-connecting-ip'),
+        firstHeaderValue(req, 'x-forwarded-for'),
+        firstHeaderValue(req, 'x-real-ip'),
+        req.ip,
+        req.socket && req.socket.remoteAddress
+    ];
+
+    for (const candidate of candidates) {
+        const ip = normalizeIpValue(candidate);
+        if (ip) return ip;
+    }
+    return '';
+}
+
+function normalizeCountryCode(value) {
+    const code = String(value || '').trim().toUpperCase();
+    if (!/^[A-Z]{2}$/.test(code) || code === 'XX') return '';
+    return code;
+}
+
+function formatCountryCode(code) {
+    if (!code) return '';
+    try {
+        if (typeof Intl !== 'undefined' && Intl.DisplayNames) {
+            const regionNames = new Intl.DisplayNames(['en'], { type: 'region' });
+            const name = regionNames.of(code);
+            if (name && name !== code) return name + ' (' + code + ')';
+        }
+    } catch (err) {
+        // Fall through to storing the stable two-letter country code.
+    }
+    return code;
+}
+
+function getCloudflareCountry(req) {
+    return formatCountryCode(normalizeCountryCode(firstHeaderValue(req, 'cf-ipcountry')));
+}
+
+function resolveInquiryCountry(req, submittedCountry) {
+    const country = String(submittedCountry || '').trim();
+    return country || getCloudflareCountry(req);
 }
 
 function buildStoredProductContext(inquiry) {
@@ -165,7 +215,11 @@ router.post('/', async function (req, res) {
         }
 
         const now = Date.now();
-        const ip = req.ip || getClientIp(req);
+        const ip = getClientIp(req);
+        const storedInquiry = {
+            ...normalized,
+            country: resolveInquiryCountry(req, normalized.country)
+        };
         const userAgent = String(req.headers['user-agent'] || '');
         const result = getDb().prepare(`
             INSERT INTO inquiries
@@ -181,14 +235,14 @@ router.post('/', async function (req, res) {
                     NULL, NULL, @created_at, @updated_at
                 )
         `).run({
-            name: normalized.name,
-            email: normalized.email,
-            company: normalized.company,
-            phone: normalized.phone,
-            country: normalized.country,
-            subject: normalized.subject,
-            message: normalized.message,
-            product_context: buildStoredProductContext(normalized),
+            name: storedInquiry.name,
+            email: storedInquiry.email,
+            company: storedInquiry.company,
+            phone: storedInquiry.phone,
+            country: storedInquiry.country,
+            subject: storedInquiry.subject,
+            message: storedInquiry.message,
+            product_context: buildStoredProductContext(storedInquiry),
             ip,
             user_agent: userAgent,
             created_at: now,
@@ -205,7 +259,7 @@ router.post('/', async function (req, res) {
         let notification = { sent: false, reason: 'not_attempted' };
         try {
             notification = await sendNotification({
-                ...normalized,
+                ...storedInquiry,
                 ip,
                 createdAt
             });
