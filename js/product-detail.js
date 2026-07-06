@@ -870,36 +870,26 @@
         if (sidebar) sidebar.style.display = 'none';
     }
 
-    function injectProductSchema(product, name, desc, canonicalUrl) {
+    function injectProductPageSchema(product, name, desc, canonicalUrl) {
+        var oldProductSchema = document.querySelector('script[data-schema-auto="product"]');
+        if (oldProductSchema) oldProductSchema.remove();
         var schema = {
             '@context': 'https://schema.org',
-            '@type': 'Product',
+            '@type': 'WebPage',
             name: name,
             description: desc,
-            image: absoluteImageUrl(product.image),
-            sku: product.id || product.slug || '',
             url: canonicalUrl,
-            category: product.categoryLabel || product.category
+            inLanguage: locale,
+            isPartOf: {
+                '@type': 'WebSite',
+                name: detailLabel('titleSuffix'),
+                url: window.location.origin + '/'
+            }
         };
-        var schemaSpecs = displaySpecRows(product);
-        if (schemaSpecs.length) {
-            schema.additionalProperty = schemaSpecs.slice(0, 12).map(function (spec) {
-                return {
-                    '@type': 'PropertyValue',
-                    name: translatedSpecLabel(spec[0]),
-                    value: spec[1]
-                };
-            });
-        }
-        var brandName = detailLabel('schemaBrand');
-        if (brandName) {
-            schema.brand = {
-                '@type': 'Brand',
-                name: brandName
-            };
-        }
+        var image = absoluteImageUrl(product.image);
+        if (image) schema.primaryImageOfPage = image;
 
-        injectJsonLd('product', schema);
+        injectJsonLd('product-page', schema);
         injectJsonLd('product-breadcrumb', {
             '@context': 'https://schema.org',
             '@type': 'BreadcrumbList',
@@ -989,7 +979,7 @@
             button.setAttribute('data-product-name', name);
         });
 
-        injectProductSchema(product, name, desc, canonicalUrl);
+        injectProductPageSchema(product, name, desc, canonicalUrl);
         loadRelatedProducts(product);
     }
 

@@ -147,6 +147,7 @@ function inspectRawHtml(url, html) {
     const jsonLdEntries = jsonLdEntriesFromHtml(html);
     const failures = [];
     const schemas = parseJsonLd(jsonLdEntries, url, failures, 'RAW');
+    const pageSchema = firstSchemaByType(schemas, 'WebPage');
     const productSchema = firstSchemaByType(schemas, 'Product');
     const breadcrumbSchema = firstSchemaByType(schemas, 'BreadcrumbList');
     const canonical = canonicalLinks[0] ? normalizeUrl(canonicalLinks[0].href, url) : '';
@@ -159,15 +160,16 @@ function inspectRawHtml(url, html) {
     REQUIRED_HREFLANGS.forEach((lang) => {
         if (!alternates[lang]) failures.push({ severity: 'Critical', code: 'RAW_MISSING_HREFLANG', url, detail: lang });
     });
-    if (!productSchema) failures.push({ severity: 'Critical', code: 'RAW_MISSING_PRODUCT_SCHEMA', url });
+    if (!pageSchema) failures.push({ severity: 'Critical', code: 'RAW_MISSING_WEBPAGE_SCHEMA', url });
     if (!breadcrumbSchema) failures.push({ severity: 'Critical', code: 'RAW_MISSING_BREADCRUMB_SCHEMA', url });
+    if (pageSchema && pageSchema.url && normalizeUrl(pageSchema.url, url) !== canonical) {
+        failures.push({ severity: 'Important', code: 'RAW_WEBPAGE_SCHEMA_URL_MISMATCH', url, detail: pageSchema.url });
+    }
     if (productSchema) {
+        failures.push({ severity: 'Critical', code: 'RAW_PRODUCT_SCHEMA_EXPOSED', url });
         productHighRiskFields(productSchema).forEach((field) => {
             failures.push({ severity: 'Critical', code: 'RAW_PRODUCT_HIGH_RISK_FIELD', url, detail: field });
         });
-        if (productSchema.url && normalizeUrl(productSchema.url, url) !== canonical) {
-            failures.push({ severity: 'Important', code: 'RAW_PRODUCT_SCHEMA_URL_MISMATCH', url, detail: productSchema.url });
-        }
     }
     if (containsPtExposure({ canonical, alternates, schemas })) {
         failures.push({ severity: 'Critical', code: 'RAW_PT_EXPOSURE', url });
@@ -178,6 +180,7 @@ function inspectRawHtml(url, html) {
         description: rawMetaContent(html, 'description'),
         canonical,
         alternates,
+        pageSchema: Boolean(pageSchema),
         productSchema: Boolean(productSchema),
         breadcrumbSchema: Boolean(breadcrumbSchema),
         failures
@@ -215,10 +218,10 @@ async function inspectRendered(browser, url, raw) {
         });
         await page.waitForFunction(() => {
             const h1 = document.querySelector('h1');
-            const productSchema = document.querySelector('script[data-schema-auto="product"]');
+            const pageSchema = document.querySelector('script[data-schema-auto="product-page"]');
             let schemaName = '';
             try {
-                schemaName = productSchema ? String(JSON.parse(productSchema.textContent || '{}').name || '').trim() : '';
+                schemaName = pageSchema ? String(JSON.parse(pageSchema.textContent || '{}').name || '').trim() : '';
             } catch (err) {
                 schemaName = '';
             }
@@ -270,6 +273,7 @@ async function inspectRendered(browser, url, raw) {
 function inspectRenderedResult(url, raw, rendered) {
     const failures = [];
     const schemas = parseJsonLd(rendered.jsonLd || [], url, failures, 'RENDERED');
+    const pageSchema = firstSchemaByType(schemas, 'WebPage');
     const productSchema = firstSchemaByType(schemas, 'Product');
     const breadcrumbSchema = firstSchemaByType(schemas, 'BreadcrumbList');
     const alternates = hrefMap(rendered.alternates || [], url);
@@ -289,9 +293,13 @@ function inspectRenderedResult(url, raw, rendered) {
             failures.push({ severity: 'Important', code: 'RAW_RENDERED_HREFLANG_MISMATCH', url, detail: lang });
         }
     });
-    if (!productSchema) failures.push({ severity: 'Critical', code: 'RENDERED_MISSING_PRODUCT_SCHEMA', url });
+    if (!pageSchema) failures.push({ severity: 'Critical', code: 'RENDERED_MISSING_WEBPAGE_SCHEMA', url });
     if (!breadcrumbSchema) failures.push({ severity: 'Critical', code: 'RENDERED_MISSING_BREADCRUMB_SCHEMA', url });
+    if (pageSchema && pageSchema.url && normalizeUrl(pageSchema.url, url) !== canonical) {
+        failures.push({ severity: 'Important', code: 'RENDERED_WEBPAGE_SCHEMA_URL_MISMATCH', url, detail: pageSchema.url });
+    }
     if (productSchema) {
+        failures.push({ severity: 'Critical', code: 'RENDERED_PRODUCT_SCHEMA_EXPOSED', url });
         productHighRiskFields(productSchema).forEach((field) => {
             failures.push({ severity: 'Critical', code: 'RENDERED_PRODUCT_HIGH_RISK_FIELD', url, detail: field });
         });
@@ -306,6 +314,7 @@ function inspectRenderedResult(url, raw, rendered) {
         h1: rendered.h1,
         canonical,
         alternates,
+        pageSchema: Boolean(pageSchema),
         productSchema: Boolean(productSchema),
         breadcrumbSchema: Boolean(breadcrumbSchema),
         failures
@@ -381,10 +390,12 @@ async function main() {
         baseUrl,
         productDetailUrlCount: urls.length,
         expectedCount,
+        rawWebPageSchemaCount: results.filter((item) => item.raw && item.raw.pageSchema).length,
         rawProductSchemaCount: results.filter((item) => item.raw && item.raw.productSchema).length,
         rawBreadcrumbSchemaCount: results.filter((item) => item.raw && item.raw.breadcrumbSchema).length,
         rawCanonicalCount: results.filter((item) => item.raw && item.raw.canonical).length,
         rawHreflangCompleteCount: results.filter((item) => item.raw && REQUIRED_HREFLANGS.every((lang) => item.raw.alternates[lang])).length,
+        renderedWebPageSchemaCount: results.filter((item) => item.rendered && item.rendered.pageSchema).length,
         renderedProductSchemaCount: results.filter((item) => item.rendered && item.rendered.productSchema).length,
         renderedBreadcrumbSchemaCount: results.filter((item) => item.rendered && item.rendered.breadcrumbSchema).length,
         renderedCanonicalCount: results.filter((item) => item.rendered && item.rendered.canonical).length,
@@ -396,9 +407,11 @@ async function main() {
     console.log('Product detail URL count: ' + summary.productDetailUrlCount);
     console.log('Raw canonical: ' + summary.rawCanonicalCount + '/' + summary.productDetailUrlCount);
     console.log('Raw complete hreflang: ' + summary.rawHreflangCompleteCount + '/' + summary.productDetailUrlCount);
-    console.log('Raw Product Schema: ' + summary.rawProductSchemaCount + '/' + summary.productDetailUrlCount);
+    console.log('Raw WebPage Schema: ' + summary.rawWebPageSchemaCount + '/' + summary.productDetailUrlCount);
+    console.log('Raw Product Schema exposures: ' + summary.rawProductSchemaCount);
     console.log('Raw BreadcrumbList: ' + summary.rawBreadcrumbSchemaCount + '/' + summary.productDetailUrlCount);
-    console.log('Rendered Product Schema: ' + summary.renderedProductSchemaCount + '/' + summary.productDetailUrlCount);
+    console.log('Rendered WebPage Schema: ' + summary.renderedWebPageSchemaCount + '/' + summary.productDetailUrlCount);
+    console.log('Rendered Product Schema exposures: ' + summary.renderedProductSchemaCount);
     console.log('Rendered BreadcrumbList: ' + summary.renderedBreadcrumbSchemaCount + '/' + summary.productDetailUrlCount);
     console.log('Failures: ' + failures.length);
 

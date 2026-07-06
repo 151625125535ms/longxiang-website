@@ -103,44 +103,24 @@ function absoluteUrl(value, origin) {
     }
 }
 
-function productCategory(product, localeCode) {
-    return localizedProductValue(product, 'subCategoryLabel', localeCode)
-        || localizedProductValue(product, 'categoryLabel', localeCode)
-        || localizedProductValue(product, 'groupLabel', localeCode)
-        || String(product && product.category || '').trim();
-}
-
-function productJsonLd(product, localeCode, canonicalUrl, origin) {
+function productPageJsonLd(product, localeCode, canonicalUrl, origin) {
     const name = localizedProductValue(product, 'name', localeCode) || localizedProductValue(product, 'name', 'en');
     const description = productSeoDescription(product, localeCode);
     const schema = {
         '@context': 'https://schema.org',
-        '@type': 'Product',
+        '@type': 'WebPage',
         name,
         description,
-        sku: product && (product.id || product.slug) || '',
         url: canonicalUrl,
-        category: productCategory(product, localeCode)
+        inLanguage: localeCode,
+        isPartOf: {
+            '@type': 'WebSite',
+            name: TITLE_SUFFIX,
+            url: origin + '/'
+        }
     };
     const image = absoluteUrl(product && product.image, origin);
-    if (image) schema.image = image;
-    schema.brand = {
-        '@type': 'Brand',
-        name: TITLE_SUFFIX
-    };
-
-    const specs = Array.isArray(product && product.specs) ? product.specs : [];
-    if (specs.length) {
-        schema.additionalProperty = specs.slice(0, 12).filter(function (spec) {
-            return Array.isArray(spec) && (spec[0] || spec[1]);
-        }).map(function (spec) {
-            return {
-                '@type': 'PropertyValue',
-                name: String(spec[0] || '').trim(),
-                value: String(spec[1] || '').trim()
-            };
-        });
-    }
+    if (image) schema.primaryImageOfPage = image;
     return schema;
 }
 
@@ -203,6 +183,7 @@ function stripManagedHeadTags(html) {
         .replace(/<meta\b[^>]*(?:name|property)=["']og:[^"']+["'][^>]*>\s*/gi, '')
         .replace(/<meta\b[^>]*(?:name|property)=["']twitter:[^"']+["'][^>]*>\s*/gi, '')
         .replace(/<script\b[^>]*data-schema-auto=["']product["'][^>]*>[\s\S]*?<\/script>\s*/gi, '')
+        .replace(/<script\b[^>]*data-schema-auto=["']product-page["'][^>]*>[\s\S]*?<\/script>\s*/gi, '')
         .replace(/<script\b[^>]*data-schema-auto=["']product-breadcrumb["'][^>]*>[\s\S]*?<\/script>\s*/gi, '');
 }
 
@@ -219,7 +200,7 @@ function renderProductDetailSeoHtml(html, product, locale, origin) {
     const title = productSeoTitle(product, localeCode);
     const description = productSeoDescription(product, localeCode);
     const image = absoluteUrl(product && product.image, origin);
-    const productSchema = productJsonLd(product, localeCode, canonicalUrl, origin);
+    const pageSchema = productPageJsonLd(product, localeCode, canonicalUrl, origin);
     const breadcrumbSchema = productBreadcrumbJsonLd(product, localeCode, canonicalUrl, origin);
 
     const seoTags = [
@@ -241,7 +222,7 @@ function renderProductDetailSeoHtml(html, product, locale, origin) {
         seoTags.push(linkTag('alternate', { hreflang: entry.hreflang, href: urls[entry.code] }));
     });
     seoTags.push(linkTag('alternate', { hreflang: 'x-default', href: urls[defaultLocale.code] }));
-    seoTags.push('<script type="application/ld+json" data-schema-auto="product">' + jsonScriptValue(productSchema) + '</script>');
+    seoTags.push('<script type="application/ld+json" data-schema-auto="product-page">' + jsonScriptValue(pageSchema) + '</script>');
     seoTags.push('<script type="application/ld+json" data-schema-auto="product-breadcrumb">' + jsonScriptValue(breadcrumbSchema) + '</script>');
 
     const cleaned = stripManagedHeadTags(html).replace(/<title>[\s\S]*?<\/title>\s*/i, '');
@@ -257,7 +238,7 @@ module.exports = {
     cleanMetaDescription,
     productSeoTitle,
     productSeoDescription,
-    productJsonLd,
+    productPageJsonLd,
     productBreadcrumbJsonLd,
     renderProductDetailSeoHtml
 };
