@@ -13,6 +13,7 @@
 - 生产服务器工作区：`git status --short` 为空
 - 本地未跟踪噪音：`.tmp/`、`chanpince/`，按项目规则默认不处理
 - 禁止同步方向：不得执行 `git push longxiang`；服务器只允许 `git pull origin main`
+- 2026-07-08 产品图片资源关联修复代码提交：`8690b6b`（`补充产品图片资源关联修复入口`）已推送 GitHub 并由生产服务器 `git pull origin main` 拉取；本次只部署脚本、审计口径和运维文档，未执行生产数据库 `--apply`。
 
 ## 运行环境
 
@@ -121,6 +122,7 @@
 - 产品媒体资源关联 apply：`npm run images:repair-product-links -- --apply`
 - 产品媒体资源关联验证：`npm run images:verify-product-links`
 - 该入口只补产品图片链路的 `assets`、`product_media.asset_id` 和产品 owner 的 `asset_references`；生产执行 `--apply` 属于数据库写入，必须先 dry-run、确认备份、说明回滚与验证方式，并取得明确确认。
+- 2026-07-08 生产 dry-run 结果：`product_media.asset_id IS NULL=1/53`，`product_media missing active asset paths=1`，缺口文件为 `/home/ubuntu/longxiang-website/成品区/干式非晶三相三柱 .png` 且 `file_exists=true`，受影响 owner 为产品 `12`；`product asset_references missing=0`，`stale product asset_references=0`。未执行生产 `--apply`。
 
 ## 备份与监控
 
