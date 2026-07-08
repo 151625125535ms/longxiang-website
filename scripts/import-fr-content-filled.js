@@ -16,10 +16,10 @@ const stageDir = path.join(homeDir || root, 'Desktop', 'new', 'stage');
 const defaultDbPath = process.env.DB_PATH
     ? (path.isAbsolute(process.env.DB_PATH) ? process.env.DB_PATH : path.join(root, process.env.DB_PATH))
     : path.join(root, 'data', 'longxiang.db');
+const localeConfigPath = path.join(root, 'config', 'locales.json');
 const requiredCollections = ['productCategories', 'products', 'certifications', 'staticPages', 'contentBlocks'];
 const defaultLocale = 'fr';
-const importableLocales = ['fr', 'ru'];
-const knownLocaleCodes = ['en', 'ar', 'fr', 'ru', 'pt'];
+const sourceLocales = ['en', 'ar'];
 let targetLocale = defaultLocale;
 let collectionSpecs = buildCollectionSpecs(targetLocale);
 
@@ -80,8 +80,9 @@ function buildCollectionSpecs(locale) {
 
 function configureTargetLocale(locale) {
     targetLocale = String(locale || defaultLocale).trim().toLowerCase();
+    const importableLocales = localeMetadata().importableLocales;
     if (!importableLocales.includes(targetLocale)) {
-        throw new Error('Unsupported import locale: ' + targetLocale + '. Allowed: ' + importableLocales.join(', ') + '.');
+        throw new Error('Unsupported import locale: ' + targetLocale + '. Allowed active content targets: ' + importableLocales.join(', ') + '.');
     }
     collectionSpecs = buildCollectionSpecs(targetLocale);
 }
@@ -147,6 +148,10 @@ function arraysEqual(actual, expected) {
     return JSON.stringify(actual) === JSON.stringify(expected);
 }
 
+function unique(values) {
+    return Array.from(new Set(values));
+}
+
 function hasOwn(object, key) {
     return Object.prototype.hasOwnProperty.call(object || {}, key);
 }
@@ -157,6 +162,25 @@ function hasText(value) {
 
 function readJsonFile(filePath) {
     return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+}
+
+function localeMetadata() {
+    const config = readJsonFile(localeConfigPath);
+    const supportedLocales = Array.isArray(config.supportedLocales) ? config.supportedLocales : [];
+    const activeLocaleCodes = Object.keys(config.locales || {});
+    const plannedOnlyLocales = Object.keys(config.plannedLocales || {});
+    const importableLocales = supportedLocales.filter((code) => {
+        return sourceLocales.indexOf(code) === -1 && config.locales && config.locales[code];
+    });
+
+    return {
+        config,
+        supportedLocales,
+        activeLocaleCodes,
+        plannedOnlyLocales,
+        importableLocales,
+        knownLocaleCodes: unique(supportedLocales.concat(plannedOnlyLocales))
+    };
 }
 
 function tableExists(db, tableName) {
@@ -356,7 +380,7 @@ function isLocaleScopedContentBlockPath(patchPath) {
 
 function isExplicitNonTargetLocaleContentBlockPath(patchPath) {
     const value = String(patchPath || '');
-    return knownLocaleCodes
+    return localeMetadata().knownLocaleCodes
         .filter((code) => code !== targetLocale)
         .some((code) => localePathPattern(code).test(value));
 }
@@ -373,15 +397,14 @@ function validateFilledData(data, errors, collectionNames, locale) {
     }
 
     if (!data.meta || data.meta.locale !== locale) errors.push('meta.locale must be ' + locale + '.');
-    const currentSupportedLocales = ['en', 'ar', 'fr'];
-    const allowedSupportedSnapshots = [currentSupportedLocales];
-    if (locale === 'fr') allowedSupportedSnapshots.push(['en', 'ar']);
-    if (!allowedSupportedSnapshots.some((expected) => arraysEqual(data.meta && data.meta.supportedLocales, expected))) {
-        errors.push('meta.supportedLocales must match current supported locales ["en","ar","fr"]'
-            + (locale === 'fr' ? ' or legacy ["en","ar"] for the historical French filled file.' : '.'));
+    const localeMeta = localeMetadata();
+    if (!arraysEqual(data.meta && data.meta.supportedLocales, localeMeta.supportedLocales)) {
+        errors.push('meta.supportedLocales must match current supported locales '
+            + JSON.stringify(localeMeta.supportedLocales) + '.');
     }
-    if (!arraysEqual(data.meta && data.meta.plannedOnlyLocales, ['pt'])) {
-        errors.push('meta.plannedOnlyLocales must stay ["pt"].');
+    if (!arraysEqual(data.meta && data.meta.plannedOnlyLocales, localeMeta.plannedOnlyLocales)) {
+        errors.push('meta.plannedOnlyLocales must match current planned locales '
+            + JSON.stringify(localeMeta.plannedOnlyLocales) + '.');
     }
     if (!data.meta || !data.meta.counts || typeof data.meta.counts !== 'object' || Array.isArray(data.meta.counts)) {
         errors.push('meta.counts must exist and be an object.');
@@ -612,10 +635,10 @@ function validateCleanBoundary(errors, warnings, args) {
         sitemapLocaleCount: null,
         sitemapProductUrlCount: null
     };
-    const localeConfigPath = path.join(root, 'config', 'locales.json');
     const frontendPath = path.join(root, 'js', 'main.js');
     const sitemapPath = path.join(root, 'sitemap.xml');
     const localeConfig = readJsonFile(localeConfigPath);
+    const localeMeta = localeMetadata();
     let sitemapCountModel = null;
 
     try {
@@ -629,8 +652,9 @@ function validateCleanBoundary(errors, warnings, args) {
         errors.push('Dynamic sitemap URL count model failed: ' + err.message);
     }
 
-    if (!arraysEqual(localeConfig.supportedLocales, ['en', 'ar', 'fr'])) {
-        errors.push('config/locales.json supportedLocales must stay ["en","ar","fr"] in this stage.');
+    if (!arraysEqual(localeConfig.supportedLocales || [], localeMeta.activeLocaleCodes)) {
+        errors.push('config/locales.json supportedLocales must match active locale keys '
+            + JSON.stringify(localeMeta.activeLocaleCodes) + '.');
     }
     Object.keys(localeConfig.plannedLocales || {}).forEach((code) => {
         const planned = localeConfig.plannedLocales && localeConfig.plannedLocales[code];

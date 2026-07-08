@@ -16,8 +16,7 @@ if (!homeDir) throw new Error('Unable to resolve user home directory for desktop
 const stageDir = path.join(homeDir, 'Desktop', 'new', 'stage');
 const localeConfigPath = path.join(root, 'config', 'locales.json');
 const dbPath = path.join(root, 'data', 'longxiang.db');
-const expectedSupportedLocales = ['en', 'ar', 'fr'];
-const allowedTargetLocales = ['fr', 'ru'];
+const sourceLocales = ['en', 'ar'];
 const requiredPlannedOnlyLocales = ['pt'];
 
 function argValue(name, fallback) {
@@ -53,6 +52,21 @@ function assert(condition, message) {
 
 function formatList(values) {
     return values.length ? values.join(', ') : 'none';
+}
+
+function arraysEqual(actual, expected) {
+    return JSON.stringify(actual) === JSON.stringify(expected);
+}
+
+function activeLocaleCodes(config) {
+    return Object.keys(config && config.locales ? config.locales : {});
+}
+
+function contentTargetLocales(config) {
+    const supportedLocales = Array.isArray(config.supportedLocales) ? config.supportedLocales : [];
+    return supportedLocales.filter((code) => {
+        return sourceLocales.indexOf(code) === -1 && config.locales && config.locales[code];
+    });
 }
 
 function hasText(value) {
@@ -177,14 +191,20 @@ function bodySummary(body) {
 }
 
 function validateLocaleConfig(config, targetLocale, plannedOnlyLocales) {
-    assert(JSON.stringify(config.supportedLocales) === JSON.stringify(expectedSupportedLocales),
-        'supportedLocales must be en/ar/fr. Current: ' + formatList(config.supportedLocales || []));
+    const activeCodes = activeLocaleCodes(config);
+    assert(arraysEqual(config.supportedLocales || [], activeCodes),
+        'supportedLocales must match config.locales active keys. Active: ' + formatList(activeCodes)
+        + '. Current: ' + formatList(config.supportedLocales || []));
 
+    const allowedTargetLocales = contentTargetLocales(config);
     assert(allowedTargetLocales.indexOf(targetLocale) !== -1,
-        targetLocale + ' is not an allowed target locale. Allowed: ' + allowedTargetLocales.join(', '));
+        targetLocale + ' is not an allowed target locale. Allowed active content targets: ' + formatList(allowedTargetLocales) + '.');
 
     const plannedLocales = plannedLocaleEntries(config);
     const plannedCodes = plannedLocales.map((locale) => locale.code);
+    assert(arraysEqual(plannedOnlyLocales.slice().sort(), plannedCodes.slice().sort()),
+        'planned-only locales must match config.plannedLocales. Expected: '
+        + formatList(plannedCodes) + '. Current: ' + formatList(plannedOnlyLocales) + '.');
 
     const activeLocale = config.locales && config.locales[targetLocale];
     const plannedTargetLocale = plannedLocales.find((entry) => entry.code === targetLocale);
