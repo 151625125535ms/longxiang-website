@@ -3,6 +3,7 @@ const path = require('path');
 
 const { getDb } = require('../server/lib/db');
 const { PROJECT_ROOT, resolveUploadDir, resolveUploadPublicPath } = require('../server/lib/fileStore');
+const { auditProductMediaAssetLinks } = require('../server/lib/assetReferences');
 
 const args = new Set(process.argv.slice(2));
 const strict = args.has('--strict');
@@ -70,6 +71,11 @@ function audit() {
         assetsEntityIdNull: 0,
         productMediaAssetIdNull: 0,
         productMediaTotal: 0,
+        productMediaMissingAssetPaths: 0,
+        productMediaAssetIdUpdates: 0,
+        productAssetReferenceGaps: 0,
+        staleProductAssetReferences: 0,
+        productAssetReferences: 0,
         notes: []
     };
 
@@ -129,6 +135,17 @@ function audit() {
         result.notes.push('assets table not found.');
     }
 
+    if (tableExists(db, 'assets') && tableExists(db, 'asset_references')) {
+        const linkAudit = auditProductMediaAssetLinks(db);
+        result.productMediaMissingAssetPaths = linkAudit.missing_asset_paths.length;
+        result.productMediaAssetIdUpdates = linkAudit.product_media_asset_id_updates.length;
+        result.productAssetReferenceGaps = linkAudit.product_asset_reference_gaps.length;
+        result.staleProductAssetReferences = linkAudit.stale_product_asset_references.length;
+        result.productAssetReferences = linkAudit.product_asset_references;
+    } else if (!tableExists(db, 'asset_references')) {
+        result.notes.push('asset_references table not found.');
+    }
+
     walkFiles(uploadDir).forEach(function (filePath) {
         const publicPath = toPublicPath(uploadDir, uploadPublicPath, filePath);
         if (!referencedPaths.has(publicPath)) {
@@ -161,6 +178,11 @@ function printText(result) {
         'product_media.asset_id IS NULL: ' + result.productMediaAssetIdNull +
         ' / ' + result.productMediaTotal + ' (' + pct(result.productMediaAssetIdNull, result.productMediaTotal) + ')'
     );
+    console.log('product_media missing active asset paths: ' + result.productMediaMissingAssetPaths);
+    console.log('product_media asset_id updates needed: ' + result.productMediaAssetIdUpdates);
+    console.log('product asset_references missing: ' + result.productAssetReferenceGaps);
+    console.log('stale product asset_references: ' + result.staleProductAssetReferences);
+    console.log('product asset_references: ' + result.productAssetReferences);
     result.notes.forEach(function (note) {
         console.log('note: ' + note);
     });

@@ -12,6 +12,8 @@
     "db:backup": "node server/db/backup.js",
     "db:status": "node server/db/status.js",
     "images:audit": "node scripts/audit-image-sync.js --dry-run",
+    "images:repair-product-links": "node scripts/repair-product-media-asset-links.js",
+    "images:verify-product-links": "node scripts/repair-product-media-asset-links.js --verify",
     "images:performance": "node scripts/audit-image-performance.js",
     "content:upgrade-inquiry": "node scripts/upgrade-inquiry-conversion-content.js",
     "seo:fill-products": "node scripts/fill-product-seo.js",

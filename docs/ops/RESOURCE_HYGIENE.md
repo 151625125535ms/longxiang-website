@@ -76,6 +76,9 @@ git check-ignore -v --no-index logs\example.log
 git check-ignore -v --no-index uploads\example.png
 git check-ignore -v --no-index data\example.db
 git ls-files backups screenshots logs uploads data
+npm run images:audit
+npm run images:repair-product-links
+npm run images:verify-product-links
 ```
 
 ## 后续建议
@@ -84,3 +87,4 @@ git ls-files backups screenshots logs uploads data
 - 如果后续继续细化 `.gitignore`，可单独评估是否显式加入 `data/backups/`，以及是否为 `uploads/docs/.gitkeep` 建立更清晰的例外规则。
 - 对生产上传资源的备份，应依赖服务器备份策略或单独对象存储备份，而不是 Git。
 - 对本地验证截图和临时文件，应在确认无需追溯后由用户批准清理。
+- 产品图片资源关联补偿优先使用 `npm run images:repair-product-links` 做 dry-run；生产 `--apply` 属于数据库写入，必须单独确认，不和资源文件清理混在同一阶段。

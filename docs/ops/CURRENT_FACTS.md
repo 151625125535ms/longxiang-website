@@ -115,6 +115,13 @@
 - `missing cover files=0` 和 `invalid product_media paths=0` 是当前图片链路的关键健康信号。
 - `assets.entity_id IS NULL` 与 `product_media.asset_id IS NULL` 当前属于已知未完全闭合的资源关联信号，不等同于页面图片缺失，但后续资源治理应跟踪。
 
+2026-07-08 补充运维入口：
+
+- 产品媒体资源关联 dry-run：`npm run images:repair-product-links`
+- 产品媒体资源关联 apply：`npm run images:repair-product-links -- --apply`
+- 产品媒体资源关联验证：`npm run images:verify-product-links`
+- 该入口只补产品图片链路的 `assets`、`product_media.asset_id` 和产品 owner 的 `asset_references`；生产执行 `--apply` 属于数据库写入，必须先 dry-run、确认备份、说明回滚与验证方式，并取得明确确认。
+
 ## 备份与监控
 
 - 最新备份包：`/var/backups/longxiang/daily-20260706-181702.tar.gz`
@@ -141,6 +148,8 @@ git rev-parse HEAD
 git rev-parse origin/main
 node scripts/generate-sitemap.js --dry-run
 node scripts/verify-seo-i18n.js
+npm run images:repair-product-links
+npm run images:verify-product-links
 git diff --check
 ```
 
@@ -158,4 +167,6 @@ export PATH=/home/ubuntu/.nvm/versions/node/v24.18.0/bin:$PATH
 node scripts/generate-sitemap.js --dry-run
 node scripts/verify-seo-i18n.js
 npm run images:audit
+npm run images:repair-product-links
+npm run images:verify-product-links
 ```

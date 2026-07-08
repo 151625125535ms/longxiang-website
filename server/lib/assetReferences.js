@@ -36,6 +36,16 @@ function looksLikeAssetPath(value) {
     return /\.(jpe?g|png|webp|gif|svg|pdf)$/i.test(normalized);
 }
 
+function looksLikeStoredAssetPath(value) {
+    const text = String(value || '').trim();
+    if (!text || isExternalPath(text)) return false;
+    const normalized = normalizeAssetPath(text).split(/[?#]/)[0];
+    if (!normalized || normalized.indexOf('..') !== -1) return false;
+    if (/^(mailto:|tel:|#)/i.test(normalized)) return false;
+    if (/^(uploads|assets)\//i.test(normalized)) return true;
+    return /\.(jpe?g|png|webp|gif|svg|pdf)$/i.test(normalized);
+}
+
 function fileChecksum(filePath) {
     return crypto.createHash('sha256').update(fs.readFileSync(filePath)).digest('hex');
 }
@@ -179,6 +189,233 @@ function syncProductAssetReferences(db, productId) {
             title
         };
     }));
+}
+
+function productTitle(row) {
+    return row.name_en || row.name_ar || row.legacy_id || row.slug || ('Product #' + row.product_id);
+}
+
+function productMediaIssue(row, extra) {
+    return Object.assign({
+        media_id: row.media_id,
+        product_id: row.product_id,
+        product: productTitle(row),
+        path: row.path
+    }, extra || {});
+}
+
+function auditProductMediaAssetLinks(db) {
+    const rows = db.prepare(`
+        SELECT
+            pm.id AS media_id, pm.product_id, pm.asset_id, pm.path, pm.is_cover, pm.sort_order,
+            p.status, p.name_en, p.name_ar, p.legacy_id, p.slug,
+            matched.id AS matched_asset_id
+        FROM product_media pm
+        LEFT JOIN products p ON p.id = pm.product_id
+        LEFT JOIN assets matched ON matched.path = pm.path AND matched.is_active = 1
+        ORDER BY pm.product_id, pm.is_cover DESC, pm.sort_order, pm.id
+    `).all();
+
+    const productIds = new Set();
+    const ownersToSync = new Set();
+    const invalidPaths = [];
+    const assetIdUpdates = [];
+    const missingAssetByPath = new Map();
+    let assetIdNull = 0;
+
+    rows.forEach(function (row) {
+        if (row.product_id != null) productIds.add(row.product_id);
+        const normalizedPath = normalizeAssetPath(row.path);
+        if (!looksLikeStoredAssetPath(normalizedPath)) {
+            invalidPaths.push(productMediaIssue(row));
+            return;
+        }
+        if (row.asset_id == null) assetIdNull += 1;
+        if (!row.matched_asset_id) {
+            let missing = missingAssetByPath.get(normalizedPath);
+            if (!missing) {
+                const filePath = resolveLocalFilePath(normalizedPath);
+                missing = {
+                    path: normalizedPath,
+                    file: filePath,
+                    file_exists: fs.existsSync(filePath) && fs.statSync(filePath).isFile(),
+                    media_ids: [],
+                    product_ids: [],
+                    products: []
+                };
+                missingAssetByPath.set(normalizedPath, missing);
+            }
+            missing.media_ids.push(row.media_id);
+            if (missing.product_ids.indexOf(row.product_id) === -1) missing.product_ids.push(row.product_id);
+            if (missing.products.indexOf(productTitle(row)) === -1) missing.products.push(productTitle(row));
+            if (missing.file_exists && row.product_id != null) ownersToSync.add(row.product_id);
+            return;
+        }
+        if (String(row.asset_id || '') !== String(row.matched_asset_id)) {
+            assetIdUpdates.push(productMediaIssue(row, {
+                current_asset_id: row.asset_id,
+                matched_asset_id: row.matched_asset_id
+            }));
+            if (row.product_id != null) ownersToSync.add(row.product_id);
+        }
+    });
+
+    const referenceGaps = db.prepare(`
+        SELECT
+            pm.id AS media_id, pm.product_id, pm.asset_id, pm.path,
+            p.name_en, p.name_ar, p.legacy_id, p.slug
+        FROM product_media pm
+        INNER JOIN products p ON p.id = pm.product_id
+        WHERE p.status != 'deleted'
+            AND pm.asset_id IS NOT NULL
+            AND NOT EXISTS (
+                SELECT 1
+                FROM asset_references ar
+                WHERE ar.module = 'products'
+                    AND ar.entity_type = 'product'
+                    AND ar.entity_id = pm.product_id
+                    AND ar.asset_id = pm.asset_id
+                    AND ar.asset_path = pm.path
+            )
+        ORDER BY pm.product_id, pm.is_cover DESC, pm.sort_order, pm.id
+    `).all().map(function (row) {
+        ownersToSync.add(row.product_id);
+        return productMediaIssue(row, { asset_id: row.asset_id });
+    });
+
+    const staleReferences = db.prepare(`
+        SELECT
+            ar.id AS reference_id, ar.entity_id AS product_id, ar.asset_id, ar.asset_path, ar.field_path, ar.title,
+            p.name_en, p.name_ar, p.legacy_id, p.slug
+        FROM asset_references ar
+        LEFT JOIN products p ON p.id = ar.entity_id
+        WHERE ar.module = 'products'
+            AND ar.entity_type = 'product'
+            AND NOT EXISTS (
+                SELECT 1
+                FROM product_media pm
+                INNER JOIN products live_product ON live_product.id = pm.product_id
+                WHERE live_product.status != 'deleted'
+                    AND pm.product_id = ar.entity_id
+                    AND pm.asset_id = ar.asset_id
+                    AND pm.path = ar.asset_path
+                    AND ar.field_path = CASE
+                        WHEN pm.is_cover = 1 THEN 'cover_image'
+                        ELSE 'media[' || pm.sort_order || ']'
+                    END
+            )
+        ORDER BY ar.entity_id, ar.field_path, ar.id
+    `).all().map(function (row) {
+        if (row.product_id != null) ownersToSync.add(row.product_id);
+        return {
+            reference_id: row.reference_id,
+            product_id: row.product_id,
+            product: productTitle(row),
+            asset_id: row.asset_id,
+            asset_path: row.asset_path,
+            field_path: row.field_path,
+            title: row.title || ''
+        };
+    });
+
+    const missingAssetPaths = Array.from(missingAssetByPath.values()).map(function (item) {
+        item.media_ids.sort(function (a, b) { return a - b; });
+        item.product_ids.sort(function (a, b) { return a - b; });
+        return item;
+    }).sort(function (a, b) {
+        return a.path.localeCompare(b.path);
+    });
+
+    const productReferenceTotal = db.prepare(`
+        SELECT COUNT(*) AS total
+        FROM asset_references
+        WHERE module = 'products' AND entity_type = 'product'
+    `).get().total;
+
+    return {
+        product_media_total: rows.length,
+        products_with_media: productIds.size,
+        product_media_asset_id_null: assetIdNull,
+        product_media_invalid_paths: invalidPaths,
+        missing_asset_paths: missingAssetPaths,
+        product_media_asset_id_updates: assetIdUpdates,
+        product_asset_reference_gaps: referenceGaps,
+        stale_product_asset_references: staleReferences,
+        product_asset_references: productReferenceTotal,
+        owners_to_sync: Array.from(ownersToSync).sort(function (a, b) { return a - b; })
+    };
+}
+
+function productMediaAssetLinkBlockerCount(audit) {
+    return audit.product_media_invalid_paths.length +
+        audit.missing_asset_paths.length +
+        audit.product_media_asset_id_updates.length +
+        audit.product_asset_reference_gaps.length +
+        audit.stale_product_asset_references.length;
+}
+
+function repairProductMediaAssetLinks(db, options) {
+    const apply = !!(options && options.apply);
+    const before = auditProductMediaAssetLinks(db);
+    const result = {
+        mode: apply ? 'apply' : 'dry-run',
+        before,
+        actions: {
+            created_assets: [],
+            missing_files: [],
+            product_media_update_changes: 0,
+            synced_products: []
+        },
+        after: null,
+        ok: false
+    };
+
+    if (!apply) {
+        result.ok = productMediaAssetLinkBlockerCount(before) === 0;
+        return result;
+    }
+
+    before.missing_asset_paths.forEach(function (item) {
+        if (!item.file_exists) {
+            result.actions.missing_files.push({ path: item.path, file: item.file });
+            return;
+        }
+        const created = createMissingAssetForPath(db, item.path, 'products');
+        if (created.created) result.actions.created_assets.push(item.path);
+    });
+
+    result.actions.product_media_update_changes = db.prepare(`
+        UPDATE product_media
+        SET asset_id = (
+            SELECT id
+            FROM assets
+            WHERE assets.path = product_media.path AND assets.is_active = 1
+            ORDER BY assets.id DESC
+            LIMIT 1
+        )
+        WHERE COALESCE(NULLIF(TRIM(path), ''), '') != ''
+            AND EXISTS (
+                SELECT 1
+                FROM assets
+                WHERE assets.path = product_media.path AND assets.is_active = 1
+            )
+            AND COALESCE(asset_id, -1) != (
+                SELECT id
+                FROM assets
+                WHERE assets.path = product_media.path AND assets.is_active = 1
+                ORDER BY assets.id DESC
+                LIMIT 1
+            )
+    `).run().changes;
+
+    const owners = before.owners_to_sync.slice();
+    owners.forEach(function (productId) {
+        syncProductAssetReferences(db, productId);
+    });
+    result.actions.synced_products = owners;
+    result.after = auditProductMediaAssetLinks(db);
+    result.ok = productMediaAssetLinkBlockerCount(result.after) === 0;
+    return result;
 }
 
 function syncCertificationAssetReference(db, certificationId) {
@@ -600,6 +837,8 @@ module.exports = {
     deleteAssetReferences,
     replaceAssetReferences,
     syncProductAssetReferences,
+    auditProductMediaAssetLinks,
+    repairProductMediaAssetLinks,
     syncCertificationAssetReference,
     syncContentBlockAssetReferences,
     findAssetUsage,

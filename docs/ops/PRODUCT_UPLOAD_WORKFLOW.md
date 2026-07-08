@@ -168,6 +168,37 @@ GET /api/products/<legacy_id>
 - `capacities`
 - `voltages`
 
+## 产品图片资源关联补偿
+
+如果 `npm run images:audit` 显示 `product_media.asset_id`、`product_media missing active asset paths` 或 `product asset_references missing` 仍有缺口，优先使用产品媒体专用修复入口，不使用会全量重建所有模块引用的旧 backfill。
+
+Dry-run：
+
+```powershell
+npm run images:repair-product-links
+```
+
+Apply：
+
+```powershell
+npm run images:repair-product-links -- --apply
+```
+
+验证：
+
+```powershell
+npm run images:verify-product-links
+npm run images:audit
+```
+
+该入口只处理产品图片链路：
+
+- 为 `product_media.path` 中存在但 `assets` 缺失的本地文件补 `assets` 行。
+- 按路径补回或修正 `product_media.asset_id`。
+- 只重建受影响产品 owner 的 `asset_references`，不清空其他模块引用。
+
+生产环境执行 `--apply` 属于数据库写入，必须先 dry-run、确认备份、说明回滚与验证方式，并取得明确确认后再执行。生产服务器执行这些命令时必须显式使用 Node 24 环境。
+
 ## 服务器同步流程
 
 数据导入到服务器时优先走服务器后台 API，不直接修改服务器代码。
