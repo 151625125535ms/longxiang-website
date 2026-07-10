@@ -1098,7 +1098,7 @@ p:last-child {
     flex: 0 0 40px;
     overflow: hidden;
     direction: ltr;
-    background: var(--color-navy);
+    background: transparent;
     color: var(--color-white-pure);
     border-bottom: 1px solid rgba(212, 168, 67, 0.55);
     opacity: 1;

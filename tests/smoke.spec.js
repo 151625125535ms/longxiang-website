@@ -60,7 +60,7 @@ test('CSP Report-Only 头存在', async ({ page }) => {
 });
 
 test.describe('顶部公共联系方式栏', function () {
-    test('桌面端数据、布局和滚动收起符合 A 方案', async ({ page }) => {
+    test('桌面端透明顶栏、布局和滚动收起符合方案', async ({ page }) => {
         await page.setViewportSize({ width: 1440, height: 900 });
         await mockHeaderContactBarData(page);
         await page.goto(BASE + '/index.html');
@@ -102,7 +102,7 @@ test.describe('顶部公共联系方式栏', function () {
         expect(layout.barHeight).toBeGreaterThanOrEqual(39);
         expect(layout.barHeight).toBeLessThanOrEqual(41);
         expect(layout.barTop).toBe(0);
-        expect(layout.background).toBe('rgb(10, 22, 40)');
+        expect(layout.background).toBe('rgba(0, 0, 0, 0)');
         expect(layout.emailX).toBeLessThan(layout.instagramX);
         expect(layout.instagramX).toBeLessThan(layout.youtubeX);
         expect(layout.navTop).toBeGreaterThanOrEqual(39);
