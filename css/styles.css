@@ -1169,11 +1169,11 @@ p:last-child {
     background: none;
 }
 
-.header-contact-bar .instagram-glyph {
+.header-contact-bar .instagram-brand-icon .instagram-glyph {
     stroke: currentColor;
 }
 
-.header-contact-bar .instagram-dot,
+.header-contact-bar .instagram-brand-icon .instagram-dot,
 .header-contact-bar .youtube-brand-icon .youtube-back {
     fill: currentColor;
     stroke: currentColor;

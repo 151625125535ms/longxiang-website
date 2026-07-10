@@ -141,6 +141,8 @@ test.describe('顶部公共联系方式栏', function () {
             var barEl = document.querySelector('.header-contact-bar');
             var navbarEl = document.querySelector('.navbar');
             var emailEl = document.querySelector('.header-contact-bar__email');
+            var instagramGlyphEl = document.querySelector('.header-contact-bar .instagram-glyph');
+            var instagramDotEl = document.querySelector('.header-contact-bar .instagram-dot');
             var logoEl = document.querySelector('.nav-logo-text');
             var navLinkEl = document.querySelector('.nav-links > .nav-item > a');
             var languageEl = document.querySelector('.language-switcher select');
@@ -148,6 +150,8 @@ test.describe('顶部公共联系方式栏', function () {
                 barBackground: getComputedStyle(barEl).backgroundColor,
                 navBackground: getComputedStyle(navbarEl, '::before').backgroundColor,
                 emailColor: getComputedStyle(emailEl).color,
+                instagramStroke: getComputedStyle(instagramGlyphEl).stroke,
+                instagramDot: getComputedStyle(instagramDotEl).fill,
                 logoColor: getComputedStyle(logoEl).color,
                 navLinkColor: getComputedStyle(navLinkEl).color,
                 languageColor: getComputedStyle(languageEl).color,
@@ -158,6 +162,8 @@ test.describe('顶部公共联系方式栏', function () {
         expect(scrolledLayout.barBackground).toBe('rgb(255, 255, 255)');
         expect(scrolledLayout.navBackground).toBe('rgb(255, 255, 255)');
         expect(scrolledLayout.emailColor).toBe('rgb(10, 22, 40)');
+        expect(scrolledLayout.instagramStroke).toBe('rgb(10, 22, 40)');
+        expect(scrolledLayout.instagramDot).toBe('rgb(10, 22, 40)');
         expect(scrolledLayout.logoColor).toBe('rgb(10, 22, 40)');
         expect(scrolledLayout.navLinkColor).toBe('rgb(10, 22, 40)');
         expect(scrolledLayout.languageColor).toBe('rgb(10, 22, 40)');
