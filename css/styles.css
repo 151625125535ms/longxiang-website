@@ -1066,8 +1066,8 @@ p:last-child {
 }
 
 .navbar.scrolled::before {
-    background: var(--color-navy);
-    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+    background: var(--color-white-pure);
+    box-shadow: 0 2px 20px rgba(10, 22, 40, 0.14);
 }
 
 .navbar.scrolled {
@@ -1187,11 +1187,24 @@ p:last-child {
     height: 40px;
     max-height: 40px;
     flex-basis: 40px;
-    background: var(--color-navy);
+    background: var(--color-white-pure);
     border-bottom-width: 1px;
     border-bottom-color: rgba(212, 168, 67, 0.55);
     opacity: 1;
     pointer-events: auto;
+}
+
+.navbar.scrolled .header-contact-bar a {
+    color: var(--color-navy);
+}
+
+.navbar.scrolled .header-contact-bar a:hover,
+.navbar.scrolled .header-contact-bar a:focus-visible {
+    color: var(--color-gold);
+}
+
+.navbar.scrolled .header-contact-bar .youtube-brand-icon .youtube-play {
+    fill: var(--color-white-pure);
 }
 
 .navbar.has-contact-bar.scrolled > .container {
@@ -1288,6 +1301,31 @@ p:last-child {
 
 .language-switcher select option {
     color: var(--color-gray-800);
+}
+
+.navbar.scrolled .nav-logo-text {
+    color: var(--color-navy);
+}
+
+.navbar.scrolled .language-switcher select {
+    border-color: rgba(10, 22, 40, 0.24);
+    background: var(--color-white-pure);
+    color: var(--color-navy);
+}
+
+.navbar.scrolled .hamburger span {
+    background: var(--color-navy);
+}
+
+@media (min-width: 769px) {
+    .navbar.scrolled .nav-item > a {
+        color: var(--color-navy);
+    }
+
+    .navbar.scrolled .nav-item > a:hover,
+    .navbar.scrolled .nav-item > a.active {
+        color: var(--color-gold);
+    }
 }
 
 .hamburger {

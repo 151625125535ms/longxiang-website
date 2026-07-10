@@ -26,7 +26,7 @@ async function mockHeaderContactBarData(page, overrides) {
                 slug: 'global-shell',
                 body: {
                     navigation: {
-                        mainLinks: [],
+                        mainLinks: [{ href: 'index.html', label: 'Home' }],
                         contactBar: contactBar
                     },
                     footer: {},
@@ -60,7 +60,7 @@ test('CSP Report-Only 头存在', async ({ page }) => {
 });
 
 test.describe('顶部公共联系方式栏', function () {
-    test('桌面端顶栏滚动后保持显示并与导航同色', async ({ page }) => {
+    test('桌面端顶栏滚动后保持显示并与导航统一为白底', async ({ page }) => {
         await page.setViewportSize({ width: 1440, height: 900 });
         await mockHeaderContactBarData(page);
         await page.goto(BASE + '/index.html');
@@ -136,17 +136,31 @@ test.describe('顶部公共联系方式栏', function () {
         }).toBeGreaterThanOrEqual(39);
         await expect.poll(async function () {
             return bar.evaluate(function (element) { return getComputedStyle(element).backgroundColor; });
-        }).toBe('rgb(10, 22, 40)');
+        }).toBe('rgb(255, 255, 255)');
         const scrolledLayout = await page.evaluate(function () {
             var barEl = document.querySelector('.header-contact-bar');
             var navbarEl = document.querySelector('.navbar');
+            var emailEl = document.querySelector('.header-contact-bar__email');
+            var logoEl = document.querySelector('.nav-logo-text');
+            var navLinkEl = document.querySelector('.nav-links > .nav-item > a');
+            var languageEl = document.querySelector('.language-switcher select');
             return {
-                background: getComputedStyle(barEl).backgroundColor,
+                barBackground: getComputedStyle(barEl).backgroundColor,
+                navBackground: getComputedStyle(navbarEl, '::before').backgroundColor,
+                emailColor: getComputedStyle(emailEl).color,
+                logoColor: getComputedStyle(logoEl).color,
+                navLinkColor: getComputedStyle(navLinkEl).color,
+                languageColor: getComputedStyle(languageEl).color,
                 barHeight: barEl.getBoundingClientRect().height,
                 navbarHeight: navbarEl.getBoundingClientRect().height
             };
         });
-        expect(scrolledLayout.background).toBe('rgb(10, 22, 40)');
+        expect(scrolledLayout.barBackground).toBe('rgb(255, 255, 255)');
+        expect(scrolledLayout.navBackground).toBe('rgb(255, 255, 255)');
+        expect(scrolledLayout.emailColor).toBe('rgb(10, 22, 40)');
+        expect(scrolledLayout.logoColor).toBe('rgb(10, 22, 40)');
+        expect(scrolledLayout.navLinkColor).toBe('rgb(10, 22, 40)');
+        expect(scrolledLayout.languageColor).toBe('rgb(10, 22, 40)');
         expect(scrolledLayout.barHeight).toBeLessThanOrEqual(41);
         expect(scrolledLayout.navbarHeight).toBeGreaterThanOrEqual(109);
         expect(scrolledLayout.navbarHeight).toBeLessThanOrEqual(111);
