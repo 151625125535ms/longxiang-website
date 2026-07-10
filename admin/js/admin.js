@@ -945,7 +945,9 @@
                     ] },
                     { key: 'contactInfo', label: '联系方式', path: '', previewSelector: '.contact-primary-section, .contact-info-card', fields: [
                         { key: 'phone', label: '电话', type: 'text' },
-                        { key: 'email', label: '邮箱', type: 'email' },
+                        { key: 'email', label: '邮箱', type: 'email', localized: false },
+                        { key: 'instagram', label: 'Instagram URL', type: 'url', localized: false },
+                        { key: 'youtube', label: 'YouTube URL', type: 'url', localized: false },
                         { key: 'address', label: '地址', type: 'textarea' },
                         { key: 'headquarters', label: '总部地址', type: 'textarea' },
                         { key: 'officeHours', label: '办公时间', type: 'text' }
@@ -980,6 +982,12 @@
                     { key: 'navigation', label: '导航', path: 'navigation.mainLinks', previewSelector: '.navbar', array: true, itemLabel: '导航项', fields: [
                         { key: 'label', label: '显示名称', type: 'text' },
                         { key: 'href', label: '链接', type: 'url' }
+                    ] },
+                    { key: 'contactBar', label: '顶部联系栏', path: 'navigation.contactBar', previewSelector: '.header-contact-bar, .navbar', fields: [
+                        { key: 'enabled', label: '启用顶部联系栏', type: 'toggle', localized: false },
+                        { key: 'showEmail', label: '显示邮箱', type: 'toggle', localized: false },
+                        { key: 'showInstagram', label: '显示 Instagram', type: 'toggle', localized: false },
+                        { key: 'showYouTube', label: '显示 YouTube', type: 'toggle', localized: false }
                     ] },
                     { key: 'footer', label: '底部信息', path: 'footer', previewSelector: 'footer, .footer', fields: [
                         { key: 'text', label: '公司简介', type: 'textarea' },

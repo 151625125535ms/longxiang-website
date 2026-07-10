@@ -1080,6 +1080,120 @@ p:last-child {
     justify-content: space-between;
 }
 
+.navbar.has-contact-bar {
+    height: calc(var(--navbar-height) + 40px);
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.navbar.has-contact-bar > .container {
+    height: var(--navbar-height);
+    flex: 0 0 var(--navbar-height);
+}
+
+.header-contact-bar {
+    width: 100%;
+    height: 40px;
+    max-height: 40px;
+    flex: 0 0 40px;
+    overflow: hidden;
+    direction: ltr;
+    background: var(--color-navy);
+    color: var(--color-white-pure);
+    border-bottom: 1px solid rgba(212, 168, 67, 0.55);
+    opacity: 1;
+    transition: height 200ms ease, max-height 200ms ease, flex-basis 200ms ease, opacity 160ms ease, border-color 160ms ease;
+}
+
+.header-contact-bar__inner {
+    width: 100%;
+    max-width: var(--container-max);
+    height: 40px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-xl);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.header-contact-bar a {
+    min-width: 32px;
+    min-height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-white-pure);
+    transition: color var(--transition-fast), transform var(--transition-fast);
+}
+
+.header-contact-bar a:hover,
+.header-contact-bar a:focus-visible {
+    color: var(--color-gold);
+    transform: translateY(-1px);
+}
+
+.header-contact-bar__email {
+    gap: 9px;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.header-contact-bar__email svg,
+.header-contact-bar__social-link svg {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
+}
+
+.header-contact-bar__email svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.header-contact-bar__socials {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.header-contact-bar .instagram-brand-icon {
+    border-radius: 0;
+    background: none;
+}
+
+.header-contact-bar .instagram-glyph {
+    stroke: currentColor;
+}
+
+.header-contact-bar .instagram-dot,
+.header-contact-bar .youtube-brand-icon .youtube-back {
+    fill: currentColor;
+    stroke: currentColor;
+}
+
+.header-contact-bar .youtube-brand-icon .youtube-play {
+    fill: var(--color-navy);
+}
+
+.navbar.scrolled .header-contact-bar {
+    height: 0;
+    max-height: 0;
+    flex-basis: 0;
+    border-bottom-width: 0;
+    border-bottom-color: transparent;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.navbar.has-contact-bar.scrolled > .container {
+    height: 70px;
+    flex-basis: 70px;
+}
+
 .nav-logo {
     display: flex;
     align-items: center;
@@ -2525,6 +2639,19 @@ p:last-child {
     .section,
     .footer {
         max-width: 100%;
+    }
+
+    .navbar.has-contact-bar {
+        height: var(--navbar-height);
+    }
+
+    .navbar.has-contact-bar > .container {
+        height: var(--navbar-height);
+        flex-basis: var(--navbar-height);
+    }
+
+    .header-contact-bar {
+        display: none;
     }
 
     .fade-in-left,

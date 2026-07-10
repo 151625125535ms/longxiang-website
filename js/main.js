@@ -1741,6 +1741,92 @@
         instagram: '<svg class="social-brand-icon instagram-brand-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect class="instagram-glyph" x="5" y="5" width="14" height="14" rx="4"></rect><circle class="instagram-glyph" cx="12" cy="12" r="3.2"></circle><circle class="instagram-dot" cx="16.8" cy="7.2" r="1.05"></circle></svg>',
         youtube: '<svg class="social-brand-icon youtube-brand-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect class="youtube-back" x="3" y="6.5" width="18" height="11" rx="3.2"></rect><path class="youtube-play" d="M10.4 9.4L15.2 12l-4.8 2.6z"></path></svg>'
     };
+    var CONTACT_BAR_EMAIL_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 6.5h16v11H4z"></path><path d="m4.7 7.2 7.3 6 7.3-6"></path></svg>';
+
+    function validContactEmail(value) {
+        value = String(value || '').trim();
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? value : '';
+    }
+
+    function safeContactUrl(value) {
+        value = String(value || '').trim();
+        if (!/^https?:\/\//i.test(value)) return '';
+        try {
+            var parsed = new URL(value);
+            return parsed.protocol === 'http:' || parsed.protocol === 'https:' ? parsed.href : '';
+        } catch (err) {
+            return '';
+        }
+    }
+
+    function removeHeaderContactBar() {
+        if (!navbar) return;
+        var existing = navbar.querySelector('.header-contact-bar');
+        if (existing) existing.remove();
+        navbar.classList.remove('has-contact-bar');
+    }
+
+    function createContactBarSocialLink(name, href, trackingName) {
+        var link = document.createElement('a');
+        link.className = 'header-contact-bar__social-link';
+        link.href = href;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.setAttribute('aria-label', name);
+        link.setAttribute('title', name);
+        link.setAttribute('data-contact-bar-social', name.toLowerCase());
+        link.innerHTML = SOCIAL_ICON_SVG[name.toLowerCase()] + '<span class="sr-only">' + escapeHtml(name) + '</span>';
+        link.addEventListener('click', function () { trackEvent(trackingName); });
+        return link;
+    }
+
+    function renderHeaderContactBar() {
+        if (!navbar || !companyCache || globalShellCache === null) return;
+        var navigation = shellSection('navigation');
+        var settings = navigation.contactBar || {};
+        if (settings.enabled === false) {
+            removeHeaderContactBar();
+            return;
+        }
+
+        var email = settings.showEmail === false ? '' : validContactEmail(companyCache.email);
+        var instagram = settings.showInstagram === false ? '' : safeContactUrl(companyCache.instagram);
+        var youtube = settings.showYouTube === false ? '' : safeContactUrl(companyCache.youtube);
+        if (!email && !instagram && !youtube) {
+            removeHeaderContactBar();
+            return;
+        }
+
+        var bar = navbar.querySelector('.header-contact-bar');
+        if (!bar) {
+            bar = document.createElement('div');
+            bar.className = 'header-contact-bar';
+            navbar.insertBefore(bar, navbar.firstChild);
+        }
+        bar.innerHTML = '';
+
+        var inner = document.createElement('div');
+        inner.className = 'header-contact-bar__inner';
+        if (email) {
+            var emailLink = document.createElement('a');
+            emailLink.className = 'header-contact-bar__email';
+            emailLink.href = 'mailto:' + email;
+            emailLink.setAttribute('aria-label', 'Email ' + email);
+            emailLink.setAttribute('title', email);
+            emailLink.innerHTML = CONTACT_BAR_EMAIL_ICON + '<span>' + escapeHtml(email) + '</span>';
+            emailLink.addEventListener('click', function () { trackEvent('click_email'); });
+            inner.appendChild(emailLink);
+        }
+
+        var social = document.createElement('div');
+        social.className = 'header-contact-bar__socials';
+        if (instagram) social.appendChild(createContactBarSocialLink('Instagram', instagram, 'click_instagram'));
+        if (youtube) social.appendChild(createContactBarSocialLink('YouTube', youtube, 'click_youtube'));
+        if (social.children.length) inner.appendChild(social);
+
+        bar.appendChild(inner);
+        navbar.classList.add('has-contact-bar');
+    }
 
     function createMessengerLink(label, href, className, trackingName, iconName) {
         var link = document.createElement('a');
@@ -1841,14 +1927,19 @@
                 gaTrackingId = company.ga4TrackingId || '';
                 loadGaIfAllowed();
                 initSeoMeta(company);
+                renderHeaderContactBar();
             })
-            .catch(function () {});
+            .catch(function () {
+                companyCache = null;
+                removeHeaderContactBar();
+            });
     }
 
     function initGlobalShellContent() {
         return fetchJson('/api/content-blocks/global-shell')
             .then(function (block) {
                 globalShellCache = block && block.body ? window.LongxiangI18n.localizeContentTree(block.body, locale) : {};
+                renderHeaderContactBar();
                 ensureConsentUi();
                 applyFunctionalEmbeds();
                 updateMainNavigation();
@@ -1865,7 +1956,10 @@
                 if (floating) floating.textContent = shellValue('inquiry', 'floatingLabel', '');
                 initContactForm();
             })
-            .catch(function () {});
+            .catch(function () {
+                globalShellCache = {};
+                renderHeaderContactBar();
+            });
     }
 
     function setFormStatus(form, message, type) {

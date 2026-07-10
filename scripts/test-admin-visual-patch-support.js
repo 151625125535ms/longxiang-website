@@ -189,7 +189,23 @@ const blocks = {
         }
     },
     about: { slug: 'about-us', version: 1, body_json: { hero: { title: 'About' } } },
-    global: { slug: 'global-shell', version: 1, body_json: { navigation: { mainLinks: [] } } }
+    contact: {
+        slug: 'contact',
+        version: 1,
+        body_json: {
+            email: 'sales@longxiang.test',
+            instagram: 'https://www.instagram.com/longxiang.test/',
+            youtube: 'https://www.youtube.com/@longxiang-test',
+            contactPage: {
+                faq: {
+                    items: [{ question: 'How quickly?', answer: 'Within one business day.' }],
+                    itemsPatchFr: { index_0: { questionFr: 'Sous quel délai ?', answerFr: 'Sous un jour ouvré.' } },
+                    itemsPatchRu: { index_0: { questionRu: 'Как быстро?', answerRu: 'В течение рабочего дня.' } }
+                }
+            }
+        }
+    },
+    'global-shell': { slug: 'global-shell', version: 1, body_json: { navigation: { mainLinks: [] } } }
 };
 
 function apiBlock(slug) {
@@ -229,7 +245,9 @@ async function fieldSnapshot(page) {
         return fields.map(function (field) {
             return {
                 path: field.getAttribute('data-visual-field'),
-                value: field.value || ''
+                value: field.value || '',
+                type: field.type || '',
+                checked: field.type === 'checkbox' ? field.checked : null
             };
         });
     });
@@ -248,6 +266,8 @@ function assertField(fields, path, text) {
 async function main() {
     const server = await startStaticServer();
     let capturedSolutionsSave = null;
+    let capturedContactSave = null;
+    let capturedGlobalShellSave = null;
     const browser = await chromium.launch({ headless: true });
     try {
         const page = await browser.newPage();
@@ -261,6 +281,8 @@ async function main() {
             if (request.method() === 'PUT') {
                 const payload = request.postDataJSON();
                 if (slug === 'solutions') capturedSolutionsSave = payload;
+                if (slug === 'contact') capturedContactSave = payload;
+                if (slug === 'global-shell') capturedGlobalShellSave = payload;
                 const block = apiBlock(slug);
                 block.version += 1;
                 block.body_json = payload.body_json;
@@ -334,7 +356,38 @@ async function main() {
         const hasArrayMutationsInRu = await page.locator('#visual-editor-content [data-visual-array-action="add"]').count();
         if (hasArrayMutationsInRu !== 0) throw new Error('Ru patch mode still exposes array structure mutation controls.');
 
-        console.log('admin visual Fr/Ru patch support OK');
+        await switchLanguage(page, 'default');
+        await clickVisualModule(page, 'contact', 'contactInfo');
+        fields = await fieldSnapshot(page);
+        assertField(fields, 'email', 'sales@longxiang.test');
+        assertField(fields, 'instagram', 'https://www.instagram.com/longxiang.test/');
+        assertField(fields, 'youtube', 'https://www.youtube.com/@longxiang-test');
+        if (fields.find((item) => item.path === 'instagram').type !== 'url' || fields.find((item) => item.path === 'youtube').type !== 'url') {
+            throw new Error('Instagram and YouTube visual fields must use URL inputs.');
+        }
+        await page.fill('[data-visual-field="instagram"]', 'https://www.instagram.com/longxiang-updated/');
+        await page.click('[data-visual-save]');
+        await page.waitForFunction(function () { return document.querySelector('#visual-save-status') && document.querySelector('#visual-save-status').textContent.indexOf('保存') === -1; }, null, { timeout: 10000 }).catch(function () {});
+        if (!capturedContactSave || capturedContactSave.body_json.instagram !== 'https://www.instagram.com/longxiang-updated/') {
+            throw new Error('Contact social URL was not saved to the existing contact content block.');
+        }
+
+        await clickVisualModule(page, 'global', 'contactBar');
+        fields = await fieldSnapshot(page);
+        ['navigation.contactBar.enabled', 'navigation.contactBar.showEmail', 'navigation.contactBar.showInstagram', 'navigation.contactBar.showYouTube'].forEach(function (path) {
+            assertField(fields, path);
+            if (fields.find((item) => item.path === path).checked !== true) {
+                throw new Error(`Legacy global-shell data should default ${path} to enabled.`);
+            }
+        });
+        await page.locator('[data-visual-field="navigation.contactBar.showYouTube"]').uncheck({ force: true });
+        await page.click('[data-visual-save]');
+        await page.waitForFunction(function () { return document.querySelector('#visual-save-status') && document.querySelector('#visual-save-status').textContent.indexOf('保存') === -1; }, null, { timeout: 10000 }).catch(function () {});
+        if (!capturedGlobalShellSave || capturedGlobalShellSave.body_json.navigation.contactBar.showYouTube !== false) {
+            throw new Error('Top contact bar toggle was not saved to global-shell.navigation.contactBar.');
+        }
+
+        console.log('admin visual patch and top contact bar support OK');
     } finally {
         await browser.close();
         server.close();
