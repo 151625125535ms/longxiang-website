@@ -60,7 +60,7 @@ test('CSP Report-Only 头存在', async ({ page }) => {
 });
 
 test.describe('顶部公共联系方式栏', function () {
-    test('桌面端透明顶栏、布局和滚动收起符合方案', async ({ page }) => {
+    test('桌面端顶栏滚动后保持显示并与导航同色', async ({ page }) => {
         await page.setViewportSize({ width: 1440, height: 900 });
         await mockHeaderContactBarData(page);
         await page.goto(BASE + '/index.html');
@@ -133,7 +133,23 @@ test.describe('顶部公共联系方式栏', function () {
         await expect(page.locator('.navbar')).toHaveClass(/scrolled/);
         await expect.poll(async function () {
             return bar.evaluate(function (element) { return element.getBoundingClientRect().height; });
-        }).toBeLessThan(1);
+        }).toBeGreaterThanOrEqual(39);
+        await expect.poll(async function () {
+            return bar.evaluate(function (element) { return getComputedStyle(element).backgroundColor; });
+        }).toBe('rgb(10, 22, 40)');
+        const scrolledLayout = await page.evaluate(function () {
+            var barEl = document.querySelector('.header-contact-bar');
+            var navbarEl = document.querySelector('.navbar');
+            return {
+                background: getComputedStyle(barEl).backgroundColor,
+                barHeight: barEl.getBoundingClientRect().height,
+                navbarHeight: navbarEl.getBoundingClientRect().height
+            };
+        });
+        expect(scrolledLayout.background).toBe('rgb(10, 22, 40)');
+        expect(scrolledLayout.barHeight).toBeLessThanOrEqual(41);
+        expect(scrolledLayout.navbarHeight).toBeGreaterThanOrEqual(109);
+        expect(scrolledLayout.navbarHeight).toBeLessThanOrEqual(111);
         await expect(page.locator('.navbar .nav-logo')).toBeVisible();
     });
 
@@ -182,6 +198,12 @@ test.describe('顶部公共联系方式栏', function () {
         expect(navHeight).toBeGreaterThanOrEqual(64);
         expect(navHeight).toBeLessThanOrEqual(66);
         await expect(page.locator('.hamburger')).toBeVisible();
+        await page.evaluate(function () { window.scrollTo(0, 180); });
+        const scrolledNavHeight = await page.locator('.navbar').evaluate(function (element) {
+            return element.getBoundingClientRect().height;
+        });
+        expect(scrolledNavHeight).toBeGreaterThanOrEqual(64);
+        expect(scrolledNavHeight).toBeLessThanOrEqual(66);
     });
 
     test('关闭开关或链接不安全时不输出对应入口', async ({ page }) => {

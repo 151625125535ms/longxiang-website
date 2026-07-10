@@ -1086,6 +1086,10 @@ p:last-child {
     align-items: stretch;
 }
 
+.navbar.has-contact-bar.scrolled {
+    height: 110px;
+}
+
 .navbar.has-contact-bar > .container {
     height: var(--navbar-height);
     flex: 0 0 var(--navbar-height);
@@ -1102,7 +1106,7 @@ p:last-child {
     color: var(--color-white-pure);
     border-bottom: 1px solid rgba(212, 168, 67, 0.55);
     opacity: 1;
-    transition: height 200ms ease, max-height 200ms ease, flex-basis 200ms ease, opacity 160ms ease, border-color 160ms ease;
+    transition: background-color var(--transition-base), height 200ms ease, max-height 200ms ease, flex-basis 200ms ease, opacity 160ms ease, border-color 160ms ease;
 }
 
 .header-contact-bar__inner {
@@ -1180,13 +1184,14 @@ p:last-child {
 }
 
 .navbar.scrolled .header-contact-bar {
-    height: 0;
-    max-height: 0;
-    flex-basis: 0;
-    border-bottom-width: 0;
-    border-bottom-color: transparent;
-    opacity: 0;
-    pointer-events: none;
+    height: 40px;
+    max-height: 40px;
+    flex-basis: 40px;
+    background: var(--color-navy);
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(212, 168, 67, 0.55);
+    opacity: 1;
+    pointer-events: auto;
 }
 
 .navbar.has-contact-bar.scrolled > .container {
@@ -2645,7 +2650,16 @@ p:last-child {
         height: var(--navbar-height);
     }
 
+    .navbar.has-contact-bar.scrolled {
+        height: var(--navbar-height);
+    }
+
     .navbar.has-contact-bar > .container {
+        height: var(--navbar-height);
+        flex-basis: var(--navbar-height);
+    }
+
+    .navbar.has-contact-bar.scrolled > .container {
         height: var(--navbar-height);
         flex-basis: var(--navbar-height);
     }
