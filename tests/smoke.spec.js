@@ -46,6 +46,8 @@ async function mockContactCardData(page) {
                     hero: { title: 'Contact Us', subtitle: 'Send your project requirements.' },
                     phone: '0371-85901122',
                     email: 'sales@longxiang.test',
+                    instagram: 'https://www.instagram.com/longxiang.test/',
+                    youtube: 'https://www.youtube.com/@longxiang-test',
                     headquarters: 'Zhengzhou Factory',
                     huaiyangBase: 'Zhoukou Factory',
                     contactPage: {
@@ -53,7 +55,8 @@ async function mockContactCardData(page) {
                         infoTitle: 'Headquarters Information',
                         officeLabel: 'Office',
                         emailLabel: 'Email',
-                        factoryAddressLabel: 'Factory Address'
+                        factoryAddressLabel: 'Factory Address',
+                        socialTitle: 'Social Media'
                     }
                 }
             }
@@ -83,7 +86,7 @@ test('CSP Report-Only 头存在', async ({ page }) => {
     expect(headers['content-security-policy-report-only']).toBeTruthy();
 });
 
-test('联系页移除 Office 卡片并将剩余卡片重排为一加二布局', async ({ page }) => {
+test('联系页三项联系方式采用精简列表且 Social Media 保持不变', async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await mockContactCardData(page);
     await page.goto(BASE + '/contact.html');
@@ -96,16 +99,58 @@ test('联系页移除 Office 卡片并将剩余卡片重排为一加二布局', 
     await expect(rows.nth(1).locator('strong')).toHaveText('Factory Address');
     await expect(rows.nth(1)).toContainText('Zhengzhou Factory');
     await expect(rows.nth(2)).toContainText('Zhoukou Factory');
+    const socialBlock = page.locator('.contact-social-block');
+    await expect(socialBlock).toBeVisible();
+    await expect(socialBlock.locator('h4')).toHaveText('Social Media');
+    await expect(socialBlock.locator('.contact-social-icons a')).toHaveCount(2);
 
-    const layout = await rows.evaluateAll(function (elements) {
-        return elements.map(function (element) {
+    const visual = await page.evaluate(function () {
+        var list = document.querySelector('.contact-info-list');
+        var elements = Array.from(list.querySelectorAll('.contact-info-row'));
+        var social = document.querySelector('.contact-social-block');
+        var socialIcons = document.querySelector('.contact-social-icons');
+        var socialLink = socialIcons.querySelector('a');
+        var rowStyle = getComputedStyle(elements[0]);
+        var socialStyle = getComputedStyle(social);
+        var socialLinkStyle = getComputedStyle(socialLink);
+        return {
+            rows: elements.map(function (element) {
             var box = element.getBoundingClientRect();
             return { x: box.x, y: box.y, width: box.width };
-        });
+            }),
+            listBorderTopWidth: getComputedStyle(list).borderTopWidth,
+            rowBackground: rowStyle.backgroundColor,
+            rowBorderRadius: rowStyle.borderRadius,
+            rowBorderLeftWidth: rowStyle.borderLeftWidth,
+            rowBorderRightWidth: rowStyle.borderRightWidth,
+            rowBorderBottomWidth: rowStyle.borderBottomWidth,
+            socialMarginTop: socialStyle.marginTop,
+            socialPaddingTop: socialStyle.paddingTop,
+            socialBorderTopWidth: socialStyle.borderTopWidth,
+            socialGap: getComputedStyle(socialIcons).gap,
+            socialLinkWidth: socialLinkStyle.width,
+            socialLinkHeight: socialLinkStyle.height
+        };
     });
-    expect(layout[0].width).toBeGreaterThan(layout[1].width * 1.8);
-    expect(Math.abs(layout[1].y - layout[2].y)).toBeLessThanOrEqual(1);
-    expect(layout[1].x).toBeLessThan(layout[2].x);
+    expect(visual.rows[0].width).toBeGreaterThan(500);
+    expect(Math.abs(visual.rows[0].width - visual.rows[1].width)).toBeLessThanOrEqual(1);
+    expect(Math.abs(visual.rows[1].width - visual.rows[2].width)).toBeLessThanOrEqual(1);
+    expect(Math.abs(visual.rows[0].x - visual.rows[1].x)).toBeLessThanOrEqual(1);
+    expect(Math.abs(visual.rows[1].x - visual.rows[2].x)).toBeLessThanOrEqual(1);
+    expect(visual.rows[0].y).toBeLessThan(visual.rows[1].y);
+    expect(visual.rows[1].y).toBeLessThan(visual.rows[2].y);
+    expect(visual.listBorderTopWidth).toBe('2px');
+    expect(visual.rowBackground).toBe('rgba(0, 0, 0, 0)');
+    expect(visual.rowBorderRadius).toBe('0px');
+    expect(visual.rowBorderLeftWidth).toBe('0px');
+    expect(visual.rowBorderRightWidth).toBe('0px');
+    expect(visual.rowBorderBottomWidth).toBe('1px');
+    expect(visual.socialMarginTop).toBe('24px');
+    expect(visual.socialPaddingTop).toBe('20px');
+    expect(visual.socialBorderTopWidth).toBe('1px');
+    expect(visual.socialGap).toBe('12px');
+    expect(visual.socialLinkWidth).toBe('44px');
+    expect(visual.socialLinkHeight).toBe('44px');
 });
 
 test.describe('顶部公共联系方式栏', function () {
