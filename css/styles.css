@@ -4710,6 +4710,10 @@ p:last-child {
     gap: 18px 22px;
 }
 
+.contact-email-row {
+    grid-column: 1 / -1;
+}
+
 .contact-info-row {
     display: grid;
     grid-template-columns: 46px minmax(0, 1fr);

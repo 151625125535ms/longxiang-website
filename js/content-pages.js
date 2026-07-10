@@ -1353,11 +1353,6 @@
         refreshDynamicUi();
     }
 
-    function phoneHref(phone) {
-        var clean = String(phone || '').replace(/[^\d+]/g, '');
-        return clean ? 'tel:' + clean : '#';
-    }
-
     function emailHref(email) {
         return email ? 'mailto:' + email : '#';
     }
@@ -1377,7 +1372,6 @@
             { key: 'youtube', label: 'YouTube' }
         ].filter(function (item) { return body[item.key]; });
         var infoTitle = localizedOrPageFallback(page, 'infoTitle', 'contactInfoTitle', localized(page, 'infoTitle'));
-        var officeLabel = localizedOrPageFallback(page, 'officeLabel', 'contactOfficeLabel', localized(page, 'officeLabel'));
         var emailLabel = localizedOrPageFallback(page, 'emailLabel', 'contactEmailLabel', localized(page, 'emailLabel'));
         var addressLabel = localizedOrPageFallback(page, 'factoryAddressLabel', 'contactAddressLabel', localized(page, 'factoryAddressLabel'));
         var socialTitle = localizedOrPageFallback(page, 'socialTitle', 'contactSocialTitle', localized(page, 'socialTitle'));
@@ -1387,8 +1381,7 @@
             '<div class="contact-info-card fade-in-left">' +
             '<div class="contact-section-heading"><span>' + escapeHtml(localized(page, 'companyName')) + '</span><h2>' + escapeHtml(infoTitle) + '</h2></div>' +
             '<div class="contact-info-list">' +
-            '<div class="contact-info-row"><span>&#9742;</span><div><strong>' + escapeHtml(officeLabel) + '</strong><a href="' + escapeHtml(phoneHref(body.phone)) + '">' + escapeHtml(body.phone || '') + '</a></div></div>' +
-            '<div class="contact-info-row"><span>&#9993;</span><div><strong>' + escapeHtml(emailLabel) + '</strong><a href="' + escapeHtml(emailHref(body.email)) + '">' + escapeHtml(body.email || '') + '</a></div></div>' +
+            '<div class="contact-info-row contact-email-row"><span>&#9993;</span><div><strong>' + escapeHtml(emailLabel) + '</strong><a href="' + escapeHtml(emailHref(body.email)) + '">' + escapeHtml(body.email || '') + '</a></div></div>' +
             '<div class="contact-info-row contact-address-row"><span>&#8982;</span><div><strong>' + escapeHtml(addressLabel) + '</strong><span>' + escapeHtml(localized(body, 'headquarters') || localized(body, 'address')) + '</span></div></div>' +
             '<div class="contact-info-row contact-address-row"><span>&#9635;</span><div><strong>' + escapeHtml(addressLabel) + '</strong><span>' + escapeHtml(localized(body, 'huaiyangBase')) + '</span></div></div>' +
             '</div>' +

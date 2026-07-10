@@ -37,6 +37,30 @@ async function mockHeaderContactBarData(page, overrides) {
     });
 }
 
+async function mockContactCardData(page) {
+    await page.route('**/api/content-blocks/contact', function (route) {
+        return route.fulfill({
+            json: {
+                slug: 'contact',
+                body: {
+                    hero: { title: 'Contact Us', subtitle: 'Send your project requirements.' },
+                    phone: '0371-85901122',
+                    email: 'sales@longxiang.test',
+                    headquarters: 'Zhengzhou Factory',
+                    huaiyangBase: 'Zhoukou Factory',
+                    contactPage: {
+                        companyName: 'Henan Longxiang Electrical Co., Ltd.',
+                        infoTitle: 'Headquarters Information',
+                        officeLabel: 'Office',
+                        emailLabel: 'Email',
+                        factoryAddressLabel: 'Factory Address'
+                    }
+                }
+            }
+        });
+    });
+}
+
 test('首页加载正常', async ({ page }) => {
     await page.goto(BASE + '/index.html');
     await expect(page).toHaveTitle(/Longxiang/i);
@@ -57,6 +81,31 @@ test('CSP Report-Only 头存在', async ({ page }) => {
     const resp = await page.goto(BASE + '/index.html');
     const headers = resp.headers();
     expect(headers['content-security-policy-report-only']).toBeTruthy();
+});
+
+test('联系页移除 Office 卡片并将剩余卡片重排为一加二布局', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await mockContactCardData(page);
+    await page.goto(BASE + '/contact.html');
+
+    const rows = page.locator('.contact-info-list .contact-info-row');
+    await expect(rows).toHaveCount(3);
+    await expect(page.locator('.contact-info-list a[href^="tel:"]')).toHaveCount(0);
+    await expect(rows.nth(0).locator('strong')).toHaveText('Email');
+    await expect(rows.nth(0).locator('a')).toHaveAttribute('href', 'mailto:sales@longxiang.test');
+    await expect(rows.nth(1).locator('strong')).toHaveText('Factory Address');
+    await expect(rows.nth(1)).toContainText('Zhengzhou Factory');
+    await expect(rows.nth(2)).toContainText('Zhoukou Factory');
+
+    const layout = await rows.evaluateAll(function (elements) {
+        return elements.map(function (element) {
+            var box = element.getBoundingClientRect();
+            return { x: box.x, y: box.y, width: box.width };
+        });
+    });
+    expect(layout[0].width).toBeGreaterThan(layout[1].width * 1.8);
+    expect(Math.abs(layout[1].y - layout[2].y)).toBeLessThanOrEqual(1);
+    expect(layout[1].x).toBeLessThan(layout[2].x);
 });
 
 test.describe('顶部公共联系方式栏', function () {
