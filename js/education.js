@@ -9,6 +9,8 @@
     var assetPrefix = window.LongxiangI18n && window.LongxiangI18n.assetBasePrefix
         ? window.LongxiangI18n.assetBasePrefix(locale)
         : (isArabic ? '../' : '');
+    var WEBSITE_ID = 'https://www.lxenelectric.com/#website';
+    var educationApiVersion = null;
 
     if (!pageRoot) return;
 
@@ -227,16 +229,22 @@
         meta.setAttribute('content', value);
     }
 
-    function upsertJsonLd(key, data) {
+    function upsertJsonLd(key, data, fields) {
         if (!key || !data) return;
         var script = document.querySelector('script[data-schema-auto="' + key + '"]');
-        if (!script) {
-            script = document.createElement('script');
-            script.type = 'application/ld+json';
-            script.setAttribute('data-schema-auto', key);
-            document.head.appendChild(script);
+        if (!script || educationApiVersion == null) return;
+        var nextVersion = String(educationApiVersion || 0);
+        if (script.getAttribute('data-schema-version') === nextVersion) return;
+        try {
+            var existing = JSON.parse(script.textContent || '{}');
+            (fields || []).forEach(function (property) {
+                if (Object.prototype.hasOwnProperty.call(data, property)) existing[property] = data[property];
+            });
+            script.textContent = JSON.stringify(existing).replace(/</g, '\\u003c');
+            script.setAttribute('data-schema-version', nextVersion);
+        } catch (err) {
+            return;
         }
-        script.textContent = JSON.stringify(data);
     }
 
     function stripBrandSuffix(value) {
@@ -292,12 +300,8 @@
             description: description,
             url: canonicalUrl,
             inLanguage: language,
-            isPartOf: {
-                '@type': 'WebSite',
-                name: 'Longxiang Electric',
-                url: window.location.origin + '/'
-            }
-        });
+            isPartOf: { '@id': WEBSITE_ID }
+        }, ['name', 'description', 'inLanguage', 'primaryImageOfPage']);
         upsertJsonLd('education-breadcrumb', {
             '@context': 'https://schema.org',
             '@type': 'BreadcrumbList',
@@ -315,7 +319,7 @@
                     item: canonicalUrl
                 }
             ]
-        });
+        }, ['itemListElement']);
     }
 
     function setCanonicalLink(path) {
@@ -637,8 +641,12 @@
 
     injectEducationSchema(null);
 
-    var educationPromise = fetchJson('/api/education')
-        .then(renderPage)
+    var educationPromise = fetchJson('/api/content-blocks/education')
+        .then(function (block) {
+            educationApiVersion = block && block.version != null ? Number(block.version) || 0 : null;
+            renderPage(block && block.body ? block.body : {});
+            return block;
+        })
         .catch(function () {
             pageRoot.setAttribute('data-education-fallback', 'static');
         });

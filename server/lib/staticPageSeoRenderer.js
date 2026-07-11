@@ -5,13 +5,19 @@ const {
     localizedHtmlShellPath
 } = require('./i18nRoutes');
 const { PUBLIC_COMPANY_IDENTITY } = require('./companyIdentity');
+const {
+    buildPageEntity,
+    buildHomeSiteGraph,
+    buildBreadcrumbEntity,
+    standaloneSchema
+} = require('./siteEntityGraph');
 
 const STATIC_SEO_PAGES = Object.freeze([
     Object.freeze({
         basePath: '/',
         file: 'index.html',
-        schemaType: 'Organization',
-        schemaKey: 'site'
+        schemaType: 'WebPage',
+        schemaKey: 'site-page'
     }),
     Object.freeze({
         basePath: '/about.html',
@@ -51,8 +57,8 @@ const STATIC_SEO_PAGES = Object.freeze([
     Object.freeze({
         basePath: '/contact.html',
         file: 'contact.html',
-        schemaType: 'LocalBusiness',
-        schemaKey: 'site'
+        schemaType: 'ContactPage',
+        schemaKey: 'contact-page'
     })
 ]);
 
@@ -150,6 +156,14 @@ function stripBrandSuffix(value) {
         .trim();
 }
 
+function localizedField(value, key, localeCode) {
+    if (!value || typeof value !== 'object') return '';
+    const code = String(localeCode || 'en');
+    const suffix = code === 'en' ? '' : code.charAt(0).toUpperCase() + code.slice(1);
+    const localized = suffix ? value[key + suffix] : value[key];
+    return localized == null || localized === '' ? String(value[key] || '') : String(localized);
+}
+
 function htmlEscape(value) {
     return String(value == null ? '' : value)
         .replace(/&/g, '&amp;')
@@ -170,8 +184,9 @@ function linkTag(rel, attributes) {
     return '<link rel="' + htmlEscape(rel) + '" ' + attributeText + '>';
 }
 
-function schemaScript(key, value) {
-    return '<script type="application/ld+json" data-schema-auto="' + htmlEscape(key) + '">'
+function schemaScript(key, value, version) {
+    const versionAttribute = version == null ? '' : ' data-schema-version="' + htmlEscape(version) + '"';
+    return '<script type="application/ld+json" data-schema-auto="' + htmlEscape(key) + '"' + versionAttribute + '>'
         + jsonScriptValue(value)
         + '</script>';
 }
@@ -183,9 +198,21 @@ function topLevelSchemaTypes(value) {
     return Array.isArray(type) ? type.map(String) : [String(type)];
 }
 
+function managedSchemaTypes(value) {
+    const types = topLevelSchemaTypes(value);
+    if (value && Array.isArray(value['@graph'])) {
+        value['@graph'].forEach(function (node) {
+            topLevelSchemaTypes(node).forEach(function (type) {
+                if (types.indexOf(type) === -1) types.push(type);
+            });
+        });
+    }
+    return types;
+}
+
 function stripManagedJsonLd(html, route) {
-    const managedKeys = [route.schemaKey, route.breadcrumbKey].filter(Boolean);
-    const managedTypes = [route.schemaType];
+    const managedKeys = [route.schemaKey, route.breadcrumbKey, 'site', 'site-graph', 'site-page', 'contact-page'].filter(Boolean);
+    const managedTypes = [route.schemaType, 'Organization', 'WebSite', 'LocalBusiness'];
     if (route.breadcrumbKey) managedTypes.push('BreadcrumbList');
 
     return String(html || '').replace(
@@ -195,7 +222,7 @@ function stripManagedJsonLd(html, route) {
             if (managedKeys.indexOf(attributes['data-schema-auto'] || '') !== -1) return '';
             try {
                 const value = JSON.parse(jsonText);
-                if (topLevelSchemaTypes(value).some(function (type) {
+                if (managedSchemaTypes(value).some(function (type) {
                     return managedTypes.indexOf(type) !== -1;
                 })) return '';
             } catch (err) {
@@ -217,53 +244,28 @@ function stripManagedHeadTags(html, route) {
 }
 
 function pageSchema(route, canonicalUrl, origin, name, description) {
-    if (route.schemaType === 'Organization') {
-        return {
-            '@context': 'https://schema.org',
-            '@type': 'Organization',
-            name: PUBLIC_COMPANY_IDENTITY.legalName,
-            alternateName: PUBLIC_COMPANY_IDENTITY.brandName,
+    if (route.basePath === '/' && route.locale.code === 'en') {
+        return buildHomeSiteGraph({
+            canonicalUrl,
+            name,
             description: description || name,
-            email: PUBLIC_COMPANY_IDENTITY.globalSalesEmail,
-            url: origin + '/',
-            logo: origin + '/assets/optimized/longxiang-logo-symbol-320.webp',
-            address: {
-                '@type': 'PostalAddress',
-                addressRegion: 'Henan',
-                addressCountry: 'CN'
-            }
-        };
+            language: route.locale.htmlLang
+        });
     }
-    if (route.schemaType === 'LocalBusiness') {
-        return {
-            '@context': 'https://schema.org',
-            '@type': 'LocalBusiness',
-            name: PUBLIC_COMPANY_IDENTITY.legalName,
-            email: PUBLIC_COMPANY_IDENTITY.globalSalesEmail,
-            address: PUBLIC_COMPANY_IDENTITY.headquarters,
-            url: origin + '/'
-        };
-    }
-    return {
-        '@context': 'https://schema.org',
-        '@type': route.schemaType,
-        name: name,
+    return standaloneSchema(buildPageEntity({
+        type: route.schemaType,
+        canonicalUrl,
+        name,
         description: description || name,
-        url: canonicalUrl,
-        inLanguage: route.locale.htmlLang,
-        isPartOf: {
-            '@type': 'WebSite',
-            name: PUBLIC_COMPANY_IDENTITY.brandName,
-            url: origin + '/'
-        }
-    };
+        language: route.locale.htmlLang,
+        aboutOrganization: route.basePath === '/' || route.basePath === '/about.html' || route.basePath === '/contact.html'
+    }));
 }
 
 function breadcrumbSchema(route, canonicalUrl, origin, name) {
-    return {
-        '@context': 'https://schema.org',
-        '@type': 'BreadcrumbList',
-        itemListElement: [
+    return standaloneSchema(buildBreadcrumbEntity({
+        canonicalUrl,
+        items: [
             {
                 '@type': 'ListItem',
                 position: 1,
@@ -277,7 +279,7 @@ function breadcrumbSchema(route, canonicalUrl, origin, name) {
                 item: canonicalUrl
             }
         ]
-    };
+    }));
 }
 
 function renderStaticPageSeoHtml(html, route, originValue) {
@@ -287,8 +289,15 @@ function renderStaticPageSeoHtml(html, route, originValue) {
         return !locale.pathPrefix;
     }) || locales[0];
     const canonicalUrl = origin + route.path;
-    const name = pageHeading(html) || stripBrandSuffix(pageTitle(html)) || PUBLIC_COMPANY_IDENTITY.brandName;
-    const description = metaDescription(html);
+    const schemaBody = route.schemaContentBlock && route.schemaContentBlock.body || {};
+    const schemaSeo = schemaBody.seo || {};
+    const schemaHero = schemaBody.hero || {};
+    const name = localizedField(schemaHero, 'title', route.locale.code)
+        || pageHeading(html)
+        || stripBrandSuffix(localizedField(schemaSeo, 'title', route.locale.code))
+        || stripBrandSuffix(pageTitle(html))
+        || PUBLIC_COMPANY_IDENTITY.brandName;
+    const description = localizedField(schemaSeo, 'description', route.locale.code) || metaDescription(html);
     const cleaned = stripManagedHeadTags(html, route);
     const tags = [linkTag('canonical', { href: canonicalUrl })];
 
@@ -302,9 +311,11 @@ function renderStaticPageSeoHtml(html, route, originValue) {
         hreflang: 'x-default',
         href: origin + localizedStaticPath(route.basePath, defaultLocale)
     }));
-    tags.push(schemaScript(route.schemaKey, pageSchema(route, canonicalUrl, origin, name, description)));
+    const schema = pageSchema(route, canonicalUrl, origin, name, description);
+    const schemaKey = route.basePath === '/' && route.locale.code === 'en' ? 'site-graph' : route.schemaKey;
+    tags.push(schemaScript(schemaKey, schema, route.schemaVersion));
     if (route.breadcrumbKey) {
-        tags.push(schemaScript(route.breadcrumbKey, breadcrumbSchema(route, canonicalUrl, origin, name)));
+        tags.push(schemaScript(route.breadcrumbKey, breadcrumbSchema(route, canonicalUrl, origin, name), route.schemaVersion));
     }
 
     if (!/<\/head>/i.test(cleaned)) {

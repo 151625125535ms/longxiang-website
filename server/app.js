@@ -64,6 +64,15 @@ const CONTENT_PAGE_SLUGS = Object.freeze({
     '/solutions.html': 'solutions',
     '/contact.html': 'contact'
 });
+const SEO_CONTENT_PAGE_SLUGS = Object.freeze({
+    '/': 'home',
+    '/about.html': 'about-us',
+    '/solutions.html': 'solutions',
+    '/education.html': 'education',
+    '/certifications.html': 'certifications',
+    '/compare.html': 'compare',
+    '/contact.html': 'contact'
+});
 
 // Only trust proxy XFF headers when explicitly configured — avoids IP spoofing for rate limiting.
 // Set TRUST_PROXY to the upstream proxy IP/CIDR (e.g. "10.0.0.0/8") or "1" for loopback-only.
@@ -238,20 +247,31 @@ function renderPublicShell(html, locale, pathname) {
 }
 
 staticSeoRouteDefinitions().forEach(function (route) {
-    app.get(route.path, function (req, res, next) {
+    const requestPaths = [route.path];
+    if (route.basePath === '/') {
+        requestPaths.push(route.locale.pathPrefix ? route.locale.pathPrefix + '/' : '/index.html');
+    }
+    app.get(requestPaths, function (req, res, next) {
         fs.readFile(route.filePath, 'utf8', function (err, html) {
             if (err) return next(err);
             try {
                 const contentSlug = CONTENT_PAGE_SLUGS[route.basePath];
+                const seoContentSlug = SEO_CONTENT_PAGE_SLUGS[route.basePath];
+                const seoContentBlock = seoContentSlug
+                    ? publicSiteDataSource.readContentBlock(seoContentSlug)
+                    : null;
                 const withContent = contentSlug
                     ? renderContentPageHtml(html, {
                         slug: contentSlug,
                         locale: route.locale,
-                        block: publicSiteDataSource.readContentBlock(contentSlug)
+                        block: seoContentBlock
                     })
                     : html;
                 const withShell = renderPublicShell(withContent, route.locale, req.path);
-                const rendered = renderStaticPageSeoHtml(withShell, route, requestOrigin(req));
+                const rendered = renderStaticPageSeoHtml(withShell, Object.assign({}, route, {
+                    schemaVersion: seoContentBlock && seoContentBlock.version || 0,
+                    schemaContentBlock: seoContentBlock
+                }), requestOrigin(req));
                 sendHtmlString(res, rendered, 200);
             } catch (renderErr) {
                 next(renderErr);
@@ -286,12 +306,13 @@ function sendProductDetailShell(req, res, next) {
     fs.readFile(filePath, 'utf8', function (err, html) {
         if (err) return next(err);
         const withBase = html.replace(/<head>/i, '<head>\n    <base href="' + baseHrefForLocale(locale) + '">');
+        const contentBlock = publicSiteDataSource.readContentBlock('product-pages');
         const withSeo = renderProductDetailSeoHtml(withBase, product, locale, requestOrigin(req));
         const withBody = renderProductDetailBodyHtml(withSeo, {
             locale,
             product,
             products: publicSiteDataSource.readProducts(),
-            contentBlock: publicSiteDataSource.readContentBlock('product-pages')
+            contentBlock
         });
         const withShell = renderPublicShell(withBody, locale, req.path);
         sendHtmlString(res, withShell, 200);
@@ -330,7 +351,8 @@ function sendProductListShell(req, res, next) {
             products: publicSiteDataSource.readProducts(),
             taxonomy: publicSiteDataSource.readProductCategories(),
             query: req.query || {},
-            contentBlock: publicSiteDataSource.readContentBlock('product-pages')
+            contentBlock: publicSiteDataSource.readContentBlock('product-pages'),
+            requireSeoSchema: true
         });
         sendHtmlString(res, renderPublicShell(withProducts, locale, req.path), 200);
     });

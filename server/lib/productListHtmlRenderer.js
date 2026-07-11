@@ -3,6 +3,11 @@
 const presentation = require('../../js/product-page-presentation');
 const { findElementRange } = require('./contentPageHtmlRenderer');
 const { renderHeroBackgroundHtml } = require('./pageHeroHtmlRenderer');
+const {
+    SITE_ENTITY_IDS,
+    entityReference,
+    pageEntityId
+} = require('./siteEntityGraph');
 
 function replaceRange(html, range, innerHtml, openTag) {
     if (!range) throw new Error('Missing product list SSR marker');
@@ -32,6 +37,33 @@ function injectScripts(html, bootstrap) {
     return html.replace(/<script\b[^>]*src=(["'])[^"']*product-presentation-i18n\.js[^"']*\1/i, payload + '$&');
 }
 
+function renderProductListSchemaHtml(html, required) {
+    let found = false;
+    const rendered = String(html || '').replace(
+        /<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi,
+        function (full, jsonText) {
+            let schema;
+            try {
+                schema = JSON.parse(jsonText);
+            } catch (err) {
+                return full;
+            }
+            const types = Array.isArray(schema && schema['@type']) ? schema['@type'] : [schema && schema['@type']];
+            if (types.indexOf('CollectionPage') === -1) return full;
+            const canonicalUrl = String(schema.url || '').trim();
+            if (!canonicalUrl) throw new Error('Product list CollectionPage schema is missing url');
+            schema['@id'] = pageEntityId(canonicalUrl);
+            schema.isPartOf = entityReference(SITE_ENTITY_IDS.website);
+            found = true;
+            return '<script type="application/ld+json" data-schema-auto="product-list-page">'
+                + JSON.stringify(schema).replace(/</g, '\\u003c')
+                + '</script>';
+        }
+    );
+    if (!found && required) throw new Error('Missing product list CollectionPage schema');
+    return rendered;
+}
+
 function renderProductListHtml(html, options) {
     options = options || {};
     const locale = String(options.locale && options.locale.code || options.locale || 'en');
@@ -45,7 +77,7 @@ function renderProductListHtml(html, options) {
         contentBlock,
         contentVersion: contentBlock.version || 0
     });
-    let rendered = String(html || '');
+    let rendered = renderProductListSchemaHtml(html, Boolean(options.requireSeoSchema));
     rendered = renderHeroBackgroundHtml(rendered, { locale, backgroundImage: contentBlock.body.productsHero && contentBlock.body.productsHero.backgroundImage });
     rendered = replaceByAttribute(rendered, 'data-content-page', 'product-pages',
         rendered.slice(findElementRange(rendered, 'data-content-page', 'product-pages').openEnd, findElementRange(rendered, 'data-content-page', 'product-pages').closeStart),
@@ -69,4 +101,4 @@ function renderProductListHtml(html, options) {
     return injectScripts(rendered, view.bootstrap);
 }
 
-module.exports = { renderProductListHtml };
+module.exports = { renderProductListHtml, renderProductListSchemaHtml };

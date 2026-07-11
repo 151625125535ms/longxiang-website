@@ -1420,38 +1420,6 @@
         injectAlternateSeoLinks(url);
         injectMeta('', 'og:image', seoDefaultImage(company));
 
-        var path = window.location.pathname;
-        var schema = null;
-        if (/contact\.html$/.test(path)) {
-            schema = {
-                '@context': 'https://schema.org',
-                '@type': 'LocalBusiness',
-                name: company.name,
-                email: company.email,
-                telephone: company.phone,
-                address: company.address,
-                url: window.location.origin + '/'
-            };
-        } else if (/\/$|index\.html$/.test(path)) {
-            schema = {
-                '@context': 'https://schema.org',
-                '@type': 'Organization',
-                name: company.name,
-                alternateName: company.nameCN,
-                email: company.email,
-                telephone: company.phone,
-                address: company.address,
-                url: window.location.origin + '/'
-            };
-        }
-
-        if (schema && !document.querySelector('script[data-schema-auto="site"]')) {
-            var script = document.createElement('script');
-            script.type = 'application/ld+json';
-            script.setAttribute('data-schema-auto', 'site');
-            script.textContent = JSON.stringify(schema);
-            document.head.appendChild(script);
-        }
     }
 
     function upsertLink(rel, attrs) {

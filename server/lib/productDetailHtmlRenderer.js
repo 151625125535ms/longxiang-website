@@ -53,6 +53,13 @@ function injectScripts(html, bootstrap) {
     return html.replace(pattern, scripts + '$&');
 }
 
+function markSchemaVersion(html, key, version) {
+    const pattern = new RegExp('(<script\\b[^>]*data-schema-auto=(["\\\'])' + key + '\\2[^>]*)(>)', 'i');
+    return String(html || '').replace(pattern, function (_, tag, quote, close) {
+        return setAttribute(tag + close, 'data-schema-version', version).replace(/>$/, '') + close;
+    });
+}
+
 function renderProductDetailBodyHtml(html, options) {
     options = options || {};
     const locale = String(options.locale && options.locale.code || options.locale || 'en');
@@ -99,6 +106,8 @@ function renderProductDetailBodyHtml(html, options) {
         tag = setAttribute(tag, 'decoding', 'async');
         return setAttribute(tag, 'fetchpriority', 'high');
     });
+    rendered = markSchemaVersion(rendered, 'product-page', view.key);
+    rendered = markSchemaVersion(rendered, 'product-breadcrumb', view.key);
     return injectScripts(rendered, view.bootstrap);
 }
 

@@ -314,8 +314,11 @@ async function main() {
                         throw new Error('raw hreflang missing ' + language + ' for ' + route.path);
                     }
                 });
+                const expectedSchemaKey = route.basePath === '/' && route.locale.code === 'en'
+                    ? 'site-graph'
+                    : route.schemaKey;
                 if (head.indexOf('"@type":"' + route.schemaType + '"') === -1 ||
-                        head.indexOf('data-schema-auto="' + route.schemaKey + '"') === -1) {
+                        head.indexOf('data-schema-auto="' + expectedSchemaKey + '"') === -1) {
                     throw new Error('raw page schema mismatch for ' + route.path);
                 }
                 if (route.breadcrumbKey &&

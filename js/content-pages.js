@@ -13,6 +13,8 @@
         ? window.LongxiangI18n.assetBasePrefix(locale)
         : (isArabic ? '../' : '');
     var ARABIC_CHAT_APP_NAME = '\u0648\u0627\u062a\u0633\u0627\u0628';
+    var WEBSITE_ID = 'https://www.lxenelectric.com/#website';
+    var contentApiVersion = null;
     var ARABIC_TEXT_FALLBACKS = {
         'Home': 'الرئيسية',
         'Products': 'المنتجات',
@@ -763,16 +765,22 @@
         }
     }
 
-    function upsertJsonLd(key, data) {
+    function upsertJsonLd(key, data, fields) {
         if (!key || !data) return;
         var script = document.querySelector('script[data-schema-auto="' + key + '"]');
-        if (!script) {
-            script = document.createElement('script');
-            script.type = 'application/ld+json';
-            script.setAttribute('data-schema-auto', key);
-            document.head.appendChild(script);
+        if (!script || contentApiVersion == null) return;
+        var nextVersion = String(contentApiVersion || 0);
+        if (script.getAttribute('data-schema-version') === nextVersion) return;
+        try {
+            var existing = JSON.parse(script.textContent || '{}');
+            (fields || []).forEach(function (property) {
+                if (Object.prototype.hasOwnProperty.call(data, property)) existing[property] = data[property];
+            });
+            script.textContent = JSON.stringify(existing).replace(/</g, '\\u003c');
+            script.setAttribute('data-schema-version', nextVersion);
+        } catch (err) {
+            return;
         }
-        script.textContent = JSON.stringify(data);
     }
 
     function stripBrandSuffix(value) {
@@ -831,14 +839,10 @@
             description: description || stripBrandSuffix(title),
             url: canonicalUrl,
             inLanguage: language,
-            isPartOf: {
-                '@type': 'WebSite',
-                name: 'Longxiang Electric',
-                url: window.location.origin + '/'
-            }
+            isPartOf: { '@id': WEBSITE_ID }
         };
         var homeUrl = window.location.origin + localizedHomePath();
-        upsertJsonLd('content-page', pageSchema);
+        upsertJsonLd('content-page', pageSchema, ['name', 'description', 'inLanguage', 'primaryImageOfPage']);
         upsertJsonLd('content-breadcrumb', {
             '@context': 'https://schema.org',
             '@type': 'BreadcrumbList',
@@ -856,7 +860,7 @@
                     item: canonicalUrl
                 }
             ]
-        });
+        }, ['itemListElement']);
     }
 
     function currentCanonicalUrl() {
@@ -2037,6 +2041,7 @@
     }
 
     function renderPage(block) {
+        contentApiVersion = block && block.version != null ? Number(block.version) || 0 : null;
         var body = block && block.body ? block.body : {};
         if (window.LongxiangI18n && window.LongxiangI18n.localizeContentTree) {
             body = window.LongxiangI18n.localizeContentTree(body, locale);

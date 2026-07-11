@@ -10,6 +10,7 @@
         : (isArabic ? '../' : '');
     var productPageContent = {};
     var productPageContentVersion = 0;
+    var WEBSITE_ID = 'https://www.lxenelectric.com/#website';
     var ARABIC_TEXT_FALLBACKS = {
         'Product Details': 'تفاصيل المنتج',
         'Review product information and request a quotation.': 'راجع معلومات المنتج واطلب عرض سعر.',
@@ -550,14 +551,21 @@
         meta.setAttribute('content', content);
     }
 
-    function injectJsonLd(key, data) {
-        var old = document.querySelector('script[data-schema-auto="' + key + '"]');
-        if (old) old.remove();
-        var script = document.createElement('script');
-        script.type = 'application/ld+json';
-        script.setAttribute('data-schema-auto', key);
-        script.textContent = JSON.stringify(data);
-        document.head.appendChild(script);
+    function injectJsonLd(key, data, versionKey, fields) {
+        var script = document.querySelector('script[data-schema-auto="' + key + '"]');
+        if (!script || !versionKey) return;
+        var nextVersion = String(versionKey);
+        if (script.getAttribute('data-schema-version') === nextVersion) return;
+        try {
+            var existing = JSON.parse(script.textContent || '{}');
+            (fields || []).forEach(function (property) {
+                if (Object.prototype.hasOwnProperty.call(data, property)) existing[property] = data[property];
+            });
+            script.textContent = JSON.stringify(existing).replace(/</g, '\\u003c');
+            script.setAttribute('data-schema-version', nextVersion);
+        } catch (err) {
+            return;
+        }
     }
 
     function productCanonicalUrls(product) {
@@ -871,7 +879,7 @@
         if (sidebar) sidebar.style.display = 'none';
     }
 
-    function injectProductPageSchema(product, name, desc, canonicalUrl) {
+    function injectProductPageSchema(product, name, desc, canonicalUrl, viewKey) {
         var oldProductSchema = document.querySelector('script[data-schema-auto="product"]');
         if (oldProductSchema) oldProductSchema.remove();
         var schema = {
@@ -881,16 +889,12 @@
             description: desc,
             url: canonicalUrl,
             inLanguage: locale,
-            isPartOf: {
-                '@type': 'WebSite',
-                name: detailLabel('titleSuffix'),
-                url: window.location.origin + '/'
-            }
+            isPartOf: { '@id': WEBSITE_ID }
         };
         var image = absoluteImageUrl(product.image);
         if (image) schema.primaryImageOfPage = image;
 
-        injectJsonLd('product-page', schema);
+        injectJsonLd('product-page', schema, viewKey, ['name', 'description', 'inLanguage', 'primaryImageOfPage']);
         injectJsonLd('product-breadcrumb', {
             '@context': 'https://schema.org',
             '@type': 'BreadcrumbList',
@@ -910,7 +914,7 @@
                     item: canonicalUrl
                 }
             ]
-        });
+        }, viewKey, ['itemListElement']);
     }
 
     function productSsrRoot() {
@@ -967,7 +971,7 @@
         var name = localize(product, 'name');
         var desc = localize(product, 'description') || localize(product, 'shortDesc');
         var canonicalUrl = injectProductSeo(product, name, desc);
-        injectProductPageSchema(product, name, desc, canonicalUrl);
+        injectProductPageSchema(product, name, desc, canonicalUrl, view.key);
         document.querySelectorAll('[data-open-inquiry]').forEach(function (button) {
             button.setAttribute('data-product-id', product.id);
             button.setAttribute('data-product-name', name);

@@ -1,6 +1,11 @@
 'use strict';
 
 const { localeEntries } = require('./i18nRoutes');
+const {
+    buildPageEntity,
+    buildBreadcrumbEntity,
+    standaloneSchema
+} = require('./siteEntityGraph');
 
 const PRODUCT_LABELS = {
     en: 'Products',
@@ -106,22 +111,15 @@ function absoluteUrl(value, origin) {
 function productPageJsonLd(product, localeCode, canonicalUrl, origin) {
     const name = localizedProductValue(product, 'name', localeCode) || localizedProductValue(product, 'name', 'en');
     const description = productSeoDescription(product, localeCode);
-    const schema = {
-        '@context': 'https://schema.org',
-        '@type': 'WebPage',
+    const image = absoluteUrl(product && product.image, origin);
+    return standaloneSchema(buildPageEntity({
+        type: 'WebPage',
+        canonicalUrl,
         name,
         description,
-        url: canonicalUrl,
-        inLanguage: localeCode,
-        isPartOf: {
-            '@type': 'WebSite',
-            name: TITLE_SUFFIX,
-            url: origin + '/'
-        }
-    };
-    const image = absoluteUrl(product && product.image, origin);
-    if (image) schema.primaryImageOfPage = image;
-    return schema;
+        language: localeCode,
+        primaryImageOfPage: image
+    }));
 }
 
 function productBreadcrumbJsonLd(product, localeCode, canonicalUrl, origin) {
@@ -129,10 +127,9 @@ function productBreadcrumbJsonLd(product, localeCode, canonicalUrl, origin) {
         return entry.code === localeCode;
     }) || localeEntries()[0];
     const productName = localizedProductValue(product, 'name', localeCode) || localizedProductValue(product, 'name', 'en');
-    return {
-        '@context': 'https://schema.org',
-        '@type': 'BreadcrumbList',
-        itemListElement: [
+    return standaloneSchema(buildBreadcrumbEntity({
+        canonicalUrl,
+        items: [
             {
                 '@type': 'ListItem',
                 position: 1,
@@ -146,7 +143,7 @@ function productBreadcrumbJsonLd(product, localeCode, canonicalUrl, origin) {
                 item: canonicalUrl
             }
         ]
-    };
+    }));
 }
 
 function htmlEscape(value) {

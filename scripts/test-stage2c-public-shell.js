@@ -29,9 +29,10 @@ const contactBlock = readPublicContentBlock('contact');
 assert(contactBlock && contactBlock.version > 0);
 assert(!/whatsapp/i.test(JSON.stringify(contactBlock)), 'contact block exposes WhatsApp configuration');
 
-const versionedProductScripts = versionHydrationScripts('<script src="../js/products-list.js?v=old"></script><script src="js/product-detail.js"></script>');
-assert(versionedProductScripts.includes('/js/products-list.js?v=20260711-stage2c-final'));
-assert(versionedProductScripts.includes('/js/product-detail.js?v=20260711-stage2c-final'));
+const versionedProductScripts = versionHydrationScripts('<script src="../js/products-list.js?v=old"></script><script src="js/product-detail.js"></script><script src="js/education.js?v=old"></script>');
+assert(versionedProductScripts.includes('/js/products-list.js?v=20260712-stage2d-entity-graph'));
+assert(versionedProductScripts.includes('/js/product-detail.js?v=20260712-stage2d-entity-graph'));
+assert(versionedProductScripts.includes('/js/education.js?v=20260712-stage2d-entity-graph'));
 
 locales.forEach(function ([locale, file, pathname]) {
     const html = fs.readFileSync(path.join(root, file), 'utf8');
@@ -48,11 +49,11 @@ locales.forEach(function ([locale, file, pathname]) {
     assert(rendered.includes('class="footer-grid"'));
     assert(rendered.includes('henanlxgj@163.com'));
     assert(rendered.includes('https://www.lxelec.cn/'));
-    assert(rendered.includes('/js/main.js?v=20260711-stage2c-final'));
-    assert(rendered.includes('/js/content-pages.js?v=20260711-stage2c-final'));
+    assert(rendered.includes('/js/main.js?v=20260712-stage2d-entity-graph'));
+    assert(rendered.includes('/js/content-pages.js?v=20260712-stage2d-entity-graph'));
     const hydrationScripts = Array.from(rendered.matchAll(/src=["']([^"']*js\/(?:main|content-pages)\.js[^"']*)["']/gi)).map(function (match) { return match[1]; });
     assert(hydrationScripts.length >= 2);
-    assert(hydrationScripts.every(function (src) { return src.endsWith('?v=20260711-stage2c-final'); }));
+    assert(hydrationScripts.every(function (src) { return src.endsWith('?v=20260712-stage2d-entity-graph'); }));
     forbidden.forEach(function (value) {
         assert(!rendered.toLowerCase().includes(value.toLowerCase()), locale + ' exposed ' + value);
     });

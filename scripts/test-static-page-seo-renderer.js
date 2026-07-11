@@ -54,6 +54,17 @@ function topLevelType(entry) {
     return entry && entry.value ? entry.value['@type'] : '';
 }
 
+function schemaNodes(entries) {
+    return entries.flatMap(function (entry) {
+        const values = [];
+        if (entry.value && entry.value['@type']) values.push(entry.value);
+        if (entry.value && Array.isArray(entry.value['@graph'])) values.push(...entry.value['@graph']);
+        return values.map(function (value) {
+            return { key: entry.key, value };
+        });
+    });
+}
+
 function expectedAlternates(routes, basePath) {
     const group = routes.filter(function (route) {
         return route.basePath === basePath;
@@ -84,6 +95,7 @@ function run() {
         const canonicals = headLinks(rendered, 'canonical');
         const alternates = headLinks(rendered, 'alternate');
         const schemas = jsonLdEntries(rendered);
+        const flattenedSchemas = schemaNodes(schemas);
         const expected = expectedAlternates(routes, route.basePath);
 
         assert.strictEqual(bodyHtml(rendered), bodyHtml(source), 'renderer must not change body HTML: ' + route.path);
@@ -102,33 +114,28 @@ function run() {
                 'hreflang URL mismatch for ' + language + ': ' + route.path);
         });
 
-        const pageSchemas = schemas.filter(function (entry) {
+        const pageSchemas = flattenedSchemas.filter(function (entry) {
             return topLevelType(entry) === route.schemaType;
         });
         assert.strictEqual(pageSchemas.length, 1, 'route must have one ' + route.schemaType + ' schema: ' + route.path);
-        assert.strictEqual(pageSchemas[0].key, route.schemaKey, 'page schema key mismatch: ' + route.path);
+        const expectedSchemaKey = route.basePath === '/' && route.locale.code === 'en' ? 'site-graph' : route.schemaKey;
+        assert.strictEqual(pageSchemas[0].key, expectedSchemaKey, 'page schema key mismatch: ' + route.path);
+        assert.strictEqual(pageSchemas[0].value.url, ORIGIN + route.path, 'page schema URL mismatch: ' + route.path);
+        assert.strictEqual(pageSchemas[0].value['@id'], ORIGIN + route.path + '#webpage', 'page schema ID mismatch: ' + route.path);
+        assert.strictEqual(pageSchemas[0].value.inLanguage, route.locale.htmlLang,
+            'page schema language mismatch: ' + route.path);
+        assert.deepStrictEqual(pageSchemas[0].value.isPartOf,
+            { '@id': ORIGIN + '/#website' }, 'WebSite reference mismatch: ' + route.path);
 
-        if (route.schemaType !== 'Organization' && route.schemaType !== 'LocalBusiness') {
-            assert.strictEqual(pageSchemas[0].value.url, ORIGIN + route.path, 'page schema URL mismatch: ' + route.path);
-            assert.strictEqual(pageSchemas[0].value.inLanguage, route.locale.htmlLang,
-                'page schema language mismatch: ' + route.path);
-        }
-        if (route.schemaType === 'Organization') {
-            assert(pageSchemas[0].value.description, 'Organization description must be preserved: ' + route.path);
-            assert.strictEqual(pageSchemas[0].value.logo,
-                ORIGIN + '/assets/optimized/longxiang-logo-symbol-320.webp',
-                'Organization logo must be preserved: ' + route.path);
-            assert.strictEqual(pageSchemas[0].value.address && pageSchemas[0].value.address.addressCountry,
-                'CN', 'Organization country must be preserved: ' + route.path);
-        }
-
-        const breadcrumbs = schemas.filter(function (entry) {
+        const breadcrumbs = flattenedSchemas.filter(function (entry) {
             return topLevelType(entry) === 'BreadcrumbList';
         });
         assert.strictEqual(breadcrumbs.length, route.breadcrumbKey ? 1 : 0,
             'breadcrumb count mismatch: ' + route.path);
         if (route.breadcrumbKey) {
             assert.strictEqual(breadcrumbs[0].key, route.breadcrumbKey, 'breadcrumb key mismatch: ' + route.path);
+            assert.strictEqual(breadcrumbs[0].value['@id'], ORIGIN + route.path + '#breadcrumb',
+                'breadcrumb ID mismatch: ' + route.path);
             assert.strictEqual(breadcrumbs[0].value.itemListElement[1].item, ORIGIN + route.path,
                 'breadcrumb current item mismatch: ' + route.path);
         }

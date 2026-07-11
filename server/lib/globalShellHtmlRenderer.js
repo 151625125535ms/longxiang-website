@@ -1,6 +1,6 @@
 'use strict';
 
-const HYDRATION_ASSET_VERSION = '20260711-stage2c-final';
+const HYDRATION_ASSET_VERSION = '20260712-stage2d-entity-graph';
 
 function escapeHtml(value) {
     return String(value == null ? '' : value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
@@ -87,7 +87,7 @@ function footerHtml(body, company, locale) {
 }
 
 function versionHydrationScripts(html) {
-    return String(html || '').replace(/(<script\b[^>]*\bsrc=)(["'])(?:\.\.\/|\.\/|\/)?js\/(main|content-pages|products-list|product-detail)\.js(?:\?[^"']*)?\2/gi, function (_, prefix, quote, name) {
+    return String(html || '').replace(/(<script\b[^>]*\bsrc=)(["'])(?:\.\.\/|\.\/|\/)?js\/(main|content-pages|education|products-list|product-detail)\.js(?:\?[^"']*)?\2/gi, function (_, prefix, quote, name) {
         return prefix + quote + '/js/' + name + '.js?v=' + HYDRATION_ASSET_VERSION + quote;
     });
 }
