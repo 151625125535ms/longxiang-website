@@ -22,6 +22,8 @@ const { renderProductDetailSeoHtml } = require('./lib/productDetailSeoRenderer')
 const { readPublicContentBlock, localizePublicContentBlock } = require('./lib/publicContentBlocks');
 const { readPublicCompanyView } = require('./lib/publicCompanyView');
 const { renderGlobalShellHtml } = require('./lib/globalShellHtmlRenderer');
+const { createRuntimePublicSiteDataSource } = require('./lib/publicSiteDataSource');
+const { renderContentPageHtml } = require('./lib/contentPageHtmlRenderer');
 const {
     staticSeoRouteDefinitions,
     renderStaticPageSeoHtml
@@ -54,6 +56,13 @@ try { rateLimit = require('express-rate-limit'); } catch (err) { rateLimit = nul
 const app = express();
 const PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST || '127.0.0.1';
+const publicSiteDataSource = createRuntimePublicSiteDataSource();
+const CONTENT_PAGE_SLUGS = Object.freeze({
+    '/': 'home',
+    '/about.html': 'about-us',
+    '/solutions.html': 'solutions',
+    '/contact.html': 'contact'
+});
 
 // Only trust proxy XFF headers when explicitly configured — avoids IP spoofing for rate limiting.
 // Set TRUST_PROXY to the upstream proxy IP/CIDR (e.g. "10.0.0.0/8") or "1" for loopback-only.
@@ -232,7 +241,15 @@ staticSeoRouteDefinitions().forEach(function (route) {
         fs.readFile(route.filePath, 'utf8', function (err, html) {
             if (err) return next(err);
             try {
-                const withShell = renderPublicShell(html, route.locale, req.path);
+                const contentSlug = CONTENT_PAGE_SLUGS[route.basePath];
+                const withContent = contentSlug
+                    ? renderContentPageHtml(html, {
+                        slug: contentSlug,
+                        locale: route.locale,
+                        block: publicSiteDataSource.readContentBlock(contentSlug)
+                    })
+                    : html;
+                const withShell = renderPublicShell(withContent, route.locale, req.path);
                 const rendered = renderStaticPageSeoHtml(withShell, route, requestOrigin(req));
                 sendHtmlString(res, rendered, 200);
             } catch (renderErr) {

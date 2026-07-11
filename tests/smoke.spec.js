@@ -506,3 +506,50 @@ test.describe('顶部公共联系方式栏', function () {
         await expect(page.locator('[data-contact-bar-social="youtube"]')).toBeVisible();
     });
 });
+
+test('同版本重点正文水合保留服务端正文和联系表单节点', async ({ page }) => {
+    await page.route('**/api/content-blocks/contact', async (route) => {
+        await new Promise((resolve) => setTimeout(resolve, 700));
+        await route.continue();
+    });
+    await page.goto(BASE + '/contact.html', { waitUntil: 'domcontentloaded' });
+    const probes = await page.evaluate(() => {
+        const root = document.querySelector('[data-content-page="contact"]');
+        const section = root && root.querySelector('section');
+        const form = root && root.querySelector('#contactForm');
+        if (section) section.setAttribute('data-content-node-probe', 'section');
+        if (form) form.setAttribute('data-content-node-probe', 'form');
+        return [Boolean(section), Boolean(form), root && root.getAttribute('data-content-version')];
+    });
+    expect(probes[0]).toBe(true);
+    expect(probes[1]).toBe(true);
+    expect(probes[2]).toBeTruthy();
+    await page.waitForTimeout(1000);
+    await expect(page.locator('[data-content-page="contact"] section[data-content-node-probe="section"]')).toHaveCount(1);
+    await expect(page.locator('#contactForm[data-content-node-probe="form"]')).toHaveCount(1);
+    await expect(page.locator('[data-content-page="contact"]')).toHaveAttribute('data-content-hydrated-version', probes[2]);
+});
+
+test('重点正文 API 失败时服务端正文仍可见且可提交', async ({ page }) => {
+    await page.route('**/api/content-blocks/contact', (route) => route.abort());
+    await page.goto(BASE + '/contact.html', { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(300);
+    await expect(page.locator('[data-content-page="contact"] h2').first()).toBeVisible();
+    await expect(page.locator('#contactForm')).toHaveCount(1);
+    await expect(page.locator('[data-content-page="contact"]')).toHaveAttribute('data-content-fallback', 'static');
+    await expect(page.locator('[data-content-page="contact"]')).not.toContainText('Loading contact information');
+});
+
+test('首页正文延迟水合不会清除已加载产品卡', async ({ page }) => {
+    await page.route('**/api/content-blocks/home', async (route) => {
+        await new Promise((resolve) => setTimeout(resolve, 900));
+        await route.continue();
+    });
+    await page.goto(BASE + '/', { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('#featured-products-container .product-card').first()).toBeVisible();
+    const countBefore = await page.locator('#featured-products-container .product-card').count();
+    await page.waitForTimeout(1100);
+    const countAfter = await page.locator('#featured-products-container .product-card').count();
+    expect(countAfter).toBe(countBefore);
+    expect(countAfter).toBeGreaterThan(0);
+});

@@ -1946,11 +1946,81 @@
         scrollToCurrentHash();
     }
 
+    function sharedPresentationMatches(block) {
+        if (!block || !window.LongxiangContentPagePresentation) return false;
+        return pageRoot.getAttribute('data-ssr-content') === pageSlug &&
+            pageRoot.getAttribute('data-content-locale') === locale &&
+            pageRoot.getAttribute('data-content-version') === String(block.version || 0) &&
+            pageRoot.getAttribute('data-content-renderer-version') === '1';
+    }
+
+    function applySharedHomePatches(patches) {
+        var products = pageRoot.querySelector('[data-home-products]');
+        if (products && patches.productsHeader) {
+            var header = products.querySelector('.section-header');
+            if (header) header.innerHTML = patches.productsHeader.replace(/^<div class="section-header">|<\/div>$/g, '');
+        }
+        if (products && patches.productsButton) {
+            var button = products.querySelector('.all-products-btn');
+            if (button) {
+                button.textContent = patches.productsButton.label || button.textContent;
+                button.href = patches.productsButton.href || button.href;
+            }
+        }
+        [
+            ['applications', '[data-home-applications]'],
+            ['news', '[data-home-news]'],
+            ['trust', '[data-home-trust]'],
+            ['features', '[data-home-features]'],
+            ['stats', '[data-home-stats]'],
+            ['cta', '[data-home-cta]']
+        ].forEach(function (entry) {
+            var section = pageRoot.querySelector(entry[1]);
+            if (!section) return;
+            if (entry[0] === 'applications' || entry[0] === 'news') section.hidden = Boolean(patches[entry[0] + 'Hidden']);
+            if (patches[entry[0]]) section.innerHTML = patches[entry[0]];
+            else if (patches[entry[0] + 'Hidden']) section.innerHTML = '';
+        });
+    }
+
+    function renderSharedContentPage(block, body) {
+        var presentation = window.LongxiangContentPagePresentation;
+        if (!presentation || presentation.SUPPORTED_PAGES.indexOf(pageSlug) === -1) return false;
+        var matches = sharedPresentationMatches(block);
+        if (!matches) {
+            var output = presentation.renderPageBody(pageSlug, block.body || {}, { locale: locale });
+            if (pageSlug === 'home') applySharedHomePatches(output);
+            else pageRoot.innerHTML = output;
+        }
+
+        if (pageSlug === 'home') {
+            renderHomeHero(body);
+            updateSeo(body.seo, body.hero);
+        }
+        if (pageSlug === 'about-us') {
+            renderAboutHero(body.hero);
+            updateSeo(body.seo, body.hero);
+        }
+        if (pageSlug === 'solutions') {
+            updateHero(body.hero);
+            updateSeo(body.seo, body.hero);
+            if (!matches) scrollToCurrentHash();
+        }
+        if (pageSlug === 'contact') {
+            updateHero(body.hero);
+            updateSeo(body.seo, body.hero);
+        }
+        refreshDynamicUi();
+        pageRoot.setAttribute('data-content-hydrated-version', String(block.version || 0));
+        return true;
+    }
+
     function renderPage(block) {
         var body = block && block.body ? block.body : {};
         if (window.LongxiangI18n && window.LongxiangI18n.localizeContentTree) {
             body = window.LongxiangI18n.localizeContentTree(body, locale);
         }
+        if (renderSharedContentPage(block, body)) return;
         if (pageSlug === 'solutions') renderSolutions(body);
         if (pageSlug === 'about-us') renderAbout(body);
         if (pageSlug === 'contact') renderContact(body);
