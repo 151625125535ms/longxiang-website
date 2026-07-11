@@ -151,19 +151,19 @@ Record exact counts, 404 cases, GET/HEAD parity, query dropping, unchanged sitem
 - Consumes: fully reviewed and verified local change
 - Produces: deployed production 301 behavior with rollback commit boundary
 
-- [ ] **Step 1: Stage precisely and commit**
+- [x] **Step 1: Stage precisely and commit**
 
 Run `git diff --cached --check`, commit as `规范旧查询式产品详情URL`, and push `origin main`.
 
-- [ ] **Step 2: Pull and restart once**
+- [x] **Step 2: Pull and restart once**
 
 Verify the production checkout is clean, run `git pull --ff-only origin main`, restart `longxiang-website` exactly once, and confirm PM2 is `online`.
 
-- [ ] **Step 3: Run full production verification**
+- [x] **Step 3: Run full production verification**
 
 Run the complete redirect audit against `https://www.lxenelectric.com`, the 152-product raw audit, the 184-URL schema audit, and real-browser checks for four representative language redirects and Contact constraints.
 
-- [ ] **Step 4: Record production evidence**
+- [x] **Step 4: Record production evidence**
 
 Mark all plan steps complete and append production results. Commit and deploy documentation only without another PM2 restart.
 
