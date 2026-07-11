@@ -92,6 +92,19 @@ function sitemapLocations(xml) {
     });
 }
 
+function looksLikePrivateInquiryContainer(key, value) {
+    if (!['inquiry', 'inquiryrecord', 'lead', 'leadrecord'].includes(key)) return false;
+    if (Array.isArray(value)) return value.length > 0;
+    if (!isPlainObject(value)) return false;
+    const privateFields = [
+        'name', 'email', 'phone', 'telephone', 'mobile', 'message', 'company', 'country',
+        'customername', 'customeremail', 'customerphone', 'customermessage', 'ipaddress'
+    ];
+    return Object.keys(value).some(function (field) {
+        return privateFields.includes(field.toLowerCase().replace(/[^a-z0-9]/g, ''));
+    });
+}
+
 function scanSensitiveValue(value, findings, currentPath) {
     if (Array.isArray(value)) {
         value.forEach(function (item, index) { scanSensitiveValue(item, findings, currentPath + '[' + index + ']'); });
@@ -105,8 +118,8 @@ function scanSensitiveValue(value, findings, currentPath) {
                 'session', 'sessioncookie', 'cookie', 'apikey', 'secret'
             ];
             const forbiddenPrivateDataKeys = [
-                'admin', 'admins', 'administrator', 'administrators', 'inquiries', 'inquiryrecords',
-                'customers', 'customerrecords', 'customername', 'customeremail', 'customerphone',
+                'admin', 'admins', 'administrator', 'administrators', 'inquiries', 'inquiryrecord', 'inquiryrecords',
+                'customer', 'customers', 'customerrecord', 'customerrecords', 'customername', 'customeremail', 'customerphone',
                 'customermessage', 'ipaddress'
             ];
             const credentialPattern = normalized.endsWith('token') || normalized.startsWith('authorization') ||
@@ -114,7 +127,7 @@ function scanSensitiveValue(value, findings, currentPath) {
                 (/cookie/.test(normalized) && !normalized.startsWith('cookiesettings') && !normalized.startsWith('cookieconsent'));
             const privateDataPattern = /^(?:admin|administrator)/.test(normalized) ||
                 ['users', 'userrecords', 'auditlog', 'auditlogs'].includes(normalized);
-            if (/whatsapp/.test(normalized) || forbiddenCredentialKeys.includes(normalized) || forbiddenPrivateDataKeys.includes(normalized) || credentialPattern || privateDataPattern) {
+            if (/whatsapp/.test(normalized) || forbiddenCredentialKeys.includes(normalized) || forbiddenPrivateDataKeys.includes(normalized) || credentialPattern || privateDataPattern || looksLikePrivateInquiryContainer(normalized, value[key])) {
                 findings.push(currentPath + '.' + key + ': forbidden key');
             }
             const publicPhoneKey = ['phone', 'telephone', 'mobile', 'officephone', 'contactphone', 'phonenumber', 'hotline', 'companyphone', 'salesphone', 'internationalphone'].includes(normalized);
@@ -126,9 +139,11 @@ function scanSensitiveValue(value, findings, currentPath) {
         return;
     }
     const text = String(value == null ? '' : value);
+    const digitsOnly = text.replace(/\D/g, '');
+    const compactEmail = text.replace(/[\s\u200B-\u200D\uFEFF]/g, '');
+    if (digitsOnly.includes('17513354200')) findings.push(currentPath + ': domestic phone');
+    if (/hnlxdq2003@163\.com/i.test(compactEmail)) findings.push(currentPath + ': domestic email');
     const forbidden = [
-        [/17513354200/, 'domestic phone'],
-        [/hnlxdq2003@163\.com/i, 'domestic email'],
         [/\btel\s*:/i, 'telephone URI'],
         [/(?:\+|\b00)\d[\d\s().-]{7,}\d/, 'international telephone value'],
         [/\b\d{3}[-.\s]\d{3}[-.\s]\d{4}\b/, 'international telephone value'],

@@ -390,7 +390,10 @@ async function main() {
 
         const sensitiveCases = [
             ['domestic-phone', '17513354200'],
+            ['domestic-phone-spaced', '175 1335 4200'],
+            ['domestic-phone-punctuated', '175-1335-4200'],
             ['domestic-email', 'hnlxdq2003@163.com'],
+            ['domestic-email-spaced', 'hnlxdq2003 @ 163.com'],
             ['old-capital', '100 million RMB'],
             ['whatsapp', { whatsapp: 'https://wa.me/123456' }],
             ['telephone-uri', 'tel:+1-555-123-4567'],
@@ -404,6 +407,7 @@ async function main() {
             ['password', { password: 'secret' }],
             ['admin', { admin: { username: 'root' } }],
             ['inquiries', { inquiries: [{ customerName: 'Example', customerEmail: 'example@example.com' }] }],
+            ['inquiry-singular-record', { inquiry: { name: 'Buyer', email: 'buyer@example.com', message: 'Quote request' } }],
             ['international-phone', 'Call +1 212 555 1212'],
             ['china-url-wrong-path', 'https://www.lxelec.cn/'],
             ['credential-and-private-variants', {
