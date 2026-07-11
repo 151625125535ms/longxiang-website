@@ -613,3 +613,34 @@ alias 全量映射测试、目标产品事实核对、状态码与 canonical 检
 本批次新增独立的静态页 SEO 头部渲染模块，并在 `express.static` 之前只挂载上述 28 个精确路由；`/index.html`、`/products.html`、产品详情、参数 URL 与任何分类路径均不在该路由集合中。
 
 生产部署后复验结果与本地一致：28/28 原始 HTML 通过，184/184 sitemap URL 的浏览器结构化数据审计通过，四种正式语言首页和 Contact 真实浏览器验收通过；PM2 完成一次必要重启后保持 `online`。
+
+## 13. 批次 2B 本地实施记录（2026-07-11）
+
+批次 2B 仅为四种正式语言的精确旧路径 `product-detail.html?id=...` 增加服务端 301/404 处理。解析顺序固定为正式 `legacy_id`、正式 `slug`、28 条代码白名单 alias；未列入白名单或不能唯一解析的标识返回本语言 404。
+
+修改前以生产公开 `/api/products` 和本地只读数据库交叉盘点，结果完全一致：
+
+- 已发布产品：38；
+- alias 记录：30；
+- 安全 alias：28；
+- 冲突 alias：`3phase-3limb`、`3phase-5limb`；
+- 两个冲突标识均按正式产品优先，目标为各自清洁产品 URL，不指向 `amorphous-scbh-dry`。
+
+本地验证结果：
+
+- legacy ID 重定向：152/152；
+- 正式 slug 重定向：152/152；
+- 批准 alias 重定向：112/112；
+- 正式标识优先于冲突 alias：8/8；
+- 有效重定向矩阵检查：424 次，对应 320 个唯一旧 URL；
+- 缺失、空、重复、数组、未知、前置空格和异常编码 404：28/28；
+- 清洁目标无重定向链：152/152；
+- GET/HEAD 状态与 Location 一致；
+- 所有目标 Location 均无 query 和 fragment；
+- 接口验收：32/32；
+- 清洁产品页原始与渲染 SEO：152/152，失败 0；
+- sitemap：184，未增加分类页或 planned locale；
+- 全站 Schema：184/184，无缺失、错配、解析错误、加载错误或高风险 Product 字段；
+- 浏览器回归：18/18。
+
+本批次没有修改 `.cn`、数据库、alias 数据、清洁产品页行为、产品列表/筛选策略、分类页、sitemap URL 集合、canonical、hreflang、Schema、正文、CSS、Hero、Contact 或联系方式。

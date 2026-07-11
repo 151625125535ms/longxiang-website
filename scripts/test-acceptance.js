@@ -3,6 +3,7 @@ const fs = require('fs');
 const http = require('http');
 const path = require('path');
 const { staticSeoRouteDefinitions } = require('../server/lib/staticPageSeoRenderer');
+const { readPublicProducts } = require('../server/lib/publicProducts');
 
 const ROOT = path.join(__dirname, '..');
 require('dotenv').config({ path: path.join(ROOT, '.env') });
@@ -44,7 +45,7 @@ function request(method, urlPath, options) {
                 } catch (err) {
                     parsed = raw;
                 }
-                resolve({ status: res.statusCode, body: parsed, raw: raw });
+                resolve({ status: res.statusCode, headers: res.headers, body: parsed, raw: raw });
             });
         });
         req.on('timeout', function () {
@@ -327,6 +328,61 @@ async function main() {
                 }
             }
             return '28 routes expose raw canonical, hreflang, and basic schema';
+        });
+
+        await runTest('T04F', 'legacy query product URLs redirect once to clean localized products', async function () {
+            const products = readPublicProducts();
+            const product = products[0];
+            const identifier = product.id;
+            const cleanIdentifier = product.slug || product.id;
+            const directPath = '/product-detail.html?id=' + encodeURIComponent(identifier) + '&utm_source=legacy';
+            const direct = await request('GET', directPath);
+            expectStatus(direct, 301);
+            if (direct.headers.location !== '/products/' + encodeURIComponent(cleanIdentifier)) {
+                throw new Error('direct legacy redirect location mismatch: ' + direct.headers.location);
+            }
+            if (/[?#]/.test(direct.headers.location)) {
+                throw new Error('direct legacy redirect retained query or fragment');
+            }
+
+            const directHead = await request('HEAD', directPath);
+            expectStatus(directHead, 301);
+            if (directHead.headers.location !== direct.headers.location) {
+                throw new Error('GET and HEAD redirect locations differ');
+            }
+
+            const localizedAlias = await request('GET', '/fr/product-detail.html?id=SCBH15&msclkid=test');
+            expectStatus(localizedAlias, 301);
+            if (localizedAlias.headers.location !== '/fr/products/amorphous-scbh-dry') {
+                throw new Error('localized alias redirect location mismatch: ' + localizedAlias.headers.location);
+            }
+
+            for (const conflict of ['3phase-3limb', '3phase-5limb']) {
+                const conflictResponse = await request('GET', '/ru/product-detail.html?id=' + conflict);
+                expectStatus(conflictResponse, 301);
+                if (conflictResponse.headers.location !== '/ru/products/' + conflict) {
+                    throw new Error('conflicting alias did not preserve formal product: ' + conflict);
+                }
+            }
+
+            const invalidPaths = [
+                '/product-detail.html',
+                '/ar/product-detail.html?id=',
+                '/fr/product-detail.html?id=s13&id=SCBH15',
+                '/ru/product-detail.html?id%5B%5D=s13',
+                '/product-detail.html?id=unknown-product',
+                '/product-detail.html?id=%20s13',
+                '/product-detail.html?id=%E0%A4%A'
+            ];
+            for (const invalidPath of invalidPaths) {
+                const invalid = await request('GET', invalidPath);
+                expectStatus(invalid, 404);
+                if (!/<meta\s+name=["']robots["']\s+content=["'][^"']*noindex[^"']*["']/i.test(invalid.raw)) {
+                    throw new Error('invalid legacy URL is missing noindex 404 shell: ' + invalidPath);
+                }
+            }
+
+            return 'GET/HEAD 301, clean Location, direct-before-alias conflicts, invalid IDs 404';
         });
 
         await runTest('T05', 'GET /api/education', async function () {

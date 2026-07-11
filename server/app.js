@@ -23,6 +23,10 @@ const {
     staticSeoRouteDefinitions,
     renderStaticPageSeoHtml
 } = require('./lib/staticPageSeoRenderer');
+const {
+    resolveLegacyProductRedirect,
+    localizedLegacyProductPath
+} = require('./lib/legacyProductRedirect');
 const { buildSitemap } = require('../scripts/generate-sitemap');
 const {
     localeForRequestPath,
@@ -251,6 +255,16 @@ function sendProductDetailShell(req, res, next) {
 }
 
 app.get(productDetailRoutePatterns(), sendProductDetailShell);
+
+function sendLegacyProductRedirect(req, res, next) {
+    const resolved = resolveLegacyProductRedirect(req.query && req.query.id);
+    if (!resolved) return sendNotFoundShell(req, res, next);
+    const locale = localeForRequestPath(req.path);
+    const targetPath = localizedLegacyProductPath(resolved.targetIdentifier, locale);
+    res.redirect(301, targetPath);
+}
+
+app.get(/^\/(?:ar\/|fr\/|ru\/)?product-detail\.html$/, sendLegacyProductRedirect);
 
 function hasProductFilterQuery(req) {
     return ['group', 'sub', 'search', 'page'].some(function (key) {
