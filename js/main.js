@@ -1452,7 +1452,8 @@
 
     function injectAlternateSeoLinks(currentUrl) {
         var origin = window.location.origin;
-        var search = window.location.search || '';
+        var isProductListing = /\/products\.html$/.test(window.location.pathname);
+        var search = isProductListing ? '' : (window.location.search || '');
         var plannedPath = window.LongxiangI18n.plannedLocalePathInfo(window.location.pathname);
         var productId = window.LongxiangI18n.productIdentifierFromLocalizedPath(window.location.pathname);
         var basePath = window.LongxiangI18n.baseStaticPathFromLocalizedPath(window.location.pathname);
@@ -1460,7 +1461,9 @@
         var defaultPath = productId
             ? window.LongxiangI18n.localizedProductPath(productId, defaultLocale)
             : window.LongxiangI18n.localizedStaticPath(basePath, defaultLocale);
-        var canonicalUrl = plannedPath ? origin + defaultPath + search : currentUrl;
+        var canonicalUrl = plannedPath
+            ? origin + defaultPath + search
+            : (isProductListing ? origin + window.location.pathname : currentUrl);
 
         upsertLink('canonical', { href: canonicalUrl });
         window.LongxiangI18n.seoLocales().forEach(function (entry) {
@@ -2313,8 +2316,8 @@
                     '<span class="home-product-category-image">' +
                         (category.icon
                             ? '<img src="' + escapeHtml(resolveAssetPath(category.icon)) + '" alt="' + escapeHtml(label) + '" loading="lazy" decoding="async" width="240" height="180">'
-                            : sample && sample.image
-                                ? '<img src="' + escapeHtml(resolveAssetPath(sample.image)) + '" alt="' + escapeHtml(label) + '" loading="lazy" decoding="async" width="240" height="180">'
+                            : sample && (sample.cardImage || sample.image)
+                                ? '<img src="' + escapeHtml(resolveAssetPath(sample.cardImage || sample.image)) + '" alt="' + escapeHtml(label) + '" loading="lazy" decoding="async" width="240" height="180">'
                             : '<span class="home-product-category-fallback">' + escapeHtml(label.charAt(0)) + '</span>') +
                     '</span>' +
                     '<span class="home-product-category-title">' + escapeHtml(label) + '</span>';
@@ -2329,7 +2332,7 @@
             var name = localizedApiValue(product, 'name');
             var desc = localizedApiValue(product, 'shortDesc');
             var detail = window.LongxiangI18n.localizedProductPath(product.slug || product.id, locale);
-            var imagePath = resolveAssetPath(product.image);
+            var imagePath = resolveAssetPath(product.cardImage || product.image);
             var textAttrs = isArabic ? ' dir="rtl" lang="ar" class="rtl-product-text"' : '';
             card.innerHTML =
                 '<a class="product-card-clickarea" href="' + detail + '">' +

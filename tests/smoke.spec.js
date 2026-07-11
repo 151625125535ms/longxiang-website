@@ -70,6 +70,19 @@ test('首页加载正常', async ({ page }) => {
     await expect(page.locator('nav.navbar')).toBeVisible();
 });
 
+test('首页非 Hero 产品卡使用现有专用缩略图', async ({ page }) => {
+    await page.goto(BASE + '/index.html');
+    const images = page.locator('#featured-products-container .product-card-image img');
+    await expect(images.first()).toBeVisible();
+    const sources = await images.evaluateAll(function (items) {
+        return items.map(function (item) { return item.getAttribute('src') || ''; });
+    });
+    expect(sources.length).toBeGreaterThan(0);
+    expect(sources.every(function (source) {
+        return source.indexOf('assets/optimized/product-cards/') !== -1;
+    })).toBe(true);
+});
+
 test('四种正式语言页脚均显示中国官网绝对链接', async ({ page }) => {
     const locales = [
         { path: '/index.html', label: 'China Website / 中国官网' },
@@ -100,6 +113,21 @@ test('真实联系页保持原地址标签且仅显示国际邮箱', async ({ pa
 test('产品列表页加载正常', async ({ page }) => {
     await page.goto(BASE + '/products.html');
     await expect(page.locator('nav.navbar')).toBeVisible();
+});
+
+test('产品筛选参数页保持筛选体验但不建立独立索引', async ({ page }) => {
+    await page.goto(BASE + '/fr/products.html?group=transformer&sub=dry-type');
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex,follow');
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+        'href',
+        BASE + '/fr/products.html'
+    );
+    const alternates = await page.locator('link[rel="alternate"]').evaluateAll(function (links) {
+        return links.map(function (link) { return link.getAttribute('href'); });
+    });
+    expect(alternates.every(function (href) { return href && href.indexOf('?') === -1; })).toBe(true);
+    await expect(page.locator('.catalog-filter-status')).toBeVisible();
+    await expect(page.locator('#catalog-current-filter')).toContainText('Transformateurs secs');
 });
 
 test('敏感路径返回 403', async ({ page }) => {

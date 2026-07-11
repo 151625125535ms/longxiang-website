@@ -234,6 +234,27 @@ function sendProductDetailShell(req, res, next) {
 
 app.get(productDetailRoutePatterns(), sendProductDetailShell);
 
+function hasProductFilterQuery(req) {
+    return ['group', 'sub', 'search', 'page'].some(function (key) {
+        return Object.prototype.hasOwnProperty.call(req.query || {}, key);
+    });
+}
+
+function sendFilteredProductListShell(req, res, next) {
+    if (!hasProductFilterQuery(req)) return next();
+    const locale = localeForRequestPath(req.path);
+    const filePath = localizedHtmlShellPath('products.html', locale);
+
+    fs.readFile(filePath, 'utf8', function (err, html) {
+        if (err) return next(err);
+        const withBase = html.replace(/<head>/i,
+            '<head>\n    <base href="' + baseHrefForLocale(locale) + '">\n    <meta name="robots" content="noindex,follow">');
+        sendHtmlString(res, withBase, 200);
+    });
+}
+
+app.get(/^\/(?:ar\/|fr\/|ru\/)?products\.html$/, sendFilteredProductListShell);
+
 app.use(express.static(path.join(__dirname, '..'), {
     maxAge: '7d',
     setHeaders: function (res, filePath) {

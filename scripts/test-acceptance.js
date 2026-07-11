@@ -261,6 +261,31 @@ async function main() {
             return 'localized crawlable link present';
         });
 
+        await runTest('T04D', 'filtered product URLs are noindex with clean canonical', async function () {
+            const filtered = await request('GET', '/products.html?group=transformer&sub=dry-type');
+            expectStatus(filtered, 200);
+            if (!/<meta\s+name=["']robots["']\s+content=["']noindex,follow["']/i.test(filtered.raw)) {
+                throw new Error('filtered product page is missing noindex,follow');
+            }
+            if (!/<link\s+rel=["']canonical["']\s+href=["']https:\/\/www\.lxenelectric\.com\/products\.html["']/i.test(filtered.raw)) {
+                throw new Error('filtered product page canonical is not clean');
+            }
+
+            const localized = await request('GET', '/fr/products.html?group=transformer');
+            expectStatus(localized, 200);
+            if (!/<meta\s+name=["']robots["']\s+content=["']noindex,follow["']/i.test(localized.raw) ||
+                    !/<link\s+rel=["']canonical["']\s+href=["']https:\/\/www\.lxenelectric\.com\/fr\/products\.html["']/i.test(localized.raw)) {
+                throw new Error('localized filtered product page SEO directives are incorrect');
+            }
+
+            const clean = await request('GET', '/products.html');
+            expectStatus(clean, 200);
+            if (/<meta\s+name=["']robots["']\s+content=["']noindex,follow["']/i.test(clean.raw)) {
+                throw new Error('clean product listing was marked noindex');
+            }
+            return 'parameter variants noindex; clean listing remains indexable';
+        });
+
         await runTest('T05', 'GET /api/education', async function () {
             const res = await request('GET', '/api/education');
             expectStatus(res, 200);
