@@ -600,9 +600,26 @@
             });
     }
 
+    function currentPageType() {
+        var pageName = currentPageName();
+        var pageTypes = {
+            'index.html': 'home',
+            'products.html': 'product_list',
+            'product-detail.html': 'product_detail',
+            'solutions.html': 'solution',
+            'about.html': 'about',
+            'contact.html': 'contact',
+            'education.html': 'education'
+        };
+        return pageTypes[pageName] || 'other';
+    }
+
     function trackEvent(name, params) {
         if (isConsentGranted('analytics') && typeof window.gtag === 'function') {
-            window.gtag('event', name, params || {});
+            window.gtag('event', name, Object.assign({
+                locale: locale,
+                page_type: currentPageType()
+            }, params || {}));
         }
     }
 
@@ -1735,6 +1752,11 @@
                         '<div class="form-status" aria-live="polite"></div>' +
                     '</form>' +
                 '</div>';
+            grid.querySelectorAll('.footer-links a[href="https://www.lxelec.cn/"]').forEach(function (link) {
+                link.addEventListener('click', function () {
+                    trackEvent('click_china_website', { source_component: 'footer' });
+                });
+            });
         });
         document.querySelectorAll('.footer-bottom p').forEach(function (item) {
             item.textContent = shellValue('footer', 'copyright', '');

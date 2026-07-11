@@ -6,6 +6,7 @@
 
 - 生产接口的 `ga4TrackingId` 当前为空，网站不会加载 Google Analytics 脚本。
 - 前端已实现 Consent Mode：用户未同意 Analytics Cookie 时，分析存储保持拒绝状态。
+- 公共事件入口会自动附加当前正式语言 `locale` 和页面类型 `page_type`。
 - 询盘成功后已有 `generate_lead` 事件调用；邮箱及部分社交入口已有点击事件调用。
 - 在没有真实 GA4 Measurement ID 前，不填写示例 ID，不向生产数据库写入占位值。
 
@@ -30,7 +31,7 @@
 | `view_item_list` | 产品列表或首页推荐产品完成渲染 | `item_list_name`、`item_category`、`locale` | 否 | 待后续埋点 |
 | `search` | 提交站内产品搜索 | `search_term`、`item_category`、`locale` | 否 | 待后续埋点 |
 | `select_content` | 点击产品分类或解决方案入口 | `content_type`、`content_id`、`source_component`、`locale` | 否 | 待后续埋点 |
-| `click_china_website` | 点击页脚中国官网链接 | `source_component=footer`、`locale` | 否 | 待后续埋点 |
+| `click_china_website` | 点击页脚中国官网链接 | `source_component=footer`、`locale`、`page_type` | 否 | 已实现，启用 GA4 后在 DebugView 复核 |
 | `click_instagram` | 点击 Instagram | `source_component`、`locale` | 否 | 已实现基础事件 |
 | `click_youtube` | 点击 YouTube | `source_component`、`locale` | 否 | 已实现基础事件 |
 

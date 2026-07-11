@@ -1,4 +1,4 @@
-# 阶段一：Bing Webmaster Tools 导入准备
+# 阶段一：Bing Webmaster Tools 导入与验收记录
 
 更新时间：2026-07-11
 
@@ -11,6 +11,22 @@
 - 葡萄牙语仍为 planned，不进入 sitemap；
 - 参数筛选 URL 不进入 sitemap，并输出 `noindex,follow`；
 - Google Search Console 的 domain property 已验证，可用于 Bing 导入。
+
+## 生产验收结果
+
+2026-07-11 由账号持有人在其已登录的 Chrome 中核验 Bing Webmaster Tools：
+
+- 站点属性：`lxenelectric.com/`；
+- 已知站点地图：1；
+- 站点地图：`https://www.lxenelectric.com/sitemap.xml`；
+- 状态：`Success`；
+- 发现 URL：184；
+- 存在错误的站点地图：0；
+- 带有警告的站点地图：0；
+- 最后提交：2026-07-05；
+- 最后一次爬行：2026-07-05。
+
+以上结果与生产 sitemap 的 184 个 URL 一致，阶段一的 Bing 站点验证和 sitemap 验收已经完成。
 
 ## 官方导入步骤
 
@@ -27,10 +43,6 @@
 
 - `https://www.bing.com/webmasters/help/add-and-verify-site-12184f8b`
 - `https://www.bing.com/webmasters/help/sitemaps-3b5cf6ed`
-
-## 当前阻断
-
-当前工作会话没有已授权的 Bing Webmaster Tools 账号。导入需要账号持有人登录，并授权 Bing 读取 Google Search Console；在登录完成前不能代表企业创建账号、选择 property 或授予权限。
 
 ## 导入后的验收
 

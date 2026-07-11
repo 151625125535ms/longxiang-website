@@ -100,6 +100,64 @@ test('四种正式语言页脚均显示中国官网绝对链接', async ({ page 
     }
 });
 
+test('中国官网跳转仅在分析同意后发送带页面上下文的 GA4 事件', async ({ page }) => {
+    await page.addInitScript(function () {
+        window.__capturedGtagCalls = [];
+        window.gtag = function () {
+            window.__capturedGtagCalls.push(Array.from(arguments));
+        };
+        localStorage.setItem('lx_cookie_consent_v1', JSON.stringify({
+            necessary: true,
+            analytics: true,
+            functional: false,
+            updatedAt: new Date().toISOString()
+        }));
+    });
+
+    await page.goto(BASE + '/fr/index.html');
+    const chinaWebsiteLink = page.locator('.footer-links a[href="https://www.lxelec.cn/"]');
+    await expect(chinaWebsiteLink).toHaveCount(1);
+    await chinaWebsiteLink.evaluate(function (link) {
+        link.addEventListener('click', function (event) { event.preventDefault(); }, { once: true });
+        link.click();
+    });
+
+    const eventCalls = await page.evaluate(function () {
+        return window.__capturedGtagCalls.filter(function (call) {
+            return call[0] === 'event' && call[1] === 'click_china_website';
+        });
+    });
+    expect(eventCalls).toEqual([[
+        'event',
+        'click_china_website',
+        { locale: 'fr', page_type: 'home', source_component: 'footer' }
+    ]]);
+});
+
+test('未同意分析 Cookie 时不发送中国官网 GA4 事件', async ({ page }) => {
+    await page.addInitScript(function () {
+        window.__capturedGtagCalls = [];
+        window.gtag = function () {
+            window.__capturedGtagCalls.push(Array.from(arguments));
+        };
+    });
+
+    await page.goto(BASE + '/index.html');
+    const chinaWebsiteLink = page.locator('.footer-links a[href="https://www.lxelec.cn/"]');
+    await expect(chinaWebsiteLink).toHaveCount(1);
+    await chinaWebsiteLink.evaluate(function (link) {
+        link.addEventListener('click', function (event) { event.preventDefault(); }, { once: true });
+        link.click();
+    });
+
+    const eventCalls = await page.evaluate(function () {
+        return window.__capturedGtagCalls.filter(function (call) {
+            return call[0] === 'event' && call[1] === 'click_china_website';
+        });
+    });
+    expect(eventCalls).toEqual([]);
+});
+
 test('真实联系页保持原地址标签且仅显示国际邮箱', async ({ page }) => {
     await page.goto(BASE + '/contact.html');
     const rows = page.locator('.contact-info-list .contact-info-row');
