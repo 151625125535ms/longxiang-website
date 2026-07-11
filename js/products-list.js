@@ -12,6 +12,7 @@
         ? window.LongxiangI18n.assetBasePrefix(locale)
         : (isArabic ? '../' : '');
     var productsCache = [];
+    var productContentBlock = null;
     var pageSize = 9;
     var UI_TEXT = {
         en: {
@@ -402,13 +403,15 @@
         }
         var requested = selectedFilter();
         var pageRoot = document.querySelector('[data-product-page-kind="listing"]');
-        var contentVersion = pageRoot ? pageRoot.getAttribute('data-product-content-version') || '0' : '0';
+        var contentVersion = productContentBlock && productContentBlock.version != null
+            ? productContentBlock.version
+            : (pageRoot ? pageRoot.getAttribute('data-product-content-version') || '0' : '0');
         var view = presentation.presentCatalog({
             locale: locale,
             products: products,
             taxonomy: taxonomy,
             query: requested,
-            contentBlock: { body: {} },
+            contentBlock: productContentBlock || { body: {} },
             contentVersion: Number(contentVersion) || 0
         });
         var filter = view.state;
@@ -444,7 +447,10 @@
             container.querySelectorAll('.fade-in').forEach(function (el) { el.classList.add('visible'); });
         }
 
-        if (pageRoot) pageRoot.setAttribute('data-product-view-key', view.key);
+        if (pageRoot) {
+            pageRoot.setAttribute('data-product-view-key', view.key);
+            pageRoot.setAttribute('data-product-content-version', String(Number(contentVersion) || 0));
+        }
     }
 
     function bindPagination() {
@@ -642,7 +648,7 @@
                 if (window.console && console.warn) {
                     console.warn('Product categories API unavailable; deriving categories from product data.', err);
                 }
-                return [];
+                return null;
             });
     }
 
@@ -699,19 +705,38 @@
 
     function initCatalog() {
         localizeCatalogStaticUi();
-        Promise.all([loadCategories(), loadProducts()])
+        Promise.all([loadCategories(), loadProducts(), window.longxiangContentPagePromise || Promise.resolve(null)])
             .then(function (results) {
                 productsCache = results[1].map(normalizeProduct);
-                taxonomy = results[0].length ? results[0] : deriveTaxonomyFromProducts(productsCache);
+                productContentBlock = results[2] && results[2].body ? results[2] : null;
+                var categoryFailed = results[0] === null;
+                taxonomy = categoryFailed ? deriveTaxonomyFromProducts(productsCache) : results[0];
                 var pageRoot = document.querySelector('[data-product-page-kind="listing"]');
                 var presentation = window.LongxiangProductPagePresentation;
-                var contentVersion = pageRoot ? pageRoot.getAttribute('data-product-content-version') || '0' : '0';
-                var view = presentation ? presentation.presentCatalog({ locale: locale, products: productsCache, taxonomy: taxonomy, query: selectedFilter(), contentBlock: { body: {} }, contentVersion: Number(contentVersion) || 0 }) : null;
+                var contentVersion = productContentBlock && productContentBlock.version != null
+                    ? productContentBlock.version
+                    : (pageRoot ? pageRoot.getAttribute('data-product-content-version') || '0' : '0');
+                var view = presentation ? presentation.presentCatalog({ locale: locale, products: productsCache, taxonomy: taxonomy, query: selectedFilter(), contentBlock: productContentBlock || { body: {} }, contentVersion: Number(contentVersion) || 0 }) : null;
                 var preserveSsr = Boolean(view && pageRoot && pageRoot.getAttribute('data-product-ssr') === 'catalog' && pageRoot.getAttribute('data-product-view-key') === view.key);
+                if (!productContentBlock && pageRoot && pageRoot.getAttribute('data-product-ssr') === 'catalog' && container.children.length) {
+                    initProductTree(true);
+                    bindPagination();
+                    pageRoot.setAttribute('data-product-fallback', 'content-block');
+                    pageRoot.setAttribute('data-product-hydrated', 'true');
+                    return;
+                }
+                if (categoryFailed && pageRoot && pageRoot.getAttribute('data-product-ssr') === 'catalog' && container.children.length) {
+                    initProductTree(true);
+                    bindPagination();
+                    pageRoot.setAttribute('data-product-fallback', 'taxonomy');
+                    pageRoot.setAttribute('data-product-hydrated', 'true');
+                    return;
+                }
                 initProductTree(preserveSsr);
                 if (preserveSsr) {
                     bindPagination();
                     pageRoot.setAttribute('data-product-hydrated', 'true');
+                    pageRoot.setAttribute('data-product-content-version', String(Number(contentVersion) || 0));
                 } else {
                     renderProducts(productsCache);
                 }

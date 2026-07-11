@@ -946,9 +946,7 @@
     function updateHero(hero) {
         var heroEl = document.querySelector('.page-hero');
         if (!heroEl || !hero) return;
-        if (hero.backgroundImage) {
-            heroEl.style.backgroundImage = "url('" + resolveAsset(hero.backgroundImage).replace(/'/g, "\\'") + "')";
-        }
+        enhancePageHeroAsset(hero);
         var title = heroEl.querySelector('h1');
         var desc = heroEl.querySelector('p:not(.page-hero-title)');
         var actions = heroEl.querySelector('.solutions-hero-actions, .page-hero-actions');
@@ -993,6 +991,12 @@
             upsertMeta('twitter:image', '', imageUrl);
         }
         injectContentPageSchema(title, description, canonicalUrl);
+    }
+
+    function enhancePageHeroAsset(hero) {
+        var heroEl = document.querySelector('.page-hero');
+        if (!heroEl || !hero || !hero.backgroundImage) return;
+        heroEl.style.backgroundImage = "url('" + resolveAsset(hero.backgroundImage).replace(/'/g, "\\'") + "')";
     }
 
     function listHtml(items) {
@@ -1691,17 +1695,12 @@
         var hero = body.hero || {};
         var heroEl = document.querySelector('.hero-hex');
         if (!heroEl) return;
-        var bg = heroEl.querySelector('.hero-bg');
-        var logo = heroEl.querySelector('.hero-hex-logo');
         var title = heroEl.querySelector('.hero-hex-title');
         var subtitle = heroEl.querySelector('.hero-hex-subtitle');
         var actions = heroEl.querySelector('.hero-hex-actions');
         var proof = heroEl.querySelector('.hero-proof-strip');
 
-        if (bg && hero.backgroundImage) setOptimizedBackground(bg, hero.backgroundImage);
-        if (logo && hero.logo && getComputedStyle(logo).display !== 'none') {
-            setOptimizedImage(logo, hero.logo, localized(hero, 'logoAlt') || 'Longxiang Electric logo');
-        }
+        enhanceHomeHeroAssets(body);
         if (title && localized(hero, 'title')) title.textContent = localized(hero, 'title');
         if (subtitle && localized(hero, 'subtitle')) subtitle.textContent = localized(hero, 'subtitle');
         if (actions) {
@@ -1713,6 +1712,18 @@
             proof.innerHTML = (body.proof || []).map(function (item) {
                 return '<span><strong>' + escapeHtml(item.value || '') + '</strong> ' + escapeHtml(localized(item, 'label')) + '</span>';
             }).join('');
+        }
+    }
+
+    function enhanceHomeHeroAssets(body) {
+        var hero = body && body.hero || {};
+        var heroEl = document.querySelector('.hero-hex');
+        if (!heroEl) return;
+        var bg = heroEl.querySelector('.hero-bg');
+        var logo = heroEl.querySelector('.hero-hex-logo');
+        if (bg && hero.backgroundImage) setOptimizedBackground(bg, hero.backgroundImage);
+        if (logo && hero.logo && getComputedStyle(logo).display !== 'none') {
+            setOptimizedImage(logo, hero.logo, localized(hero, 'logoAlt') || 'Longxiang Electric logo');
         }
     }
 
@@ -2000,20 +2011,24 @@
         }
 
         if (pageSlug === 'home') {
-            renderHomeHero(body);
+            if (matches) enhanceHomeHeroAssets(body);
+            else renderHomeHero(body);
             updateSeo(body.seo, body.hero);
         }
         if (pageSlug === 'about-us') {
-            renderAboutHero(body.hero);
+            if (matches) enhancePageHeroAsset(body.hero);
+            else renderAboutHero(body.hero);
             updateSeo(body.seo, body.hero);
         }
         if (pageSlug === 'solutions') {
-            updateHero(body.hero);
+            if (matches) enhancePageHeroAsset(body.hero);
+            else updateHero(body.hero);
             updateSeo(body.seo, body.hero);
             if (!matches) scrollToCurrentHash();
         }
         if (pageSlug === 'contact') {
-            updateHero(body.hero);
+            if (matches) enhancePageHeroAsset(body.hero);
+            else updateHero(body.hero);
             updateSeo(body.seo, body.hero);
         }
         refreshDynamicUi();

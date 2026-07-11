@@ -17,7 +17,6 @@ const adminRoutes = require('./routes/admin/index');
 const { ensureDirectory, resolveUploadDir } = require('./lib/fileStore');
 const { getDb } = require('./lib/db');
 const { ensureContentBlockSeeds } = require('./lib/contentBlockSeeds');
-const { readPublicProduct } = require('./lib/publicProducts');
 const { renderProductDetailSeoHtml } = require('./lib/productDetailSeoRenderer');
 const { readPublicContentBlock, localizePublicContentBlock } = require('./lib/publicContentBlocks');
 const { readPublicCompanyView } = require('./lib/publicCompanyView');
@@ -25,6 +24,7 @@ const { renderGlobalShellHtml } = require('./lib/globalShellHtmlRenderer');
 const { createRuntimePublicSiteDataSource } = require('./lib/publicSiteDataSource');
 const { renderContentPageHtml } = require('./lib/contentPageHtmlRenderer');
 const { renderProductListHtml } = require('./lib/productListHtmlRenderer');
+const { renderProductDetailBodyHtml } = require('./lib/productDetailHtmlRenderer');
 const {
     staticSeoRouteDefinitions,
     renderStaticPageSeoHtml
@@ -276,7 +276,7 @@ function sendProductDetailShell(req, res, next) {
     const identifier = String(req.params.slug || '').trim();
     let product = null;
     try {
-        product = identifier ? readPublicProduct(identifier) : null;
+        product = identifier ? publicSiteDataSource.readProduct(identifier) : null;
         if (!product) {
             return sendNotFoundShell(req, res, next);
         }
@@ -287,7 +287,13 @@ function sendProductDetailShell(req, res, next) {
         if (err) return next(err);
         const withBase = html.replace(/<head>/i, '<head>\n    <base href="' + baseHrefForLocale(locale) + '">');
         const withSeo = renderProductDetailSeoHtml(withBase, product, locale, requestOrigin(req));
-        const withShell = renderPublicShell(withSeo, locale, req.path);
+        const withBody = renderProductDetailBodyHtml(withSeo, {
+            locale,
+            product,
+            products: publicSiteDataSource.readProducts(),
+            contentBlock: publicSiteDataSource.readContentBlock('product-pages')
+        });
+        const withShell = renderPublicShell(withBody, locale, req.path);
         sendHtmlString(res, withShell, 200);
     });
 }

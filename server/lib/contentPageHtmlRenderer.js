@@ -1,6 +1,7 @@
 'use strict';
 
 const presentation = require('../../js/content-page-presentation');
+const { renderHeroBackgroundHtml } = require('./pageHeroHtmlRenderer');
 
 const SUPPORTED = new Set(presentation.SUPPORTED_PAGES);
 const HOME_MARKERS = Object.freeze({
@@ -89,7 +90,7 @@ function markContentTag(tag, options) {
 
 function injectPresentationScript(html) {
     if (/content-page-presentation\.js/i.test(html)) return html;
-    const script = '<script src="js/content-page-presentation.js?v=20260711"></script>\n    ';
+    const script = '<script src="/js/content-presentation-i18n.js?v=20260711"></script>\n    <script src="/js/content-page-presentation.js?v=20260711"></script>\n    ';
     const pattern = /<script\b[^>]*src=(["'])[^"']*content-pages\.js[^"']*\1[^>]*><\/script>/i;
     if (!pattern.test(html)) throw new Error('Missing content-pages.js script marker');
     return html.replace(pattern, script + '$&');
@@ -142,6 +143,11 @@ function renderContentPageHtml(html, options) {
     const config = { slug, locale, version: block.version || 0 };
     let rendered = String(html || '');
     const hero = presentation.renderHeroFragments(slug, block.body, { locale });
+    rendered = renderHeroBackgroundHtml(rendered, {
+        locale,
+        className: slug === 'home' ? 'hero-bg' : 'page-hero',
+        backgroundImage: block.body.hero && block.body.hero.backgroundImage
+    });
     if (hero.title) rendered = rendered.replace(/(<h1\b[^>]*>)[\s\S]*?(<\/h1>)/i, '$1' + presentation.escapeHtml(hero.title) + '$2');
     if (hero.subtitle) rendered = rendered.replace(/(<h1\b[^>]*>[\s\S]*?<\/h1>\s*<p\b[^>]*>)[\s\S]*?(<\/p>)/i, '$1' + presentation.escapeHtml(hero.subtitle) + '$2');
     if (hero.kicker && slug === 'about-us') rendered = replaceClassInnerHtml(rendered, 'section-kicker', presentation.escapeHtml(hero.kicker));
@@ -150,6 +156,8 @@ function renderContentPageHtml(html, options) {
         rendered = replaceClassInnerHtml(rendered, 'hero-proof-strip', hero.proofHtml);
     } else if (slug === 'about-us') {
         rendered = replaceClassInnerHtml(rendered, 'about-hero-actions', hero.actionsHtml);
+    } else if (slug === 'solutions') {
+        rendered = replaceClassInnerHtml(rendered, 'solutions-hero-actions', hero.actionsHtml);
     }
     if (slug === 'home') {
         rendered = patchHome(rendered, block.body, config);

@@ -39,6 +39,14 @@
         if (/^[a-z][a-z0-9+.-]*:/i.test(value)) return '';
         return (locale === 'en' ? '' : '../') + value.replace(/^\/+|^\.\.\//g, '');
     }
+    function safeHref(value) {
+        value = String(value || '#').trim();
+        if (/[\u0000-\u001f\u007f]/.test(value) || /^\/\//.test(value)) return '#';
+        if (/^https:\/\//i.test(value) || value.charAt(0) === '#') return value;
+        if (value.charAt(0) === '/' && value.charAt(1) !== '/') return value;
+        if (/^[a-z][a-z0-9+.-]*:/i.test(value)) return '#';
+        return value.replace(/^\/+/, '') || '#';
+    }
     function productPath(product, locale) {
         var slug = String(product && (product.slug || product.id) || '');
         return '/' + (locale === 'en' ? '' : locale + '/') + 'products/' + encodeURIComponent(slug);
@@ -135,7 +143,7 @@
     function ctaHtml(section, locale) {
         if (!section) return '';
         var button = section.button || {};
-        return '<div class="container"><h2 class="fade-in">' + esc(localized(section, 'title', locale)) + '</h2><p class="fade-in">' + esc(localized(section, 'text', locale)) + '</p><div class="cta-buttons fade-in"><a href="' + esc(button.href || 'contact.html') + '" class="' + esc(button.className || 'btn btn-gold btn-lg') + '">' + esc(localized(button, 'label', locale)) + '</a></div></div>';
+        return '<div class="container"><h2 class="fade-in">' + esc(localized(section, 'title', locale)) + '</h2><p class="fade-in">' + esc(localized(section, 'text', locale)) + '</p><div class="cta-buttons fade-in"><a href="' + esc(safeHref(button.href || 'contact.html')) + '" class="' + esc(button.className || 'btn btn-gold btn-lg') + '">' + esc(localized(button, 'label', locale)) + '</a></div></div>';
     }
 
     function presentCatalog(options) {
@@ -156,13 +164,15 @@
         var empty = keyword ? ui.noResultsPrefix + filter.search.trim() + ui.noResultsMiddle + label + ui.noResultsSuffix : label + ui.updatedSoonSuffix;
         var summary = list.length ? list.length + ' ' + ui.productsAvailable + (pageCount > 1 ? ' / ' + ui.pageOf(filter.page, pageCount) : '') : ui.productsUpdatedSoon;
         var current = label + (filter.search ? ' / ' + ui.keyword + ': "' + filter.search + '"' : '') + ' (' + list.length + ')';
-        var keyData = { v: 1, locale: locale, filter: filter, taxonomy: taxonomy.map(function (x) { return [x.group, x.children.map(function (y) { return y.sub; })]; }), items: items.map(function (x) { return [x.id, x.slug, localized(x, 'name', locale), x.cardImage || x.image]; }), contentVersion: options.contentVersion || 0 };
-        return {
-            contractVersion: 1, kind: 'catalog', key: 'catalog-' + hash(keyData), state: filter,
+        var result = {
+            contractVersion: 1, kind: 'catalog', key: '', state: filter,
             ui: ui,
             fragments: { tree: catalogTree(taxonomy, filter, locale), title: esc(label), summary: esc(summary), filterCurrent: esc(current), cards: list.length ? items.map(function (product) { return catalogCard(product, locale); }).join('') : '<div class="empty-state">' + esc(empty) + '</div>', pagination: pagination(list.length, filter.page), support: supportHtml(block.listingSupport, locale), cta: ctaHtml(block.listingCta, locale) },
-            bootstrap: { v: 1, kind: 'catalog', locale: locale, key: 'catalog-' + hash(keyData), state: filter, contentVersion: options.contentVersion || 0 }
+            bootstrap: { v: 1, kind: 'catalog', locale: locale, key: '', state: filter, contentVersion: options.contentVersion || 0 }
         };
+        result.key = 'catalog-' + hash({ v: 1, locale: locale, state: result.state, fragments: result.fragments, contentVersion: options.contentVersion || 0 });
+        result.bootstrap.key = result.key;
+        return result;
     }
 
     function displaySpecRows(product) {
@@ -254,10 +264,8 @@
         if (voltage || capacity || standard) selection.unshift([voltage ? text('Voltage: ', locale, 'الجهد: ') + voltage : '', capacity ? text('Capacity: ', locale, 'السعة: ') + capacity : '', standard ? text('Standard: ', locale, 'المعيار: ') + standard : ''].filter(Boolean).join(' | '));
         var related = relatedProducts(product, products);
         var specs = displaySpecRows(product);
-        var keyData = { v: 1, locale: locale, product: [product.id, product.slug, name, desc, product.image, specs], related: related.map(function (x) { return x.id; }), contentVersion: options.contentVersion || 0 };
-        var key = 'detail-' + hash(keyData);
-        return {
-            contractVersion: 1, kind: 'detail', key: key,
+        var result = {
+            contractVersion: 1, kind: 'detail', key: '',
             state: { productId: product.id || '', slug: product.slug || product.id || '' },
             image: { src: safeAsset(product.image, locale), alt: name, width: 960, height: 720 },
             hero: { title: name, subtitle: category || localized(labels, 'defaultSubtitle', locale), breadcrumb: name },
@@ -271,8 +279,11 @@
                 support: productSupport(block.detailSupport, locale), faq: productFaq(block.detailFaq, labels, locale), inquiry: productInquiry(block.inquiryForm, product, name, locale),
                 related: related.length ? '<h2>' + esc(localized(labels, 'relatedTitle', locale) || localized(labels, 'relatedProducts', locale) || 'Related Products') + '</h2><div class="product-related-grid">' + related.map(function (item) { var relatedName = localized(item, 'name', locale), relatedDesc = localized(item, 'shortDesc', locale) || localized(item, 'description', locale), image = safeAsset(item.image, locale); return '<article class="product-related-card"><a href="' + esc(productPath(item, locale)) + '"><div class="product-related-image">' + (image ? '<img src="' + esc(image) + '" alt="' + esc(relatedName) + '" loading="lazy" decoding="async" width="320" height="220">' : '') + '</div><div class="product-related-body"><h3' + rtl(locale) + '>' + esc(relatedName) + '</h3><p' + rtl(locale) + '>' + esc(relatedDesc) + '</p></div></a></article>'; }).join('') + '</div>' : ''
             },
-            bootstrap: { v: 1, kind: 'detail', locale: locale, key: key, productId: product.id || '', contentVersion: options.contentVersion || 0 }
+            bootstrap: { v: 1, kind: 'detail', locale: locale, key: '', productId: product.id || '', contentVersion: options.contentVersion || 0 }
         };
+        result.key = 'detail-' + hash({ v: 1, locale: locale, state: result.state, image: result.image, hero: result.hero, fragments: result.fragments, contentVersion: options.contentVersion || 0 });
+        result.bootstrap.key = result.key;
+        return result;
     }
 
     function serializeBootstrap(value) { return JSON.stringify(value).replace(/&/g, '\\u0026').replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029'); }

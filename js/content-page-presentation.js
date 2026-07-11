@@ -1,10 +1,16 @@
 (function (root, factory) {
     'use strict';
-    var api = factory();
-    if (typeof module === 'object' && module.exports) module.exports = api;
-    if (root) root.LongxiangContentPagePresentation = api;
-}(typeof window !== 'undefined' ? window : null, function () {
+    var i18n = root && root.LongxiangContentPresentationI18n;
+    if (typeof module === 'object' && module.exports) {
+        i18n = require('./content-presentation-i18n');
+        module.exports = factory(i18n);
+    } else if (root) {
+        root.LongxiangContentPagePresentation = factory(i18n);
+    }
+}(typeof window !== 'undefined' ? window : null, function (i18n) {
     'use strict';
+
+    if (!i18n) throw new Error('Content presentation i18n dependency is missing');
 
     var SUPPORTED_PAGES = ['home', 'about-us', 'solutions', 'contact'];
 
@@ -25,20 +31,52 @@
         return value !== undefined && value !== null && value !== '' && (!Array.isArray(value) || value.length > 0);
     }
 
-    function localized(item, key, locale) {
+    function repairFrenchText(value, locale) {
+        if (locale !== 'fr' || typeof value !== 'string' || value.indexOf('?') === -1) return value;
+        return value
+            .replace(/\?lectrique/g, 'électrique').replace(/c\?blage/g, 'câblage').replace(/\? valider/g, 'À valider')
+            .replace(/p\?rim\?tre/g, 'périmètre').replace(/b\?timents/g, 'bâtiments').replace(/immerg\?s/g, 'immergés')
+            .replace(/l\?huile/g, 'l’huile').replace(/d\?usine/g, 'd’usine').replace(/Bo\?te/g, 'Boîte')
+            .replace(/\?quipements/g, 'équipements').replace(/capacit\?/g, 'capacité').replace(/r\?seau/g, 'réseau')
+            .replace(/\?nerg\?tiques/g, 'énergétiques').replace(/d\?exploitation/g, 'd’exploitation').replace(/\?les/g, 'ôles')
+            .replace(/contr\?le/g, 'contrôle').replace(/dur\?e/g, 'durée').replace(/priorit\?/g, 'priorité')
+            .replace(/d\?extension/g, 'd’extension').replace(/personnalis\?e/g, 'personnalisée').replace(/\?quipement/g, 'équipement')
+            .replace(/adapt\?/g, 'adapté').replace(/r\?els/g, 'réels').replace(/apr\?s/g, 'après')
+            .replace(/mod\?le/g, 'modèle').replace(/sp\?cifications/g, 'spécifications').replace(/s\?lection/g, 'sélection')
+            .replace(/sch\?ma/g, 'schéma').replace(/l\?environnement/g, 'l’environnement').replace(/d\?installation/g, 'd’installation')
+            .replace(/l\?enveloppe/g, 'l’enveloppe').replace(/l\?implantation/g, 'l’implantation').replace(/\?tre/g, 'être')
+            .replace(/paramêtres/g, 'paramètres');
+    }
+
+    function fallbackText(value, locale, pageSlug) {
+        value = String(value == null ? '' : value);
+        var trimmed = value.trim();
+        if (locale === 'fr' && pageSlug === 'solutions' && i18n.FR_SOLUTIONS_TEXT_FALLBACKS[trimmed]) return i18n.FR_SOLUTIONS_TEXT_FALLBACKS[trimmed];
+        if (locale === 'ar' && i18n.ARABIC_TEXT_FALLBACKS[trimmed]) return i18n.ARABIC_TEXT_FALLBACKS[trimmed];
+        var pack = i18n.TEXT_FALLBACKS[locale] || {};
+        return repairFrenchText(pack[trimmed] || value, locale);
+    }
+
+    function localized(item, key, locale, pageSlug) {
         if (!item) return '';
         locale = String(locale || 'en').toLowerCase();
         var direct = item[key];
-        if (direct && typeof direct === 'object' && !Array.isArray(direct) && hasValue(direct[locale])) return direct[locale];
+        var value = '';
+        if (direct && typeof direct === 'object' && !Array.isArray(direct) && hasValue(direct[locale])) value = direct[locale];
         if (locale !== 'en') {
             var suffix = locale.charAt(0).toUpperCase() + locale.slice(1);
             var snake = camelToSnake(key);
             var candidates = [key + suffix, snake + '_' + locale, key + '_' + locale];
             for (var i = 0; i < candidates.length; i += 1) {
-                if (hasValue(item[candidates[i]])) return item[candidates[i]];
+                if (hasValue(item[candidates[i]])) { value = item[candidates[i]]; break; }
             }
         }
-        return hasValue(direct) ? direct : '';
+        if (!hasValue(value)) value = hasValue(direct) ? direct : '';
+        if (Array.isArray(value)) return value.map(function (entry) { return typeof entry === 'string' ? fallbackText(entry, locale, pageSlug) : entry; });
+        var contactPack = pageSlug === 'contact' && (i18n.CONTACT_FIELD_TEXT_FALLBACKS[locale] || {});
+        var contactFallback = contactPack && contactPack[key] && item.name ? contactPack[key][item.name] : '';
+        if (contactFallback && (!hasValue(value) || value === direct)) return contactFallback;
+        return typeof value === 'string' ? fallbackText(value, locale, pageSlug) : value;
     }
 
     function clone(value) {
@@ -99,16 +137,17 @@
         return out;
     }
 
-    function context(options) {
+    function context(options, pageSlug) {
         options = options || {};
         var locale = String(options.locale || 'en');
         var prefix = locale === 'en' ? '' : '../';
         return {
             locale: locale,
             isArabic: locale === 'ar',
-            localized: function (item, key) { return localized(item, key, locale); },
+            pageSlug: pageSlug || '',
+            localized: function (item, key) { return localized(item, key, locale, pageSlug); },
             localizedList: function (item, key) {
-                var value = localized(item, key, locale);
+                var value = localized(item, key, locale, pageSlug);
                 return Array.isArray(value) ? value : [];
             },
             asset: function (value) {
@@ -117,6 +156,14 @@
                 if (/^https:\/\//i.test(value) || (value.charAt(0) === '/' && value.charAt(1) !== '/')) return value;
                 if (/^[a-z][a-z0-9+.-]*:/i.test(value)) return '';
                 return prefix + value.replace(/^\.\.\//, '');
+            },
+            cssAsset: function (value) {
+                value = this.asset(value);
+                return /["'()\\]/.test(value) ? '' : value;
+            },
+            iframe: function (value) {
+                value = String(value || '').trim();
+                return /^https:\/\//i.test(value) && !/[\u0000-\u001f\u007f"']/i.test(value) ? value : '';
             },
             href: function (value) {
                 value = String(value || '#');
@@ -158,11 +205,16 @@
         return '<ul class="' + escapeHtml(className || 'solution-check-list') + '">' + items.map(function (item) { return '<li>' + escapeHtml(item) + '</li>'; }).join('') + '</ul>';
     }
 
+    function safeIconHtml(value) {
+        value = String(value || '').trim();
+        return /^&#\d+;$/.test(value) ? value : '';
+    }
+
     function renderSolutions(body, ctx) {
         function anchors(value) {
             if (!value || !value.length) return '';
             return '<section class="solutions-anchor-bar" aria-label="' + escapeHtml(ctx.isArabic ? 'أقسام الحلول' : 'Solution sections') + '"><div class="container"><div class="solutions-anchor-list">' + value.map(function (item) {
-                return '<a href="' + escapeHtml(item.href || '#') + '">' + escapeHtml(ctx.localized(item, 'label')) + '</a>';
+                return '<a href="' + escapeHtml(ctx.href(item.href || '#')) + '">' + escapeHtml(ctx.localized(item, 'label')) + '</a>';
             }).join('') + '</div></div></section>';
         }
         function overview(value) {
@@ -221,16 +273,18 @@
         function snapshot(value) {
             if (!value) return '';
             var video = value.video || {};
+            var videoSrc = ctx.iframe(video.src);
             return '<section class="about-snapshot-section"><div class="container"><div class="about-snapshot-card"><div class="about-snapshot-copy"><span class="section-kicker">' + escapeHtml(ctx.localized(value, 'kicker')) + '</span><h2>' + escapeHtml(ctx.localized(value, 'title')) + '</h2>' + (ctx.localized(value, 'text') ? '<p>' + escapeHtml(ctx.localized(value, 'text')) + '</p>' : '') + (value.body || []).map(function (item) {
                 var field = item && item.companyField ? ' data-company-field="' + escapeHtml(item.companyField) + '"' : '';
                 var text = typeof item === 'string' ? item : ctx.localized(item, 'text');
                 return '<p' + field + '>' + escapeHtml(text) + '</p>';
-            }).join('') + '</div><div class="about-snapshot-media"><div class="about-inline-video">' + (video.src ? '<iframe title="' + escapeHtml(ctx.localized(video, 'title')) + '" data-consent-category="functional" data-consent-src="' + escapeHtml(video.src) + '" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>' : '') + '</div><p class="about-video-caption">' + escapeHtml(ctx.localized(video, 'caption')) + '</p></div><div class="about-stats-grid" aria-label="' + escapeHtml(ctx.isArabic ? 'أبرز بيانات الشركة' : 'Company highlights') + '">' + (value.stats || []).map(function (stat) { return '<div class="about-stat"><strong>' + escapeHtml(stat.value || '') + '</strong><span>' + escapeHtml(ctx.localized(stat, 'label')) + '</span></div>'; }).join('') + '</div></div></div></section>';
+            }).join('') + '</div><div class="about-snapshot-media"><div class="about-inline-video">' + (videoSrc ? '<iframe title="' + escapeHtml(ctx.localized(video, 'title')) + '" data-consent-category="functional" data-consent-src="' + escapeHtml(videoSrc) + '" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>' : '') + '</div><p class="about-video-caption">' + escapeHtml(ctx.localized(video, 'caption')) + '</p></div><div class="about-stats-grid" aria-label="' + escapeHtml(ctx.isArabic ? 'أبرز بيانات الشركة' : 'Company highlights') + '">' + (value.stats || []).map(function (stat) { return '<div class="about-stat"><strong>' + escapeHtml(stat.value || '') + '</strong><span>' + escapeHtml(ctx.localized(stat, 'label')) + '</span></div>'; }).join('') + '</div></div></div></section>';
         }
         function values(value) {
             if (!value || !value.length) return '';
             return '<section class="section about-values-section"><div class="about-values-grid">' + value.map(function (item) {
-                var style = item.image ? ' style="background-image: url(&quot;' + escapeHtml(ctx.asset(item.image)) + '&quot;);"' : '';
+                var background = ctx.cssAsset(item.image);
+                var style = background ? ' style="background-image: url(&quot;' + escapeHtml(background) + '&quot;);"' : '';
                 return '<article class="about-value-card"' + style + '><div><span>' + escapeHtml(ctx.localized(item, 'label')) + '</span><h3>' + escapeHtml(ctx.localized(item, 'title')) + '</h3><p>' + escapeHtml(ctx.localized(item, 'text')) + '</p></div></article>';
             }).join('') + '</div></section>';
         }
@@ -257,7 +311,8 @@
         }
         function cta(value) {
             if (!value) return '';
-            var style = value.backgroundImage ? ' style="--about-cta-bg-image: url(&quot;' + escapeHtml(ctx.asset(value.backgroundImage)) + '&quot;);"' : '';
+            var background = ctx.cssAsset(value.backgroundImage);
+            var style = background ? ' style="--about-cta-bg-image: url(&quot;' + escapeHtml(background) + '&quot;);"' : '';
             return '<section class="about-cta-section"' + style + '><div class="container"><div class="about-cta-panel"><h2>' + escapeHtml(ctx.localized(value, 'title')) + '</h2><p>' + escapeHtml(ctx.localized(value, 'text')) + '</p>' + buttonHtml(value.button, 'btn btn-primary', ctx) + '</div></div></section>';
         }
         return snapshot(body.snapshot) + values(body.values) + quality(body.quality) + history() + cards(body.capability, 'bg-light about-capability-section', 'about-capability-grid') + factory(body.factory) + markets(body.markets) + cta(body.cta);
@@ -270,7 +325,7 @@
             return '<svg class="social-brand-icon instagram-brand-icon" viewBox="0 0 24 24" aria-hidden="true"><rect class="instagram-glyph" x="5" y="5" width="14" height="14" rx="4"></rect><circle class="instagram-glyph" cx="12" cy="12" r="3.2"></circle><circle class="instagram-dot" cx="16.8" cy="7.2" r="1.05"></circle></svg>';
         }
         function primary() {
-            var mapSrc = body.googleMapsEmbedUrl || body.googleMyMapsEmbedUrl || '';
+            var mapSrc = ctx.iframe(body.googleMapsEmbedUrl || body.googleMyMapsEmbedUrl || '');
             var socials = [{ key: 'instagram', label: 'Instagram' }, { key: 'youtube', label: 'YouTube' }].filter(function (item) { return body[item.key]; });
             var label = ctx.localized(page, 'factoryAddressLabel');
             return '<section class="section bg-light contact-primary-section"><div class="container"><div class="contact-section"><div class="contact-info-card fade-in-left"><div class="contact-section-heading"><span>' + escapeHtml(ctx.localized(page, 'companyName')) + '</span><h2>' + escapeHtml(ctx.localized(page, 'infoTitle')) + '</h2></div><div class="contact-info-list"><div class="contact-info-row contact-email-row"><span>&#9993;</span><div><strong>' + escapeHtml(ctx.localized(page, 'emailLabel')) + '</strong><a href="mailto:' + escapeHtml(body.email || '') + '">' + escapeHtml(body.email || '') + '</a></div></div><div class="contact-info-row contact-address-row"><span>&#8982;</span><div><strong>' + escapeHtml(label) + '</strong><span>' + escapeHtml(ctx.localized(body, 'headquarters') || ctx.localized(body, 'address')) + '</span></div></div><div class="contact-info-row contact-address-row"><span>&#9635;</span><div><strong>' + escapeHtml(label) + '</strong><span>' + escapeHtml(ctx.localized(body, 'huaiyangBase')) + '</span></div></div></div>' + (socials.length ? '<div class="contact-social-block"><h4>' + escapeHtml(ctx.localized(page, 'socialTitle')) + '</h4><div class="contact-social-icons">' + socials.map(function (item) { return '<a href="' + escapeHtml(ctx.href(body[item.key])) + '" aria-label="' + escapeHtml(item.label) + '" target="_blank" rel="noopener">' + socialSvg(item.key) + '</a>'; }).join('') + '</div></div>' : '') + '</div><div class="map-placeholder contact-location-panel contact-npc-map-panel fade-in-right">' + (mapSrc ? '<iframe class="contact-map-frame" title="' + escapeHtml(ctx.localized(page, 'mapTitle')) + '" data-consent-category="functional" data-consent-src="' + escapeHtml(mapSrc) + '" width="640" height="480" loading="eager" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>' : '') + '</div></div></div></section>';
@@ -330,8 +385,8 @@
             newsHidden: !news || news.enabled === false,
             news: news && news.enabled !== false ? '<div class="container"><div class="section-header fade-in"><h2>' + escapeHtml(ctx.localized(news, 'title')) + '</h2>' + (ctx.localized(news, 'text') ? '<p>' + escapeHtml(ctx.localized(news, 'text')) + '</p>' : '') + '</div><div class="home-news-grid" data-stagger="120">' + (news.cards || []).map(function (card) { var inner = '<span>' + escapeHtml(card.date || '') + '</span><h3>' + escapeHtml(ctx.localized(card, 'title')) + '</h3><p>' + escapeHtml(ctx.localized(card, 'text')) + '</p>'; return card.href ? '<a class="home-news-card fade-in" href="' + escapeHtml(ctx.href(card.href)) + '">' + inner + '</a>' : '<article class="home-news-card fade-in">' + inner + '</article>'; }).join('') + '</div><div class="text-center mt-4 fade-in">' + buttonHtml(news.button, 'btn btn-secondary', ctx) + '</div></div>' : '',
             trust: trust ? '<div class="container"><div class="section-header fade-in"><h2>' + escapeHtml(ctx.localized(trust, 'title')) + '</h2><p>' + escapeHtml(ctx.localized(trust, 'text')) + '</p></div><div class="trust-logos fade-in">' + (trust.chips || []).map(function (chip) { return '<div class="trust-chip"><strong>' + escapeHtml(ctx.localized(chip, 'title')) + '</strong><span>' + escapeHtml(ctx.localized(chip, 'text')) + '</span></div>'; }).join('') + '</div><div class="testimonials-grid trust-testimonials fade-in">' + (trust.cards || []).map(function (card) { return '<div class="testimonial-card"><p class="testimonial-text">' + escapeHtml(ctx.localized(card, 'text')) + '</p><div class="testimonial-author"><div class="testimonial-author-info"><strong>' + escapeHtml(ctx.localized(card, 'title')) + '</strong><span>' + escapeHtml(ctx.localized(card, 'meta')) + '</span></div></div></div>'; }).join('') + '</div></div>' : '',
-            features: body.features && body.features.length ? '<div class="container"><div class="section-header fade-in"><h2>' + escapeHtml(featureTitle) + '</h2></div><div class="features-grid" data-stagger="150">' + body.features.map(function (item) { return '<div class="feature-card fade-in"><div class="feature-icon">' + (item.icon || '') + '</div><h4>' + escapeHtml(ctx.localized(item, 'title')) + '</h4><p>' + escapeHtml(ctx.localized(item, 'text')) + '</p></div>'; }).join('') + '</div></div>' : '',
-            stats: body.stats && body.stats.length ? '<div class="container"><div class="stats-grid">' + body.stats.map(function (stat) { var count = stat.count || String(stat.value || '').replace(/[^\d]/g, '') || 0; return '<div class="stat-item fade-in"><div class="stat-number" data-count="' + escapeHtml(count) + '">0</div><div class="stat-divider"></div><div class="stat-label">' + escapeHtml(ctx.localized(stat, 'label')) + '</div></div>'; }).join('') + '</div></div>' : '',
+            features: body.features && body.features.length ? '<div class="container"><div class="section-header fade-in"><h2>' + escapeHtml(featureTitle) + '</h2></div><div class="features-grid" data-stagger="150">' + body.features.map(function (item) { return '<div class="feature-card fade-in"><div class="feature-icon">' + safeIconHtml(item.icon) + '</div><h4>' + escapeHtml(ctx.localized(item, 'title')) + '</h4><p>' + escapeHtml(ctx.localized(item, 'text')) + '</p></div>'; }).join('') + '</div></div>' : '',
+            stats: body.stats && body.stats.length ? '<div class="container"><div class="stats-grid">' + body.stats.map(function (stat) { var count = stat.count || String(stat.value || '').replace(/[^\d]/g, '') || 0; return '<div class="stat-item fade-in"><div class="stat-number" data-count="' + escapeHtml(count) + '">' + escapeHtml(stat.value || count) + '</div><div class="stat-divider"></div><div class="stat-label">' + escapeHtml(ctx.localized(stat, 'label')) + '</div></div>'; }).join('') + '</div></div>' : '',
             cta: body.cta ? '<div class="container"><h2 class="fade-in">' + escapeHtml(ctx.localized(body.cta, 'title')) + '</h2><p class="fade-in">' + escapeHtml(ctx.localized(body.cta, 'text')) + '</p><div class="cta-buttons fade-in">' + buttonHtml(body.cta.button, 'btn btn-gold btn-lg', ctx) + '</div></div>' : ''
         };
     }
@@ -352,7 +407,7 @@
             result.proofHtml = (body.proof || []).map(function (item) {
                 return '<span><strong>' + escapeHtml(item.value || '') + '</strong> ' + escapeHtml(ctx.localized(item, 'label')) + '</span>';
             }).join('');
-        } else if (slug === 'about-us') {
+        } else if (slug === 'about-us' || slug === 'solutions') {
             result.actionsHtml = (hero.actions || []).map(function (action, index) {
                 return buttonHtml(action, index === 0 ? 'btn btn-primary' : 'btn btn-secondary', ctx);
             }).join('');
@@ -362,7 +417,7 @@
 
     function renderPageBody(slug, body, options) {
         if (SUPPORTED_PAGES.indexOf(slug) === -1) throw new Error('Unsupported content page: ' + slug);
-        var ctx = context(options);
+        var ctx = context(options, slug);
         body = localizeTree(body || {}, ctx.locale);
         if (slug === 'about-us') return renderAbout(body, ctx);
         if (slug === 'solutions') return renderSolutions(body, ctx);
@@ -375,8 +430,8 @@
         escapeHtml: escapeHtml,
         localized: localized,
         localizeTree: localizeTree,
-        renderHomeSections: function (body, options) { var ctx = context(options); return renderHomeSections(localizeTree(body || {}, ctx.locale), ctx); },
-        renderHeroFragments: function (slug, body, options) { var ctx = context(options); return renderHeroFragments(slug, localizeTree(body || {}, ctx.locale), ctx); },
+        renderHomeSections: function (body, options) { var ctx = context(options, 'home'); return renderHomeSections(localizeTree(body || {}, ctx.locale), ctx); },
+        renderHeroFragments: function (slug, body, options) { var ctx = context(options, slug); return renderHeroFragments(slug, localizeTree(body || {}, ctx.locale), ctx); },
         renderPageBody: renderPageBody
     };
 }));

@@ -5,6 +5,7 @@ const path = require('path');
 const { createSnapshotPublicSiteDataSource } = require('../server/lib/publicSiteDataSource');
 const { staticSeoRouteDefinitions } = require('../server/lib/staticPageSeoRenderer');
 const { renderContentPageHtml } = require('../server/lib/contentPageHtmlRenderer');
+const presentation = require('../js/content-page-presentation');
 
 function option(name) {
     const index = process.argv.indexOf(name);
@@ -42,9 +43,23 @@ staticSeoRouteDefinitions().forEach(function (route) {
     if (slug === 'home' && route.locale.code === 'ar') {
         if (output.includes('data-home-applications') || output.includes('data-home-news')) throw new Error(route.path + ': missing Arabic home slots were added');
     }
-    const heroBefore = (input.match(/<div class="hero-bg"[^>]*>/i) || [''])[0];
-    const heroAfter = (output.match(/<div class="hero-bg"[^>]*>/i) || [''])[0];
-    if (heroBefore !== heroAfter) throw new Error(route.path + ': Hero background node changed');
+    const main = (output.match(new RegExp('<main\\b[^>]*data-content-page=["\']' + slug + '["\'][^>]*>[\\s\\S]*?<\\/main>', 'i')) || [''])[0];
+    if (!/<h[23]\b/i.test(main) || !/<(?:a|button)\b/i.test(main)) throw new Error(route.path + ': SSR main content heading or action missing');
+    if (slug === 'solutions') {
+        const expectedActions = presentation.renderHeroFragments(slug, dataSource.readContentBlock(slug).body, { locale: route.locale.code }).actionsHtml;
+        const actions = (output.match(/<div\b[^>]*class=["'][^"']*\bsolutions-hero-actions\b[^"']*["'][^>]*>([\s\S]*?)<\/div>/i) || [])[1] || '';
+        if (!expectedActions || actions !== expectedActions) throw new Error(route.path + ': localized Solutions Hero actions missing or changed');
+    }
+    const block = dataSource.readContentBlock(slug);
+    const backgroundImage = block && block.body && block.body.hero && block.body.hero.backgroundImage;
+    const expectedHeroAsset = (route.locale.code === 'en' ? '' : '../') + String(backgroundImage || '').replace(/^\/+|^\.\.\//g, '');
+    const heroClass = slug === 'home' ? 'hero-bg' : 'page-hero';
+    const heroPattern = new RegExp('<[^>]+class=["\'][^"\']*\\b' + heroClass + '\\b[^"\']*["\'][^>]*>', 'i');
+    const heroAfter = (output.match(heroPattern) || [''])[0];
+    if (!expectedHeroAsset || !heroAfter.includes("background-image: url('" + expectedHeroAsset + "')")) {
+        throw new Error(route.path + ': authoritative Hero background is missing or changed');
+    }
+    if (/thumbnail|cardImage|[?&](?:w|width|q|quality)=/i.test(heroAfter)) throw new Error(route.path + ': Hero image quality or source changed');
     checked += 1;
 });
 

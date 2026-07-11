@@ -1,6 +1,6 @@
 const { test, expect } = require('@playwright/test');
 
-const BASE = 'http://localhost:3000';
+const BASE = process.env.TEST_BASE || 'http://localhost:3000';
 
 async function mockHeaderContactBarData(page, overrides) {
     overrides = overrides || {};
@@ -580,4 +580,61 @@ test('产品目录 API 失败时保留服务端筛选结果', async ({ page }) =
     await expect(page.locator('#products-container .product-card').first()).toBeVisible();
     await expect(page.locator('[data-product-ssr="catalog"]')).toHaveAttribute('data-product-fallback', 'static');
     await expect(page.locator('#products-container')).not.toContainText('Unable to load products');
+});
+
+test('同版本产品详情水合保留H1规格相关产品和询盘节点', async ({ page }) => {
+    await page.route('**/api/content-blocks/product-pages', async (route) => { await new Promise((resolve) => setTimeout(resolve, 500)); await route.continue(); });
+    await page.route('**/api/products/**', async (route) => { await new Promise((resolve) => setTimeout(resolve, 800)); await route.continue(); });
+    await page.route('**/api/products', async (route) => { await new Promise((resolve) => setTimeout(resolve, 800)); await route.continue(); });
+    await page.goto(BASE + '/products/anti-short-amorphous', { waitUntil: 'domcontentloaded' });
+    const probes = await page.evaluate(() => {
+        const nodes = [document.querySelector('#product-title'), document.querySelector('#specs-body tr'), document.querySelector('[data-product-related] .product-related-card'), document.querySelector('[data-product-detail-inquiry] form')];
+        nodes.forEach((node, index) => { if (node) node.setAttribute('data-detail-node-probe', String(index)); });
+        return nodes.map(Boolean);
+    });
+    expect(probes).toEqual([true, true, true, true]);
+    await page.waitForTimeout(1500);
+    for (let index = 0; index < 4; index += 1) await expect(page.locator('[data-detail-node-probe="' + index + '"]')).toHaveCount(1);
+    await expect(page.locator('[data-product-ssr="detail"]')).toHaveAttribute('data-product-hydrated', 'true');
+    const image = await page.locator('#main-product-image').getAttribute('src');
+    expect(image).not.toContain('product-cards');
+});
+
+test('产品详情 API 失败时保留服务端完整正文', async ({ page }) => {
+    await page.route('**/api/content-blocks/product-pages', (route) => route.abort());
+    await page.route('**/api/products/**', (route) => route.abort());
+    await page.route('**/api/products', (route) => route.abort());
+    await page.goto(BASE + '/fr/products/anti-short-amorphous', { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(400);
+    await expect(page.locator('#product-title')).not.toContainText('Product Details');
+    await expect(page.locator('#specs-body tr').first()).toBeVisible();
+    await expect(page.locator('[data-product-related] .product-related-card').first()).toBeVisible();
+    await expect(page.locator('[data-product-detail-inquiry] form')).toHaveCount(1);
+    await expect(page.locator('[data-product-ssr="detail"]')).toHaveAttribute('data-product-fallback', 'content-block');
+});
+
+test('禁用JavaScript时产品详情核心正文仍完整可见', async ({ browser }) => {
+    const context = await browser.newContext({ javaScriptEnabled: false });
+    const page = await context.newPage();
+    await page.goto(BASE + '/ru/products/anti-short-amorphous');
+    await expect(page.locator('#product-title')).toBeVisible();
+    await expect(page.locator('#product-desc p').first()).toBeVisible();
+    await expect(page.locator('#main-product-image')).toHaveAttribute('fetchpriority', 'high');
+    await expect(page.locator('#specs-body tr').first()).toBeVisible();
+    await expect(page.locator('[data-product-related] a').first()).toHaveAttribute('href', /\/ru\/products\//);
+    await context.close();
+});
+
+test('阿法俄页面正确加载共享展示模块并完成幂等水合', async ({ page }) => {
+    const errors = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    for (const locale of ['ar', 'fr', 'ru']) {
+        await page.goto(BASE + '/' + locale + '/about.html', { waitUntil: 'networkidle' });
+        await expect(page.locator('[data-ssr-content="about-us"]')).toHaveAttribute('data-content-hydrated-version', /\d+/);
+        await page.goto(BASE + '/' + locale + '/products.html', { waitUntil: 'networkidle' });
+        await expect(page.locator('[data-product-ssr="catalog"]')).toHaveAttribute('data-product-hydrated', 'true');
+        await page.goto(BASE + '/' + locale + '/products/anti-short-amorphous', { waitUntil: 'networkidle' });
+        await expect(page.locator('[data-product-ssr="detail"]')).toHaveAttribute('data-product-hydrated', 'true');
+    }
+    expect(errors.filter((message) => /presentation|MIME|not defined/i.test(message))).toEqual([]);
 });

@@ -648,3 +648,19 @@ alias 全量映射测试、目标产品事实核对、状态码与 canonical 检
 生产部署后使用生产公开 `/api/products` 和真实 HTTP/浏览器再次完整验收，结果与本地一致：424 次有效重定向检查覆盖 320 个唯一旧 URL，28 个无效场景均返回本语言 404，152 个清洁目标均为 200 且无第二跳；清洁产品页 SEO 152/152、全站 Schema 184/184、四语言代表性旧链接最终页面及 Contact 约束全部通过。PM2 只执行一次必要重启并保持 `online`。
 
 需要持续注意：301 可能被客户端和搜索引擎长期缓存；即使以后通过 Git 回滚路由，已缓存的永久重定向也不保证立即失效。任何白名单目标调整都必须重新完成生产 alias→目标映射盘点。
+
+## 2026-07-11 批次 2C 本地实施结果
+
+2C 已按共享数据源、共享纯展示模块和薄服务端 adapter 的结构完成，未在 40 个物理 HTML 壳中复制正文、导航或页脚：
+
+- 公共壳：184/184 sitemap URL 原始 HTML 具备非空主导航、完整页脚、footer-bottom、国际邮箱、Social Media、中国官网普通跳转链接、Cookie Settings 和页脚询盘表单。
+- 重点正文：16/16 首页、About、Solutions、Contact 原始 HTML 具备唯一 H1、已发布正文、关键 H2/H3、CTA 和内部链接。
+- 产品目录：4/4 clean 目录具备 taxonomy 和最多 9 张首屏产品卡；4 个代表性参数页继续为 200、`noindex,follow`，canonical/hreflang 均不带 query。
+- 产品详情：152/152 原始 HTML 具备产品特定 H1、描述、原始 `image` 主图、960×720 尺寸、`fetchpriority=high`、规格、应用、选型、支持、FAQ、询盘上下文和相关清洁链接。
+- 结构化数据：184/184 无缺失、错配、JSON-LD 解析错误或加载错误；Product Schema 和价格、库存、Offer、Review、AggregateRating 高风险字段暴露均为 0。
+- URL 回归：320 个唯一旧产品 URL 的 424 次有效 GET/HEAD 检查全部单跳 301；28 个无效场景保持 404；152 个清洁目标无第二跳。
+- sitemap 与语言：仍为 184；仅 en/ar/fr/ru；planned `pt`、分类 URL、分类 Schema、分类 hreflang 和分类 sitemap URL 均为 0。
+- 浏览器回归：35/35；覆盖公共壳、重点正文、目录和详情的同版本节点保留、分类/内容 API 单独失败、内容版本升级、禁用 JavaScript、四语言 clean URL、阿语 RTL、法语/俄语共享模块路径、筛选和询盘。
+- 敏感信息：184 sitemap URL 与 4 参数页原始 HTML 中，国内电话、国内邮箱、WhatsApp、遗留注册资本暴露均为 0；`.cn` 只作为允许的普通中国官网链接。
+
+本批没有修改 CSS、Hero 图片或图片资源，也未压缩或替换产品主图；Contact 两个地址行继续使用既有地址标签，国际邮箱保持 `henanlxgj@163.com`。

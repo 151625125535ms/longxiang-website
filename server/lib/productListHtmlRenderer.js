@@ -2,6 +2,7 @@
 
 const presentation = require('../../js/product-page-presentation');
 const { findElementRange } = require('./contentPageHtmlRenderer');
+const { renderHeroBackgroundHtml } = require('./pageHeroHtmlRenderer');
 
 function replaceRange(html, range, innerHtml, openTag) {
     if (!range) throw new Error('Missing product list SSR marker');
@@ -22,7 +23,7 @@ function setAttribute(tag, name, value) {
 
 function injectScripts(html, bootstrap) {
     if (!/product-presentation-i18n\.js/i.test(html)) {
-        const scripts = '<script src="js/content-page-presentation.js?v=20260711"></script>\n    <script src="js/product-presentation-i18n.js?v=20260711"></script>\n    <script src="js/product-page-presentation.js?v=20260711"></script>\n    ';
+        const scripts = '<script src="/js/content-presentation-i18n.js?v=20260711"></script>\n    <script src="/js/content-page-presentation.js?v=20260711"></script>\n    <script src="/js/product-presentation-i18n.js?v=20260711"></script>\n    <script src="/js/product-page-presentation.js?v=20260711"></script>\n    ';
         const pattern = /<script\b[^>]*src=(["'])[^"']*products-list\.js[^"']*\1[^>]*><\/script>/i;
         if (!pattern.test(html)) throw new Error('Missing products-list.js script marker');
         html = html.replace(pattern, scripts + '$&');
@@ -45,6 +46,7 @@ function renderProductListHtml(html, options) {
         contentVersion: contentBlock.version || 0
     });
     let rendered = String(html || '');
+    rendered = renderHeroBackgroundHtml(rendered, { locale, backgroundImage: contentBlock.body.productsHero && contentBlock.body.productsHero.backgroundImage });
     rendered = replaceByAttribute(rendered, 'data-content-page', 'product-pages',
         rendered.slice(findElementRange(rendered, 'data-content-page', 'product-pages').openEnd, findElementRange(rendered, 'data-content-page', 'product-pages').closeStart),
         function (tag) {
