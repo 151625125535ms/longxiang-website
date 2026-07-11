@@ -147,8 +147,8 @@ function findSqliteProductByAlias(db, id) {
     return null;
 }
 
-function readSqliteProducts(id) {
-    const db = getDb();
+function readSqliteProducts(id, dbValue) {
+    const db = dbValue || getDb();
     let params = [];
     let idWhere = '';
     if (id) {
@@ -220,12 +220,13 @@ function readSqliteProducts(id) {
         .filter(Boolean);
 }
 
-function readPublicProducts() {
-    return readSqliteProducts();
+function readPublicProducts(dbValue) {
+    return readSqliteProducts(null, dbValue);
 }
 
-function readPublicProduct(identifier) {
-    return readSqliteProducts(identifier)[0] || null;
+function readPublicProduct(identifier, dbValue) {
+    if (identifier == null || identifier === '' || identifier === 0) return null;
+    return readSqliteProducts(identifier, dbValue)[0] || null;
 }
 
 module.exports = {

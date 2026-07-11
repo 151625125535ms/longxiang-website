@@ -19,6 +19,7 @@ yarn-error.log*
 *.bak-*
 *.tmp
 !/.tmp/
+/.tmp/stage2c-public-snapshot-*/
 *.old
 
 .env

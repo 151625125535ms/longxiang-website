@@ -830,11 +830,13 @@ function verifyStaticHtmlRuntimeCacheVersions() {
 function verifyPublicApiI18nFieldMapping() {
     const productsRouteSource = readText('server/routes/products.js');
     const productsSource = productsRouteSource + '\n' + readText('server/lib/publicProducts.js');
-    const categoriesSource = readText('server/routes/product-categories.js');
+    const categoriesRouteSource = readText('server/routes/product-categories.js');
+    const categoriesSource = categoriesRouteSource + '\n' + readText('server/lib/publicProductTaxonomy.js');
     const certificationsSource = readText('server/routes/certifications.js');
 
     assertSourceContains(productsRouteSource, /readPublicProducts\s*\(/, 'server/routes/products.js 应复用 server/lib/publicProducts.js 的公开产品列表读取。');
     assertSourceContains(productsRouteSource, /readPublicProduct\s*\(/, 'server/routes/products.js 应复用 server/lib/publicProducts.js 的公开产品详情读取。');
+    assertSourceContains(categoriesRouteSource, /readPublicProductCategories\s*\(/, 'server/routes/product-categories.js 应复用 server/lib/publicProductTaxonomy.js 的公开分类读取。');
 
     [
         'nameFr', 'nameRu',
@@ -851,7 +853,7 @@ function verifyPublicApiI18nFieldMapping() {
     });
 
     ['labelFr', 'labelRu'].forEach((field) => {
-        assertSourceContains(categoriesSource, new RegExp('\\b' + field + '\\b'), 'server/routes/product-categories.js 缺少公开分类字段：' + field + '。');
+        assertSourceContains(categoriesSource, new RegExp('\\b' + field + '\\b'), 'server/lib/publicProductTaxonomy.js 缺少公开分类字段：' + field + '。');
     });
 
     [
