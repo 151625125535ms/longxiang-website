@@ -32,7 +32,7 @@
 - Consumes: planned module `server/lib/staticPageSeoRenderer.js`
 - Produces: executable regression gate covering `staticSeoRouteDefinitions()` and `renderStaticPageSeoHtml(html, route, origin)`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 The test must:
 
@@ -50,7 +50,7 @@ The test must:
 12. Assert Home and Contact have no BreadcrumbList added by this batch.
 13. Assert generated JSON-LD contains no `telephone`, `whatsapp`, domestic email or `.cn`.
 
-- [ ] **Step 2: Run the test and verify RED**
+- [x] **Step 2: Run the test and verify RED**
 
 Run:
 
@@ -112,7 +112,7 @@ The seven allowed page definitions are:
 ]
 ```
 
-- [ ] **Step 1: Implement URL generation**
+- [x] **Step 1: Implement URL generation**
 
 Use only locale entries whose `includeInSitemap` is true. Generate canonical paths as:
 
@@ -125,7 +125,7 @@ function localizedStaticPath(basePath, locale) {
 
 Generate x-default from the locale with an empty `pathPrefix`.
 
-- [ ] **Step 2: Implement managed head cleanup**
+- [x] **Step 2: Implement managed head cleanup**
 
 Remove:
 
@@ -136,7 +136,7 @@ Remove:
 
 Do not remove unrelated JSON-LD.
 
-- [ ] **Step 3: Implement page Schema generation**
+- [x] **Step 3: Implement page Schema generation**
 
 For AboutPage/WebPage/CollectionPage:
 
@@ -184,7 +184,7 @@ For LocalBusiness:
 
 Do not emit `telephone`, `whatsapp`, domestic email or China Website fields.
 
-- [ ] **Step 4: Implement BreadcrumbList**
+- [x] **Step 4: Implement BreadcrumbList**
 
 Only routes with `breadcrumbKey` receive:
 
@@ -211,7 +211,7 @@ Only routes with `breadcrumbKey` receive:
 
 For English, `route.locale.homePath` is `/`.
 
-- [ ] **Step 5: Inject head tags before `</head>`**
+- [x] **Step 5: Inject head tags before `</head>`**
 
 Inject in this order:
 
@@ -223,7 +223,7 @@ Inject in this order:
 
 Escape HTML attributes and replace `<` in JSON with `\u003c`.
 
-- [ ] **Step 6: Run the test and verify GREEN**
+- [x] **Step 6: Run the test and verify GREEN**
 
 Run:
 
@@ -248,7 +248,7 @@ Expected: `static page SEO renderer tests passed (28 routes)`.
 - Consumes: `staticSeoRouteDefinitions()`, `renderStaticPageSeoHtml()`
 - Produces: HTTP 200 original HTML for the 28 exact routes before `express.static`
 
-- [ ] **Step 1: Add a failing HTTP acceptance test**
+- [x] **Step 1: Add a failing HTTP acceptance test**
 
 Add an acceptance test before admin tests that requests all 28 paths and asserts:
 
@@ -269,7 +269,7 @@ node scripts/test-acceptance.js
 
 Expected: fail because the server has not mounted the renderer.
 
-- [ ] **Step 2: Mount routes in `server/app.js`**
+- [x] **Step 2: Mount routes in `server/app.js`**
 
 Import:
 
@@ -296,7 +296,7 @@ staticSeoRouteDefinitions().forEach(function (route) {
 
 Do not mount `/index.html`, product list, product details, parameter pages or category paths.
 
-- [ ] **Step 3: Add the renderer test to `check:server`**
+- [x] **Step 3: Add the renderer test to `check:server`**
 
 Insert:
 
@@ -304,7 +304,7 @@ Insert:
 "check:server": "node --check server/app.js && node --check server/routes/products.js && node --check server/lib/publicProducts.js && node --check server/lib/productDetailSeoRenderer.js && node --check server/lib/staticPageSeoRenderer.js && node scripts/test-static-page-seo-renderer.js && node scripts/test-content-block-safe-patch.js && node scripts/test-product-field-safe-patch.js && node scripts/test-acceptance.js"
 ```
 
-- [ ] **Step 4: Verify unit and HTTP tests GREEN**
+- [x] **Step 4: Verify unit and HTTP tests GREEN**
 
 Run:
 
@@ -326,7 +326,7 @@ Expected: all tests pass and the new acceptance test reports 28 routes.
 - Consumes: completed renderer and server routes
 - Produces: verified stage2A completion evidence
 
-- [ ] **Step 1: Run syntax and repository checks**
+- [x] **Step 1: Run syntax and repository checks**
 
 ```powershell
 node --check server/lib/staticPageSeoRenderer.js
@@ -336,7 +336,7 @@ git diff --check
 npm run check:all
 ```
 
-- [ ] **Step 2: Run SEO and schema audits against local server**
+- [x] **Step 2: Run SEO and schema audits against local server**
 
 ```powershell
 node scripts/generate-sitemap.js --dry-run
@@ -352,7 +352,7 @@ Expected:
 - no missing/mismatched Schema;
 - all 152 product routes remain unchanged.
 
-- [ ] **Step 3: Run browser regression**
+- [x] **Step 3: Run browser regression**
 
 ```powershell
 npx playwright test tests/smoke.spec.js --reporter=line
@@ -360,7 +360,7 @@ npx playwright test tests/smoke.spec.js --reporter=line
 
 Expected: all existing tests pass, including Hero, Contact label, international-only contact, four-language footer and parameter URL behavior.
 
-- [ ] **Step 4: Update the audit report**
+- [x] **Step 4: Update the audit report**
 
 Append a stage2A implementation record containing:
 

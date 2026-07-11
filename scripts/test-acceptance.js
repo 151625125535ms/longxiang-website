@@ -2,6 +2,7 @@ const { spawn } = require('child_process');
 const fs = require('fs');
 const http = require('http');
 const path = require('path');
+const { staticSeoRouteDefinitions } = require('../server/lib/staticPageSeoRenderer');
 
 const ROOT = path.join(__dirname, '..');
 require('dotenv').config({ path: path.join(ROOT, '.env') });
@@ -284,6 +285,48 @@ async function main() {
                 throw new Error('clean product listing was marked noindex');
             }
             return 'parameter variants noindex; clean listing remains indexable';
+        });
+
+        await runTest('T04E', 'static sitemap pages expose canonical hreflang and schema in raw HTML', async function () {
+            const routes = staticSeoRouteDefinitions();
+            if (routes.length !== 28) throw new Error('expected 28 static SEO routes, got ' + routes.length);
+
+            for (const route of routes) {
+                const res = await request('GET', route.path);
+                expectStatus(res, 200);
+                const headMatch = String(res.raw || '').match(/<head\b[^>]*>([\s\S]*?)<\/head>/i);
+                const head = headMatch ? headMatch[1] : '';
+                const canonicalTags = head.match(/<link\b[^>]*rel=["']canonical["'][^>]*>/gi) || [];
+                const alternateTags = head.match(/<link\b[^>]*rel=["']alternate["'][^>]*>/gi) || [];
+                const expectedCanonical = 'http://127.0.0.1:' + PORT + route.path;
+
+                if (canonicalTags.length !== 1 || canonicalTags[0].indexOf('href="' + expectedCanonical + '"') === -1) {
+                    throw new Error('raw canonical mismatch for ' + route.path);
+                }
+                if (alternateTags.length !== 5) {
+                    throw new Error('raw hreflang count mismatch for ' + route.path + ': ' + alternateTags.length);
+                }
+                ['en', 'ar', 'fr', 'ru', 'x-default'].forEach(function (language) {
+                    if (!alternateTags.some(function (tag) {
+                        return tag.indexOf('hreflang="' + language + '"') !== -1;
+                    })) {
+                        throw new Error('raw hreflang missing ' + language + ' for ' + route.path);
+                    }
+                });
+                if (head.indexOf('"@type":"' + route.schemaType + '"') === -1 ||
+                        head.indexOf('data-schema-auto="' + route.schemaKey + '"') === -1) {
+                    throw new Error('raw page schema mismatch for ' + route.path);
+                }
+                if (route.breadcrumbKey &&
+                        (head.indexOf('"@type":"BreadcrumbList"') === -1 ||
+                         head.indexOf('data-schema-auto="' + route.breadcrumbKey + '"') === -1)) {
+                    throw new Error('raw breadcrumb schema missing for ' + route.path);
+                }
+                if (/hreflang=["']pt["']|\/pt\/|lxelec\.cn|17513354200|hnlxdq2003@163\.com/i.test(head)) {
+                    throw new Error('forbidden locale, domain, or domestic contact in SEO head for ' + route.path);
+                }
+            }
+            return '28 routes expose raw canonical, hreflang, and basic schema';
         });
 
         await runTest('T05', 'GET /api/education', async function () {

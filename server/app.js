@@ -19,6 +19,10 @@ const { getDb } = require('./lib/db');
 const { ensureContentBlockSeeds } = require('./lib/contentBlockSeeds');
 const { readPublicProduct } = require('./lib/publicProducts');
 const { renderProductDetailSeoHtml } = require('./lib/productDetailSeoRenderer');
+const {
+    staticSeoRouteDefinitions,
+    renderStaticPageSeoHtml
+} = require('./lib/staticPageSeoRenderer');
 const { buildSitemap } = require('../scripts/generate-sitemap');
 const {
     localeForRequestPath,
@@ -205,6 +209,20 @@ function requestOrigin(req) {
     const requestHost = req.get('host') || '127.0.0.1:' + PORT;
     return protocol + '://' + requestHost;
 }
+
+staticSeoRouteDefinitions().forEach(function (route) {
+    app.get(route.path, function (req, res, next) {
+        fs.readFile(route.filePath, 'utf8', function (err, html) {
+            if (err) return next(err);
+            try {
+                const rendered = renderStaticPageSeoHtml(html, route, requestOrigin(req));
+                sendHtmlString(res, rendered, 200);
+            } catch (renderErr) {
+                next(renderErr);
+            }
+        });
+    });
+});
 
 function sendNotFoundShell(req, res, next) {
     const shell = notFoundShellForRequestPath(req.path);

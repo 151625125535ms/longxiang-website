@@ -592,3 +592,22 @@ alias 全量映射测试、目标产品事实核对、状态码与 canonical 检
 - Contact 地址标签或联系方式修改。
 
 建议下一步先确认是否执行“批次 2A：统一静态页原始 head”。实施前还需输出具体文件范围、测试清单和回滚提交边界。
+
+## 12. 批次 2A 实施记录（2026-07-11）
+
+批次 2A 已按确认范围完成本地实现和回归验证：服务端仅为 en/ar/fr/ru 的首页、About、Solutions、Education、Certifications、Compare、Contact 共 28 个正式 URL 重写受管控的 `<head>` 标签，不修改页面 `<body>`。
+
+验证结果：
+
+- 原始 HTML canonical：28/28 正确，且每页仅 1 个；
+- 原始 HTML hreflang：28/28 完整，每页均为 en/ar/fr/ru/x-default 共 5 个；
+- 原始 HTML 必需页面 Schema：28/28 正确；
+- 全站结构化数据审计：184/184 URL 通过，无缺失、类型错误、JSON 解析错误或 planned `pt` 暴露；
+- 产品详情回归：152/152 原始 canonical、hreflang、WebPage、BreadcrumbList 和渲染结果通过；
+- sitemap 保持 184 个 URL，未增加分类页或 planned locale；
+- 浏览器回归：18/18 通过，包括参数 URL、四语种页脚、Contact 地址标签及仅国际邮箱约束；
+- 没有修改 Hero 图片、Hero 布局、页面正文、CSS、Contact 地址标签或联系方式；
+- 没有创建分类路由、分类模板、分类 Schema、分类 hreflang、分类 sitemap URL 或数据库字段；
+- 输出中没有 `.cn` SEO alternate、国内电话、国内邮箱、虚构国际电话或 WhatsApp。
+
+本批次新增独立的静态页 SEO 头部渲染模块，并在 `express.static` 之前只挂载上述 28 个精确路由；`/index.html`、`/products.html`、产品详情、参数 URL 与任何分类路径均不在该路由集合中。
