@@ -370,7 +370,7 @@ Append a stage2A implementation record containing:
 - sitemap 184;
 - no UI, Hero, Contact, category or contact-data changes.
 
-- [ ] **Step 5: Commit, push and deploy**
+- [x] **Step 5: Commit, push and deploy**
 
 ```powershell
 git add server/lib/staticPageSeoRenderer.js server/app.js scripts/test-static-page-seo-renderer.js scripts/test-acceptance.js package.json docs/seo/stage2-com-technical-audit-20260711.md docs/superpowers/plans/2026-07-11-stage2a-static-seo-head.md
@@ -385,7 +385,7 @@ Because runtime server code changes, restart PM2 only after the pull and only on
 ssh longxiang "pm2 restart longxiang-website && pm2 status longxiang-website --no-color"
 ```
 
-- [ ] **Step 6: Verify production original HTML**
+- [x] **Step 6: Verify production original HTML**
 
 Audit all 28 production routes:
 

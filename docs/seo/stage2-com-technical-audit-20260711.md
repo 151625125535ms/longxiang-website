@@ -611,3 +611,5 @@ alias 全量映射测试、目标产品事实核对、状态码与 canonical 检
 - 输出中没有 `.cn` SEO alternate、国内电话、国内邮箱、虚构国际电话或 WhatsApp。
 
 本批次新增独立的静态页 SEO 头部渲染模块，并在 `express.static` 之前只挂载上述 28 个精确路由；`/index.html`、`/products.html`、产品详情、参数 URL 与任何分类路径均不在该路由集合中。
+
+生产部署后复验结果与本地一致：28/28 原始 HTML 通过，184/184 sitemap URL 的浏览器结构化数据审计通过，四种正式语言首页和 Contact 真实浏览器验收通过；PM2 完成一次必要重启后保持 `online`。
