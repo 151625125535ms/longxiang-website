@@ -10,6 +10,39 @@
 - `.com` 仅保留页脚中的中国官网普通链接。
 - 任何 `.cn` 的 301、noindex、内容改写或站长平台操作，都必须另行授权并在 `.cn` 自身系统内执行。
 
+## 完整 sitemap 快照
+
+2026-07-11 对公开的 `https://www.lxelec.cn/sitemap.xml` 进行一次只读快照：
+
+- sitemap 记录数：105；
+- 唯一 URL 数：104；
+- 重复 URL：`https://www.lxelec.cn/Innovation.html`，出现 2 次；
+- 104 个唯一 URL 均带 `lastmod`；
+- `lastmod` 范围：2024-08-19 至 2026-05-08；
+- HTTP 地址会跳转到 HTTPS sitemap；
+- 完整清单：[`stage1-cn-sitemap-inventory-20260711.csv`](stage1-cn-sitemap-inventory-20260711.csv)。
+
+页面类型分布：
+
+| 页面类型 | 唯一 URL 数 |
+|---|---:|
+| 产品详情 | 19 |
+| 产品列表/分类 | 6 |
+| 新闻详情 | 25 |
+| 新闻列表 | 7 |
+| 案例详情 | 8 |
+| 案例列表 | 5 |
+| 创新中心及子页 | 4 |
+| 合作页面 | 4 |
+| 标签页 | 6 |
+| 服务页面 | 2 |
+| 招聘/加入我们 | 2 |
+| About 子页 | 1 |
+| 首页 | 1 |
+| 其他静态页 | 14 |
+
+这些 URL 使用 `.cn` 的英文/default 路径体系，但 sitemap 本身不能证明每个页面获得了流量或外链，也不能证明 Google 当前选择的 canonical。最终优先级仍以 `.cn` Search Console 的页面、查询、索引和链接导出为准。
+
 ## 公开索引样本
 
 | `.cn` 英文 URL | 公开页面类型 | 与 `.com` 的重合 | `.com` 承接页 | 当前动作 |
