@@ -553,3 +553,31 @@ test('首页正文延迟水合不会清除已加载产品卡', async ({ page }) 
     expect(countAfter).toBe(countBefore);
     expect(countAfter).toBeGreaterThan(0);
 });
+
+test('同版本产品目录水合保留服务端首张卡片和分类节点', async ({ page }) => {
+    await page.route('**/api/products', async (route) => { await new Promise((resolve) => setTimeout(resolve, 700)); await route.continue(); });
+    await page.route('**/api/product-categories', async (route) => { await new Promise((resolve) => setTimeout(resolve, 700)); await route.continue(); });
+    await page.goto(BASE + '/products.html', { waitUntil: 'domcontentloaded' });
+    const probes = await page.evaluate(() => {
+        const card = document.querySelector('#products-container .product-card');
+        const category = document.querySelector('.product-tree-body [data-product-filter]');
+        if (card) card.setAttribute('data-product-node-probe', 'card');
+        if (category) category.setAttribute('data-product-node-probe', 'category');
+        return [Boolean(card), Boolean(category)];
+    });
+    expect(probes).toEqual([true, true]);
+    await page.waitForTimeout(1000);
+    await expect(page.locator('#products-container [data-product-node-probe="card"]')).toHaveCount(1);
+    await expect(page.locator('.product-tree-body [data-product-node-probe="category"]')).toHaveCount(1);
+    await expect(page.locator('[data-product-ssr="catalog"]')).toHaveAttribute('data-product-hydrated', 'true');
+});
+
+test('产品目录 API 失败时保留服务端筛选结果', async ({ page }) => {
+    await page.route('**/api/products', (route) => route.abort());
+    await page.route('**/api/product-categories', (route) => route.abort());
+    await page.goto(BASE + '/products.html?group=switchgear', { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(300);
+    await expect(page.locator('#products-container .product-card').first()).toBeVisible();
+    await expect(page.locator('[data-product-ssr="catalog"]')).toHaveAttribute('data-product-fallback', 'static');
+    await expect(page.locator('#products-container')).not.toContainText('Unable to load products');
+});

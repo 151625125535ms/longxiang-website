@@ -24,6 +24,7 @@ const { readPublicCompanyView } = require('./lib/publicCompanyView');
 const { renderGlobalShellHtml } = require('./lib/globalShellHtmlRenderer');
 const { createRuntimePublicSiteDataSource } = require('./lib/publicSiteDataSource');
 const { renderContentPageHtml } = require('./lib/contentPageHtmlRenderer');
+const { renderProductListHtml } = require('./lib/productListHtmlRenderer');
 const {
     staticSeoRouteDefinitions,
     renderStaticPageSeoHtml
@@ -318,7 +319,14 @@ function sendProductListShell(req, res, next) {
         const robots = hasProductFilterQuery(req) ? '\n    <meta name="robots" content="noindex,follow">' : '';
         const withBase = html.replace(/<head>/i,
             '<head>\n    <base href="' + baseHrefForLocale(locale) + '">' + robots);
-        sendHtmlString(res, renderPublicShell(withBase, locale, req.path), 200);
+        const withProducts = renderProductListHtml(withBase, {
+            locale,
+            products: publicSiteDataSource.readProducts(),
+            taxonomy: publicSiteDataSource.readProductCategories(),
+            query: req.query || {},
+            contentBlock: publicSiteDataSource.readContentBlock('product-pages')
+        });
+        sendHtmlString(res, renderPublicShell(withProducts, locale, req.path), 200);
     });
 }
 

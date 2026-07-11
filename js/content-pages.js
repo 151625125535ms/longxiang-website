@@ -1660,7 +1660,13 @@
 
     function renderProductPages(body) {
         var kind = pageRoot.getAttribute('data-product-page-kind') || 'listing';
+        var productContentMatches = pageRoot.hasAttribute('data-product-ssr') &&
+            pageRoot.getAttribute('data-product-content-version') === String((window.longxiangContentPageBlock && window.longxiangContentPageBlock.version) || 0);
         if (kind === 'detail') {
+            if (productContentMatches) {
+                refreshDynamicUi();
+                return;
+            }
             var labels = body.detailLabels || {};
             renderProductDetailHero(body);
             renderProductDetailLabels(labels);
@@ -1675,9 +1681,9 @@
         updateSeo(body.seo, body.productsHero);
         renderHeroBreadcrumb(body.productsHero);
         var support = pageRoot.querySelector('[data-product-listing-support]');
-        if (support) support.innerHTML = '<div class="container">' + renderProductSupport(body.listingSupport) + '</div>';
+        if (support && !productContentMatches) support.innerHTML = '<div class="container">' + renderProductSupport(body.listingSupport) + '</div>';
         var cta = pageRoot.querySelector('[data-product-listing-cta]');
-        if (cta) cta.innerHTML = renderProductListingCta(body.listingCta);
+        if (cta && !productContentMatches) cta.innerHTML = renderProductListingCta(body.listingCta);
         refreshDynamicUi();
     }
 
@@ -2039,6 +2045,7 @@
             return res.json();
         })
         .then(function (block) {
+            window.longxiangContentPageBlock = block;
             renderPage(block);
             return block;
         })

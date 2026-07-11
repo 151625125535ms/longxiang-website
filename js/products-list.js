@@ -395,31 +395,38 @@
     }
 
     function renderProducts(products) {
-        var filter = resolveFilter(selectedFilter(), products);
+        var presentation = window.LongxiangProductPagePresentation;
+        if (!presentation) {
+            showError();
+            return;
+        }
+        var requested = selectedFilter();
+        var pageRoot = document.querySelector('[data-product-page-kind="listing"]');
+        var contentVersion = pageRoot ? pageRoot.getAttribute('data-product-content-version') || '0' : '0';
+        var view = presentation.presentCatalog({
+            locale: locale,
+            products: products,
+            taxonomy: taxonomy,
+            query: requested,
+            contentBlock: { body: {} },
+            contentVersion: Number(contentVersion) || 0
+        });
+        var filter = view.state;
         var keywordEl = document.getElementById('catalog-search');
         if (keywordEl && keywordEl.value !== filter.search) keywordEl.value = filter.search;
-        var list = filterProducts(products, filter.group, filter.sub, filter.search);
-        var pageCount = Math.max(1, Math.ceil(list.length / pageSize));
-        var currentPage = Math.min(filter.page, pageCount);
-        var pageItems = list.slice((currentPage - 1) * pageSize, currentPage * pageSize);
         var title = document.getElementById('catalog-title');
         var summary = document.getElementById('catalog-summary');
+        var current = document.getElementById('catalog-current-filter');
+        var status = document.querySelector('.catalog-filter-status');
+        var pagination = document.querySelector('.catalog-pagination');
 
-        if (filter.page !== currentPage) {
-            setQueryParams({ page: currentPage > 1 ? currentPage : '' });
+        if (requested.group !== filter.group || requested.sub !== filter.sub || requested.page !== filter.page) {
+            setQueryParams({ group: filter.group, sub: filter.sub, page: filter.page > 1 ? filter.page : '' });
         }
-
-        if (title) title.textContent = taxonomyLabel(filter.group, filter.sub);
-        if (summary) {
-            summary.textContent = list.length
-                ? list.length + ' ' + t('productsAvailable')
-                : t('productsUpdatedSoon');
-        }
-
-        renderFilterStatus(filter, list.length);
-        if (summary && list.length && pageCount > 1) {
-            summary.textContent += ' / ' + t('pageOf')(currentPage, pageCount);
-        }
+        if (title) title.innerHTML = view.fragments.title;
+        if (summary) summary.innerHTML = view.fragments.summary;
+        if (current) current.innerHTML = view.fragments.filterCurrent;
+        if (status) status.hidden = false;
 
         document.querySelectorAll('[data-product-filter]').forEach(function (button) {
             var active = button.getAttribute('data-group') === filter.group &&
@@ -427,16 +434,9 @@
             button.classList.toggle('active', active);
         });
 
-        container.innerHTML = '';
-        if (!list.length) {
-            renderEmpty(filter.group, filter.sub, filter.search);
-            renderPagination(0, 1);
-            return;
-        }
-
-        pageItems.forEach(function (product) {
-            container.appendChild(createProductCard(product));
-        });
+        container.innerHTML = view.fragments.cards;
+        if (pagination) pagination.innerHTML = view.fragments.pagination;
+        bindPagination();
 
         if (typeof window.initScrollAnimations === 'function') {
             window.initScrollAnimations();
@@ -444,7 +444,17 @@
             container.querySelectorAll('.fade-in').forEach(function (el) { el.classList.add('visible'); });
         }
 
-        renderPagination(list.length, currentPage);
+        if (pageRoot) pageRoot.setAttribute('data-product-view-key', view.key);
+    }
+
+    function bindPagination() {
+        document.querySelectorAll('.catalog-pagination [data-catalog-page]').forEach(function (button) {
+            if (button.getAttribute('data-catalog-page-bound') === 'true') return;
+            button.setAttribute('data-catalog-page-bound', 'true');
+            button.addEventListener('click', function () {
+                updatePage(parseInt(button.getAttribute('data-catalog-page'), 10));
+            });
+        });
     }
 
     function updateFilter(group, sub) {
@@ -519,8 +529,8 @@
         });
     }
 
-    function initProductTree() {
-        renderProductTree();
+    function initProductTree(preserveSsrTree) {
+        if (!preserveSsrTree) renderProductTree();
         document.querySelectorAll('[data-product-filter]').forEach(function (button) {
             button.addEventListener('click', function () {
                 updateFilter(button.getAttribute('data-group') || firstTaxonomyGroup(), button.getAttribute('data-sub') || '');
@@ -590,6 +600,11 @@
     }
 
     function showError() {
+        var pageRoot = document.querySelector('[data-product-ssr="catalog"]');
+        if (pageRoot && container.children.length) {
+            pageRoot.setAttribute('data-product-fallback', 'static');
+            return;
+        }
         container.innerHTML = '<div class="empty-state">' + escapeHtml(t('unableToLoad')) + '</div>';
     }
 
@@ -688,8 +703,18 @@
             .then(function (results) {
                 productsCache = results[1].map(normalizeProduct);
                 taxonomy = results[0].length ? results[0] : deriveTaxonomyFromProducts(productsCache);
-                initProductTree();
-                renderProducts(productsCache);
+                var pageRoot = document.querySelector('[data-product-page-kind="listing"]');
+                var presentation = window.LongxiangProductPagePresentation;
+                var contentVersion = pageRoot ? pageRoot.getAttribute('data-product-content-version') || '0' : '0';
+                var view = presentation ? presentation.presentCatalog({ locale: locale, products: productsCache, taxonomy: taxonomy, query: selectedFilter(), contentBlock: { body: {} }, contentVersion: Number(contentVersion) || 0 }) : null;
+                var preserveSsr = Boolean(view && pageRoot && pageRoot.getAttribute('data-product-ssr') === 'catalog' && pageRoot.getAttribute('data-product-view-key') === view.key);
+                initProductTree(preserveSsr);
+                if (preserveSsr) {
+                    bindPagination();
+                    pageRoot.setAttribute('data-product-hydrated', 'true');
+                } else {
+                    renderProducts(productsCache);
+                }
             })
             .catch(showError);
     }
