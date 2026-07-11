@@ -1,7 +1,7 @@
 {
   "name": "longxiang-website",
   "version": "1.0.0",
-  "description": "Henan Longxiang Electrical Co., Ltd. Official Website",
+  "description": "Henan Longxiang Electric Co., Ltd. Official Website",
   "main": "server/app.js",
   "engines": {
     "node": ">=24 <25",

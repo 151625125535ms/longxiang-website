@@ -14,8 +14,8 @@ const defaults = {
         backgroundImage: 'assets/hero/contact.jpg'
     },
     contactPage: {
-        companyName: 'Henan Longxiang Electrical Co., Ltd.',
-        companyNameAr: 'شركة Henan Longxiang Electrical Co., Ltd.',
+        companyName: 'Henan Longxiang Electric Co., Ltd.',
+        companyNameAr: 'شركة Henan Longxiang Electric Co., Ltd.',
         infoTitle: 'Headquarters Information',
         infoTitleAr: 'معلومات المقر',
         officeLabel: 'Office',
@@ -117,10 +117,10 @@ const defaults = {
         }
     },
     seo: {
-        title: 'Contact Us | Henan Longxiang Electrical Co., Ltd.',
-        titleAr: 'اتصل بنا | شركة Henan Longxiang Electrical Co., Ltd.',
-        description: 'Contact Henan Longxiang Electrical for transformer, switchgear, EV charger quotes, technical selection, and power distribution project support.',
-        descriptionAr: 'تواصل مع Henan Longxiang Electrical لطلب عروض الأسعار والاستشارات الفنية ودعم المشروعات.',
+        title: 'Contact Us | Henan Longxiang Electric Co., Ltd.',
+        titleAr: 'اتصل بنا | شركة Henan Longxiang Electric Co., Ltd.',
+        description: 'Contact Henan Longxiang Electric for transformer, switchgear, EV charger quotes, technical selection, and power distribution project support.',
+        descriptionAr: 'تواصل مع Henan Longxiang Electric لطلب عروض الأسعار والاستشارات الفنية ودعم المشروعات.',
         image: 'assets/hero/contact.jpg'
     }
 };

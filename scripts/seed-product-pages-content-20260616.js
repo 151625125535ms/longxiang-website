@@ -46,14 +46,14 @@ const defaults = {
         inquiryLoadingAr: 'جار تحميل نموذج الاستفسار...',
         defaultSubtitle: 'Product Details',
         defaultSubtitleAr: 'تفاصيل المنتج',
-        titleSuffix: 'Henan Longxiang Electrical Co., Ltd.',
-        titleSuffixAr: 'Henan Longxiang Electrical Co., Ltd.',
-        schemaBrand: 'Henan Longxiang Electrical Co., Ltd.',
-        schemaBrandAr: 'Henan Longxiang Electrical Co., Ltd.'
+        titleSuffix: 'Henan Longxiang Electric Co., Ltd.',
+        titleSuffixAr: 'Henan Longxiang Electric Co., Ltd.',
+        schemaBrand: 'Henan Longxiang Electric Co., Ltd.',
+        schemaBrandAr: 'Henan Longxiang Electric Co., Ltd.'
     },
     notFound: {
-        seoTitle: 'Product Not Found | Henan Longxiang Electrical Co., Ltd.',
-        seoTitleAr: 'المنتج غير موجود | Henan Longxiang Electrical Co., Ltd.',
+        seoTitle: 'Product Not Found | Henan Longxiang Electric Co., Ltd.',
+        seoTitleAr: 'المنتج غير موجود | Henan Longxiang Electric Co., Ltd.',
         breadcrumbLabel: 'Not Found',
         breadcrumbLabelAr: 'غير موجود',
         title: 'Product Not Found',
@@ -69,8 +69,8 @@ const defaults = {
         backHref: 'products.html'
     },
     detailSeo: {
-        title: 'Product Details | Henan Longxiang Electrical Co., Ltd.',
-        titleAr: 'تفاصيل المنتج | Henan Longxiang Electrical Co., Ltd.',
+        title: 'Product Details | Henan Longxiang Electric Co., Ltd.',
+        titleAr: 'تفاصيل المنتج | Henan Longxiang Electric Co., Ltd.',
         description: 'Product details, technical parameters, customization notes, and quotation request form for Longxiang transformers, switchgear, and EV charging equipment.',
         descriptionAr: 'تفاصيل المنتج والمعلمات الفنية وملاحظات التخصيص ونموذج طلب عرض السعر لمعدات Longxiang.',
         image: 'assets/hero/product.webp'
@@ -162,8 +162,8 @@ const defaults = {
         ]
     },
     seo: {
-        title: 'Products | Henan Longxiang Electrical Co., Ltd.',
-        titleAr: 'المنتجات | Henan Longxiang Electrical Co., Ltd.',
+        title: 'Products | Henan Longxiang Electric Co., Ltd.',
+        titleAr: 'المنتجات | Henan Longxiang Electric Co., Ltd.',
         description: 'Explore Longxiang transformers, switchgear, EV chargers, and power distribution equipment for industrial parks, PV projects, charging stations, and utility applications.',
         descriptionAr: 'تصفح محولات Longxiang ومعدات المفاتيح وشواحن المركبات الكهربائية ومعدات توزيع الطاقة للمشروعات الصناعية والتجارية.',
         image: 'assets/hero/product.webp'

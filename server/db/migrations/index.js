@@ -3,7 +3,8 @@
 const migrations = [
     require('./0002_runtime_schema_baseline'),
     require('./0003_i18n_fr_ru_fields'),
-    require('./0004_products_name_cn_model')
+    require('./0004_products_name_cn_model'),
+    require('./0005_company_identity')
 ];
 
 function ensureMigrationTable(db) {

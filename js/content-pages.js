@@ -22,9 +22,9 @@
         'About Us': 'من نحن',
         'Applications': 'التطبيقات',
         'Certificates': 'الشهادات',
-        'Henan Longxiang Electrical': 'شركة خنان لونغشيانغ إلكتريكال',
+        'Henan Longxiang Electric': 'شركة خنان لونغشيانغ إلكتريك',
         'Energy-saving power equipment for industrial, utility, and renewable energy projects.': 'معدات كهربائية موفرة للطاقة للمشروعات الصناعية ومرافق الطاقة والطاقة المتجددة.',
-        'Longxiang Electrical logo': 'شعار لونغشيانغ إلكتريكال',
+        'Longxiang Electric logo': 'شعار لونغشيانغ إلكتريك',
         'View Products': 'عرض المنتجات',
         'years of electrical equipment experience': 'سنة من الخبرة في معدات الكهرباء',
         'patents and technical achievements': 'براءة وإنجاز تقني',
@@ -165,12 +165,12 @@
         },
         ru: {
             'About Us': '\u041e \u043a\u043e\u043c\u043f\u0430\u043d\u0438\u0438',
-            'About Us | Henan Longxiang Electrical Co., Ltd.': '\u041e \u043a\u043e\u043c\u043f\u0430\u043d\u0438\u0438 | Henan Longxiang Electrical Co., Ltd.',
+            'About Us | Henan Longxiang Electric Co., Ltd.': '\u041e \u043a\u043e\u043c\u043f\u0430\u043d\u0438\u0438 | Henan Longxiang Electric Co., Ltd.',
             'About Longxiang': '\u041e Longxiang',
             'Transformer Manufacturing': '\u041f\u0440\u043e\u0438\u0437\u0432\u043e\u0434\u0441\u0442\u0432\u043e \u0442\u0440\u0430\u043d\u0441\u0444\u043e\u0440\u043c\u0430\u0442\u043e\u0440\u043e\u0432',
             'Transformer manufacturing': '\u041f\u0440\u043e\u0438\u0437\u0432\u043e\u0434\u0441\u0442\u0432\u043e \u0442\u0440\u0430\u043d\u0441\u0444\u043e\u0440\u043c\u0430\u0442\u043e\u0440\u043e\u0432',
             'Certificates': '\u0421\u0435\u0440\u0442\u0438\u0444\u0438\u043a\u0430\u0442\u044b',
-            'Certificates | Henan Longxiang Electrical Co., Ltd.': '\u0421\u0435\u0440\u0442\u0438\u0444\u0438\u043a\u0430\u0442\u044b | Henan Longxiang Electrical Co., Ltd.',
+            'Certificates | Henan Longxiang Electric Co., Ltd.': '\u0421\u0435\u0440\u0442\u0438\u0444\u0438\u043a\u0430\u0442\u044b | Henan Longxiang Electric Co., Ltd.',
             'Certificates & Qualification Archive': '\u0410\u0440\u0445\u0438\u0432 \u0441\u0435\u0440\u0442\u0438\u0444\u0438\u043a\u0430\u0442\u043e\u0432 \u0438 \u043a\u0432\u0430\u043b\u0438\u0444\u0438\u043a\u0430\u0446\u0438\u0439',
             'Enterprise Qualifications': '\u041a\u0432\u0430\u043b\u0438\u0444\u0438\u043a\u0430\u0446\u0438\u0438 \u043f\u0440\u0435\u0434\u043f\u0440\u0438\u044f\u0442\u0438\u044f',
             'Patent Certificates': '\u041f\u0430\u0442\u0435\u043d\u0442\u043d\u044b\u0435 \u0441\u0435\u0440\u0442\u0438\u0444\u0438\u043a\u0430\u0442\u044b',
@@ -220,7 +220,7 @@
             productInquiryTitle: 'Demande produit',
             productInquiryNote: 'Laissez vos coordonnées et les exigences du projet.',
             productInquirySubmit: 'Envoyer la demande',
-            contactSeoTitle: 'Contactez Longxiang | Henan Longxiang Electrical',
+            contactSeoTitle: 'Contactez Longxiang | Henan Longxiang Electric',
             contactSeoDescription: 'Contactez Longxiang pour une sélection de modèles, un devis et un support de projet.',
             contactHeroTitle: 'Contactez-nous',
             contactHeroSubtitle: 'Parlez-nous de vos besoins en équipements électriques et de votre calendrier de projet.',
@@ -241,7 +241,7 @@
             productDetailInquiryLoading: 'Chargement du formulaire de demande...',
             compareTitle: 'Comparaison de produits',
             compareSubtitle: 'Comparez les modèles sélectionnés et leurs principales spécifications.',
-            compareSeoTitle: 'Comparaison de produits | Longxiang Electrical',
+            compareSeoTitle: 'Comparaison de produits | Longxiang Electric',
             compareSeoDescription: 'Comparez côte à côte les modèles d’équipements Longxiang sélectionnés.',
             compareBack: 'Retour',
             comparePrint: 'Imprimer',
@@ -256,7 +256,7 @@
             productInquiryTitle: 'Запрос по продукту',
             productInquiryNote: 'Оставьте контактные данные и требования проекта.',
             productInquirySubmit: 'Отправить запрос',
-            contactSeoTitle: 'Свяжитесь с Longxiang | Henan Longxiang Electrical',
+            contactSeoTitle: 'Свяжитесь с Longxiang | Henan Longxiang Electric',
             contactSeoDescription: 'Свяжитесь с Longxiang для подбора модели, расчета стоимости и поддержки проекта.',
             contactHeroTitle: 'Свяжитесь с нами',
             contactHeroSubtitle: 'Расскажите нам о потребностях в электрооборудовании и графике проекта.',
@@ -277,7 +277,7 @@
             productDetailInquiryLoading: 'Загрузка формы запроса...',
             compareTitle: 'Сравнение продукции',
             compareSubtitle: 'Сравните выбранные модели и основные технические характеристики.',
-            compareSeoTitle: 'Сравнение продукции | Longxiang Electrical',
+            compareSeoTitle: 'Сравнение продукции | Longxiang Electric',
             compareSeoDescription: 'Сравните выбранные модели оборудования Longxiang рядом друг с другом.',
             compareBack: 'Назад',
             comparePrint: 'Печать',
@@ -777,7 +777,7 @@
 
     function stripBrandSuffix(value) {
         return String(value || '')
-            .replace(/\s+\|\s+(Longxiang|Longxiang Electrical|Henan Longxiang Electrical).*$/i, '')
+            .replace(/\s+\|\s+(Longxiang|Longxiang Electric|Henan Longxiang Electric).*$/i, '')
             .replace(/\s+/g, ' ')
             .trim();
     }
@@ -814,7 +814,7 @@
     function visiblePageName(title) {
         var heading = document.querySelector('.page-hero h1');
         var headingText = heading ? String(heading.textContent || '').replace(/\s+/g, ' ').trim() : '';
-        return headingText || stripBrandSuffix(title) || document.title || 'Longxiang Electrical';
+        return headingText || stripBrandSuffix(title) || document.title || 'Longxiang Electric';
     }
 
     function injectContentPageSchema(title, description, canonicalUrl) {
@@ -833,7 +833,7 @@
             inLanguage: language,
             isPartOf: {
                 '@type': 'WebSite',
-                name: 'Longxiang Electrical',
+                name: 'Longxiang Electric',
                 url: window.location.origin + '/'
             }
         };
@@ -881,7 +881,7 @@
         if (pageSlug === 'home') {
             return {
                 title: isArabic ? '' : 'Transformer & Switchgear Manufacturer | Longxiang',
-                description: isArabic ? '' : 'Longxiang Electrical manufactures transformers, switchgear, EV charging stations and energy storage systems for industrial and renewable energy projects.',
+                description: isArabic ? '' : 'Longxiang Electric manufactures transformers, switchgear, EV charging stations and energy storage systems for industrial and renewable energy projects.',
                 canonicalPath: isArabic ? '/ar/' : '/'
             };
         }
@@ -907,7 +907,7 @@
         }
         if (pageSlug === 'certifications' && locale === 'ar') {
             return {
-                description: 'استعرض شهادات الجودة والاعتمادات الفنية وبراءات الاختراع ووثائق التأهيل الخاصة بشركة Henan Longxiang Electrical لدعم مراجعة المشروعات والتوريد.',
+                description: 'استعرض شهادات الجودة والاعتمادات الفنية وبراءات الاختراع ووثائق التأهيل الخاصة بشركة Henan Longxiang Electric لدعم مراجعة المشروعات والتوريد.',
                 canonicalPath: '/certifications.html'
             };
         }
@@ -926,19 +926,19 @@
         var text = String(value || '').trim();
         if (!text) return true;
         return [
-            'Henan Longxiang Electrical | Power Equipment Manufacturer',
-            'Longxiang Electrical manufactures energy-saving transformers, switchgear, and power distribution equipment.',
-            'Transformer, Switchgear & EV Charger Manufacturer | Henan Longxiang Electrical',
-            'Henan Longxiang Electrical manufactures transformers, switchgear, and EV charging equipment for power distribution projects.',
-            'Products | Longxiang Electrical',
-            'Product list of Longxiang Electrical.',
-            'Products | Henan Longxiang Electrical Co., Ltd.',
+            'Henan Longxiang Electric | Power Equipment Manufacturer',
+            'Longxiang Electric manufactures energy-saving transformers, switchgear, and power distribution equipment.',
+            'Transformer, Switchgear & EV Charger Manufacturer | Henan Longxiang Electric',
+            'Henan Longxiang Electric manufactures transformers, switchgear, and EV charging equipment for power distribution projects.',
+            'Products | Longxiang Electric',
+            'Product list of Longxiang Electric.',
+            'Products | Henan Longxiang Electric Co., Ltd.',
             'Explore Longxiang transformers, switchgear, EV chargers, and power distribution equipment for industrial parks, PV projects, charging stations, and utility applications.',
-            'Product Comparison | Longxiang Electrical',
-            'Product Comparison | Henan Longxiang Electrical Co., Ltd.',
-            'Compare Longxiang Electrical products.',
+            'Product Comparison | Longxiang Electric',
+            'Product Comparison | Henan Longxiang Electric Co., Ltd.',
+            'Compare Longxiang Electric products.',
             'Compare selected Longxiang power equipment models side by side.',
-            'Contact Us | Henan Longxiang Electrical Co., Ltd.',
+            'Contact Us | Henan Longxiang Electric Co., Ltd.',
             'Contact Longxiang for model selection, quotation, and project support.'
         ].indexOf(text) !== -1;
     }
@@ -1694,7 +1694,7 @@
 
         if (bg && hero.backgroundImage) setOptimizedBackground(bg, hero.backgroundImage);
         if (logo && hero.logo && getComputedStyle(logo).display !== 'none') {
-            setOptimizedImage(logo, hero.logo, localized(hero, 'logoAlt') || 'Longxiang Electrical logo');
+            setOptimizedImage(logo, hero.logo, localized(hero, 'logoAlt') || 'Longxiang Electric logo');
         }
         if (title && localized(hero, 'title')) title.textContent = localized(hero, 'title');
         if (subtitle && localized(hero, 'subtitle')) subtitle.textContent = localized(hero, 'subtitle');

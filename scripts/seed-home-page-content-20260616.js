@@ -36,7 +36,7 @@ const defaults = {
                 title: 'Transformer Manufacturing',
                 titleAr: 'عميل مرافق الطاقة',
                 text: 'Transformer product lines for distribution networks, industrial parks, commercial buildings, and renewable energy power access.',
-                textAr: 'تعد Longxiang Electrical مورداً موثوقاً للمحولات في مشروعاتنا منذ سنوات، وقد ساعدتنا محولاتها ذات السبيكة غير المتبلورة على خفض الفاقد وتحسين الاعتمادية.',
+                textAr: 'تعد Longxiang Electric مورداً موثوقاً للمحولات في مشروعاتنا منذ سنوات، وقد ساعدتنا محولاتها ذات السبيكة غير المتبلورة على خفض الفاقد وتحسين الاعتمادية.',
                 meta: 'Oil immersed, dry type, combined, and special transformers',
                 metaAr: 'مشروعات توزيع الكهرباء'
             },
@@ -96,10 +96,10 @@ const defaults = {
         button: { label: 'Send Project Requirements', labelAr: 'اطلب عرض سعر', href: 'contact.html', className: 'btn btn-gold btn-lg' }
     },
     seo: {
-        title: 'Transformer, Switchgear & EV Charger Manufacturer | Henan Longxiang Electrical',
-        titleAr: 'Henan Longxiang Electrical Co., Ltd. | معدات نقل وتوزيع الطاقة',
-        description: 'Henan Longxiang Electrical manufactures transformers, switchgear, and EV charging equipment for power distribution projects in industrial, solar, charging, and utility applications.',
-        descriptionAr: 'تصنع Henan Longxiang Electrical المحولات ومعدات المفاتيح وحلول الطاقة منخفضة الكربون لمشروعات توزيع الطاقة.',
+        title: 'Transformer, Switchgear & EV Charger Manufacturer | Henan Longxiang Electric',
+        titleAr: 'Henan Longxiang Electric Co., Ltd. | معدات نقل وتوزيع الطاقة',
+        description: 'Henan Longxiang Electric manufactures transformers, switchgear, and EV charging equipment for power distribution projects in industrial, solar, charging, and utility applications.',
+        descriptionAr: 'تصنع Henan Longxiang Electric المحولات ومعدات المفاتيح وحلول الطاقة منخفضة الكربون لمشروعات توزيع الطاقة.',
         image: '5、厂区厂貌/龙翔公司正门.jpg'
     }
 };

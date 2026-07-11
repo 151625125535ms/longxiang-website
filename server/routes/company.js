@@ -1,5 +1,6 @@
 const express = require('express');
 const { getDb } = require('../lib/db');
+const { readCompanyIdentity, sanitizePublicContact } = require('../lib/companyIdentity');
 
 const router = express.Router();
 
@@ -24,8 +25,9 @@ function getSetting(db, key) {
 router.get('/', function (req, res) {
     try {
         const db = getDb();
-        const companyOverview = getBlock(db, 'company-overview');
-        const contact = getBlock(db, 'contact');
+        const identity = readCompanyIdentity(db);
+        const companyOverview = sanitizePublicContact(getBlock(db, 'company-overview'), identity);
+        const contact = sanitizePublicContact(getBlock(db, 'contact'), identity);
         const pageBlocks = getBlock(db, 'page-blocks');
         const footerBlock = (pageBlocks.blocks || []).find(function (block) {
             return block.key === 'footer';
@@ -35,6 +37,15 @@ router.get('/', function (req, res) {
         res.json({
             ...companyOverview,
             ...contact,
+            identity,
+            overview: companyOverview,
+            contactPageData: contact,
+            name: identity.legalName,
+            registeredCapital: identity.registeredCapital,
+            email: identity.globalSalesEmail,
+            address: identity.headquarters,
+            headquarters: identity.headquarters,
+            huaiyangBase: identity.productionBase,
             footerText: footerBlock.footerText || '',
             footerTextAr: footerBlock.footerTextAr || '',
             ga4TrackingId

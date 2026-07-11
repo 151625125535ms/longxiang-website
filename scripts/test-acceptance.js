@@ -207,12 +207,58 @@ async function main() {
             const res = await request('GET', '/api/company');
             expectStatus(res, 200);
             const data = getPayload(res.body) || {};
-            if (!Object.prototype.hasOwnProperty.call(data, 'address') &&
-                    !Object.prototype.hasOwnProperty.call(data, 'name') &&
-                    !Object.prototype.hasOwnProperty.call(data, 'phone')) {
-                throw new Error('missing top-level address/name/phone field');
+            if (!data.identity || data.identity.legalName !== 'Henan Longxiang Electric Co., Ltd.') {
+                throw new Error('public legal identity is not canonical');
             }
-            return 'top-level company field present';
+            if (data.identity.registeredCapital !== 'RMB 69.552 million') {
+                throw new Error('registered capital is not canonical');
+            }
+            if (data.email !== 'henanlxgj@163.com' || data.identity.globalSalesEmail !== 'henanlxgj@163.com') {
+                throw new Error('public email is not the international sales email');
+            }
+            const serialized = JSON.stringify(data);
+            const emails = serialized.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi) || [];
+            if (Object.prototype.hasOwnProperty.call(data, 'phone') ||
+                    emails.some(function (email) { return email.toLowerCase() !== 'henanlxgj@163.com'; })) {
+                throw new Error('domestic contact details leaked from public company API');
+            }
+            return 'canonical identity and international-only contact';
+        });
+
+        await runTest('T04B', 'GET /api/content-blocks/contact hides domestic contacts', async function () {
+            const res = await request('GET', '/api/content-blocks/contact');
+            expectStatus(res, 200);
+            const body = res.body && res.body.body || {};
+            if (body.email !== 'henanlxgj@163.com') {
+                throw new Error('contact block does not expose the international sales email');
+            }
+            if (Object.prototype.hasOwnProperty.call(body, 'phone')) {
+                throw new Error('contact block exposes a phone field');
+            }
+            if (!body.contactPage || body.contactPage.factoryAddressLabel !== 'Factory Address') {
+                throw new Error('contact address label changed unexpectedly');
+            }
+            const serialized = JSON.stringify(body);
+            const emails = serialized.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi) || [];
+            if (emails.some(function (email) { return email.toLowerCase() !== 'henanlxgj@163.com'; })) {
+                throw new Error('domestic contact details leaked from public contact block');
+            }
+            return 'international email only; address label preserved';
+        });
+
+        await runTest('T04C', 'global shell exposes localized China website footer link', async function () {
+            const res = await request('GET', '/api/content-blocks/global-shell');
+            expectStatus(res, 200);
+            const body = res.body && res.body.body || {};
+            const links = body.navigation && body.navigation.quickLinks || [];
+            const chinaSite = links.find(function (item) {
+                return item && item.href === 'https://www.lxelec.cn/';
+            });
+            if (!chinaSite) throw new Error('China website link missing from footer quick links');
+            ['label', 'labelAr', 'labelFr', 'labelRu'].forEach(function (key) {
+                if (!String(chinaSite[key] || '').trim()) throw new Error('China website link missing ' + key);
+            });
+            return 'localized crawlable link present';
         });
 
         await runTest('T05', 'GET /api/education', async function () {
@@ -298,6 +344,19 @@ async function main() {
             return 'body_json object';
         });
 
+        await runTest('T16B', 'GET /api/admin/content-blocks/company-identity', async function () {
+            const res = await request('GET', '/api/admin/content-blocks/company-identity', { headers: authHeaders(token) });
+            expectStatus(res, 200);
+            const data = getPayload(res.body) || {};
+            if (!data.body_json || data.body_json.legalName !== 'Henan Longxiang Electric Co., Ltd.') {
+                throw new Error('canonical company identity block missing');
+            }
+            if (data.body_json.registeredCapital !== 'RMB 69.552 million') {
+                throw new Error('company identity capital is not canonical');
+            }
+            return 'canonical identity block';
+        });
+
         await runTest('T17', 'GET /api/admin/inquiries', async function () {
             const res = await request('GET', '/api/admin/inquiries', { headers: authHeaders(token) });
             expectStatus(res, 200);
@@ -311,7 +370,8 @@ async function main() {
             const data = getPayload(res.body) || {};
             if (!data.sqlite || data.sqlite.enabled !== true) throw new Error('data.sqlite.enabled is not true');
             if (data.publicApiSource !== 'sqlite') throw new Error('publicApiSource is not sqlite');
-            return 'sqlite.enabled=true, publicApiSource=sqlite';
+            if (Number(data.sqlite.schemaVersion || 0) < 5) throw new Error('schemaVersion is below company identity migration');
+            return 'sqlite.enabled=true, publicApiSource=sqlite, schemaVersion>=5';
         });
 
         await runTest('T19', 'GET /api/admin/settings/modules', async function () {

@@ -9,6 +9,7 @@ const STATUSES = ['published', 'draft'];
 const CONTENT_BLOCK_SLUGS = [
     'home',
     'solutions',
+    'company-identity',
     'company-overview',
     'about-us',
     'contact',
@@ -25,6 +26,7 @@ const CONTENT_BLOCK_SLUGS = [
 const SCHEMAS = {
     home: { hero: 'object', proof: 'array', products: 'object', applications: 'object', news: 'object', trust: 'object', features: 'array', stats: 'array', cta: 'object', seo: 'object' },
     solutions: { hero: 'object', anchors: 'array', overview: 'object', marketFit: 'object', sections: 'array', scenarios: 'object', credentials: 'object', cta: 'object', seo: 'object' },
+    'company-identity': {},
     'company-overview': { stats: 'array', seo: 'object' },
     'contact': { hero: 'object', contactPage: 'object', mapLocations: 'object', seo: 'object' },
     'about-us': { hero: 'object', snapshot: 'object', values: 'array', quality: 'object', history: 'object', sections: 'array', milestones: 'array', capability: 'object', factory: 'object', markets: 'object', cta: 'object', seo: 'object' },

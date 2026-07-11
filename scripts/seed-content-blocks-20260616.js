@@ -16,8 +16,8 @@ const blocks = [
         title_en: 'Home Page',
         body: {
             hero: {
-                title: 'Henan Longxiang Electrical',
-                titleAr: 'Henan Longxiang Electrical',
+                title: 'Henan Longxiang Electric',
+                titleAr: 'Henan Longxiang Electric',
                 subtitle: 'Transformer, switchgear and EV charging equipment manufacturer for power distribution projects.',
                 subtitleAr: 'شركة مصنعة للمحولات ومعدات المفاتيح ومعدات شحن المركبات الكهربائية لمشروعات توزيع الطاقة.',
                 backgroundImage: '5、厂区厂貌/龙翔公司正门.jpg',
@@ -40,8 +40,8 @@ const blocks = [
                 { value: '20+', count: 20, label: 'Research Partners', labelAr: 'شركاء بحث' }
             ],
             seo: {
-                title: 'Transformer, Switchgear & EV Charger Manufacturer | Henan Longxiang Electrical',
-                description: 'Henan Longxiang Electrical manufactures transformers, switchgear, and EV charging equipment for power distribution projects.',
+                title: 'Transformer, Switchgear & EV Charger Manufacturer | Henan Longxiang Electric',
+                description: 'Henan Longxiang Electric manufactures transformers, switchgear, and EV charging equipment for power distribution projects.',
                 image: '5、厂区厂貌/龙翔公司正门.jpg'
             }
         }
@@ -331,8 +331,8 @@ const blocks = [
                 button: { label: 'Send Project Requirements', labelAr: 'أرسل متطلبات المشروع', inquiry: true, productName: 'Integrated Smart Energy Solutions', productNameAr: 'حلول الطاقة الذكية المتكاملة' }
             },
             seo: {
-                title: 'Integrated Smart Energy Solutions | Henan Longxiang Electrical Co., Ltd.',
-                titleAr: 'حلول الطاقة الذكية المتكاملة | Henan Longxiang Electrical Co., Ltd.',
+                title: 'Integrated Smart Energy Solutions | Henan Longxiang Electric Co., Ltd.',
+                titleAr: 'حلول الطاقة الذكية المتكاملة | Henan Longxiang Electric Co., Ltd.',
                 description: 'Integrated transformer, switchgear, EV charging, PV, energy storage, microgrid, EPC, and line O&M solutions from Longxiang.',
                 descriptionAr: 'حلول متكاملة للمحولات والمفاتيح والشحن والطاقة الشمسية والتخزين والشبكات المصغرة وEPC وتشغيل وصيانة الخطوط من Longxiang.',
                 image: 'assets/solutions/smart-energy/smart-ev-network-hero.png'

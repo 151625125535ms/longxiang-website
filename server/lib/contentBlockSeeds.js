@@ -1,18 +1,33 @@
 const CONTENT_BLOCK_SEEDS = [
     {
+        slug: 'company-identity',
+        title_en: 'Company Identity',
+        sort_order: 5,
+        body_json: {
+            legalName: 'Henan Longxiang Electric Co., Ltd.',
+            brandName: 'Longxiang Electric',
+            registeredCapital: 'RMB 69.552 million',
+            headquarters: 'Xinzheng City, Zhengzhou City, Henan Province, P.R. China',
+            productionBase: 'Huaiyang District, Zhoukou City, Henan Province, P.R. China',
+            globalSalesEmail: 'henanlxgj@163.com',
+            globalWebsite: 'https://www.lxenelectric.com/',
+            chinaWebsite: 'https://www.lxelec.cn/'
+        }
+    },
+    {
         slug: 'home',
         title_en: 'Home',
         sort_order: 10,
         body_json: {
             hero: {
-                title: 'Henan Longxiang Electrical',
+                title: 'Henan Longxiang Electric',
                 subtitle: 'Energy-saving power equipment for industrial, utility, and renewable energy projects.',
-                titleAr: 'شركة خنان لونغشيانغ إلكتريكال',
+                titleAr: 'شركة خنان لونغشيانغ إلكتريك',
                 subtitleAr: 'معدات كهربائية موفرة للطاقة للمشروعات الصناعية ومرافق الطاقة والطاقة المتجددة.',
                 backgroundImage: 'longxiang-factory-gate.jpg',
                 logo: 'longxiang-logo-symbol.png',
-                logoAlt: 'Longxiang Electrical logo',
-                logoAltAr: 'شعار لونغشيانغ إلكتريكال',
+                logoAlt: 'Longxiang Electric logo',
+                logoAltAr: 'شعار لونغشيانغ إلكتريك',
                 actions: [
                     { label: 'View Products', labelAr: 'عرض المنتجات', href: 'products.html', className: 'hero-hex-btn primary' },
                     { label: 'Contact Us', labelAr: 'اتصل بنا', href: 'contact.html', className: 'hero-hex-btn' }
@@ -84,8 +99,8 @@ const CONTENT_BLOCK_SEEDS = [
                 button: { label: 'Send Inquiry', labelAr: 'إرسال استفسار', href: 'contact.html' }
             },
             seo: {
-                title: 'Henan Longxiang Electrical | Power Equipment Manufacturer',
-                description: 'Longxiang Electrical manufactures energy-saving transformers, switchgear, and power distribution equipment.'
+                title: 'Henan Longxiang Electric | Power Equipment Manufacturer',
+                description: 'Longxiang Electric manufactures energy-saving transformers, switchgear, and power distribution equipment.'
             }
         }
     },
@@ -107,7 +122,7 @@ const CONTENT_BLOCK_SEEDS = [
             scenarios: { title: 'Scenarios', titleAr: 'السيناريوهات', items: [] },
             credentials: { title: 'Credentials', titleAr: 'الاعتمادات', text: '' },
             cta: { title: 'Discuss Your Project', titleAr: 'ناقش مشروعك', text: 'Share your project requirements with us.', textAr: 'شاركنا متطلبات مشروعك.', button: { label: 'Contact Us', labelAr: 'اتصل بنا', href: 'contact.html' } },
-            seo: { title: 'Solutions | Longxiang Electrical', description: 'Power equipment solutions from Longxiang Electrical.' }
+            seo: { title: 'Solutions | Longxiang Electric', description: 'Power equipment solutions from Longxiang Electric.' }
         }
     },
     {
@@ -180,7 +195,7 @@ const CONTENT_BLOCK_SEEDS = [
                 textAr: 'شاركنا سيناريو مشروعك وسيساعدك فريقنا في اختيار المنتجات المناسبة.',
                 button: { label: 'Contact Us', labelAr: 'اتصل بنا', href: 'contact.html' }
             },
-            seo: { title: 'About Longxiang Electrical', description: 'Learn about Henan Longxiang Electrical manufacturing capability.' }
+            seo: { title: 'About Longxiang Electric', description: 'Learn about Henan Longxiang Electric manufacturing capability.' }
         }
     },
     {
@@ -194,8 +209,7 @@ const CONTENT_BLOCK_SEEDS = [
                 titleAr: 'اتصل بنا',
                 subtitleAr: 'أرسل متطلبات مشروعك وسيتواصل فريقنا معك بسرعة.'
             },
-            phone: '+86',
-            email: 'sales@example.com',
+            email: 'henanlxgj@163.com',
             address: 'Henan, China',
             headquarters: 'Henan, China',
             officeHours: 'Monday to Friday',
@@ -203,14 +217,14 @@ const CONTENT_BLOCK_SEEDS = [
             openStreetMapUrl: '',
             mapLocations: {},
             contactPage: {
-                companyName: 'Henan Longxiang Electrical',
+                companyName: 'Henan Longxiang Electric',
                 infoTitle: 'Contact Longxiang',
                 officeLabel: 'Phone',
                 emailLabel: 'Email',
                 factoryAddressLabel: 'Address',
                 mapTitle: 'Longxiang Location',
                 socialTitle: 'Social Media',
-                companyNameAr: 'شركة خنان لونغشيانغ إلكتريكال',
+                companyNameAr: 'شركة خنان لونغشيانغ إلكتريك',
                 infoTitleAr: 'التواصل مع لونغشيانغ',
                 officeLabelAr: 'رقم الهاتف',
                 emailLabelAr: 'البريد الإلكتروني',
@@ -244,7 +258,7 @@ const CONTENT_BLOCK_SEEDS = [
                     ]
                 }
             },
-            seo: { title: 'Contact Longxiang Electrical', description: 'Contact Henan Longxiang Electrical for power equipment inquiries.' }
+            seo: { title: 'Contact Longxiang Electric', description: 'Contact Henan Longxiang Electric for power equipment inquiries.' }
         }
     },
     {
@@ -301,8 +315,8 @@ const CONTENT_BLOCK_SEEDS = [
                 noteAr: 'اترك بيانات الاتصال ومتطلباتك.',
                 submitLabelAr: 'إرسال الاستفسار'
             },
-            seo: { title: 'Products | Longxiang Electrical', description: 'Product list of Longxiang Electrical.' },
-            detailSeo: { title: 'Product Detail | Longxiang Electrical', description: 'Longxiang Electrical product details.' }
+            seo: { title: 'Products | Longxiang Electric', description: 'Product list of Longxiang Electric.' },
+            detailSeo: { title: 'Product Detail | Longxiang Electric', description: 'Longxiang Electric product details.' }
         }
     },
     {
@@ -327,17 +341,24 @@ const CONTENT_BLOCK_SEEDS = [
                 quickLinks: [
                     { label: 'About Us', labelAr: 'من نحن', href: 'about.html' },
                     { label: 'Contact Us', labelAr: 'اتصل بنا', href: 'contact.html' },
-                    { label: 'Certificates', labelAr: 'الشهادات', href: 'certifications.html' }
+                    { label: 'Certificates', labelAr: 'الشهادات', href: 'certifications.html' },
+                    {
+                        label: 'China Website / 中国官网',
+                        labelAr: 'الموقع الرسمي في الصين',
+                        labelFr: 'Site officiel en Chine',
+                        labelRu: 'Официальный сайт в Китае',
+                        href: 'https://www.lxelec.cn/'
+                    }
                 ],
                 productLinks: [
                     { label: 'All Products', labelAr: 'جميع المنتجات', href: 'products.html' }
                 ]
             },
             footer: {
-                text: 'Henan Longxiang Electrical manufactures power equipment for industrial and energy projects.',
-                textAr: 'تصنع شركة خنان لونغشيانغ إلكتريكال معدات الطاقة للمشروعات الصناعية ومشروعات الطاقة.',
-                copyright: '© Henan Longxiang Electrical Co., Ltd. All rights reserved.',
-                copyrightAr: '© شركة خنان لونغشيانغ إلكتريكال المحدودة. جميع الحقوق محفوظة.',
+                text: 'Henan Longxiang Electric manufactures power equipment for industrial and energy projects.',
+                textAr: 'تصنع شركة خنان لونغشيانغ إلكتريك معدات الطاقة للمشروعات الصناعية ومشروعات الطاقة.',
+                copyright: '© Henan Longxiang Electric Co., Ltd. All rights reserved.',
+                copyrightAr: '© شركة خنان لونغشيانغ إلكتريك المحدودة. جميع الحقوق محفوظة.',
                 icp: ''
             },
             inquiry: {
@@ -382,7 +403,7 @@ const CONTENT_BLOCK_SEEDS = [
             cookieConsent: {},
             embedConsent: {},
             seoDefaults: {
-                title: 'Henan Longxiang Electrical',
+                title: 'Henan Longxiang Electric',
                 description: 'Power equipment manufacturer.'
             }
         }
@@ -396,7 +417,7 @@ const CONTENT_BLOCK_SEEDS = [
             intro: { title: 'Quality Credentials', text: 'Review Longxiang qualification materials.' },
             stats: [],
             toolbar: { searchPlaceholder: 'Search certificates', allLabel: 'All' },
-            seo: { title: 'Certificates | Longxiang Electrical', description: 'Certificates and qualification materials.' }
+            seo: { title: 'Certificates | Longxiang Electric', description: 'Certificates and qualification materials.' }
         }
     },
     {
@@ -408,7 +429,7 @@ const CONTENT_BLOCK_SEEDS = [
             toolbar: { backLabel: 'Back', backLabelAr: 'رجوع', printLabel: 'Print', printLabelAr: 'طباعة' },
             emptyState: { title: 'No products selected', titleAr: 'لم يتم تحديد منتجات', text: 'Return to the product list and choose products to compare.', textAr: 'ارجع إلى قائمة المنتجات واختر المنتجات المراد مقارنتها.' },
             table: { productLabel: 'Product', productLabelAr: 'المنتج', categoryLabel: 'Category', categoryLabelAr: 'الفئة', imageLabel: 'Image', imageLabelAr: 'الصورة', capacitiesLabel: 'Capacities', capacitiesLabelAr: 'السعات', voltagesLabel: 'Voltages', voltagesLabelAr: 'الجهود', descriptionLabel: 'Description', descriptionLabelAr: 'الوصف', specificationLabel: 'Specification', specificationLabelAr: 'المواصفة' },
-            seo: { title: 'Product Comparison | Longxiang Electrical', description: 'Compare Longxiang Electrical products.' }
+            seo: { title: 'Product Comparison | Longxiang Electric', description: 'Compare Longxiang Electric products.' }
         }
     },
     {
@@ -424,7 +445,7 @@ const CONTENT_BLOCK_SEEDS = [
                     { label: 'View Products', href: 'products.html' }
                 ]
             },
-            seo: { title: 'Page Not Found | Longxiang Electrical', description: 'The page was not found.' }
+            seo: { title: 'Page Not Found | Longxiang Electric', description: 'The page was not found.' }
         }
     }
 ];

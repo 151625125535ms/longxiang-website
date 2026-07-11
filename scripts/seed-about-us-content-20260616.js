@@ -15,8 +15,8 @@ const aboutBody = {
         kickerAr: 'شركة تصنيع مدرجة عالية التقنية',
         title: 'About Longxiang',
         titleAr: 'عن Longxiang',
-        subtitle: 'Power equipment built for reliable, low-carbon distribution. Henan Longxiang Electrical integrates R&D, manufacturing, sales, project delivery, and technical education for modern power distribution systems.',
-        subtitleAr: 'معدات طاقة مصممة لتوزيع موثوق ومنخفض الكربون. تجمع Henan Longxiang Electrical بين البحث والتطوير والتصنيع والمبيعات وتسليم المشاريع والتعليم الفني لأنظمة توزيع الطاقة الحديثة.',
+        subtitle: 'Power equipment built for reliable, low-carbon distribution. Henan Longxiang Electric integrates R&D, manufacturing, sales, project delivery, and technical education for modern power distribution systems.',
+        subtitleAr: 'معدات طاقة مصممة لتوزيع موثوق ومنخفض الكربون. تجمع Henan Longxiang Electric بين البحث والتطوير والتصنيع والمبيعات وتسليم المشاريع والتعليم الفني لأنظمة توزيع الطاقة الحديثة.',
         backgroundImage: '5、厂区厂貌/龙翔公司正门.jpg',
         actions: [
             { label: 'Discuss a Project', labelAr: 'ناقش مشروعك', href: 'contact.html', className: 'btn btn-primary' },
@@ -26,13 +26,13 @@ const aboutBody = {
     snapshot: {
         kicker: 'About Longxiang',
         kickerAr: 'عن Longxiang',
-        title: 'Henan Longxiang Electrical Co., Ltd.',
-        titleAr: 'Henan Longxiang Electrical Co., Ltd.',
+        title: 'Henan Longxiang Electric Co., Ltd.',
+        titleAr: 'Henan Longxiang Electric Co., Ltd.',
         body: [
             {
                 companyField: 'aboutIntro',
-                text: 'Founded in 2003, Henan Longxiang Electrical Co., Ltd. is a national high-tech enterprise focused on R&D, production, and sales of power transmission and distribution equipment.',
-                textAr: 'تأسست شركة Henan Longxiang Electrical Co., Ltd. عام 2003، وهي مؤسسة وطنية عالية التقنية تركز على البحث والتطوير والإنتاج وبيع معدات نقل وتوزيع الطاقة.'
+                text: 'Founded in 2003, Henan Longxiang Electric Co., Ltd. is a national high-tech enterprise focused on R&D, production, and sales of power transmission and distribution equipment.',
+                textAr: 'تأسست شركة Henan Longxiang Electric Co., Ltd. عام 2003، وهي مؤسسة وطنية عالية التقنية تركز على البحث والتطوير والإنتاج وبيع معدات نقل وتوزيع الطاقة.'
             },
             {
                 companyField: 'aboutDetail',
@@ -181,10 +181,10 @@ const aboutBody = {
         button: { label: 'Contact Longxiang', labelAr: 'تواصل مع Longxiang', href: 'contact.html', className: 'btn btn-primary' }
     },
     seo: {
-        title: 'About Us | Henan Longxiang Electrical Co., Ltd.',
-        titleAr: 'من نحن | Henan Longxiang Electrical Co., Ltd.',
-        description: 'About Henan Longxiang Electrical, a listed high-tech manufacturer of intelligent low-carbon power distribution equipment.',
-        descriptionAr: 'تعرف على Henan Longxiang Electrical، شركة مدرجة عالية التقنية لتصنيع معدات توزيع الطاقة الذكية منخفضة الكربون.',
+        title: 'About Us | Henan Longxiang Electric Co., Ltd.',
+        titleAr: 'من نحن | Henan Longxiang Electric Co., Ltd.',
+        description: 'About Henan Longxiang Electric, a listed high-tech manufacturer of intelligent low-carbon power distribution equipment.',
+        descriptionAr: 'تعرف على Henan Longxiang Electric، شركة مدرجة عالية التقنية لتصنيع معدات توزيع الطاقة الذكية منخفضة الكربون.',
         image: '5、厂区厂貌/龙翔公司正门.jpg'
     }
 };

@@ -22,7 +22,7 @@ const pages = [
 
 const allowedEnglishPatterns = [
     /\bLongxiang\b/i,
-    /\bHenan Longxiang Electrical\b/i,
+    /\bHenan Longxiang Electric\b/i,
     /\bNEEQ\b/i,
     /\bEV\b/,
     /\bPV\b/,

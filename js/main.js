@@ -482,8 +482,8 @@
         'Message': 'الرسالة',
         'I would like to request a quotation for {product}.': 'أرغب في طلب عرض سعر لـ {product}.',
         'I would like to request a quotation for product ID {product}.': 'أرغب في طلب عرض سعر للمنتج رقم {product}.',
-        'Henan Longxiang Electrical manufactures power equipment for industrial and energy projects.': 'تصنع شركة خنان لونغشيانغ إلكتريكال معدات الطاقة للمشروعات الصناعية ومشروعات الطاقة.',
-        '© Henan Longxiang Electrical Co., Ltd. All rights reserved.': '© شركة خنان لونغشيانغ إلكتريكال المحدودة. جميع الحقوق محفوظة.'
+        'Henan Longxiang Electric manufactures power equipment for industrial and energy projects.': 'تصنع شركة خنان لونغشيانغ إلكتريك معدات الطاقة للمشروعات الصناعية ومشروعات الطاقة.',
+        '© Henan Longxiang Electric Co., Ltd. All rights reserved.': '© شركة خنان لونغشيانغ إلكتريك المحدودة. جميع الحقوق محفوظة.'
     };
 
     var TEXT_FALLBACKS = {
@@ -1009,6 +1009,7 @@
 
     function pageHref(page, hash) {
         var value = String(page || 'index.html');
+        if (/^https?:\/\//i.test(value)) return value;
         var hashIndex = value.indexOf('#');
         var embeddedHash = '';
         if (hashIndex !== -1) {

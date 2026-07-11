@@ -18,8 +18,8 @@ const defaults = {
         ]
     },
     seo: {
-        title: 'Page Not Found | Henan Longxiang Electrical Co., Ltd.',
-        titleAr: 'الصفحة غير موجودة | Henan Longxiang Electrical Co., Ltd.',
+        title: 'Page Not Found | Henan Longxiang Electric Co., Ltd.',
+        titleAr: 'الصفحة غير موجودة | Henan Longxiang Electric Co., Ltd.',
         description: 'The page may have moved, or the address may be incorrect.',
         descriptionAr: 'ربما تم نقل الصفحة أو أن العنوان غير صحيح.'
     }

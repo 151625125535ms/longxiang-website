@@ -1,6 +1,6 @@
 const { getDb } = require('../server/lib/db');
 
-const BRAND = 'Longxiang Electrical';
+const BRAND = 'Longxiang Electric';
 const MAX_TITLE_LENGTH = 60;
 const MAX_DESCRIPTION_LENGTH = 158;
 

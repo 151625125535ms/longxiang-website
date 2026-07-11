@@ -49,69 +49,69 @@ const localizedStaticShellExpectations = {
     fr: {
         'index.html': {
             title: "Fabricant de transformateurs et d'appareillages | Longxiang",
-            description: "Longxiang Electrical fabrique des transformateurs, appareillages, bornes de recharge EV et systèmes de stockage d'énergie pour les projets industriels et d'énergies renouvelables."
+            description: "Longxiang Electric fabrique des transformateurs, appareillages, bornes de recharge EV et systèmes de stockage d'énergie pour les projets industriels et d'énergies renouvelables."
         },
         'about.html': {
-            title: 'À propos | Henan Longxiang Electrical Co., Ltd.',
-            description: "Découvrez Henan Longxiang Electrical, fabricant high-tech coté d'équipements intelligents et bas carbone pour la distribution électrique."
+            title: 'À propos | Henan Longxiang Electric Co., Ltd.',
+            description: "Découvrez Henan Longxiang Electric, fabricant high-tech coté d'équipements intelligents et bas carbone pour la distribution électrique."
         },
         'products.html': {
             title: 'Transformateurs, appareillages et bornes EV | Longxiang',
             description: "Parcourez les transformateurs, appareillages, bornes de recharge EV, systèmes de stockage et équipements PV Longxiang pour projets industriels et énergétiques."
         },
         'solutions.html': {
-            title: 'Solutions de distribution électrique | Henan Longxiang Electrical',
+            title: 'Solutions de distribution électrique | Henan Longxiang Electric',
             description: "Solutions Longxiang pour transformateurs, appareillages, recharge EV, solaire PV, stockage, micro-réseaux, EPC et maintenance de lignes électriques."
         },
         'education.html': {
-            title: 'Coopération éducative | Henan Longxiang Electrical Co., Ltd.',
+            title: 'Coopération éducative | Henan Longxiang Electric Co., Ltd.',
             description: "Programmes de coopération école-entreprise Longxiang pour collèges industriels, formation des talents, équipements pédagogiques et coopération internationale."
         },
         'certifications.html': {
-            title: 'Certificats | Henan Longxiang Electrical Co., Ltd.',
-            description: 'Certificats, qualifications, brevets et rapports d’essai de Henan Longxiang Electrical pour la revue technique et fournisseur.'
+            title: 'Certificats | Henan Longxiang Electric Co., Ltd.',
+            description: 'Certificats, qualifications, brevets et rapports d’essai de Henan Longxiang Electric pour la revue technique et fournisseur.'
         },
         'compare.html': {
-            title: 'Comparaison de produits | Henan Longxiang Electrical Co., Ltd.',
+            title: 'Comparaison de produits | Henan Longxiang Electric Co., Ltd.',
             description: 'Comparez côte à côte les modèles Longxiang sélectionnés et leurs principales spécifications techniques.'
         },
         'contact.html': {
-            title: 'Contactez-nous | Henan Longxiang Electrical Co., Ltd.',
-            description: "Contactez Henan Longxiang Electrical pour devis, sélection technique et support de projet sur transformateurs, appareillages, bornes EV et distribution électrique."
+            title: 'Contactez-nous | Henan Longxiang Electric Co., Ltd.',
+            description: "Contactez Henan Longxiang Electric pour devis, sélection technique et support de projet sur transformateurs, appareillages, bornes EV et distribution électrique."
         }
     },
     ru: {
         'index.html': {
             title: 'Производитель трансформаторов и КРУ | Longxiang',
-            description: 'Longxiang Electrical производит трансформаторы, распределительные устройства, зарядные станции EV и системы накопления энергии для промышленных и энергетических проектов.'
+            description: 'Longxiang Electric производит трансформаторы, распределительные устройства, зарядные станции EV и системы накопления энергии для промышленных и энергетических проектов.'
         },
         'about.html': {
-            title: 'О компании | Henan Longxiang Electrical Co., Ltd.',
-            description: 'О Henan Longxiang Electrical: высокотехнологичный производитель интеллектуального низкоуглеродного оборудования для распределения электроэнергии.'
+            title: 'О компании | Henan Longxiang Electric Co., Ltd.',
+            description: 'О Henan Longxiang Electric: высокотехнологичный производитель интеллектуального низкоуглеродного оборудования для распределения электроэнергии.'
         },
         'products.html': {
             title: 'Трансформаторы, КРУ и зарядные станции EV | Longxiang',
             description: 'Каталог трансформаторов, распределительных устройств, зарядных станций EV, систем накопления энергии и PV-оборудования Longxiang.'
         },
         'solutions.html': {
-            title: 'Решения для электроснабжения | Henan Longxiang Electrical',
+            title: 'Решения для электроснабжения | Henan Longxiang Electric',
             description: 'Решения Longxiang для трансформаторов, распределительных устройств, зарядки EV, солнечной энергетики, накопителей, микросетей, EPC и обслуживания линий.'
         },
         'education.html': {
-            title: 'Образовательное сотрудничество | Henan Longxiang Electrical Co., Ltd.',
+            title: 'Образовательное сотрудничество | Henan Longxiang Electric Co., Ltd.',
             description: 'Программы сотрудничества Longxiang с учебными заведениями для промышленных колледжей, подготовки специалистов, учебного оборудования и международных проектов.'
         },
         'certifications.html': {
-            title: 'Сертификаты | Henan Longxiang Electrical Co., Ltd.',
-            description: 'Сертификаты, квалификации, патенты и отчеты испытаний Henan Longxiang Electrical для технической проверки и оценки поставщика.'
+            title: 'Сертификаты | Henan Longxiang Electric Co., Ltd.',
+            description: 'Сертификаты, квалификации, патенты и отчеты испытаний Henan Longxiang Electric для технической проверки и оценки поставщика.'
         },
         'compare.html': {
-            title: 'Сравнение продукции | Henan Longxiang Electrical Co., Ltd.',
+            title: 'Сравнение продукции | Henan Longxiang Electric Co., Ltd.',
             description: 'Сравните выбранные модели оборудования Longxiang и их основные технические характеристики.'
         },
         'contact.html': {
-            title: 'Свяжитесь с нами | Henan Longxiang Electrical Co., Ltd.',
-            description: 'Свяжитесь с Henan Longxiang Electrical для запроса цены, технического подбора и поддержки проектов по трансформаторам, КРУ, зарядке EV и распределению энергии.'
+            title: 'Свяжитесь с нами | Henan Longxiang Electric Co., Ltd.',
+            description: 'Свяжитесь с Henan Longxiang Electric для запроса цены, технического подбора и поддержки проектов по трансформаторам, КРУ, зарядке EV и распределению энергии.'
         }
     }
 };
@@ -1435,6 +1435,34 @@ function verifyRobots() {
     assert(hasDirective(directives, 'Sitemap', buildUrl('/sitemap.xml')), 'robots.txt 缺少正确的 Sitemap 指向。');
 }
 
+function verifyCanonicalPublicBrand() {
+    const roots = [
+        root,
+        path.join(root, 'ar'),
+        path.join(root, 'fr'),
+        path.join(root, 'ru'),
+        path.join(root, 'pt'),
+        path.join(root, 'js'),
+        path.join(root, 'server', 'lib'),
+        path.join(root, 'scripts')
+    ];
+    const checked = new Set();
+
+    roots.forEach((directory) => {
+        if (!fs.existsSync(directory)) return;
+        fs.readdirSync(directory, { withFileTypes: true }).forEach((entry) => {
+            if (!entry.isFile() || !/\.(?:html|js|json)$/.test(entry.name)) return;
+            const filePath = path.join(directory, entry.name);
+            if (filePath === __filename || checked.has(filePath)) return;
+            checked.add(filePath);
+            const source = fs.readFileSync(filePath, 'utf8');
+            const legacyBrand = new RegExp('Longxiang ' + 'Electrical', 'i');
+            assert(!legacyBrand.test(source),
+                path.relative(root, filePath) + ' 仍包含旧英文品牌名。');
+        });
+    });
+}
+
 function main() {
     verifyFrontendLocaleConfigSync();
     verifyPageShellFiles();
@@ -1458,6 +1486,7 @@ function main() {
     verifyGeneratedSitemapDryRunGuards();
     verifyDisabledLocalesNotInSitemap();
     verifyRobots();
+    verifyCanonicalPublicBrand();
 
     if (warnings.length) {
         console.warn('SEO i18n 校验警告：');

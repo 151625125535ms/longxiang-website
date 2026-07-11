@@ -38,10 +38,10 @@ const body = {
         loadMoreLabelAr: 'تحميل المزيد'
     },
     seo: {
-        title: 'Certificates | Henan Longxiang Electrical Co., Ltd.',
-        titleAr: 'الشهادات | Henan Longxiang Electrical Co., Ltd.',
-        description: 'Certificates and qualifications for Henan Longxiang Electrical.',
-        descriptionAr: 'الشهادات والمؤهلات الخاصة بشركة Henan Longxiang Electrical.',
+        title: 'Certificates | Henan Longxiang Electric Co., Ltd.',
+        titleAr: 'الشهادات | Henan Longxiang Electric Co., Ltd.',
+        description: 'Certificates and qualifications for Henan Longxiang Electric.',
+        descriptionAr: 'الشهادات والمؤهلات الخاصة بشركة Henan Longxiang Electric.',
         image: '5、厂区厂貌/厂区1.JPG'
     }
 };

@@ -83,8 +83,8 @@ function upgradeBody(body) {
     fillText(next.intro, 'textAr', labels.introTextAr || next.hero.subtitleAr, changes, 'intro.textAr');
 
     next.seo = isObject(next.seo) ? next.seo : {};
-    fillText(next.seo, 'title', 'Education Cooperation | Henan Longxiang Electrical Co., Ltd.', changes, 'seo.title');
-    fillText(next.seo, 'titleAr', (next.hero.titleAr || 'Education Cooperation') + ' | Henan Longxiang Electrical Co., Ltd.', changes, 'seo.titleAr');
+    fillText(next.seo, 'title', 'Education Cooperation | Henan Longxiang Electric Co., Ltd.', changes, 'seo.title');
+    fillText(next.seo, 'titleAr', (next.hero.titleAr || 'Education Cooperation') + ' | Henan Longxiang Electric Co., Ltd.', changes, 'seo.titleAr');
     fillText(next.seo, 'description', next.hero.subtitle || 'Education cooperation programs from Longxiang for colleges, vocational groups, utilities, and overseas institutions.', changes, 'seo.description');
     fillText(next.seo, 'descriptionAr', next.hero.subtitleAr || next.hero.subtitle || 'Education cooperation programs from Longxiang.', changes, 'seo.descriptionAr');
     fillText(next.seo, 'image', next.hero.backgroundImage || '', changes, 'seo.image');

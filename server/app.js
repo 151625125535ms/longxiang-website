@@ -160,7 +160,7 @@ try {
 }
 
 app.use(function (req, res, next) {
-    const blocked = /^\/(?:data|server|scripts|logs|backups|node_modules)(?:\/|$)|^\/package(?:-lock)?\.json$/i;
+    const blocked = /^\/(?:data|server|scripts|tests|docs|logs|backups|node_modules|chanpince|\.tmp)(?:\/|$)|^\/package(?:-lock)?\.json$/i;
     if (blocked.test(req.path)) {
         return res.status(403).json({ ok: false, error: { code: 'FORBIDDEN', message: 'Access denied.' } });
     }

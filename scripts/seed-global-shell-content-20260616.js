@@ -75,8 +75,8 @@ const defaults = {
     footer: {
         text: 'Providing intelligent, low-carbon power equipment and cultivating excellent professional electrical talent since 2003.',
         textAr: 'نوفر معدات طاقة ذكية منخفضة الكربون ونساهم في تنمية الكفاءات الكهربائية المهنية منذ عام 2003.',
-        copyright: '© 2026 Henan Longxiang Electrical Co., Ltd. All Rights Reserved.',
-        copyrightAr: '© 2026 Henan Longxiang Electrical Co., Ltd. جميع الحقوق محفوظة.'
+        copyright: '© 2026 Henan Longxiang Electric Co., Ltd. All Rights Reserved.',
+        copyrightAr: '© 2026 Henan Longxiang Electric Co., Ltd. جميع الحقوق محفوظة.'
     },
     inquiry: {
         title: 'Request Quote',

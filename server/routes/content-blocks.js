@@ -1,5 +1,10 @@
 const express = require('express');
 const { getDb } = require('../lib/db');
+const {
+    readCompanyIdentity,
+    sanitizePublicContact,
+    ensureChinaWebsiteLink
+} = require('../lib/companyIdentity');
 
 const router = express.Router();
 
@@ -27,14 +32,17 @@ function parseJson(value, fallback) {
     }
 }
 
-function normalizeRow(row) {
+function normalizeRow(row, db) {
     if (!row) return null;
+    let body = parseJson(row.body_json, {});
+    if (row.slug === 'contact') body = sanitizePublicContact(body, readCompanyIdentity(db));
+    if (row.slug === 'global-shell') body = ensureChinaWebsiteLink(body, readCompanyIdentity(db));
     return {
         id: row.id,
         slug: row.slug,
         title: row.title_en || '',
         titleAr: row.title_ar || '',
-        body: parseJson(row.body_json, {}),
+        body: body,
         version: row.version || 1,
         updatedAt: row.updated_at || null
     };
@@ -47,14 +55,15 @@ router.get('/:slug', function (req, res) {
     }
 
     try {
-        const row = getDb().prepare(`
+        const db = getDb();
+        const row = db.prepare(`
             SELECT id, slug, title_en, title_ar, body_json, version, updated_at
             FROM content_blocks
             WHERE slug = ? AND status = 'published'
         `).get(slug);
 
         if (!row) return res.status(404).json({ error: 'Content block not found.' });
-        res.json(normalizeRow(row));
+        res.json(normalizeRow(row, db));
     } catch (err) {
         res.status(500).json({ error: 'Failed to read content block.' });
     }

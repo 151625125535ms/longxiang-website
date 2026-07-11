@@ -5,7 +5,7 @@ const BASE = 'http://localhost:3000';
 async function mockHeaderContactBarData(page, overrides) {
     overrides = overrides || {};
     const company = Object.assign({
-        name: 'Longxiang Electrical',
+        name: 'Longxiang Electric',
         email: 'sales@longxiang.test',
         instagram: 'https://www.instagram.com/longxiang.test/',
         youtube: 'https://www.youtube.com/@longxiang-test'
@@ -51,7 +51,7 @@ async function mockContactCardData(page) {
                     headquarters: 'Zhengzhou Factory',
                     huaiyangBase: 'Zhoukou Factory',
                     contactPage: {
-                        companyName: 'Henan Longxiang Electrical Co., Ltd.',
+                        companyName: 'Henan Longxiang Electric Co., Ltd.',
                         infoTitle: 'Headquarters Information',
                         officeLabel: 'Office',
                         emailLabel: 'Email',
@@ -70,14 +70,43 @@ test('首页加载正常', async ({ page }) => {
     await expect(page.locator('nav.navbar')).toBeVisible();
 });
 
+test('四种正式语言页脚均显示中国官网绝对链接', async ({ page }) => {
+    const locales = [
+        { path: '/index.html', label: 'China Website / 中国官网' },
+        { path: '/ar/index.html', label: 'الموقع الرسمي في الصين' },
+        { path: '/fr/index.html', label: 'Site officiel en Chine' },
+        { path: '/ru/index.html', label: 'Официальный сайт в Китае' }
+    ];
+    for (const locale of locales) {
+        await page.goto(BASE + locale.path);
+        const link = page.locator('.footer-links a[href="https://www.lxelec.cn/"]');
+        await expect(link).toHaveCount(1);
+        await expect(link).toHaveText(locale.label);
+        await expect(link).not.toHaveAttribute('rel', /nofollow/i);
+        await expect(page.locator('body')).not.toContainText('Longxiang ' + 'Electrical');
+    }
+});
+
+test('真实联系页保持原地址标签且仅显示国际邮箱', async ({ page }) => {
+    await page.goto(BASE + '/contact.html');
+    const rows = page.locator('.contact-info-list .contact-info-row');
+    await expect(rows).toHaveCount(3);
+    await expect(rows.nth(0)).toContainText('henanlxgj@163.com');
+    await expect(rows.nth(1).locator('strong')).toHaveText('Factory Address');
+    await expect(rows.nth(2).locator('strong')).toHaveText('Factory Address');
+    await expect(page.locator('a[href^="tel:"]')).toHaveCount(0);
+});
+
 test('产品列表页加载正常', async ({ page }) => {
     await page.goto(BASE + '/products.html');
     await expect(page.locator('nav.navbar')).toBeVisible();
 });
 
 test('敏感路径返回 403', async ({ page }) => {
-    const resp = await page.request.get(BASE + '/data/longxiang.db');
-    expect(resp.status()).toBe(403);
+    for (const path of ['/data/longxiang.db', '/tests/smoke.spec.js', '/.tmp/admin-js-raw-head.js', '/docs/']) {
+        const resp = await page.request.get(BASE + path);
+        expect(resp.status(), path).toBe(403);
+    }
 });
 
 test('CSP Report-Only 头存在', async ({ page }) => {

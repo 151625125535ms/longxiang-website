@@ -88,7 +88,7 @@
             'Models': '\u041c\u043e\u0434\u0435\u043b\u0438',
             'Teaching Equipment': '\u0423\u0447\u0435\u0431\u043d\u043e\u0435 \u043e\u0431\u043e\u0440\u0443\u0434\u043e\u0432\u0430\u043d\u0438\u0435',
             'Education Cooperation': '\u041e\u0431\u0440\u0430\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044c\u043d\u043e\u0435 \u0441\u043e\u0442\u0440\u0443\u0434\u043d\u0438\u0447\u0435\u0441\u0442\u0432\u043e',
-            'Education Cooperation | Henan Longxiang Electrical Co., Ltd.': '\u041e\u0431\u0440\u0430\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044c\u043d\u043e\u0435 \u0441\u043e\u0442\u0440\u0443\u0434\u043d\u0438\u0447\u0435\u0441\u0442\u0432\u043e | Henan Longxiang Electrical Co., Ltd.',
+            'Education Cooperation | Henan Longxiang Electric Co., Ltd.': '\u041e\u0431\u0440\u0430\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044c\u043d\u043e\u0435 \u0441\u043e\u0442\u0440\u0443\u0434\u043d\u0438\u0447\u0435\u0441\u0442\u0432\u043e | Henan Longxiang Electric Co., Ltd.',
             'Four cooperation models': '\u0427\u0435\u0442\u044b\u0440\u0435 \u043c\u043e\u0434\u0435\u043b\u0438 \u0441\u043e\u0442\u0440\u0443\u0434\u043d\u0438\u0447\u0435\u0441\u0442\u0432\u0430',
             'FOUR COOPERATION MODELS': '\u0427\u0435\u0442\u044b\u0440\u0435 \u043c\u043e\u0434\u0435\u043b\u0438 \u0441\u043e\u0442\u0440\u0443\u0434\u043d\u0438\u0447\u0435\u0441\u0442\u0432\u0430',
             'Industrial college planning and cooperation framework': '\u041f\u043b\u0430\u043d\u0438\u0440\u043e\u0432\u0430\u043d\u0438\u0435 \u0438\u043d\u0434\u0443\u0441\u0442\u0440\u0438\u0430\u043b\u044c\u043d\u043e\u0433\u043e \u043a\u043e\u043b\u043b\u0435\u0434\u0436\u0430 \u0438 \u0444\u043e\u0440\u043c\u0430\u0442 \u0441\u043e\u0442\u0440\u0443\u0434\u043d\u0438\u0447\u0435\u0441\u0442\u0432\u0430',
@@ -241,7 +241,7 @@
 
     function stripBrandSuffix(value) {
         return String(value || '')
-            .replace(/\s+\|\s+(Longxiang|Longxiang Electrical|Henan Longxiang Electrical).*$/i, '')
+            .replace(/\s+\|\s+(Longxiang|Longxiang Electric|Henan Longxiang Electric).*$/i, '')
             .replace(/\s+/g, ' ')
             .trim();
     }
@@ -294,7 +294,7 @@
             inLanguage: language,
             isPartOf: {
                 '@type': 'WebSite',
-                name: 'Longxiang Electrical',
+                name: 'Longxiang Electric',
                 url: window.location.origin + '/'
             }
         });

@@ -66,8 +66,8 @@ const body = {
         descriptionLabelAr: 'الوصف'
     },
     seo: {
-        title: 'Product Comparison | Henan Longxiang Electrical Co., Ltd.',
-        titleAr: 'مقارنة المنتجات | Henan Longxiang Electrical Co., Ltd.',
+        title: 'Product Comparison | Henan Longxiang Electric Co., Ltd.',
+        titleAr: 'مقارنة المنتجات | Henan Longxiang Electric Co., Ltd.',
         description: 'Compare selected Longxiang power equipment models side by side.',
         descriptionAr: 'قارن نماذج معدات الطاقة المختارة من Longxiang جنباً إلى جنب.',
         image: '成品区/非晶立体卷.png'

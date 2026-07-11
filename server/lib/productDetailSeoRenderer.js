@@ -8,7 +8,7 @@ const PRODUCT_LABELS = {
     fr: 'Produits',
     ru: '\u041f\u0440\u043e\u0434\u0443\u043a\u0446\u0438\u044f'
 };
-const TITLE_SUFFIX = 'Henan Longxiang Electrical Co., Ltd.';
+const TITLE_SUFFIX = 'Henan Longxiang Electric Co., Ltd.';
 
 function localeFieldSuffix(localeCode) {
     localeCode = String(localeCode || '').trim().toLowerCase();
