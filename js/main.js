@@ -1701,6 +1701,7 @@
     function updateMainNavigation() {
         var links = document.querySelector('.navbar .nav-links');
         if (!links) return;
+        if (globalShellCache === null && links.hasAttribute('data-ssr-shell')) return;
         var mainLinks = shellSection('navigation').mainLinks;
         links.innerHTML = Array.isArray(mainLinks) ? mainLinks.map(renderMainNavItem).join('') : '';
         links.querySelectorAll('.nav-item.has-dropdown > a').forEach(function (link) {
@@ -1709,6 +1710,7 @@
     }
 
     function updateFooterNavigation() {
+        if (globalShellCache === null && document.querySelector('.footer-grid[data-ssr-shell]')) return;
         var navigation = shellSection('navigation');
         document.querySelectorAll('.footer-grid').forEach(function (grid) {
             grid.innerHTML =
@@ -1752,11 +1754,7 @@
                         '<div class="form-status" aria-live="polite"></div>' +
                     '</form>' +
                 '</div>';
-            grid.querySelectorAll('.footer-links a[href="https://www.lxelec.cn/"]').forEach(function (link) {
-                link.addEventListener('click', function () {
-                    trackEvent('click_china_website', { source_component: 'footer' });
-                });
-            });
+            bindChinaWebsiteTracking(grid);
         });
         document.querySelectorAll('.footer-bottom p').forEach(function (item) {
             item.textContent = shellValue('footer', 'copyright', '');
@@ -1772,6 +1770,16 @@
     function validContactEmail(value) {
         value = String(value || '').trim();
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? value : '';
+    }
+
+    function bindChinaWebsiteTracking(root) {
+        (root || document).querySelectorAll('.footer-links a[href="https://www.lxelec.cn/"]').forEach(function (link) {
+            if (link._chinaWebsiteTrackingBound) return;
+            link._chinaWebsiteTrackingBound = true;
+            link.addEventListener('click', function () {
+                trackEvent('click_china_website', { source_component: 'footer' });
+            });
+        });
     }
 
     function safeContactUrl(value) {
@@ -1965,11 +1973,16 @@
         return fetchJson('/api/content-blocks/global-shell')
             .then(function (block) {
                 globalShellCache = block && block.body ? window.LongxiangI18n.localizeContentTree(block.body, locale) : {};
+                var ssrShell = document.querySelector('[data-ssr-shell][data-shell-version]');
+                var shellVersionMatches = ssrShell && String(ssrShell.getAttribute('data-shell-version')) === String(block && block.version || 1);
                 renderHeaderContactBar();
                 ensureConsentUi();
                 applyFunctionalEmbeds();
-                updateMainNavigation();
-                updateFooterNavigation();
+                if (!shellVersionMatches) {
+                    updateMainNavigation();
+                    updateFooterNavigation();
+                }
+                bindChinaWebsiteTracking(document);
                 initActiveNavLink();
                 if (companyCache) {
                     updateCompanyDom(companyCache);

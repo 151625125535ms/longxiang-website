@@ -47,11 +47,8 @@ function clonePublicValue(value) {
 }
 
 function canonicalIdentity(value) {
-    const stored = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
-    return {
-        ...PUBLIC_COMPANY_IDENTITY,
-        ...stored
-    };
+    void value;
+    return { ...PUBLIC_COMPANY_IDENTITY };
 }
 
 function readCompanyIdentity(db) {

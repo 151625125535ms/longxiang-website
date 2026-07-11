@@ -19,6 +19,9 @@ const { getDb } = require('./lib/db');
 const { ensureContentBlockSeeds } = require('./lib/contentBlockSeeds');
 const { readPublicProduct } = require('./lib/publicProducts');
 const { renderProductDetailSeoHtml } = require('./lib/productDetailSeoRenderer');
+const { readPublicContentBlock, localizePublicContentBlock } = require('./lib/publicContentBlocks');
+const { readPublicCompanyView } = require('./lib/publicCompanyView');
+const { renderGlobalShellHtml } = require('./lib/globalShellHtmlRenderer');
 const {
     staticSeoRouteDefinitions,
     renderStaticPageSeoHtml
@@ -214,12 +217,23 @@ function requestOrigin(req) {
     return protocol + '://' + requestHost;
 }
 
+function renderPublicShell(html, locale, pathname) {
+    const shell = localizePublicContentBlock(readPublicContentBlock('global-shell'), locale.code || locale);
+    return renderGlobalShellHtml(html, {
+        locale: locale.code || locale,
+        pathname,
+        shell,
+        company: readPublicCompanyView()
+    });
+}
+
 staticSeoRouteDefinitions().forEach(function (route) {
     app.get(route.path, function (req, res, next) {
         fs.readFile(route.filePath, 'utf8', function (err, html) {
             if (err) return next(err);
             try {
-                const rendered = renderStaticPageSeoHtml(html, route, requestOrigin(req));
+                const withShell = renderPublicShell(html, route.locale, req.path);
+                const rendered = renderStaticPageSeoHtml(withShell, route, requestOrigin(req));
                 sendHtmlString(res, rendered, 200);
             } catch (renderErr) {
                 next(renderErr);
@@ -230,7 +244,12 @@ staticSeoRouteDefinitions().forEach(function (route) {
 
 function sendNotFoundShell(req, res, next) {
     const shell = notFoundShellForRequestPath(req.path);
-    sendHtmlShell(res, next, shell.filePath, shell.baseHref, 404);
+    fs.readFile(shell.filePath, 'utf8', function (err, html) {
+        if (err) return next(err);
+        const locale = localeForRequestPath(req.path);
+        const withBase = html.replace(/<head>/i, '<head>\n    <base href="' + shell.baseHref + '">');
+        sendHtmlString(res, renderPublicShell(withBase, locale, req.path), 404);
+    });
 }
 
 function sendProductDetailShell(req, res, next) {
@@ -250,7 +269,8 @@ function sendProductDetailShell(req, res, next) {
         if (err) return next(err);
         const withBase = html.replace(/<head>/i, '<head>\n    <base href="' + baseHrefForLocale(locale) + '">');
         const withSeo = renderProductDetailSeoHtml(withBase, product, locale, requestOrigin(req));
-        sendHtmlString(res, withSeo, 200);
+        const withShell = renderPublicShell(withSeo, locale, req.path);
+        sendHtmlString(res, withShell, 200);
     });
 }
 
@@ -272,20 +292,20 @@ function hasProductFilterQuery(req) {
     });
 }
 
-function sendFilteredProductListShell(req, res, next) {
-    if (!hasProductFilterQuery(req)) return next();
+function sendProductListShell(req, res, next) {
     const locale = localeForRequestPath(req.path);
     const filePath = localizedHtmlShellPath('products.html', locale);
 
     fs.readFile(filePath, 'utf8', function (err, html) {
         if (err) return next(err);
+        const robots = hasProductFilterQuery(req) ? '\n    <meta name="robots" content="noindex,follow">' : '';
         const withBase = html.replace(/<head>/i,
-            '<head>\n    <base href="' + baseHrefForLocale(locale) + '">\n    <meta name="robots" content="noindex,follow">');
-        sendHtmlString(res, withBase, 200);
+            '<head>\n    <base href="' + baseHrefForLocale(locale) + '">' + robots);
+        sendHtmlString(res, renderPublicShell(withBase, locale, req.path), 200);
     });
 }
 
-app.get(/^\/(?:ar\/|fr\/|ru\/)?products\.html$/, sendFilteredProductListShell);
+app.get(/^\/(?:ar\/|fr\/|ru\/)?products\.html$/, sendProductListShell);
 
 app.use(express.static(path.join(__dirname, '..'), {
     maxAge: '7d',
