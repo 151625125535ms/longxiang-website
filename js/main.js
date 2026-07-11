@@ -1930,9 +1930,7 @@
         document.querySelectorAll('[data-communication-links]').forEach(function (container) {
             container.innerHTML = '';
             links.forEach(function (link) { container.appendChild(link.cloneNode(true)); });
-            container.querySelectorAll('[data-track-event]').forEach(function (link) {
-                link.addEventListener('click', function () { trackEvent(link.getAttribute('data-track-event')); });
-            });
+            bindCommunicationTracking(container);
             if (company.wechat) {
                 var wechat = document.createElement('div');
                 wechat.className = 'wechat-placeholder';
@@ -1950,6 +1948,30 @@
         ensureFloatingInquiry();
     }
 
+    function bindCommunicationTracking(root) {
+        (root || document).querySelectorAll('[data-track-event]').forEach(function (link) {
+            if (link._communicationTrackingBound) return;
+            link._communicationTrackingBound = true;
+            link.addEventListener('click', function () { trackEvent(link.getAttribute('data-track-event')); });
+        });
+    }
+
+    function companySsrVersionMatches(company) {
+        var ssrCompany = document.querySelector('[data-ssr-shell][data-company-version]');
+        return Boolean(ssrCompany) && String(ssrCompany.getAttribute('data-company-version')) === String(company && company.version || 1);
+    }
+
+    function applyCompanyPublicDom(company) {
+        if (companySsrVersionMatches(company)) {
+            bindCommunicationTracking(document);
+            ensureInquiryModal(company);
+            ensureFloatingInquiry();
+            return;
+        }
+        updateCompanyDom(company);
+        renderCommunicationWidgets(company);
+    }
+
     function updateFooterProductLinks() {
     }
 
@@ -1957,9 +1979,8 @@
         fetchJson('/api/company')
             .then(function (company) {
                 companyCache = company;
-                updateCompanyDom(company);
+                applyCompanyPublicDom(company);
                 initContactMapTabs(company);
-                renderCommunicationWidgets(company);
                 gaTrackingId = company.ga4TrackingId || '';
                 loadGaIfAllowed();
                 initSeoMeta(company);
@@ -1987,8 +2008,7 @@
                 bindChinaWebsiteTracking(document);
                 initActiveNavLink();
                 if (companyCache) {
-                    updateCompanyDom(companyCache);
-                    renderCommunicationWidgets(companyCache);
+                    applyCompanyPublicDom(companyCache);
                     initSeoMeta(companyCache);
                 }
                 var modal = document.getElementById('inquiry-modal');

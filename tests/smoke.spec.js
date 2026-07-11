@@ -70,6 +70,47 @@ test('首页加载正常', async ({ page }) => {
     await expect(page.locator('nav.navbar')).toBeVisible();
 });
 
+test('同版本公共壳水合保留服务端导航页脚和社交节点', async ({ page }) => {
+    await page.route('**/api/content-blocks/global-shell', async (route) => {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        await route.continue();
+    });
+    await page.route('**/api/company', async (route) => {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        await route.continue();
+    });
+    await page.goto(BASE + '/', { waitUntil: 'domcontentloaded' });
+    const probes = await page.evaluate(() => {
+        const nodes = [
+            document.querySelector('.nav-links .nav-item'),
+            document.querySelector('.footer-grid .footer-company'),
+            document.querySelector('[data-communication-links] > *')
+        ];
+        nodes.forEach((node, index) => {
+            if (node) node.setAttribute('data-ssr-node-probe', String(index));
+        });
+        return nodes.map(Boolean);
+    });
+    expect(probes).toEqual([true, true, true]);
+    await page.waitForTimeout(900);
+    await expect(page.locator('.nav-links [data-ssr-node-probe="0"]')).toHaveCount(1);
+    await expect(page.locator('.footer-grid [data-ssr-node-probe="1"]')).toHaveCount(1);
+    await expect(page.locator('[data-communication-links] > [data-ssr-node-probe="2"]')).toHaveCount(1);
+});
+
+test('公共数据 API 失败时服务端导航和页脚保持可用', async ({ page }) => {
+    await page.route('**/api/content-blocks/global-shell', (route) => route.abort());
+    await page.route('**/api/company', (route) => route.abort());
+    await page.goto(BASE + '/', { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(300);
+    expect(await page.locator('.nav-links a').count()).toBeGreaterThan(0);
+    await expect(page.locator('.footer-grid')).toContainText('henanlxgj@163.com');
+    await expect(page.locator('.footer-links a[href="https://www.lxelec.cn/"]')).toHaveCount(1);
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.locator('.hamburger').click();
+    await expect(page.locator('.nav-links')).toHaveClass(/active/);
+});
+
 test('首页非 Hero 产品卡使用现有专用缩略图', async ({ page }) => {
     await page.goto(BASE + '/index.html');
     const images = page.locator('#featured-products-container .product-card-image img');
