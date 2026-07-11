@@ -21,6 +21,7 @@
 - `lastmod` 范围：2024-08-19 至 2026-05-08；
 - HTTP 地址会跳转到 HTTPS sitemap；
 - 完整清单：[`stage1-cn-sitemap-inventory-20260711.csv`](stage1-cn-sitemap-inventory-20260711.csv)。
+- 19 个英文产品详情页的候选一对一承接表：[`stage1-cn-product-mapping-candidates-20260711.md`](stage1-cn-product-mapping-candidates-20260711.md)。
 
 页面类型分布：
 
