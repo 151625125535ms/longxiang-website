@@ -173,7 +173,7 @@ test('产品列表页加载正常', async ({ page }) => {
     await expect(page.locator('nav.navbar')).toBeVisible();
 });
 
-test('产品筛选参数页保持筛选体验但不建立独立索引', async ({ page }) => {
+test('.com 产品筛选参数页保持筛选体验但不建立独立索引', async ({ page }) => {
     await page.goto(BASE + '/fr/products.html?group=transformer&sub=dry-type');
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex,follow');
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
@@ -184,6 +184,7 @@ test('产品筛选参数页保持筛选体验但不建立独立索引', async ({
         return links.map(function (link) { return link.getAttribute('href'); });
     });
     expect(alternates.every(function (href) { return href && href.indexOf('?') === -1; })).toBe(true);
+    expect(alternates.every(function (href) { return href && href.indexOf(BASE + '/') === 0; })).toBe(true);
     await expect(page.locator('.catalog-filter-status')).toBeVisible();
     await expect(page.locator('#catalog-current-filter')).toContainText('Transformateurs secs');
 });
