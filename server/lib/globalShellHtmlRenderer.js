@@ -1,5 +1,7 @@
 'use strict';
 
+const HYDRATION_ASSET_VERSION = '20260711-stage2c-final';
+
 function escapeHtml(value) {
     return String(value == null ? '' : value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
 }
@@ -84,6 +86,12 @@ function footerHtml(body, company, locale) {
         '<form class="footer-quote-form" data-inquiry-form><input type="hidden" name="name" value="' + escapeHtml(localized(inquiry, 'hiddenName', locale, '')) + '"><input type="hidden" name="subject" value="quote"><input type="hidden" name="productContext" value="' + escapeHtml(localized(inquiry, 'productContext', locale, '')) + '"><textarea name="message" rows="4" placeholder="' + escapeHtml(localized(inquiry, 'messagePlaceholder', locale, '')) + '" required></textarea><div class="footer-quote-row"><input type="email" name="email" placeholder="' + escapeHtml(localized(inquiry, 'emailPlaceholder', locale, '')) + '" required><input type="text" name="phone" placeholder="' + escapeHtml(localized(inquiry, 'phonePlaceholder', locale, '')) + '"></div><button type="submit">' + escapeHtml(localized(inquiry, 'submitLabel', locale, '')) + '</button><div class="form-status" aria-live="polite"></div></form></div>';
 }
 
+function versionHydrationScripts(html) {
+    return String(html || '').replace(/(<script\b[^>]*\bsrc=)(["'])(?:\.\.\/|\.\/|\/)?js\/(main|content-pages|products-list|product-detail)\.js(?:\?[^"']*)?\2/gi, function (_, prefix, quote, name) {
+        return prefix + quote + '/js/' + name + '.js?v=' + HYDRATION_ASSET_VERSION + quote;
+    });
+}
+
 function renderGlobalShellHtml(html, options) {
     const shell = options.shell || {};
     const body = shell.body || {};
@@ -94,7 +102,7 @@ function renderGlobalShellHtml(html, options) {
     output = output.replace(/<div class="footer-grid"[^>]*>\s*<\/div>\s*<div class="footer-bottom">/i, '<div class="footer-grid" aria-live="polite" data-ssr-shell="true" data-shell-version="' + escapeHtml(version) + '" data-company-version="' + escapeHtml((options.company || {}).version || 1) + '">' + footerHtml(body, options.company || {}, locale) + '</div><div class="footer-bottom">');
     if (!output.includes('data-ssr-shell="true"')) throw new Error('HTML shell is missing empty SSR shell placeholders.');
     output = output.replace(/(<div class="footer-bottom"><p>)[\s\S]*?(<\/p>)/i, '$1' + escapeHtml(localized(body.footer || {}, 'copyright', locale, '')) + '$2');
-    return output;
+    return versionHydrationScripts(output);
 }
 
-module.exports = { renderGlobalShellHtml, localizedHref, escapeHtml, localized };
+module.exports = { renderGlobalShellHtml, versionHydrationScripts, localizedHref, escapeHtml, localized };

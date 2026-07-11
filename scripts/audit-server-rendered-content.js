@@ -48,6 +48,14 @@ function uniqueIds(html) {
     return duplicates;
 }
 function sitemapUrls(xml) { return Array.from(xml.matchAll(/<loc>(.*?)<\/loc>/gi)).map(function (match) { return match[1].replace(/&amp;/g, '&'); }); }
+function decodeCloudflareEmail(value) {
+    value = String(value || '');
+    if (!/^[0-9a-f]+$/i.test(value) || value.length < 4 || value.length % 2 !== 0) return '';
+    const key = parseInt(value.slice(0, 2), 16);
+    let output = '';
+    for (let index = 2; index < value.length; index += 2) output += String.fromCharCode(parseInt(value.slice(index, index + 2), 16) ^ key);
+    return output;
+}
 function localeFromPath(pathname) { const match = String(pathname || '').match(/^\/(ar|fr|ru)\//); return match ? match[1] : 'en'; }
 function localizedProduct(product, field, locale) {
     if (locale === 'en') return String(product && product[field] || '');
@@ -66,16 +74,18 @@ async function fetchText(url) {
 }
 
 function inspectShell(path, html) {
+    const cloudflareEmails = Array.from(html.matchAll(/data-cfemail=["']([0-9a-f]+)["']/gi)).map(function (match) { return decodeCloudflareEmail(match[1]); }).filter(Boolean);
+    const searchableHtml = html + '\n' + cloudflareEmails.join('\n');
     const nav = (html.match(/<div\b[^>]*class=["'][^"']*\bnav-links\b[^"']*["'][^>]*>([\s\S]*?)<\/div>/i) || [])[1] || '';
     if (count(nav, /<a\b/gi) < 1) fail(path, 'empty server navigation');
     const footer = (html.match(/<footer\b[^>]*class=["'][^"']*\bfooter\b[^"']*["'][^>]*>([\s\S]*?)<\/footer>/i) || [])[1] || '';
     if (count(footer, /<a\b/gi) < 1 || !/footer-bottom/i.test(footer)) fail(path, 'incomplete server footer');
-    if (!/henanlxgj(?:@|&#\d+;|<span[^>]*data-cfemail)/i.test(html)) fail(path, 'international email missing');
+    if (!/henanlxgj\s*@\s*163\.com/i.test(searchableHtml)) fail(path, 'international email missing');
     const duplicates = uniqueIds(html);
     if (duplicates.length) fail(path, 'duplicate IDs: ' + Array.from(new Set(duplicates)).join(', '));
     const cnTags = Array.from(html.matchAll(/<(?:link|script)\b[^>]*>[\s\S]*?(?:<\/script>)?|<link\b[^>]*>/gi)).map(function (match) { return match[0]; }).filter(function (tag) { return /lxelec\.cn/i.test(tag); });
     if (cnTags.length) fail(path, '.cn appears in canonical/hreflang/schema');
-    forbidden.forEach(function (item) { if (item.pattern.test(html)) { summary.sensitiveFindings += 1; fail(path, 'sensitive value: ' + item.label); } });
+    forbidden.forEach(function (item) { if (item.pattern.test(searchableHtml)) { summary.sensitiveFindings += 1; fail(path, 'sensitive value: ' + item.label); } });
     summary.shell += 1;
 }
 
