@@ -15,7 +15,7 @@
 | 1 | 确认法定英文名、注册资本、总部、生产基地与国际联系方式 | 完成 | 用户已确认；生产 `/api/company` 返回统一身份数据，且仅公开国际邮箱 |
 | 2 | 建立企业实体主数据 | 完成 | `server/lib/companyIdentity.js`、数据库迁移 `0005_company_identity.js`、生产 schemaVersion 5 |
 | 3 | 确认 `.cn` 中国官网、`.com` 全球官网分工 | 完成 | `.com` 页脚四种正式语言均有普通可抓取中国官网链接；未建立跨域 canonical |
-| 4 | 盘点 `.cn` 英文 URL、流量和外链 | 部分完成 | 已完成公开 URL 样本和 `.com` 承接映射；没有 `.cn` Search Console/外链导出，无法验证点击、曝光、查询词和真实外链 |
+| 4 | 盘点 `.cn` 英文 URL、流量和外链 | 部分完成 | 已完成 `.cn` 的 104 个唯一 sitemap URL 清单；已分析 `lxdianqi.com` GSC，但该 property 是中文站而非 `.cn` 英文站，仍缺 `.cn` Search Console/外链导出 |
 | 5 | 修复 `?group=`、`?sub=` 参数 URL 策略 | 完成 | 参数筛选页原始 HTML 输出 `noindex,follow`，canonical/hreflang 指向对应语言的干净产品列表页 |
 | 6 | 制定产品分类 URL 和后台数据模型 | 完成（设计） | `stage1-cn-readonly-inventory-20260711.md` 已记录 13 个计划分类 URL、字段模型和可索引门槛；未在内容不足时提前上线 |
 | 7 | 优化首页和产品详情大背景图 | 用户取消 | 按用户最新指令保持 Hero 图片原样；提交中没有任何图片文件变更 |
@@ -52,6 +52,8 @@
 3. “网页索引”及 sitemap 状态截图或导出。
 
 在取得这些只读数据前，不对 `.cn` 英文 URL 制定 301、noindex 或删除动作，也不把公开搜索结果误当成完整外链清单。
+
+补充发现：`lxdianqi.com` 当前提供中文站，`lxelec.cn` 当前提供英文站，两者虽然位于同一服务器，但分别 self-canonical，Search Console 数据不能互相替代。详见 `stage1-legacy-domains-gsc-audit-20260711.md`。
 
 ## GA4 启用前置条件
 
