@@ -8,6 +8,7 @@
 - 不修改 `lxdianqi.com`、`lxelec.cn`、中文 IDN 域名或其服务器；
 - 不提交 sitemap、不发起索引请求、不配置重定向；
 - 原始 Search Console 导出保留在用户桌面，不提交到代码仓库。
+- 后续所有 SEO 实施、内容建设、内链、外链和数据闭环只针对 `lxenelectric.com`。
 
 ## 一、当前线上域名关系
 
@@ -24,7 +25,7 @@
 - 中文 IDN 的 HTTP 入口使用临时 `302` 并先跳到 HTTP，而不是最终 HTTPS canonical；
 - 本次测试中中文 IDN 的 HTTPS 连接未成功完成，不能证明其 HTTPS 可用；
 - `lxdianqi.com` 与 `lxelec.cn` sitemap 有 32 个相同路径，但对应页面是中文和英文版本；
-- 两个旧站首页均没有跨域 hreflang，只输出各自 self-canonical；
+- 两个被观察站点首页均没有跨域 hreflang，只输出各自 self-canonical；
 - `lxelec.cn` 的英文内容与新的 `lxenelectric.com` 全球英文内容存在主题竞争风险。
 
 因此，“指向同一服务器”只是基础设施关系，不会让 Google 自动合并三个域名的索引、点击、外链或 canonical 信号。Search Console 数据仍按域名 property 分开统计。
@@ -104,27 +105,28 @@
 - 中文 IDN 暂时跳到 `lxdianqi.com`；
 - 新全球站 `lxenelectric.com` 另有英语、阿语、法语和俄语内容。
 
-所以不能把三个旧域名简单理解为“同一个站点的三个入口”，也不能把 `lxdianqi.com` 的 GSC 数据当成 `lxelec.cn` 数据。
+所以不能把三个非 `.com` 域名简单理解为“同一个站点的三个入口”，也不能把 `lxdianqi.com` 的 GSC 数据当成 `lxelec.cn` 数据。
 
-## 四、推荐的长期迁移方向（本阶段不执行）
+## 四、`.cn` 竞争监测与 `.com` 海外权重建设
 
-如果继续坚持“`.cn` 中国官网、`.com` 全球官网”的正式分工，推荐最终状态为：
+正式执行边界：
 
-1. `lxdianqi.com` 的中文 URL 在 `.cn` 建好等价中文页后，逐页 301 到 `lxelec.cn` 对应路径；
-2. `lxelec.cn` 当前英文 URL 在 `.com` 建好等价国际页后，逐页 301 到 `lxenelectric.com` 对应路径；
-3. `龙翔电气.com` 配置有效 HTTPS，并 301 到 `https://www.lxelec.cn/` 或对应中文路径；
-4. 所有裸域名先覆盖有效证书，再一次性 301 到各自 `www + HTTPS` canonical；
-5. 不把全部旧 URL 重定向到首页；没有等价页的 URL需按流量、外链和业务价值决定合并或 410；
-6. 迁移前必须获取三个旧域名各自的 Search Console 页面、查询、索引和外链数据，并制作逐 URL 映射表。
+1. `lxelec.cn`、`lxdianqi.com` 和中文 IDN 只做公开页面、公开 sitemap 和公开搜索结果的只读观察；
+2. 不把上述域名列入迁移、改版、技术修复或站长平台配置计划；
+3. `lxenelectric.com` 独立建设海外采购关键词、IEC/目标市场标准、OEM/EPC、出口交付、案例和 RFQ 内容；
+4. `.com` 的产品、分类、解决方案、案例和技术文章形成独立内链闭环；
+5. `.com` 通过展会、协会、合作伙伴、行业媒体、客户案例和可链接工具获取海外相关外链；
+6. 监测 `.cn` 英文页面只是为了识别竞争主题和内容缺口，不复制其正文，不把其权重视为 `.com` 的依赖。
 
-该迁移涉及 `.cn` 内容、服务器/Nginx、证书、301、sitemap 和 Search Console，是高风险独立项目。按照用户当前“不要修改 `.cn`”的要求，本阶段只记录方案，不执行。
+该边界为长期约束，不是“等待以后授权”的临时暂停。
 
-## 五、阶段一仍需的数据
+## 五、后续监测方式
 
-要完成英文旧站权重盘点，仍需从 `sc-domain:lxelec.cn` 导出：
+阶段一不再以 `.cn` Search Console 数据为完成条件。后续仅使用公开信息按季度观察：
 
-1. 过去 16 个月 Search results：查询、网页、国家、设备；
-2. Links：外部链接最多的网页、链接最多的网站、链接最多的文字；
-3. 网页索引和 sitemap 状态截图。
+1. `.cn` 公开 sitemap 的 URL 数、页面类型和新增/删除变化；
+2. Google/Bing 对 `.cn` 英文页面的公开索引样本与品牌/产品查询竞争；
+3. `.com` 与 `.cn` 在相同产品主题上的标题、搜索意图和内容覆盖差异；
+4. `.com` 自身 GSC/Bing 的非品牌曝光、点击、排名、外链和有效询盘增长。
 
-`lxdianqi.com` 的链接与索引报告当前仍在处理，待 Search Console 生成后可作为中国站迁移资产的补充数据，但不阻塞 `.com` 当前阶段的代码优化。
+`lxdianqi.com` 已导出的少量 GSC 数据只作为背景记录，不进入 `.com` KPI，也不触发任何非 `.com` 网站操作。

@@ -1,4 +1,4 @@
-# 阶段一：`lxelec.cn` 英文产品页到 `.com` 的候选映射
+# 阶段一：`.cn` 英文产品竞争监测与 `.com` 内容覆盖对照
 
 盘点日期：2026-07-11
 
@@ -7,21 +7,22 @@
 - 只读取 `lxelec.cn` 公开 sitemap 中的 19 个产品详情 URL、页面 H1、状态码和 canonical；
 - 目标产品来自 `https://www.lxenelectric.com/api/products` 当前公开的 38 个产品；
 - 19 个 `.cn` 产品 URL 均返回 200，并 self-canonical；
-- 本表只用于迁移设计，不代表已经批准或执行 301；
-- 真正重定向前仍需核对 `.cn` Search Console 的点击、曝光和外链，并由产品人员确认技术等价性。
+- 本表只用于观察 `.cn` 英文产品主题与 `.com` 当前内容覆盖，不用于设计重定向；
+- `.cn` 不属于本项目的改造范围，不执行 301、canonical、noindex、hreflang、内容或站长平台配置；
+- `.com` 仅把对照结果用于识别海外内容缺口，并用独立文案、关键词和证据建设自身权重。
 
-置信度定义：
+覆盖相似度定义：
 
-- 高：型号、产品类型和主要能力一致，可进入一对一迁移候选；
-- 中：属于同一产品族，但容量、版本、命名或系列合并方式不同；
-- 低：没有明确等价单品，不应强制跳转到近似产品。
+- 高：`.com` 已有相同型号或高度相近的海外产品主题，可重点做差异化增强；
+- 中：属于同一产品族，但容量、版本、命名或系列合并方式不同，说明 `.com` 仍有内容缺口；
+- 低：`.com` 没有明确对应单品，应建设独立分类或主题页，不复制 `.cn` 页面。
 
-## 完整候选映射
+## 竞争主题覆盖对照
 
-| `.cn` 英文产品 URL | 页面 H1 | `.com` 候选承接 URL | 置信度 | 迁移前检查 |
+| `.cn` 英文产品 URL | 页面 H1 | `.com` 当前相关 URL | 相似度 | `.com` 优化动作 |
 |---|---|---|---|---|
 | `/product_detail/1296874736991305728.html` | Full Fusion Large Capacity Network Charging Reactor Products – 1600kW Series | `/products/lxdc480-1280kw` | 中 | `.cn` 为 1600kW，`.com` 当前为 480–1280kW，容量不等价；确认是否需要新建 1600kW 页面 |
-| `/product_detail/1296873941302976512.html` | Split Single Cabinet Flexible Charging Stack – 360–480kW | `/products/lxdc480-1280kw` | 中 | 同为充电堆，但容量区间和柜体组合不同；不能仅凭名称执行 301 |
+| `/product_detail/1296873941302976512.html` | Split Single Cabinet Flexible Charging Stack – 360–480kW | `/products/lxdc480-1280kw` | 中 | 同为充电堆，但容量区间和柜体组合不同；评估是否需要独立 360–480kW 海外页面 |
 | `/product_detail/1296870047709102080.html` | Full Range of AC Charging Pile 7kW Products | `/products/lxac-7kw` 或 `/products/lxac-7kw-display` | 中 | 确认旧页是否包含显示屏版本，必要时先建立 7kW 系列汇总页 |
 | `/product_detail/1296866833375371264.html` | Complete Set of High-Voltage Reactive Power Compensation Device | `/products/lxwz` | 高 | 核对型号、电压等级和装置组成 |
 | `/product_detail/1296866166262931456.html` | KYN-12 Indoor Dry Air Metal Armored Removable Switchgear | `/products/kyn-12` | 高 | 核对旧页型号拼写和技术参数 |
@@ -38,15 +39,15 @@
 | `/product_detail/(B)H25_Oil-immersed_amorphous_alloy_core_distribution_transformers.html` | (B)H25 Oil-Immersed Amorphous Alloy Core Distribution Transformer | `/products/amorphous-sbh15-m` | 中 | `.com` 为 S(S)H15/21/25-M 合并系列；核对型号前缀和铁芯结构 |
 | `/product_detail/(B)H21_Oil-immersed_amorphous_alloy_core_distribution_transformers.html` | (B)H21 Oil-Immersed Amorphous Alloy Core Distribution Transformer | `/products/amorphous-sbh15-m` | 中 | 同上；若旧页是 M.RL 三维卷铁芯，应改候选为 `/products/amorphous-sbh-mrl-wound-core` |
 | `/product_detail/S(B)H15_Oil-immersed_amorphous_alloy_core_distribution_transformers.html` | S(B)H15 Oil-Immersed Amorphous Alloy Core Distribution Transformer | `/products/amorphous-sbh15-m` | 中 | 核对能效等级、短路能力和型号后缀 |
-| `/product_detail/Amorphous_alloy_transformer.html` | Amorphous Alloy Transformer | 未来非晶合金变压器分类页 | 低 | 泛化主题页；当前没有等价分类 URL，不能重定向到任一单品 |
+| `/product_detail/Amorphous_alloy_transformer.html` | Amorphous Alloy Transformer | 未来非晶合金变压器分类页 | 低 | 泛化主题页；建设独立海外分类页并加入选型、标准、产品内链和询盘入口 |
 
 ## 汇总与执行规则
 
 - 高置信度：11 个；
 - 中置信度：7 个；
 - 低置信度：1 个；
-- 当前不执行任何 `.cn` 重定向；
-- 高置信度也必须等 `.cn` GSC 流量和外链导出后才能确定优先级；
-- 中置信度必须由技术/产品人员确认容量、型号、结构和应用等价性；
-- 低置信度页面应先在 `.com` 建立真正的分类或主题承接页；
-- 不允许把 19 个产品页批量跳转到 `.com` 首页或产品总目录。
+- `.cn` 永久保持公开只读观察，不进入待改造或待迁移清单；
+- 高相似度页面用于监测关键词竞争，并增强 `.com` 的海外差异化卖点、标准、交付与 RFQ 内容；
+- 中相似度页面由技术/产品人员判断 `.com` 是否需要新建独立容量或版本页面；
+- 低相似度页面优先在 `.com` 建立真正的分类或主题页；
+- 不复制 `.cn` 正文，不依赖 `.cn` 权重，也不规划任何从 `.cn` 到 `.com` 的跳转。
