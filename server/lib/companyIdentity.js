@@ -40,7 +40,7 @@ function clonePublicValue(value) {
     const output = {};
     Object.keys(value).forEach(function (key) {
         const normalizedKey = key.toLowerCase().replace(/[_-]/g, '');
-        if (PRIVATE_CONTACT_KEYS.has(normalizedKey)) return;
+        if (PRIVATE_CONTACT_KEYS.has(normalizedKey) || normalizedKey.startsWith('whatsapp')) return;
         output[key] = clonePublicValue(value[key]);
     });
     return output;

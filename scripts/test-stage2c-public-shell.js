@@ -24,6 +24,10 @@ assert.strictEqual(company.whatsapp, undefined);
 
 const block = readPublicContentBlock('global-shell');
 assert(block && block.version > 0);
+assert(!/whatsapp/i.test(JSON.stringify(block)), 'global-shell exposes WhatsApp configuration');
+const contactBlock = readPublicContentBlock('contact');
+assert(contactBlock && contactBlock.version > 0);
+assert(!/whatsapp/i.test(JSON.stringify(contactBlock)), 'contact block exposes WhatsApp configuration');
 
 locales.forEach(function ([locale, file, pathname]) {
     const html = fs.readFileSync(path.join(root, file), 'utf8');
