@@ -1282,13 +1282,15 @@
     }
 
     function initActiveNavLink() {
-        var currentPage = window.location.pathname.split('/').pop() || 'index.html';
+        var currentPage = currentPageName();
         document.querySelectorAll('.nav-links a').forEach(function (link) {
             var href = link.getAttribute('href');
             if (!href) return;
             var linkPage = href.split('?')[0].split('/').pop();
             link.classList.remove('active');
-            if (linkPage === currentPage || (currentPage === '' && linkPage === 'index.html')) {
+            var isProductParent = currentPage === 'product-detail.html' && link.parentElement &&
+                link.parentElement.classList.contains('has-dropdown') && linkPage === 'products.html';
+            if (linkPage === currentPage || isProductParent || (currentPage === '' && linkPage === 'index.html')) {
                 link.classList.add('active');
             }
         });
