@@ -158,6 +158,9 @@ test('中国官网跳转仅在分析同意后发送带页面上下文的 GA4 事
     await page.goto(BASE + '/fr/index.html');
     const chinaWebsiteLink = page.locator('.footer-links a[href="https://www.lxelec.cn/"]');
     await expect(chinaWebsiteLink).toHaveCount(1);
+    await expect.poll(function () {
+        return chinaWebsiteLink.evaluate(function (link) { return link._chinaWebsiteTrackingBound === true; });
+    }).toBe(true);
     await chinaWebsiteLink.evaluate(function (link) {
         link.addEventListener('click', function (event) { event.preventDefault(); }, { once: true });
         link.click();
@@ -428,6 +431,9 @@ test.describe('顶部公共联系方式栏', function () {
         await page.setViewportSize({ width: 1024, height: 768 });
         await mockHeaderContactBarData(page);
         await page.goto(BASE + '/ar/index.html');
+        await expect(page.locator('.header-contact-bar__email')).toBeVisible();
+        await expect(page.locator('[data-contact-bar-social="instagram"]')).toBeVisible();
+        await expect(page.locator('[data-contact-bar-social="youtube"]')).toBeVisible();
         const positions = await page.evaluate(function () {
             var email = document.querySelector('.header-contact-bar__email').getBoundingClientRect();
             var instagram = document.querySelector('[data-contact-bar-social="instagram"]').getBoundingClientRect();

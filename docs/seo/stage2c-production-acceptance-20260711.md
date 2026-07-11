@@ -19,7 +19,15 @@
 
 ## 生产执行
 
-生产部署与线上复验结果将在 B/C/D 最终部署完成后写入本节。运行时代码只允许由服务器 `git pull --ff-only origin main` 获取，PM2 仅执行一次必要重启。
+- GitHub `main` 已包含 B/C/D 与缓存版本修复；生产服务器仅通过 `git pull --ff-only origin main` 更新，未直接编辑服务器文件。
+- 初次部署后执行一次必要 PM2 restart。生产浏览器验收发现 Cloudflare 仍返回旧查询版本的四个水合脚本，因此增加统一缓存版本提交，并执行一次必要的零停机 PM2 reload；最终服务保持 `online`。
+- 生产普通 URL 已统一输出 `/js/main.js`、`content-pages.js`、`products-list.js`、`product-detail.js` 的 `20260711-stage2c-final` 缓存版本，HTML 响应 `cf-cache-status=DYNAMIC`。
+- 全站服务端正文：184 sitemap URL + 4 参数目录全部通过；精确分类为 16 个重点正文、4 个 clean 目录、152 个详情、4 个参数目录，敏感字段发现 0。Cloudflare 邮件保护经解码后仍仅为国际邮箱。
+- 旧 URL：320 个唯一旧地址、424 次有效 GET/HEAD 检查全部单跳 301；28 个无效场景 404；152 个 clean target 无第二跳。
+- 产品详情 SEO：152/152 原始 canonical、完整 hreflang、WebPage、BreadcrumbList 与渲染结果通过；Product Schema 暴露 0，失败 0。
+- Schema：184/184；缺失、错配、JSON-LD 解析错误、加载错误、高风险 Product 字段和 planned `pt` 暴露均为 0。
+- 生产 Playwright：35/35；覆盖桌面/移动、四语言、API 失败、内容版本升级、禁用 JavaScript、Hero、目录、详情、Contact 与询盘。
+- 最终 PM2 状态：`longxiang-website` 为 `online`。
 
 ## 固定约束检查
 
