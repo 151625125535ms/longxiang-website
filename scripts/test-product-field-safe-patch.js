@@ -36,14 +36,17 @@ function createFixture() {
             name_ar TEXT,
             name_fr TEXT,
             name_ru TEXT,
+            short_desc_ar TEXT,
             short_desc_fr TEXT,
             short_desc_ru TEXT,
             description_en TEXT,
             description_ar TEXT,
             description_fr TEXT,
             description_ru TEXT,
+            seo_title TEXT,
             seo_title_fr TEXT,
             seo_title_ru TEXT,
+            seo_description TEXT,
             seo_description_fr TEXT,
             seo_description_ru TEXT,
             seo_keywords_fr TEXT,
@@ -53,12 +56,15 @@ function createFixture() {
     db.prepare(`
         INSERT INTO products (
             id, legacy_id, slug, status, version, updated_at, name_en, name_ar,
-            description_en, description_ru, short_desc_ru
+            short_desc_ar, description_en, description_ru, short_desc_ru,
+            seo_title, seo_description
         )
         VALUES (
             1, 'legacy-product', 'sample-product', 'published', 3, '2026-01-01T00:00:00.000Z',
-            'English name', 'Arabic name', 'English description',
-            'Текст 230Vac (single-phase), 25.', 'Project-specific value'
+            'English name', 'Arabic name', 'وصف عربي 10kV ONAN', 'English description',
+            'Текст 230Vac (single-phase), 25.', 'Project-specific value',
+            'Sample Transformer | Longxiang',
+            'Review product information for Sample Transformer from Longxiang Electric. Contact us to discuss project requirements or request a quotation.'
         )
     `).run();
     db.close();
@@ -86,11 +92,62 @@ function createFixture() {
     return { dir, dbPath, inputPath, reportPath, backupPath };
 }
 
+function createSearchCopyFixture() {
+    const fixture = createFixture();
+    const input = {
+        meta: {
+            policy: 'search-copy-v1',
+            operation: 'forward',
+            counts: { products: 1 }
+        },
+        products: [
+            {
+                slug: 'sample-product',
+                expected: {
+                    seo_title: 'Sample Transformer | Longxiang',
+                    seo_description: 'Review product information for Sample Transformer from Longxiang Electric. Contact us to discuss project requirements or request a quotation.',
+                    name_en: 'English name',
+                    name_ar: 'Arabic name',
+                    short_desc_ar: 'وصف عربي 10kV ONAN'
+                },
+                target: {
+                    seo_title: 'Sample Distribution Transformer | Longxiang',
+                    seo_description: 'Review product information for Sample Distribution Transformer from Longxiang Electric. Contact us to discuss project requirements or request a quotation.',
+                    name_en: 'English product name',
+                    name_ar: 'اسم المنتج بالعربية',
+                    short_desc_ar: 'وصف عربي محدث 10kV ONAN'
+                }
+            }
+        ]
+    };
+    fs.writeFileSync(fixture.inputPath, JSON.stringify(input, null, 2), 'utf8');
+    return fixture;
+}
+
 function readProduct(dbPath) {
     const db = new Database(dbPath, { readonly: true });
     const row = db.prepare('SELECT * FROM products WHERE slug = ?').get('sample-product');
     db.close();
     return row;
+}
+
+function readInput(inputPath) {
+    return JSON.parse(fs.readFileSync(inputPath, 'utf8'));
+}
+
+function writeInput(inputPath, input) {
+    fs.writeFileSync(inputPath, JSON.stringify(input, null, 2), 'utf8');
+}
+
+function runSearchCopy(fixture, mode, extraArgs) {
+    return runNode([
+        scriptPath,
+        '--policy', 'search-copy-v1',
+        mode === 'apply' ? '--apply' : '--dry-run',
+        '--input', fixture.inputPath,
+        '--db', fixture.dbPath,
+        '--report', fixture.reportPath
+    ].concat(extraArgs || []));
 }
 
 function testDryRunDoesNotChangeDatabase() {
@@ -184,9 +241,183 @@ function testApplyRequiresBackup() {
     assert.match(result.stderr + result.stdout, /backup/i);
 }
 
+function testSearchCopyPolicyAcceptsExactFields() {
+    const fixture = createSearchCopyFixture();
+    const before = readProduct(fixture.dbPath);
+    const result = runNode([
+        scriptPath,
+        '--policy', 'search-copy-v1',
+        '--dry-run',
+        '--input', fixture.inputPath,
+        '--db', fixture.dbPath,
+        '--report', fixture.reportPath
+    ]);
+
+    assert.strictEqual(result.status, 0, result.stderr || result.stdout);
+    assert.deepStrictEqual(readProduct(fixture.dbPath), before);
+    const report = fs.readFileSync(fixture.reportPath, 'utf8');
+    assert.match(report, /Policy: search-copy-v1/);
+    assert.match(report, /Field changes: 5/);
+}
+
+function testDefaultPolicyRejectsSearchCopyFields() {
+    const fixture = createSearchCopyFixture();
+    const input = readInput(fixture.inputPath);
+    delete input.meta.policy;
+    writeInput(fixture.inputPath, input);
+    const result = runNode([
+        scriptPath,
+        '--dry-run',
+        '--input', fixture.inputPath,
+        '--db', fixture.dbPath,
+        '--report', fixture.reportPath
+    ]);
+
+    assert.notStrictEqual(result.status, 0, 'default policy must reject search-copy fields');
+    assert.match(result.stderr + result.stdout, /unsupported.*seo_title|fr-ru-localization-v1/i);
+}
+
+function testSearchCopyPolicyRejectsUnsupportedFields() {
+    const fixture = createSearchCopyFixture();
+    const input = readInput(fixture.inputPath);
+    input.products[0].expected.description_en = 'English description';
+    input.products[0].target.description_en = 'Changed English description';
+    input.products[0].expected.seo_title_fr = '';
+    input.products[0].target.seo_title_fr = 'Titre interdit';
+    writeInput(fixture.inputPath, input);
+    const result = runSearchCopy(fixture, 'dry-run');
+
+    assert.notStrictEqual(result.status, 0, 'search-copy policy must reject frozen fields');
+    assert.match(result.stderr + result.stdout, /unsupported.*description_en|unsupported.*seo_title_fr/i);
+}
+
+function testPolicyMetadataGuardrails() {
+    const missing = createSearchCopyFixture();
+    const missingInput = readInput(missing.inputPath);
+    delete missingInput.meta.policy;
+    writeInput(missing.inputPath, missingInput);
+    const missingResult = runSearchCopy(missing, 'dry-run');
+    assert.notStrictEqual(missingResult.status, 0, 'explicit policy must require input meta.policy');
+    assert.match(missingResult.stderr + missingResult.stdout, /requires meta\.policy/i);
+
+    const mismatch = createSearchCopyFixture();
+    const mismatchInput = readInput(mismatch.inputPath);
+    mismatchInput.meta.policy = 'fr-ru-localization-v1';
+    writeInput(mismatch.inputPath, mismatchInput);
+    const mismatchResult = runSearchCopy(mismatch, 'dry-run');
+    assert.notStrictEqual(mismatchResult.status, 0, 'CLI/input policy mismatch must fail');
+    assert.match(mismatchResult.stderr + mismatchResult.stdout, /does not match CLI policy/i);
+
+    const unknown = createSearchCopyFixture();
+    const unknownResult = runNode([
+        scriptPath,
+        '--policy', 'search-copy-v99',
+        '--dry-run',
+        '--input', unknown.inputPath,
+        '--db', unknown.dbPath,
+        '--report', unknown.reportPath
+    ]);
+    assert.notStrictEqual(unknownResult.status, 0, 'unknown policy must fail');
+    assert.match(unknownResult.stderr + unknownResult.stdout, /Unknown product field patch policy/i);
+}
+
+function testSearchCopyApplyUpdatesOnlyApprovedFieldsAndBacksUp() {
+    const fixture = createSearchCopyFixture();
+    const before = readProduct(fixture.dbPath);
+    const result = runSearchCopy(fixture, 'apply', ['--backup', fixture.backupPath]);
+
+    assert.strictEqual(result.status, 0, result.stderr || result.stdout);
+    assert.ok(fs.existsSync(fixture.backupPath), 'search-copy apply must create backup');
+    const after = readProduct(fixture.dbPath);
+    assert.strictEqual(after.seo_title, 'Sample Distribution Transformer | Longxiang');
+    assert.strictEqual(after.seo_description, 'Review product information for Sample Distribution Transformer from Longxiang Electric. Contact us to discuss project requirements or request a quotation.');
+    assert.strictEqual(after.name_en, 'English product name');
+    assert.strictEqual(after.name_ar, 'اسم المنتج بالعربية');
+    assert.strictEqual(after.short_desc_ar, 'وصف عربي محدث 10kV ONAN');
+    assert.strictEqual(after.description_en, before.description_en);
+    assert.strictEqual(after.description_ar, before.description_ar);
+    assert.strictEqual(after.version, before.version + 1);
+    const report = fs.readFileSync(fixture.reportPath, 'utf8');
+    assert.match(report, /Policy: search-copy-v1/);
+    assert.match(report, /Database changed: yes/);
+    assert.match(report, /Field changes: 5/);
+}
+
+function testSearchCopyExpectedValueMismatchFails() {
+    const fixture = createSearchCopyFixture();
+    const input = readInput(fixture.inputPath);
+    input.products[0].expected.seo_title = 'Not the database value';
+    writeInput(fixture.inputPath, input);
+    const result = runSearchCopy(fixture, 'dry-run');
+
+    assert.notStrictEqual(result.status, 0, 'search-copy expected mismatch must fail');
+    assert.match(result.stderr + result.stdout, /expected value mismatch/i);
+}
+
+function testSearchCopyEmptyChangeDoesNotWrite() {
+    const fixture = createSearchCopyFixture();
+    const input = readInput(fixture.inputPath);
+    input.products[0].target = Object.assign({}, input.products[0].expected);
+    writeInput(fixture.inputPath, input);
+    const before = readProduct(fixture.dbPath);
+    const result = runSearchCopy(fixture, 'apply', ['--backup', fixture.backupPath]);
+
+    assert.strictEqual(result.status, 0, result.stderr || result.stdout);
+    const after = readProduct(fixture.dbPath);
+    assert.deepStrictEqual(after, before);
+    assert.match(fs.readFileSync(fixture.reportPath, 'utf8'), /Database changed: no/);
+}
+
+function testSearchCopyRollbackPatchDryRunsAfterApply() {
+    const fixture = createSearchCopyFixture();
+    const forward = readInput(fixture.inputPath);
+    const applyResult = runSearchCopy(fixture, 'apply', ['--backup', fixture.backupPath]);
+    assert.strictEqual(applyResult.status, 0, applyResult.stderr || applyResult.stdout);
+
+    const rollback = {
+        meta: { policy: 'search-copy-v1', operation: 'rollback', counts: { products: 1 } },
+        products: forward.products.map((item) => ({
+            slug: item.slug,
+            expected: item.target,
+            target: item.expected
+        }))
+    };
+    writeInput(fixture.inputPath, rollback);
+    const rollbackResult = runSearchCopy(fixture, 'dry-run');
+    assert.strictEqual(rollbackResult.status, 0, rollbackResult.stderr || rollbackResult.stdout);
+    assert.match(fs.readFileSync(fixture.reportPath, 'utf8'), /Field changes: 5/);
+}
+
+function testSearchCopyFieldValidators() {
+    const ellipsis = createSearchCopyFixture();
+    const ellipsisInput = readInput(ellipsis.inputPath);
+    ellipsisInput.products[0].target.seo_description = 'This deliberately invalid meta description ends with an artificial truncation marker and must be rejected before any database operation can start...';
+    writeInput(ellipsis.inputPath, ellipsisInput);
+    const ellipsisResult = runSearchCopy(ellipsis, 'dry-run');
+    assert.notStrictEqual(ellipsisResult.status, 0, 'ellipsis description must fail');
+    assert.match(ellipsisResult.stderr + ellipsisResult.stdout, /ellipsis|120-170/i);
+
+    const tokenLoss = createSearchCopyFixture();
+    const tokenInput = readInput(tokenLoss.inputPath);
+    tokenInput.products[0].target.short_desc_ar = 'وصف عربي محدث';
+    writeInput(tokenLoss.inputPath, tokenInput);
+    const tokenResult = runSearchCopy(tokenLoss, 'dry-run');
+    assert.notStrictEqual(tokenResult.status, 0, 'Arabic token loss must fail');
+    assert.match(tokenResult.stderr + tokenResult.stdout, /numeric tokens|unit tokens|code tokens/i);
+}
+
 testDryRunDoesNotChangeDatabase();
 testApplyUpdatesOnlyAllowedFieldsAndBacksUpDatabase();
 testRejectsUnsupportedNeutralField();
 testRejectsExpectedValueMismatch();
 testApplyRequiresBackup();
+testSearchCopyPolicyAcceptsExactFields();
+testDefaultPolicyRejectsSearchCopyFields();
+testSearchCopyPolicyRejectsUnsupportedFields();
+testPolicyMetadataGuardrails();
+testSearchCopyApplyUpdatesOnlyApprovedFieldsAndBacksUp();
+testSearchCopyExpectedValueMismatchFails();
+testSearchCopyEmptyChangeDoesNotWrite();
+testSearchCopyRollbackPatchDryRunsAfterApply();
+testSearchCopyFieldValidators();
 console.log('product field safe patch tests passed');

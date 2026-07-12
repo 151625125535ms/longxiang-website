@@ -1,0 +1,460 @@
+{
+  "meta": {
+    "policy": "search-copy-v1",
+    "operation": "rollback",
+    "title": "Stage 3 approved product search copy rollback",
+    "approved_date": "2026-07-12",
+    "source": "Exact inverse of stage3-product-search-copy-forward.json",
+    "counts": {
+      "products": 35,
+      "fields": 80,
+      "seo_title": 13,
+      "seo_description": 35,
+      "short_desc_ar": 32,
+      "name_en": 0,
+      "name_ar": 0
+    }
+  },
+  "products": [
+    {
+      "row_id": 5,
+      "slug": "anti-short-amorphous",
+      "expected": {
+        "seo_title": "S(B)H15 / S(B)H21 / S(B)H25 Anti-Short-Circuit Amorphous Alloy Distribution Transformer",
+        "seo_description": "S(B)H15 / S(B)H21 / S(B)H25 Anti-Short-Circuit Amorphous Alloy Distribution Transformer. Contact Longxiang Electric for product information or a project quotation.",
+        "short_desc_ar": "محول توزيع بسبيكة غير متبلورة مقاوم للقصر S(B)H15 / S(B)H21 / S(B)H25 مناسب لـ شبكات ذات تيار قصر مرتفع، مع تكوين سعة 30-1000 kVA، خيارات جهد تشمل 10/0.4kV و6/0.4kV، مرجع النموذج سلسلة S(B)H15 / S(B)H21 / S(B)H25 (مقاوم للقصر)، سبيكة غير متبلورة، تبريد ONAN."
+      },
+      "target": {
+        "seo_title": "S(B)H15 / S(B)H21 / S(B)H25 Anti-Short-Circuit Amorphous | Longxiang",
+        "seo_description": "S(B)H15 / S(B)H21 / S(B)H25 Anti-Short-Circuit Amorphous Alloy Distribution Transformer for Grid with high fault current, with capacity configuration of 30...",
+        "short_desc_ar": "محول توزيع بسبيكة غير متبلورة مقاوم للقصر S(B)H15 / S(B)H21 / S(B)H25 مناسب لـ Grid with high fault current، مع تكوين سعة 30-1000 kVA، خيارات جهد تشمل 10/0.4kV and 6/0.4kV، مرجع النموذج S(B)H15 / S(B)H21 / S(B)H25 Series (Anti-Short-Circuit)، Amorphous Alloy، تبريد ONAN."
+      }
+    },
+    {
+      "row_id": 6,
+      "slug": "amorphous-veg-oil",
+      "expected": {
+        "seo_title": "Amorphous Alloy (Vegetable Oil) High Overload Transformer | Longxiang",
+        "seo_description": "Amorphous Alloy (Vegetable Oil) High Overload Transformer from Longxiang Electric. Contact us to discuss project requirements or request a quotation.",
+        "short_desc_ar": "محول عالي التحميل بسبيكة غير متبلورة وزيت نباتي مناسب لـ التوزيع الصديق للبيئة، مع تكوين سعة 30-630 kVA، خيارات جهد تشمل 10/0.4kV و6/0.4kV، مرجع النموذج S(B)H15 (زيت نباتي)، سبيكة غير متبلورة، تبريد ONAN."
+      },
+      "target": {
+        "seo_title": "Amorphous Alloy (Vegetable Oil) High Overload | Longxiang",
+        "seo_description": "Amorphous Alloy (Vegetable Oil) High Overload Transformer for Eco-friendly distribution, with capacity configuration of 30-630 kVA, voltage options...",
+        "short_desc_ar": "محول عالي التحميل بسبيكة غير متبلورة وزيت نباتي مناسب لـ Eco-friendly distribution، مع تكوين سعة 30-630 kVA، خيارات جهد تشمل 10/0.4kV and 6/0.4kV، مرجع النموذج S(B)H15 (Vegetable Oil)، Amorphous Alloy، تبريد ONAN."
+      }
+    },
+    {
+      "row_id": 8,
+      "slug": "aluminum",
+      "expected": {
+        "seo_description": "Oil-Immersed Power Transformer (Aluminum) from Longxiang Electric. Contact us to discuss project requirements or request a quotation.",
+        "short_desc_ar": "محول قدرة مغمور بالزيت من الألومنيوم مناسب لـ التوزيع الاقتصادي، مع تكوين سعة 30-2500 kVA، خيارات جهد تشمل 10/0.4kV و35/10kV، مرجع النموذج سلسلة S11/S13 (ألومنيوم)، فولاذ سيليكوني، تبريد ONAN."
+      },
+      "target": {
+        "seo_description": "Oil-Immersed Power Transformer (Aluminum) for Cost-effective distribution, with capacity configuration of 30-2500 kVA, voltage options including 10/0.4kV...",
+        "short_desc_ar": "محول قدرة مغمور بالزيت من الألومنيوم مناسب لـ Cost-effective distribution، مع تكوين سعة 30-2500 kVA، خيارات جهد تشمل 10/0.4kV and 35/10kV، مرجع النموذج S11/S13 Series (Aluminum)، Silicon Steel، تبريد ONAN."
+      }
+    },
+    {
+      "row_id": 12,
+      "slug": "3phase-3limb",
+      "expected": {
+        "seo_title": "SC(B)H15/17/19 NX3/2/1 Three-Phase Three-Limb Amorphous Alloy Dry-Type Transformer",
+        "seo_description": "SC(B)H15/17/19 NX3/2/1 Three-Phase Three-Limb Amorphous Alloy Dry-Type Transformer. Contact Longxiang Electric for product information or a project quotation.",
+        "short_desc_ar": "محول جاف ثلاثي الطور بثلاثة أعمدة من السبيكة غير المتبلورة SC(B)H15/17/19 NX3/2/1 مناسب لـ التوزيع التجاري والصناعي، مع تكوين سعة 30-2000 kVA، خيارات جهد تشمل 10/0.4kV و6/0.4kV، مرجع النموذج سلسلة SC(B)H15/17/19 NX3/2/1 (ثلاثة أعمدة)، سبيكة غير متبلورة، تبريد AN / AF."
+      },
+      "target": {
+        "seo_title": "Three-Phase Three-Limb Amorphous Alloy Dry-Type | Longxiang",
+        "seo_description": "Three-Phase Three-Limb Amorphous Alloy Dry-Type Transformer for Commercial & industrial distribution, with capacity configuration of 30-2000 kVA, voltage...",
+        "short_desc_ar": "محول جاف ثلاثي الطور بثلاثة أعمدة من السبيكة غير المتبلورة SC(B)H15/17/19 NX3/2/1 مناسب لـ Commercial & industrial distribution، مع تكوين سعة 30-2000 kVA، خيارات جهد تشمل 10/0.4kV and 6/0.4kV، مرجع النموذج SC(B)H15/17/19 NX3/2/1 Series (Three-Limb)، Amorphous Alloy، تبريد AN / AF."
+      }
+    },
+    {
+      "row_id": 13,
+      "slug": "3phase-5limb",
+      "expected": {
+        "seo_title": "SC(B)H15/17/19 NX3/2/1 Three-Phase Five-Limb Amorphous Alloy Dry-Type Transformer",
+        "seo_description": "SC(B)H15/17/19 NX3/2/1 Three-Phase Five-Limb Amorphous Alloy Dry-Type Transformer. Contact Longxiang Electric for product information or a project quotation.",
+        "short_desc_ar": "محول جاف ثلاثي الطور بخمسة أعمدة من السبيكة غير المتبلورة SC(B)H15/17/19 NX3/2/1 مناسب لـ المنشآت الحساسة للضوضاء، مع تكوين سعة 30-2500 kVA، خيارات جهد تشمل 10/0.4kV و35/0.4kV، مرجع النموذج سلسلة SC(B)H15/17/19 NX3/2/1 (خمسة أعمدة)، سبيكة غير متبلورة، تبريد AN / AF."
+      },
+      "target": {
+        "seo_title": "Three-Phase Five-Limb Amorphous Alloy Dry-Type | Longxiang",
+        "seo_description": "Three-Phase Five-Limb Amorphous Alloy Dry-Type Transformer for Noise-sensitive installations, with capacity configuration of 30-2500 kVA, voltage options...",
+        "short_desc_ar": "محول جاف ثلاثي الطور بخمسة أعمدة من السبيكة غير المتبلورة SC(B)H15/17/19 NX3/2/1 مناسب لـ Noise-sensitive installations، مع تكوين سعة 30-2500 kVA، خيارات جهد تشمل 10/0.4kV and 35/0.4kV، مرجع النموذج SC(B)H15/17/19 NX3/2/1 Series (Five-Limb)، Amorphous Alloy، تبريد AN / AF."
+      }
+    },
+    {
+      "row_id": 16,
+      "slug": "wind-power",
+      "expected": {
+        "seo_description": "ZGSBH15 Wind Power Combined Transformer (Vegetable Oil) from Longxiang Electric. Contact us to discuss project requirements or request a quotation.",
+        "short_desc_ar": "محول مركب لطاقة الرياح ZGSBH15 بزيت نباتي مناسب لـ توليد طاقة الرياح، مع تكوين سعة 500-4000 kVA، خيارات جهد تشمل 35/0.69kV، 10/0.69kV و35/0.4kV، مرجع النموذج سلسلة ZGSBH15-ZG، سبيكة غير متبلورة، معيار GB/T 17467 / IEC 62271-202."
+      },
+      "target": {
+        "seo_description": "ZGSBH15 Wind Power Combined Transformer (Vegetable Oil) for Wind power generation, with capacity configuration of 500-4000 kVA, voltage options including...",
+        "short_desc_ar": "محول مركب لطاقة الرياح ZGSBH15 بزيت نباتي مناسب لـ Wind power generation، مع تكوين سعة 500-4000 kVA، خيارات جهد تشمل 35/0.69kV, 10/0.69kV and 35/0.4kV، مرجع النموذج ZGSBH15-ZG Series، Amorphous Alloy، معيار GB/T 17467 / IEC 62271-202."
+      }
+    },
+    {
+      "row_id": 17,
+      "slug": "pv-combined",
+      "expected": {
+        "seo_description": "ZGS13 Photovoltaic Power Combined Transformer from Longxiang Electric. Contact us to discuss project requirements or request a quotation.",
+        "short_desc_ar": "محول مركب للطاقة الكهروضوئية ZGS13 مناسب لـ توليد الطاقة الشمسية / الكهروضوئية PV، مع تكوين سعة 315-3150 kVA، خيارات جهد تشمل 35/0.4kV، 10/0.4kV و35/0.8kV، مرجع النموذج سلسلة ZGS13-ZG، فولاذ سيليكوني / سبيكة غير متبلورة، تبريد ONAN."
+      },
+      "target": {
+        "seo_description": "ZGS13 Photovoltaic Power Combined Transformer for Solar / PV power generation, with capacity configuration of 315-3150 kVA, voltage options including 35/0...",
+        "short_desc_ar": "محول مركب للطاقة الكهروضوئية ZGS13 مناسب لـ Solar / PV power generation، مع تكوين سعة 315-3150 kVA، خيارات جهد تشمل 35/0.4kV, 10/0.4kV and 35/0.8kV، مرجع النموذج ZGS13-ZG Series، Silicon Steel / Amorphous Alloy، تبريد ONAN."
+      }
+    },
+    {
+      "row_id": 18,
+      "slug": "gcs",
+      "expected": {
+        "seo_description": "GCS Low-Voltage Withdrawable Switchgear from Longxiang Electric. Contact us to discuss project requirements or request a quotation.",
+        "short_desc_ar": "لوحة مفاتيح منخفضة الجهد قابلة للسحب GCS مناسب لـ توزيع الطاقة والتحكم في المحركات، مع تكوين تيار مقنن أو تصنيف خزانة 630A، 1000A و1250A، خيارات جهد تشمل 380V، 660V و380V / 660V، مرجع النموذج سلسلة GCS، حماية IP30 / IP40، معيار GB 7251 / IEC 61439."
+      },
+      "target": {
+        "seo_description": "GCS Low-Voltage Withdrawable Switchgear for Power distribution, motor control, with rated current or cabinet rating of 630A, 1000A and 1250A, voltage...",
+        "short_desc_ar": "لوحة مفاتيح منخفضة الجهد قابلة للسحب GCS مناسب لـ Power distribution, motor control، مع تكوين تيار مقنن أو تصنيف خزانة 630A, 1000A and 1250A، خيارات جهد تشمل 380V, 660V and 380V / 660V، مرجع النموذج GCS Series، حماية IP30 / IP40، معيار GB 7251 / IEC 61439."
+      }
+    },
+    {
+      "row_id": 19,
+      "slug": "lxac-7kw",
+      "expected": {
+        "seo_description": "7kW AC EV Charging Station (No Display) from Longxiang Electric. Contact us to discuss project requirements or request a quotation."
+      },
+      "target": {
+        "seo_description": "7kW AC EV Charging Station (No Display) for residential parking areas, commercial car parks, hotels, campuses and fleet sites that need everyday AC charging..."
+      }
+    },
+    {
+      "row_id": 20,
+      "slug": "lxac-7kw-display",
+      "expected": {
+        "seo_description": "7kW AC EV Charging Station (Display Version) from Longxiang Electric. Contact us to discuss project requirements or request a quotation."
+      },
+      "target": {
+        "seo_description": "7kW AC EV Charging Station (Display Version) for residential parking areas, commercial car parks, hotels, campuses and fleet sites that need everyday AC..."
+      }
+    },
+    {
+      "row_id": 21,
+      "slug": "lxac-14kw",
+      "expected": {
+        "seo_description": "14kW Dual-Gun AC EV Charging Station from Longxiang Electric. Contact us to discuss project requirements or request a quotation."
+      },
+      "target": {
+        "seo_description": "14kW Dual-Gun AC EV Charging Station for residential parking areas, commercial car parks, hotels, campuses and fleet sites that need everyday AC charging..."
+      }
+    },
+    {
+      "row_id": 22,
+      "slug": "lxdc-20-30-40kw",
+      "expected": {
+        "seo_description": "20kW / 30kW / 40kW Low-Power DC EV Charging Station from Longxiang Electric. Contact us to discuss project requirements or request a quotation.",
+        "short_desc_ar": "محطة شحن تيار مستمر منخفضة القدرة 20/30/40 كيلوواط مناسب لـ محطات الشحن العامة ومناطق خدمات الطرق ومستودعات الحافلات وأساطيل الخدمات اللوجستية والمواقع التي تحتاج إلى شحن تيار مستمر أسرع، مع تكوين قدرة شحن 20kW، 30kW، 40kW، خيارات جهد تشمل AC380V ±15%، نظام ثلاثي الطور بخمسة أسلاك و200-1000V DC، مرجع النموذج LXDC-20kW، 30kW، 40kW، حماية IP54."
+      },
+      "target": {
+        "seo_description": "20kW / 30kW / 40kW Low-Power DC EV Charging Station for public charging stations, highway service areas, bus depots, logistics fleets and sites that need...",
+        "short_desc_ar": "محطة شحن تيار مستمر منخفضة القدرة 20/30/40 كيلوواط مناسب لـ محطات الشحن العامة ومناطق خدمات الطرق ومستودعات الحافلات وأساطيل الخدمات اللوجستية والمواقع التي تحتاج إلى شحن تيار مستمر أسرع، مع تكوين قدرة شحن 20kW, 30kW, 40kW، خيارات جهد تشمل AC380V ±15%, three-phase five-wire and 200-1000V DC، مرجع النموذج LXDC-20kW, 30kW, 40kW، حماية IP54."
+      }
+    },
+    {
+      "row_id": 23,
+      "slug": "lxdc-120-400kw",
+      "expected": {
+        "seo_description": "120kW-400kW DC EV Charging Station from Longxiang Electric. Contact us to discuss project requirements or request a quotation.",
+        "short_desc_ar": "محطة شحن تيار مستمر بقدرة 120 إلى 400 كيلوواط مناسب لـ محطات الشحن العامة ومناطق خدمات الطرق ومستودعات الحافلات وأساطيل الخدمات اللوجستية والمواقع التي تحتاج إلى شحن تيار مستمر أسرع، مع تكوين قدرة شحن 120kW، 160kW، 240kW، 320kW، 400kW، خيارات جهد تشمل AC380V ±15%، نظام ثلاثي الطور بخمسة أسلاك و200-1000V DC، مرجع النموذج محطة شحن مدمجة مزدوجة الموصل LXDC، تبريد هوائي، حماية IP54."
+      },
+      "target": {
+        "seo_description": "120kW-400kW DC EV Charging Station for public charging stations, highway service areas, bus depots, logistics fleets and sites that need faster DC charging...",
+        "short_desc_ar": "محطة شحن تيار مستمر بقدرة 120 إلى 400 كيلوواط مناسب لـ محطات الشحن العامة ومناطق خدمات الطرق ومستودعات الحافلات وأساطيل الخدمات اللوجستية والمواقع التي تحتاج إلى شحن تيار مستمر أسرع، مع تكوين قدرة شحن 120kW, 160kW, 240kW, 320kW, 400kW، خيارات جهد تشمل AC380V ±15%, three-phase five-wire and 200-1000V DC، مرجع النموذج LXDC integrated dual-gun charging station، تبريد Air cooling، حماية IP54."
+      }
+    },
+    {
+      "row_id": 24,
+      "slug": "lxdc480-1280kw",
+      "expected": {
+        "seo_description": "480kW-1280kW DC EV Charging Stack from Longxiang Electric. Contact us to discuss project requirements or request a quotation.",
+        "short_desc_ar": "مجموعة شحن تيار مستمر بقدرة 480 إلى 1280 كيلوواط مناسب لـ محطات الشحن العامة ومناطق خدمات الطرق ومستودعات الحافلات وأساطيل الخدمات اللوجستية والمواقع التي تحتاج إلى شحن تيار مستمر أسرع، مع تكوين قدرة شحن 480kW-1280kW، خيارات جهد تشمل AC380V ±15%، نظام ثلاثي الطور بخمسة أسلاك و200-1000V DC، مرجع النموذج مجموعة شحن تيار مستمر (DC) LXDC، تبريد هوائي ذكي / سائل، حماية IP55."
+      },
+      "target": {
+        "seo_description": "480kW-1280kW DC EV Charging Stack for public charging stations, highway service areas, bus depots, logistics fleets and sites that need faster DC charging...",
+        "short_desc_ar": "مجموعة شحن تيار مستمر بقدرة 480 إلى 1280 كيلوواط مناسب لـ محطات الشحن العامة ومناطق خدمات الطرق ومستودعات الحافلات وأساطيل الخدمات اللوجستية والمواقع التي تحتاج إلى شحن تيار مستمر أسرع، مع تكوين قدرة شحن 480kW-1280kW، خيارات جهد تشمل AC380V ±15%, three-phase five-wire and 200-1000V DC، مرجع النموذج LXDC DC charging stack، تبريد Intelligent air cooling / liquid cooling، حماية IP55."
+      }
+    },
+    {
+      "row_id": 25,
+      "slug": "portable-storage-1kw-3kwh",
+      "expected": {
+        "seo_description": "1kW / 3kWh Portable Energy Storage System from Longxiang Electric. Contact us to discuss project requirements or request a quotation.",
+        "short_desc_ar": "نظام تخزين طاقة محمول 1 كيلوواط / 3 كيلوواط ساعة مناسب لـ مشروعات الطاقة الشمسية مع التخزين والطاقة الاحتياطية الصناعية وخفض الذروة والشبكات المصغرة وسيناريوهات دعم الطاقة الخارجية، مع تكوين قدرة أو طاقة مقننة 120Ah، 2kW و3kWh، خيارات جهد تشمل 230Vac (أحادي الطور)، 25.6V و20-29.2V، فوسفات حديد الليثيوم، تبريد بمروحة مدمجة."
+      },
+      "target": {
+        "seo_description": "1kW / 3kWh Portable Energy Storage System for solar-storage projects, industrial backup power, peak shaving, microgrids and outdoor energy support scenarios...",
+        "short_desc_ar": "نظام تخزين طاقة محمول 1 كيلوواط / 3 كيلوواط ساعة مناسب لـ مشروعات الطاقة الشمسية مع التخزين والطاقة الاحتياطية الصناعية وخفض الذروة والشبكات المصغرة وسيناريوهات دعم الطاقة الخارجية، مع تكوين قدرة أو طاقة مقننة 120Ah, 2kW and 3kWh، خيارات جهد تشمل 230Vac (single-phase), 25.6V and 20-29.2V، Lithium iron phosphate، تبريد Built-in fan."
+      }
+    },
+    {
+      "row_id": 26,
+      "slug": "portable-storage-3kw-5kwh",
+      "expected": {
+        "seo_description": "3kW / 5kWh Portable Energy Storage System from Longxiang Electric. Contact us to discuss project requirements or request a quotation.",
+        "short_desc_ar": "نظام تخزين طاقة محمول 3 كيلوواط / 5 كيلوواط ساعة مناسب لـ مشروعات الطاقة الشمسية مع التخزين والطاقة الاحتياطية الصناعية وخفض الذروة والشبكات المصغرة وسيناريوهات دعم الطاقة الخارجية، مع تكوين قدرة أو طاقة مقننة 200Ah، 6kW و5.12kWh، خيارات جهد تشمل 230Vac (أحادي الطور)، 25.6V و20-29.2V، فوسفات حديد الليثيوم، تبريد بمروحة مدمجة."
+      },
+      "target": {
+        "seo_description": "3kW / 5kWh Portable Energy Storage System for solar-storage projects, industrial backup power, peak shaving, microgrids and outdoor energy support scenarios...",
+        "short_desc_ar": "نظام تخزين طاقة محمول 3 كيلوواط / 5 كيلوواط ساعة مناسب لـ مشروعات الطاقة الشمسية مع التخزين والطاقة الاحتياطية الصناعية وخفض الذروة والشبكات المصغرة وسيناريوهات دعم الطاقة الخارجية، مع تكوين قدرة أو طاقة مقننة 200Ah, 6kW and 5.12kWh، خيارات جهد تشمل 230Vac (single-phase), 25.6V and 20-29.2V، Lithium iron phosphate، تبريد Built-in fan."
+      }
+    },
+    {
+      "row_id": 27,
+      "slug": "ts-mes-115k12l",
+      "expected": {
+        "seo_description": "High-Rate Liquid-Cooled Energy Storage Cabinet from Longxiang Electric. Contact us to discuss project requirements or request a quotation.",
+        "short_desc_ar": "خزانة تخزين طاقة مبردة بالسائل عالية المعدل مناسب لـ مشروعات الطاقة الشمسية مع التخزين والطاقة الاحتياطية الصناعية وخفض الذروة والشبكات المصغرة وسيناريوهات دعم الطاقة الخارجية، مع تكوين قدرة أو طاقة مقننة 115kW و12.44kWh، مرجع النموذج TS-MES-115K12L، حماية IP54."
+      },
+      "target": {
+        "seo_description": "High-Rate Liquid-Cooled Energy Storage Cabinet for solar-storage projects, industrial backup power, peak shaving, microgrids and outdoor energy support...",
+        "short_desc_ar": "خزانة تخزين طاقة مبردة بالسائل عالية المعدل مناسب لـ مشروعات الطاقة الشمسية مع التخزين والطاقة الاحتياطية الصناعية وخفض الذروة والشبكات المصغرة وسيناريوهات دعم الطاقة الخارجية، مع تكوين قدرة أو طاقة مقننة 115kW and 12.44kWh، مرجع النموذج TS-MES-115K12L، حماية IP54."
+      }
+    },
+    {
+      "row_id": 28,
+      "slug": "ts-les-920k100l",
+      "expected": {
+        "seo_description": "High-Rate Liquid-Cooled Energy Storage Container from Longxiang Electric. Contact us to discuss project requirements or request a quotation.",
+        "short_desc_ar": "حاوية تخزين طاقة مبردة بالسائل عالية المعدل مناسب لـ مشروعات الطاقة الشمسية مع التخزين والطاقة الاحتياطية الصناعية وخفض الذروة والشبكات المصغرة وسيناريوهات دعم الطاقة الخارجية، مع تكوين قدرة أو طاقة مقننة 920kW و99.5kWh، مرجع النموذج TS-LES-920K100L، حماية IP54."
+      },
+      "target": {
+        "seo_description": "High-Rate Liquid-Cooled Energy Storage Container for solar-storage projects, industrial backup power, peak shaving, microgrids and outdoor energy support...",
+        "short_desc_ar": "حاوية تخزين طاقة مبردة بالسائل عالية المعدل مناسب لـ مشروعات الطاقة الشمسية مع التخزين والطاقة الاحتياطية الصناعية وخفض الذروة والشبكات المصغرة وسيناريوهات دعم الطاقة الخارجية، مع تكوين قدرة أو طاقة مقننة 920kW and 99.5kWh، مرجع النموذج TS-LES-920K100L، حماية IP54."
+      }
+    },
+    {
+      "row_id": 32,
+      "slug": "zgsbh15-pv",
+      "expected": {
+        "seo_title": "ZGSBH15 Photovoltaic Combined Amorphous Alloy Transformer | Longxiang",
+        "seo_description": "ZGSBH15 Photovoltaic Combined Amorphous Alloy Transformer from Longxiang Electric. Contact us to discuss project requirements or request a quotation.",
+        "short_desc_ar": "محول مدمج للطاقة الكهروضوئية بقلب من سبيكة غير متبلورة ZGSBH15 مناسب لـ توليد الطاقة الكهروضوئية، مع تكوين سعة 630-2000kVA، 630 و800، خيارات جهد تشمل 35kV، 10kV و35kV / 10kV وما دون، مرجع النموذج ZGSBH15، سبيكة غير متبلورة، حماية خزان الزيت IP68، غرفة الجهد العالي IP45."
+      },
+      "target": {
+        "seo_title": "ZGSBH15 Photovoltaic Combined Amorphous Alloy | Longxiang",
+        "seo_description": "ZGSBH15 Photovoltaic Combined Amorphous Alloy Transformer for Photovoltaic power generation, with capacity configuration of 630-2000kVA, 630 and 800...",
+        "short_desc_ar": "محول مدمج للطاقة الكهروضوئية بقلب من سبيكة غير متبلورة ZGSBH15 مناسب لـ Photovoltaic power generation، مع تكوين سعة 630-2000kVA, 630 and 800، خيارات جهد تشمل 35kV, 10kV and 35kV / 10kV and below، مرجع النموذج ZGSBH15، Amorphous alloy، حماية Oil tank IP68, high-voltage room IP45."
+      }
+    },
+    {
+      "row_id": 33,
+      "slug": "zgs13-wind",
+      "expected": {
+        "seo_description": "ZGS13 Wind Power Combined Transformer from Longxiang Electric. Contact us to discuss project requirements or request a quotation.",
+        "short_desc_ar": "محول مدمج لطاقة الرياح ZGS13 مناسب لـ توليد طاقة الرياح، مع تكوين سعة 630-2000kVA، 630 و800، خيارات جهد تشمل 12/0.69kV، 35/0.69kV و12kV، 35kV، مرجع النموذج ZGS13، فولاذ سيليكوني، تبريد ذاتي بالغمر في الزيت."
+      },
+      "target": {
+        "seo_description": "ZGS13 Wind Power Combined Transformer for Wind power generation, with capacity configuration of 630-2000kVA, 630 and 800, voltage options including 12/0...",
+        "short_desc_ar": "محول مدمج لطاقة الرياح ZGS13 مناسب لـ Wind power generation، مع تكوين سعة 630-2000kVA, 630 and 800، خيارات جهد تشمل 12/0.69kV, 35/0.69kV and 12kV, 35kV، مرجع النموذج ZGS13، Silicon steel، تبريد Oil immersed self-cooling."
+      }
+    },
+    {
+      "row_id": 34,
+      "slug": "compact-cooling-box",
+      "expected": {
+        "seo_description": "Energy-Saving Cooling Compact Box-Type Transformer from Longxiang Electric. Contact us to discuss project requirements or request a quotation.",
+        "short_desc_ar": "محطة تحويل صندوقية مدمجة موفرة للطاقة ومخفضة للحرارة مناسب لـ المجمعات السكنية وشبكات الطاقة العامة الحضرية والمناطق التجارية والطاقة المؤقتة لمواقع البناء ومحطات الوقود ونقاط شحن المركبات الكهربائية EV وغيرها من مواقع المحولات الصندوقية، مع مرجع النموذج محول صندوقي مدمج موفر للطاقة ومخفض للحرارة، محول عالي الكفاءة من سبيكة غير متبلورة."
+      },
+      "target": {
+        "seo_description": "Energy-Saving Cooling Compact Box-Type Transformer for Residential communities, urban public power, commercial areas, construction temporary power, oil...",
+        "short_desc_ar": "محطة تحويل صندوقية مدمجة موفرة للطاقة ومخفضة للحرارة مناسب لـ Residential communities, urban public power, commercial areas, construction temporary power, oil stations, EV charging piles and other box-transformer locations، مع مرجع النموذج Energy-saving cooling compact box-type transformer، High-efficiency amorphous alloy transformer."
+      }
+    },
+    {
+      "row_id": 35,
+      "slug": "box-type-substation",
+      "expected": {
+        "seo_description": "Review product information for Box-Type Substation from Longxiang Electric. Contact us to discuss project requirements or request a quotation.",
+        "short_desc_ar": "محطة تحويل صندوقية مناسب لـ مشروعات الطاقة المتجددة والمحطات الخارجية والمناطق الصناعية ومشروعات التوزيع المدمجة التي تحتاج إلى تسليم متكامل، مع تكوين سعة 50-280kVA، 50 و80، خيارات جهد تشمل 12kV و400V، مرجع النموذج محطة تحويل صندوقية."
+      },
+      "target": {
+        "seo_description": "Box-Type Substation for renewable-energy projects, outdoor substations, industrial parks and compact distribution projects that need integrated delivery...",
+        "short_desc_ar": "محطة تحويل صندوقية مناسب لـ مشروعات الطاقة المتجددة والمحطات الخارجية والمناطق الصناعية ومشروعات التوزيع المدمجة التي تحتاج إلى تسليم متكامل، مع تكوين سعة 50-280kVA, 50 and 80، خيارات جهد تشمل 12kV and 400V، مرجع النموذج Box-type substation."
+      }
+    },
+    {
+      "row_id": 36,
+      "slug": "ggd",
+      "expected": {
+        "seo_description": "GGD Low-Voltage Fixed Complete Switchgear from Longxiang Electric. Contact us to discuss project requirements or request a quotation.",
+        "short_desc_ar": "لوحة مفاتيح منخفضة الجهد ثابتة كاملة GGD مناسب لـ محطات الطاقة والمحطات الفرعية والمصانع والمنشآت البتروكيميائية وغرف توزيع المباني التي تحتاج إلى توزيع وتحكم في الجهد المنخفض، مع خيارات جهد تشمل 380V وAC 380V، مرجع النموذج GGD، لوحة مفاتيح منخفضة الجهد ثابتة وكاملة، حماية IP30."
+      },
+      "target": {
+        "seo_description": "GGD Low-Voltage Fixed Complete Switchgear for power plants, substations, factories, petrochemical facilities and building distribution rooms that need low...",
+        "short_desc_ar": "لوحة مفاتيح منخفضة الجهد ثابتة كاملة GGD مناسب لـ محطات الطاقة والمحطات الفرعية والمصانع والمنشآت البتروكيميائية وغرف توزيع المباني التي تحتاج إلى توزيع وتحكم في الجهد المنخفض، مع خيارات جهد تشمل 380V and AC 380V، مرجع النموذج GGD، Low-voltage fixed complete switchgear، حماية IP30."
+      }
+    },
+    {
+      "row_id": 38,
+      "slug": "kyn-12",
+      "expected": {
+        "seo_description": "KYN-12 Indoor Dry-Air Metal-Clad Withdrawable Switchgear from Longxiang Electric. Contact us to discuss project requirements or request a quotation.",
+        "short_desc_ar": "معدات مفاتيح داخلية معدنية قابلة للسحب بعزل هواء جاف KYN-12 مناسب لـ بيئة خالية من الحريق ومخاطر الانفجار والتلوث الشديد والتآكل الكيميائي والاهتزازات العنيفة، مع خيارات جهد تشمل 3kV، 6kV و7.2kV، مرجع النموذج KYN-12، لوحة مفاتيح داخلية معدنية قابلة للسحب بعزل هواء جاف، حماية الغلاف IP4X، والحجرة وباب قاطع الدائرة عند الفتح IP2X."
+      },
+      "target": {
+        "seo_description": "KYN-12 Indoor Dry-Air Metal-Clad Withdrawable Switchgear for Free from fire, explosion hazard, severe pollution, chemical corrosion and violent vibration...",
+        "short_desc_ar": "معدات مفاتيح داخلية معدنية قابلة للسحب بعزل هواء جاف KYN-12 مناسب لـ Free from fire, explosion hazard, severe pollution, chemical corrosion and violent vibration، مع خيارات جهد تشمل 3kV, 6kV and 7.2kV، مرجع النموذج KYN-12، Indoor dry-air metal-clad withdrawable switchgear، حماية Enclosure IP4X, compartment and circuit-breaker door open IP2X."
+      }
+    },
+    {
+      "row_id": 39,
+      "slug": "lxwz",
+      "expected": {
+        "seo_title": "LXWZ High-Voltage Reactive Power Compensation Complete Device",
+        "seo_description": "LXWZ High-Voltage Reactive Power Compensation Complete Device from Longxiang Electric. Contact us to discuss project requirements or request a quotation.",
+        "short_desc_ar": "جهاز تعويض القدرة غير الفعالة عالي الجهد الكامل LXWZ مناسب لـ غرف توزيع الجهد المتوسط والمحطات الفرعية والمنشآت الصناعية وأنظمة استقبال الطاقة التي تحتاج إلى تحكم وحماية للدوائر، مع خيارات جهد تشمل 10kV، 35kV و12kV، مرجع النموذج LXWZ، جهاز كامل لتعويض القدرة غير الفعالة عالي الجهد."
+      },
+      "target": {
+        "seo_title": "LXWZ High-Voltage Reactive Power Compensation Complete | Longxiang",
+        "seo_description": "LXWZ High-Voltage Reactive Power Compensation Complete Device for medium-voltage distribution rooms, substations, industrial facilities and power receiving...",
+        "short_desc_ar": "جهاز تعويض القدرة غير الفعالة عالي الجهد الكامل LXWZ مناسب لـ غرف توزيع الجهد المتوسط والمحطات الفرعية والمنشآت الصناعية وأنظمة استقبال الطاقة التي تحتاج إلى تحكم وحماية للدوائر، مع خيارات جهد تشمل 10kV, 35kV and 12kV، مرجع النموذج LXWZ، High-voltage reactive power compensation complete device."
+      }
+    },
+    {
+      "row_id": 40,
+      "slug": "silicon-scb-dry",
+      "expected": {
+        "seo_title": "SC(B)12 / SC(B)14 / SC(B)18 Silicon Steel Laminated Dry-Type Transformer",
+        "seo_description": "SC(B)12 / SC(B)14 / SC(B)18 Silicon Steel Laminated Dry-Type Transformer from Longxiang Electric. Contact us to discuss project requirements or request a quotation.",
+        "short_desc_ar": "محول جاف من صفائح الفولاذ السيليكوني SC(B)12 / SC(B)14 / SC(B)18 مناسب لـ غرف التوزيع الداخلية والمباني العامة والمصانع والمجمعات التجارية والمواقع التي تفضل المعدات الخالية من الزيت، مع تكوين سعة 30-2500 kVA، خيارات جهد تشمل فئة 10kV، فئة 6kV وفئة توزيع 6-10kV، مرجع النموذج سلسلة SC(B)12 / SC(B)14 / SC(B)18، قلب مصفح من الفولاذ السيليكوني، تبريد AN / AF اختياري."
+      },
+      "target": {
+        "seo_title": "SC(B)12 / SC(B)14 / SC(B)18 Silicon Steel Laminated Dry | Longxiang",
+        "seo_description": "SC(B)12 / SC(B)14 / SC(B)18 Silicon Steel Laminated Dry-Type Transformer for indoor distribution rooms, public buildings, factories, commercial complexes...",
+        "short_desc_ar": "محول جاف من صفائح الفولاذ السيليكوني SC(B)12 / SC(B)14 / SC(B)18 مناسب لـ غرف التوزيع الداخلية والمباني العامة والمصانع والمجمعات التجارية والمواقع التي تفضل المعدات الخالية من الزيت، مع تكوين سعة 30-2500 kVA، خيارات جهد تشمل 10kV class, 6kV class and 6-10kV distribution class، مرجع النموذج SC(B)12 / SC(B)14 / SC(B)18 Series، Silicon steel laminated core، تبريد AN / AF optional."
+      }
+    },
+    {
+      "row_id": 41,
+      "slug": "silicon-smrl-wound-core",
+      "expected": {
+        "seo_title": "S13 / S20 / S22-M.RL Oil-Immersed 3D Wound Core Distribution Transformer",
+        "seo_description": "S13 / S20 / S22-M.RL Oil-Immersed 3D Wound Core Distribution Transformer from Longxiang Electric. Contact us to discuss project requirements or request a quotation.",
+        "short_desc_ar": "محول توزيع مغمور بالزيت بقلب ملفوف ثلاثي الأبعاد S13 / S20 / S22-M.RL مناسب لـ المناطق الصناعية والمحطات الفرعية والمصانع وغرف التوزيع، مع تكوين سعة 30-2500 kVA، خيارات جهد تشمل فئة 10kV، فئة 6kV وفئة توزيع 6-10kV، مرجع النموذج سلسلة S13 / S20 / S22-M.RL، قلب ملفوف ثلاثي الأبعاد (3D) من الفولاذ السيليكوني، تبريد ONAN."
+      },
+      "target": {
+        "seo_title": "S13 / S20 / S22-M.RL Oil-Immersed 3D Wound Core | Longxiang",
+        "seo_description": "S13 / S20 / S22-M.RL Oil-Immersed 3D Wound Core Distribution Transformer for industrial parks, utility substations, factories and distribution rooms, with...",
+        "short_desc_ar": "محول توزيع مغمور بالزيت بقلب ملفوف ثلاثي الأبعاد S13 / S20 / S22-M.RL مناسب لـ المناطق الصناعية والمحطات الفرعية والمصانع وغرف التوزيع، مع تكوين سعة 30-2500 kVA، خيارات جهد تشمل 10kV class, 6kV class and 6-10kV distribution class، مرجع النموذج S13 / S20 / S22-M.RL Series، Silicon steel 3D wound core، تبريد ONAN."
+      }
+    },
+    {
+      "row_id": 42,
+      "slug": "silicon-smrl-anti-short",
+      "expected": {
+        "seo_title": "S13 / S20 / S22-M.RL Anti-Short-Circuit 3D Wound Core Transformer",
+        "seo_description": "S13 / S20 / S22-M.RL Anti-Short-Circuit 3D Wound Core Transformer from Longxiang Electric. Contact us to discuss project requirements or request a quotation.",
+        "short_desc_ar": "محول S13 / S20 / S22-M.RL بقلب ملفوف ثلاثي الأبعاد مقاوم لقصر الدائرة مناسب لـ المناطق الصناعية والمحطات الفرعية والمصانع وغرف التوزيع، مع تكوين سعة 30-2500 kVA، خيارات جهد تشمل فئة 10kV وفئة 6kV، مرجع النموذج سلسلة S13 / S20 / S22-M.RL المقاومة للقصر، قلب ملفوف ثلاثي الأبعاد (3D) من الفولاذ السيليكوني، تبريد ONAN."
+      },
+      "target": {
+        "seo_title": "S13 / S20 / S22-M.RL Anti-Short-Circuit 3D Wound Core | Longxiang",
+        "seo_description": "S13 / S20 / S22-M.RL Anti-Short-Circuit 3D Wound Core Transformer for industrial parks, utility substations, factories and distribution rooms, with capacity...",
+        "short_desc_ar": "محول S13 / S20 / S22-M.RL بقلب ملفوف ثلاثي الأبعاد مقاوم لقصر الدائرة مناسب لـ المناطق الصناعية والمحطات الفرعية والمصانع وغرف التوزيع، مع تكوين سعة 30-2500 kVA، خيارات جهد تشمل 10kV class and 6kV class، مرجع النموذج S13 / S20 / S22-M.RL Anti-Short-Circuit Series، Silicon steel 3D wound core، تبريد ONAN."
+      }
+    },
+    {
+      "row_id": 44,
+      "slug": "silicon-s13-vegetable-oil-high-overload",
+      "expected": {
+        "seo_title": "S-M Vegetable Oil High-Overload Distribution Transformer | Longxiang",
+        "seo_description": "S-M Vegetable Oil High-Overload Distribution Transformer from Longxiang Electric. Contact us to discuss project requirements or request a quotation.",
+        "short_desc_ar": "محول توزيع S-M بزيت نباتي وقدرة تحمل حمل زائد عالية مناسب لـ المناطق الصناعية والمحطات الفرعية والمصانع وغرف التوزيع، مع تكوين سعة 30-2500 kVA، خيارات جهد تشمل فئة 10kV، مرجع النموذج سلسلة S-M بزيت نباتي وتحمل حمل زائد مرتفع، محول توزيع مغمور بالزيت، تبريد ONAN."
+      },
+      "target": {
+        "seo_title": "S-M Vegetable Oil High-Overload Distribution | Longxiang",
+        "seo_description": "S-M Vegetable Oil High-Overload Distribution Transformer for industrial parks, utility substations, factories and distribution rooms, with capacity...",
+        "short_desc_ar": "محول توزيع S-M بزيت نباتي وقدرة تحمل حمل زائد عالية مناسب لـ المناطق الصناعية والمحطات الفرعية والمصانع وغرف التوزيع، مع تكوين سعة 30-2500 kVA، خيارات جهد تشمل 10kV class، مرجع النموذج S-M Vegetable Oil High-Overload Series، Oil-immersed distribution transformer، تبريد ONAN."
+      }
+    },
+    {
+      "row_id": 45,
+      "slug": "amorphous-scbh-dry",
+      "expected": {
+        "seo_title": "SC(B)H15 / SC(B)H17 / SC(B)H19 Dry-Type Amorphous Alloy Core Transformer",
+        "seo_description": "SC(B)H15 / SC(B)H17 / SC(B)H19 Dry-Type Amorphous Alloy Core Transformer from Longxiang Electric. Contact us to discuss project requirements or request a quotation.",
+        "short_desc_ar": "محول جاف بقلب من سبيكة غير متبلورة SC(B)H15 / SC(B)H17 / SC(B)H19 مناسب لـ غرف التوزيع الداخلية والمباني العامة والمصانع والمجمعات التجارية والمواقع التي تفضل المعدات الخالية من الزيت، مع تكوين سعة 30-2500 kVA، خيارات جهد تشمل فئة 10kV، فئة 6kV وفئة توزيع 6-10kV، مرجع النموذج سلسلة SC(B)H15 / SC(B)H17 / SC(B)H19، قلب من سبيكة غير متبلورة، تبريد AN / AF اختياري."
+      },
+      "target": {
+        "seo_title": "SC(B)H15 / SC(B)H17 / SC(B)H19 Dry-Type Amorphous Alloy | Longxiang",
+        "seo_description": "SC(B)H15 / SC(B)H17 / SC(B)H19 Dry-Type Amorphous Alloy Core Transformer for indoor distribution rooms, public buildings, factories, commercial complexes...",
+        "short_desc_ar": "محول جاف بقلب من سبيكة غير متبلورة SC(B)H15 / SC(B)H17 / SC(B)H19 مناسب لـ غرف التوزيع الداخلية والمباني العامة والمصانع والمجمعات التجارية والمواقع التي تفضل المعدات الخالية من الزيت، مع تكوين سعة 30-2500 kVA، خيارات جهد تشمل 10kV class, 6kV class and 6-10kV distribution class، مرجع النموذج SC(B)H15 / SC(B)H17 / SC(B)H19 Series، Amorphous alloy core، تبريد AN / AF optional."
+      }
+    },
+    {
+      "row_id": 46,
+      "slug": "amorphous-dgh-furnace",
+      "expected": {
+        "seo_description": "DGH15/17/19 Series Dry-Type Amorphous Alloy Furnace Transformer from Longxiang Electric. Contact us to discuss project requirements or request a quotation.",
+        "short_desc_ar": "محول فرن جاف من السبيكة غير المتبلورة سلسلة DGH مناسب لـ تغذية أفران صناعية، مع تكوين سعة حسب متطلبات المشروع، خيارات جهد تشمل فئة جهد مخصصة، مرجع النموذج سلسلة DGH15/17/19، قلب من سبيكة غير متبلورة."
+      },
+      "target": {
+        "seo_description": "DGH15/17/19 Series Dry-Type Amorphous Alloy Furnace Transformer for Industrial furnace power supply, with capacity configuration of Project-specific, voltage...",
+        "short_desc_ar": "محول فرن جاف من السبيكة غير المتبلورة سلسلة DGH مناسب لـ Industrial furnace power supply، مع تكوين سعة Project-specific، خيارات جهد تشمل Customized voltage class، مرجع النموذج DGH15/17/19 Series، Amorphous alloy core."
+      }
+    },
+    {
+      "row_id": 47,
+      "slug": "amorphous-sbh-mrl-wound-core",
+      "expected": {
+        "seo_title": "S(B)H21/25 - M.RL Oil-Immersed Amorphous Alloy 3D Wound Core Transformer",
+        "seo_description": "S(B)H21/25 - M.RL Oil-Immersed Amorphous Alloy 3D Wound Core Transformer from Longxiang Electric. Contact us to discuss project requirements or request a quotation.",
+        "short_desc_ar": "محول مغمور بالزيت بقلب ملفوف ثلاثي الأبعاد من السبيكة غير المتبلورة S(B)H21/25-M.RL مناسب لـ المناطق الصناعية والمحطات الفرعية والمصانع وغرف التوزيع، مع تكوين سعة 30-2500 kVA، خيارات جهد تشمل فئة 10kV، مرجع النموذج سلسلة S(B)H21/25-M.RL، قلب ملفوف ثلاثي الأبعاد (3D) من سبيكة غير متبلورة، تبريد ONAN."
+      },
+      "target": {
+        "seo_title": "S(B)H21/25-M.RL Oil-Immersed Amorphous Alloy 3D Wound Core | Longxiang",
+        "seo_description": "S(B)H21/25-M.RL Oil-Immersed Amorphous Alloy 3D Wound Core Transformer for industrial parks, utility substations, factories and distribution rooms, with...",
+        "short_desc_ar": "محول مغمور بالزيت بقلب ملفوف ثلاثي الأبعاد من السبيكة غير المتبلورة S(B)H21/25-M.RL مناسب لـ المناطق الصناعية والمحطات الفرعية والمصانع وغرف التوزيع، مع تكوين سعة 30-2500 kVA، خيارات جهد تشمل 10kV class، مرجع النموذج S(B)H21/25-M.RL Series، Amorphous alloy 3D wound core، تبريد ONAN."
+      }
+    },
+    {
+      "row_id": 48,
+      "slug": "amorphous-sbh15-m",
+      "expected": {
+        "seo_title": "S(S)H15/21/25-M NX3/2/1 Oil-Immersed Amorphous Alloy Distribution Transformer",
+        "seo_description": "S(S)H15/21/25-M NX3/2/1 Oil-Immersed Amorphous Alloy Distribution Transformer from Longxiang Electric. Contact us to discuss project requirements or request a quotation.",
+        "short_desc_ar": "محول توزيع مغمور بالزيت بقلب غير متبلور S(S)H15/21/25-M NX3/2/1 مناسب لـ المناطق الصناعية والمحطات الفرعية والمصانع وغرف التوزيع، مع تكوين سعة 30-2500 kVA، خيارات جهد تشمل فئة 10kV، مرجع النموذج سلسلة S(S)H15/21/25-M NX3/2/1، قلب من سبيكة غير متبلورة، تبريد ONAN."
+      },
+      "target": {
+        "seo_title": "S(S)H15/21/25-M NX3/2/1 Oil-Immersed Amorphous Alloy Distribution | Longxiang",
+        "seo_description": "S(S)H15/21/25-M NX3/2/1 Oil-Immersed Amorphous Alloy Distribution Transformer for industrial parks, utility substations, factories and distribution rooms, with capacity...",
+        "short_desc_ar": "محول توزيع مغمور بالزيت بقلب غير متبلور S(S)H15/21/25-M NX3/2/1 مناسب لـ المناطق الصناعية والمحطات الفرعية والمصانع وغرف التوزيع، مع تكوين سعة 30-2500 kVA، خيارات جهد تشمل 10kV class، مرجع النموذج S(S)H15/21/25-M NX3/2/1 Series، Amorphous alloy core، تبريد ONAN."
+      }
+    },
+    {
+      "row_id": 53,
+      "slug": "pv-combiner-box",
+      "expected": {
+        "seo_description": "Review product information for PV Combiner Box from Longxiang Electric. Contact us to discuss project requirements or request a quotation.",
+        "short_desc_ar": "صندوق تجميع كهروضوئي مناسب لـ مشروعات الطاقة الكهروضوئية المتصلة بالشبكة التي تحتاج إلى توزيع أو قياس أو تجميع أو حماية ربط بين العواكس وجانب الشبكة، مع تكوين قدرة كهروضوئية 100-250 kW، خيارات جهد تشمل 690V AC، 400V AC و690VAC، مرجع النموذج 100 / 150 / 200 / 250 kW، حماية IP65."
+      },
+      "target": {
+        "seo_description": "PV Combiner Box for grid-connected photovoltaic projects that need AC distribution, metering, combiner or grid-connection protection between inverters and...",
+        "short_desc_ar": "صندوق تجميع كهروضوئي مناسب لـ مشروعات الطاقة الكهروضوئية المتصلة بالشبكة التي تحتاج إلى توزيع أو قياس أو تجميع أو حماية ربط بين العواكس وجانب الشبكة، مع تكوين قدرة كهروضوئية 100-250 kW، خيارات جهد تشمل 690V AC, 400V AC and 690VAC، مرجع النموذج 100 / 150 / 200 / 250 kW، حماية IP65."
+      }
+    },
+    {
+      "row_id": 54,
+      "slug": "grid-connected-pv-cabinet",
+      "expected": {
+        "seo_description": "Review product information for Grid-Connected PV Cabinet from Longxiang Electric. Contact us to discuss project requirements or request a quotation.",
+        "short_desc_ar": "خزانة ربط كهروضوئية بالشبكة مناسب لـ مشروعات الطاقة الكهروضوئية المتصلة بالشبكة التي تحتاج إلى توزيع أو قياس أو تجميع أو حماية ربط بين العواكس وجانب الشبكة، مع تكوين قدرة كهروضوئية 100-800 kW، خيارات جهد تشمل 690V AC، 400V AC و690VAC، مرجع النموذج 100 / 200 / 300 / 400 / 500 / 600 / 800 kW، حماية IP30 / IP65."
+      },
+      "target": {
+        "seo_description": "Grid-Connected PV Cabinet for grid-connected photovoltaic projects that need AC distribution, metering, combiner or grid-connection protection between...",
+        "short_desc_ar": "خزانة ربط كهروضوئية بالشبكة مناسب لـ مشروعات الطاقة الكهروضوئية المتصلة بالشبكة التي تحتاج إلى توزيع أو قياس أو تجميع أو حماية ربط بين العواكس وجانب الشبكة، مع تكوين قدرة كهروضوئية 100-800 kW، خيارات جهد تشمل 690V AC, 400V AC and 690VAC، مرجع النموذج 100 / 200 / 300 / 400 / 500 / 600 / 800 kW، حماية IP30 / IP65."
+      }
+    }
+  ]
+}
