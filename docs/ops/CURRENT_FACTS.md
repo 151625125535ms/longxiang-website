@@ -1,6 +1,6 @@
 # 当前事实清单
 
-更新时间：2026-07-13 21:35（Asia/Shanghai）
+更新时间：2026-07-13 19:56（Asia/Shanghai）
 用途：记录当前线上真实状态，作为后续修改、部署、SEO/i18n 调整和后台内容维护的对照基线。
 更新原则：只记录已经通过本地、GitHub、服务器或真实 HTTP 结果核验过的事实；未核验项必须明确标注。
 
@@ -8,6 +8,7 @@
 
 - 本地分支：`main`
 - 2026-07-13 产品详情图库代码提交 `e5ddf04`（`实现产品详情多图图库闭环`）已推送至 GitHub；生产服务器已通过 `git pull --ff-only origin main` 从 `25eeb82` 快进到该提交。
+- 2026-07-13 图库切换修复提交 `0ac95b8`（`修复产品图库脚本缓存导致无法切图`）已推送并部署；根因是公共壳层把 `product-detail.js` 改写为旧的 30 天 immutable 缓存版本，修复后仅产品详情脚本使用 `20260713-product-gallery-interaction-fix`。
 - 生产使用 `pm2 reload longxiang-website --update-env` 完成无停机重载，进程保持 `online`；部署后内网和公网健康接口均返回成功。
 - 本次提交未修改依赖、数据库结构或迁移，因此未执行 `npm install`，也未写入生产数据库、生产上传目录或产品图库数据。
 - 生产服务器工作区在部署前后均无 tracked 改动。
@@ -47,6 +48,7 @@
 - 生产 `node scripts/generate-sitemap.js --dry-run` URL 数：`184`
 - 公网 `https://www.lxenelectric.com/api/health` 返回 `HTTP 200`，`ok=true`、`sqlite=true`
 - 公网 `en/ar/fr/ru` 产品详情已通过真实浏览器验收：页面成功水合，单图产品无缩略图和切换控件，阿语为 RTL，`390x844` 视口无横向溢出，未发现页面脚本错误或图片加载失败
+- 公网多图产品 `segmented-arc-quenching-surge-arrester` 已通过真实交互验收：3 张图片的缩略图点击和上下切换按钮均能更新主图、选中态与计数；四语和手机视口均通过
 
 ## 多语言与 SEO
 
@@ -71,10 +73,10 @@
 | products | 53 | 其中 `published=38`，`deleted=15` |
 | categories | 17 |  |
 | certifications | 76 | 全部 `published` |
-| content_blocks | 14 | 全部 `published` |
-| assets | 213 |  |
-| product_media | 53 | 其中非封面媒体 `0` |
-| inquiries | 7 |  |
+| content_blocks | 15 |  |
+| assets | 217 |  |
+| product_media | 55 | 其中非封面媒体 `2` |
+| inquiries | 8 |  |
 
 当前关键表：
 
@@ -96,7 +98,7 @@
 - 生产 `products` 表没有 `image` 字段。
 - 产品图片当前以 `product_media.path` 为主。
 - 产品详情图库继续使用 `product_media` 作为唯一数据源，不新增图库字段或第二套关系；封面为 `is_cover=1, sort_order=1`，图库从 2 开始连续排序。
-- 2026-07-13 只读复核：38 个 published 产品均为单图，拥有非封面媒体的 published 产品为 0。不能从 `published=38` 与媒体总数推导该事实，后续仍需直接查询非封面媒体。
+- 2026-07-13 生产试点后只读复核：38 个 published 产品中，`segmented-arc-quenching-surge-arrester` 有 3 张图片（1 张封面、2 张图库图），其余 37 个产品仍为单图。
 - `products` 已有 `fr`、`ru` 字段族，例如 `name_fr`、`name_ru`、`description_fr`、`description_ru`、`seo_title_fr`、`seo_title_ru`。
 - `certifications` 已有 `fr`、`ru` 字段族。
 
@@ -112,8 +114,9 @@
 - invalid product_media paths：`0`
 - non-upload product_media paths：`23`
 - orphan upload files：`9`
-- `assets.entity_id IS NULL`：`211`
-- `product_media.asset_id IS NULL`：`1 / 53 (1.89%)`
+- 产品图库派生缩略图缓存文件：`3`
+- `assets.entity_id IS NULL`：`213`
+- `product_media.asset_id IS NULL`：`1 / 55 (1.82%)`
 
 解释：
 
@@ -139,7 +142,7 @@
 - 同一组真实 PNG 最终复测：图库首屏新增传输为 `42668` bytes；单图 LCP `144ms`，多图 LCP `132ms`。Playwright 后台及前台 7/7 通过，桌面、手机、四语、RTL、无 JavaScript 和单图场景均达到验收目标。
 - `npm run images:audit` 会单独统计产品图库派生缓存文件，并将专用缓存目录排除在孤儿上传文件检查之外；临时干净数据库验证未产生资源引用缺口或孤儿缓存误报。
 - 现有本地业务数据库的资源验证仍保留执行前噪音基线：2 个媒体路径缺少 active asset、1 个产品 owner 引用缺口、3 个过期引用。图库改动不得新增或替换这些缺口；不为本任务顺手修改本地业务数据。
-- 当前图库代码能力已达到状态 B（代码已部署并完成生产单图无回归验收）；生产数据仍为 38 个单图产品、0 个图库产品。代码能力部署与生产多图客户验收是两个独立阶段，生产图库试点仍须单独授权具体产品、图片、顺序和数据库写入。
+- 当前图库代码能力已达到状态 B，并已进入生产多图试点：`segmented-arc-quenching-surge-arrester` 的 3 图交互已通过自动化真实浏览器技术验收。用户侧确认修复结果前暂不标记为状态 C；继续为其他产品写入图库数据仍须单独确认产品、图片和顺序。
 
 ## 备份与监控
 
@@ -153,8 +156,8 @@
 ## 当前已知风险
 
 - 服务器 SSH 默认 Node/npm 与项目 engines 不一致；直接用默认 `node` 跑依赖 `better-sqlite3` 的脚本会失败。部署、排障和手工脚本执行时必须显式进入 Node 24 环境。
-- 资源关联尚未完全闭合：`assets.entity_id IS NULL=211`，`product_media.asset_id IS NULL=1/53`。当前不影响已核验的图片路径健康，但属于后续治理项。
-- 产品图库代码已部署，但生产多图试点尚未授权；未获得明确生产写库授权前不得为生产产品添加图库图片，因此当前尚未达到状态 C（生产多图客户验收完成）。
+- 资源关联尚未完全闭合：`assets.entity_id IS NULL=213`，`product_media.asset_id IS NULL=1/55`。图库试点新增图片没有产生产品 owner 引用缺口或过期引用；剩余缺口仍是此前产品 12 的旧路径关联，当前不影响已核验的图片路径健康。
+- 生产多图试点已完成技术验收，用户侧最终确认仍待完成；在扩大到其他产品前仍需逐项确认图片内容和顺序。
 - 搜索引擎控制台状态本次未核验；Google Search Console、Bing Webmaster Tools 的提交和收录状态不应从代码或 sitemap 状态反推。
 - 本清单是时间点事实，不代表永久事实。每次语言、SEO、产品数据、上传链路、部署环境发生变化后都应更新。
 
