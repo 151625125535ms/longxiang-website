@@ -6,6 +6,19 @@ const { chromium } = require('@playwright/test');
 const ROOT = path.join(__dirname, '..');
 const PORT = 3897;
 const BASE_URL = `http://127.0.0.1:${PORT}`;
+const ADMIN_CACHE_VERSION = '20260713-about-visual';
+
+function svgAsset(width, height, color) {
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><rect width="${width}" height="${height}" fill="${color}"/></svg>`;
+}
+
+const TEST_ASSETS = {
+    '/test-assets/capability-original.svg': svgAsset(640, 480, '#547aa5'),
+    '/test-assets/factory-original.svg': svgAsset(960, 640, '#9c6644'),
+    '/test-assets/dimension-320x180.svg': svgAsset(320, 180, '#3a86ff'),
+    '/test-assets/dimension-450x300.svg': svgAsset(450, 300, '#ef476f'),
+    '/test-assets/dimension-slow-240x160.svg': svgAsset(240, 160, '#06d6a0')
+};
 
 function contentType(filePath) {
     const ext = path.extname(filePath).toLowerCase();
@@ -22,6 +35,15 @@ function contentType(filePath) {
 function startStaticServer() {
     const server = http.createServer(function (req, res) {
         const url = new URL(req.url, BASE_URL);
+        if (TEST_ASSETS[url.pathname]) {
+            const sendAsset = function () {
+                res.writeHead(200, { 'Content-Type': 'image/svg+xml; charset=utf-8' });
+                res.end(TEST_ASSETS[url.pathname]);
+            };
+            if (url.pathname.indexOf('dimension-slow') !== -1) setTimeout(sendAsset, 650);
+            else sendAsset();
+            return;
+        }
         let filePath = path.join(ROOT, decodeURIComponent(url.pathname.replace(/^\/+/, '')));
         if (url.pathname === '/') filePath = path.join(ROOT, 'admin', 'index.html');
         if (!filePath.startsWith(ROOT) || !fs.existsSync(filePath) || fs.statSync(filePath).isDirectory()) {
@@ -188,7 +210,58 @@ const blocks = {
             }
         }
     },
-    about: { slug: 'about-us', version: 1, body_json: { hero: { title: 'About' } } },
+    'about-us': {
+        slug: 'about-us',
+        version: 1,
+        body_json: {
+            hero: { title: 'About', untouched: 'keep-hero' },
+            untouchedModule: { marker: 'keep-about-data' },
+            capability: {
+                kicker: 'Project Delivery',
+                title: 'End-to-end capability for distribution projects',
+                text: 'English capability text.',
+                cards: [
+                    {
+                        title: 'Engineering',
+                        text: 'English engineering text.',
+                        image: { src: 'test-assets/capability-original.svg', alt: 'Engineering capability', width: 640, height: 480 }
+                    },
+                    {
+                        title: 'Manufacturing',
+                        text: 'English manufacturing text.',
+                        image: { src: 'test-assets/capability-original.svg', alt: 'Manufacturing capability', width: 640, height: 480 }
+                    }
+                ],
+                cardsPatchFr: {
+                    index_0: { titleFr: 'Ingénierie', textFr: 'Texte français.', image: { altFr: 'Capacité d’ingénierie' } }
+                },
+                cardsPatchRu: {
+                    index_0: { titleRu: 'Проектирование', textRu: 'Русский текст.', image: { altRu: 'Инженерные возможности' } }
+                }
+            },
+            factory: {
+                kicker: 'Factory Evidence',
+                title: 'Real production scenes, not stock imagery',
+                text: 'English factory text.',
+                images: [
+                    {
+                        caption: 'Transformer workshop',
+                        image: { src: 'test-assets/factory-original.svg', alt: 'Transformer workshop', width: 960, height: 640 }
+                    },
+                    {
+                        caption: 'Switchgear line',
+                        image: { src: 'test-assets/factory-original.svg', alt: 'Switchgear line', width: 960, height: 640 }
+                    }
+                ],
+                imagesPatchFr: {
+                    index_0: { captionFr: 'Atelier de transformateurs', image: { altFr: 'Atelier de transformateurs' } }
+                },
+                imagesPatchRu: {
+                    index_0: { captionRu: 'Цех трансформаторов', image: { altRu: 'Цех трансформаторов' } }
+                }
+            }
+        }
+    },
     contact: {
         slug: 'contact',
         version: 1,
@@ -253,6 +326,24 @@ async function fieldSnapshot(page) {
     });
 }
 
+async function selectVisualAsset(page, fieldPath, assetId) {
+    const field = page.locator(`[data-visual-field="${fieldPath}"]`);
+    const fieldId = await field.getAttribute('id');
+    if (!fieldId) throw new Error(`Visual asset field has no id: ${fieldPath}`);
+    await page.click(`[data-visual-select-asset="${fieldId}"]`);
+    await page.waitForSelector('#asset-picker-modal.show [data-asset-picker-id]', { timeout: 10000 });
+    await page.click(`#asset-picker-modal [data-asset-picker-id="${assetId}"]`);
+    await page.click('#asset-picker-confirm');
+}
+
+async function waitForVisualSave(page) {
+    await page.waitForFunction(function () {
+        var status = document.querySelector('#visual-save-status');
+        var button = document.querySelector('[data-visual-save]');
+        return status && status.textContent.indexOf('保存中') === -1 && button && !button.disabled;
+    }, null, { timeout: 10000 });
+}
+
 function assertField(fields, path, text) {
     const field = fields.find((item) => item.path === path);
     if (!field) {
@@ -268,12 +359,25 @@ async function main() {
     let capturedSolutionsSave = null;
     let capturedContactSave = null;
     let capturedGlobalShellSave = null;
+    const capturedAboutSaves = [];
     const browser = await chromium.launch({ headless: true });
     try {
         const page = await browser.newPage();
         await page.route('**/api/**', (route) => route.fulfill({ json: { ok: true, data: [] } }));
         await page.route('**/api/admin/**', (route) => route.fulfill({ json: { ok: true, data: [], meta: { page: 1, pageSize: 20, total: 0 } } }));
         await page.route('**/api/auth/verify', (route) => route.fulfill({ json: { ok: true, username: 'admin' } }));
+        await page.route('**/api/admin/assets**', (route) => route.fulfill({
+            json: {
+                ok: true,
+                data: [
+                    { id: 'capability-good', path: 'test-assets/dimension-320x180.svg', original_name: 'Capability replacement', mime_type: 'image/svg+xml', module: 'test', usage_count: 0 },
+                    { id: 'factory-good', path: 'test-assets/dimension-450x300.svg', original_name: 'Factory replacement', mime_type: 'image/svg+xml', module: 'test', usage_count: 0 },
+                    { id: 'slow-good', path: 'test-assets/dimension-slow-240x160.svg', original_name: 'Slow replacement', mime_type: 'image/svg+xml', module: 'test', usage_count: 0 },
+                    { id: 'broken', path: 'test-assets/missing.svg', original_name: 'Broken replacement', mime_type: 'image/svg+xml', module: 'test', usage_count: 0 }
+                ],
+                meta: { page: 1, pageSize: 20, total: 4 }
+            }
+        }));
         await page.route('**/api/admin/content-blocks/*', async function (route) {
             const request = route.request();
             const url = new URL(request.url());
@@ -283,9 +387,11 @@ async function main() {
                 if (slug === 'solutions') capturedSolutionsSave = payload;
                 if (slug === 'contact') capturedContactSave = payload;
                 if (slug === 'global-shell') capturedGlobalShellSave = payload;
+                if (slug === 'about-us') capturedAboutSaves.push(clone(payload));
                 const block = apiBlock(slug);
                 block.version += 1;
                 block.body_json = payload.body_json;
+                blocks[slug] = clone(block);
                 return route.fulfill({ json: { ok: true, data: block } });
             }
             return route.fulfill({ json: { ok: true, data: apiBlock(slug) } });
@@ -356,6 +462,189 @@ async function main() {
         const hasArrayMutationsInRu = await page.locator('#visual-editor-content [data-visual-array-action="add"]').count();
         if (hasArrayMutationsInRu !== 0) throw new Error('Ru patch mode still exposes array structure mutation controls.');
 
+        await clickVisualModule(page, 'solutions', 'overview');
+        await switchLanguage(page, 'default');
+        if (await page.locator('#visual-editor-content [data-visual-array-action="add"]').count() !== 1) {
+            throw new Error('Unlocked arrays must keep default-language structure controls.');
+        }
+        await switchLanguage(page, 'ar');
+        if (await page.locator('#visual-editor-content [data-visual-array-action="add"]').count() !== 1) {
+            throw new Error('Unlocked arrays must keep their existing Arabic structure controls.');
+        }
+        await switchLanguage(page, 'fr');
+        if (await page.locator('#visual-editor-content [data-visual-array-action="add"]').count() !== 0) {
+            throw new Error('Unlocked arrays must remain structure-locked in Fr patch mode.');
+        }
+
+        await clickVisualModule(page, 'about', 'capability');
+        await switchLanguage(page, 'default');
+        fields = await fieldSnapshot(page);
+        assertField(fields, 'capability.kicker', 'Project Delivery');
+        assertField(fields, 'capability.title', 'End-to-end capability');
+        assertField(fields, 'capability.cards.0.title', 'Engineering');
+        assertField(fields, 'capability.cards.0.image.src', 'capability-original.svg');
+        const capabilityAsset = page.locator('[data-visual-field="capability.cards.0.image.src"]');
+        if (await capabilityAsset.getAttribute('data-visual-sync-dimensions') !== 'true') {
+            throw new Error('Capability image field must opt into dimension synchronization.');
+        }
+        for (const languageKey of ['default', 'ar', 'fr', 'ru']) {
+            await switchLanguage(page, languageKey);
+            const structureActions = await page.locator('#visual-editor-content [data-visual-array-action]').count();
+            if (structureActions !== 0) throw new Error(`Capability structure controls are exposed in ${languageKey}.`);
+        }
+        await switchLanguage(page, 'default');
+        await page.evaluate(function () {
+            var button = document.createElement('button');
+            button.type = 'button';
+            button.setAttribute('data-visual-array-action', 'remove');
+            button.setAttribute('data-page', 'about');
+            button.setAttribute('data-module', 'capabilityCards');
+            button.setAttribute('data-index', '0');
+            button.id = 'forced-capability-remove';
+            document.querySelector('#visual-editor-content').appendChild(button);
+        });
+        await page.locator('#forced-capability-remove').evaluate(function (button) { button.click(); });
+        if (await page.locator('[data-visual-field="capability.cards.0.title"]').count() !== 1 ||
+            await page.locator('[data-visual-field="capability.cards.1.title"]').count() !== 1) {
+            throw new Error('Capability array structure changed through a forced mutation event.');
+        }
+
+        await switchLanguage(page, 'ar');
+        fields = await fieldSnapshot(page);
+        assertField(fields, 'capability.cards.0.titleAr');
+        assertField(fields, 'capability.cards.0.image.altAr');
+        await page.fill('[data-visual-field="capability.cards.0.titleAr"]', 'قدرة هندسية محدثة');
+        await page.fill('[data-visual-field="capability.cards.0.image.altAr"]', 'وصف هندسي محدث');
+        await page.click('[data-visual-save]');
+        await waitForVisualSave(page);
+        let savedAbout = capturedAboutSaves[capturedAboutSaves.length - 1].body_json;
+        if (savedAbout.capability.cards[0].title !== 'Engineering' || savedAbout.capability.cards[0].titleAr !== 'قدرة هندسية محدثة') {
+            throw new Error('Arabic capability save overwrote the neutral title or missed titleAr.');
+        }
+        if (savedAbout.factory.title !== 'Real production scenes, not stock imagery' || savedAbout.untouchedModule.marker !== 'keep-about-data') {
+            throw new Error('Capability save did not preserve factory or unrelated About data.');
+        }
+
+        await switchLanguage(page, 'fr');
+        fields = await fieldSnapshot(page);
+        assertField(fields, 'capability.cardsPatchFr.index_0.titleFr', 'Ingénierie');
+        assertField(fields, 'capability.cardsPatchFr.index_0.image.altFr', 'Capacité');
+        await page.fill('[data-visual-field="capability.cardsPatchFr.index_0.titleFr"]', 'Ingénierie mise à jour');
+        await page.click('[data-visual-save]');
+        await waitForVisualSave(page);
+        savedAbout = capturedAboutSaves[capturedAboutSaves.length - 1].body_json;
+        if (savedAbout.capability.cards[0].title !== 'Engineering' || savedAbout.capability.cardsPatchFr.index_0.titleFr !== 'Ingénierie mise à jour') {
+            throw new Error('Fr capability patch save overwrote the neutral card or missed cardsPatchFr.');
+        }
+        await switchLanguage(page, 'ru');
+        fields = await fieldSnapshot(page);
+        assertField(fields, 'capability.cardsPatchRu.index_0.titleRu', 'Проектирование');
+        assertField(fields, 'capability.cardsPatchRu.index_0.image.altRu', 'Инженерные');
+
+        await switchLanguage(page, 'default');
+        const beforePendingSaveCount = capturedAboutSaves.length;
+        await selectVisualAsset(page, 'capability.cards.0.image.src', 'slow-good');
+        await page.waitForFunction(function () {
+            var field = document.querySelector('[data-visual-field="capability.cards.0.image.src"]');
+            return field && field.getAttribute('data-visual-dimension-state') === 'pending';
+        }, null, { timeout: 3000 });
+        if (!(await page.locator('[data-visual-save]').isDisabled())) {
+            throw new Error('Visual save must be disabled while image dimensions are pending.');
+        }
+        await page.locator('[data-visual-save]').evaluate(function (button) {
+            button.disabled = false;
+            button.click();
+        });
+        await page.waitForTimeout(120);
+        if (capturedAboutSaves.length !== beforePendingSaveCount) {
+            throw new Error('A forced save bypassed the pending image dimension guard.');
+        }
+        await page.waitForFunction(function () {
+            var field = document.querySelector('[data-visual-field="capability.cards.0.image.src"]');
+            return field && field.getAttribute('data-visual-dimension-state') === 'ready' && field.value.indexOf('dimension-slow') !== -1;
+        }, null, { timeout: 5000 });
+        await page.click('[data-visual-save]');
+        await waitForVisualSave(page);
+        savedAbout = capturedAboutSaves[capturedAboutSaves.length - 1].body_json;
+        if (savedAbout.capability.cards[0].image.src !== 'test-assets/dimension-slow-240x160.svg' ||
+            savedAbout.capability.cards[0].image.width !== 240 ||
+            savedAbout.capability.cards[0].image.height !== 160) {
+            throw new Error('Capability image save did not persist numeric natural dimensions.');
+        }
+
+        await selectVisualAsset(page, 'capability.cards.0.image.src', 'broken');
+        await page.waitForFunction(function () {
+            var field = document.querySelector('[data-visual-field="capability.cards.0.image.src"]');
+            return field && field.getAttribute('data-visual-dimension-state') === 'error';
+        }, null, { timeout: 5000 });
+        const failedFieldValue = await page.locator('[data-visual-field="capability.cards.0.image.src"]').inputValue();
+        if (failedFieldValue !== 'test-assets/dimension-slow-240x160.svg') {
+            throw new Error('Failed image dimension read replaced the previously valid source.');
+        }
+        const beforeFailedSaveCount = capturedAboutSaves.length;
+        await page.locator('[data-visual-save]').evaluate(function (button) {
+            button.disabled = false;
+            button.click();
+        });
+        await page.waitForTimeout(120);
+        if (capturedAboutSaves.length !== beforeFailedSaveCount) {
+            throw new Error('A forced save bypassed the image dimension error guard.');
+        }
+        const capabilityFieldId = await page.locator('[data-visual-field="capability.cards.0.image.src"]').getAttribute('id');
+        await page.click(`[data-visual-clear-asset="${capabilityFieldId}"]`);
+        await page.click('[data-visual-save]');
+        await waitForVisualSave(page);
+        savedAbout = capturedAboutSaves[capturedAboutSaves.length - 1].body_json;
+        if (savedAbout.capability.cards[0].image.src !== '' ||
+            savedAbout.capability.cards[0].image.width !== null ||
+            savedAbout.capability.cards[0].image.height !== null) {
+            throw new Error('Clearing a synchronized image did not clear src/width/height together.');
+        }
+
+        await clickVisualModule(page, 'about', 'factory');
+        await switchLanguage(page, 'default');
+        fields = await fieldSnapshot(page);
+        assertField(fields, 'factory.title', 'Real production scenes');
+        assertField(fields, 'factory.images.0.caption', 'Transformer workshop');
+        const factoryAsset = page.locator('[data-visual-field="factory.images.0.image.src"]');
+        if (await factoryAsset.getAttribute('data-visual-sync-dimensions') !== 'true') {
+            throw new Error('Factory image field must opt into dimension synchronization.');
+        }
+        if (await page.locator('#visual-editor-content [data-visual-array-action]').count() !== 0) {
+            throw new Error('Factory structure controls are exposed.');
+        }
+        await selectVisualAsset(page, 'factory.images.0.image.src', 'factory-good');
+        await page.waitForFunction(function () {
+            var field = document.querySelector('[data-visual-field="factory.images.0.image.src"]');
+            return field && field.getAttribute('data-visual-dimension-state') === 'ready';
+        }, null, { timeout: 5000 });
+        await page.click('[data-visual-save]');
+        await waitForVisualSave(page);
+        savedAbout = capturedAboutSaves[capturedAboutSaves.length - 1].body_json;
+        if (savedAbout.factory.images[0].image.src !== 'test-assets/dimension-450x300.svg' ||
+            savedAbout.factory.images[0].image.width !== 450 ||
+            savedAbout.factory.images[0].image.height !== 300) {
+            throw new Error('Factory image save did not persist numeric natural dimensions.');
+        }
+        if (savedAbout.capability.cards.length !== 2 || savedAbout.factory.images.length !== 2) {
+            throw new Error('Locked About arrays changed length during editing.');
+        }
+
+        await switchLanguage(page, 'fr');
+        fields = await fieldSnapshot(page);
+        assertField(fields, 'factory.imagesPatchFr.index_0.captionFr', 'Atelier');
+        assertField(fields, 'factory.imagesPatchFr.index_0.image.altFr', 'Atelier');
+        await switchLanguage(page, 'ru');
+        fields = await fieldSnapshot(page);
+        assertField(fields, 'factory.imagesPatchRu.index_0.captionRu', 'Цех');
+        assertField(fields, 'factory.imagesPatchRu.index_0.image.altRu', 'Цех');
+
+        await page.reload({ waitUntil: 'networkidle' });
+        await clickVisualModule(page, 'about', 'factory');
+        await switchLanguage(page, 'default');
+        fields = await fieldSnapshot(page);
+        assertField(fields, 'factory.images.0.image.src', 'dimension-450x300.svg');
+
         await switchLanguage(page, 'default');
         await clickVisualModule(page, 'contact', 'contactInfo');
         fields = await fieldSnapshot(page);
@@ -387,7 +676,12 @@ async function main() {
             throw new Error('Top contact bar toggle was not saved to global-shell.navigation.contactBar.');
         }
 
-        console.log('admin visual patch and top contact bar support OK');
+        const adminHtml = fs.readFileSync(path.join(ROOT, 'admin', 'index.html'), 'utf8');
+        if (!adminHtml.includes(`js/admin.js?v=${ADMIN_CACHE_VERSION}`)) {
+            throw new Error(`admin/index.html must load admin.js with cache version ${ADMIN_CACHE_VERSION}.`);
+        }
+
+        console.log('admin visual About modules, patch safety, image dimensions, and cache support OK');
     } finally {
         await browser.close();
         server.close();

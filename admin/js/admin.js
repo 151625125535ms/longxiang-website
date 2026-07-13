@@ -638,6 +638,29 @@
                         { key: 'title', label: '标题', type: 'text' },
                         { key: 'text', label: '说明', type: 'textarea' },
                         { key: 'image', label: '展示图', type: 'asset' }
+                    ] },
+                    { key: 'capability', label: '项目全流程能力', path: 'capability', previewSelector: '.about-capability-section', fields: [
+                        { key: 'kicker', label: '小标题', type: 'text' },
+                        { key: 'title', label: '模块标题', type: 'textarea' },
+                        { key: 'text', label: '模块说明', type: 'textarea' }
+                    ], children: [
+                        { key: 'capabilityCards', label: '能力卡片', path: 'capability.cards', previewSelector: '.about-capability-grid', array: true, allowStructureChanges: false, structureLockHelp: '当前顺序与多语言内容绑定，如需调整请走结构迁移流程。', itemLabel: '能力卡片', fields: [
+                            { key: 'title', label: '卡片标题', type: 'text' },
+                            { key: 'text', label: '卡片说明', type: 'textarea' },
+                            { key: 'image.src', label: '卡片图片', type: 'asset', localized: false, syncDimensions: true },
+                            { key: 'image.alt', label: '图片说明', type: 'text' }
+                        ] }
+                    ] },
+                    { key: 'factory', label: '真实生产场景', path: 'factory', previewSelector: '.about-factory-section', fields: [
+                        { key: 'kicker', label: '小标题', type: 'text' },
+                        { key: 'title', label: '模块标题', type: 'textarea' },
+                        { key: 'text', label: '模块说明', type: 'textarea' }
+                    ], children: [
+                        { key: 'factoryImages', label: '工厂图片', path: 'factory.images', previewSelector: '.about-factory-grid', array: true, allowStructureChanges: false, structureLockHelp: '当前顺序与多语言内容绑定，如需调整请走结构迁移流程；第一张图片为重点大图。', itemLabel: '工厂图片', fields: [
+                            { key: 'caption', label: '图片标题', type: 'text' },
+                            { key: 'image.src', label: '工厂图片', type: 'asset', localized: false, syncDimensions: true },
+                            { key: 'image.alt', label: '图片说明', type: 'text' }
+                        ] }
                     ] }
                 ]
             },
@@ -4514,6 +4537,10 @@
             return key === 'fr' || key === 'ru';
         }
 
+        function visualCanChangeArrayStructure(module) {
+            return !!module && module.allowStructureChanges !== false && !visualUsesPatchFields();
+        }
+
         function visualPatchSuffix() {
             return 'Patch' + visualLanguageSuffix();
         }
@@ -4794,16 +4821,23 @@
                 var preview = valueText
                     ? '<img src="' + escapeHtml(visualAssetSrc(valueText)) + '" alt="' + escapeHtml(label) + '预览">'
                     : '<span>未选择图片</span>';
+                var dimensionAttrs = field.syncDimensions
+                    ? ' data-visual-sync-dimensions="true" data-visual-dimension-state="idle"'
+                    : '';
+                var dimensionStatus = field.syncDimensions
+                    ? '<small class="visual-asset-dimension-status" data-visual-dimension-status="' + escapeHtml(id) + '">更换图片时会自动读取并保存天然宽高。</small>'
+                    : '';
                 return '<div class="visual-field visual-asset-field">' +
                     '<label>' + escapeHtml(label) + '</label>' +
                     '<div class="visual-asset-card" data-visual-asset-card="' + escapeHtml(id) + '">' +
                         '<div class="visual-asset-preview">' + preview + '</div>' +
-                        '<input type="hidden" id="' + escapeHtml(id) + '" data-visual-field="' + escapeHtml(path) + '" value="' + escapeHtml(valueText) + '">' +
+                        '<input type="hidden" id="' + escapeHtml(id) + '" data-visual-field="' + escapeHtml(path) + '" value="' + escapeHtml(valueText) + '"' + dimensionAttrs + '>' +
                         '<div class="visual-asset-actions">' +
                             '<button type="button" class="btn btn-secondary btn-sm" data-visual-select-asset="' + escapeHtml(id) + '">选择图片</button>' +
                             '<button type="button" class="btn btn-secondary btn-sm" data-visual-clear-asset="' + escapeHtml(id) + '">清除</button>' +
                         '</div>' +
                         '<small class="visual-asset-path">' + escapeHtml(valueText || '图片会从资源库选择') + '</small>' +
+                        dimensionStatus +
                     '</div>' +
                 '</div>';
             }
@@ -4825,10 +4859,13 @@
             var arrayPath = visualModulePath(module, body, { createMissing: true });
             var items = getPathValue(body, arrayPath);
             if (!Array.isArray(items)) items = [];
-            var canChangeStructure = !visualUsesPatchFields();
+            var canChangeStructure = visualCanChangeArrayStructure(module);
+            var structureLockHelp = module.allowStructureChanges === false
+                ? (module.structureLockHelp || '当前列表结构与多语言内容绑定，暂不允许新增、删除或排序。')
+                : '当前语言只编辑已有项目的本地化字段，不调整数组结构。';
             var structureAction = canChangeStructure
                 ? '<button type="button" class="btn btn-secondary btn-sm" data-visual-array-action="add" data-page="' + escapeHtml(page.key) + '" data-module="' + escapeHtml(module.key) + '">新增' + escapeHtml(module.itemLabel || '项目') + '</button>'
-                : '<small>当前语言只编辑已有项目的本地化字段，不调整数组结构。</small>';
+                : '<small>' + escapeHtml(structureLockHelp) + '</small>';
             return '<div class="visual-array-editor" data-visual-array="' + escapeHtml(arrayPath) + '">' +
                 '<div class="visual-array-head"><span>共 ' + items.length + ' 项</span>' + structureAction + '</div>' +
                 '<div class="visual-array-list">' + items.map(function (item, index) {
@@ -5080,6 +5117,21 @@
             return modules;
         }
 
+        function visualAssetDimensionBlocker() {
+            var root = document.getElementById('visual-editor-content');
+            if (!root) return null;
+            return root.querySelector(
+                '[data-visual-sync-dimensions="true"][data-visual-dimension-state="pending"], ' +
+                '[data-visual-sync-dimensions="true"][data-visual-dimension-state="error"]'
+            );
+        }
+
+        function syncVisualSaveAvailability() {
+            var saveBtn = document.querySelector('[data-visual-save]');
+            if (!saveBtn) return;
+            saveBtn.disabled = saveBtn.getAttribute('data-visual-saving') === 'true' || !!visualAssetDimensionBlocker();
+        }
+
         function collectVisualBody(page, module) {
             var block = visualBuilderState.blocks[page.slug] || {};
             var body = cloneBody(block.body_json || {});
@@ -5115,9 +5167,23 @@
             if (!page || !module || !block.version) return;
             var statusEl = document.getElementById('visual-save-status');
             var saveBtn = document.querySelector('[data-visual-save]');
+            var dimensionBlocker = visualAssetDimensionBlocker();
+            if (dimensionBlocker) {
+                var dimensionState = dimensionBlocker.getAttribute('data-visual-dimension-state');
+                var dimensionMessage = dimensionState === 'pending'
+                    ? '图片尺寸仍在读取，请稍候再保存。'
+                    : '图片尺寸读取失败，请重新选择或清除该图片后再保存。';
+                if (statusEl) statusEl.textContent = dimensionMessage;
+                showToast(dimensionMessage, 'error');
+                syncVisualSaveAvailability();
+                return;
+            }
             var body = collectVisualBody(page, module);
             if (statusEl) statusEl.textContent = '保存中...';
-            if (saveBtn) saveBtn.disabled = true;
+            if (saveBtn) {
+                saveBtn.setAttribute('data-visual-saving', 'true');
+                saveBtn.disabled = true;
+            }
             apiRequest('/admin/content-blocks/' + encodeURIComponent(page.slug), {
                 method: 'PUT',
                 body: {
@@ -5142,7 +5208,8 @@
                 if (statusEl) statusEl.textContent = '保存失败';
                 showToast('保存可视化内容失败：' + err.message, 'error');
             }).finally(function () {
-                if (saveBtn) saveBtn.disabled = false;
+                if (saveBtn) saveBtn.removeAttribute('data-visual-saving');
+                syncVisualSaveAvailability();
             });
         }
 
@@ -5152,8 +5219,10 @@
             if (!page || !module) return;
             var block = visualBuilderState.blocks[page.slug];
             if (!block) return;
-            if (visualUsesPatchFields()) {
-                showToast('法语/俄语模式只维护已有项目的本地化内容，不能调整数组结构。', 'error');
+            if (!visualCanChangeArrayStructure(module)) {
+                showToast(module.allowStructureChanges === false
+                    ? '当前列表结构与多语言内容绑定，不能新增、删除或排序。'
+                    : '法语/俄语模式只维护已有项目的本地化内容，不能调整数组结构。', 'error');
                 return;
             }
             var body = collectVisualBody(page, module);
@@ -5179,9 +5248,9 @@
             renderVisualBuilder();
         }
 
-        function updateVisualAssetField(fieldId, path) {
-            var input = document.getElementById(fieldId);
+        function applyVisualAssetFieldValue(input, path) {
             if (!input) return;
+            var fieldId = input.id;
             input.value = path || '';
             var card = document.querySelector('[data-visual-asset-card="' + fieldId + '"]');
             if (card) {
@@ -5192,7 +5261,102 @@
                 }
                 if (pathEl) pathEl.textContent = path || '图片会从资源库选择';
             }
-            markFormDirty();
+        }
+
+        function setVisualAssetDimensionState(input, state, message) {
+            if (!input) return;
+            input.setAttribute('data-visual-dimension-state', state || 'idle');
+            var status = document.querySelector('[data-visual-dimension-status="' + input.id + '"]');
+            if (status) status.textContent = message || '';
+            syncVisualSaveAvailability();
+        }
+
+        function visualSynchronizedAssetPaths(input) {
+            var srcPath = input ? input.getAttribute('data-visual-field') : '';
+            if (visualPathLast(srcPath) !== 'src') return { src: '', width: '', height: '' };
+            var imagePath = visualPathParent(srcPath);
+            return {
+                src: srcPath,
+                width: visualJoinPath(imagePath, 'width'),
+                height: visualJoinPath(imagePath, 'height')
+            };
+        }
+
+        function updateVisualSynchronizedAssetBody(input, path, width, height) {
+            var page = visualPageByKey(visualBuilderState.activePage);
+            var block = page ? visualBuilderState.blocks[page.slug] : null;
+            if (!block || !block.body_json) return false;
+            var paths = visualSynchronizedAssetPaths(input);
+            if (!paths.src || !paths.width || !paths.height) return false;
+            setPathValue(block.body_json, paths.src, path || '');
+            setPathValue(block.body_json, paths.width, width);
+            setPathValue(block.body_json, paths.height, height);
+            return true;
+        }
+
+        function updateVisualAssetField(fieldId, path) {
+            var input = document.getElementById(fieldId);
+            if (!input) return Promise.resolve(false);
+            path = String(path || '').trim();
+            if (input.getAttribute('data-visual-sync-dimensions') !== 'true') {
+                applyVisualAssetFieldValue(input, path);
+                markFormDirty();
+                return Promise.resolve(true);
+            }
+
+            var requestId = String(Date.now()) + '-' + Math.random().toString(36).slice(2);
+            input.setAttribute('data-visual-dimension-request', requestId);
+            if (!path) {
+                if (!updateVisualSynchronizedAssetBody(input, '', null, null)) {
+                    setVisualAssetDimensionState(input, 'error', '无法更新图片字段，请刷新后重试。');
+                    showToast('无法更新图片字段，请刷新后重试。', 'error');
+                    return Promise.resolve(false);
+                }
+                applyVisualAssetFieldValue(input, '');
+                setVisualAssetDimensionState(input, 'ready', '图片及天然宽高已清除。');
+                markFormDirty();
+                return Promise.resolve(true);
+            }
+
+            setVisualAssetDimensionState(input, 'pending', '正在读取图片天然宽高，请稍候...');
+            return new Promise(function (resolve) {
+                var image = new Image();
+                image.onload = function () {
+                    if (document.getElementById(fieldId) !== input || input.getAttribute('data-visual-dimension-request') !== requestId) {
+                        resolve(false);
+                        return;
+                    }
+                    var width = Number(image.naturalWidth || 0);
+                    var height = Number(image.naturalHeight || 0);
+                    if (!Number.isInteger(width) || width <= 0 || !Number.isInteger(height) || height <= 0 ||
+                        !updateVisualSynchronizedAssetBody(input, path, width, height)) {
+                        setVisualAssetDimensionState(input, 'error', '无法读取图片天然宽高，请重新选择或清除。');
+                        showToast('无法读取图片天然宽高，请重新选择或清除。', 'error');
+                        resolve(false);
+                        return;
+                    }
+                    applyVisualAssetFieldValue(input, path);
+                    setVisualAssetDimensionState(input, 'ready', '已读取天然尺寸：' + width + ' × ' + height + ' px');
+                    markFormDirty();
+                    resolve(true);
+                };
+                image.onerror = function () {
+                    if (document.getElementById(fieldId) !== input || input.getAttribute('data-visual-dimension-request') !== requestId) {
+                        resolve(false);
+                        return;
+                    }
+                    setVisualAssetDimensionState(input, 'error', '图片加载失败，已保留原图片和尺寸。');
+                    showToast('图片加载失败，已保留原图片和尺寸。', 'error');
+                    resolve(false);
+                };
+                image.src = visualAssetSrc(path);
+            });
+        }
+
+        function finishVisualAssetSelection(fieldId, path) {
+            updateVisualAssetField(fieldId, path).then(function (updated) {
+                if (updated && path) showToast('已选择可视化图片');
+            });
         }
 
         function openVisualAssetPicker(fieldId) {
@@ -5289,8 +5453,7 @@
                             entityType: 'content_block',
                             entityId: '',
                             onSelect: function (asset) {
-                                updateVisualAssetField(fieldId, asset && asset.path ? asset.path : '');
-                                showToast('已选择可视化图片');
+                                finishVisualAssetSelection(fieldId, asset && asset.path ? asset.path : '');
                             }
                         });
                     })(selectAsset.getAttribute('data-visual-select-asset'));
@@ -5298,7 +5461,7 @@
                 }
                 var clearAsset = e.target.closest('[data-visual-clear-asset]');
                 if (clearAsset) {
-                    updateVisualAssetField(clearAsset.getAttribute('data-visual-clear-asset'), '');
+                    finishVisualAssetSelection(clearAsset.getAttribute('data-visual-clear-asset'), '');
                     return;
                 }
                 var imageGridAction = e.target.closest('[data-visual-image-action]');
@@ -5313,7 +5476,7 @@
                     return;
                 }                var pickedAsset = e.target.closest('[data-visual-pick-asset]');
                 if (pickedAsset && visualBuilderState.activeAssetField) {
-                    updateVisualAssetField(visualBuilderState.activeAssetField, pickedAsset.getAttribute('data-visual-pick-asset'));
+                    finishVisualAssetSelection(visualBuilderState.activeAssetField, pickedAsset.getAttribute('data-visual-pick-asset'));
                     closeVisualAssetPicker();
                     return;
                 }
