@@ -1,6 +1,9 @@
 'use strict';
 
 const HYDRATION_ASSET_VERSION = '20260712-stage2d-entity-graph';
+const HYDRATION_ASSET_VERSION_OVERRIDES = Object.freeze({
+    'product-detail': '20260713-product-gallery-interaction-fix'
+});
 
 function escapeHtml(value) {
     return String(value == null ? '' : value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
@@ -88,7 +91,8 @@ function footerHtml(body, company, locale) {
 
 function versionHydrationScripts(html) {
     return String(html || '').replace(/(<script\b[^>]*\bsrc=)(["'])(?:\.\.\/|\.\/|\/)?js\/(main|content-pages|education|products-list|product-detail)\.js(?:\?[^"']*)?\2/gi, function (_, prefix, quote, name) {
-        return prefix + quote + '/js/' + name + '.js?v=' + HYDRATION_ASSET_VERSION + quote;
+        const version = HYDRATION_ASSET_VERSION_OVERRIDES[String(name).toLowerCase()] || HYDRATION_ASSET_VERSION;
+        return prefix + quote + '/js/' + name + '.js?v=' + version + quote;
     });
 }
 
