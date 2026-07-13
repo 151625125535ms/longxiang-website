@@ -75,7 +75,7 @@
 | `combined` | Combined |
 | `switchgear` | Switchgear |
 
-**响应** `200` — 产品对象数组
+**响应** `200` — 产品对象数组。列表只返回封面字段 `image`，不返回完整 `images` 图库，避免列表负担和逐产品图库查询。
 ```json
 [
   {
@@ -105,7 +105,33 @@
 ### GET `/api/products/:id`
 获取单个产品详情。**无需认证**。
 
-**成功响应** `200` — 单个产品对象（结构同上）
+**成功响应** `200` — 单个产品对象。保留兼容字段 `image` 作为封面，并新增仅用于详情的有序 `images`：
+
+```json
+{
+  "id": "sbh15",
+  "image": "uploads/product-cover.webp",
+  "images": [
+    {
+      "src": "uploads/product-cover.webp",
+      "thumbnailSrc": "/media/product-gallery/sbh15/0.webp?v=101",
+      "isCover": true
+    },
+    {
+      "src": "uploads/product-side.webp",
+      "thumbnailSrc": "/media/product-gallery/sbh15/1.webp?v=102",
+      "isCover": false
+    }
+  ]
+}
+```
+
+- `images[0]` 是有效封面，且与 `image` 一致。
+- 后续图片按后台保存顺序返回；空路径、非图片媒体和重复路径不会公开。
+- `src` 始终是主图切换使用的原始资源；`thumbnailSrc` 是详情页缩略图专用的 `320x240` WebP 派生资源，不替代原图或 SEO 主图。
+- `thumbnailSrc` 只允许按已发布产品及其有序媒体访问。首次请求按需生成并写入专用缓存，后续请求复用缓存。
+- 响应不暴露 `product_media.id`、`asset_id` 等内部字段。
+- 单图产品仍返回只包含封面的 `images`，前台不会显示缩略图、计数或空图库栏。
 
 **失败响应** `404`
 ```json
@@ -114,23 +140,58 @@
 
 ---
 
-### POST `/api/products` 🔒
-新增产品。**需要认证**。
+### POST `/api/admin/products` 🔒
+新增产品。**需要认证**。公开 `/api/products` 的写入口已停用。
 
-**请求体** — 产品对象，`id` 和 `name` 必填，其余同上结构。
+**请求体** — 后台产品对象，可包含 `cover_image` 和 `gallery`。第一版图库最多 6 张，不含封面。
+
+```json
+{
+  "name_en": "Distribution Transformer",
+  "category_id": 12,
+  "cover_image": "uploads/product-cover.webp",
+  "gallery": [
+    "uploads/product-side.webp",
+    "uploads/product-detail.webp"
+  ]
+}
+```
+
+- 创建时省略 `gallery` 和提交 `gallery: []` 都表示初始图库为空。
+- 服务端会移除与封面重复或图库内部重复的路径，并按最终顺序连续保存。
 
 **成功响应** `201` — 新建的产品对象
 
 ---
 
-### PUT `/api/products/:id` 🔒
-更新产品。**需要认证**。请求体为要更新的字段（部分更新，`id` 不可修改）。
+### PUT `/api/admin/products/:id` 🔒
+更新产品。**需要认证**。请求体为要更新的字段，并必须携带当前 `version`。
+
+- 省略 `gallery`：保留现有图库；如同时修改封面，服务端仍会从图库移除最终封面的重复项。
+- `gallery: []`：显式清空图库。
+- 提交 `gallery` 数组：按数组顺序覆盖图库，最多 6 张。
+- 旧封面不会因更换封面而自动加入图库。
+- 封面和图库变更与 `product_media.asset_id`、产品 owner 的 `asset_references` 在同一保存流程中同步。
 
 **成功响应** `200` — 更新后的产品对象
 
+**图库校验失败** `422`
+
+```json
+{
+  "ok": false,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "图库最多添加 6 张图片。"
+  }
+}
+```
+
+非法图片路径同样返回 `422 VALIDATION_ERROR`，并使用图库专属错误信息。
+
 ---
 
-### DELETE `/api/products/:id` 🔒
+### DELETE `/api/admin/products/:id` 🔒
 删除产品。**需要认证**。
 
 **成功响应** `200`
@@ -140,10 +201,10 @@
 
 ---
 
-### POST `/api/products/upload` 🔒
+### POST `/api/admin/products/upload` 🔒
 上传产品图片。**需要认证**。请求格式 `multipart/form-data`，字段名 `image`。
 
-**限制**：仅 jpeg / jpg / png / gif / webp，最大 10MB。
+**限制**：仅 jpeg / jpg / png / gif / webp，最大 8MB。
 
 **成功响应** `200`
 ```json
@@ -526,3 +587,4 @@
 |---|---|---|
 | 2026-06-06 | Codex | 新增 Education 后台管理接口需求与内容 schema |
 | 2026-06-06 | Claude | 初始版本，整理现有所有接口 |
+| 2026-07-13 | Codex | 补充产品详情 `images`、后台 `gallery` 保存语义、6 张上限和图库错误协议 |

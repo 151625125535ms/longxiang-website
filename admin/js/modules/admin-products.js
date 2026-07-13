@@ -49,6 +49,7 @@
         var ICON_VIEW = context.ICON_VIEW || '';
         var ICON_EDIT = context.ICON_EDIT || '';
         var ICON_DELETE = context.ICON_DELETE || '';
+        var MAX_PRODUCT_GALLERY_IMAGES = 6;
 
         var products = [];
         var editingProductId = null;
@@ -74,6 +75,11 @@
             uploadedImagePath = path || '';
             var coverField = document.getElementById('field-cover-image');
             if (coverField) coverField.value = uploadedImagePath;
+            var duplicateIndex = productGalleryPaths.indexOf(uploadedImagePath);
+            if (uploadedImagePath && duplicateIndex !== -1) {
+                productGalleryPaths.splice(duplicateIndex, 1);
+                renderProductGallery();
+            }
             updateProductCompletenessSummary();
         }
 
@@ -756,6 +762,29 @@
             });
         }
 
+        function updateProductGalleryActionState() {
+            var atLimit = productGalleryPaths.length >= MAX_PRODUCT_GALLERY_IMAGES;
+            var uploadButton = document.getElementById('btn-product-gallery-upload');
+            var selectButton = document.getElementById('btn-product-gallery-select');
+            var help = document.getElementById('product-gallery-help');
+            if (uploadButton) uploadButton.disabled = atLimit || productImageUploading;
+            if (selectButton) selectButton.disabled = atLimit || productImageUploading;
+            if (help) {
+                help.textContent = '封面始终为第 1 张，图库按当前顺序展示。已添加 ' + productGalleryPaths.length + ' / ' + MAX_PRODUCT_GALLERY_IMAGES + ' 张。';
+                help.classList.toggle('is-limit', atLimit);
+            }
+        }
+
+        function moveProductGalleryImage(index, direction) {
+            var targetIndex = index + direction;
+            if (index < 0 || targetIndex < 0 || index >= productGalleryPaths.length || targetIndex >= productGalleryPaths.length) return;
+            var moved = productGalleryPaths[index];
+            productGalleryPaths[index] = productGalleryPaths[targetIndex];
+            productGalleryPaths[targetIndex] = moved;
+            renderProductGallery();
+            markFormDirty();
+        }
+
         function renderProductGallery(product) {
             var container = document.getElementById('product-gallery-preview');
             if (!container) return;
@@ -767,14 +796,27 @@
             }
             if (!productGalleryPaths.length) {
                 container.innerHTML = '<div class="gallery-empty">暂无图库图片</div>';
+                updateProductGalleryActionState();
                 return;
             }
             container.innerHTML = productGalleryPaths.map(function (path, index) {
-                return '<div class="gallery-item">' +
+                return '<div class="gallery-item product-gallery-editor-item">' +
                     '<img src="' + escapeHtml(assetPreviewSrc(path)) + '" alt="">' +
+                    '<span class="gallery-order-badge">第 ' + (index + 2) + ' 张</span>' +
+                    '<div class="gallery-order-controls">' +
+                    '<button type="button" data-move-gallery-image="previous" data-gallery-index="' + index + '" aria-label="前移第 ' + (index + 2) + ' 张图片" title="前移"' + (index === 0 ? ' disabled' : '') + '>\u2191</button>' +
+                    '<button type="button" data-move-gallery-image="next" data-gallery-index="' + index + '" aria-label="后移第 ' + (index + 2) + ' 张图片" title="后移"' + (index === productGalleryPaths.length - 1 ? ' disabled' : '') + '>\u2193</button>' +
+                    '</div>' +
                     '<button class="gallery-remove-btn" type="button" data-remove-gallery-image="' + index + '" aria-label="移除图库图片">×</button>' +
                     '</div>';
             }).join('') || '<div class="gallery-empty">暂无图库图片</div>';
+            container.querySelectorAll('[data-move-gallery-image]').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var index = parseInt(btn.getAttribute('data-gallery-index'), 10);
+                    var direction = btn.getAttribute('data-move-gallery-image') === 'next' ? 1 : -1;
+                    if (!isNaN(index)) moveProductGalleryImage(index, direction);
+                });
+            });
             container.querySelectorAll('[data-remove-gallery-image]').forEach(function (btn) {
                 btn.addEventListener('click', function () {
                     var index = parseInt(btn.getAttribute('data-remove-gallery-image'), 10);
@@ -785,14 +827,29 @@
                     }
                 });
             });
+            updateProductGalleryActionState();
         }
 
         function addProductGalleryPath(path) {
             path = String(path || '').trim();
-            if (!path) return;
-            if (productGalleryPaths.indexOf(path) === -1) productGalleryPaths.push(path);
+            if (!path) return false;
+            if (path === uploadedImagePath) {
+                showToast('封面已是第 1 张，无需重复加入图库。', 'error');
+                return false;
+            }
+            if (productGalleryPaths.indexOf(path) !== -1) {
+                showToast('该图片已在图库中。', 'error');
+                return false;
+            }
+            if (productGalleryPaths.length >= MAX_PRODUCT_GALLERY_IMAGES) {
+                showToast('图库最多添加 ' + MAX_PRODUCT_GALLERY_IMAGES + ' 张图片。', 'error');
+                updateProductGalleryActionState();
+                return false;
+            }
+            productGalleryPaths.push(path);
             renderProductGallery();
             markFormDirty();
+            return true;
         }
 
         function uploadProductGalleryFiles() {
@@ -804,8 +861,19 @@
                 showToast('请选择 JPG、PNG、WebP 或 GIF 图片。', 'error');
                 return;
             }
+            var remaining = MAX_PRODUCT_GALLERY_IMAGES - productGalleryPaths.length;
+            if (remaining <= 0) {
+                showToast('图库最多添加 ' + MAX_PRODUCT_GALLERY_IMAGES + ' 张图片。', 'error');
+                updateProductGalleryActionState();
+                return;
+            }
+            if (images.length > remaining) {
+                showToast('剩余可添加 ' + remaining + ' 张，本次仅上传前 ' + remaining + ' 张。', 'error');
+                images = images.slice(0, remaining);
+            }
             productImageUploading = true;
             setProductSubmitDisabled(true);
+            updateProductGalleryActionState();
             Promise.all(images.map(function (file) {
                 return uploadAdminAssetFile(file, {
                     module: 'products',
@@ -822,10 +890,16 @@
             }).finally(function () {
                 productImageUploading = false;
                 setProductSubmitDisabled(false);
+                updateProductGalleryActionState();
             });
         }
 
         function openProductGalleryAssetPicker() {
+            if (productGalleryPaths.length >= MAX_PRODUCT_GALLERY_IMAGES) {
+                showToast('图库最多添加 ' + MAX_PRODUCT_GALLERY_IMAGES + ' 张图片。', 'error');
+                updateProductGalleryActionState();
+                return;
+            }
             openAssetPicker({
                 title: '添加产品图库图片',
                 subtitle: '选择资源库中的图片加入当前产品图库。',
@@ -833,8 +907,7 @@
                 entityType: 'product',
                 entityId: editingProductId || '',
                 onSelect: function (asset) {
-                    addProductGalleryPath(asset && asset.path ? asset.path : '');
-                    showToast('已添加到产品图库');
+                    if (addProductGalleryPath(asset && asset.path ? asset.path : '')) showToast('已添加到产品图库');
                 }
             });
         }

@@ -238,7 +238,8 @@ function createRuntimeFixtureDb() {
             id INTEGER PRIMARY KEY, product_id INTEGER, spec_group TEXT, spec_key TEXT, spec_value TEXT, sort_order INTEGER
         );
         CREATE TABLE product_media (
-            id INTEGER PRIMARY KEY, product_id INTEGER, path TEXT, is_cover INTEGER, sort_order INTEGER
+            id INTEGER PRIMARY KEY, product_id INTEGER, asset_id INTEGER, media_type TEXT,
+            path TEXT, is_cover INTEGER, sort_order INTEGER
         );
     `);
     const payloads = validPayloads();
@@ -273,12 +274,16 @@ function createRuntimeFixtureDb() {
         )
     `);
     const insertSpec = db.prepare('INSERT INTO product_specs VALUES (?, ?, ?, ?, ?, ?)');
-    const insertMedia = db.prepare('INSERT INTO product_media VALUES (?, ?, ?, ?, ?)');
+    const insertMedia = db.prepare('INSERT INTO product_media VALUES (?, ?, ?, ?, ?, ?, ?)');
     products().forEach(function (product, index) {
         insertProduct.run({ ...product, internalId: index + 1, aliases: JSON.stringify(product.aliases) });
         insertSpec.run(index + 1, index + 1, 'technical', 'Model', 'M' + (index + 1), 1);
-        insertMedia.run(index + 1, index + 1, product.image, 1, 1);
+        insertMedia.run(index + 1, index + 1, null, 'image', product.image, 1, 1);
     });
+    insertMedia.run(1001, 1, null, 'image', products()[0].image, 0, 2);
+    insertMedia.run(1002, 1, null, 'image', 'assets/product-1-detail.png', 0, 3);
+    insertMedia.run(1003, 1, null, 'image', 'assets/product-1-side.png', 0, 4);
+    insertMedia.run(1004, 1, null, 'document', 'assets/product-1-sheet.pdf', 0, 5);
     return db;
 }
 
@@ -475,20 +480,37 @@ async function main() {
         const snapshotSource = createSnapshotPublicSiteDataSource(captured.out);
         const runtimeDb = createRuntimeFixtureDb();
         const runtimeSource = createRuntimePublicSiteDataSource({ db: runtimeDb });
-        assertDataSourceContract(snapshotSource);
-        assertDataSourceContract(runtimeSource);
-        assert.strictEqual(snapshotSource.readContentBlock('home').version, 46);
-        assert.strictEqual(snapshotSource.readCompany().identity.legalName, IDENTITY.legalName);
-        assert.strictEqual(snapshotSource.readProducts().length, 38);
-        assert.strictEqual(snapshotSource.readProduct('product-1').id, 'legacy-1');
-        assert.strictEqual(snapshotSource.readProduct('legacy-1').slug, 'product-1');
-        assert.strictEqual(snapshotSource.readProduct('alias-one').slug, 'product-1');
-        assert(Array.isArray(snapshotSource.readProductCategories()));
+        try {
+            assertDataSourceContract(snapshotSource);
+            assertDataSourceContract(runtimeSource);
+            assert.strictEqual(snapshotSource.readContentBlock('home').version, 46);
+            assert.strictEqual(snapshotSource.readCompany().identity.legalName, IDENTITY.legalName);
+            assert.strictEqual(snapshotSource.readProducts().length, 38);
+            assert.strictEqual(snapshotSource.readProduct('product-1').id, 'legacy-1');
+            assert.strictEqual(snapshotSource.readProduct('legacy-1').slug, 'product-1');
+            assert.strictEqual(snapshotSource.readProduct('alias-one').slug, 'product-1');
+            assert(Array.isArray(snapshotSource.readProductCategories()));
 
-        const mutated = snapshotSource.readProducts();
-        mutated[0].name = 'Mutated';
-        assert.strictEqual(snapshotSource.readProducts()[0].name, 'Product 1');
-        runtimeDb.close();
+            const runtimeListProduct = runtimeSource.readProducts()[0];
+            assert.strictEqual(Object.prototype.hasOwnProperty.call(runtimeListProduct, 'images'), false);
+            const runtimeDetailProduct = runtimeSource.readProduct('product-1');
+            assert.deepStrictEqual(runtimeDetailProduct.images.map(function (image) {
+                return { src: image.src, isCover: image.isCover };
+            }), [
+                { src: 'assets/product-1.png', isCover: true },
+                { src: 'assets/product-1-detail.png', isCover: false },
+                { src: 'assets/product-1-side.png', isCover: false }
+            ]);
+            runtimeDetailProduct.images.forEach(function (image, index) {
+                assert(new RegExp('^/media/product-gallery/product-1/' + index + '\\.webp\\?v=').test(image.thumbnailSrc));
+            });
+
+            const mutated = snapshotSource.readProducts();
+            mutated[0].name = 'Mutated';
+            assert.strictEqual(snapshotSource.readProducts()[0].name, 'Product 1');
+        } finally {
+            runtimeDb.close();
+        }
 
         const isolationCode = [
             "const Module=require('module');",

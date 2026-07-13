@@ -7,6 +7,7 @@ const fs = require('fs');
 const { authMiddleware } = require('./middleware/auth');
 const authRoutes = require('./routes/auth');
 const productsRoutes = require('./routes/products');
+const productGalleryThumbnailRoutes = require('./routes/product-gallery-thumbnails');
 const productCategoriesRoutes = require('./routes/product-categories');
 const companyRoutes = require('./routes/company');
 const inquiriesRoutes = require('./routes/inquiries');
@@ -182,6 +183,7 @@ if (rateLimit) {
 const uploadDir = resolveUploadDir();
 ensureDirectory(uploadDir);
 app.use('/uploads', express.static(uploadDir, { maxAge: '30d', fallthrough: false }));
+app.use('/media/product-gallery', productGalleryThumbnailRoutes);
 
 try {
     ensureContentBlockSeeds(getDb());

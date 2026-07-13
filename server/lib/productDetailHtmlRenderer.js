@@ -48,7 +48,7 @@ function injectScripts(html, bootstrap) {
     if (!/content-presentation-i18n\.js/i.test(html)) scripts += '<script src="/js/content-presentation-i18n.js?v=20260711"></script>\n    ';
     if (!/content-page-presentation\.js/i.test(html)) scripts += '<script src="/js/content-page-presentation.js?v=20260711"></script>\n    ';
     if (!/product-presentation-i18n\.js/i.test(html)) scripts += '<script src="/js/product-presentation-i18n.js?v=20260711"></script>\n    ';
-    if (!/product-page-presentation\.js/i.test(html)) scripts += '<script src="/js/product-page-presentation.js?v=20260711"></script>\n    ';
+    if (!/product-page-presentation\.js/i.test(html)) scripts += '<script src="/js/product-page-presentation.js?v=20260713-product-gallery"></script>\n    ';
     scripts += '<script type="application/json" id="product-detail-bootstrap">' + presentation.serializeBootstrap(bootstrap) + '</script>\n    ';
     return html.replace(pattern, scripts + '$&');
 }
@@ -83,6 +83,7 @@ function renderProductDetailBodyHtml(html, options) {
     rendered = replaceElement(rendered, 'id', 'breadcrumb-product', escapeAttribute(view.hero.breadcrumb), arabicTag);
     rendered = replaceElement(rendered, 'id', 'page-title', escapeAttribute(view.hero.title), arabicTag);
     rendered = replaceElement(rendered, 'id', 'page-subtitle', escapeAttribute(view.hero.subtitle), arabicTag);
+    rendered = replaceElement(rendered, 'data-product-gallery', null, view.fragments.gallery);
     rendered = replaceElement(rendered, 'id', 'product-title', view.fragments.title, arabicTag);
     rendered = replaceElement(rendered, 'id', 'product-desc', view.fragments.description, arabicTag);
     rendered = replaceElement(rendered, 'data-product-decision-summary', null, view.fragments.decision);

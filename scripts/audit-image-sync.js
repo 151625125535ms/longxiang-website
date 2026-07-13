@@ -2,7 +2,12 @@ const fs = require('fs');
 const path = require('path');
 
 const { getDb } = require('../server/lib/db');
-const { PROJECT_ROOT, resolveUploadDir, resolveUploadPublicPath } = require('../server/lib/fileStore');
+const {
+    PROJECT_ROOT,
+    resolveProductGalleryThumbnailCacheDir,
+    resolveUploadDir,
+    resolveUploadPublicPath
+} = require('../server/lib/fileStore');
 const { auditProductMediaAssetLinks } = require('../server/lib/assetReferences');
 
 const args = new Set(process.argv.slice(2));
@@ -14,14 +19,18 @@ function tableExists(db, name) {
     return !!row;
 }
 
-function walkFiles(root) {
+function walkFiles(root, ignoredRoots) {
     const files = [];
     if (!fs.existsSync(root)) return files;
+    const ignored = new Set((ignoredRoots || []).map(function (ignoredRoot) {
+        return path.resolve(ignoredRoot);
+    }));
 
     function walk(current) {
         fs.readdirSync(current, { withFileTypes: true }).forEach(function (entry) {
             const fullPath = path.join(current, entry.name);
             if (entry.isDirectory()) {
+                if (ignored.has(path.resolve(fullPath))) return;
                 walk(fullPath);
                 return;
             }
@@ -60,6 +69,7 @@ function audit() {
     const db = getDb();
     const uploadDir = resolveUploadDir();
     const uploadPublicPath = resolveUploadPublicPath();
+    const productGalleryThumbnailCacheDir = resolveProductGalleryThumbnailCacheDir();
 
     const result = {
         uploadDir,
@@ -68,6 +78,7 @@ function audit() {
         productMediaInvalidPaths: [],
         nonUploadProductMediaPaths: [],
         orphanUploadFiles: [],
+        productGalleryThumbnailCacheFiles: walkFiles(productGalleryThumbnailCacheDir).length,
         assetsEntityIdNull: 0,
         productMediaAssetIdNull: 0,
         productMediaTotal: 0,
@@ -146,7 +157,7 @@ function audit() {
         result.notes.push('asset_references table not found.');
     }
 
-    walkFiles(uploadDir).forEach(function (filePath) {
+    walkFiles(uploadDir, [productGalleryThumbnailCacheDir]).forEach(function (filePath) {
         const publicPath = toPublicPath(uploadDir, uploadPublicPath, filePath);
         if (!referencedPaths.has(publicPath)) {
             result.orphanUploadFiles.push(publicPath);
@@ -173,6 +184,7 @@ function printText(result) {
     result.orphanUploadFiles.slice(0, 20).forEach(function (publicPath) {
         console.log('  - ' + publicPath);
     });
+    console.log('product gallery thumbnail cache files (derived, excluded from orphan audit): ' + result.productGalleryThumbnailCacheFiles);
     console.log('assets.entity_id IS NULL: ' + result.assetsEntityIdNull);
     console.log(
         'product_media.asset_id IS NULL: ' + result.productMediaAssetIdNull +

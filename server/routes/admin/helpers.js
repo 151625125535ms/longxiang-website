@@ -21,6 +21,8 @@ const FRIENDLY_ERROR_MESSAGES = {
     'Invalid category type.': '分类类型不正确，请刷新后台后重试。',
     'Invalid featured value.': '首页推荐状态不正确，请刷新后台后重试。',
     'Invalid cover_image path.': '图片路径不正确，请使用上传后的图片或资源库中的路径。',
+    'Invalid gallery image path.': '图库图片路径不正确，请使用上传后的图片或资源库中的路径。',
+    'Gallery supports up to 6 images.': '图库最多添加 6 张图片。',
     'aliases_json must be a JSON string.': '别名数据格式不正确，请刷新后台后重试。',
     'legacy_id or slug already exists.': '产品 ID 或链接已存在，系统已无法自动避让，请换一个名称后再试。',
     'legacy_id already exists.': '证书 ID 已存在，请换一个名称后再试。',

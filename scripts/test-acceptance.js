@@ -198,6 +198,33 @@ async function main() {
             return 'items=' + list.length;
         });
 
+        await runTest('T02B', 'product list stays cover-only and detail exposes ordered images', async function () {
+            const listResponse = await request('GET', '/api/products');
+            expectStatus(listResponse, 200);
+            const list = expectArray(listResponse.body, false);
+            if (list.some(function (product) { return Object.prototype.hasOwnProperty.call(product, 'images'); })) {
+                throw new Error('product list unexpectedly exposes gallery images');
+            }
+            const listed = list[0];
+            const identifier = listed.slug || listed.id;
+            const detailResponse = await request('GET', '/api/products/' + encodeURIComponent(identifier));
+            expectStatus(detailResponse, 200);
+            const detail = getPayload(detailResponse.body) || {};
+            if (!Array.isArray(detail.images) || !detail.images.length) throw new Error('detail images are missing');
+            if (!detail.images[0].isCover || detail.images[0].src !== detail.image) {
+                throw new Error('detail cover is not first in images');
+            }
+            const paths = detail.images.map(function (image) { return image && image.src; });
+            if (new Set(paths).size !== paths.length || detail.images.some(function (image) {
+                return !image || !image.src || !image.thumbnailSrc ||
+                    !/^\/media\/product-gallery\//.test(image.thumbnailSrc) ||
+                    Object.prototype.hasOwnProperty.call(image, 'asset_id') || Object.prototype.hasOwnProperty.call(image, 'id');
+            })) {
+                throw new Error('detail images contain duplicates or internal fields');
+            }
+            return 'list cover-only; detail images=' + detail.images.length;
+        });
+
         await runTest('T03', 'GET /api/certifications', async function () {
             const res = await request('GET', '/api/certifications');
             expectStatus(res, 200);

@@ -604,6 +604,9 @@ test('同版本产品详情水合保留H1规格相关产品和询盘节点', asy
     await expect(page.locator('[data-product-ssr="detail"]')).toHaveAttribute('data-product-hydrated', 'true');
     const image = await page.locator('#main-product-image').getAttribute('src');
     expect(image).not.toContain('product-cards');
+    await expect(page.locator('[data-product-gallery] [data-gallery-state="single"]')).toHaveCount(1);
+    await expect(page.locator('[data-product-gallery-thumbnail]')).toHaveCount(0);
+    await expect(page.locator('[data-product-gallery-step]')).toHaveCount(0);
 });
 
 test('产品详情 API 失败时保留服务端完整正文', async ({ page }) => {
@@ -626,6 +629,7 @@ test('禁用JavaScript时产品详情核心正文仍完整可见', async ({ brow
     await expect(page.locator('#product-title')).toBeVisible();
     await expect(page.locator('#product-desc p').first()).toBeVisible();
     await expect(page.locator('#main-product-image')).toHaveAttribute('fetchpriority', 'high');
+    await expect(page.locator('[data-product-gallery-thumbnail]')).toHaveCount(0);
     await expect(page.locator('#specs-body tr').first()).toBeVisible();
     await expect(page.locator('[data-product-related] a').first()).toHaveAttribute('href', /\/ru\/products\//);
     await context.close();

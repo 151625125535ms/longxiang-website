@@ -1,16 +1,16 @@
 # 当前事实清单
 
-更新时间：2026-07-07 09:00 左右（Asia/Shanghai）
+更新时间：2026-07-13 18:55（Asia/Shanghai）
 用途：记录当前线上真实状态，作为后续修改、部署、SEO/i18n 调整和后台内容维护的对照基线。
 更新原则：只记录已经通过本地、GitHub、服务器或真实 HTTP 结果核验过的事实；未核验项必须明确标注。
 
 ## 代码与部署
 
 - 本地分支：`main`
-- 本地 HEAD：`d6a6831`（`调整产品详情结构化数据策略`，2026-07-06 23:18:04 +0800）
-- GitHub `origin/main`：`d6a6831`
-- 生产服务器 `/home/ubuntu/longxiang-website`：`main`，HEAD `d6a6831`
-- 生产服务器工作区：`git status --short` 为空
+- 2026-07-13 本次图库任务执行前，本地 HEAD、GitHub `origin/main` 和生产服务器 HEAD 均为 `25eeb82`（`修复关于页面可视化模块编辑`）。
+- 产品详情图库功能正在本地工作区验收，尚未 commit 或 push；生产服务器未执行 pull，仍运行 `25eeb82`。
+- 本次未检查或操作 PM2，也未修改生产数据库或生产上传目录。
+- 生产服务器工作区在执行前只读检查时无 tracked 改动。
 - 本地未跟踪噪音：`.tmp/`、`chanpince/`，按项目规则默认不处理
 - 禁止同步方向：不得执行 `git push longxiang`；服务器只允许 `git pull origin main`
 - 2026-07-08 产品图片资源关联修复代码提交：`8690b6b`（`补充产品图片资源关联修复入口`）已推送 GitHub 并由生产服务器 `git pull origin main` 拉取；本次只部署脚本、审计口径和运维文档，未执行生产数据库 `--apply`。
@@ -71,7 +71,7 @@
 | certifications | 76 | 全部 `published` |
 | content_blocks | 14 | 全部 `published` |
 | assets | 213 |  |
-| product_media | 53 |  |
+| product_media | 53 | 其中非封面媒体 `0` |
 | inquiries | 7 |  |
 
 当前关键表：
@@ -93,6 +93,8 @@
 
 - 生产 `products` 表没有 `image` 字段。
 - 产品图片当前以 `product_media.path` 为主。
+- 产品详情图库继续使用 `product_media` 作为唯一数据源，不新增图库字段或第二套关系；封面为 `is_cover=1, sort_order=1`，图库从 2 开始连续排序。
+- 2026-07-13 只读复核：38 个 published 产品均为单图，拥有非封面媒体的 published 产品为 0。不能从 `published=38` 与媒体总数推导该事实，后续仍需直接查询非封面媒体。
 - `products` 已有 `fr`、`ru` 字段族，例如 `name_fr`、`name_ru`、`description_fr`、`description_ru`、`seo_title_fr`、`seo_title_ru`。
 - `certifications` 已有 `fr`、`ru` 字段族。
 
@@ -124,6 +126,19 @@
 - 该入口只补产品图片链路的 `assets`、`product_media.asset_id` 和产品 owner 的 `asset_references`；生产执行 `--apply` 属于数据库写入，必须先 dry-run、确认备份、说明回滚与验证方式，并取得明确确认。
 - 2026-07-08 生产 dry-run 结果：`product_media.asset_id IS NULL=1/53`，`product_media missing active asset paths=1`，缺口文件为 `/home/ubuntu/longxiang-website/成品区/干式非晶三相三柱 .png` 且 `file_exists=true`，受影响 owner 为产品 `12`；`product asset_references missing=0`，`stale product asset_references=0`。未执行生产 `--apply`。
 
+2026-07-13 产品详情图库代码能力验收：
+
+- 临时数据库完成后台真实上传 4 张图库图片、前移/后移、保存、关闭重开和顺序持久化；接口测试另覆盖删除、清空、只修改封面和封面/图库去重。
+- 临时数据库中的 `product_media.asset_id`、连续 `sort_order` 与产品 owner `asset_references` 完全一致；`npm run images:verify-product-links` 等价验证为 `ok=true`、退出码 0。
+- Playwright 覆盖桌面 `1440x900`、手机 `390x844`、`en/ar/fr/ru`、RTL、JavaScript 禁用和单图无控件状态，7/7 通过；图片请求无 404，手机无横向溢出。
+- 第一轮使用产品卡片 WebP 的 5 图测试新增传输约 `145368` bytes，但该样本不能代表后台直接上传的原始产品图，不作为最终性能结论。
+- 改用仓库中真实的 0.59–1.39MB 产品 PNG 后，直接加载原图缩略列表的首屏新增传输为 `3390085` bytes，超过 `2.5MB` 门槛约 29%，因此未采用该实现。
+- 经单独授权后补充最小派生链路：主图和 SEO 保持原图，缩略图通过受产品媒体顺序约束的 `/media/product-gallery/:identifier/:index.webp` 按需生成 `320x240` WebP，缓存位于 `uploads/.cache/product-gallery/`；无需数据库迁移，也不改变 `product_media` 权威数据源。
+- 同一组真实 PNG 最终复测：图库首屏新增传输为 `42668` bytes；单图 LCP `144ms`，多图 LCP `132ms`。Playwright 后台及前台 7/7 通过，桌面、手机、四语、RTL、无 JavaScript 和单图场景均达到验收目标。
+- `npm run images:audit` 会单独统计产品图库派生缓存文件，并将专用缓存目录排除在孤儿上传文件检查之外；临时干净数据库验证未产生资源引用缺口或孤儿缓存误报。
+- 现有本地业务数据库的资源验证仍保留执行前噪音基线：2 个媒体路径缺少 active asset、1 个产品 owner 引用缺口、3 个过期引用。图库改动不得新增或替换这些缺口；不为本任务顺手修改本地业务数据。
+- 当前图库代码能力已达到状态 A；生产尚未部署，仍为 38 个单图产品、0 个图库产品。代码部署与生产多图客户验收是两个独立阶段：本任务不包含服务器 pull/PM2 操作，生产图库试点仍须单独授权具体产品、图片、顺序和数据库写入。
+
 ## 备份与监控
 
 - 最新备份包：`/var/backups/longxiang/daily-20260706-181702.tar.gz`
@@ -137,6 +152,7 @@
 
 - 服务器 SSH 默认 Node/npm 与项目 engines 不一致；直接用默认 `node` 跑依赖 `better-sqlite3` 的脚本会失败。部署、排障和手工脚本执行时必须显式进入 Node 24 环境。
 - 资源关联尚未完全闭合：`assets.entity_id IS NULL=211`，`product_media.asset_id IS NULL=1/53`。当前不影响已核验的图片路径健康，但属于后续治理项。
+- 产品图库代码尚未部署；即使后续部署完成，未获得明确生产写库授权前也不得为生产产品添加图库图片。
 - 搜索引擎控制台状态本次未核验；Google Search Console、Bing Webmaster Tools 的提交和收录状态不应从代码或 sitemap 状态反推。
 - 本清单是时间点事实，不代表永久事实。每次语言、SEO、产品数据、上传链路、部署环境发生变化后都应更新。
 

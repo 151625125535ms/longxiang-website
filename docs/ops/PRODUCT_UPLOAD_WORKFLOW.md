@@ -7,7 +7,7 @@
 - 从 PDF、Word、图片目录或产品表格中提取产品资料。
 - 将产品新增到后台产品模块。
 - 图片需要进入资源库，并和产品建立关联。
-- 需要同时维护英文和阿拉伯语内容。
+- 需要同时维护当前正式语言 `en/ar/fr/ru` 的内容。
 - 只做数据导入，不改前台 UI、布局、样式和交互。
 
 ## 基本原则
@@ -56,6 +56,7 @@ Invoke-WebRequest -UseBasicParsing -Uri http://127.0.0.1:3000/api/health
 - `seo_description`
 - `seo_keywords`
 - `cover_image`
+- `gallery`（可选，最多 6 张，不含封面）
 - `specs`
 
 参数建议按三类写入：
@@ -100,7 +101,17 @@ Content-Type: multipart/form-data
 - `asset.checksum`
 - 是否复用已有资源：`asset.reused`
 
-产品保存时将 `asset.path` 写入 `cover_image`，后台产品接口会在 `product_media` 中用该路径关联对应 `assets.id`。
+产品保存时将封面资源的 `asset.path` 写入 `cover_image`；其他视角图片按展示顺序写入 `gallery`。后台产品接口会在 `product_media` 中关联对应 `assets.id`，封面固定为 `is_cover=1, sort_order=1`，图库从 `sort_order=2` 开始连续保存。
+
+后台界面中的图库操作规则：
+
+1. 封面始终是前台第 1 张，不要重复加入图库。
+2. 图库最多 6 张；达到上限后先删除不需要的图片再继续添加。
+3. 使用前移、后移按钮调整顺序，不依赖拖拽。
+4. 保存后关闭并重新打开产品，确认数量和顺序仍一致。
+5. 产品只有封面时保持图库为空，前台不会显示空缩略图区。
+
+前台缩略图不会直接下载图库原始大图。公开详情接口同时返回原图 `src` 和缩略图 `thumbnailSrc`：主图与 SEO 继续使用原图，缩略图按需生成 `320x240` WebP 并缓存到 `uploads/.cache/product-gallery/`。该目录是可再生成的派生缓存，不属于 `product_media` 或 `assets` 业务数据；`npm run images:audit` 会单独报告缓存文件数量，并将其排除在孤儿上传文件之外。
 
 ## 产品创建或更新流程
 
@@ -126,7 +137,14 @@ Content-Type: application/json
 - 产品基础字段。
 - `category_id`，且必须是父分类下的子分类。
 - `cover_image`，值为资源库返回的相对路径。
+- `gallery`，需要多图时按前台展示顺序传入资源相对路径；不需要多图时创建可省略或传空数组。
 - `specs`，按 `capacity`、`voltage`、`technical` 组织。
+
+更新接口的图库语义必须区分：
+
+- 省略 `gallery`：保留现有图库；只修改封面时服务端仍会排除与新封面重复的图库项。
+- 提交 `gallery: []`：清空图库。
+- 提交非空 `gallery`：按数组顺序覆盖图库；服务端最终执行去重和 6 张上限校验。
 
 ## 本地验证清单
 
@@ -163,10 +181,21 @@ GET /api/products/<legacy_id>
 - `description`
 - `descriptionAr`
 - `image`
+- 详情接口的 `images`（封面第一、顺序与后台一致，包含原图 `src` 和缩略图 `thumbnailSrc`）；产品列表接口不得返回完整图库
 - `category`
 - `specs`
 - `capacities`
 - `voltages`
+
+多图产品还必须完成真实页面验收：
+
+1. 桌面端缩略图位于主图右侧，手机端位于主图下方且页面无横向溢出。
+2. 鼠标、触摸和键盘选择缩略图后，主图、选中态和计数同步变化。
+3. `en/ar/fr/ru` 均能显示同一媒体顺序，阿语 RTL 方向自然。
+4. 真实单图产品没有缩略图、计数、翻页按钮或空图库容器。
+5. 原始 HTML 已包含主图和多图缩略图；主图继续作为 SEO 主图。
+6. 缩略图请求返回 `image/webp` 且无 404；点击缩略图后主图切换到对应原始 `src`，不得把缩略图放大为主图。
+7. 使用代表性真实大图复测首屏传输和 LCP；图库新增传输不得超过任务约定阈值，不能用小体积占位图代替真实样本。
 
 ## 产品图片资源关联补偿
 
@@ -198,6 +227,8 @@ npm run images:audit
 - 只重建受影响产品 owner 的 `asset_references`，不清空其他模块引用。
 
 生产环境执行 `--apply` 属于数据库写入，必须先 dry-run、确认备份、说明回滚与验证方式，并取得明确确认后再执行。生产服务器执行这些命令时必须显式使用 Node 24 环境。
+
+给生产产品新增、删除或重排图库同样属于生产数据库写入。代码部署授权不包含图库数据试点；必须另行确认目标产品、图片来源、顺序、备份和回滚方式后，才能通过生产后台保存。
 
 ## 服务器同步流程
 

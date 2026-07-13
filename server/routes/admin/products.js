@@ -13,6 +13,7 @@ const { deleteProductCardThumbnail, queueProductCardThumbnail } = require('../..
 const router = express.Router();
 const STATUSES = ['published', 'draft', 'deleted'];
 const BATCH_ACTIONS = ['soft_delete', 'publish', 'draft', 'hard_delete'];
+const MAX_PRODUCT_GALLERY_IMAGES = 6;
 const PRODUCT_ISSUE_FILTERS = new Set(['missing_seo', 'missing_arabic', 'missing_cover', 'missing_specs', 'missing_public_url']);
 const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
 const IMAGE_EXTENSIONS = {
@@ -354,6 +355,25 @@ function normalizeGalleryPaths(value) {
     return paths;
 }
 
+function finalGalleryPaths(paths, coverPath) {
+    const cover = String(coverPath || '');
+    const seen = new Set();
+    return (paths || []).filter(function (galleryPath) {
+        if (!galleryPath || galleryPath === cover || seen.has(galleryPath)) return false;
+        seen.add(galleryPath);
+        return true;
+    });
+}
+
+function existingGalleryPaths(db, productId) {
+    return db.prepare(`
+        SELECT path
+        FROM product_media
+        WHERE product_id = ? AND is_cover = 0
+        ORDER BY sort_order, id
+    `).all(productId).map(function (row) { return row.path || ''; }).filter(Boolean);
+}
+
 function replaceGalleryImages(db, productId, paths, coverPath, timestamp) {
     if (paths == null) return;
     db.prepare('DELETE FROM product_media WHERE product_id = ? AND is_cover = 0').run(productId);
@@ -593,9 +613,13 @@ router.post('/', function (req, res, next) {
         if (coverPath == null && body.cover_image != null) {
             return sendError(res, 422, 'VALIDATION_ERROR', 'Invalid cover_image path.');
         }
-        const galleryPaths = body.gallery === undefined ? [] : normalizeGalleryPaths(body.gallery);
-        if (galleryPaths == null) {
-            return sendError(res, 422, 'VALIDATION_ERROR', 'Invalid cover_image path.');
+        const normalizedGalleryPaths = body.gallery === undefined ? [] : normalizeGalleryPaths(body.gallery);
+        if (normalizedGalleryPaths == null) {
+            return sendError(res, 422, 'VALIDATION_ERROR', 'Invalid gallery image path.');
+        }
+        const galleryPaths = finalGalleryPaths(normalizedGalleryPaths, coverPath);
+        if (galleryPaths.length > MAX_PRODUCT_GALLERY_IMAGES) {
+            return sendError(res, 422, 'VALIDATION_ERROR', 'Gallery supports up to 6 images.');
         }
 
         const db = getDb();
@@ -713,10 +737,19 @@ router.put('/:id', function (req, res, next) {
         if (coverPath == null && body.cover_image !== undefined) {
             return sendError(res, 422, 'VALIDATION_ERROR', 'Invalid cover_image path.');
         }
-        const galleryPaths = body.gallery === undefined ? undefined : normalizeGalleryPaths(body.gallery);
-        if (galleryPaths == null && body.gallery !== undefined) {
-            return sendError(res, 422, 'VALIDATION_ERROR', 'Invalid cover_image path.');
+        const requestedGalleryPaths = body.gallery === undefined ? undefined : normalizeGalleryPaths(body.gallery);
+        if (requestedGalleryPaths == null && body.gallery !== undefined) {
+            return sendError(res, 422, 'VALIDATION_ERROR', 'Invalid gallery image path.');
         }
+        const finalCoverPath = coverPath === undefined ? before.cover_image : coverPath;
+        const galleryPaths = finalGalleryPaths(
+            requestedGalleryPaths === undefined ? existingGalleryPaths(db, before.id) : requestedGalleryPaths,
+            finalCoverPath
+        );
+        if (galleryPaths.length > MAX_PRODUCT_GALLERY_IMAGES) {
+            return sendError(res, 422, 'VALIDATION_ERROR', 'Gallery supports up to 6 images.');
+        }
+        const mediaTouched = body.cover_image !== undefined || body.gallery !== undefined;
 
         let categoryMapping = null;
         if (body.category_id !== undefined) {
@@ -803,8 +836,8 @@ router.put('/:id', function (req, res, next) {
                 replaceProductSpecs(db, before.id, normalizeProductSpecs(body.specs), timestamp);
             }
             replaceCoverImage(db, before.id, coverPath, timestamp);
-            if (galleryPaths !== undefined) {
-                replaceGalleryImages(db, before.id, galleryPaths, coverPath === undefined ? before.cover_image : coverPath, timestamp);
+            if (mediaTouched) {
+                replaceGalleryImages(db, before.id, galleryPaths, finalCoverPath, timestamp);
             }
             syncProductAssetReferences(db, before.id);
             const afterAudit = getAuditProduct(db, before.id);

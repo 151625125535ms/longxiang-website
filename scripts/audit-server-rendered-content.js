@@ -137,6 +137,12 @@ function inspectDetail(path, html) {
     const imageAttrs = attributes(image);
     if (!imageAttrs.src || /product-cards/i.test(imageAttrs.src) || imageAttrs.width !== '960' || imageAttrs.height !== '720' || String(imageAttrs.fetchpriority || '').toLowerCase() !== 'high') fail(path, 'high-quality main image contract mismatch');
     if (expectedView && imageAttrs.src !== expectedView.image.src) fail(path, 'main image does not match URL product');
+    const galleryLayout = (html.match(/<div\b[^>]*class=["'][^"']*\bproduct-gallery-layout\b[^"']*["'][^>]*>/i) || [])[0] || '';
+    const galleryAttrs = attributes(galleryLayout);
+    if (galleryAttrs['data-gallery-state'] !== 'single') fail(path, 'single-image production product has a non-single gallery state');
+    if (count(html, /data-product-gallery-thumbnail/gi) !== 0 || count(html, /data-product-gallery-step/gi) !== 0 || /class=["'][^"']*\bproduct-gallery-rail\b/i.test(html)) {
+        fail(path, 'single-image production product exposes gallery controls or an empty rail');
+    }
     if (count(html, /<tbody\b[^>]*id=["']specs-body["'][^>]*>[\s\S]*?<tr>/gi) < 1) fail(path, 'specification rows missing');
     const specsBody = (html.match(/<tbody\b[^>]*id=["']specs-body["'][^>]*>([\s\S]*?)<\/tbody>/i) || [])[1] || '';
     if (expectedView && specsBody.trim() !== expectedView.fragments.specs.trim()) fail(path, 'specifications do not match URL product');

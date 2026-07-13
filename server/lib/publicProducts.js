@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const { getDb } = require('./db');
 const { resolveUploadDir, resolveUploadPublicPath } = require('./fileStore');
+const { productGalleryThumbnailUrl } = require('./productGalleryThumbnail');
 const { VALID_GROUPS, getCategoryMapping } = require('./category-helper');
 
 const PROJECT_ROOT = path.resolve(__dirname, '..', '..');
@@ -71,7 +72,41 @@ function resolveProductCardImage(row, coverPath) {
     return publicPath + '?v=' + Math.round(cardStat.mtimeMs);
 }
 
-function mapSqliteProduct(row, specsByProduct, coverByProduct) {
+function normalizePublicMediaPath(value) {
+    const normalized = String(value || '').trim().replace(/\\/g, '/').replace(/^\/+/, '');
+    if (!normalized || /[\u0000-\u001f\u007f]/.test(normalized)) return '';
+    if (normalized.indexOf('..') !== -1 || /^(?:https?:)?\/\//i.test(normalized)) return '';
+    return normalized;
+}
+
+function detailProductImages(mediaRows, coverPath, identifier) {
+    const cover = normalizePublicMediaPath(coverPath);
+    if (!cover) return [];
+    const seen = new Set([cover]);
+    const coverMedia = (mediaRows || []).find(function (media) {
+        return media && Number(media.is_cover) === 1 && normalizePublicMediaPath(media.path) === cover;
+    });
+    const images = [{
+        src: cover,
+        thumbnailSrc: productGalleryThumbnailUrl(identifier, 0, cover, coverMedia && coverMedia.id),
+        isCover: true
+    }];
+    (mediaRows || []).forEach(function (media) {
+        if (!media || Number(media.is_cover) === 1) return;
+        if (media.media_type && media.media_type !== 'image') return;
+        const src = normalizePublicMediaPath(media.path);
+        if (!src || seen.has(src)) return;
+        seen.add(src);
+        images.push({
+            src,
+            thumbnailSrc: productGalleryThumbnailUrl(identifier, images.length, src, media.id),
+            isCover: false
+        });
+    });
+    return images;
+}
+
+function mapSqliteProduct(row, specsByProduct, coverByProduct, mediaByProduct, includeImages) {
     const specs = specsByProduct[row.id] || [];
     let group = row.product_group || '';
     let subCategory = row.sub_category || '';
@@ -86,7 +121,7 @@ function mapSqliteProduct(row, specsByProduct, coverByProduct) {
         subCategory = mapping.subCategory;
     }
 
-    return {
+    const product = {
         id: row.legacy_id,
         slug: row.slug || '',
         name: row.name_en,
@@ -133,6 +168,14 @@ function mapSqliteProduct(row, specsByProduct, coverByProduct) {
         seoKeywordsFr: row.seo_keywords_fr || '',
         seoKeywordsRu: row.seo_keywords_ru || ''
     };
+    if (includeImages) {
+        product.images = detailProductImages(
+            mediaByProduct[row.id] || [],
+            coverByProduct[row.id] || '',
+            row.slug || row.legacy_id
+        );
+    }
+    return product;
 }
 
 function findSqliteProductByAlias(db, id) {
@@ -149,6 +192,7 @@ function findSqliteProductByAlias(db, id) {
 
 function readSqliteProducts(id, dbValue) {
     const db = dbValue || getDb();
+    const includeImages = Boolean(id);
     let params = [];
     let idWhere = '';
     if (id) {
@@ -200,8 +244,8 @@ function readSqliteProducts(id, dbValue) {
     `).all(ids);
     const mediaRows = db.prepare(`
         SELECT * FROM product_media
-        WHERE product_id IN (${placeholders}) AND is_cover = 1
-        ORDER BY sort_order, id
+        WHERE product_id IN (${placeholders}) ${includeImages ? '' : 'AND is_cover = 1'}
+        ORDER BY product_id, is_cover DESC, sort_order, id
     `).all(ids);
 
     const specsByProduct = {};
@@ -211,12 +255,17 @@ function readSqliteProducts(id, dbValue) {
     });
 
     const coverByProduct = {};
+    const mediaByProduct = {};
     mediaRows.forEach(function (media) {
-        if (!coverByProduct[media.product_id]) coverByProduct[media.product_id] = media.path || '';
+        if (!mediaByProduct[media.product_id]) mediaByProduct[media.product_id] = [];
+        mediaByProduct[media.product_id].push(media);
+        if (Number(media.is_cover) === 1 && !coverByProduct[media.product_id]) {
+            coverByProduct[media.product_id] = normalizePublicMediaPath(media.path);
+        }
     });
 
     return products
-        .map(product => mapSqliteProduct(product, specsByProduct, coverByProduct))
+        .map(product => mapSqliteProduct(product, specsByProduct, coverByProduct, mediaByProduct, includeImages))
         .filter(Boolean);
 }
 

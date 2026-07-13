@@ -20,6 +20,12 @@
         fr: { viewDetails: 'Voir les détails', priceInquiry: 'Demander un prix', productsAvailable: 'produits disponibles', productsUpdatedSoon: 'Les produits seront mis à jour prochainement.', pageOf: function (p, n) { return 'Page ' + p + ' sur ' + n; }, keyword: 'Mot-clé', noResultsPrefix: 'Aucun résultat pour "', noResultsMiddle: '" dans ', noResultsSuffix: '.', updatedSoonSuffix: ' seront mis à jour prochainement.', allCategories: 'Toutes les catégories', closeCategories: 'Fermer les catégories de produits', productCategories: 'Catégories de produits', searchPlaceholder: 'Rechercher par nom ou modèle', searchButton: 'Rechercher', currentFilter: 'Filtre actuel :', clearFilters: 'Effacer les filtres', productPagination: 'Pagination des produits' },
         ru: { viewDetails: 'Подробнее', priceInquiry: 'Запросить цену', productsAvailable: 'товаров доступно', productsUpdatedSoon: 'Продукция будет обновлена в ближайшее время.', pageOf: function (p, n) { return 'Страница ' + p + ' из ' + n; }, keyword: 'Ключевое слово', noResultsPrefix: 'Нет результатов по запросу "', noResultsMiddle: '" в ', noResultsSuffix: '.', updatedSoonSuffix: ' будут обновлены в ближайшее время.', allCategories: 'Все категории', closeCategories: 'Закрыть категории продукции', productCategories: 'Категории продукции', searchPlaceholder: 'Поиск по названию или модели', searchButton: 'Поиск', currentFilter: 'Текущий фильтр:', clearFilters: 'Сбросить фильтры', productPagination: 'Пагинация продукции' }
     };
+    var GALLERY_UI = {
+        en: { images: 'Product images', image: 'Image', view: 'View product image', previous: 'Previous image', next: 'Next image' },
+        ar: { images: 'صور المنتج', image: 'الصورة', view: 'عرض صورة المنتج', previous: 'الصورة السابقة', next: 'الصورة التالية' },
+        fr: { images: 'Images du produit', image: 'Image', view: 'Voir l’image du produit', previous: 'Image précédente', next: 'Image suivante' },
+        ru: { images: 'Изображения продукта', image: 'Изображение', view: 'Показать изображение продукта', previous: 'Предыдущее изображение', next: 'Следующее изображение' }
+    };
 
     function esc(value) { return content.escapeHtml(value); }
     function localizeTree(value, locale) { return content.localizeTree(value || {}, locale); }
@@ -242,6 +248,59 @@
         return '<h3>' + esc(localized(form, 'title', locale) || 'Product Inquiry') + '</h3>' + (localized(form, 'note', locale) ? '<p class="product-inquiry-note">' + esc(localized(form, 'note', locale)) + '</p>' : '') + '<form class="inquiry-form" data-inquiry-form><input type="hidden" name="subject" value="quote"><input type="hidden" name="productContext" data-product-context value="' + esc(contextValue) + '">' + fields.map(function (field) { var html = inquiryField(field, locale); if (field.productContextDisplay) html = html.replace(/(<input\b[^>]*)(>)/, '$1 value="' + esc(contextValue) + '"$2'); if (field.productMessage) html = html.replace(/(<textarea\b[^>]*>)(<\/textarea>)/, '$1' + esc(message) + '$2'); return html; }).join('') + '<button type="submit" class="btn btn-primary">' + esc(localized(form, 'submitLabel', locale) || 'Submit Inquiry') + '</button></form>';
     }
 
+    function productImages(product, name, locale) {
+        var items = Array.isArray(product.images) ? product.images : [];
+        var cover = safeAsset(product.image, locale);
+        if (!cover) {
+            var markedCover = items.find(function (item) { return item && typeof item === 'object' && item.isCover; });
+            cover = safeAsset(markedCover && markedCover.src, locale);
+        }
+        if (!cover) return [];
+        var seen = {};
+        var normalizedItems = [{ src: cover, thumbnailSrc: cover }];
+        seen[cover] = true;
+        items.forEach(function (item) {
+            var src = safeAsset(item && typeof item === 'object' ? item.src : item, locale);
+            if (!src || seen[src]) return;
+            seen[src] = true;
+            normalizedItems.push({
+                src: src,
+                thumbnailSrc: safeAsset(item && typeof item === 'object' ? (item.thumbnailSrc || item.thumbnail_src) : '', locale) || src
+            });
+        });
+        if (items.length && items[0] && typeof items[0] === 'object' && safeAsset(items[0].src, locale) === cover) {
+            normalizedItems[0].thumbnailSrc = safeAsset(items[0].thumbnailSrc || items[0].thumbnail_src, locale) || cover;
+        }
+        var ui = GALLERY_UI[locale] || GALLERY_UI.en;
+        return normalizedItems.map(function (item, index) {
+            return {
+                src: item.src,
+                thumbnailSrc: item.thumbnailSrc,
+                isCover: index === 0,
+                alt: index === 0 ? name : name + ' - ' + ui.image + ' ' + (index + 1)
+            };
+        });
+    }
+
+    function productGalleryHtml(images, locale) {
+        var ui = GALLERY_UI[locale] || GALLERY_UI.en;
+        var multiple = images.length > 1;
+        var main = images[0] || { src: '', alt: '' };
+        var imageAttrs = main.src ? ' src="' + esc(main.src) + '"' : '';
+        var html = '<div class="product-gallery-layout" data-gallery-state="' + (multiple ? 'multiple' : 'single') + '" aria-label="' + esc(ui.images) + '">' +
+            '<div class="product-detail-main-image product-gallery-main-stage"><img id="main-product-image"' + imageAttrs + ' alt="' + esc(main.alt) + '" width="960" height="720" loading="eager" decoding="async" fetchpriority="high"></div>';
+        if (multiple) {
+            html += '<div class="product-gallery-rail"><div class="product-gallery-toolbar">' +
+                '<span class="product-gallery-count" aria-live="polite"><span data-product-gallery-current>1</span> / ' + images.length + '</span>' +
+                '<div class="product-gallery-actions"><button type="button" class="product-gallery-step" data-product-gallery-step="previous" aria-label="' + esc(ui.previous) + '" title="' + esc(ui.previous) + '" disabled>\u2191</button>' +
+                '<button type="button" class="product-gallery-step" data-product-gallery-step="next" aria-label="' + esc(ui.next) + '" title="' + esc(ui.next) + '">\u2193</button></div></div>' +
+                '<div class="product-gallery-thumbnails" role="list" aria-label="' + esc(ui.images) + '">' + images.map(function (image, index) {
+                    return '<button type="button" class="product-gallery-thumbnail" role="listitem" data-product-gallery-thumbnail data-gallery-index="' + index + '" data-gallery-src="' + esc(image.src) + '" data-gallery-alt="' + esc(image.alt) + '" aria-label="' + esc(ui.view + ' ' + (index + 1)) + '" aria-current="' + (index === 0 ? 'true' : 'false') + '"><img src="' + esc(image.thumbnailSrc || image.src) + '" alt="" aria-hidden="true" loading="lazy" decoding="async" width="160" height="120"></button>';
+                }).join('') + '</div></div>';
+        }
+        return html + '</div>';
+    }
+
     function presentDetail(options) {
         options = options || {};
         var locale = options.locale || 'en', product = options.product || {}, products = options.products || [];
@@ -264,13 +323,16 @@
         if (voltage || capacity || standard) selection.unshift([voltage ? text('Voltage: ', locale, 'الجهد: ') + voltage : '', capacity ? text('Capacity: ', locale, 'السعة: ') + capacity : '', standard ? text('Standard: ', locale, 'المعيار: ') + standard : ''].filter(Boolean).join(' | '));
         var related = relatedProducts(product, products);
         var specs = displaySpecRows(product);
+        var images = productImages(product, name, locale);
+        var mainImage = images[0] || { src: safeAsset(product.image, locale), alt: name };
         var result = {
             contractVersion: 1, kind: 'detail', key: '',
             state: { productId: product.id || '', slug: product.slug || product.id || '' },
-            image: { src: safeAsset(product.image, locale), alt: name, width: 960, height: 720 },
+            image: { src: mainImage.src, alt: mainImage.alt, width: 960, height: 720 },
+            images: images,
             hero: { title: name, subtitle: category || localized(labels, 'defaultSubtitle', locale), breadcrumb: name },
             fragments: {
-                title: esc(name), description: descriptionHtml(desc),
+                gallery: productGalleryHtml(images, locale), title: esc(name), description: descriptionHtml(desc),
                 decision: '<div class="product-decision-grid">' + decision.map(function (item) { return '<div><span>' + esc(item.label) + '</span><strong' + rtl(locale) + '>' + esc(item.value) + '</strong></div>'; }).join('') + '</div><button type="button" class="btn btn-primary btn-sm" data-open-inquiry data-product-id="' + esc(product.id || '') + '" data-product-name="' + esc(name) + '">' + esc(text('Request Configuration Quote', locale, 'طلب عرض تكوين')) + '</button>',
                 applications: '<h2>' + esc(text('Application Scenarios', locale, 'سيناريوهات الاستخدام')) + '</h2><div class="product-applications-grid">' + applications.map(function (item) { return '<div><strong>' + esc(item.title) + '</strong><span>' + esc(item.text) + '</span></div>'; }).join('') + '</div>',
                 selection: '<h2>' + esc(text('Selection & Delivery Notes', locale, 'ملاحظات الاختيار والتسليم')) + '</h2><ul class="product-selection-list">' + selection.map(function (item) { return '<li>' + esc(item) + '</li>'; }).join('') + '</ul>',

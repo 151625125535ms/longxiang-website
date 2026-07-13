@@ -875,6 +875,8 @@
         if (specs) specs.style.display = 'none';
         var image = document.getElementById('main-product-image');
         if (image) image.style.display = 'none';
+        var gallery = document.querySelector('[data-product-gallery]');
+        if (gallery) gallery.hidden = true;
         var sidebar = document.querySelector('.product-detail-sidebar');
         if (sidebar) sidebar.style.display = 'none';
     }
@@ -921,10 +923,56 @@
         return document.querySelector('[data-product-page-kind="detail"]');
     }
 
+    function initProductGallery() {
+        var gallery = document.querySelector('[data-product-gallery]');
+        if (!gallery || gallery.getAttribute('data-gallery-enhanced') === 'true') return;
+        gallery.setAttribute('data-gallery-enhanced', 'true');
+        var mainImage = gallery.querySelector('#main-product-image');
+        var thumbnails = Array.prototype.slice.call(gallery.querySelectorAll('[data-product-gallery-thumbnail]'));
+        if (!mainImage || thumbnails.length < 2) return;
+        var current = gallery.querySelector('[data-product-gallery-current]');
+        var previous = gallery.querySelector('[data-product-gallery-step="previous"]');
+        var next = gallery.querySelector('[data-product-gallery-step="next"]');
+        var currentIndex = Math.max(0, thumbnails.findIndex(function (button) {
+            return button.getAttribute('aria-current') === 'true';
+        }));
+
+        function activate(index, moveFocus, shouldScroll) {
+            index = Math.max(0, Math.min(thumbnails.length - 1, index));
+            var selected = thumbnails[index];
+            var src = selected.getAttribute('data-gallery-src') || '';
+            var alt = selected.getAttribute('data-gallery-alt') || '';
+            if (src) mainImage.src = src;
+            mainImage.alt = alt;
+            thumbnails.forEach(function (button, buttonIndex) {
+                button.setAttribute('aria-current', buttonIndex === index ? 'true' : 'false');
+            });
+            currentIndex = index;
+            if (current) current.textContent = String(index + 1);
+            if (previous) previous.disabled = index === 0;
+            if (next) next.disabled = index === thumbnails.length - 1;
+            if (shouldScroll) selected.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
+            if (moveFocus) selected.focus({ preventScroll: true });
+        }
+
+        thumbnails.forEach(function (button, index) {
+            button.addEventListener('click', function () { activate(index, false, true); });
+        });
+        if (previous) previous.addEventListener('click', function () { activate(currentIndex - 1, true, true); });
+        if (next) next.addEventListener('click', function () { activate(currentIndex + 1, true, true); });
+        activate(currentIndex, false, false);
+    }
+
     function applyPresentedProduct(view, product) {
         setText('breadcrumb-product', view.hero.breadcrumb);
         setText('page-title', view.hero.title);
         setText('page-subtitle', view.hero.subtitle);
+        var gallery = document.querySelector('[data-product-gallery]');
+        if (gallery) {
+            gallery.removeAttribute('data-gallery-enhanced');
+            gallery.innerHTML = view.fragments.gallery;
+            gallery.hidden = false;
+        }
         var image = document.getElementById('main-product-image');
         if (image) {
             image.src = view.image.src;
@@ -964,6 +1012,7 @@
         });
         var root = productSsrRoot();
         if (root) root.setAttribute('data-product-view-key', view.key);
+        initProductGallery();
         if (typeof window.initContactForm === 'function') window.initContactForm();
     }
 
@@ -982,6 +1031,7 @@
             root.setAttribute('data-product-view-key', view.key);
             root.setAttribute('data-product-content-version', String(productPageContentVersion || 0));
         }
+        initProductGallery();
     }
 
     function renderProduct(product, allProducts) {

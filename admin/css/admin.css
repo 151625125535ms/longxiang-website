@@ -2412,6 +2412,48 @@ h1, h2, h3, h4, h5, h6 {
     background: var(--color-danger);
 }
 
+.gallery-order-badge {
+    z-index: 2;
+}
+
+.gallery-order-controls {
+    position: absolute;
+    right: 38px;
+    top: 6px;
+    z-index: 2;
+    display: inline-flex;
+    gap: 4px;
+}
+
+.gallery-order-controls button {
+    width: 26px;
+    height: 26px;
+    display: inline-grid;
+    place-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.64);
+    border-radius: 4px;
+    background: rgba(15, 23, 42, 0.76);
+    color: var(--color-white-pure);
+    line-height: 1;
+    cursor: pointer;
+}
+
+.gallery-order-controls button:hover:not(:disabled),
+.gallery-order-controls button:focus-visible {
+    border-color: var(--color-warning);
+    background: var(--color-gray-900);
+}
+
+.gallery-order-controls button:disabled {
+    opacity: 0.36;
+    cursor: not-allowed;
+}
+
+#product-gallery-help.is-limit {
+    color: var(--color-warning);
+    font-weight: 700;
+}
+
 .gallery-empty,
 .relation-picker,
 .editor-status-list {
