@@ -22,10 +22,11 @@ function parseArgs(argv) {
         db: defaultDbPath,
         report: defaultReportPath,
         backup: '',
+        pairedForward: '',
         policy: DEFAULT_PRODUCT_FIELD_PATCH_POLICY_ID,
         policyExplicit: false
     };
-    const valueOptions = new Set(['input', 'db', 'report', 'backup', 'policy']);
+    const valueOptions = new Set(['input', 'db', 'report', 'backup', 'paired-forward', 'policy']);
     for (let index = 2; index < argv.length; index += 1) {
         const arg = argv[index];
         if (arg === '--dry-run') {
@@ -44,7 +45,8 @@ function parseArgs(argv) {
                 if (!value || value.startsWith('--')) throw new Error('Missing value for --' + name);
                 index += 1;
             }
-            args[name] = value;
+            if (name === 'paired-forward') args.pairedForward = value;
+            else args[name] = value;
             if (name === 'policy') args.policyExplicit = true;
         } else {
             throw new Error('Unexpected argument: ' + arg);
@@ -57,6 +59,7 @@ function parseArgs(argv) {
     args.db = path.resolve(args.db);
     args.report = path.resolve(args.report);
     args.backup = args.backup ? path.resolve(args.backup) : '';
+    args.pairedForward = args.pairedForward ? path.resolve(args.pairedForward) : '';
     return args;
 }
 
@@ -69,6 +72,7 @@ async function main(argv) {
         dbPath: args.db,
         reportPath: args.report,
         backupPath: args.backup,
+        pairedForwardPath: args.pairedForward,
         policy,
         policyExplicit: args.policyExplicit
     });

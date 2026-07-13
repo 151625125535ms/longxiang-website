@@ -1,6 +1,6 @@
 # 当前事实清单
 
-更新时间：2026-07-13 19:56（Asia/Shanghai）
+更新时间：2026-07-14（Asia/Shanghai）
 用途：记录当前线上真实状态，作为后续修改、部署、SEO/i18n 调整和后台内容维护的对照基线。
 更新原则：只记录已经通过本地、GitHub、服务器或真实 HTTP 结果核验过的事实；未核验项必须明确标注。
 
@@ -10,11 +10,12 @@
 - 2026-07-13 产品详情图库代码提交 `e5ddf04`（`实现产品详情多图图库闭环`）已推送至 GitHub；生产服务器已通过 `git pull --ff-only origin main` 从 `25eeb82` 快进到该提交。
 - 2026-07-13 图库切换修复提交 `0ac95b8`（`修复产品图库脚本缓存导致无法切图`）已推送并部署；根因是公共壳层把 `product-detail.js` 改写为旧的 30 天 immutable 缓存版本，修复后仅产品详情脚本使用 `20260713-product-gallery-interaction-fix`。
 - 生产使用 `pm2 reload longxiang-website --update-env` 完成无停机重载，进程保持 `online`；部署后内网和公网健康接口均返回成功。
-- 本次提交未修改依赖、数据库结构或迁移，因此未执行 `npm install`，也未写入生产数据库、生产上传目录或产品图库数据。
+- 上述 2026-07-13 图库提交未修改依赖、数据库结构或迁移，因此未执行 `npm install`，也未写入生产数据库、生产上传目录或产品图库数据。
 - 生产服务器工作区在部署前后均无 tracked 改动。
 - 本地未跟踪噪音：`.tmp/`、`chanpince/`，按项目规则默认不处理
 - 禁止同步方向：不得执行 `git push longxiang`；服务器只允许 `git pull origin main`
 - 2026-07-08 产品图片资源关联修复代码提交：`8690b6b`（`补充产品图片资源关联修复入口`）已推送 GitHub 并由生产服务器 `git pull origin main` 拉取；本次只部署脚本、审计口径和运维文档，未执行生产数据库 `--apply`。
+- 2026-07-14 阿语产品 SEO 代码与内容补丁已在本地完成准备和验证，生产仍未部署：未执行服务器 pull、Schema v6 迁移、后台保存 canary 或批量数据写入。部署和数据写入分别需要后续独立授权。
 
 ## 运行环境
 
@@ -59,6 +60,9 @@
 - `pt` 当前状态：只在 `plannedLocales` 中预留，`includeInSitemap=false`
 - 本地 SEO/i18n 校验：`node scripts/verify-seo-i18n.js` 通过
 - 生产 SEO/i18n 校验：使用 Node 24 运行 `node scripts/verify-seo-i18n.js` 通过
+- 生产只读核实仍为 Schema v5，`products` 尚无 `seo_title_ar`、`seo_description_ar`、`seo_keywords_ar` 三列；阿语产品详情继续使用现有名称和简介回退，不应把本地代码能力误报为已上线。
+- 本地准备的 Schema v6 将增加上述三个后台字段。公开产品接口只提供阿语 SEO 标题与描述，关键词仅供后台内容管理，不输出 `<meta name="keywords">`。
+- 基于 2026-07-14 生产只读快照已为全部 42 个非删除产品准备 126 项阿语 SEO 内容；自动长度、重复、非法字符、来源外数字/单位及 forward/rollback 对称性审计通过。独立阿语内容审批仍未完成；pending forward 可 dry-run 但被代码禁止 apply，rollback 也必须与已审批 forward 的摘要及严格逆映射一致。
 
 ## 生产数据库
 
@@ -70,12 +74,12 @@
 
 | 对象 | 数量 | 备注 |
 | --- | ---: | --- |
-| products | 53 | 其中 `published=38`，`deleted=15` |
+| products | 57 | 其中 `published=42`，`deleted=15` |
 | categories | 17 |  |
 | certifications | 76 | 全部 `published` |
 | content_blocks | 15 |  |
-| assets | 217 |  |
-| product_media | 55 | 其中非封面媒体 `2` |
+| assets | 221 |  |
+| product_media | 59 | 其中非封面媒体 `2` |
 | inquiries | 8 |  |
 
 当前关键表：
@@ -98,8 +102,9 @@
 - 生产 `products` 表没有 `image` 字段。
 - 产品图片当前以 `product_media.path` 为主。
 - 产品详情图库继续使用 `product_media` 作为唯一数据源，不新增图库字段或第二套关系；封面为 `is_cover=1, sort_order=1`，图库从 2 开始连续排序。
-- 2026-07-13 生产试点后只读复核：38 个 published 产品中，`segmented-arc-quenching-surge-arrester` 有 3 张图片（1 张封面、2 张图库图），其余 37 个产品仍为单图。
+- 2026-07-14 生产只读复核：42 个 published 产品中，`segmented-arc-quenching-surge-arrester` 有 3 张图片（1 张封面、2 张图库图），其余 41 个产品为单图。
 - `products` 已有 `fr`、`ru` 字段族，例如 `name_fr`、`name_ru`、`description_fr`、`description_ru`、`seo_title_fr`、`seo_title_ru`。
+- 生产 Schema v5 尚无三个阿语 SEO 专用列；本地迁移 `0006_product_arabic_seo_fields` 未获生产执行授权。
 - `certifications` 已有 `fr`、`ru` 字段族。
 
 ## 图片与上传资源
@@ -115,8 +120,8 @@
 - non-upload product_media paths：`23`
 - orphan upload files：`9`
 - 产品图库派生缩略图缓存文件：`3`
-- `assets.entity_id IS NULL`：`213`
-- `product_media.asset_id IS NULL`：`1 / 55 (1.82%)`
+- `assets.entity_id IS NULL`：`217`
+- `product_media.asset_id IS NULL`：`1 / 59 (1.69%)`
 
 解释：
 
@@ -156,8 +161,9 @@
 ## 当前已知风险
 
 - 服务器 SSH 默认 Node/npm 与项目 engines 不一致；直接用默认 `node` 跑依赖 `better-sqlite3` 的脚本会失败。部署、排障和手工脚本执行时必须显式进入 Node 24 环境。
-- 资源关联尚未完全闭合：`assets.entity_id IS NULL=213`，`product_media.asset_id IS NULL=1/55`。图库试点新增图片没有产生产品 owner 引用缺口或过期引用；剩余缺口仍是此前产品 12 的旧路径关联，当前不影响已核验的图片路径健康。
+- 资源关联尚未完全闭合：`assets.entity_id IS NULL=217`，`product_media.asset_id IS NULL=1/59`。图库试点和后续四个产品上传没有扩大 `product_media.asset_id` 空值数量；剩余缺口仍是此前产品 12 的旧路径关联，当前不影响已核验的图片路径健康。
 - 生产多图试点已完成技术验收，用户侧最终确认仍待完成；在扩大到其他产品前仍需逐项确认图片内容和顺序。
+- 阿语 SEO 仍处于“本地代码与内容准备完成、生产未迁移”状态。代码部署、v6 自动迁移、生产后台 canary 和 42 个产品批量 apply 是四个不同的完成边界，不能合并授权或合并汇报。
 - 搜索引擎控制台状态本次未核验；Google Search Console、Bing Webmaster Tools 的提交和收录状态不应从代码或 sitemap 状态反推。
 - 本清单是时间点事实，不代表永久事实。每次语言、SEO、产品数据、上传链路、部署环境发生变化后都应更新。
 
@@ -171,6 +177,8 @@ git rev-parse HEAD
 git rev-parse origin/main
 node scripts/generate-sitemap.js --dry-run
 node scripts/verify-seo-i18n.js
+node scripts/audit-product-arabic-seo.js
+node scripts/test-product-arabic-seo-content-patch.js
 npm run images:repair-product-links
 npm run images:verify-product-links
 git diff --check

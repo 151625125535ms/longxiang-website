@@ -31,13 +31,13 @@ assert(!/whatsapp/i.test(JSON.stringify(contactBlock)), 'contact block exposes W
 
 const versionedProductScripts = versionHydrationScripts('<script src="../js/products-list.js?v=old"></script><script src="js/product-detail.js"></script><script src="js/education.js?v=old"></script>');
 assert(versionedProductScripts.includes('/js/products-list.js?v=20260712-stage2d-entity-graph'));
-assert(versionedProductScripts.includes('/js/product-detail.js?v=20260713-product-gallery-interaction-fix'));
+assert(versionedProductScripts.includes('/js/product-detail.js?v=20260714-arabic-seo'));
 assert(!versionedProductScripts.includes('/js/product-detail.js?v=20260712-stage2d-entity-graph'));
 assert(versionedProductScripts.includes('/js/education.js?v=20260712-stage2d-entity-graph'));
 
 ['product-detail.html', 'ar/product-detail.html', 'fr/product-detail.html', 'ru/product-detail.html'].forEach(function (file) {
     const html = fs.readFileSync(path.join(root, file), 'utf8');
-    assert(html.includes('product-detail.js?v=20260713-product-gallery-interaction-fix'), file + ' must load the current product gallery interaction script');
+    assert(html.includes('product-detail.js?v=20260714-arabic-seo'), file + ' must load the current Arabic SEO product detail script');
 });
 
 locales.forEach(function ([locale, file, pathname]) {

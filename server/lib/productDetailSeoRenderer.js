@@ -29,6 +29,13 @@ function localizedProductValue(product, baseField, localeCode) {
     return String(localized || product[baseField] || '').trim();
 }
 
+function exactLocalizedProductValue(product, baseField, localeCode) {
+    if (!product || !baseField) return '';
+    const suffix = localeFieldSuffix(localeCode);
+    const key = suffix ? baseField + suffix : baseField;
+    return String(product[key] || '').trim();
+}
+
 function productPublicIdentifier(product) {
     return String(product && (product.slug || product.id) || '').trim();
 }
@@ -77,7 +84,7 @@ function cleanMetaDescription(value) {
 }
 
 function productSeoTitle(product, localeCode) {
-    const seoTitle = localeCode === 'ar' ? '' : localizedProductValue(product, 'seoTitle', localeCode);
+    const seoTitle = exactLocalizedProductValue(product, 'seoTitle', localeCode);
     if (seoTitle) return cleanSeoTitle(seoTitle);
     const name = localizedProductValue(product, 'name', localeCode) || localizedProductValue(product, 'name', 'en');
     return cleanSeoTitle(name ? name + ' | ' + TITLE_SUFFIX : TITLE_SUFFIX);
@@ -85,7 +92,7 @@ function productSeoTitle(product, localeCode) {
 
 function productSeoDescription(product, localeCode) {
     const candidates = [
-        localeCode === 'ar' ? '' : localizedProductValue(product, 'seoDescription', localeCode),
+        exactLocalizedProductValue(product, 'seoDescription', localeCode),
         localizedProductValue(product, 'shortDesc', localeCode),
         localizedProductValue(product, 'description', localeCode),
         product && product.shortDesc,
@@ -228,6 +235,7 @@ function renderProductDetailSeoHtml(html, product, locale, origin) {
 
 module.exports = {
     localizedProductValue,
+    exactLocalizedProductValue,
     productPublicIdentifier,
     localizedProductPath,
     productCanonicalUrls,

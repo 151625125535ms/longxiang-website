@@ -55,6 +55,15 @@ Invoke-WebRequest -UseBasicParsing -Uri http://127.0.0.1:3000/api/health
 - `seo_title`
 - `seo_description`
 - `seo_keywords`
+- `seo_title_ar`
+- `seo_description_ar`
+- `seo_keywords_ar`
+- `seo_title_fr`
+- `seo_description_fr`
+- `seo_keywords_fr`
+- `seo_title_ru`
+- `seo_description_ru`
+- `seo_keywords_ru`
 - `cover_image`
 - `gallery`（可选，最多 6 张，不含封面）
 - `specs`
@@ -140,6 +149,27 @@ Content-Type: application/json
 - `gallery`，需要多图时按前台展示顺序传入资源相对路径；不需要多图时创建可省略或传空数组。
 - `specs`，按 `capacity`、`voltage`、`technical` 组织。
 
+### 四语 SEO 信息
+
+产品后台的 SEO 区域按 `EN / AR / FR / RU` 四个标签切换，每种语言都包含标题、描述和关键词三个输入项。切换标签只改变当前可见面板，不会清空其它语言已经填写的值；阿语面板使用 RTL 输入方向。
+
+字段映射如下：
+
+| 语言 | 标题 | 描述 | 关键词 |
+| --- | --- | --- | --- |
+| 英语 | `seo_title` | `seo_description` | `seo_keywords` |
+| 阿语 | `seo_title_ar` | `seo_description_ar` | `seo_keywords_ar` |
+| 法语 | `seo_title_fr` | `seo_description_fr` | `seo_keywords_fr` |
+| 俄语 | `seo_title_ru` | `seo_description_ru` | `seo_keywords_ru` |
+
+阿语标题建议 20-70 字符，描述建议 90-160 字符，关键词填写 3-6 个不重复主题短语。型号、容量、电压和国际代码应与产品资料一致，不得增加来源中不存在的认证、性能或用途承诺。
+
+阿语 SEO 标题和描述会供阿语产品详情页的 title、description、Open Graph、Twitter 和 JSON-LD 使用；字段为空时继续回退到现有阿语名称和简介。`seo_keywords_ar` 仅供后台内容管理，不进入公开产品 API，也不输出 meta keywords。
+
+生产环境只有完成 Schema v6 迁移后才具备这三个阿语字段。迁移前不得在生产后台声称已保存阿语独立 SEO；代码部署、Schema 迁移和批量内容回填必须分别验收。
+
+批量回填的 forward 文件可以在 `approval_status=pending` 时执行 dry-run 和内容审计，但不能 apply；独立阿语审批完成后必须显式改为 `approved`。rollback 必须通过 `--paired-forward` 指向该已审批 forward 文件，且摘要、产品身份及三个字段的正反映射完全一致，否则拒绝执行。
+
 更新接口的图库语义必须区分：
 
 - 省略 `gallery`：保留现有图库；只修改封面时服务端仍会排除与新封面重复的图库项。
@@ -153,6 +183,7 @@ Content-Type: application/json
 1. 后台产品列表能看到目标产品。
 2. 产品归属目标分类。
 3. 后台产品详情中英文和阿拉伯语字段均非空。
+   - Schema v6 上还应切换四个 SEO 标签，确认阿语标题、描述、关键词保存后刷新仍存在，且英/法/俄值未变化。
 4. `product_media.asset_id` 已关联到资源库 `assets.id`。
 5. 封面图访问返回 200：
 
@@ -180,12 +211,16 @@ GET /api/products/<legacy_id>
 - `shortDescAr`
 - `description`
 - `descriptionAr`
+- `seoTitleAr`
+- `seoDescriptionAr`
 - `image`
 - 详情接口的 `images`（封面第一、顺序与后台一致，包含原图 `src` 和缩略图 `thumbnailSrc`）；产品列表接口不得返回完整图库
 - `category`
 - `specs`
 - `capacities`
 - `voltages`
+
+公开接口不返回 `seoKeywordsAr`，页面也不输出 meta keywords；不得把关键词字段是否出现在页面源码中作为保存成功的判断依据。
 
 多图产品还必须完成真实页面验收：
 

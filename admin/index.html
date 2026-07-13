@@ -935,23 +935,23 @@
                                         <div class="form-group"><label>法语短描述</label><input type="text" id="field-shortDescFr" class="bidi-field" dir="auto" lang="fr"></div>
                                         <div class="form-group"><label>俄语短描述</label><input type="text" id="field-shortDescRu" class="bidi-field" dir="auto" lang="ru"></div>
                                     </div>
-                                    <div class="product-description-editor">
+                                    <div class="product-description-editor" data-product-language-editor="detail">
                                         <div class="product-description-tabs" role="tablist" aria-label="产品详情语言">
-                                            <button type="button" class="product-description-tab active" id="product-detail-tab-en" data-product-detail-tab="en" role="tab" aria-selected="true" aria-controls="product-detail-panel-en">英文</button>
-                                            <button type="button" class="product-description-tab" id="product-detail-tab-ar" data-product-detail-tab="ar" role="tab" aria-selected="false" aria-controls="product-detail-panel-ar">阿语</button>
-                                            <button type="button" class="product-description-tab" id="product-detail-tab-fr" data-product-detail-tab="fr" role="tab" aria-selected="false" aria-controls="product-detail-panel-fr">法语</button>
-                                            <button type="button" class="product-description-tab" id="product-detail-tab-ru" data-product-detail-tab="ru" role="tab" aria-selected="false" aria-controls="product-detail-panel-ru">俄语</button>
+                                            <button type="button" class="product-description-tab active" id="product-detail-tab-en" data-product-language-tab="en" role="tab" aria-selected="true" aria-controls="product-detail-panel-en">英文</button>
+                                            <button type="button" class="product-description-tab" id="product-detail-tab-ar" data-product-language-tab="ar" role="tab" aria-selected="false" aria-controls="product-detail-panel-ar">阿语</button>
+                                            <button type="button" class="product-description-tab" id="product-detail-tab-fr" data-product-language-tab="fr" role="tab" aria-selected="false" aria-controls="product-detail-panel-fr">法语</button>
+                                            <button type="button" class="product-description-tab" id="product-detail-tab-ru" data-product-language-tab="ru" role="tab" aria-selected="false" aria-controls="product-detail-panel-ru">俄语</button>
                                         </div>
-                                        <div class="product-description-panel active" id="product-detail-panel-en" data-product-detail-panel="en" role="tabpanel" aria-labelledby="product-detail-tab-en">
+                                        <div class="product-description-panel active" id="product-detail-panel-en" data-product-language-panel="en" role="tabpanel" aria-labelledby="product-detail-tab-en">
                                             <div class="form-group"><label>英文详情</label><textarea id="field-description" class="product-detail-textarea" rows="12"></textarea></div>
                                         </div>
-                                        <div class="product-description-panel" id="product-detail-panel-ar" data-product-detail-panel="ar" role="tabpanel" aria-labelledby="product-detail-tab-ar" hidden>
+                                        <div class="product-description-panel" id="product-detail-panel-ar" data-product-language-panel="ar" role="tabpanel" aria-labelledby="product-detail-tab-ar" hidden>
                                             <div class="form-group"><label>阿拉伯语详情</label><textarea id="field-descriptionAr" class="rtl-field product-detail-textarea" rows="12" dir="rtl" lang="ar"></textarea></div>
                                         </div>
-                                        <div class="product-description-panel" id="product-detail-panel-fr" data-product-detail-panel="fr" role="tabpanel" aria-labelledby="product-detail-tab-fr" hidden>
+                                        <div class="product-description-panel" id="product-detail-panel-fr" data-product-language-panel="fr" role="tabpanel" aria-labelledby="product-detail-tab-fr" hidden>
                                             <div class="form-group"><label>法语详情</label><textarea id="field-descriptionFr" class="bidi-field product-detail-textarea" rows="12" dir="auto" lang="fr"></textarea></div>
                                         </div>
-                                        <div class="product-description-panel" id="product-detail-panel-ru" data-product-detail-panel="ru" role="tabpanel" aria-labelledby="product-detail-tab-ru" hidden>
+                                        <div class="product-description-panel" id="product-detail-panel-ru" data-product-language-panel="ru" role="tabpanel" aria-labelledby="product-detail-tab-ru" hidden>
                                             <div class="form-group"><label>俄语详情</label><textarea id="field-descriptionRu" class="bidi-field product-detail-textarea" rows="12" dir="auto" lang="ru"></textarea></div>
                                         </div>
                                     </div>
@@ -968,20 +968,33 @@
 
                                 <section class="form-section product-form-section" id="product-section-seo">
                                     <h3 class="form-section-title">SEO 信息</h3>
-                                    <div class="form-group"><label>SEO 标题</label><input type="text" id="field-seo-title" class="bidi-field" dir="auto"><span class="seo-length-hint" data-seo-count-for="field-seo-title"></span></div>
-                                    <div class="form-group"><label>SEO 描述</label><textarea id="field-seo-description" class="bidi-field" rows="3" dir="auto"></textarea><span class="seo-length-hint" data-seo-count-for="field-seo-description"></span></div>
-                                    <div class="form-group"><label>SEO 关键词</label><input type="text" id="field-seo-keywords" class="bidi-field" dir="auto" placeholder="多个关键词用逗号分隔"></div>
-                                    <div class="form-row">
-                                        <div class="form-group"><label>法语 SEO 标题</label><input type="text" id="field-seo-title-fr" class="bidi-field" dir="auto" lang="fr"><span class="seo-length-hint" data-seo-count-for="field-seo-title-fr"></span></div>
-                                        <div class="form-group"><label>俄语 SEO 标题</label><input type="text" id="field-seo-title-ru" class="bidi-field" dir="auto" lang="ru"><span class="seo-length-hint" data-seo-count-for="field-seo-title-ru"></span></div>
-                                    </div>
-                                    <div class="form-row">
-                                        <div class="form-group"><label>法语 SEO 描述</label><textarea id="field-seo-description-fr" class="bidi-field" rows="3" dir="auto" lang="fr"></textarea><span class="seo-length-hint" data-seo-count-for="field-seo-description-fr"></span></div>
-                                        <div class="form-group"><label>俄语 SEO 描述</label><textarea id="field-seo-description-ru" class="bidi-field" rows="3" dir="auto" lang="ru"></textarea><span class="seo-length-hint" data-seo-count-for="field-seo-description-ru"></span></div>
-                                    </div>
-                                    <div class="form-row">
-                                        <div class="form-group"><label>法语 SEO 关键词</label><input type="text" id="field-seo-keywords-fr" class="bidi-field" dir="auto" lang="fr"></div>
-                                        <div class="form-group"><label>俄语 SEO 关键词</label><input type="text" id="field-seo-keywords-ru" class="bidi-field" dir="auto" lang="ru"></div>
+                                    <div class="product-description-editor" data-product-language-editor="seo">
+                                        <div class="product-description-tabs" role="tablist" aria-label="SEO 信息语言">
+                                            <button type="button" class="product-description-tab active" id="product-seo-tab-en" data-product-language-tab="en" role="tab" aria-selected="true" aria-controls="product-seo-panel-en">英文</button>
+                                            <button type="button" class="product-description-tab" id="product-seo-tab-ar" data-product-language-tab="ar" role="tab" aria-selected="false" aria-controls="product-seo-panel-ar">阿语</button>
+                                            <button type="button" class="product-description-tab" id="product-seo-tab-fr" data-product-language-tab="fr" role="tab" aria-selected="false" aria-controls="product-seo-panel-fr">法语</button>
+                                            <button type="button" class="product-description-tab" id="product-seo-tab-ru" data-product-language-tab="ru" role="tab" aria-selected="false" aria-controls="product-seo-panel-ru">俄语</button>
+                                        </div>
+                                        <div class="product-description-panel active" id="product-seo-panel-en" data-product-language-panel="en" role="tabpanel" aria-labelledby="product-seo-tab-en">
+                                            <div class="form-group"><label>英文 SEO 标题</label><input type="text" id="field-seo-title" class="bidi-field" dir="auto" lang="en"><span class="seo-length-hint" data-seo-count-for="field-seo-title"></span></div>
+                                            <div class="form-group"><label>英文 SEO 描述</label><textarea id="field-seo-description" class="bidi-field" rows="3" dir="auto" lang="en"></textarea><span class="seo-length-hint" data-seo-count-for="field-seo-description"></span></div>
+                                            <div class="form-group"><label>英文 SEO 关键词</label><input type="text" id="field-seo-keywords" class="bidi-field" dir="auto" lang="en" placeholder="多个关键词用逗号分隔"></div>
+                                        </div>
+                                        <div class="product-description-panel" id="product-seo-panel-ar" data-product-language-panel="ar" role="tabpanel" aria-labelledby="product-seo-tab-ar" hidden>
+                                            <div class="form-group"><label>阿语 SEO 标题</label><input type="text" id="field-seo-title-ar" class="rtl-field" dir="rtl" lang="ar"><span class="seo-length-hint" data-seo-count-for="field-seo-title-ar"></span></div>
+                                            <div class="form-group"><label>阿语 SEO 描述</label><textarea id="field-seo-description-ar" class="rtl-field" rows="3" dir="rtl" lang="ar"></textarea><span class="seo-length-hint" data-seo-count-for="field-seo-description-ar"></span></div>
+                                            <div class="form-group"><label>阿语 SEO 关键词</label><input type="text" id="field-seo-keywords-ar" class="rtl-field" dir="rtl" lang="ar" placeholder="افصل بين الكلمات المفتاحية بفواصل"></div>
+                                        </div>
+                                        <div class="product-description-panel" id="product-seo-panel-fr" data-product-language-panel="fr" role="tabpanel" aria-labelledby="product-seo-tab-fr" hidden>
+                                            <div class="form-group"><label>法语 SEO 标题</label><input type="text" id="field-seo-title-fr" class="bidi-field" dir="auto" lang="fr"><span class="seo-length-hint" data-seo-count-for="field-seo-title-fr"></span></div>
+                                            <div class="form-group"><label>法语 SEO 描述</label><textarea id="field-seo-description-fr" class="bidi-field" rows="3" dir="auto" lang="fr"></textarea><span class="seo-length-hint" data-seo-count-for="field-seo-description-fr"></span></div>
+                                            <div class="form-group"><label>法语 SEO 关键词</label><input type="text" id="field-seo-keywords-fr" class="bidi-field" dir="auto" lang="fr"></div>
+                                        </div>
+                                        <div class="product-description-panel" id="product-seo-panel-ru" data-product-language-panel="ru" role="tabpanel" aria-labelledby="product-seo-tab-ru" hidden>
+                                            <div class="form-group"><label>俄语 SEO 标题</label><input type="text" id="field-seo-title-ru" class="bidi-field" dir="auto" lang="ru"><span class="seo-length-hint" data-seo-count-for="field-seo-title-ru"></span></div>
+                                            <div class="form-group"><label>俄语 SEO 描述</label><textarea id="field-seo-description-ru" class="bidi-field" rows="3" dir="auto" lang="ru"></textarea><span class="seo-length-hint" data-seo-count-for="field-seo-description-ru"></span></div>
+                                            <div class="form-group"><label>俄语 SEO 关键词</label><input type="text" id="field-seo-keywords-ru" class="bidi-field" dir="auto" lang="ru"></div>
+                                        </div>
                                     </div>
                                 </section>
                             </div>
@@ -1267,7 +1280,7 @@
     <script src="js/admin-api.js?v=20260628-stage6"></script>
     <script src="js/admin-ui.js?v=20260628-stage6"></script>
     <script src="js/modules/admin-inquiries.js?v=20260628-stage7b1"></script>
-    <script src="js/modules/admin-products.js?v=20260713-product-gallery"></script>
+    <script src="js/modules/admin-products.js?v=20260714-arabic-seo"></script>
     <script src="js/admin.js?v=20260713-about-visual"></script>
 </body>
 </html>

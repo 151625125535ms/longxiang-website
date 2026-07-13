@@ -1,6 +1,13 @@
 const fs = require('fs');
 const path = require('path');
 const Database = require('better-sqlite3');
+const { createVerifiedSqliteBackupFromConnection } = require('../../server/lib/sqliteBackup');
+const {
+    ARABIC_SEO_SOURCE_FIELDS,
+    asSourceText,
+    sourceSnapshotHash
+} = require('./product-arabic-seo-source');
+const { validateArabicSeoPatchPair } = require('./product-arabic-seo-patch-pair');
 
 function readPatchFile(filePath) {
     return JSON.parse(fs.readFileSync(filePath, 'utf8'));
@@ -39,12 +46,6 @@ function backupPathError(backupPath, dbPath) {
     return '';
 }
 
-async function createDatabaseBackup(db, backupPath) {
-    fs.mkdirSync(path.dirname(backupPath), { recursive: true });
-    await db.backup(backupPath);
-    return fs.statSync(backupPath).size;
-}
-
 function readProductColumns(db) {
     return new Set(db.prepare('PRAGMA table_info(products)').all().map((row) => row.name));
 }
@@ -70,24 +71,36 @@ function matchProduct(db, item, blockers) {
         blockers.push('products item is missing row_id, slug, legacy_id, or id.');
         return null;
     }
+    const matches = [];
+    let failed = false;
     for (const attempt of attempts) {
         const rows = attempt.run();
-        if (rows.length === 1) return { row: rows[0], matchedBy: attempt.label };
+        if (rows.length === 1) {
+            matches.push({ row: rows[0], matchedBy: attempt.label });
+            continue;
+        }
         if (rows.length > 1) {
             blockers.push('products item matched multiple rows by ' + attempt.label + '.');
-            return null;
+        } else {
+            blockers.push('products item did not match a row by ' + attempt.label + '.');
         }
+        failed = true;
     }
-    blockers.push('products item did not match any row: ' + JSON.stringify({
-        row_id: item.row_id,
-        slug: item.slug,
-        legacy_id: item.legacy_id,
-        id: item.id
-    }));
-    return null;
+    if (failed || !matches.length) return null;
+    const rowIds = new Set(matches.map((match) => match.row.id));
+    if (rowIds.size !== 1) {
+        blockers.push('products item identity fields resolve to different rows: ' + matches.map(function (match) {
+            return match.matchedBy + '=' + match.row.id;
+        }).join(', ') + '.');
+        return null;
+    }
+    return {
+        row: matches[0].row,
+        matchedBy: matches.map((match) => match.matchedBy).join('+')
+    };
 }
 
-function validatePolicyMetadata(data, policy, policyExplicit, errors) {
+function validatePolicyMetadata(data, policy, policyExplicit, mode, errors) {
     const inputPolicy = isPlainObject(data && data.meta) && typeof data.meta.policy === 'string'
         ? data.meta.policy.trim()
         : '';
@@ -96,7 +109,31 @@ function validatePolicyMetadata(data, policy, policyExplicit, errors) {
     } else if (inputPolicy && inputPolicy !== policy.id) {
         errors.push('Patch input meta.policy ' + inputPolicy + ' does not match CLI policy ' + policy.id + '.');
     }
-    policy.validateMetadata(isPlainObject(data && data.meta) ? data.meta : {}).forEach((message) => errors.push(message));
+    policy.validateMetadata(isPlainObject(data && data.meta) ? data.meta : {}, { mode }).forEach((message) => errors.push(message));
+}
+
+function validateRollbackPair(data, policy, mode, pairedForwardPath, errors) {
+    const operation = isPlainObject(data && data.meta) ? data.meta.operation : '';
+    const rollbackGuard = policy.rollbackGuard || {};
+    if (operation !== 'rollback' || !rollbackGuard.pairedForward) return null;
+    if (!pairedForwardPath) {
+        errors.push('rollback requires --paired-forward <path>.');
+        return null;
+    }
+    let pairedForward;
+    try {
+        pairedForward = readPatchFile(pairedForwardPath);
+    } catch (err) {
+        errors.push('Unable to read paired forward patch: ' + (err && err.message ? err.message : String(err)));
+        return null;
+    }
+    const pairValidation = validateArabicSeoPatchPair(pairedForward, data);
+    pairValidation.errors.forEach((message) => errors.push(message));
+    if (mode === 'apply' && rollbackGuard.approvedForwardForApply
+        && (!pairedForward.meta || pairedForward.meta.approval_status !== 'approved')) {
+        errors.push('rollback apply requires the paired forward patch approval_status to be approved.');
+    }
+    return pairedForward;
 }
 
 function validatePatchShape(data, columns, policy, errors) {
@@ -109,6 +146,7 @@ function validatePatchShape(data, columns, policy, errors) {
         return [];
     }
     const allowedFields = new Set(policy.allowedFields);
+    const operation = isPlainObject(data.meta) ? data.meta.operation : '';
     data.products.forEach((item, index) => {
         if (!isPlainObject(item)) {
             errors.push('products[' + index + '] must be an object.');
@@ -119,6 +157,49 @@ function validatePatchShape(data, columns, policy, errors) {
         const targetFields = Object.keys(item.target || {});
         const expectedFields = Object.keys(item.expected || {});
         if (!targetFields.length) errors.push('products[' + index + '].target must include at least one field.');
+        (policy.requiredFields || []).forEach(function (field) {
+            if (!targetFields.includes(field)) errors.push('products[' + index + '] is missing target.' + field + '.');
+            if (!expectedFields.includes(field)) errors.push('products[' + index + '] is missing expected.' + field + '.');
+        });
+        (policy.requiredIdentityFields || []).forEach(function (field) {
+            const value = item[field];
+            const valid = field === 'row_id'
+                ? Number.isInteger(value) && value > 0
+                : typeof value === 'string' && Boolean(value.trim());
+            if (!valid) errors.push('products[' + index + '].' + field + ' is required by policy ' + policy.id + '.');
+        });
+        if (policy.requiredStatus && (typeof item.status !== 'string' || !item.status.trim())) {
+            errors.push('products[' + index + '].status is required by policy ' + policy.id + '.');
+        }
+        const forwardGuard = policy.forwardGuard || {};
+        if (operation === 'forward' && forwardGuard.expectedVersion) {
+            if (!Number.isInteger(item.expectedVersion) || item.expectedVersion < 0) {
+                errors.push('products[' + index + '].expectedVersion must be a non-negative integer.');
+            }
+        }
+        if (operation === 'forward' && Array.isArray(forwardGuard.sourceFields)) {
+            if (!isPlainObject(item.sourceExpected)) {
+                errors.push('products[' + index + '].sourceExpected must be an object.');
+            } else {
+                const sourceFields = Object.keys(item.sourceExpected);
+                forwardGuard.sourceFields.forEach(function (field) {
+                    if (!sourceFields.includes(field)) errors.push('products[' + index + '].sourceExpected is missing ' + field + '.');
+                    if (sourceFields.includes(field) && typeof item.sourceExpected[field] !== 'string') {
+                        errors.push('products[' + index + '].sourceExpected.' + field + ' must be a string.');
+                    }
+                });
+                sourceFields.forEach(function (field) {
+                    if (!forwardGuard.sourceFields.includes(field)) {
+                        errors.push('products[' + index + '].sourceExpected has unsupported field ' + field + '.');
+                    }
+                });
+            }
+        }
+        if (operation === 'forward' && forwardGuard.sourceSnapshotHash) {
+            if (typeof item.sourceSnapshotHash !== 'string' || !/^[a-f0-9]{64}$/i.test(item.sourceSnapshotHash)) {
+                errors.push('products[' + index + '].sourceSnapshotHash must be a SHA-256 hex value.');
+            }
+        }
         targetFields.forEach((field) => {
             if (!allowedFields.has(field)) {
                 errors.push('products[' + index + '] has unsupported target field: ' + field + ' for policy ' + policy.id + '.');
@@ -146,12 +227,61 @@ function validatePatchShape(data, columns, policy, errors) {
     return data.products;
 }
 
-function analyzeProducts(db, items, columns, policy, blockers) {
+function validateMatchedProduct(item, row, index, policy, operation, blockers) {
+    if (policy.requiredStatus) {
+        if (row.status === 'deleted') blockers.push('products[' + index + '] resolves to a deleted product.');
+        if (asPatchText(row.status) !== asPatchText(item.status)) {
+            blockers.push('products[' + index + '] status mismatch.');
+        }
+    }
+
+    const forwardGuard = policy.forwardGuard || {};
+    if (operation !== 'forward') return;
+    if (forwardGuard.expectedVersion && Number(row.version || 0) !== Number(item.expectedVersion)) {
+        blockers.push('products[' + index + '] expectedVersion mismatch.');
+    }
+    (forwardGuard.sourceFields || []).forEach(function (field) {
+        if (asSourceText(row[field]) !== asSourceText(item.sourceExpected && item.sourceExpected[field])) {
+            blockers.push('products[' + index + '].sourceExpected.' + field + ' mismatch.');
+        }
+    });
+    if (forwardGuard.sourceSnapshotHash) {
+        const currentHash = sourceSnapshotHash(row);
+        if (currentHash !== String(item.sourceSnapshotHash || '').toLowerCase()) {
+            blockers.push('products[' + index + '] sourceSnapshotHash mismatch.');
+        }
+    }
+}
+
+function validateRecordSet(db, records, policy, operation, blockers) {
+    const seen = new Set();
+    records.forEach(function (record) {
+        if (seen.has(record.rowId)) blockers.push('products resolved row id is duplicated: ' + record.rowId + '.');
+        seen.add(record.rowId);
+    });
+
+    const forwardGuard = policy.forwardGuard || {};
+    if (operation !== 'forward' || !forwardGuard.exactActiveSet) return;
+    const activeIds = db.prepare("SELECT id FROM products WHERE status != 'deleted' ORDER BY id").all().map(function (row) {
+        return row.id;
+    });
+    const patchIds = Array.from(seen).sort(function (a, b) { return a - b; });
+    const missing = activeIds.filter(function (id) { return !seen.has(id); });
+    const activeSet = new Set(activeIds);
+    const extra = patchIds.filter(function (id) { return !activeSet.has(id); });
+    if (missing.length || extra.length || activeIds.length !== patchIds.length) {
+        blockers.push('forward patch product set does not equal the current status != deleted set; missing=[' + missing.join(',') + '], extra=[' + extra.join(',') + '].');
+    }
+}
+
+function analyzeProducts(db, data, items, columns, policy, blockers) {
     const allowedFields = new Set(policy.allowedFields);
+    const operation = isPlainObject(data.meta) ? data.meta.operation : '';
     const records = [];
     items.forEach((item, index) => {
         const match = matchProduct(db, item, blockers);
         if (!match) return;
+        validateMatchedProduct(item, match.row, index, policy, operation, blockers);
         const changes = [];
         Object.keys(item.target || {}).forEach((field) => {
             if (!allowedFields.has(field) || !columns.has(field)) return;
@@ -172,32 +302,73 @@ function analyzeProducts(db, items, columns, policy, blockers) {
             legacyId: match.row.legacy_id || '',
             status: match.row.status || '',
             matchedBy: match.matchedBy,
-            changes
+            changes,
+            item,
+            beforeRow: match.row
         });
     });
+    validateRecordSet(db, records, policy, operation, blockers);
     return records;
 }
 
-function applyRecords(db, records) {
+function assertUnchangedFields(record, afterRow, allowedFields) {
+    const mutable = new Set(allowedFields.concat(['version', 'updated_at']));
+    Object.keys(record.beforeRow).forEach(function (field) {
+        if (mutable.has(field)) return;
+        if (record.beforeRow[field] !== afterRow[field]) {
+            throw new Error('products ' + record.rowId + ' changed unauthorized field ' + field + '.');
+        }
+    });
+}
+
+function applyRecords(db, data, items, columns, policy) {
     const timestamp = new Date().toISOString();
-    const changed = records.filter((record) => record.changes.length);
-    if (!changed.length) return 0;
-    const transaction = db.transaction(() => {
+    const operation = isPlainObject(data.meta) ? data.meta.operation : '';
+    const transaction = db.transaction(function () {
+        const blockers = [];
+        const records = analyzeProducts(db, data, items, columns, policy, blockers);
+        if (blockers.length) {
+            const error = new Error('Patch final transaction validation failed.');
+            error.patchBlockers = blockers;
+            throw error;
+        }
+        const changed = records.filter((record) => record.changes.length);
         changed.forEach((record) => {
             const fields = record.changes.map((change) => assertSafeIdentifier(change.field, 'products field'));
             const assignments = fields.map((field) => field + ' = @' + field).join(', ');
+            const conditions = ['id = @__rowId'];
             const params = { __rowId: record.rowId, updated_at: timestamp };
             record.changes.forEach((change) => { params[change.field] = change.after; });
+            if (policy.requiredStatus) {
+                conditions.push("COALESCE(status, '') = @__status");
+                params.__status = asPatchText(record.item.status);
+            }
+            if (operation === 'forward' && policy.forwardGuard && policy.forwardGuard.expectedVersion) {
+                conditions.push('COALESCE(version, 0) = @__expectedVersion');
+                params.__expectedVersion = Number(record.item.expectedVersion);
+            }
+            Object.keys(record.item.expected || {}).forEach(function (field) {
+                const safeField = assertSafeIdentifier(field, 'products expected field');
+                conditions.push("COALESCE(" + safeField + ", '') = @__expected_" + safeField);
+                params['__expected_' + safeField] = asPatchText(record.item.expected[field]);
+            });
             const result = db.prepare(
-                'UPDATE products SET ' + assignments + ', version = COALESCE(version, 0) + 1, updated_at = @updated_at WHERE id = @__rowId'
+                'UPDATE products SET ' + assignments + ', version = COALESCE(version, 0) + 1, updated_at = @updated_at WHERE ' + conditions.join(' AND ')
             ).run(params);
             if (result.changes !== 1) {
                 throw new Error('products ' + (record.slug || record.legacyId || record.rowId) + ' expected to update exactly one row, changed ' + result.changes + '.');
             }
+            const afterRow = db.prepare('SELECT * FROM products WHERE id = ?').get(record.rowId);
+            Object.keys(record.item.target || {}).forEach(function (field) {
+                if (asPatchText(afterRow[field]) !== asPatchText(record.item.target[field])) {
+                    throw new Error('products ' + record.rowId + '.' + field + ' did not reach the requested target value.');
+                }
+            });
+            assertUnchangedFields(record, afterRow, policy.allowedFields);
         });
+        return { changedCount: changed.length, records };
     });
-    transaction();
-    return changed.length;
+    return transaction.immediate();
 }
 
 function writeReport(report) {
@@ -218,6 +389,7 @@ function writeReport(report) {
         '- Database changed: ' + (report.databaseChanged ? 'yes' : 'no'),
         '- Backup path: ' + (report.backupPath ? '`' + report.backupPath + '`' : 'none'),
         '- Backup size: ' + (report.backupSizeBytes == null ? 'not created' : report.backupSizeBytes + ' bytes'),
+        '- Backup verified: ' + (report.backupVerified ? 'yes' : 'no'),
         '- Input products: ' + report.inputCount,
         '- Matched products: ' + report.records.length,
         '- Changed products: ' + report.records.filter((record) => record.changes.length).length,
@@ -259,7 +431,8 @@ async function runProductFieldPatch(options) {
     const errors = [];
     const blockers = [];
     const data = readPatchFile(options.inputPath);
-    validatePolicyMetadata(data, policy, Boolean(options.policyExplicit), errors);
+    validatePolicyMetadata(data, policy, Boolean(options.policyExplicit), mode, errors);
+    validateRollbackPair(data, policy, mode, options.pairedForwardPath, errors);
     if (mode === 'apply') {
         const backupError = backupPathError(options.backupPath, options.dbPath);
         if (backupError) errors.push(backupError);
@@ -274,6 +447,7 @@ async function runProductFieldPatch(options) {
         reportPath: options.reportPath,
         backupPath: '',
         backupSizeBytes: null,
+        backupVerified: false,
         databaseChanged: false,
         inputCount: Array.isArray(data && data.products) ? data.products.length : 0,
         records: [],
@@ -284,12 +458,32 @@ async function runProductFieldPatch(options) {
         db = new Database(options.dbPath, { readonly: mode !== 'apply', fileMustExist: true });
         const columns = readProductColumns(db);
         const items = validatePatchShape(data, columns, policy, errors);
-        if (!errors.length) report.records = analyzeProducts(db, items, columns, policy, blockers);
+        if (!errors.length) report.records = analyzeProducts(db, data, items, columns, policy, blockers);
         if (mode === 'apply' && !errors.length && !blockers.length) {
             report.backupPath = options.backupPath;
-            report.backupSizeBytes = await createDatabaseBackup(db, options.backupPath);
-            report.databaseChanged = applyRecords(db, report.records) > 0;
+            const backupResult = await createVerifiedSqliteBackupFromConnection(db, {
+                sourcePath: options.dbPath,
+                backupPath: options.backupPath
+            });
+            report.backupSizeBytes = backupResult.sizeBytes;
+            report.backupVerified = true;
+            if (typeof options.beforeApplyTransaction === 'function') {
+                await options.beforeApplyTransaction({ dbPath: options.dbPath, report });
+            }
+            try {
+                const applyResult = applyRecords(db, data, items, columns, policy);
+                report.records = applyResult.records;
+                report.databaseChanged = applyResult.changedCount > 0;
+            } catch (err) {
+                if (Array.isArray(err && err.patchBlockers)) {
+                    err.patchBlockers.forEach(function (blocker) { blockers.push(blocker); });
+                } else {
+                    throw err;
+                }
+            }
         }
+    } catch (err) {
+        errors.push(err && err.message ? err.message : String(err));
     } finally {
         if (db) db.close();
     }

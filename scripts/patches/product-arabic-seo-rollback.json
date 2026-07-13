@@ -1,0 +1,690 @@
+{
+  "meta": {
+    "policy": "arabic-seo-v1",
+    "operation": "rollback",
+    "forward_content_sha256": "789c738fa242ebcf3856cbc6f91f4319f484fca186d755f69d6d85705627482c",
+    "title": "Rollback for prepared Arabic product SEO patch",
+    "generated_at": "2026-07-13T18:11:42.005Z",
+    "forward_source_set_sha256": "d54e07157a730ae035aa630370deacff46b2e69bf4b8be2d254f9b7fae435ba3",
+    "counts": {
+      "total": 42,
+      "published": 42,
+      "draft": 0
+    },
+    "fields_per_product": 3
+  },
+  "products": [
+    {
+      "row_id": 5,
+      "slug": "anti-short-amorphous",
+      "legacy_id": "anti-short-amorphous",
+      "status": "published",
+      "expected": {
+        "seo_title_ar": "محول توزيع غير متبلور مقاوم للقصر S(B)H15/21/25",
+        "seo_description_ar": "محول توزيع غير متبلور مقاوم للقصر لشبكات ذات تيار قصر مرتفع، بسعات 30-1000 kVA وخيارات جهد 10/0.4kV و6/0.4kV وتبريد ONAN.",
+        "seo_keywords_ar": "محول توزيع غير متبلور، محول مقاوم للقصر، S(B)H15، شبكات التوزيع"
+      },
+      "target": {
+        "seo_title_ar": "",
+        "seo_description_ar": "",
+        "seo_keywords_ar": ""
+      }
+    },
+    {
+      "row_id": 6,
+      "slug": "amorphous-veg-oil",
+      "legacy_id": "amorphous-veg-oil",
+      "status": "published",
+      "expected": {
+        "seo_title_ar": "محول غير متبلور بزيت نباتي عالي التحميل S(B)H15",
+        "seo_description_ar": "محول توزيع عالي التحميل بقلب غير متبلور وزيت نباتي للتوزيع الصديق للبيئة، بسعات 30-630 kVA وجهد 10/0.4kV أو 6/0.4kV وتبريد ONAN.",
+        "seo_keywords_ar": "محول زيت نباتي، محول غير متبلور، محول عالي التحميل، S(B)H15"
+      },
+      "target": {
+        "seo_title_ar": "",
+        "seo_description_ar": "",
+        "seo_keywords_ar": ""
+      }
+    },
+    {
+      "row_id": 8,
+      "slug": "aluminum",
+      "legacy_id": "aluminum",
+      "status": "published",
+      "expected": {
+        "seo_title_ar": "محول قدرة مغمور بالزيت من الألومنيوم",
+        "seo_description_ar": "محول قدرة مغمور بالزيت من الألومنيوم للتوزيع الاقتصادي، بسعات 30-2500 kVA وخيارات جهد 10/0.4kV و35/10kV مع تبريد ONAN.",
+        "seo_keywords_ar": "محول قدرة زيتي، محول ألومنيوم، محول توزيع اقتصادي، تبريد ONAN"
+      },
+      "target": {
+        "seo_title_ar": "",
+        "seo_description_ar": "",
+        "seo_keywords_ar": ""
+      }
+    },
+    {
+      "row_id": 12,
+      "slug": "3phase-3limb",
+      "legacy_id": "3phase-3limb",
+      "status": "published",
+      "expected": {
+        "seo_title_ar": "محول جاف غير متبلور ثلاثي الأعمدة SC(B)H15/17/19",
+        "seo_description_ar": "محول جاف ثلاثي الطور بقلب غير متبلور وثلاثة أعمدة للتوزيع التجاري والصناعي، بسعات 30-2000 kVA وخيارات جهد 10/0.4kV و6/0.4kV.",
+        "seo_keywords_ar": "محول جاف غير متبلور، محول ثلاثي الأعمدة، SC(B)H15، توزيع صناعي"
+      },
+      "target": {
+        "seo_title_ar": "",
+        "seo_description_ar": "",
+        "seo_keywords_ar": ""
+      }
+    },
+    {
+      "row_id": 13,
+      "slug": "3phase-5limb",
+      "legacy_id": "3phase-5limb",
+      "status": "published",
+      "expected": {
+        "seo_title_ar": "محول جاف غير متبلور خماسي الأعمدة SC(B)H15/17/19",
+        "seo_description_ar": "محول جاف ثلاثي الطور بقلب غير متبلور وخمسة أعمدة للمنشآت الحساسة للضوضاء، بسعات 30-2500 kVA وخيارات جهد 10/0.4kV و35/0.4kV.",
+        "seo_keywords_ar": "محول جاف غير متبلور، محول خماسي الأعمدة، SC(B)H15، منشآت حساسة للضوضاء"
+      },
+      "target": {
+        "seo_title_ar": "",
+        "seo_description_ar": "",
+        "seo_keywords_ar": ""
+      }
+    },
+    {
+      "row_id": 16,
+      "slug": "wind-power",
+      "legacy_id": "wind-power",
+      "status": "published",
+      "expected": {
+        "seo_title_ar": "محول مركب لطاقة الرياح ZGSBH15 بزيت نباتي",
+        "seo_description_ar": "محول مركب لطاقة الرياح ZGSBH15 بزيت نباتي وقلب غير متبلور، بسعات 500-4000 kVA وخيارات جهد 35/0.69kV و10/0.69kV.",
+        "seo_keywords_ar": "محول طاقة الرياح، محول مركب، ZGSBH15، زيت نباتي"
+      },
+      "target": {
+        "seo_title_ar": "",
+        "seo_description_ar": "",
+        "seo_keywords_ar": ""
+      }
+    },
+    {
+      "row_id": 17,
+      "slug": "pv-combined",
+      "legacy_id": "pv-combined",
+      "status": "published",
+      "expected": {
+        "seo_title_ar": "محول مركب للطاقة الكهروضوئية ZGS13",
+        "seo_description_ar": "محول مركب ZGS13 لمحطات توليد الطاقة الشمسية والكهروضوئية، بسعات 315-3150 kVA وخيارات جهد 35/0.4kV و10/0.4kV وتبريد ONAN.",
+        "seo_keywords_ar": "محول كهروضوئي، محول طاقة شمسية، ZGS13، محول مركب"
+      },
+      "target": {
+        "seo_title_ar": "",
+        "seo_description_ar": "",
+        "seo_keywords_ar": ""
+      }
+    },
+    {
+      "row_id": 18,
+      "slug": "gcs",
+      "legacy_id": "gcs",
+      "status": "published",
+      "expected": {
+        "seo_title_ar": "لوحة مفاتيح منخفضة الجهد قابلة للسحب GCS",
+        "seo_description_ar": "لوحة مفاتيح GCS منخفضة الجهد وقابلة للسحب لتوزيع الطاقة والتحكم في المحركات، بتيارات 630A و1000A و1250A وجهد 380V أو 660V.",
+        "seo_keywords_ar": "لوحة مفاتيح منخفضة الجهد، لوحة GCS، توزيع الطاقة، التحكم في المحركات"
+      },
+      "target": {
+        "seo_title_ar": "",
+        "seo_description_ar": "",
+        "seo_keywords_ar": ""
+      }
+    },
+    {
+      "row_id": 19,
+      "slug": "lxac-7kw",
+      "legacy_id": "LXAC-7kW",
+      "status": "published",
+      "expected": {
+        "seo_title_ar": "محطة شحن تيار متردد 7 كيلوواط LXAC بدون شاشة",
+        "seo_description_ar": "محطة شحن LXAC بقدرة 7kW وجهد AC220V ±20% للمواقف السكنية والتجارية والفنادق والحرم الجامعي ومواقع الأساطيل، مع حماية IP55.",
+        "seo_keywords_ar": "محطة شحن 7 كيلوواط، شاحن تيار متردد، LXAC-7kW، شحن المركبات الكهربائية"
+      },
+      "target": {
+        "seo_title_ar": "",
+        "seo_description_ar": "",
+        "seo_keywords_ar": ""
+      }
+    },
+    {
+      "row_id": 20,
+      "slug": "lxac-7kw-display",
+      "legacy_id": "LXAC-7kW-display",
+      "status": "published",
+      "expected": {
+        "seo_title_ar": "محطة شحن تيار متردد 7 كيلوواط LXAC مع شاشة",
+        "seo_description_ar": "محطة شحن LXAC بقدرة 7kW مع شاشة عرض وجهد AC220V ±20% للمواقف السكنية والتجارية والفنادق والحرم الجامعي، مع حماية IP55.",
+        "seo_keywords_ar": "محطة شحن مع شاشة، شاحن تيار متردد، LXAC-7kW، شحن المركبات الكهربائية"
+      },
+      "target": {
+        "seo_title_ar": "",
+        "seo_description_ar": "",
+        "seo_keywords_ar": ""
+      }
+    },
+    {
+      "row_id": 21,
+      "slug": "lxac-14kw",
+      "legacy_id": "LXAC-14kW",
+      "status": "published",
+      "expected": {
+        "seo_title_ar": "محطة شحن تيار متردد مزدوجة 14 كيلوواط LXAC",
+        "seo_description_ar": "محطة شحن تيار متردد مزدوجة بقدرة 14 كيلوواط وجهد AC220V 50Hz ±20% للمواقف والفنادق والحرم الجامعي ومواقع الأساطيل، مع حماية IP54.",
+        "seo_keywords_ar": "محطة شحن مزدوجة، شاحن 14 كيلوواط، LXAC-14kW، شحن تيار متردد"
+      },
+      "target": {
+        "seo_title_ar": "",
+        "seo_description_ar": "",
+        "seo_keywords_ar": ""
+      }
+    },
+    {
+      "row_id": 22,
+      "slug": "lxdc-20-30-40kw",
+      "legacy_id": "LXDC-20-30-40kW",
+      "status": "published",
+      "expected": {
+        "seo_title_ar": "محطة شحن تيار مستمر LXDC بقدرة 20/30/40 كيلوواط",
+        "seo_description_ar": "محطة شحن تيار مستمر LXDC بقدرات 20kW و30kW و40kW للمحطات العامة ومستودعات الحافلات والأساطيل، بخرج 200-1000V DC وحماية IP54.",
+        "seo_keywords_ar": "محطة شحن تيار مستمر، LXDC، شاحن 40 كيلوواط، شحن الأساطيل"
+      },
+      "target": {
+        "seo_title_ar": "",
+        "seo_description_ar": "",
+        "seo_keywords_ar": ""
+      }
+    },
+    {
+      "row_id": 23,
+      "slug": "lxdc-120-400kw",
+      "legacy_id": "LXDC-120-400kW",
+      "status": "published",
+      "expected": {
+        "seo_title_ar": "محطة شحن تيار مستمر LXDC بقدرة 120-400 كيلوواط",
+        "seo_description_ar": "محطة شحن تيار مستمر LXDC بقدرات 120kW و160kW و240kW و320kW و400kW للمحطات العامة والأساطيل، بخرج 200-1000V DC وحماية IP54.",
+        "seo_keywords_ar": "محطة شحن سريعة، شاحن تيار مستمر، LXDC، شحن 400 كيلوواط"
+      },
+      "target": {
+        "seo_title_ar": "",
+        "seo_description_ar": "",
+        "seo_keywords_ar": ""
+      }
+    },
+    {
+      "row_id": 24,
+      "slug": "lxdc480-1280kw",
+      "legacy_id": "LXDC480-1280kW",
+      "status": "published",
+      "expected": {
+        "seo_title_ar": "مجموعة شحن تيار مستمر LXDC بقدرة 480-1280 كيلوواط",
+        "seo_description_ar": "مجموعة شحن تيار مستمر LXDC بقدرة 480kW-1280kW للمحطات العامة ومستودعات الحافلات والأساطيل، بخرج 200-1000V DC وحماية IP55.",
+        "seo_keywords_ar": "مجموعة شحن تيار مستمر، LXDC، شحن عالي القدرة، شحن الأساطيل"
+      },
+      "target": {
+        "seo_title_ar": "",
+        "seo_description_ar": "",
+        "seo_keywords_ar": ""
+      }
+    },
+    {
+      "row_id": 25,
+      "slug": "portable-storage-1kw-3kwh",
+      "legacy_id": "portable-storage-1kw-3kwh",
+      "status": "published",
+      "expected": {
+        "seo_title_ar": "نظام تخزين طاقة محمول 1 كيلوواط و3 كيلوواط ساعة",
+        "seo_description_ar": "نظام تخزين طاقة محمول بقدرة 1 كيلوواط وطاقة 3kWh لمشروعات الطاقة الشمسية والطاقة الاحتياطية والشبكات المصغرة، ببطارية فوسفات حديد الليثيوم.",
+        "seo_keywords_ar": "تخزين طاقة محمول، نظام 3 كيلوواط ساعة، طاقة احتياطية، فوسفات حديد الليثيوم"
+      },
+      "target": {
+        "seo_title_ar": "",
+        "seo_description_ar": "",
+        "seo_keywords_ar": ""
+      }
+    },
+    {
+      "row_id": 26,
+      "slug": "portable-storage-3kw-5kwh",
+      "legacy_id": "portable-storage-3kw-5kwh",
+      "status": "published",
+      "expected": {
+        "seo_title_ar": "نظام تخزين طاقة محمول 3 كيلوواط و5 كيلوواط ساعة",
+        "seo_description_ar": "نظام تخزين طاقة محمول بقدرة 3 كيلوواط وطاقة 5.12kWh لمشروعات الطاقة الشمسية والطاقة الاحتياطية والشبكات المصغرة، ببطارية فوسفات حديد الليثيوم.",
+        "seo_keywords_ar": "تخزين طاقة محمول، نظام 5 كيلوواط ساعة، طاقة شمسية، فوسفات حديد الليثيوم"
+      },
+      "target": {
+        "seo_title_ar": "",
+        "seo_description_ar": "",
+        "seo_keywords_ar": ""
+      }
+    },
+    {
+      "row_id": 27,
+      "slug": "ts-mes-115k12l",
+      "legacy_id": "TS-MES-115K12L",
+      "status": "published",
+      "expected": {
+        "seo_title_ar": "خزانة تخزين طاقة مبردة بالسائل TS-MES-115K12L",
+        "seo_description_ar": "خزانة تخزين طاقة مبردة بالسائل عالية المعدل بقدرة 115kW وطاقة 12.44kWh للمشروعات الشمسية والطاقة الاحتياطية وخفض الذروة، مع حماية IP54.",
+        "seo_keywords_ar": "خزانة تخزين طاقة، تبريد سائل، TS-MES-115K12L، خفض الذروة"
+      },
+      "target": {
+        "seo_title_ar": "",
+        "seo_description_ar": "",
+        "seo_keywords_ar": ""
+      }
+    },
+    {
+      "row_id": 28,
+      "slug": "ts-les-920k100l",
+      "legacy_id": "TS-LES-920K100L",
+      "status": "published",
+      "expected": {
+        "seo_title_ar": "حاوية تخزين طاقة مبردة بالسائل TS-LES-920K100L",
+        "seo_description_ar": "حاوية تخزين طاقة مبردة بالسائل عالية المعدل بقدرة 920kW وطاقة 99.5kWh للمشروعات الشمسية والطاقة الاحتياطية والشبكات المصغرة، مع حماية IP54.",
+        "seo_keywords_ar": "حاوية تخزين طاقة، تبريد سائل، TS-LES-920K100L، شبكات مصغرة"
+      },
+      "target": {
+        "seo_title_ar": "",
+        "seo_description_ar": "",
+        "seo_keywords_ar": ""
+      }
+    },
+    {
+      "row_id": 32,
+      "slug": "zgsbh15-pv",
+      "legacy_id": "ZGSBH15-PV",
+      "status": "published",
+      "expected": {
+        "seo_title_ar": "محول مدمج كهروضوئي غير متبلور ZGSBH15",
+        "seo_description_ar": "محول مدمج ZGSBH15 بقلب غير متبلور لتوليد الطاقة الكهروضوئية، بسعات 630-2000kVA وخيارات جهد 35kV و10kV، مع حماية خزان الزيت IP68.",
+        "seo_keywords_ar": "محول كهروضوئي، محول غير متبلور، ZGSBH15، طاقة شمسية"
+      },
+      "target": {
+        "seo_title_ar": "",
+        "seo_description_ar": "",
+        "seo_keywords_ar": ""
+      }
+    },
+    {
+      "row_id": 33,
+      "slug": "zgs13-wind",
+      "legacy_id": "ZGS13-WIND",
+      "status": "published",
+      "expected": {
+        "seo_title_ar": "محول مدمج لطاقة الرياح ZGS13",
+        "seo_description_ar": "محول مدمج ZGS13 لتوليد طاقة الرياح، بسعات 630-2000kVA وخيارات جهد 12/0.69kV و35/0.69kV، بقلب فولاذ سيليكوني وتبريد زيتي ذاتي.",
+        "seo_keywords_ar": "محول طاقة الرياح، محول مدمج، ZGS13، تبريد زيتي"
+      },
+      "target": {
+        "seo_title_ar": "",
+        "seo_description_ar": "",
+        "seo_keywords_ar": ""
+      }
+    },
+    {
+      "row_id": 34,
+      "slug": "compact-cooling-box",
+      "legacy_id": "compact-cooling-box",
+      "status": "published",
+      "expected": {
+        "seo_title_ar": "محطة تحويل صندوقية مدمجة موفرة للطاقة",
+        "seo_description_ar": "محطة تحويل صندوقية مدمجة موفرة للطاقة ومخفضة للحرارة للمجمعات السكنية والشبكات الحضرية والمناطق التجارية ونقاط شحن المركبات الكهربائية.",
+        "seo_keywords_ar": "محطة تحويل صندوقية، محطة مدمجة، توفير الطاقة، نقاط شحن كهربائية"
+      },
+      "target": {
+        "seo_title_ar": "",
+        "seo_description_ar": "",
+        "seo_keywords_ar": ""
+      }
+    },
+    {
+      "row_id": 35,
+      "slug": "box-type-substation",
+      "legacy_id": "box-type-substation",
+      "status": "published",
+      "expected": {
+        "seo_title_ar": "محطة تحويل صندوقية لمشروعات التوزيع",
+        "seo_description_ar": "محطة تحويل صندوقية لمشروعات الطاقة المتجددة والمناطق الصناعية والتوزيع المدمج، بسعات 50-280kVA وخيارات جهد 12kV و400V.",
+        "seo_keywords_ar": "محطة تحويل صندوقية، توزيع مدمج، محطة خارجية، طاقة متجددة"
+      },
+      "target": {
+        "seo_title_ar": "",
+        "seo_description_ar": "",
+        "seo_keywords_ar": ""
+      }
+    },
+    {
+      "row_id": 36,
+      "slug": "ggd",
+      "legacy_id": "GGD",
+      "status": "published",
+      "expected": {
+        "seo_title_ar": "لوحة مفاتيح منخفضة الجهد ثابتة GGD",
+        "seo_description_ar": "لوحة مفاتيح GGD منخفضة الجهد وثابتة لمحطات الطاقة والمصانع وغرف توزيع المباني، تعمل بجهد 380V وتوفر حماية IP30.",
+        "seo_keywords_ar": "لوحة مفاتيح منخفضة الجهد، لوحة GGD، توزيع كهربائي، حماية IP30"
+      },
+      "target": {
+        "seo_title_ar": "",
+        "seo_description_ar": "",
+        "seo_keywords_ar": ""
+      }
+    },
+    {
+      "row_id": 37,
+      "slug": "kyn28-12",
+      "legacy_id": "KYN28-12",
+      "status": "published",
+      "expected": {
+        "seo_title_ar": "معدات مفاتيح معدنية قابلة للسحب KYN28-12",
+        "seo_description_ar": "معدات مفاتيح داخلية معدنية قابلة للسحب KYN28-12 بجهد 3.6 إلى 12 كيلوفولت، مخصصة للتوزيع والحماية والقياس وتشغيل المحركات.",
+        "seo_keywords_ar": "معدات مفاتيح معدنية، KYN28-12، توزيع متوسط الجهد، حماية كهربائية"
+      },
+      "target": {
+        "seo_title_ar": "",
+        "seo_description_ar": "",
+        "seo_keywords_ar": ""
+      }
+    },
+    {
+      "row_id": 38,
+      "slug": "kyn-12",
+      "legacy_id": "KYN-12",
+      "status": "published",
+      "expected": {
+        "seo_title_ar": "معدات مفاتيح بعزل هواء جاف KYN-12",
+        "seo_description_ar": "معدات مفاتيح داخلية معدنية قابلة للسحب بعزل هواء جاف KYN-12، لجهود 3kV و6kV و7.2kV مع حماية غلاف IP4X.",
+        "seo_keywords_ar": "معدات مفاتيح معدنية، عزل هواء جاف، KYN-12، حماية IP4X"
+      },
+      "target": {
+        "seo_title_ar": "",
+        "seo_description_ar": "",
+        "seo_keywords_ar": ""
+      }
+    },
+    {
+      "row_id": 39,
+      "slug": "lxwz",
+      "legacy_id": "LXWZ",
+      "status": "published",
+      "expected": {
+        "seo_title_ar": "جهاز تعويض القدرة غير الفعالة عالي الجهد LXWZ",
+        "seo_description_ar": "جهاز LXWZ متكامل لتعويض القدرة غير الفعالة في غرف توزيع الجهد المتوسط والمحطات والمنشآت الصناعية، لخيارات جهد 10kV و35kV و12kV.",
+        "seo_keywords_ar": "تعويض القدرة غير الفعالة، جهاز LXWZ، جهد عال، غرف التوزيع"
+      },
+      "target": {
+        "seo_title_ar": "",
+        "seo_description_ar": "",
+        "seo_keywords_ar": ""
+      }
+    },
+    {
+      "row_id": 40,
+      "slug": "silicon-scb-dry",
+      "legacy_id": "silicon-scb-dry",
+      "status": "published",
+      "expected": {
+        "seo_title_ar": "محول جاف من الفولاذ السيليكوني SC(B)12/14/18",
+        "seo_description_ar": "محول جاف بقلب من الفولاذ السيليكوني SC(B)12/14/18 لغرف التوزيع والمباني والمصانع، بسعات 30-2500 kVA وفئات جهد 6-10kV.",
+        "seo_keywords_ar": "محول جاف، فولاذ سيليكوني، SC(B)12، غرف التوزيع"
+      },
+      "target": {
+        "seo_title_ar": "",
+        "seo_description_ar": "",
+        "seo_keywords_ar": ""
+      }
+    },
+    {
+      "row_id": 41,
+      "slug": "silicon-smrl-wound-core",
+      "legacy_id": "silicon-smrl-wound-core",
+      "status": "published",
+      "expected": {
+        "seo_title_ar": "محول زيتي بقلب ملفوف ثلاثي الأبعاد S13/S20/S22-M.RL",
+        "seo_description_ar": "محول توزيع مغمور بالزيت بقلب فولاذ سيليكوني ملفوف ثلاثي الأبعاد، بسعات 30-2500 kVA وفئات جهد 6-10kV وتبريد ONAN.",
+        "seo_keywords_ar": "محول توزيع زيتي، قلب ملفوف ثلاثي الأبعاد، S13-M.RL، تبريد ONAN"
+      },
+      "target": {
+        "seo_title_ar": "",
+        "seo_description_ar": "",
+        "seo_keywords_ar": ""
+      }
+    },
+    {
+      "row_id": 42,
+      "slug": "silicon-smrl-anti-short",
+      "legacy_id": "silicon-smrl-anti-short",
+      "status": "published",
+      "expected": {
+        "seo_title_ar": "محول بقلب ملفوف مقاوم للقصر S13/S20/S22-M.RL",
+        "seo_description_ar": "محول S13/S20/S22-M.RL بقلب فولاذ سيليكوني ملفوف ثلاثي الأبعاد ومقاوم للقصر، بسعات 30-2500 kVA وفئات جهد 6kV و10kV وتبريد ONAN.",
+        "seo_keywords_ar": "محول مقاوم للقصر، قلب ملفوف ثلاثي الأبعاد، S13-M.RL، محول توزيع"
+      },
+      "target": {
+        "seo_title_ar": "",
+        "seo_description_ar": "",
+        "seo_keywords_ar": ""
+      }
+    },
+    {
+      "row_id": 44,
+      "slug": "silicon-s13-vegetable-oil-high-overload",
+      "legacy_id": "silicon-s13-vegetable-oil-high-overload",
+      "status": "published",
+      "expected": {
+        "seo_title_ar": "محول توزيع S-M بزيت نباتي وتحمل حمل زائد",
+        "seo_description_ar": "محول توزيع S-M مغمور بزيت نباتي وقدرة تحمل حمل زائد عالية للمناطق الصناعية والمحطات والمصانع، بسعات 30-2500 kVA وتبريد ONAN.",
+        "seo_keywords_ar": "محول زيت نباتي، محول عالي التحميل، محول S-M، تبريد ONAN"
+      },
+      "target": {
+        "seo_title_ar": "",
+        "seo_description_ar": "",
+        "seo_keywords_ar": ""
+      }
+    },
+    {
+      "row_id": 45,
+      "slug": "amorphous-scbh-dry",
+      "legacy_id": "amorphous-scbh-dry",
+      "status": "published",
+      "expected": {
+        "seo_title_ar": "محول جاف غير متبلور SC(B)H15/17/19",
+        "seo_description_ar": "محول جاف بقلب غير متبلور SC(B)H15/17/19 لغرف التوزيع والمباني والمصانع، بسعات 30-2500 kVA وفئات جهد 6-10kV وتبريد AN أو AF.",
+        "seo_keywords_ar": "محول جاف غير متبلور، SC(B)H15، غرف التوزيع، تبريد AN"
+      },
+      "target": {
+        "seo_title_ar": "",
+        "seo_description_ar": "",
+        "seo_keywords_ar": ""
+      }
+    },
+    {
+      "row_id": 46,
+      "slug": "amorphous-dgh-furnace",
+      "legacy_id": "amorphous-dgh-furnace",
+      "status": "published",
+      "expected": {
+        "seo_title_ar": "محول فرن جاف غير متبلور DGH15/17/19",
+        "seo_description_ar": "محول فرن جاف بقلب من سبيكة غير متبلورة من سلسلة DGH15/17/19، مخصص لتغذية الأفران الصناعية بسعة وجهد حسب متطلبات المشروع.",
+        "seo_keywords_ar": "محول فرن جاف، محول غير متبلور، DGH15، أفران صناعية"
+      },
+      "target": {
+        "seo_title_ar": "",
+        "seo_description_ar": "",
+        "seo_keywords_ar": ""
+      }
+    },
+    {
+      "row_id": 47,
+      "slug": "amorphous-sbh-mrl-wound-core",
+      "legacy_id": "amorphous-sbh-mrl-wound-core",
+      "status": "published",
+      "expected": {
+        "seo_title_ar": "محول زيتي غير متبلور بقلب ملفوف S(B)H21/25-M.RL",
+        "seo_description_ar": "محول مغمور بالزيت بقلب غير متبلور ملفوف ثلاثي الأبعاد S(B)H21/25-M.RL، بسعات 30-2500 kVA وفئة جهد 10kV وتبريد ONAN.",
+        "seo_keywords_ar": "محول زيتي غير متبلور، قلب ملفوف ثلاثي الأبعاد، S(B)H21، تبريد ONAN"
+      },
+      "target": {
+        "seo_title_ar": "",
+        "seo_description_ar": "",
+        "seo_keywords_ar": ""
+      }
+    },
+    {
+      "row_id": 48,
+      "slug": "amorphous-sbh15-m",
+      "legacy_id": "amorphous-sbh15-m",
+      "status": "published",
+      "expected": {
+        "seo_title_ar": "محول توزيع زيتي غير متبلور S(S)H15/21/25-M",
+        "seo_description_ar": "محول توزيع مغمور بالزيت بقلب غير متبلور S(S)H15/21/25-M NX3/2/1، بسعات 30-2500 kVA وفئة جهد 10kV وتبريد ONAN.",
+        "seo_keywords_ar": "محول توزيع زيتي، محول غير متبلور، S(S)H15، كفاءة NX3"
+      },
+      "target": {
+        "seo_title_ar": "",
+        "seo_description_ar": "",
+        "seo_keywords_ar": ""
+      }
+    },
+    {
+      "row_id": 52,
+      "slug": "grid-connected-pv-box",
+      "legacy_id": "grid-connected-pv-box",
+      "status": "published",
+      "expected": {
+        "seo_title_ar": "صندوق ربط كهروضوئي بالشبكة بقدرة 10-60 كيلوواط",
+        "seo_description_ar": "صندوق ربط على جانب التيار المتردد للأنظمة الكهروضوئية بقدرة 10 إلى 60 كيلوواط، يجمع القياس والتوزيع والحماية في تركيب جداري خارجي.",
+        "seo_keywords_ar": "صندوق ربط كهروضوئي، ربط بالشبكة، حماية كهروضوئية، توزيع تيار متردد"
+      },
+      "target": {
+        "seo_title_ar": "",
+        "seo_description_ar": "",
+        "seo_keywords_ar": ""
+      }
+    },
+    {
+      "row_id": 53,
+      "slug": "pv-combiner-box",
+      "legacy_id": "pv-combiner-box",
+      "status": "published",
+      "expected": {
+        "seo_title_ar": "صندوق تجميع كهروضوئي بقدرة 100-250 كيلوواط",
+        "seo_description_ar": "صندوق تجميع كهروضوئي لمشروعات الربط بالشبكة بقدرة 100-250 kW، لجهد 690V AC أو 400V AC مع وظائف التوزيع والقياس والحماية ودرجة IP65.",
+        "seo_keywords_ar": "صندوق تجميع كهروضوئي، ربط شمسي بالشبكة، حماية IP65، توزيع كهروضوئي"
+      },
+      "target": {
+        "seo_title_ar": "",
+        "seo_description_ar": "",
+        "seo_keywords_ar": ""
+      }
+    },
+    {
+      "row_id": 54,
+      "slug": "grid-connected-pv-cabinet",
+      "legacy_id": "grid-connected-pv-cabinet",
+      "status": "published",
+      "expected": {
+        "seo_title_ar": "خزانة ربط كهروضوئية بالشبكة بقدرة 100-800 كيلوواط",
+        "seo_description_ar": "خزانة ربط كهروضوئية بالشبكة بقدرة 100-800 kW وجهد 690V AC أو 400V AC، للتوزيع والقياس والتجميع والحماية بين العواكس والشبكة.",
+        "seo_keywords_ar": "خزانة ربط كهروضوئية، ربط بالشبكة، توزيع طاقة شمسية، حماية العواكس"
+      },
+      "target": {
+        "seo_title_ar": "",
+        "seo_description_ar": "",
+        "seo_keywords_ar": ""
+      }
+    },
+    {
+      "row_id": 55,
+      "slug": "segmented-arc-quenching-surge-arrester",
+      "legacy_id": "segmented-arc-quenching-surge-arrester",
+      "status": "published",
+      "expected": {
+        "seo_title_ar": "مانع صواعق متعدد الغرف بإخماد نشط للقوس",
+        "seo_description_ar": "مانع صواعق مقسم متعدد الغرف لخطوط توزيع 6-35 كيلوفولت، يخمد تيار المتابعة بتردد الشبكة ويساعد على تقليل فصل الخطوط الناتج عن الصواعق.",
+        "seo_keywords_ar": "مانع صواعق، إخماد القوس، خطوط التوزيع، حماية من الصواعق"
+      },
+      "target": {
+        "seo_title_ar": "",
+        "seo_description_ar": "",
+        "seo_keywords_ar": ""
+      }
+    },
+    {
+      "row_id": 56,
+      "slug": "sbh21-m-160010-nx2-oil-immersed-amorphous-alloy-distribution-transformer",
+      "legacy_id": "sbh21-m-160010-nx2-oil-immersed-amorphous-alloy-distribution-transformer",
+      "status": "published",
+      "expected": {
+        "seo_title_ar": "محول توزيع غير متبلور S(B)H21-M-1600/10-NX2",
+        "seo_description_ar": "محول توزيع مغمور بالزيت بقلب غير متبلور S(B)H21-M بقدرة 1600 كيلوفولت أمبير، جهد 10/0.4 كيلوفولت وكفاءة NX2 وتوصيل Dyn11.",
+        "seo_keywords_ar": "محول توزيع غير متبلور، S(B)H21-M، محول 1600 كيلوفولت أمبير، كفاءة NX2"
+      },
+      "target": {
+        "seo_title_ar": "",
+        "seo_description_ar": "",
+        "seo_keywords_ar": ""
+      }
+    },
+    {
+      "row_id": 57,
+      "slug": "dch15-500380-110-single-phase-dry-type-amorphous-alloy-furnace-transformer",
+      "legacy_id": "dch15-500380-110-single-phase-dry-type-amorphous-alloy-furnace-transformer",
+      "status": "published",
+      "expected": {
+        "seo_title_ar": "محول فرن جاف أحادي الطور DCH15-500/380-110",
+        "seo_description_ar": "محول فرن أحادي الطور جاف بقلب غير متبلور DCH15-500/380-110، بقدرة 500 كيلوفولت أمبير ونسبة جهد 380/110 فولت لتغذية الأفران الصناعية.",
+        "seo_keywords_ar": "محول فرن جاف، DCH15-500، محول أحادي الطور، أفران صناعية"
+      },
+      "target": {
+        "seo_title_ar": "",
+        "seo_description_ar": "",
+        "seo_keywords_ar": ""
+      }
+    },
+    {
+      "row_id": 58,
+      "slug": "large-capacity-oil-immersed-amorphous-alloy-transformer",
+      "legacy_id": "large-capacity-oil-immersed-amorphous-alloy-transformer",
+      "status": "published",
+      "expected": {
+        "seo_title_ar": "محول عالي السعة مغمور بالزيت بقلب غير متبلور",
+        "seo_description_ar": "محول عالي السعة مغمور بالزيت بقلب غير متبلور للمحطات والمصانع ومشروعات التوزيع ذات الأحمال العالية، بسعات من 1600 إلى 63000 كيلوفولت أمبير.",
+        "seo_keywords_ar": "محول عالي السعة، محول غير متبلور، محول مغمور بالزيت، محطات كهربائية"
+      },
+      "target": {
+        "seo_title_ar": "",
+        "seo_description_ar": "",
+        "seo_keywords_ar": ""
+      }
+    },
+    {
+      "row_id": 59,
+      "slug": "amdt-132-kv-60-hz-single-phase-pole-mounted-distribution-transformer",
+      "legacy_id": "amdt-132-kv-60-hz-single-phase-pole-mounted-distribution-transformer",
+      "status": "published",
+      "expected": {
+        "seo_title_ar": "محول توزيع أحادي الطور مثبت على عمود AMDT",
+        "seo_description_ar": "محول توزيع أحادي الطور AMDT مثبت على عمود بقدرة 50 كيلوفولت أمبير، لشبكات 60 هرتز وجهد أولي 13.2 كيلوفولت وخرج 120/240 فولت.",
+        "seo_keywords_ar": "محول مثبت على عمود، محول أحادي الطور، AMDT، شبكات 60 هرتز"
+      },
+      "target": {
+        "seo_title_ar": "",
+        "seo_description_ar": "",
+        "seo_keywords_ar": ""
+      }
+    }
+  ]
+}

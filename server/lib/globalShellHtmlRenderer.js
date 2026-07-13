@@ -2,7 +2,7 @@
 
 const HYDRATION_ASSET_VERSION = '20260712-stage2d-entity-graph';
 const HYDRATION_ASSET_VERSION_OVERRIDES = Object.freeze({
-    'product-detail': '20260713-product-gallery-interaction-fix'
+    'product-detail': '20260714-arabic-seo'
 });
 
 function escapeHtml(value) {

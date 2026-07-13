@@ -64,9 +64,11 @@
 
         var SEO_LENGTH_RULES = {
             'field-seo-title': { min: 20, max: 70, label: 'SEO 标题' },
+            'field-seo-title-ar': { min: 20, max: 70, label: '阿语 SEO 标题' },
             'field-seo-title-fr': { min: 20, max: 70, label: '法语 SEO 标题' },
             'field-seo-title-ru': { min: 20, max: 70, label: '俄语 SEO 标题' },
             'field-seo-description': { min: 70, max: 170, label: 'SEO 描述' },
+            'field-seo-description-ar': { min: 90, max: 160, label: '阿语 SEO 描述' },
             'field-seo-description-fr': { min: 70, max: 170, label: '法语 SEO 描述' },
             'field-seo-description-ru': { min: 70, max: 170, label: '俄语 SEO 描述' }
         };
@@ -194,7 +196,8 @@
                 completenessItem('法语内容', hasAnyTextField(['field-nameFr', 'field-shortDescFr', 'field-descriptionFr']), false),
                 completenessItem('俄语内容', hasAnyTextField(['field-nameRu', 'field-shortDescRu', 'field-descriptionRu']), false),
                 completenessItem('产品参数', hasProductSpecs(), false),
-                completenessItem('SEO 标题与描述', hasTextField('field-seo-title') && hasTextField('field-seo-description'), false)
+                completenessItem('英文 SEO 标题与描述', hasTextField('field-seo-title') && hasTextField('field-seo-description'), false),
+                completenessItem('阿语 SEO 标题与描述', hasTextField('field-seo-title-ar') && hasTextField('field-seo-description-ar'), false)
             ];
             list.innerHTML = checks.map(function (item) {
                 return '<li><strong>' + escapeHtml(item.label) + '</strong><span class="' + item.status + '">' + escapeHtml(item.text) + '</span></li>';
@@ -208,7 +211,8 @@
                 'field-nameAr', 'field-shortDescAr', 'field-descriptionAr',
                 'field-nameFr', 'field-shortDescFr', 'field-descriptionFr',
                 'field-nameRu', 'field-shortDescRu', 'field-descriptionRu',
-                'field-seo-title', 'field-seo-description'
+                'field-seo-title', 'field-seo-description',
+                'field-seo-title-ar', 'field-seo-description-ar'
             ].forEach(function (id) {
                 var field = document.getElementById(id);
                 if (!field) return;
@@ -547,7 +551,7 @@
 
             bindModalClose('product-modal', ['modal-close', 'modal-cancel']);
             bindProductEditorNavigation();
-            bindProductDescriptionTabs();
+            bindProductLanguageTabs();
 
             var imageInput = document.getElementById('field-image');
             if (imageInput) imageInput.addEventListener('change', uploadProductImage);
@@ -609,29 +613,54 @@
             });
         }
 
-        function bindProductDescriptionTabs() {
-            document.querySelectorAll('[data-product-detail-tab]').forEach(function (button) {
-                button.addEventListener('click', function () {
-                    activateProductDetailTab(button.getAttribute('data-product-detail-tab'));
-                });
-            });
-        }
-
-        function activateProductDetailTab(locale) {
+        function activateProductLanguageTab(editor, locale, moveFocus) {
+            if (!editor) return;
             locale = locale || 'en';
-            document.querySelectorAll('[data-product-detail-tab]').forEach(function (button) {
-                var active = button.getAttribute('data-product-detail-tab') === locale;
+            var activeButton = null;
+            editor.querySelectorAll('[data-product-language-tab]').forEach(function (button) {
+                var active = button.getAttribute('data-product-language-tab') === locale;
                 button.classList.toggle('active', active);
                 button.setAttribute('aria-selected', active ? 'true' : 'false');
+                button.setAttribute('tabindex', active ? '0' : '-1');
+                if (active) activeButton = button;
             });
-            document.querySelectorAll('[data-product-detail-panel]').forEach(function (panel) {
-                var active = panel.getAttribute('data-product-detail-panel') === locale;
+            editor.querySelectorAll('[data-product-language-panel]').forEach(function (panel) {
+                var active = panel.getAttribute('data-product-language-panel') === locale;
                 panel.classList.toggle('active', active);
                 if (active) {
                     panel.removeAttribute('hidden');
                 } else {
                     panel.setAttribute('hidden', 'hidden');
                 }
+            });
+            if (moveFocus && activeButton) activeButton.focus();
+        }
+
+        function bindProductLanguageTabs() {
+            document.querySelectorAll('[data-product-language-editor]').forEach(function (editor) {
+                var buttons = Array.prototype.slice.call(editor.querySelectorAll('[data-product-language-tab]'));
+                buttons.forEach(function (button, index) {
+                    button.addEventListener('click', function () {
+                        activateProductLanguageTab(editor, button.getAttribute('data-product-language-tab'), false);
+                    });
+                    button.addEventListener('keydown', function (event) {
+                        var nextIndex = index;
+                        if (event.key === 'ArrowRight' || event.key === 'ArrowDown') nextIndex = (index + 1) % buttons.length;
+                        else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') nextIndex = (index + buttons.length - 1) % buttons.length;
+                        else if (event.key === 'Home') nextIndex = 0;
+                        else if (event.key === 'End') nextIndex = buttons.length - 1;
+                        else return;
+                        event.preventDefault();
+                        activateProductLanguageTab(editor, buttons[nextIndex].getAttribute('data-product-language-tab'), true);
+                    });
+                });
+                activateProductLanguageTab(editor, 'en', false);
+            });
+        }
+
+        function resetProductLanguageTabs() {
+            document.querySelectorAll('[data-product-language-editor]').forEach(function (editor) {
+                activateProductLanguageTab(editor, 'en', false);
             });
         }
 
@@ -656,7 +685,7 @@
             renderProductSpecs([]);
             renderProductGallery({});
             renderProductCertifications({});
-            activateProductDetailTab('en');
+            resetProductLanguageTabs();
             syncProductFeaturedSwitch();
             populateProductCategorySelects();
             updateProductPreviewState();
@@ -704,8 +733,11 @@
                 'field-descriptionRu': product.description_ru || '',
                 'field-status': product.status || 'published',
                 'field-seo-title': product.seo_title || '',
+                'field-seo-title-ar': product.seo_title_ar || '',
                 'field-seo-description': product.seo_description || '',
+                'field-seo-description-ar': product.seo_description_ar || '',
                 'field-seo-keywords': product.seo_keywords || '',
+                'field-seo-keywords-ar': product.seo_keywords_ar || '',
                 'field-seo-title-fr': product.seo_title_fr || '',
                 'field-seo-title-ru': product.seo_title_ru || '',
                 'field-seo-description-fr': product.seo_description_fr || '',
@@ -1105,8 +1137,11 @@
                 featured: document.getElementById('field-featured').checked,
                 cover_image: getFieldValue('field-cover-image') || uploadedImagePath,
                 seo_title: getFieldValue('field-seo-title'),
+                seo_title_ar: getFieldValue('field-seo-title-ar'),
                 seo_description: getFieldValue('field-seo-description'),
+                seo_description_ar: getFieldValue('field-seo-description-ar'),
                 seo_keywords: getFieldValue('field-seo-keywords'),
+                seo_keywords_ar: getFieldValue('field-seo-keywords-ar'),
                 seo_title_fr: getFieldValue('field-seo-title-fr'),
                 seo_title_ru: getFieldValue('field-seo-title-ru'),
                 seo_description_fr: getFieldValue('field-seo-description-fr'),

@@ -1,3 +1,5 @@
+const { ARABIC_SEO_SOURCE_FIELDS } = require('./product-arabic-seo-source');
+
 const DEFAULT_PRODUCT_FIELD_PATCH_POLICY_ID = 'fr-ru-localization-v1';
 
 const FR_RU_LOCALIZATION_FIELDS = Object.freeze([
@@ -21,6 +23,12 @@ const SEARCH_COPY_FIELDS = Object.freeze([
     'name_en',
     'name_ar',
     'short_desc_ar'
+]);
+
+const ARABIC_SEO_FIELDS = Object.freeze([
+    'seo_title_ar',
+    'seo_description_ar',
+    'seo_keywords_ar'
 ]);
 
 const ARABIC_NATURAL_ENGLISH_PATTERN = /\b(and|with|for|series|class|optional|power|generation|distribution|control|cooling|alloy|steel|core|transformer|switchgear|device|substation|project|specific|customized|single|phase|three|five|wire|built|fan|lithium|phosphate|integrated|charging|stack|air|liquid|indoor|outdoor|enclosure|compartment|circuit|breaker|door|open|below|residential|commercial|industrial|high|voltage|oil|immersed|free|fire|explosion|hazard|pollution|chemical|corrosion|vibration|efficient|efficiency|compact|box|type)\b/i;
@@ -86,13 +94,52 @@ function validateSearchCopyMetadata(meta) {
         : ['meta.operation must be forward or rollback.'];
 }
 
-function createPolicy(id, allowedFields, validateChange, validateMetadata) {
-    return Object.freeze({
+function validateArabicSeoChange(change) {
+    if (change.operation === 'rollback') return [];
+    const target = change.target.trim();
+    const errors = [];
+    if (!target) errors.push('must not be empty.');
+    if (/[`<>\r\n]/.test(target)) errors.push('must not contain HTML, Markdown backticks, or line breaks.');
+    if (!/[\u0600-\u06ff]/.test(target)) errors.push('must contain Arabic text.');
+    if (ARABIC_NATURAL_ENGLISH_PATTERN.test(target)) errors.push('must not contain unclassified English natural-language prose.');
+    if (change.field === 'seo_title_ar') {
+        if (Array.from(target).length < 20 || Array.from(target).length > 70) errors.push('must contain 20-70 characters.');
+        if (/(\.\.\.|…)$/.test(target)) errors.push('must not end with an ellipsis.');
+    } else if (change.field === 'seo_description_ar') {
+        if (Array.from(target).length < 90 || Array.from(target).length > 160) errors.push('must contain 90-160 characters.');
+        if (/(\.\.\.|…)$/.test(target)) errors.push('must not end with an ellipsis.');
+    } else if (change.field === 'seo_keywords_ar') {
+        const keywords = target.split(/[,،]/).map((value) => value.trim()).filter(Boolean);
+        const unique = new Set(keywords.map((value) => value.toLowerCase()));
+        if (keywords.length < 3 || keywords.length > 6) errors.push('must contain 3-6 comma-separated keywords.');
+        if (unique.size !== keywords.length) errors.push('must not contain duplicate keywords.');
+    }
+    return errors;
+}
+
+function validateArabicSeoMetadata(meta, context) {
+    const errors = [];
+    if (!meta || (meta.operation !== 'forward' && meta.operation !== 'rollback')) {
+        errors.push('meta.operation must be forward or rollback.');
+        return errors;
+    }
+    if (context && context.mode === 'apply' && meta.operation === 'forward' && meta.approval_status !== 'approved') {
+        errors.push('forward apply requires meta.approval_status to be approved.');
+    }
+    if (meta.operation === 'rollback'
+        && (typeof meta.forward_content_sha256 !== 'string' || !/^[a-f0-9]{64}$/i.test(meta.forward_content_sha256))) {
+        errors.push('rollback requires meta.forward_content_sha256.');
+    }
+    return errors;
+}
+
+function createPolicy(id, allowedFields, validateChange, validateMetadata, options) {
+    return Object.freeze(Object.assign({
         id,
         allowedFields,
         validateChange: validateChange || (() => []),
         validateMetadata: validateMetadata || (() => [])
-    });
+    }, options || {}));
 }
 
 const PRODUCT_FIELD_PATCH_POLICIES = Object.freeze({
@@ -105,6 +152,28 @@ const PRODUCT_FIELD_PATCH_POLICIES = Object.freeze({
         SEARCH_COPY_FIELDS,
         validateSearchCopyChange,
         validateSearchCopyMetadata
+    ),
+    'arabic-seo-v1': createPolicy(
+        'arabic-seo-v1',
+        ARABIC_SEO_FIELDS,
+        validateArabicSeoChange,
+        validateArabicSeoMetadata,
+        {
+            requiredFields: ARABIC_SEO_FIELDS,
+            requiredIdentityFields: ['row_id', 'slug', 'legacy_id'],
+            requiredStatus: true,
+            atomicRevalidation: true,
+            forwardGuard: {
+                exactActiveSet: true,
+                expectedVersion: true,
+                sourceFields: ARABIC_SEO_SOURCE_FIELDS,
+                sourceSnapshotHash: true
+            },
+            rollbackGuard: {
+                pairedForward: true,
+                approvedForwardForApply: true
+            }
+        }
     )
 });
 

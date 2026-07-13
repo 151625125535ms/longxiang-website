@@ -1,26 +1,25 @@
-const fs = require('fs');
-const path = require('path');
 const { resolveDbPath } = require('../lib/db');
+const { createVerifiedSqliteBackup } = require('../lib/sqliteBackup');
 
 function timestamp() {
     return new Date().toISOString().replace(/[:.]/g, '-');
 }
 
-function backup() {
+async function backup(backupPathValue) {
     const dbPath = resolveDbPath();
-    if (!fs.existsSync(dbPath)) {
-        console.warn('SQLite database not found, backup skipped: ' + dbPath);
-        return;
-    }
-
-    const backupPath = dbPath + '.bak.' + timestamp();
-    fs.mkdirSync(path.dirname(backupPath), { recursive: true });
-    fs.copyFileSync(dbPath, backupPath);
-    console.log('SQLite backup created: ' + backupPath);
+    const backupPath = backupPathValue || dbPath + '.bak.' + timestamp();
+    const result = await createVerifiedSqliteBackup({ sourcePath: dbPath, backupPath });
+    console.log('SQLite backup created and verified: ' + result.backupPath);
+    console.log('SQLite backup bytes: ' + result.sizeBytes);
+    console.log('SQLite backup schema version: ' + result.summary.schemaVersion);
+    return result;
 }
 
 if (require.main === module) {
-    backup();
+    backup(process.argv[2]).catch(function (err) {
+        console.error(err && err.stack ? err.stack : err);
+        process.exitCode = 1;
+    });
 }
 
 module.exports = { backup };

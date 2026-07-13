@@ -842,8 +842,8 @@ function verifyPublicApiI18nFieldMapping() {
         'nameFr', 'nameRu',
         'shortDescFr', 'shortDescRu',
         'descriptionFr', 'descriptionRu',
-        'seoTitleFr', 'seoTitleRu',
-        'seoDescriptionFr', 'seoDescriptionRu',
+        'seoTitleAr', 'seoTitleFr', 'seoTitleRu',
+        'seoDescriptionAr', 'seoDescriptionFr', 'seoDescriptionRu',
         'seoKeywordsFr', 'seoKeywordsRu',
         'categoryLabelFr', 'categoryLabelRu',
         'groupLabelFr', 'groupLabelRu',
@@ -880,8 +880,8 @@ function verifyFrontendI18nFieldReaders() {
     assertSourceContains(productsListSource, /labelFr/, 'js/products-list.js 应保留 product-categories 的 labelFr 字段。');
     assertSourceContains(productsListSource, /labelFr\s*:\s*item\.labelFr/, 'js/products-list.js deriveTaxonomyFromProducts() 应返回父级 labelFr。');
     assertSourceContains(productsListSource, /labelRu\s*:\s*item\.labelRu/, 'js/products-list.js deriveTaxonomyFromProducts() 应返回父级 labelRu。');
-    assertSourceContains(productDetailSource, /localize\s*\(\s*product\s*,\s*['"]seoTitle['"]\s*\)/, 'js/product-detail.js 应准备读取 locale-specific SEO title。');
-    assertSourceContains(productDetailSource, /localize\s*\(\s*product\s*,\s*['"]seoDescription['"]\s*\)/, 'js/product-detail.js 应准备读取 locale-specific SEO description。');
+    assertSourceContains(productDetailSource, /exactLocalizedProductValue\s*\(\s*product\s*,\s*['"]seoTitle['"]\s*,\s*locale\s*\)/, 'js/product-detail.js 应精确读取当前语言 SEO title。');
+    assertSourceContains(productDetailSource, /exactLocalizedProductValue\s*\(\s*product\s*,\s*['"]seoDescription['"]\s*,\s*locale\s*\)/, 'js/product-detail.js 应精确读取当前语言 SEO description。');
 }
 
 function assertAdminFormIds(source, ids, label) {
@@ -1090,6 +1090,9 @@ function verifyAdminI18nEditingEntrypoints() {
     const certificationRouteSource = readText('server/routes/admin/certifications.js');
 
     const productMappings = [
+        ['seo_title_ar', 'field-seo-title-ar'],
+        ['seo_description_ar', 'field-seo-description-ar'],
+        ['seo_keywords_ar', 'field-seo-keywords-ar'],
         ['name_fr', 'field-nameFr'], ['name_ru', 'field-nameRu'],
         ['short_desc_fr', 'field-shortDescFr'], ['short_desc_ru', 'field-shortDescRu'],
         ['description_fr', 'field-descriptionFr'], ['description_ru', 'field-descriptionRu'],
@@ -1121,6 +1124,7 @@ function verifyAdminI18nEditingEntrypoints() {
     const certificationDetailSource = functionSource(certificationRouteSource, 'getCertification');
 
     assertAdminFormIds(adminHtml, [
+        'field-seo-title-ar', 'field-seo-description-ar', 'field-seo-keywords-ar',
         'field-nameFr', 'field-nameRu',
         'field-shortDescFr', 'field-shortDescRu',
         'field-descriptionFr', 'field-descriptionRu',

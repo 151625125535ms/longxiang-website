@@ -524,8 +524,8 @@ async function main() {
             const data = getPayload(res.body) || {};
             if (!data.sqlite || data.sqlite.enabled !== true) throw new Error('data.sqlite.enabled is not true');
             if (data.publicApiSource !== 'sqlite') throw new Error('publicApiSource is not sqlite');
-            if (Number(data.sqlite.schemaVersion || 0) < 5) throw new Error('schemaVersion is below company identity migration');
-            return 'sqlite.enabled=true, publicApiSource=sqlite, schemaVersion>=5';
+            if (Number(data.sqlite.schemaVersion || 0) < 6) throw new Error('schemaVersion is below Arabic SEO migration');
+            return 'sqlite.enabled=true, publicApiSource=sqlite, schemaVersion>=6';
         });
 
         await runTest('T19', 'GET /api/admin/settings/modules', async function () {

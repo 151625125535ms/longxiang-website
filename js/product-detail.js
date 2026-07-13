@@ -332,6 +332,13 @@
         return Boolean(key && product && typeof product[key] === 'string' && product[key].trim());
     }
 
+    function exactLocalizedProductValue(product, field, localeCode) {
+        if (!product || !field) return '';
+        var key = localeProductFieldName(field, localeCode);
+        if (!key) key = field;
+        return typeof product[key] === 'string' ? product[key].trim() : '';
+    }
+
     function localizedContent(item, field) {
         if (!item) return '';
         if (window.LongxiangI18n && window.LongxiangI18n.localized) {
@@ -580,7 +587,7 @@
     }
 
     function productSeoTitle(product, name) {
-        var localizedSeoTitle = isArabic ? '' : localize(product, 'seoTitle');
+        var localizedSeoTitle = exactLocalizedProductValue(product, 'seoTitle', locale);
         if (localizedSeoTitle) return cleanSeoTitle(localizedSeoTitle);
         var titleSuffix = detailLabel('titleSuffix');
         return cleanSeoTitle(titleSuffix ? name + ' | ' + titleSuffix : name);
@@ -618,10 +625,9 @@
     }
 
     function productSeoDescription(product, desc) {
-        var value = '';
-        if (!isArabic && localize(product, 'seoDescription')) value = localize(product, 'seoDescription');
-        else if (isArabic) value = localize(product, 'shortDesc') || desc;
-        else value = desc || localize(product, 'shortDesc');
+        var value = exactLocalizedProductValue(product, 'seoDescription', locale);
+        if (!value && isArabic) value = localize(product, 'shortDesc') || desc;
+        else if (!value) value = desc || localize(product, 'shortDesc');
         return cleanMetaDescription(value);
     }
 
@@ -645,6 +651,10 @@
         upsertMeta('', 'og:type', 'product');
         upsertMeta('', 'og:url', canonicalUrl);
         upsertMeta('', 'og:image', image);
+        upsertMeta('twitter:card', '', image ? 'summary_large_image' : 'summary');
+        upsertMeta('twitter:title', '', title);
+        upsertMeta('twitter:description', '', description);
+        upsertMeta('twitter:image', '', image);
         upsertHeadLink('canonical', { href: canonicalUrl });
         entries.forEach(function (entry) {
             if (urls[entry.code]) {
@@ -888,7 +898,7 @@
             '@context': 'https://schema.org',
             '@type': 'WebPage',
             name: name,
-            description: desc,
+            description: productSeoDescription(product, desc),
             url: canonicalUrl,
             inLanguage: locale,
             isPartOf: { '@id': WEBSITE_ID }
