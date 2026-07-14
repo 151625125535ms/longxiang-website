@@ -127,7 +127,9 @@ function validateRollbackPair(data, policy, mode, pairedForwardPath, errors) {
         errors.push('Unable to read paired forward patch: ' + (err && err.message ? err.message : String(err)));
         return null;
     }
-    const pairValidation = validateArabicSeoPatchPair(pairedForward, data);
+    const pairValidation = typeof policy.validatePatchPair === 'function'
+        ? policy.validatePatchPair(pairedForward, data)
+        : validateArabicSeoPatchPair(pairedForward, data);
     pairValidation.errors.forEach((message) => errors.push(message));
     if (mode === 'apply' && rollbackGuard.approvedForwardForApply
         && (!pairedForward.meta || pairedForward.meta.approval_status !== 'approved')) {
@@ -213,7 +215,8 @@ function validatePatchShape(data, columns, policy, errors) {
                     field,
                     expected: item.expected[field],
                     target: item.target[field],
-                    operation: data.meta && data.meta.operation
+                    operation: data.meta && data.meta.operation,
+                    meta: data.meta || {}
                 }).forEach((message) => {
                     errors.push('products[' + index + '].target.' + field + ' ' + message);
                 });

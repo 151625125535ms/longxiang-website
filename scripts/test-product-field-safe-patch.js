@@ -4,6 +4,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const Database = require('better-sqlite3');
+const { forwardContentSha256 } = require('./lib/product-arabic-seo-patch-pair');
 
 const root = path.resolve(__dirname, '..');
 const nodeBin = process.execPath;
@@ -124,6 +125,50 @@ function createSearchCopyFixture() {
     return fixture;
 }
 
+function createArabicModelCodeFixture() {
+    const fixture = createFixture();
+    const expected = {
+        name_ar: 'محول توزيع S(S)H15-M',
+        short_desc_ar: 'محول S(S)H15-M مع مرجع سلسلة S(S)H15-M.',
+        description_ar: 'يعتمد S(S)H15-M على قلب غير متبلور، ومرجع النموذج S(S)H15-M.'
+    };
+    const db = new Database(fixture.dbPath);
+    db.prepare(`
+        UPDATE products
+        SET name_ar = @name_ar,
+            short_desc_ar = @short_desc_ar,
+            description_ar = @description_ar
+        WHERE id = 1
+    `).run(expected);
+    db.close();
+
+    const target = Object.fromEntries(Object.entries(expected).map(([field, value]) => [
+        field,
+        value.split('S(S)H').join('S(B)H')
+    ]));
+    const input = {
+        meta: {
+            policy: 'arabic-model-code-correction-v1',
+            operation: 'forward',
+            approval_status: 'pending',
+            model_code_from: 'S(S)H',
+            model_code_to: 'S(B)H',
+            counts: { products: 1, fields: 3 }
+        },
+        products: [{
+            row_id: 1,
+            slug: 'sample-product',
+            legacy_id: 'legacy-product',
+            status: 'published',
+            expectedVersion: 3,
+            expected,
+            target
+        }]
+    };
+    fs.writeFileSync(fixture.inputPath, JSON.stringify(input, null, 2), 'utf8');
+    return fixture;
+}
+
 function readProduct(dbPath) {
     const db = new Database(dbPath, { readonly: true });
     const row = db.prepare('SELECT * FROM products WHERE slug = ?').get('sample-product');
@@ -143,6 +188,17 @@ function runSearchCopy(fixture, mode, extraArgs) {
     return runNode([
         scriptPath,
         '--policy', 'search-copy-v1',
+        mode === 'apply' ? '--apply' : '--dry-run',
+        '--input', fixture.inputPath,
+        '--db', fixture.dbPath,
+        '--report', fixture.reportPath
+    ].concat(extraArgs || []));
+}
+
+function runArabicModelCode(fixture, mode, extraArgs) {
+    return runNode([
+        scriptPath,
+        '--policy', 'arabic-model-code-correction-v1',
         mode === 'apply' ? '--apply' : '--dry-run',
         '--input', fixture.inputPath,
         '--db', fixture.dbPath,
@@ -406,6 +462,98 @@ function testSearchCopyFieldValidators() {
     assert.match(tokenResult.stderr + tokenResult.stdout, /numeric tokens|unit tokens|code tokens/i);
 }
 
+function testArabicModelCodeDryRunIsReadOnlyAndStrictlyScoped() {
+    const fixture = createArabicModelCodeFixture();
+    const before = readProduct(fixture.dbPath);
+    const result = runArabicModelCode(fixture, 'dry-run');
+
+    assert.strictEqual(result.status, 0, result.stderr || result.stdout);
+    assert.deepStrictEqual(readProduct(fixture.dbPath), before);
+    const report = fs.readFileSync(fixture.reportPath, 'utf8');
+    assert.match(report, /Policy: arabic-model-code-correction-v1/);
+    assert.match(report, /Database changed: no/);
+    assert.match(report, /Field changes: 3/);
+}
+
+function testArabicModelCodeRejectsExtraEditsAndMissingFields() {
+    const extraEdit = createArabicModelCodeFixture();
+    const extraInput = readInput(extraEdit.inputPath);
+    extraInput.products[0].target.description_ar += ' تعديل إضافي';
+    writeInput(extraEdit.inputPath, extraInput);
+    const extraResult = runArabicModelCode(extraEdit, 'dry-run');
+    assert.notStrictEqual(extraResult.status, 0, 'extra Arabic copy edits must fail');
+    assert.match(extraResult.stderr + extraResult.stdout, /must only replace every exact/i);
+
+    const missing = createArabicModelCodeFixture();
+    const missingInput = readInput(missing.inputPath);
+    delete missingInput.products[0].expected.description_ar;
+    delete missingInput.products[0].target.description_ar;
+    writeInput(missing.inputPath, missingInput);
+    const missingResult = runArabicModelCode(missing, 'dry-run');
+    assert.notStrictEqual(missingResult.status, 0, 'all three Arabic source fields are required');
+    assert.match(missingResult.stderr + missingResult.stdout, /missing target\.description_ar|missing expected\.description_ar/i);
+}
+
+function testArabicModelCodeApplyApprovalAndRollbackDryRun() {
+    const pending = createArabicModelCodeFixture();
+    const pendingResult = runArabicModelCode(pending, 'apply', ['--backup', pending.backupPath]);
+    assert.notStrictEqual(pendingResult.status, 0, 'pending correction must not apply');
+    assert.match(pendingResult.stderr + pendingResult.stdout, /approval_status.*approved/i);
+
+    const fixture = createArabicModelCodeFixture();
+    const forward = readInput(fixture.inputPath);
+    const pairedForwardPath = path.join(fixture.dir, 'paired-forward.json');
+    forward.meta.approval_status = 'approved';
+    writeInput(fixture.inputPath, forward);
+    writeInput(pairedForwardPath, forward);
+    const before = readProduct(fixture.dbPath);
+    const applyResult = runArabicModelCode(fixture, 'apply', ['--backup', fixture.backupPath]);
+    assert.strictEqual(applyResult.status, 0, applyResult.stderr || applyResult.stdout);
+    const after = readProduct(fixture.dbPath);
+    assert.strictEqual(after.name_ar, forward.products[0].target.name_ar);
+    assert.strictEqual(after.short_desc_ar, forward.products[0].target.short_desc_ar);
+    assert.strictEqual(after.description_ar, forward.products[0].target.description_ar);
+    assert.strictEqual(after.description_en, before.description_en);
+    assert.strictEqual(after.version, before.version + 1);
+
+    const rollback = {
+        meta: {
+            policy: 'arabic-model-code-correction-v1',
+            operation: 'rollback',
+            forward_content_sha256: forwardContentSha256(forward),
+            model_code_from: 'S(B)H',
+            model_code_to: 'S(S)H',
+            counts: { products: 1, fields: 3 }
+        },
+        products: [{
+            row_id: 1,
+            slug: 'sample-product',
+            legacy_id: 'legacy-product',
+            status: 'published',
+            expected: forward.products[0].target,
+            target: forward.products[0].expected
+        }]
+    };
+    writeInput(fixture.inputPath, rollback);
+    const rollbackResult = runArabicModelCode(fixture, 'dry-run', ['--paired-forward', pairedForwardPath]);
+    assert.strictEqual(rollbackResult.status, 0, rollbackResult.stderr || rollbackResult.stdout);
+    assert.match(fs.readFileSync(fixture.reportPath, 'utf8'), /Field changes: 3/);
+}
+
+function testArabicModelCodeRejectsForwardDisguisedAsRollback() {
+    const fixture = createArabicModelCodeFixture();
+    const forward = readInput(fixture.inputPath);
+    const pairedForwardPath = path.join(fixture.dir, 'paired-forward.json');
+    writeInput(pairedForwardPath, forward);
+    forward.meta.operation = 'rollback';
+    forward.meta.forward_content_sha256 = forwardContentSha256(readInput(pairedForwardPath));
+    writeInput(fixture.inputPath, forward);
+
+    const result = runArabicModelCode(fixture, 'dry-run', ['--paired-forward', pairedForwardPath]);
+    assert.notStrictEqual(result.status, 0, 'forward direction must not masquerade as rollback');
+    assert.match(result.stderr + result.stdout, /rollback must use model-code direction|not the forward target/i);
+}
+
 testDryRunDoesNotChangeDatabase();
 testApplyUpdatesOnlyAllowedFieldsAndBacksUpDatabase();
 testRejectsUnsupportedNeutralField();
@@ -420,4 +568,8 @@ testSearchCopyExpectedValueMismatchFails();
 testSearchCopyEmptyChangeDoesNotWrite();
 testSearchCopyRollbackPatchDryRunsAfterApply();
 testSearchCopyFieldValidators();
+testArabicModelCodeDryRunIsReadOnlyAndStrictlyScoped();
+testArabicModelCodeRejectsExtraEditsAndMissingFields();
+testArabicModelCodeApplyApprovalAndRollbackDryRun();
+testArabicModelCodeRejectsForwardDisguisedAsRollback();
 console.log('product field safe patch tests passed');
