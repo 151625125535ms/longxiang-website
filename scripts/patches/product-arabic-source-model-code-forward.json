@@ -2,10 +2,10 @@
   "meta": {
     "policy": "arabic-model-code-correction-v1",
     "operation": "forward",
-    "title": "Row 48 Arabic source model-code correction pending apply approval",
+    "title": "Approved row 48 Arabic source model-code correction",
     "generated_at": "2026-07-14T01:42:26.167Z",
     "source": "Production SQLite v6 read-only query",
-    "approval_status": "pending",
+    "approval_status": "approved",
     "model_code_from": "S(S)H",
     "model_code_to": "S(B)H",
     "counts": {
