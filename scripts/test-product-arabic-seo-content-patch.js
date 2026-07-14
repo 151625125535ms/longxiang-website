@@ -70,8 +70,13 @@ async function run() {
         assert.deepStrictEqual(forwardDryRun.blockers, []);
         assert.strictEqual(forwardDryRun.records.length, forward.products.length);
 
+        const pendingForward = JSON.parse(JSON.stringify(forward));
+        pendingForward.meta.approval_status = 'pending';
+        const pendingForwardPath = path.join(tempDir, 'pending-forward.json');
+        fs.writeFileSync(pendingForwardPath, JSON.stringify(pendingForward, null, 2), 'utf8');
+
         const pendingApply = await runProductFieldPatch({
-            mode: 'apply', inputPath: forwardPath, dbPath,
+            mode: 'apply', inputPath: pendingForwardPath, dbPath,
             reportPath: path.join(tempDir, 'forward-pending-apply.md'),
             backupPath: path.join(tempDir, 'forward-pending-backup.db'), policy, policyExplicit: true
         });

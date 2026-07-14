@@ -2,9 +2,9 @@
   "meta": {
     "policy": "arabic-seo-v1",
     "operation": "rollback",
-    "forward_content_sha256": "ef2c622bb3ef809227c49c4251b1696d31f389a7d97412da85c4ae0c6ee04bb1",
-    "title": "Rollback for prepared Arabic product SEO patch",
-    "generated_at": "2026-07-13T18:11:42.005Z",
+    "forward_content_sha256": "c3b2a7e6b88257f8f5c5662d1afd67853b8cac0f6f832a27debd2d82e2be3f29",
+    "title": "Rollback for approved Arabic product SEO patch",
+    "generated_at": "2026-07-14T02:50:21.807Z",
     "forward_source_set_sha256": "d54e07157a730ae035aa630370deacff46b2e69bf4b8be2d254f9b7fae435ba3",
     "counts": {
       "total": 42,
@@ -548,9 +548,9 @@
       "legacy_id": "amorphous-sbh15-m",
       "status": "published",
       "expected": {
-        "seo_title_ar": "محول توزيع زيتي غير متبلور S(S)H15/21/25-M",
-        "seo_description_ar": "محول توزيع مغمور بالزيت بقلب غير متبلور S(S)H15/21/25-M NX3/2/1، بسعات 30-2500 kVA وفئة جهد 10kV وتبريد ONAN.",
-        "seo_keywords_ar": "محول توزيع زيتي، محول غير متبلور، S(S)H15، كفاءة NX3"
+        "seo_title_ar": "محول توزيع زيتي غير متبلور S(B)H15/21/25-M",
+        "seo_description_ar": "محول توزيع مغمور بالزيت بقلب غير متبلور S(B)H15/21/25-M NX3/2/1، بسعات 30-2500 kVA وفئة جهد 10kV وتبريد ONAN.",
+        "seo_keywords_ar": "محول توزيع زيتي، محول غير متبلور، S(B)H15/21/25-M NX3/2/1"
       },
       "target": {
         "seo_title_ar": "",
