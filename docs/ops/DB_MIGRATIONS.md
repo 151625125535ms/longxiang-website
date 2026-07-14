@@ -14,7 +14,16 @@
 - Version 3: `i18n_fr_ru_fields`，增加产品和证书的法语、俄语字段族。
 - Version 4: `products_name_cn_model`，增加产品中文名称和型号字段。
 - Version 5: `company_identity`，增加公司身份相关结构。
-- Version 6: `product_arabic_seo_fields`，增加产品 `seo_title_ar`、`seo_description_ar`、`seo_keywords_ar`。截至 2026-07-14 生产仍为 v5，v6 尚未获得生产迁移授权。
+- Version 6: `product_arabic_seo_fields`，增加产品 `seo_title_ar`、`seo_description_ar`、`seo_keywords_ar`。2026-07-14 已在生产通过版本化迁移应用；三个字段迁移后保持 `NULL`，未自动回填内容。
+
+2026-07-14 生产 v6 迁移记录：
+
+- 代码提交：`900a660`
+- 迁移前 Schema：v5；迁移后 Schema：v6
+- 备份：`/home/ubuntu/longxiang-backups/longxiang-pre-v6-20260714-080154.db`，`4456448` 字节
+- 备份验证：源库/备份完整性均为 `ok`，产品统计均为 `57=42 published+0 draft+15 deleted`
+- 数据验证：迁移前备份与迁移后现库的全部旧产品列 SHA-256 一致
+- 运行验证：PM2 `longxiang-website` 重启一次后为 `online`，健康接口返回 `schemaVersion=6`
 
 ## 执行前要求
 

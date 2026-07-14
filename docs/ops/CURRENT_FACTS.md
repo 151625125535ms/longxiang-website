@@ -15,7 +15,9 @@
 - 本地未跟踪噪音：`.tmp/`、`chanpince/`，按项目规则默认不处理
 - 禁止同步方向：不得执行 `git push longxiang`；服务器只允许 `git pull origin main`
 - 2026-07-08 产品图片资源关联修复代码提交：`8690b6b`（`补充产品图片资源关联修复入口`）已推送 GitHub 并由生产服务器 `git pull origin main` 拉取；本次只部署脚本、审计口径和运维文档，未执行生产数据库 `--apply`。
-- 2026-07-14 阿语产品 SEO 代码与内容补丁已在本地完成准备和验证，生产仍未部署：未执行服务器 pull、Schema v6 迁移、后台保存 canary 或批量数据写入。部署和数据写入分别需要后续独立授权。
+- 2026-07-14 阿语产品 SEO 代码提交 `900a660` 已部署，生产已通过版本化迁移升级到 Schema v6。迁移只新增三个阿语 SEO 列，尚未执行后台保存 canary 或批量数据写入；代码部署、canary 和内容回填仍是独立完成边界。
+- v6 迁移前使用 Node 24 创建仓库外 WAL 在线备份 `/home/ubuntu/longxiang-backups/longxiang-pre-v6-20260714-080154.db`，大小 `4456448` 字节；源库和备份完整性均为 `ok`，Schema 均为 v5，产品统计均为 `57=42 published+0 draft+15 deleted`。
+- 迁移后生产旧产品列与迁移前备份的规范化 SHA-256 均为 `5c62d517e0b6c24c7f50e96e127886ca66ca4d9658ba04b28f628180f4639bf7`，确认旧产品字段未变化。
 
 ## 运行环境
 
@@ -47,7 +49,7 @@
 - 线上 sitemap URL 数：`184`
 - 本地 `node scripts/generate-sitemap.js --dry-run` URL 数：`184`
 - 生产 `node scripts/generate-sitemap.js --dry-run` URL 数：`184`
-- 公网 `https://www.lxenelectric.com/api/health` 返回 `HTTP 200`，`ok=true`、`sqlite=true`
+- 公网 `https://www.lxenelectric.com/api/health` 返回 `HTTP 200`，`ok=true`、`sqlite=true`；v6 迁移后生产本机健康接口明确返回 `schemaVersion=6`。
 - 公网 `en/ar/fr/ru` 产品详情已通过真实浏览器验收：页面成功水合，单图产品无缩略图和切换控件，阿语为 RTL，`390x844` 视口无横向溢出，未发现页面脚本错误或图片加载失败
 - 公网多图产品 `segmented-arc-quenching-surge-arrester` 已通过真实交互验收：3 张图片的缩略图点击和上下切换按钮均能更新主图、选中态与计数；四语和手机视口均通过
 
@@ -60,8 +62,8 @@
 - `pt` 当前状态：只在 `plannedLocales` 中预留，`includeInSitemap=false`
 - 本地 SEO/i18n 校验：`node scripts/verify-seo-i18n.js` 通过
 - 生产 SEO/i18n 校验：使用 Node 24 运行 `node scripts/verify-seo-i18n.js` 通过
-- 生产只读核实仍为 Schema v5，`products` 尚无 `seo_title_ar`、`seo_description_ar`、`seo_keywords_ar` 三列；阿语产品详情继续使用现有名称和简介回退，不应把本地代码能力误报为已上线。
-- 本地准备的 Schema v6 将增加上述三个后台字段。公开产品接口只提供阿语 SEO 标题与描述，关键词仅供后台内容管理，不输出 `<meta name="keywords">`。
+- 生产已为 Schema v6，`products` 已有 `seo_title_ar`、`seo_description_ar`、`seo_keywords_ar` 三列。迁移后 57 行三个新字段均为 `NULL`，没有自动写入或覆盖产品内容。
+- 生产公网已验证：公开产品接口只提供空的阿语 SEO 标题与描述，不暴露 `seoKeywordsAr`；后台页面已加载三项阿语 SEO 输入；代表性阿语产品详情的 title/description 与迁移前名称、简介回退精确一致，不输出 `<meta name="keywords">`。
 - 基于 2026-07-14 生产只读快照已为全部 42 个非删除产品准备 126 项阿语 SEO 内容；自动长度、重复、非法字符、来源外数字/单位及 forward/rollback 对称性审计通过。独立阿语内容审批仍未完成；pending forward 可 dry-run 但被代码禁止 apply，rollback 也必须与已审批 forward 的摘要及严格逆映射一致。
 
 ## 生产数据库
@@ -104,7 +106,7 @@
 - 产品详情图库继续使用 `product_media` 作为唯一数据源，不新增图库字段或第二套关系；封面为 `is_cover=1, sort_order=1`，图库从 2 开始连续排序。
 - 2026-07-14 生产只读复核：42 个 published 产品中，`segmented-arc-quenching-surge-arrester` 有 3 张图片（1 张封面、2 张图库图），其余 41 个产品为单图。
 - `products` 已有 `fr`、`ru` 字段族，例如 `name_fr`、`name_ru`、`description_fr`、`description_ru`、`seo_title_fr`、`seo_title_ru`。
-- 生产 Schema v5 尚无三个阿语 SEO 专用列；本地迁移 `0006_product_arabic_seo_fields` 未获生产执行授权。
+- 生产 Schema v6 已应用 `0006_product_arabic_seo_fields`，三个阿语 SEO 专用列存在且当前全部为空；内容回填尚未授权。
 - `certifications` 已有 `fr`、`ru` 字段族。
 
 ## 图片与上传资源
@@ -163,7 +165,7 @@
 - 服务器 SSH 默认 Node/npm 与项目 engines 不一致；直接用默认 `node` 跑依赖 `better-sqlite3` 的脚本会失败。部署、排障和手工脚本执行时必须显式进入 Node 24 环境。
 - 资源关联尚未完全闭合：`assets.entity_id IS NULL=217`，`product_media.asset_id IS NULL=1/59`。图库试点和后续四个产品上传没有扩大 `product_media.asset_id` 空值数量；剩余缺口仍是此前产品 12 的旧路径关联，当前不影响已核验的图片路径健康。
 - 生产多图试点已完成技术验收，用户侧最终确认仍待完成；在扩大到其他产品前仍需逐项确认图片内容和顺序。
-- 阿语 SEO 仍处于“本地代码与内容准备完成、生产未迁移”状态。代码部署、v6 自动迁移、生产后台 canary 和 42 个产品批量 apply 是四个不同的完成边界，不能合并授权或合并汇报。
+- 阿语 SEO 当前处于“生产代码与 v6 Schema 已部署、内容尚未写入”状态。PM2 仅为加载后端和触发迁移重启一次，最终保持 `online`，错误日志在本次重启后没有新增记录。生产后台 canary、独立阿语审批、42 个产品 dry-run 和批量 apply 仍需分别授权和验收。
 - 搜索引擎控制台状态本次未核验；Google Search Console、Bing Webmaster Tools 的提交和收录状态不应从代码或 sitemap 状态反推。
 - 本清单是时间点事实，不代表永久事实。每次语言、SEO、产品数据、上传链路、部署环境发生变化后都应更新。
 
