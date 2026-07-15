@@ -6,7 +6,8 @@ const migrations = [
     require('./0004_products_name_cn_model'),
     require('./0005_company_identity'),
     require('./0006_product_arabic_seo_fields'),
-    require('./0007_translation_revisions')
+    require('./0007_translation_revisions'),
+    require('./0008_content_translation_overlays')
 ];
 
 function ensureMigrationTable(db) {

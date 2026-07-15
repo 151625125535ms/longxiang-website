@@ -247,6 +247,27 @@ CREATE TABLE IF NOT EXISTS translation_backfill_receipts (
     rolled_back_at INTEGER
 );
 
+CREATE TABLE IF NOT EXISTS content_translation_schemas (
+    id INTEGER PRIMARY KEY,
+    content_block_id INTEGER NOT NULL,
+    content_version INTEGER NOT NULL CHECK (content_version > 0),
+    schema_version INTEGER NOT NULL CHECK (schema_version > 0),
+    schema_json TEXT NOT NULL,
+    structure_hash TEXT NOT NULL,
+    created_at INTEGER NOT NULL,
+    UNIQUE(content_block_id, content_version, schema_version),
+    FOREIGN KEY (content_block_id) REFERENCES content_blocks(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS content_overlay_migration_receipts (
+    id INTEGER PRIMARY KEY,
+    plan_hash TEXT NOT NULL UNIQUE,
+    receipt_json TEXT NOT NULL,
+    state TEXT NOT NULL DEFAULT 'applied' CHECK (state IN ('applied', 'rolled_back')),
+    created_at INTEGER NOT NULL,
+    rolled_back_at INTEGER
+);
+
 CREATE TABLE IF NOT EXISTS inquiries (
     id INTEGER PRIMARY KEY,
     legacy_id TEXT UNIQUE,
@@ -339,6 +360,8 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_content_translation_one_draft ON content_b
 CREATE UNIQUE INDEX IF NOT EXISTS idx_content_translation_one_published ON content_block_translations(content_block_id, locale) WHERE revision_state = 'published';
 CREATE INDEX IF NOT EXISTS idx_content_translation_public_lookup ON content_block_translations(locale, revision_state, content_block_id);
 CREATE INDEX IF NOT EXISTS idx_product_spec_translation_revision ON product_spec_translation_values(product_translation_id);
+CREATE INDEX IF NOT EXISTS idx_content_translation_schema_lookup ON content_translation_schemas(content_block_id, content_version, schema_version);
+CREATE INDEX IF NOT EXISTS idx_content_overlay_receipt_state ON content_overlay_migration_receipts(state, created_at);
 CREATE INDEX IF NOT EXISTS idx_certifications_category ON certifications(category_id);
 CREATE INDEX IF NOT EXISTS idx_certifications_status ON certifications(status);
 CREATE INDEX IF NOT EXISTS idx_certifications_asset ON certifications(asset_id);

@@ -95,6 +95,68 @@ function productQuery(locale, includeDescription, idFilter) {
     `;
 }
 
+function revisionProductQuery(includeDescription, idFilter) {
+    const localizedDescription = includeDescription
+        ? `translation.description AS localized_description,
+            fallback.description AS fallback_description,
+            translation.seo_title AS localized_seo_title,
+            fallback.seo_title AS fallback_seo_title,
+            translation.seo_description AS localized_seo_description,
+            fallback.seo_description AS fallback_seo_description,`
+        : '';
+    return `
+        SELECT
+            p.id, p.legacy_id, p.slug, p.model, p.product_group, p.sub_category,
+            p.aliases_json, p.featured, p.updated_at,
+            translation.id AS translation_id,
+            translation.name AS localized_name,
+            fallback.name AS fallback_name,
+            translation.short_description AS localized_short,
+            fallback.short_description AS fallback_short,
+            ${localizedDescription}
+            c.slug AS category_slug,
+            category_translation.name AS localized_category_label,
+            category_fallback.name AS fallback_category_label,
+            parent.slug AS parent_slug,
+            parent_translation.name AS localized_parent_label,
+            parent_fallback.name AS fallback_parent_label
+        FROM products p
+        JOIN product_translations translation
+            ON translation.product_id = p.id
+            AND translation.locale = @locale
+            AND translation.revision_state = 'published'
+        LEFT JOIN product_translations fallback
+            ON fallback.product_id = p.id
+            AND fallback.locale = 'en'
+            AND fallback.revision_state = 'published'
+        LEFT JOIN categories c ON c.id = p.category_id
+        JOIN category_translations category_translation
+            ON category_translation.category_id = c.id
+            AND category_translation.locale = @locale
+            AND category_translation.revision_state = 'published'
+        LEFT JOIN category_translations category_fallback
+            ON category_fallback.category_id = c.id
+            AND category_fallback.locale = 'en'
+            AND category_fallback.revision_state = 'published'
+        LEFT JOIN categories parent ON parent.id = c.parent_id
+        LEFT JOIN category_translations parent_translation
+            ON parent_translation.category_id = parent.id
+            AND parent_translation.locale = @locale
+            AND parent_translation.revision_state = 'published'
+        LEFT JOIN category_translations parent_fallback
+            ON parent_fallback.category_id = parent.id
+            AND parent_fallback.locale = 'en'
+            AND parent_fallback.revision_state = 'published'
+        WHERE p.status = 'published'
+            AND p.category_id IS NOT NULL
+            AND c.id IS NOT NULL
+            AND c.is_active = 1
+            AND (c.parent_id IS NULL OR (parent.is_active = 1 AND parent_translation.id IS NOT NULL))
+            ${idFilter ? 'AND p.id = @product_id' : ''}
+        ORDER BY p.sort_order, p.id
+    `;
+}
+
 function resolveGroup(row) {
     if (row.parent_slug) return { group: row.parent_slug, subCategory: row.category_slug || row.sub_category || '' };
     if (row.product_group && VALID_GROUPS.has(row.product_group)) {
@@ -170,20 +232,36 @@ function mapProduct(row, locale, mediaState, details, specs) {
     return product;
 }
 
-function readLocalizedProducts(locale, dbValue) {
+function readLocalizedProducts(locale, dbValue, options) {
     assertLocale(locale);
     const db = dbValue || getDb();
-    const rows = db.prepare(productQuery(locale, false, false)).all();
+    const revisionSource = options && options.source === 'revision';
+    const rows = revisionSource
+        ? db.prepare(revisionProductQuery(false, false)).all({ locale })
+        : db.prepare(productQuery(locale, false, false)).all();
     const productIds = rows.map(function (row) { return row.id; });
     const specsByProduct = {};
     if (productIds.length) {
         const placeholders = productIds.map(function () { return '?'; }).join(',');
-        db.prepare(`
-            SELECT product_id, spec_group, spec_value
-            FROM product_specs
-            WHERE product_id IN (${placeholders}) AND spec_group IN ('capacity', 'voltage')
-            ORDER BY product_id, spec_group, sort_order, id
-        `).all(productIds).forEach(function (spec) {
+        const specs = revisionSource
+            ? db.prepare(`
+                SELECT translation.product_id, spec.spec_group,
+                    value.value_text AS spec_value, value.label AS spec_key
+                FROM product_translations translation
+                JOIN product_spec_translation_values value
+                    ON value.product_translation_id = translation.id
+                JOIN product_specs spec ON spec.id = value.product_spec_id
+                WHERE translation.id IN (${rows.map(function () { return '?'; }).join(',')})
+                    AND spec.spec_group IN ('capacity', 'voltage')
+                ORDER BY translation.product_id, spec.spec_group, spec.sort_order, spec.id
+            `).all(rows.map(function (row) { return row.translation_id; }))
+            : db.prepare(`
+                SELECT product_id, spec_group, spec_value
+                FROM product_specs
+                WHERE product_id IN (${placeholders}) AND spec_group IN ('capacity', 'voltage')
+                ORDER BY product_id, spec_group, sort_order, id
+            `).all(productIds);
+        specs.forEach(function (spec) {
             if (!specsByProduct[spec.product_id]) specsByProduct[spec.product_id] = [];
             specsByProduct[spec.product_id].push(spec);
         });
@@ -192,36 +270,69 @@ function readLocalizedProducts(locale, dbValue) {
     return rows.map(function (row) { return mapProduct(row, locale, mediaState, false, specsByProduct[row.id] || []); }).filter(Boolean);
 }
 
-function readLocalizedProduct(identifier, locale, dbValue) {
+function readLocalizedProduct(identifier, locale, dbValue, options) {
     assertLocale(locale);
     if (identifier == null || identifier === '') return null;
     const db = dbValue || getDb();
     const productId = findProductId(db, String(identifier));
     if (!productId) return null;
-    const row = db.prepare(productQuery(locale, true, true)).get(productId);
+    const revisionSource = options && options.source === 'revision';
+    const row = revisionSource
+        ? db.prepare(revisionProductQuery(true, true)).get({ locale, product_id: productId })
+        : db.prepare(productQuery(locale, true, true)).get(productId);
     if (!row) return null;
-    const specs = db.prepare(`
-        SELECT spec_group, spec_key, spec_value, unit
-        FROM product_specs WHERE product_id = ?
-        ORDER BY spec_group, sort_order, id
-    `).all(productId);
+    const specs = revisionSource
+        ? db.prepare(`
+            SELECT spec.spec_group, value.label AS spec_key,
+                value.value_text AS spec_value, spec.unit
+            FROM product_spec_translation_values value
+            JOIN product_specs spec ON spec.id = value.product_spec_id
+            WHERE value.product_translation_id = ?
+            ORDER BY spec.spec_group, spec.sort_order, spec.id
+        `).all(row.translation_id)
+        : db.prepare(`
+            SELECT spec_group, spec_key, spec_value, unit
+            FROM product_specs WHERE product_id = ?
+            ORDER BY spec_group, sort_order, id
+        `).all(productId);
     const mediaState = mediaMaps(db, [productId], true);
     return mapProduct(row, locale, mediaState, true, specs);
 }
 
-function readLocalizedProductCategories(locale, dbValue) {
+function readLocalizedProductCategories(locale, dbValue, options) {
     assertLocale(locale);
     const db = dbValue || getDb();
+    const revisionSource = options && options.source === 'revision';
     const column = 'name_' + ENTITY_SUFFIX[locale];
-    const rows = db.prepare(`
-        SELECT c.id, c.parent_id, c.slug, c.${column} AS localized_name, c.name_en AS fallback_name
-        FROM categories c
-        LEFT JOIN categories parent ON parent.id = c.parent_id
-        WHERE c.type = 'product' AND c.is_active = 1
-            AND (c.parent_id IS NULL OR parent.is_active = 1)
-        ORDER BY COALESCE(parent.sort_order, c.sort_order),
-            CASE WHEN c.parent_id IS NULL THEN 0 ELSE 1 END, c.sort_order, c.id
-    `).all();
+    const rows = revisionSource
+        ? db.prepare(`
+            SELECT c.id, c.parent_id, c.slug,
+                translation.name AS localized_name,
+                fallback.name AS fallback_name
+            FROM categories c
+            JOIN category_translations translation
+                ON translation.category_id = c.id
+                AND translation.locale = @locale
+                AND translation.revision_state = 'published'
+            LEFT JOIN category_translations fallback
+                ON fallback.category_id = c.id
+                AND fallback.locale = 'en'
+                AND fallback.revision_state = 'published'
+            LEFT JOIN categories parent ON parent.id = c.parent_id
+            WHERE c.type = 'product' AND c.is_active = 1
+                AND (c.parent_id IS NULL OR parent.is_active = 1)
+            ORDER BY COALESCE(parent.sort_order, c.sort_order),
+                CASE WHEN c.parent_id IS NULL THEN 0 ELSE 1 END, c.sort_order, c.id
+        `).all({ locale })
+        : db.prepare(`
+            SELECT c.id, c.parent_id, c.slug, c.${column} AS localized_name, c.name_en AS fallback_name
+            FROM categories c
+            LEFT JOIN categories parent ON parent.id = c.parent_id
+            WHERE c.type = 'product' AND c.is_active = 1
+                AND (c.parent_id IS NULL OR parent.is_active = 1)
+            ORDER BY COALESCE(parent.sort_order, c.sort_order),
+                CASE WHEN c.parent_id IS NULL THEN 0 ELSE 1 END, c.sort_order, c.id
+        `).all();
     const byParent = rows.reduce(function (groups, row) {
         if (row.parent_id == null) return groups;
         if (!groups[row.parent_id]) groups[row.parent_id] = [];
@@ -243,19 +354,42 @@ function readLocalizedProductCategories(locale, dbValue) {
     }).filter(function (group) { return group.children.length; });
 }
 
-function readLocalizedCertifications(locale, dbValue) {
+function readLocalizedCertifications(locale, dbValue, options) {
     assertLocale(locale);
     const db = dbValue || getDb();
     const suffix = ENTITY_SUFFIX[locale];
-    return db.prepare(`
-        SELECT legacy_id, legacy_category, image_path, source_type, pages, width, height,
-            name_${suffix} AS localized_name, name_en AS fallback_name,
-            category_label_${suffix} AS localized_category, category_label_en AS fallback_category,
-            issuer_${suffix} AS localized_issuer, issuer_en AS fallback_issuer,
-            description_${suffix} AS localized_description, description_en AS fallback_description
-        FROM certifications WHERE status = 'published'
-        ORDER BY sort_order, id
-    `).all().map(function (row) {
+    const revisionSource = options && options.source === 'revision';
+    const rows = revisionSource
+        ? db.prepare(`
+            SELECT certification.legacy_id, certification.legacy_category,
+                certification.image_path, certification.source_type,
+                certification.pages, certification.width, certification.height,
+                translation.name AS localized_name, fallback.name AS fallback_name,
+                translation.category_label AS localized_category, fallback.category_label AS fallback_category,
+                translation.issuer AS localized_issuer, fallback.issuer AS fallback_issuer,
+                translation.description AS localized_description, fallback.description AS fallback_description
+            FROM certifications certification
+            JOIN certification_translations translation
+                ON translation.certification_id = certification.id
+                AND translation.locale = @locale
+                AND translation.revision_state = 'published'
+            LEFT JOIN certification_translations fallback
+                ON fallback.certification_id = certification.id
+                AND fallback.locale = 'en'
+                AND fallback.revision_state = 'published'
+            WHERE certification.status = 'published'
+            ORDER BY certification.sort_order, certification.id
+        `).all({ locale })
+        : db.prepare(`
+            SELECT legacy_id, legacy_category, image_path, source_type, pages, width, height,
+                name_${suffix} AS localized_name, name_en AS fallback_name,
+                category_label_${suffix} AS localized_category, category_label_en AS fallback_category,
+                issuer_${suffix} AS localized_issuer, issuer_en AS fallback_issuer,
+                description_${suffix} AS localized_description, description_en AS fallback_description
+            FROM certifications WHERE status = 'published'
+            ORDER BY sort_order, id
+        `).all();
+    return rows.map(function (row) {
         const name = localizedText(row.localized_name, row.fallback_name, locale);
         const category = localizedText(row.localized_category, row.fallback_category, locale);
         const issuer = localizedText(row.localized_issuer, row.fallback_issuer, locale);
@@ -277,9 +411,29 @@ function readLocalizedCertifications(locale, dbValue) {
     });
 }
 
+function readRevisionLocalizedProducts(locale, dbValue) {
+    return readLocalizedProducts(locale, dbValue, { source: 'revision' });
+}
+
+function readRevisionLocalizedProduct(identifier, locale, dbValue) {
+    return readLocalizedProduct(identifier, locale, dbValue, { source: 'revision' });
+}
+
+function readRevisionLocalizedProductCategories(locale, dbValue) {
+    return readLocalizedProductCategories(locale, dbValue, { source: 'revision' });
+}
+
+function readRevisionLocalizedCertifications(locale, dbValue) {
+    return readLocalizedCertifications(locale, dbValue, { source: 'revision' });
+}
+
 module.exports = {
     readLocalizedProducts,
     readLocalizedProduct,
     readLocalizedProductCategories,
-    readLocalizedCertifications
+    readLocalizedCertifications,
+    readRevisionLocalizedProducts,
+    readRevisionLocalizedProduct,
+    readRevisionLocalizedProductCategories,
+    readRevisionLocalizedCertifications
 };

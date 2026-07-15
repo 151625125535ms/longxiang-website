@@ -15,6 +15,15 @@ function clone(value) {
     return Object.keys(value).reduce(function (out, key) { out[key] = clone(value[key]); return out; }, {});
 }
 
+function stripPrivateContentMetadata(value) {
+    if (Array.isArray(value)) return value.map(stripPrivateContentMetadata);
+    if (!value || typeof value !== 'object') return value;
+    return Object.keys(value).reduce(function (out, key) {
+        if (key !== '_translationId') out[key] = stripPrivateContentMetadata(value[key]);
+        return out;
+    }, {});
+}
+
 function merge(base, patch) {
     if (!patch || typeof patch !== 'object') return clone(patch);
     if (Array.isArray(base)) return Array.isArray(patch) ? clone(patch) : applyArrayPatch(base, patch);
@@ -71,6 +80,7 @@ function normalizeRow(row, db) {
     let body = parseJson(row.body_json, {});
     if (row.slug === 'contact') body = sanitizePublicContact(body, identity);
     if (row.slug === 'global-shell') body = ensureChinaWebsiteLink(body, identity);
+    body = stripPrivateContentMetadata(body);
     return { id: row.id, slug: row.slug, title: row.title_en || '', titleAr: row.title_ar || '', body, version: row.version || 1, updatedAt: row.updated_at || null };
 }
 
@@ -157,5 +167,6 @@ module.exports = {
     localizePublicContentBlock,
     localizeTree,
     compactLocalizedContentBlock,
-    compactLocalizedTree
+    compactLocalizedTree,
+    stripPrivateContentMetadata
 };

@@ -28,6 +28,7 @@
     "test:stage3-search-copy": "node scripts/test-stage3-product-search-copy-patch.js",
     "test:locale-api": "node scripts/test-locale-api-stage-a.js",
     "test:translation-stage-b": "node scripts/test-translation-stage-b.js && node scripts/test-translation-backfill-stage-b.js && node scripts/test-translation-admin-integration.js && node scripts/test-translation-admin-browser.js",
+    "test:translation-stage-c1": "node scripts/test-content-overlay-stage-c1.js",
     "test:acceptance:db-copy": "node scripts/run-acceptance-on-db-copy.js",
     "translations:audit-writers": "node scripts/audit-translation-write-entrypoints.js",
     "sitemap:generate": "node scripts/generate-sitemap.js",

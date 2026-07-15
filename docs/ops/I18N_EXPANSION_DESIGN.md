@@ -107,6 +107,45 @@ dry-run 计划哈希包含待导入的旧字段内容和产品规格源快照；
 
 生产部署顺序必须单独授权，并保持：WAL 在线备份及校验 -> 迁移 v7 -> backfill dry-run -> 核对计划哈希与 blocker -> 单独授权 apply -> 写后数据库和后台闭环验收。当前阶段不得仅凭代码合入自动执行生产迁移或 backfill。
 
+## Content overlay 阶段 C1 能力
+
+阶段 C1 只建立默认关闭的迁移与读取能力，不切换公开读取权威：
+
+- Schema v8 以 additive migration 增加 `content_translation_schemas` 和 `content_overlay_migration_receipts`。前者保存按 content block、内容版本和 schema 版本绑定的路径白名单及结构哈希；后者保存 apply/rollback 回执。
+- `server/lib/contentTranslationOverlay.js` 只允许白名单内的文本路径进入 overlay。对象数组使用持久 `_translationId` 作为翻译身份；该字段属于数据库内部元数据，旧接口和 revision 接口都不得向前台输出。
+- 旧 Patch 转换时，只有双方等长且均为对象数组时，才允许按旧下标一次性继承稳定 ID。迁移后排序与文本绑定只依赖稳定 ID；插入、删除或结构变化会改变 canonical structure hash，并在重新发布前阻止旧 overlay 静默套用。
+- About Us 阿语和 Education 法语中现存的数组长度差异使用 schema 显式允许的受控 replacement 保存，不扩大到资源路径或其它中性结构字段。
+- `server/lib/localizedPublicCatalog.js` 和 `server/lib/revisionPublicContent.js` 提供显式 revision 读取入口；`server/lib/publicTranslationReadAdapter.js` 的默认 source 仍是 `legacy`。C1 合入本身不会改变公开路由、SSR、SEO、sitemap 或前台页面的数据来源。
+- `server/lib/localePublicationPolicy.js` 提供基于 published revision 的批量发布矩阵，产品、分类、证书或 content block 的一批实体只执行一次矩阵查询，供后续读取切换和 sitemap 使用。
+
+### overlay dry-run、apply 与 rollback
+
+只读 dry-run：
+
+```powershell
+node scripts/migrate-content-overlays.js --db=<database-copy>
+```
+
+apply 必须使用显式数据库副本、dry-run 计划哈希、确认词和新的外部 receipt 路径：
+
+```powershell
+node scripts/migrate-content-overlays.js --apply --db=<database-copy> --expected-plan-hash=<hash> --receipt=<receipt.json> --confirm=STAGE_C1_CONTENT_OVERLAYS
+```
+
+rollback 会核对数据库内 receipt、当前 content block、schema 和本批 published revision；任一内容在 apply 后发生变化时整批拒绝回滚：
+
+```powershell
+node scripts/migrate-content-overlays.js --rollback --db=<database-copy> --receipt=<receipt.json> --confirm=STAGE_C1_CONTENT_OVERLAYS_ROLLBACK
+```
+
+也可以使用数据库内计划哈希恢复：
+
+```powershell
+node scripts/migrate-content-overlays.js --rollback --db=<database-copy> --plan-hash=<applied-plan-hash> --confirm=STAGE_C1_CONTENT_OVERLAYS_ROLLBACK
+```
+
+C1 的本地验收使用 SQLite 在线备份生成临时副本，连续验证 dry-run 不写库、源数据漂移阻断、apply 收敛、旧接口兼容、四语 revision 输出、稳定数组 ID、结构哈希、批量查询预算、rollback 和 reapply。生产 Schema v8 迁移、content overlay apply 及公开读取切换分别属于后续授权节点，不能由 C1 commit 自动触发。
+
 ## pt planned 边界
 
 - 不创建正式 `/pt/` 公开页面目录作为上线入口。
@@ -134,6 +173,7 @@ node --check scripts/verify-seo-i18n.js
 node --check scripts/generate-sitemap.js
 node scripts/audit-translation-write-entrypoints.js
 npm run test:translation-stage-b
+npm run test:translation-stage-c1
 npm run test:acceptance:db-copy
 node scripts/generate-sitemap.js --dry-run
 node scripts/verify-seo-i18n.js
@@ -143,6 +183,6 @@ git diff --check
 ## 风险与治理建议
 
 - 前端运行时和 `config/locales.json` 仍存在一份静态配置重复；短期通过 `scripts/verify-seo-i18n.js` 强校验兜底，长期可评估构建脚本或服务端注入。
-- 当前公开读取仍使用固定语言字段；translation revision 表是兼容迁移层。只有完成阶段 C 的四语读取切换、观察期和旧写入口退役，才能消除双写技术债。
+- 当前公开读取仍使用固定语言字段；translation revision 与 content overlay 都是默认关闭的兼容迁移层。只有完成后续四语读取切换、观察期和旧写入口退役，才能消除双写及旧 Patch 技术债。
 - 新语言上线前不要开启 `includeInSitemap`，否则 sitemap 会暴露尚未准备好的 URL。
 - 每次语言状态变化后都必须同步更新 `docs/ops/CURRENT_FACTS.md` 和本设计文档。
