@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { loadLocaleRegistry, normalizePathPrefix } = require('../server/lib/localeRegistry');
 
 const DEFAULT_LOCALE_CONFIG_PATH = path.join(__dirname, '..', 'config', 'locales.json');
 
@@ -27,25 +28,7 @@ const NOT_FOUND_SHELL = {
 const PAGE_SHELLS = BASE_STATIC_PAGES.concat([PRODUCT_DETAIL_SHELL, NOT_FOUND_SHELL]);
 
 function loadLocaleConfig(configPath) {
-    const parsed = JSON.parse(fs.readFileSync(configPath || DEFAULT_LOCALE_CONFIG_PATH, 'utf8'));
-    const localeMap = parsed.locales || {};
-    const plannedLocaleMap = parsed.plannedLocales || {};
-    const supportedLocales = Array.isArray(parsed.supportedLocales) && parsed.supportedLocales.length
-        ? parsed.supportedLocales
-        : Object.keys(localeMap);
-
-    return {
-        defaultLocale: parsed.defaultLocale || supportedLocales[0] || 'en',
-        supportedLocales: supportedLocales,
-        locales: localeMap,
-        plannedLocales: plannedLocaleMap
-    };
-}
-
-function normalizePathPrefix(value) {
-    const prefix = String(value || '').trim().replace(/\/+$/, '');
-    if (!prefix || prefix === '/') return '';
-    return prefix.charAt(0) === '/' ? prefix : '/' + prefix;
+    return loadLocaleRegistry(configPath || DEFAULT_LOCALE_CONFIG_PATH).legacyConfig();
 }
 
 function normalizeBasePath(value) {
@@ -216,6 +199,7 @@ function alternatePathMap(config, basePath) {
 
 module.exports = {
     BASE_STATIC_PAGES,
+    PAGE_SHELLS,
     PRODUCT_DETAIL_SHELL,
     NOT_FOUND_SHELL,
     loadLocaleConfig,

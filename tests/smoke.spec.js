@@ -20,7 +20,7 @@ async function mockHeaderContactBarData(page, overrides) {
     await page.route('**/api/company', function (route) {
         return route.fulfill({ json: company });
     });
-    await page.route('**/api/content-blocks/global-shell', function (route) {
+    await page.route('**/api/content-blocks/global-shell?locale=*', function (route) {
         return route.fulfill({
             json: {
                 slug: 'global-shell',
@@ -38,7 +38,7 @@ async function mockHeaderContactBarData(page, overrides) {
 }
 
 async function mockContactCardData(page) {
-    await page.route('**/api/content-blocks/contact', function (route) {
+    await page.route('**/api/content-blocks/contact?locale=*', function (route) {
         return route.fulfill({
             json: {
                 slug: 'contact',
@@ -71,7 +71,7 @@ test('首页加载正常', async ({ page }) => {
 });
 
 test('同版本公共壳水合保留服务端导航页脚和社交节点', async ({ page }) => {
-    await page.route('**/api/content-blocks/global-shell', async (route) => {
+    await page.route('**/api/content-blocks/global-shell?locale=*', async (route) => {
         await new Promise((resolve) => setTimeout(resolve, 500));
         await route.continue();
     });
@@ -99,7 +99,7 @@ test('同版本公共壳水合保留服务端导航页脚和社交节点', async
 });
 
 test('公共数据 API 失败时服务端导航和页脚保持可用', async ({ page }) => {
-    await page.route('**/api/content-blocks/global-shell', (route) => route.abort());
+    await page.route('**/api/content-blocks/global-shell?locale=*', (route) => route.abort());
     await page.route('**/api/company', (route) => route.abort());
     await page.goto(BASE + '/', { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(300);
@@ -514,7 +514,7 @@ test.describe('顶部公共联系方式栏', function () {
 });
 
 test('同版本重点正文水合保留服务端正文和联系表单节点', async ({ page }) => {
-    await page.route('**/api/content-blocks/contact', async (route) => {
+    await page.route('**/api/content-blocks/contact?locale=*', async (route) => {
         await new Promise((resolve) => setTimeout(resolve, 700));
         await route.continue();
     });
@@ -537,7 +537,7 @@ test('同版本重点正文水合保留服务端正文和联系表单节点', as
 });
 
 test('重点正文 API 失败时服务端正文仍可见且可提交', async ({ page }) => {
-    await page.route('**/api/content-blocks/contact', (route) => route.abort());
+    await page.route('**/api/content-blocks/contact?locale=*', (route) => route.abort());
     await page.goto(BASE + '/contact.html', { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(300);
     await expect(page.locator('[data-content-page="contact"] h2').first()).toBeVisible();
@@ -547,7 +547,7 @@ test('重点正文 API 失败时服务端正文仍可见且可提交', async ({ 
 });
 
 test('首页正文延迟水合不会清除已加载产品卡', async ({ page }) => {
-    await page.route('**/api/content-blocks/home', async (route) => {
+    await page.route('**/api/content-blocks/home?locale=*', async (route) => {
         await new Promise((resolve) => setTimeout(resolve, 900));
         await route.continue();
     });
@@ -561,8 +561,8 @@ test('首页正文延迟水合不会清除已加载产品卡', async ({ page }) 
 });
 
 test('同版本产品目录水合保留服务端首张卡片和分类节点', async ({ page }) => {
-    await page.route('**/api/products', async (route) => { await new Promise((resolve) => setTimeout(resolve, 700)); await route.continue(); });
-    await page.route('**/api/product-categories', async (route) => { await new Promise((resolve) => setTimeout(resolve, 700)); await route.continue(); });
+    await page.route('**/api/products?locale=*', async (route) => { await new Promise((resolve) => setTimeout(resolve, 700)); await route.continue(); });
+    await page.route('**/api/product-categories?locale=*', async (route) => { await new Promise((resolve) => setTimeout(resolve, 700)); await route.continue(); });
     await page.goto(BASE + '/products.html', { waitUntil: 'domcontentloaded' });
     const probes = await page.evaluate(() => {
         const card = document.querySelector('#products-container .product-card');
@@ -579,8 +579,8 @@ test('同版本产品目录水合保留服务端首张卡片和分类节点', as
 });
 
 test('产品目录 API 失败时保留服务端筛选结果', async ({ page }) => {
-    await page.route('**/api/products', (route) => route.abort());
-    await page.route('**/api/product-categories', (route) => route.abort());
+    await page.route('**/api/products?locale=*', (route) => route.abort());
+    await page.route('**/api/product-categories?locale=*', (route) => route.abort());
     await page.goto(BASE + '/products.html?group=switchgear', { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(300);
     await expect(page.locator('#products-container .product-card').first()).toBeVisible();
@@ -589,9 +589,9 @@ test('产品目录 API 失败时保留服务端筛选结果', async ({ page }) =
 });
 
 test('同版本产品详情水合保留H1规格相关产品和询盘节点', async ({ page }) => {
-    await page.route('**/api/content-blocks/product-pages', async (route) => { await new Promise((resolve) => setTimeout(resolve, 500)); await route.continue(); });
-    await page.route('**/api/products/**', async (route) => { await new Promise((resolve) => setTimeout(resolve, 800)); await route.continue(); });
-    await page.route('**/api/products', async (route) => { await new Promise((resolve) => setTimeout(resolve, 800)); await route.continue(); });
+    await page.route('**/api/content-blocks/product-pages?locale=*', async (route) => { await new Promise((resolve) => setTimeout(resolve, 500)); await route.continue(); });
+    await page.route('**/api/products/**?locale=*', async (route) => { await new Promise((resolve) => setTimeout(resolve, 800)); await route.continue(); });
+    await page.route('**/api/products?locale=*', async (route) => { await new Promise((resolve) => setTimeout(resolve, 800)); await route.continue(); });
     await page.goto(BASE + '/products/anti-short-amorphous', { waitUntil: 'domcontentloaded' });
     const probes = await page.evaluate(() => {
         const nodes = [document.querySelector('#product-title'), document.querySelector('#specs-body tr'), document.querySelector('[data-product-related] .product-related-card'), document.querySelector('[data-product-detail-inquiry] form')];
@@ -610,9 +610,9 @@ test('同版本产品详情水合保留H1规格相关产品和询盘节点', asy
 });
 
 test('产品详情 API 失败时保留服务端完整正文', async ({ page }) => {
-    await page.route('**/api/content-blocks/product-pages', (route) => route.abort());
-    await page.route('**/api/products/**', (route) => route.abort());
-    await page.route('**/api/products', (route) => route.abort());
+    await page.route('**/api/content-blocks/product-pages?locale=*', (route) => route.abort());
+    await page.route('**/api/products/**?locale=*', (route) => route.abort());
+    await page.route('**/api/products?locale=*', (route) => route.abort());
     await page.goto(BASE + '/fr/products/anti-short-amorphous', { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(400);
     await expect(page.locator('#product-title')).not.toContainText('Product Details');

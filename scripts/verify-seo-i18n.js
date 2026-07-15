@@ -174,36 +174,24 @@ function localeConfigSnapshot(value) {
 }
 
 function extractFrontendLocaleConfig() {
-    const source = readText('js/main.js');
-    const match = source.match(/var\s+LOCALE_CONFIG\s*=\s*({[\s\S]*?})\s*;\s*\r?\n\s*var\s+STATIC_PAGE_BASE_PATHS/);
-
-    assert(Boolean(match), 'js/main.js 缺少可校验的 LOCALE_CONFIG 定义。');
-    if (!match) return null;
-
     try {
-        return vm.runInNewContext('(' + match[1] + ')', Object.create(null), { timeout: 1000 });
+        const context = { window: {} };
+        vm.runInNewContext(readText('js/locale-manifest.js'), context, { timeout: 1000 });
+        const manifest = context.window.LONGXIANG_LOCALE_MANIFEST;
+        assert(Boolean(manifest), 'js/locale-manifest.js 缺少 LONGXIANG_LOCALE_MANIFEST。');
+        return manifest || null;
     } catch (err) {
-        fail('js/main.js 的 LOCALE_CONFIG 无法解析：' + err.message);
+        fail('js/locale-manifest.js 无法解析：' + err.message);
         return null;
     }
 }
 
 function extractFrontendPlannedLocalePathPrefixes() {
-    const source = readText('js/main.js');
-    const match = source.match(/var\s+PLANNED_LOCALE_PATH_PREFIXES\s*=\s*(\[[\s\S]*?\])\s*;/);
-
-    assert(Boolean(match), 'js/main.js is missing PLANNED_LOCALE_PATH_PREFIXES.');
-    if (!match) return [];
-
-    try {
-        const prefixes = vm.runInNewContext(match[1], Object.create(null), { timeout: 1000 });
-        assert(Array.isArray(prefixes), 'js/main.js PLANNED_LOCALE_PATH_PREFIXES must be an array.');
-        if (!Array.isArray(prefixes)) return [];
-        return prefixes.map(normalizePathPrefixForVerification).filter(Boolean).sort();
-    } catch (err) {
-        fail('js/main.js PLANNED_LOCALE_PATH_PREFIXES cannot be parsed: ' + err.message);
-        return [];
-    }
+    const frontendConfig = extractFrontendLocaleConfig();
+    return Object.keys(frontendConfig && frontendConfig.plannedLocales || {})
+        .map((code) => normalizePathPrefixForVerification(frontendConfig.plannedLocales[code].pathPrefix))
+        .filter(Boolean)
+        .sort();
 }
 
 function assertJsonEqual(actual, expected, label) {
@@ -318,10 +306,10 @@ function verifyFrontendLocaleConfigSync() {
     const expected = localeConfigSnapshot(localeConfig);
     const actual = localeConfigSnapshot(frontendConfig);
 
-    assertJsonEqual(actual.defaultLocale, expected.defaultLocale, 'js/main.js LOCALE_CONFIG.defaultLocale');
-    assertJsonEqual(actual.supportedLocales, expected.supportedLocales, 'js/main.js LOCALE_CONFIG.supportedLocales');
+    assertJsonEqual(actual.defaultLocale, expected.defaultLocale, 'js/locale-manifest.js defaultLocale');
+    assertJsonEqual(actual.supportedLocales, expected.supportedLocales, 'js/locale-manifest.js supportedLocales');
     expected.supportedLocales.forEach((code) => {
-        assertJsonEqual(actual.locales[code], expected.locales[code], 'js/main.js LOCALE_CONFIG.locales.' + code);
+        assertJsonEqual(actual.locales[code], expected.locales[code], 'js/locale-manifest.js locales.' + code);
     });
 
     verifyPlannedLocaleConfig(frontendConfig);
@@ -708,7 +696,8 @@ function verifyFrontendPlannedLocaleRuntimeSeoGuards(source) {
     const basePathSource = functionSource(source, 'baseStaticPathFromLocalizedPath');
     const alternateSource = functionSource(source, 'injectAlternateSeoLinks');
 
-    assertArrayEqual(actualPrefixes, expectedPrefixes, 'js/main.js PLANNED_LOCALE_PATH_PREFIXES must match config/locales.json plannedLocales pathPrefix values.');
+    assertArrayEqual(actualPrefixes, expectedPrefixes, 'js/locale-manifest.js planned locale prefixes must match config/locales.json.');
+    assertSourceContains(source, /Object\.keys\(LOCALE_CONFIG\.plannedLocales\s*\|\|\s*\{\}\)/, 'js/main.js must derive planned locale prefixes from the generated manifest.');
     assertSourceContains(source, /function\s+plannedLocalePathInfo\s*\(/, 'js/main.js is missing plannedLocalePathInfo().');
     assertSourceContains(source, /function\s+isPlannedLocalePath\s*\(/, 'js/main.js is missing isPlannedLocalePath().');
     assertSourceContains(basePathSource, /plannedLocalePathInfo\s*\(/, 'js/main.js baseStaticPathFromLocalizedPath() must normalize planned locale paths first.');

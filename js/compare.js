@@ -123,11 +123,9 @@
     }
 
     function fetchProducts() {
-        return fetch('/api/products')
-            .then(function (res) {
-                if (!res.ok) throw new Error('API request failed');
-                return res.json();
-            });
+        return Promise.all(getIds().map(function (id) {
+            return window.LongxiangI18n.fetchLocalizedJson('/api/products/' + encodeURIComponent(id), locale);
+        }));
     }
 
     function valueList(values) {

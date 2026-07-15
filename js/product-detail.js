@@ -791,11 +791,7 @@
     }
 
     function loadRelatedProducts(product) {
-        fetch('/api/products')
-            .then(function (res) {
-                if (!res.ok) throw new Error('API request failed');
-                return res.json();
-            })
+        window.LongxiangI18n.fetchLocalizedJson('/api/products', locale)
             .then(function (products) {
                 renderRelatedProducts(product, products);
             })
@@ -1136,8 +1132,8 @@
         var hasSsr = Boolean(root && root.getAttribute('data-product-ssr') === 'detail');
         if (!hasSsr) setLoading();
         Promise.allSettled([
-            fetch('/api/products/' + encodeURIComponent(productId)).then(function (res) { if (!res.ok) throw new Error('API request failed'); return res.json(); }),
-            fetch('/api/products').then(function (res) { if (!res.ok) throw new Error('Products API request failed'); return res.json(); })
+            window.LongxiangI18n.fetchLocalizedJson('/api/products/' + encodeURIComponent(productId), locale),
+            window.LongxiangI18n.fetchLocalizedJson('/api/products', locale)
         ]).then(function (results) {
             if (results[0].status !== 'fulfilled') {
                 if (hasSsr) {

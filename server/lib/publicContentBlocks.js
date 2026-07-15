@@ -86,4 +86,76 @@ function localizePublicContentBlock(block, locale) {
     return { ...block, body: localizeTree(block.body, locale || 'en') };
 }
 
-module.exports = { PUBLIC_SLUGS, readPublicContentBlock, localizePublicContentBlock, localizeTree };
+function compactLocalizedTree(value, locale, localeCodes) {
+    const localized = localizeTree(value, locale);
+    const codes = Array.from(new Set(['en'].concat(localeCodes || [], ['cn'])));
+    function localizedKey(key) {
+        for (let index = 0; index < codes.length; index += 1) {
+            const code = codes[index];
+            const suffix = code.charAt(0).toUpperCase() + code.slice(1);
+            if (key.endsWith('Patch' + suffix)) return { code, base: key.slice(0, -('Patch' + suffix).length), patch: true };
+            if (key.endsWith('_patch_' + code)) return { code, base: key.slice(0, -('_patch_' + code).length), patch: true };
+            if (key.endsWith('_' + code)) return { code, base: key.slice(0, -(code.length + 1)), patch: false };
+            if (key.endsWith(suffix) && key.length > suffix.length) return { code, base: key.slice(0, -suffix.length), patch: false };
+        }
+        return null;
+    }
+    function hasTranslation(value) {
+        if (value == null || value === '') return false;
+        if (Array.isArray(value)) return value.length > 0;
+        return true;
+    }
+    function compactNode(node) {
+        if (!node || typeof node !== 'object') return node;
+        if (Array.isArray(node)) return node.map(compactNode);
+        const out = {};
+        const variants = {};
+        Object.keys(node).forEach(function (key) {
+            const parsed = localizedKey(key);
+            if (!parsed) {
+                out[key] = compactNode(node[key]);
+                return;
+            }
+            if (parsed.patch || !parsed.base || parsed.code === 'cn') return;
+            if (!variants[parsed.base]) variants[parsed.base] = {};
+            if (!hasTranslation(variants[parsed.base][parsed.code])) variants[parsed.base][parsed.code] = node[key];
+        });
+        Object.keys(variants).forEach(function (base) {
+            const target = variants[base][locale];
+            const fallback = variants[base].en;
+            if (hasTranslation(target)) out[base] = compactNode(target);
+            else if (hasTranslation(fallback)) out[base] = compactNode(fallback);
+        });
+        return out;
+    }
+    return compactNode(localized);
+}
+
+function compactLocalizedContentBlock(block, locale, localeCodes) {
+    if (!block) return null;
+    const titleKey = 'title' + locale.charAt(0).toUpperCase() + locale.slice(1);
+    const localizedTitle = locale === 'en' ? block.title : block[titleKey];
+    const title = localizedTitle || block.title || '';
+    return {
+        id: block.id,
+        slug: block.slug,
+        title,
+        body: compactLocalizedTree(block.body, locale || 'en', localeCodes || []),
+        version: block.version,
+        updatedAt: block.updatedAt,
+        localization: {
+            requestedLocale: locale,
+            sourceLocale: localizedTitle || locale === 'en' ? locale : 'en',
+            fallbackApplied: locale !== 'en' && !localizedTitle
+        }
+    };
+}
+
+module.exports = {
+    PUBLIC_SLUGS,
+    readPublicContentBlock,
+    localizePublicContentBlock,
+    localizeTree,
+    compactLocalizedContentBlock,
+    compactLocalizedTree
+};

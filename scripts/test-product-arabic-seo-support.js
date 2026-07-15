@@ -142,7 +142,7 @@ function testAdminAndCacheContracts() {
     assert.match(adminHtml, /id="field-seo-title-ar"[^>]*dir="rtl"[^>]*lang="ar"/);
     assert.match(adminJs, /function\s+activateProductLanguageTab\s*\(/);
 
-    const expectedVersion = '20260714-arabic-seo';
+    const expectedVersion = '20260715-locale-api';
     ['product-detail.html', 'ar/product-detail.html', 'fr/product-detail.html', 'ru/product-detail.html'].forEach(function (relativePath) {
         const source = fs.readFileSync(path.join(ROOT, relativePath), 'utf8');
         assert.ok(source.includes('product-detail.js?v=' + expectedVersion), relativePath + ' cache version mismatch');

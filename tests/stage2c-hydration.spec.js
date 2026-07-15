@@ -3,8 +3,8 @@ const { test, expect } = require('@playwright/test');
 const BASE = process.env.TEST_BASE || 'http://localhost:3000';
 
 test('仅分类 API 失败时保留服务端目录节点', async ({ page }) => {
-    await page.route('**/api/product-categories', (route) => route.abort());
-    await page.route('**/api/products', async (route) => {
+    await page.route('**/api/product-categories?locale=*', (route) => route.abort());
+    await page.route('**/api/products?locale=*', async (route) => {
         await new Promise((resolve) => setTimeout(resolve, 700));
         await route.continue();
     });
@@ -18,8 +18,8 @@ test('仅分类 API 失败时保留服务端目录节点', async ({ page }) => {
 });
 
 test('仅目录内容 API 失败时保留服务端目录节点', async ({ page }) => {
-    await page.route('**/api/content-blocks/product-pages', (route) => route.abort());
-    await page.route('**/api/products', async (route) => {
+    await page.route('**/api/content-blocks/product-pages?locale=*', (route) => route.abort());
+    await page.route('**/api/products?locale=*', async (route) => {
         await new Promise((resolve) => setTimeout(resolve, 700));
         await route.continue();
     });
@@ -32,7 +32,7 @@ test('仅目录内容 API 失败时保留服务端目录节点', async ({ page }
 
 test('产品正文 API 新版本触发受控重绘并更新版本标记', async ({ page }) => {
     let nextVersion = 0;
-    await page.route('**/api/content-blocks/product-pages', async (route) => {
+    await page.route('**/api/content-blocks/product-pages?locale=*', async (route) => {
         const response = await route.fetch();
         const body = await response.json();
         nextVersion = Number(body.version || 0) + 1;
@@ -53,7 +53,7 @@ test('产品正文 API 新版本触发受控重绘并更新版本标记', async 
 });
 
 test('仅详情内容 API 失败时保留完整服务端正文', async ({ page }) => {
-    await page.route('**/api/content-blocks/product-pages', (route) => route.abort());
+    await page.route('**/api/content-blocks/product-pages?locale=*', (route) => route.abort());
     await page.goto(BASE + '/fr/products/anti-short-amorphous', { waitUntil: 'domcontentloaded' });
     const probes = await page.evaluate(() => {
         const nodes = [document.querySelector('#product-title'), document.querySelector('#specs-body tr'), document.querySelector('[data-product-related] .product-related-card'), document.querySelector('[data-product-detail-inquiry] form')];

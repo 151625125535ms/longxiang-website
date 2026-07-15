@@ -638,11 +638,7 @@
     }
 
     function loadCategories() {
-        return fetch('/api/product-categories')
-            .then(function (res) {
-                if (!res.ok) throw new Error('Category API request failed');
-                return res.json();
-            })
+        return window.LongxiangI18n.fetchLocalizedJson('/api/product-categories', locale)
             .then(normalizeTaxonomyResponse)
             .catch(function (err) {
                 if (window.console && console.warn) {
@@ -692,11 +688,7 @@
     }
 
     function loadProducts() {
-        return fetch('/api/products')
-            .then(function (res) {
-                if (!res.ok) throw new Error('Products API request failed');
-                return res.json();
-            })
+        return window.LongxiangI18n.fetchLocalizedJson('/api/products', locale)
             .then(function (products) {
                 if (!Array.isArray(products)) throw new Error('Invalid products response');
                 return products;

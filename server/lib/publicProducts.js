@@ -283,5 +283,8 @@ function readPublicProduct(identifier, dbValue) {
 module.exports = {
     readPublicProducts,
     readPublicProduct,
-    parseJsonArray
+    parseJsonArray,
+    detailProductImages,
+    normalizePublicMediaPath,
+    resolveProductCardImage
 };

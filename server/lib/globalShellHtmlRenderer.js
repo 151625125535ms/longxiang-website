@@ -2,7 +2,12 @@
 
 const HYDRATION_ASSET_VERSION = '20260712-stage2d-entity-graph';
 const HYDRATION_ASSET_VERSION_OVERRIDES = Object.freeze({
-    'product-detail': '20260714-arabic-seo'
+    main: '20260715-locale-api',
+    'content-pages': '20260715-locale-api',
+    education: '20260715-locale-api',
+    'products-list': '20260715-locale-api',
+    'product-detail': '20260715-locale-api',
+    compare: '20260715-locale-api'
 });
 
 function escapeHtml(value) {
@@ -90,7 +95,7 @@ function footerHtml(body, company, locale) {
 }
 
 function versionHydrationScripts(html) {
-    return String(html || '').replace(/(<script\b[^>]*\bsrc=)(["'])(?:\.\.\/|\.\/|\/)?js\/(main|content-pages|education|products-list|product-detail)\.js(?:\?[^"']*)?\2/gi, function (_, prefix, quote, name) {
+    return String(html || '').replace(/(<script\b[^>]*\bsrc=)(["'])(?:\.\.\/|\.\/|\/)?js\/(main|content-pages|education|products-list|product-detail|compare)\.js(?:\?[^"']*)?\2/gi, function (_, prefix, quote, name) {
         const version = HYDRATION_ASSET_VERSION_OVERRIDES[String(name).toLowerCase()] || HYDRATION_ASSET_VERSION;
         return prefix + quote + '/js/' + name + '.js?v=' + version + quote;
     });

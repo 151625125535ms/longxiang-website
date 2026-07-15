@@ -1,59 +1,19 @@
 (function () {
     'use strict';
 
-    var LOCALE_CONFIG = {
+    var LOCALE_CONFIG = window.LONGXIANG_LOCALE_MANIFEST || {
         defaultLocale: 'en',
-        supportedLocales: ['en', 'ar', 'fr', 'ru'],
+        supportedLocales: ['en'],
         locales: {
-            en: {
-                label: 'English',
-                nativeLabel: 'English',
-                htmlLang: 'en',
-                hreflang: 'en',
-                dir: 'ltr',
-                pathPrefix: '',
-                homePath: '/',
-                fallbackLocale: null,
-                includeInSitemap: true
-            },
-            ar: {
-                label: 'Arabic',
-                nativeLabel: '\u0627\u0644\u0639\u0631\u0628\u064a\u0629',
-                htmlLang: 'ar',
-                hreflang: 'ar',
-                dir: 'rtl',
-                pathPrefix: '/ar',
-                homePath: '/ar/index.html',
-                fallbackLocale: 'en',
-                includeInSitemap: true
-            },
-            fr: {
-                label: 'French',
-                nativeLabel: 'Fran\u00e7ais',
-                htmlLang: 'fr',
-                hreflang: 'fr',
-                dir: 'ltr',
-                pathPrefix: '/fr',
-                homePath: '/fr/index.html',
-                fallbackLocale: 'en',
-                includeInSitemap: true
-            },
-            ru: {
-                label: 'Russian',
-                nativeLabel: '\u0420\u0443\u0441\u0441\u043a\u0438\u0439',
-                htmlLang: 'ru',
-                hreflang: 'ru',
-                dir: 'ltr',
-                pathPrefix: '/ru',
-                homePath: '/ru/index.html',
-                fallbackLocale: 'en',
-                includeInSitemap: true
-            }
-        }
+            en: { label: 'English', nativeLabel: 'English', htmlLang: 'en', hreflang: 'en', dir: 'ltr', pathPrefix: '', homePath: '/', fallbackLocale: null, includeInSitemap: true }
+        },
+        plannedLocales: {}
     };
 
     var STATIC_PAGE_BASE_PATHS = ['/', '/about.html', '/products.html', '/solutions.html', '/education.html', '/certifications.html', '/compare.html', '/contact.html'];
-    var PLANNED_LOCALE_PATH_PREFIXES = ['/pt'];
+    var PLANNED_LOCALE_PATH_PREFIXES = Object.keys(LOCALE_CONFIG.plannedLocales || {}).map(function (code) {
+        return normalizePathPrefix(LOCALE_CONFIG.plannedLocales[code].pathPrefix || '/' + code);
+    }).filter(Boolean);
 
     function normalizePathPrefix(value) {
         var prefix = String(value || '').trim().replace(/\/+$/, '');
@@ -223,6 +183,25 @@
 
     function currentLocaleEntry() {
         return localeEntry(currentLocale());
+    }
+
+    function localizedApiUrl(url, requestedLocale) {
+        var target = String(url || '');
+        var separator = target.indexOf('?') === -1 ? '?' : '&';
+        return target + separator + 'locale=' + encodeURIComponent(normalizeLocale(requestedLocale || currentLocale()));
+    }
+
+    function unwrapLocalizedApiResponse(payload) {
+        return payload && payload.ok === true && Object.prototype.hasOwnProperty.call(payload, 'data')
+            ? payload.data
+            : payload;
+    }
+
+    function fetchLocalizedJson(url, requestedLocale) {
+        return fetch(localizedApiUrl(url, requestedLocale)).then(function (res) {
+            if (!res.ok) throw new Error('Localized API request failed');
+            return res.json();
+        }).then(unwrapLocalizedApiResponse);
     }
 
     function isRtl(locale) {
@@ -425,6 +404,9 @@
         localeEntries: localeEntries,
         currentLocale: currentLocale,
         currentLocaleEntry: currentLocaleEntry,
+        localizedApiUrl: localizedApiUrl,
+        unwrapLocalizedApiResponse: unwrapLocalizedApiResponse,
+        fetchLocalizedJson: fetchLocalizedJson,
         inferLocaleFromPath: inferLocaleFromPath,
         isRtl: isRtl,
         localized: localized,
@@ -1961,7 +1943,7 @@
     }
 
     function initGlobalShellContent() {
-        return fetchJson('/api/content-blocks/global-shell')
+        return fetchLocalizedJson('/api/content-blocks/global-shell')
             .then(function (block) {
                 globalShellCache = block && block.body ? window.LongxiangI18n.localizeContentTree(block.body, locale) : {};
                 var ssrShell = document.querySelector('[data-ssr-shell][data-shell-version]');
@@ -2391,7 +2373,7 @@
         }
 
         function fetchHomeContent() {
-            var promise = window.longxiangContentPagePromise || fetchJson('/api/content-blocks/home');
+            var promise = window.longxiangContentPagePromise || fetchLocalizedJson('/api/content-blocks/home');
             return promise.then(function (block) {
                 return block && block.body ? window.LongxiangI18n.localizeContentTree(block.body, locale) : {};
             }).catch(function () {
@@ -2400,7 +2382,7 @@
         }
 
         function fetchProductCategories() {
-            return fetchJson('/api/product-categories')
+            return fetchLocalizedJson('/api/product-categories')
                 .then(function (response) {
                     if (Array.isArray(response)) return response;
                     return Array.isArray(response.data) ? response.data : [];
@@ -2411,7 +2393,7 @@
         }
 
         Promise.all([
-            fetchJson('/api/products').catch(function () { return []; }),
+            fetchLocalizedJson('/api/products').catch(function () { return []; }),
             fetchHomeContent(),
             fetchProductCategories()
         ])
@@ -2691,7 +2673,7 @@
             openPreview(cert);
         });
 
-        fetchJson('/api/certifications').then(function (data) {
+        fetchLocalizedJson('/api/certifications').then(function (data) {
             certifications = Array.isArray(data) ? data : [];
             updateStats(certifications);
             renderTabs(certifications);

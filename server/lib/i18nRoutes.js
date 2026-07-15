@@ -1,52 +1,11 @@
 const fs = require('fs');
 const path = require('path');
+const { loadLocaleRegistry } = require('./localeRegistry');
 
 const PROJECT_ROOT = path.join(__dirname, '..', '..');
-const LOCALE_CONFIG_PATH = path.join(PROJECT_ROOT, 'config', 'locales.json');
-
-function loadLocaleConfig() {
-    const parsed = JSON.parse(fs.readFileSync(LOCALE_CONFIG_PATH, 'utf8'));
-    const localeMap = parsed.locales || {};
-    const supportedLocales = Array.isArray(parsed.supportedLocales) && parsed.supportedLocales.length
-        ? parsed.supportedLocales
-        : Object.keys(localeMap);
-
-    return {
-        defaultLocale: parsed.defaultLocale || supportedLocales[0] || 'en',
-        supportedLocales: supportedLocales,
-        locales: localeMap
-    };
-}
-
-function normalizePathPrefix(value) {
-    const prefix = String(value || '').trim().replace(/\/+$/, '');
-    if (!prefix || prefix === '/') return '';
-    return prefix.charAt(0) === '/' ? prefix : '/' + prefix;
-}
-
-function localeEntry(config, code) {
-    const localeConfig = config.locales[code] || {};
-    const prefix = normalizePathPrefix(localeConfig.pathPrefix);
-
-    return {
-        code: code,
-        label: localeConfig.label || code,
-        nativeLabel: localeConfig.nativeLabel || localeConfig.label || code,
-        htmlLang: localeConfig.htmlLang || code,
-        hreflang: localeConfig.hreflang || localeConfig.htmlLang || code,
-        dir: localeConfig.dir || '',
-        pathPrefix: prefix,
-        homePath: localeConfig.homePath || (prefix ? prefix + '/index.html' : '/'),
-        fallbackLocale: localeConfig.fallbackLocale || null,
-        includeInSitemap: localeConfig.includeInSitemap !== false
-    };
-}
 
 function localeEntries() {
-    const config = loadLocaleConfig();
-    return config.supportedLocales.map(function (code) {
-        return localeEntry(config, code);
-    });
+    return loadLocaleRegistry().publicEntries;
 }
 
 function localeForRequestPath(pathname) {
@@ -82,10 +41,8 @@ function baseHrefForLocale(locale) {
 }
 
 function defaultLocaleEntry() {
-    const entries = localeEntries();
-    return entries.filter(function (locale) {
-        return !locale.pathPrefix;
-    })[0] || entries[0];
+    const registry = loadLocaleRegistry();
+    return registry.get(registry.defaultLocale);
 }
 
 function notFoundShellForRequestPath(pathname) {

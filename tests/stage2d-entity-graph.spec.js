@@ -98,7 +98,7 @@ test('content API 失败时保留服务端 Schema', async ({ page, request }) =>
     const response = await request.get(BASE + '/about.html');
     const raw = jsonLdScriptFromHtml(await response.text(), 'content-page');
     expect(raw).not.toBeNull();
-    await page.route('**/api/content-blocks/about-us', (route) => route.abort());
+    await page.route('**/api/content-blocks/about-us?locale=*', (route) => route.abort());
     await page.goto(BASE + '/about.html', { waitUntil: 'domcontentloaded' });
     await page.evaluate(async () => {
         if (window.longxiangContentPagePromise) await window.longxiangContentPagePromise;
@@ -113,7 +113,7 @@ test('API 新版本只更新页面字段且重复初始化不增加 Schema', asy
     const before = JSON.parse(raw.text);
     const nextVersion = String(Number(raw.version) + 1);
 
-    await page.route('**/api/content-blocks/about-us', async (route) => {
+    await page.route('**/api/content-blocks/about-us?locale=*', async (route) => {
         const apiResponse = await route.fetch();
         const block = await apiResponse.json();
         block.version = Number(nextVersion);

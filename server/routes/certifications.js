@@ -5,6 +5,8 @@ const { authMiddleware } = require('../middleware/auth');
 const { ensureDirectory, resolveUploadDir, resolveUploadPublicPath } = require('../lib/fileStore');
 const { getDb } = require('../lib/db');
 const { normalizeUploadedFilename } = require('../lib/filenameEncoding');
+const { readLocalizedCertifications } = require('../lib/localizedPublicCatalog');
+const { resolveRequestedLocale, sendLocalizedJson, localizedEnvelope } = require('../lib/localizedApiResponse');
 
 const router = express.Router();
 const UPLOAD_DIR = resolveUploadDir();
@@ -115,6 +117,13 @@ function publicCertificationName(certification, lang) {
 
 router.get('/', function (req, res) {
     try {
+        const requested = resolveRequestedLocale(req);
+        if (requested.error) return res.status(requested.error.status).json(requested.error.body);
+        if (requested.mode === 'localized') {
+            const certifications = readLocalizedCertifications(requested.locale);
+            const fallbackLocale = requested.entry.fallbackLocale || (requested.locale === requested.registry.defaultLocale ? null : requested.registry.defaultLocale);
+            return sendLocalizedJson(req, res, localizedEnvelope(certifications, requested.locale, fallbackLocale));
+        }
         const certifications = getDb().prepare(`
             SELECT * FROM certifications
             WHERE status = 'published'

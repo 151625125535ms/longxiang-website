@@ -2059,11 +2059,7 @@
 
     injectContentPageSchema(document.title, currentMetaDescription(), currentCanonicalUrl());
 
-    var contentPromise = fetch('/api/content-blocks/' + encodeURIComponent(pageSlug))
-        .then(function (res) {
-            if (!res.ok) throw new Error('Content block request failed');
-            return res.json();
-        })
+    var contentPromise = window.LongxiangI18n.fetchLocalizedJson('/api/content-blocks/' + encodeURIComponent(pageSlug), locale)
         .then(function (block) {
             window.longxiangContentPageBlock = block;
             renderPage(block);

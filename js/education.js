@@ -641,7 +641,7 @@
 
     injectEducationSchema(null);
 
-    var educationPromise = fetchJson('/api/content-blocks/education')
+    var educationPromise = window.LongxiangI18n.fetchLocalizedJson('/api/content-blocks/education', locale)
         .then(function (block) {
             educationApiVersion = block && block.version != null ? Number(block.version) || 0 : null;
             renderPage(block && block.body ? block.body : {});
