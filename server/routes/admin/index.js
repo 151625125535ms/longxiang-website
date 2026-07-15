@@ -2,6 +2,7 @@ const express = require('express');
 const { authMiddleware } = require('../../middleware/auth');
 const { getDb } = require('../../lib/db');
 const { sendError } = require('./helpers');
+const { TranslationError } = require('../../lib/translationWriter');
 
 const dashboardRoutes = require('./dashboard');
 const systemRoutes = require('./system');
@@ -13,6 +14,7 @@ const inquiriesAdminRoutes = require('./inquiries');
 const settingsRoutes = require('./settings');
 const auditLogsRoutes = require('./audit-logs');
 const assetsRoutes = require('./assets');
+const translationsRoutes = require('./translations');
 
 const router = express.Router();
 
@@ -34,6 +36,7 @@ router.use('/categories', categoriesRoutes);
 router.use('/content-blocks', contentBlocksRoutes);
 router.use('/inquiries', inquiriesAdminRoutes);
 router.use('/assets', assetsRoutes);
+router.use('/translations', translationsRoutes);
 router.use('/settings', settingsRoutes);
 router.use('/audit-logs', auditLogsRoutes);
 router.use('/system', systemRoutes);
@@ -44,6 +47,10 @@ router.use(function (req, res) {
 
 router.use(function (err, req, res, next) {
     if (res.headersSent) return next(err);
+
+    if (err instanceof TranslationError) {
+        return sendError(res, err.status, err.code, err.message);
+    }
 
     if (err && (err.code === 'SQLITE_CANTOPEN' || err.code === 'SQLITE_NOTADB' || err.code === 'SQLITE_ERROR')) {
         return sendError(res, 503, 'DATABASE_UNAVAILABLE', 'SQLite database is unavailable.');

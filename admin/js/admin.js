@@ -421,6 +421,7 @@
         var inquiryUnreadOnly = false;
         var inquiryModule = null;
         var productModule = null;
+        var translationModule = null;
         var certPageByView = {};
         var certMetaByView = {};
         var certSearchTimers = {};
@@ -468,6 +469,7 @@
             dashboard: { title: '控制台', group: 'overview', groupLabel: '概况', breadcrumb: '概况 › 控制台', description: '查看网站后台关键数据与最近动态。' },
             products: { title: '产品列表', group: 'products', groupLabel: '产品', breadcrumb: '产品 › 产品列表', description: '管理产品资料、状态、分类与首页推荐。' },
             categories: { title: '分类管理', group: 'products', groupLabel: '产品', breadcrumb: '产品 › 分类管理', description: '维护产品分类名称、排序与展示状态。' },
+            translations: { title: '翻译版本', group: 'products', groupLabel: '产品', breadcrumb: '产品 › 翻译版本', description: '按语言维护产品、分类、证书和内容块的草稿与发布版本。' },
             inquiries: { title: '询盘列表', group: 'inquiries', groupLabel: '询盘', breadcrumb: '询盘 › 询盘列表', description: '查看客户询盘并进行状态跟进或批量处理。' },
             'visual-builder': { title: '可视化管理', group: 'visual', groupLabel: '可视化管理', breadcrumb: '可视化管理', description: '左侧预览真实前台页面，右侧按当前子模块编辑中文字段。' },
             'content-home': { title: '首页', group: 'content', groupLabel: '内容', breadcrumb: '内容 › 首页', description: '维护首页 Hero、统计、CTA 等内容块。' },
@@ -1163,6 +1165,25 @@
             return productModule;
         }
 
+        function getTranslationModule() {
+            if (!translationModule) {
+                var translationFactory = window.LongxiangAdminModules && window.LongxiangAdminModules.translations;
+                if (!translationFactory) throw new Error('翻译版本模块未加载');
+                translationModule = translationFactory({
+                    apiRequest: apiRequest,
+                    unwrapDataResponse: unwrapDataResponse,
+                    escapeHtml: escapeHtml,
+                    showToast: showToast,
+                    showConfirm: showConfirm,
+                    markFormDirty: markFormDirty,
+                    resetFormDirty: resetFormDirty,
+                    confirmDiscardChanges: confirmDiscardChanges,
+                    getCurrentView: function () { return currentView; }
+                });
+            }
+            return translationModule;
+        }
+
         function bindNavigation() {
             initNavGroups();
 
@@ -1297,7 +1318,7 @@
 
         function isDirtyTrackedField(target) {
             if (!target || !target.matches || !target.matches('input, textarea, select')) return false;
-            return !!target.closest('.modal-overlay, .content-block-form, .visual-builder-root, #company-form, #module-settings-form');
+            return !!target.closest('.modal-overlay, .content-block-form, .visual-builder-root, #company-form, #module-settings-form, #view-translations');
         }
 
         function markFormDirty() {
@@ -1465,7 +1486,8 @@
             else if (view === 'categories') {
                 loadProductCategoriesView();
                 loadProductCategories();
-            } else if (view === 'inquiries') loadInquiries();
+            } else if (view === 'translations') getTranslationModule().load();
+            else if (view === 'inquiries') loadInquiries();
             else if (view === 'cert-qualifications' || view === 'cert-patents' || view === 'cert-software' || view === 'cert-test-reports') loadCertView(view);
             else if (view === 'visual-builder') loadVisualBuilder();
             else if (isContentBlockView(view)) loadContentBlock(view);
@@ -1681,6 +1703,7 @@
             if (view === 'dashboard') loadDashboard();
             if (view === 'products') loadProducts();
             if (view === 'categories') loadProductCategoriesView();
+            if (view === 'translations') getTranslationModule().load();
             if (view === 'inquiries') loadInquiries();
             if (view === 'cert-qualifications') loadCertView(view);
             if (view === 'cert-patents') loadCertView(view);

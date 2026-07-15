@@ -9,6 +9,7 @@ const { normalizeUploadedFilename } = require('../../lib/filenameEncoding');
 const { sendError, insertAuditLog } = require('./helpers');
 const { syncProductAssetReferences, deleteAssetReferences } = require('../../lib/assetReferences');
 const { deleteProductCardThumbnail, queueProductCardThumbnail } = require('../../lib/productCardThumbnail');
+const { syncLegacyTranslations } = require('./translation-compat');
 
 const router = express.Router();
 const STATUSES = ['published', 'draft', 'deleted'];
@@ -163,6 +164,8 @@ function normalizeProductSpecs(value) {
     if (!Array.isArray(source)) return [];
 
     return source.map(function (item, index) {
+        let id = null;
+        let specCode = '';
         let specGroup = 'technical';
         let specKey = '';
         let specValue = '';
@@ -174,6 +177,8 @@ function normalizeProductSpecs(value) {
             specValue = item[1] == null ? '' : String(item[1]).trim();
             unit = item[2] == null ? '' : String(item[2]).trim();
         } else if (item && typeof item === 'object') {
+            id = parseInteger(item.id, null);
+            specCode = firstText(item.spec_code, item.specCode);
             specGroup = firstText(item.spec_group, item.group, item.group_name, 'technical');
             specKey = firstText(item.spec_key, item.key, item.name, item.label);
             specValue = firstText(item.spec_value, item.value, item.text);
@@ -182,6 +187,8 @@ function normalizeProductSpecs(value) {
         }
 
         return {
+            id,
+            spec_code: specCode,
             spec_group: specGroup || 'technical',
             spec_key: specKey,
             spec_value: specValue,
@@ -194,19 +201,64 @@ function normalizeProductSpecs(value) {
 }
 
 function replaceProductSpecs(db, productId, specs, timestamp) {
-    db.prepare('DELETE FROM product_specs WHERE product_id = ?').run(productId);
-    if (!specs || !specs.length) return;
+    const existingRows = db.prepare(`
+        SELECT id, spec_code
+        FROM product_specs
+        WHERE product_id = ?
+    `).all(productId);
+    const assignExistingCode = db.prepare(`
+        UPDATE product_specs
+        SET spec_code = ?, updated_at = ?
+        WHERE id = ? AND product_id = ? AND (spec_code IS NULL OR trim(spec_code) = '')
+    `);
+    existingRows.forEach(function (row) {
+        if (row.spec_code) return;
+        row.spec_code = 'legacy-spec-' + row.id;
+        assignExistingCode.run(row.spec_code, timestamp, row.id, productId);
+    });
+    const existingById = new Map(existingRows.map(function (row) { return [Number(row.id), row]; }));
+    const retainedIds = [];
+
+    const updateSpec = db.prepare(`
+        UPDATE product_specs
+        SET spec_group = @spec_group,
+            spec_key = @spec_key,
+            spec_value = @spec_value,
+            unit = @unit,
+            sort_order = @sort_order,
+            updated_at = @updated_at
+        WHERE id = @id AND product_id = @product_id
+    `);
 
     const insertSpec = db.prepare(`
         INSERT INTO product_specs
-            (product_id, spec_group, spec_key, spec_value, unit, sort_order, created_at, updated_at)
+            (product_id, spec_code, spec_group, spec_key, spec_value, unit, sort_order, created_at, updated_at)
         VALUES
-            (@product_id, @spec_group, @spec_key, @spec_value, @unit, @sort_order, @created_at, @updated_at)
+            (@product_id, @spec_code, @spec_group, @spec_key, @spec_value, @unit, @sort_order, @created_at, @updated_at)
     `);
 
-    specs.forEach(function (spec, index) {
-        insertSpec.run({
+    (specs || []).forEach(function (spec, index) {
+        const existing = spec.id == null ? null : existingById.get(Number(spec.id));
+        if (existing) {
+            if (spec.spec_code && spec.spec_code !== existing.spec_code) {
+                throw new Error('spec_code is immutable');
+            }
+            updateSpec.run({
+                id: existing.id,
+                product_id: productId,
+                spec_group: spec.spec_group || 'technical',
+                spec_key: spec.spec_key || '',
+                spec_value: spec.spec_value || '',
+                unit: spec.unit || '',
+                sort_order: parseInteger(spec.sort_order, index),
+                updated_at: timestamp
+            });
+            retainedIds.push(existing.id);
+            return;
+        }
+        const result = insertSpec.run({
             product_id: productId,
+            spec_code: 'spec-' + crypto.randomUUID(),
             spec_group: spec.spec_group || 'technical',
             spec_key: spec.spec_key || '',
             spec_value: spec.spec_value || '',
@@ -215,6 +267,18 @@ function replaceProductSpecs(db, productId, specs, timestamp) {
             created_at: timestamp,
             updated_at: timestamp
         });
+        retainedIds.push(Number(result.lastInsertRowid));
+    });
+
+    const archive = db.prepare(`
+        UPDATE product_specs
+        SET spec_group = 'archived', updated_at = ?
+        WHERE id = ? AND product_id = ?
+    `);
+    existingRows.forEach(function (row) {
+        if (retainedIds.indexOf(Number(row.id)) === -1) {
+            archive.run(timestamp, row.id, productId);
+        }
     });
 }
 
@@ -291,9 +355,9 @@ function getFullProduct(db, id) {
     `).all(id);
 
     product.specs = db.prepare(`
-        SELECT id, product_id, spec_group, spec_key, spec_value, unit, sort_order, created_at, updated_at
+        SELECT id, product_id, spec_code, spec_group, spec_key, spec_value, unit, sort_order, created_at, updated_at
         FROM product_specs
-        WHERE product_id = ?
+        WHERE product_id = ? AND spec_group != 'archived'
         ORDER BY spec_group, sort_order, id
     `).all(id);
 
@@ -702,6 +766,7 @@ router.post('/', function (req, res, next) {
             replaceCoverImage(db, productId, coverPath, now);
             replaceGalleryImages(db, productId, galleryPaths, coverPath, now);
             syncProductAssetReferences(db, productId);
+            syncLegacyTranslations(db, req, 'product', productId);
             const product = getFullProduct(db, productId);
             insertAuditLog(db, req, 'product', product.id, 'create', null, product);
             return product;
@@ -849,6 +914,7 @@ router.put('/:id', function (req, res, next) {
                 replaceGalleryImages(db, before.id, galleryPaths, finalCoverPath, timestamp);
             }
             syncProductAssetReferences(db, before.id);
+            syncLegacyTranslations(db, req, 'product', before.id);
             const afterAudit = getAuditProduct(db, before.id);
             insertAuditLog(db, req, 'product', before.id, 'update', before, afterAudit);
             return getFullProduct(db, before.id);
@@ -947,6 +1013,7 @@ router.post('/batch', function (req, res, next) {
                 uniqueIds.forEach(function (id) {
                     deleteAssetReferences(db, { module: 'products', entity_type: 'product', entity_id: id });
                 });
+                db.prepare(`DELETE FROM product_translations WHERE product_id IN (${placeholders})`).run(...uniqueIds);
                 db.prepare(`DELETE FROM product_specs WHERE product_id IN (${placeholders})`).run(...uniqueIds);
                 db.prepare(`DELETE FROM product_media WHERE product_id IN (${placeholders})`).run(...uniqueIds);
                 db.prepare(`DELETE FROM products WHERE id IN (${placeholders})`).run(...uniqueIds);

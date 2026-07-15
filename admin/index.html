@@ -8,7 +8,7 @@
     <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png?v=20260615-lxdq">
     <link rel="stylesheet" href="css/admin-base.css?v=20260628-stage6">
     <link rel="stylesheet" href="css/admin-components.css?v=20260628-stage6">
-    <link rel="stylesheet" href="css/admin.css?v=20260713-product-gallery">
+    <link rel="stylesheet" href="css/admin.css?v=20260715-translation-stage-b">
 </head>
 <body>
     <div class="admin-layout" id="admin-page">
@@ -40,6 +40,7 @@
                     <ul class="nav-group-items">
                         <li><a href="#" data-view="products" class="nav-sub-item">产品列表</a></li>
                         <li><a href="#" data-view="categories" class="nav-sub-item">分类管理</a></li>
+                        <li><a href="#" data-view="translations" class="nav-sub-item">翻译版本</a></li>
                     </ul>
                 </div>
 
@@ -386,6 +387,49 @@
                         </button>
                     </div>
                     <div class="pagination-bar admin-pagination" id="products-pagination" style="display:none;"></div>
+                </section>
+
+                <section class="view-section" id="view-translations">
+                    <div class="translation-page-head">
+                        <div>
+                            <h2>翻译版本</h2>
+                            <p>按语言维护草稿、发布版本和历史版本；计划中语言不会进入公开网站。</p>
+                        </div>
+                    </div>
+                    <div class="translation-toolbar">
+                        <div class="form-group">
+                            <label for="translation-entity-type">内容类型</label>
+                            <select id="translation-entity-type">
+                                <option value="product">产品</option>
+                                <option value="category">分类</option>
+                                <option value="certification">证书</option>
+                                <option value="content_block">内容块</option>
+                            </select>
+                        </div>
+                        <div class="form-group translation-entity-field">
+                            <label for="translation-entity">内容项目</label>
+                            <select id="translation-entity"><option value="">正在加载...</option></select>
+                        </div>
+                    </div>
+                    <div class="translation-workspace">
+                        <div class="translation-locale-tabs" id="translation-locale-tabs" role="tablist" aria-label="翻译语言"></div>
+                        <div class="translation-version-bar">
+                            <div id="translation-version-status" class="translation-version-status"></div>
+                            <div class="translation-version-actions">
+                                <button type="button" class="btn btn-secondary" id="translation-discard-draft" hidden>丢弃草稿</button>
+                                <button type="button" class="btn btn-secondary" id="translation-save-draft">保存草稿</button>
+                                <button type="button" class="btn btn-primary" id="translation-publish-draft" disabled>发布草稿</button>
+                            </div>
+                        </div>
+                        <div class="translation-editor" id="translation-editor">
+                            <p class="translation-empty">正在加载翻译版本...</p>
+                        </div>
+                        <section class="translation-spec-fields" id="translation-spec-fields" hidden></section>
+                        <section class="translation-history-section">
+                            <h3>历史发布版本</h3>
+                            <div id="translation-history"><p class="translation-empty">暂无历史发布版本。</p></div>
+                        </section>
+                    </div>
                 </section>
 
                 <section class="view-section" id="view-inquiries">
@@ -1280,7 +1324,8 @@
     <script src="js/admin-api.js?v=20260628-stage6"></script>
     <script src="js/admin-ui.js?v=20260628-stage6"></script>
     <script src="js/modules/admin-inquiries.js?v=20260628-stage7b1"></script>
-    <script src="js/modules/admin-products.js?v=20260714-arabic-seo"></script>
-    <script src="js/admin.js?v=20260713-about-visual"></script>
+    <script src="js/modules/admin-products.js?v=20260715-translation-stage-b"></script>
+    <script src="js/modules/admin-translations.js?v=20260715-translation-stage-b-review"></script>
+    <script src="js/admin.js?v=20260715-translation-stage-b-review"></script>
 </body>
 </html>

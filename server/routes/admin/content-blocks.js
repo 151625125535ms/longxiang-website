@@ -2,6 +2,7 @@ const express = require('express');
 const { getDb } = require('../../lib/db');
 const { sendError, insertAuditLog } = require('./helpers');
 const { syncContentBlockAssetReferences } = require('../../lib/assetReferences');
+const { syncLegacyTranslations } = require('./translation-compat');
 
 const router = express.Router();
 const BATCH_ACTIONS = ['publish', 'unpublish'];
@@ -253,6 +254,7 @@ router.put('/:slug', function (req, res, next) {
                 updated_at: Date.now()
             });
 
+            syncLegacyTranslations(db, req, 'content_block', before.id);
             const after = getContentBlockBySlug(db, before.slug);
             syncContentBlockAssetReferences(db, after.id);
             insertAuditLog(db, req, 'content_block', before.id, 'update', before, after);

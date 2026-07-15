@@ -1,6 +1,7 @@
 const express = require('express');
 const { getDb } = require('../../lib/db');
 const { sendError, insertAuditLog } = require('./helpers');
+const { syncLegacyTranslations } = require('./translation-compat');
 
 const router = express.Router();
 const CATEGORY_TYPES = ['product', 'certification', 'content'];
@@ -220,6 +221,7 @@ router.post('/', function (req, res, next) {
                 updated_at: now
             });
 
+            syncLegacyTranslations(db, req, 'category', result.lastInsertRowid);
             const category = findCategory(db, result.lastInsertRowid);
             insertAuditLog(db, req, 'category', category.id, 'create', null, category);
             return category;
@@ -280,6 +282,7 @@ router.put('/:id', function (req, res, next) {
                 updated_at: Date.now()
             });
 
+            syncLegacyTranslations(db, req, 'category', before.id);
             const after = findCategory(db, before.id);
             insertAuditLog(db, req, 'category', before.id, 'update', before, after);
             return after;

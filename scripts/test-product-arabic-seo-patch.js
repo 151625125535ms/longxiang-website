@@ -13,6 +13,8 @@ const {
     sourceSnapshotHash
 } = require('./lib/product-arabic-seo-source');
 const { forwardContentSha256 } = require('./lib/product-arabic-seo-patch-pair');
+const { loadLocaleRegistry } = require('../server/lib/localeRegistry');
+const { createTranslationWriter } = require('../server/lib/translationWriter');
 
 const ROOT = path.resolve(__dirname, '..');
 const SCRIPT = path.join(ROOT, 'scripts', 'apply-product-field-safe-patch.js');
@@ -335,6 +337,34 @@ async function testTransactionRevalidationBlocksConcurrentChange() {
     assert.strictEqual(rows[1].seo_title_ar, null);
 }
 
+async function testApplySynchronizesExistingPublishedRevisions() {
+    const fixture = createFixture();
+    approveForward(fixture.inputPath);
+    const setup = new Database(fixture.dbPath);
+    const writer = createTranslationWriter({ db: setup, registry: loadLocaleRegistry() });
+    writer.syncLegacyPublished({ entityType: 'product', entityId: 1, locales: ['ar'] });
+    writer.syncLegacyPublished({ entityType: 'product', entityId: 2, locales: ['ar'] });
+    setup.close();
+
+    const report = await runProductFieldPatch({
+        mode: 'apply',
+        inputPath: fixture.inputPath,
+        dbPath: fixture.dbPath,
+        reportPath: fixture.reportPath,
+        backupPath: fixture.backupPath,
+        policy: getProductFieldPatchPolicy('arabic-seo-v1'),
+        policyExplicit: true
+    });
+    assert.strictEqual(report.databaseChanged, true, report.errors.join('; '));
+    const db = new Database(fixture.dbPath, { readonly: true });
+    const published = db.prepare(`
+        SELECT seo_title FROM product_translations
+        WHERE product_id = 1 AND locale = 'ar' AND revision_state = 'published'
+    `).get();
+    db.close();
+    assert.strictEqual(published.seo_title, TARGETS[0].seo_title_ar, 'safe patch must publish the updated legacy value into revisions');
+}
+
 async function main() {
     testForwardDryRunAndNullSafeApply();
     testForwardIdentitySetVersionAndSourceGuards();
@@ -342,6 +372,7 @@ async function main() {
     testRollbackBlocksManualSeoChange();
     testRollbackRequiresStrictApprovedPairAndOriginalRows();
     await testTransactionRevalidationBlocksConcurrentChange();
+    await testApplySynchronizesExistingPublishedRevisions();
     console.log('product Arabic SEO patch tests passed');
 }
 

@@ -8,6 +8,8 @@ const {
     sourceSnapshotHash
 } = require('./product-arabic-seo-source');
 const { validateArabicSeoPatchPair } = require('./product-arabic-seo-patch-pair');
+const { loadLocaleRegistry } = require('../../server/lib/localeRegistry');
+const { createTranslationWriter } = require('../../server/lib/translationWriter');
 
 function readPatchFile(filePath) {
     return JSON.parse(fs.readFileSync(filePath, 'utf8'));
@@ -324,6 +326,39 @@ function assertUnchangedFields(record, afterRow, allowedFields) {
     });
 }
 
+function tableExists(db, tableName) {
+    return Boolean(db.prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?").get(tableName));
+}
+
+function localeForLegacyField(field) {
+    if (/_ar$/i.test(field)) return 'ar';
+    if (/_fr$/i.test(field)) return 'fr';
+    if (/_ru$/i.test(field)) return 'ru';
+    if (/_en$/i.test(field) || /^(?:seo_title|seo_description|seo_keywords)$/i.test(field)) return 'en';
+    return '';
+}
+
+// TRANSLATION_WRITER_SYNC: dynamic product field patches must not bypass published revisions.
+function syncPatchedTranslationRevisions(db, record) {
+    if (!tableExists(db, 'product_translations')) return;
+    const locales = [...new Set(record.changes.map(function (change) {
+        return localeForLegacyField(change.field);
+    }).filter(Boolean))].filter(function (locale) {
+        return Boolean(db.prepare(`
+            SELECT 1 FROM product_translations
+            WHERE product_id = ? AND locale = ? AND revision_state = 'published'
+            LIMIT 1
+        `).get(record.rowId, locale));
+    });
+    if (!locales.length) return;
+    createTranslationWriter({ db, registry: loadLocaleRegistry() }).publishLegacyWrite({
+        entityType: 'product',
+        entityId: record.rowId,
+        locales,
+        actor: { username: 'product-field-safe-patch' }
+    });
+}
+
 function applyRecords(db, data, items, columns, policy) {
     const timestamp = new Date().toISOString();
     const operation = isPlainObject(data.meta) ? data.meta.operation : '';
@@ -368,6 +403,7 @@ function applyRecords(db, data, items, columns, policy) {
                 }
             });
             assertUnchangedFields(record, afterRow, policy.allowedFields);
+            syncPatchedTranslationRevisions(db, record);
         });
         return { changedCount: changed.length, records };
     });

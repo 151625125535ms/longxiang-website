@@ -2,10 +2,15 @@
 
 const assert = require('assert');
 const { spawn } = require('child_process');
+const fs = require('fs');
+const os = require('os');
 const path = require('path');
 const zlib = require('zlib');
 const { performance } = require('perf_hooks');
-const { getDb } = require('../server/lib/db');
+const Database = require('better-sqlite3');
+const { resolveDbPath } = require('../server/lib/db');
+const { runMigrations } = require('../server/db/migrations');
+const { createVerifiedSqliteBackup } = require('../server/lib/sqliteBackup');
 const { createLocaleRegistry, loadLocaleRegistry } = require('../server/lib/localeRegistry');
 const { createLocalePublicationPolicy } = require('../server/lib/localePublicationPolicy');
 const { readPublicProducts } = require('../server/lib/publicProducts');
@@ -107,6 +112,14 @@ function assertNoLocalizedKeys(value, label) {
 }
 
 async function main() {
+    const tempRoot = path.resolve(os.tmpdir());
+    const tempDir = fs.mkdtempSync(path.join(tempRoot, 'longxiang-locale-api-'));
+    const dbPath = path.join(tempDir, 'locale-api.db');
+    await createVerifiedSqliteBackup({ sourcePath: resolveDbPath(), backupPath: dbPath });
+    const db = new Database(dbPath);
+    db.pragma('foreign_keys = ON');
+    runMigrations(db);
+    try {
     const registry = loadLocaleRegistry();
     assert.deepStrictEqual(registry.publicEntries.map(function (entry) { return entry.code; }), ['en', 'ar', 'fr', 'ru']);
     assert.strictEqual(registry.get('pt').state, 'planned');
@@ -146,7 +159,7 @@ async function main() {
         title: 'Arabic title'
     });
     ['applications', 'innovation', 'page-blocks'].forEach(function (slug) {
-        const block = readPublicContentBlock(slug);
+        const block = readPublicContentBlock(slug, db);
         assert(block, slug + ' content block must exist');
         ['ar', 'fr', 'ru'].forEach(function (locale) {
             const expectedValues = directLocaleStrings(block.body, locale);
@@ -166,7 +179,7 @@ async function main() {
         2: []
     });
 
-    const listDb = instrumentDb(getDb());
+    const listDb = instrumentDb(db);
     const localized = readLocalizedProducts('en', listDb);
     assert.strictEqual(listDb.state.prepares, 3, 'localized product list must use three bounded SQL queries');
     assert(localized.length > 0);
@@ -174,7 +187,7 @@ async function main() {
     assert(!Object.prototype.hasOwnProperty.call(localized[0], 'description'));
     assert(!Object.prototype.hasOwnProperty.call(localized[0], 'specs'));
 
-    const detailDb = instrumentDb(getDb());
+    const detailDb = instrumentDb(db);
     const detail = readLocalizedProduct(localized[0].slug, 'ar', detailDb);
     assert(detail);
     assert.strictEqual(detailDb.state.prepares, 4, 'direct localized detail must use four bounded SQL queries');
@@ -191,7 +204,7 @@ async function main() {
 
     const child = spawn(process.execPath, ['server/app.js'], {
         cwd: PROJECT_ROOT,
-        env: { ...process.env, PORT: String(PORT), HOST: '127.0.0.1', NODE_ENV: 'test' },
+        env: { ...process.env, DB_PATH: dbPath, PORT: String(PORT), HOST: '127.0.0.1', NODE_ENV: 'test' },
         stdio: ['ignore', 'pipe', 'pipe']
     });
     try {
@@ -201,7 +214,7 @@ async function main() {
         assert(Array.isArray(legacy.json));
         assert(Object.prototype.hasOwnProperty.call(legacy.json[0], 'nameAr'));
         assert.strictEqual(legacy.response.headers.get('cache-control'), 'no-store');
-        assert.deepStrictEqual(legacy.json, readPublicProducts());
+        assert.deepStrictEqual(legacy.json, readPublicProducts(db));
 
         const metrics = [];
         for (const locale of ['en', 'ar', 'fr', 'ru']) {
@@ -260,6 +273,14 @@ async function main() {
             child.once('exit', resolve);
             setTimeout(resolve, 3000);
         });
+    }
+    } finally {
+        db.close();
+        const resolvedTempDir = path.resolve(tempDir);
+        if (path.dirname(resolvedTempDir) !== tempRoot || path.basename(resolvedTempDir).indexOf('longxiang-locale-api-') !== 0) {
+            throw new Error('Refusing to remove an unexpected temporary directory: ' + resolvedTempDir);
+        }
+        fs.rmSync(resolvedTempDir, { recursive: true, force: true });
     }
 }
 

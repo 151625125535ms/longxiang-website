@@ -63,6 +63,50 @@
 - `scripts/export-i18n-content-template.js` 和 `scripts/import-fr-content-filled.js` 应按 `config/locales.json` 校验 supported/planned 状态，不再接受旧的 `en/ar` 或 `en/ar/fr` 阶段快照。
 - `js/main.js` 的运行时语言配置保留静态内联对象，但必须通过 `scripts/verify-seo-i18n.js` 与 `config/locales.json` 同步校验。
 
+## Translation revision 阶段 B 能力
+
+阶段 B 在代码层增加通用翻译版本能力，但不切换公开读取权威：
+
+- Schema v7 以 additive migration 增加产品、分类、证书和 content block 的 translation revision 表；现有四语固定字段继续作为公开读取来源。
+- `server/lib/translationWriter.js` 是正式翻译写入口。`saveDraft()` 只写草稿；`publishDraft()` 和 `restoreRevision()` 在同一写事务内切换版本、镜像现有四语旧字段并记录审计。
+- 旧产品、分类、证书和内容块表单继续保持“保存即上线”，但必须在原事务内通过兼容适配器同步 published revision。
+- `product_specs.spec_code` 是不可随排序或翻译变化的稳定行身份。无法可靠识别的历史规格由 backfill 报告阻断，不根据相近规格猜测。
+- 后台“翻译版本”工作台从 locale registry 动态生成语言标签，可按单一语言保存草稿、发布和恢复历史版本。
+- `pt` 可以准备内部草稿或内部发布版本，但其 planned 状态不变；公开 API、前台语言选择器、sitemap、hreflang 和正式路由仍拒绝 `pt`。
+- content block 的 Fr/Ru Patch 和 overlay 迁移仍属于阶段 C；阶段 B 只建立 revision 容器，不改变现有公开合并逻辑。
+
+### backfill 与回滚边界
+
+`scripts/backfill-translation-revisions.js` 默认只读 dry-run，并输出计划哈希、待分配规格身份、待创建 revision 和 blocker：
+
+```powershell
+node scripts/backfill-translation-revisions.js --db=<database-copy>
+```
+
+apply 只允许显式数据库路径、确认词、dry-run 计划哈希和新 receipt 路径：
+
+```powershell
+node scripts/backfill-translation-revisions.js --apply --db=<database-copy> --expected-plan-hash=<hash> --receipt=<receipt.json> --confirm=STAGE_B_BACKFILL
+```
+
+apply 会在同一写事务内完成收敛检查，并把 recovery receipt 写入数据库表 `translation_backfill_receipts`；外部 receipt 文件只是便于运维携带的副本。逻辑 rollback 会精确核对本批 revision，发现任何后续草稿、发布、历史或内容变化时整批拒绝回滚：
+
+```powershell
+node scripts/backfill-translation-revisions.js --rollback --db=<database-copy> --receipt=<receipt.json> --confirm=STAGE_B_BACKFILL_ROLLBACK
+```
+
+如果 apply 已提交但外部 receipt 文件写入失败，可以使用数据库内的计划哈希恢复：
+
+```powershell
+node scripts/backfill-translation-revisions.js --rollback --db=<database-copy> --plan-hash=<applied-plan-hash> --confirm=STAGE_B_BACKFILL_ROLLBACK
+```
+
+dry-run 计划哈希包含待导入的旧字段内容和产品规格源快照；源内容在 dry-run 后发生变化时，apply 会在取得写锁后以 `PLAN_CHANGED` 整批拒绝。逻辑 rollback 会移除本批 translation revision，但保留已经分配的稳定 `spec_code`。Schema 迁移和完整数据库状态的生产回滚必须使用迁移前、仓库外、校验通过的 SQLite WAL 在线备份；receipt 不能替代数据库备份。
+
+旧后台表单继续采用“保存即上线”语义，但保存事务会通过统一 writer 生成 draft 并立即 publish；已有未发布草稿时，旧表单保存会整笔拒绝，管理员应先在翻译工作台发布或丢弃草稿。翻译工作台的 `saveDraft` 永远不修改旧公开字段，只有 publish、restore 和兼容保存会改变当前公开快照。
+
+生产部署顺序必须单独授权，并保持：WAL 在线备份及校验 -> 迁移 v7 -> backfill dry-run -> 核对计划哈希与 blocker -> 单独授权 apply -> 写后数据库和后台闭环验收。当前阶段不得仅凭代码合入自动执行生产迁移或 backfill。
+
 ## pt planned 边界
 
 - 不创建正式 `/pt/` 公开页面目录作为上线入口。
@@ -88,6 +132,9 @@ node --check scripts/export-i18n-content-template.js
 node --check scripts/import-fr-content-filled.js
 node --check scripts/verify-seo-i18n.js
 node --check scripts/generate-sitemap.js
+node scripts/audit-translation-write-entrypoints.js
+npm run test:translation-stage-b
+npm run test:acceptance:db-copy
 node scripts/generate-sitemap.js --dry-run
 node scripts/verify-seo-i18n.js
 git diff --check
@@ -96,6 +143,6 @@ git diff --check
 ## 风险与治理建议
 
 - 前端运行时和 `config/locales.json` 仍存在一份静态配置重复；短期通过 `scripts/verify-seo-i18n.js` 强校验兜底，长期可评估构建脚本或服务端注入。
-- 当前产品翻译字段仍是固定语言字段，继续新增多种语言会膨胀；后续应单独规划翻译表或结构化 JSON 字段。
+- 当前公开读取仍使用固定语言字段；translation revision 表是兼容迁移层。只有完成阶段 C 的四语读取切换、观察期和旧写入口退役，才能消除双写技术债。
 - 新语言上线前不要开启 `includeInSitemap`，否则 sitemap 会暴露尚未准备好的 URL。
 - 每次语言状态变化后都必须同步更新 `docs/ops/CURRENT_FACTS.md` 和本设计文档。

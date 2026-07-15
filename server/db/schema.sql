@@ -83,6 +83,7 @@ CREATE TABLE IF NOT EXISTS product_media (
 CREATE TABLE IF NOT EXISTS product_specs (
     id INTEGER PRIMARY KEY,
     product_id INTEGER NOT NULL,
+    spec_code TEXT,
     spec_group TEXT NOT NULL DEFAULT 'technical',
     spec_key TEXT NOT NULL,
     spec_value TEXT NOT NULL,
@@ -141,6 +142,109 @@ CREATE TABLE IF NOT EXISTS content_blocks (
     version INTEGER DEFAULT 1,
     created_at INTEGER,
     updated_at INTEGER
+);
+
+CREATE TABLE IF NOT EXISTS product_translations (
+    id INTEGER PRIMARY KEY,
+    product_id INTEGER NOT NULL,
+    locale TEXT NOT NULL COLLATE NOCASE CHECK (length(trim(locale)) > 0),
+    revision_no INTEGER NOT NULL CHECK (revision_no > 0),
+    revision_state TEXT NOT NULL DEFAULT 'draft' CHECK (revision_state IN ('draft', 'published', 'archived')),
+    base_revision_id INTEGER,
+    name TEXT NOT NULL DEFAULT '',
+    short_description TEXT,
+    description TEXT,
+    seo_title TEXT,
+    seo_description TEXT,
+    seo_keywords TEXT,
+    version INTEGER NOT NULL DEFAULT 1 CHECK (version > 0),
+    created_by TEXT,
+    updated_by TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    published_at INTEGER,
+    UNIQUE(product_id, locale, revision_no),
+    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS category_translations (
+    id INTEGER PRIMARY KEY,
+    category_id INTEGER NOT NULL,
+    locale TEXT NOT NULL COLLATE NOCASE CHECK (length(trim(locale)) > 0),
+    revision_no INTEGER NOT NULL CHECK (revision_no > 0),
+    revision_state TEXT NOT NULL DEFAULT 'draft' CHECK (revision_state IN ('draft', 'published', 'archived')),
+    base_revision_id INTEGER,
+    name TEXT NOT NULL DEFAULT '',
+    version INTEGER NOT NULL DEFAULT 1 CHECK (version > 0),
+    created_by TEXT,
+    updated_by TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    published_at INTEGER,
+    UNIQUE(category_id, locale, revision_no),
+    FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS certification_translations (
+    id INTEGER PRIMARY KEY,
+    certification_id INTEGER NOT NULL,
+    locale TEXT NOT NULL COLLATE NOCASE CHECK (length(trim(locale)) > 0),
+    revision_no INTEGER NOT NULL CHECK (revision_no > 0),
+    revision_state TEXT NOT NULL DEFAULT 'draft' CHECK (revision_state IN ('draft', 'published', 'archived')),
+    base_revision_id INTEGER,
+    name TEXT NOT NULL DEFAULT '',
+    category_label TEXT,
+    issuer TEXT,
+    description TEXT,
+    version INTEGER NOT NULL DEFAULT 1 CHECK (version > 0),
+    created_by TEXT,
+    updated_by TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    published_at INTEGER,
+    UNIQUE(certification_id, locale, revision_no),
+    FOREIGN KEY (certification_id) REFERENCES certifications(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS content_block_translations (
+    id INTEGER PRIMARY KEY,
+    content_block_id INTEGER NOT NULL,
+    locale TEXT NOT NULL COLLATE NOCASE CHECK (length(trim(locale)) > 0),
+    revision_no INTEGER NOT NULL CHECK (revision_no > 0),
+    revision_state TEXT NOT NULL DEFAULT 'draft' CHECK (revision_state IN ('draft', 'published', 'archived')),
+    base_revision_id INTEGER,
+    title TEXT NOT NULL DEFAULT '',
+    schema_version INTEGER NOT NULL DEFAULT 1 CHECK (schema_version > 0),
+    translation_json TEXT NOT NULL DEFAULT '{}',
+    base_structure_hash TEXT NOT NULL DEFAULT '',
+    version INTEGER NOT NULL DEFAULT 1 CHECK (version > 0),
+    created_by TEXT,
+    updated_by TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    published_at INTEGER,
+    UNIQUE(content_block_id, locale, revision_no),
+    FOREIGN KEY (content_block_id) REFERENCES content_blocks(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS product_spec_translation_values (
+    id INTEGER PRIMARY KEY,
+    product_translation_id INTEGER NOT NULL,
+    product_spec_id INTEGER NOT NULL,
+    label TEXT,
+    value_text TEXT,
+    UNIQUE(product_translation_id, product_spec_id),
+    FOREIGN KEY (product_translation_id) REFERENCES product_translations(id) ON DELETE CASCADE,
+    FOREIGN KEY (product_spec_id) REFERENCES product_specs(id) ON DELETE RESTRICT
+);
+
+CREATE TABLE IF NOT EXISTS translation_backfill_receipts (
+    id INTEGER PRIMARY KEY,
+    plan_hash TEXT NOT NULL UNIQUE,
+    receipt_json TEXT NOT NULL,
+    state TEXT NOT NULL DEFAULT 'applied' CHECK (state IN ('applied', 'rolled_back')),
+    created_at INTEGER NOT NULL,
+    rolled_back_at INTEGER
 );
 
 CREATE TABLE IF NOT EXISTS inquiries (
@@ -221,6 +325,20 @@ CREATE INDEX IF NOT EXISTS idx_products_sort ON products(sort_order);
 CREATE INDEX IF NOT EXISTS idx_products_updated ON products(updated_at);
 CREATE INDEX IF NOT EXISTS idx_product_media_product ON product_media(product_id);
 CREATE INDEX IF NOT EXISTS idx_product_specs_product ON product_specs(product_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_product_specs_code ON product_specs(product_id, spec_code);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_product_translation_one_draft ON product_translations(product_id, locale) WHERE revision_state = 'draft';
+CREATE UNIQUE INDEX IF NOT EXISTS idx_product_translation_one_published ON product_translations(product_id, locale) WHERE revision_state = 'published';
+CREATE INDEX IF NOT EXISTS idx_product_translation_public_lookup ON product_translations(locale, revision_state, product_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_category_translation_one_draft ON category_translations(category_id, locale) WHERE revision_state = 'draft';
+CREATE UNIQUE INDEX IF NOT EXISTS idx_category_translation_one_published ON category_translations(category_id, locale) WHERE revision_state = 'published';
+CREATE INDEX IF NOT EXISTS idx_category_translation_public_lookup ON category_translations(locale, revision_state, category_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_certification_translation_one_draft ON certification_translations(certification_id, locale) WHERE revision_state = 'draft';
+CREATE UNIQUE INDEX IF NOT EXISTS idx_certification_translation_one_published ON certification_translations(certification_id, locale) WHERE revision_state = 'published';
+CREATE INDEX IF NOT EXISTS idx_certification_translation_public_lookup ON certification_translations(locale, revision_state, certification_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_content_translation_one_draft ON content_block_translations(content_block_id, locale) WHERE revision_state = 'draft';
+CREATE UNIQUE INDEX IF NOT EXISTS idx_content_translation_one_published ON content_block_translations(content_block_id, locale) WHERE revision_state = 'published';
+CREATE INDEX IF NOT EXISTS idx_content_translation_public_lookup ON content_block_translations(locale, revision_state, content_block_id);
+CREATE INDEX IF NOT EXISTS idx_product_spec_translation_revision ON product_spec_translation_values(product_translation_id);
 CREATE INDEX IF NOT EXISTS idx_certifications_category ON certifications(category_id);
 CREATE INDEX IF NOT EXISTS idx_certifications_status ON certifications(status);
 CREATE INDEX IF NOT EXISTS idx_certifications_asset ON certifications(asset_id);

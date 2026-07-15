@@ -1,0 +1,38 @@
+{
+  "runtimeCompatibilityWriters": [
+    "server/routes/admin/products.js",
+    "server/routes/admin/categories.js",
+    "server/routes/admin/certifications.js",
+    "server/routes/admin/content-blocks.js"
+  ],
+  "neutralContentWriters": [
+    "server/lib/assetReferences.js"
+  ],
+  "dynamicTranslationWriters": [
+    "scripts/lib/product-field-safe-patch-engine.js"
+  ],
+  "legacyMaintenanceWriters": [
+    "server/lib/contentBlockSeeds.js",
+    "server/db/migrations/0005_company_identity.js",
+    "scripts/apply-content-block-safe-patch.js",
+    "scripts/fill-product-seo.js",
+    "scripts/fix-seo-content-20260620.js",
+    "scripts/migrate-product-category-hierarchy.js",
+    "scripts/seed-about-us-content-20260616.js",
+    "scripts/seed-background-fields-20260616.js",
+    "scripts/seed-certifications-content-20260616.js",
+    "scripts/seed-compare-content-20260616.js",
+    "scripts/seed-contact-page-content-20260616.js",
+    "scripts/seed-content-blocks-20260616.js",
+    "scripts/seed-global-shell-content-20260616.js",
+    "scripts/seed-home-page-content-20260616.js",
+    "scripts/seed-not-found-content-20260616.js",
+    "scripts/seed-product-pages-content-20260616.js",
+    "scripts/seed-solutions-hero-actions-20260616.js",
+    "scripts/upgrade-education-content-20260623.js",
+    "scripts/upgrade-inquiry-conversion-content.js",
+    "scripts/upgrade-product-detail-remaining-20260620.js",
+    "scripts/upgrade-product-detail-samples-20260620.js",
+    "scripts/upgrade-solutions-content-20260621.js"
+  ]
+}

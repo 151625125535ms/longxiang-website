@@ -1046,6 +1046,8 @@
             if (empty) empty.remove();
             var row = document.createElement('div');
             row.className = 'spec-row';
+            row.setAttribute('data-spec-id', spec.id == null ? '' : String(spec.id));
+            row.setAttribute('data-spec-code', spec.spec_code || spec.specCode || '');
             row.innerHTML = '<input type="text" class="spec-key bidi-field" dir="auto" placeholder="参数名" value="' + escapeHtml(key) + '">' +
                 '<input type="text" class="spec-value bidi-field" dir="auto" placeholder="参数值" value="' + escapeHtml(value) + '">' +
                 '<button type="button" class="btn-remove-spec">×</button>';
@@ -1068,6 +1070,8 @@
                 var value = row.querySelector('.spec-value').value.trim();
                 if (key || value) {
                     specs.push({
+                        id: row.getAttribute('data-spec-id') || null,
+                        spec_code: row.getAttribute('data-spec-code') || '',
                         spec_key: key,
                         spec_value: value
                     });

@@ -2,6 +2,7 @@ const express = require('express');
 const { getDb } = require('../../lib/db');
 const { sendError, insertAuditLog } = require('./helpers');
 const { resolveAssetIdByPath, syncCertificationAssetReference, deleteAssetReferences } = require('../../lib/assetReferences');
+const { syncLegacyTranslations } = require('./translation-compat');
 
 const router = express.Router();
 const STATUSES = ['published', 'draft', 'deleted'];
@@ -203,6 +204,7 @@ router.post('/', function (req, res, next) {
             });
 
             syncCertificationAssetReference(db, result.lastInsertRowid);
+            syncLegacyTranslations(db, req, 'certification', result.lastInsertRowid);
             const certification = getCertification(db, result.lastInsertRowid);
             insertAuditLog(db, req, 'certification', certification.id, 'create', null, certification);
             return certification;
@@ -295,6 +297,7 @@ router.put('/:id', function (req, res, next) {
             });
 
             syncCertificationAssetReference(db, before.id);
+            syncLegacyTranslations(db, req, 'certification', before.id);
             const after = getCertification(db, before.id);
             insertAuditLog(db, req, 'certification', before.id, 'update', before, after);
             return after;
