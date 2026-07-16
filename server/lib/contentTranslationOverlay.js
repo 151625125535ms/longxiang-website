@@ -521,6 +521,7 @@ module.exports = {
     stripTranslationMetadata,
     inheritLegacyArrayIds,
     extractOverlay,
+    validateOverlay,
     structureHash,
     validateOverlay,
     applyOverlay,

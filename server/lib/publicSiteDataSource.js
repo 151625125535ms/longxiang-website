@@ -15,17 +15,36 @@ function freezeDataSource(methods) {
 
 function createRuntimePublicSiteDataSource(options) {
     options = options || {};
-    const { readPublicContentBlock } = require('./publicContentBlocks');
     const { readPublicCompanyView } = require('./publicCompanyView');
-    const { readPublicProducts, readPublicProduct } = require('./publicProducts');
-    const { readPublicProductCategories } = require('./publicProductTaxonomy');
+    const {
+        createRuntimePublicTranslationReadAdapter,
+        getRuntimePublicTranslationReadAdapter
+    } = require('./publicTranslationReadAdapter');
     const db = options.db;
+    const publicRead = options.publicRead || (db
+        ? createRuntimePublicTranslationReadAdapter({ db, registry: options.registry, env: options.env })
+        : getRuntimePublicTranslationReadAdapter());
     return freezeDataSource({
-        readContentBlock: function (slug) { return deepClone(readPublicContentBlock(slug, db)); },
+        readContentBlock: function (slug, locale) {
+            const value = locale
+                ? publicRead.readPresentationContentBlock(slug, locale.code || locale)
+                : publicRead.readContentBlock(slug);
+            return deepClone(value);
+        },
         readCompany: function () { return deepClone(readPublicCompanyView(db)); },
-        readProducts: function () { return deepClone(readPublicProducts(db)); },
-        readProduct: function (identifier) { return deepClone(readPublicProduct(identifier, db)); },
-        readProductCategories: function () { return deepClone(readPublicProductCategories(db)); }
+        readProducts: function (locale) {
+            return deepClone(locale ? publicRead.readPresentationProducts(locale.code || locale) : publicRead.readProducts());
+        },
+        readProduct: function (identifier, locale) {
+            return deepClone(locale
+                ? publicRead.readPresentationProduct(identifier, locale.code || locale)
+                : publicRead.readProduct(identifier));
+        },
+        readProductCategories: function (locale) {
+            return deepClone(locale
+                ? publicRead.readPresentationProductCategories(locale.code || locale)
+                : publicRead.readProductCategories());
+        }
     });
 }
 

@@ -19,10 +19,11 @@ const { ensureDirectory, resolveUploadDir } = require('./lib/fileStore');
 const { getDb } = require('./lib/db');
 const { ensureContentBlockSeeds } = require('./lib/contentBlockSeeds');
 const { renderProductDetailSeoHtml } = require('./lib/productDetailSeoRenderer');
-const { readPublicContentBlock, localizePublicContentBlock } = require('./lib/publicContentBlocks');
+const { localizePublicContentBlock } = require('./lib/publicContentBlocks');
 const { readPublicCompanyView } = require('./lib/publicCompanyView');
 const { renderGlobalShellHtml } = require('./lib/globalShellHtmlRenderer');
 const { createRuntimePublicSiteDataSource } = require('./lib/publicSiteDataSource');
+const { getRuntimePublicTranslationReadAdapter } = require('./lib/publicTranslationReadAdapter');
 const { renderContentPageHtml } = require('./lib/contentPageHtmlRenderer');
 const { renderProductListHtml } = require('./lib/productListHtmlRenderer');
 const { renderProductDetailBodyHtml } = require('./lib/productDetailHtmlRenderer');
@@ -58,7 +59,9 @@ try { rateLimit = require('express-rate-limit'); } catch (err) { rateLimit = nul
 const app = express();
 const PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST || '127.0.0.1';
-const publicSiteDataSource = createRuntimePublicSiteDataSource();
+const publicTranslationRead = getRuntimePublicTranslationReadAdapter();
+const publicSiteDataSource = createRuntimePublicSiteDataSource({ publicRead: publicTranslationRead });
+console.log('Public translation read source: ' + publicTranslationRead.source);
 const CONTENT_PAGE_SLUGS = Object.freeze({
     '/': 'home',
     '/about.html': 'about-us',
@@ -239,7 +242,7 @@ function requestOrigin(req) {
 }
 
 function renderPublicShell(html, locale, pathname) {
-    const shell = localizePublicContentBlock(readPublicContentBlock('global-shell'), locale.code || locale);
+    const shell = localizePublicContentBlock(publicSiteDataSource.readContentBlock('global-shell', locale), locale.code || locale);
     return renderGlobalShellHtml(html, {
         locale: locale.code || locale,
         pathname,
@@ -260,7 +263,7 @@ staticSeoRouteDefinitions().forEach(function (route) {
                 const contentSlug = CONTENT_PAGE_SLUGS[route.basePath];
                 const seoContentSlug = SEO_CONTENT_PAGE_SLUGS[route.basePath];
                 const seoContentBlock = seoContentSlug
-                    ? publicSiteDataSource.readContentBlock(seoContentSlug)
+                    ? publicSiteDataSource.readContentBlock(seoContentSlug, route.locale)
                     : null;
                 const withContent = contentSlug
                     ? renderContentPageHtml(html, {
@@ -298,7 +301,7 @@ function sendProductDetailShell(req, res, next) {
     const identifier = String(req.params.slug || '').trim();
     let product = null;
     try {
-        product = identifier ? publicSiteDataSource.readProduct(identifier) : null;
+        product = identifier ? publicSiteDataSource.readProduct(identifier, locale) : null;
         if (!product) {
             return sendNotFoundShell(req, res, next);
         }
@@ -308,12 +311,12 @@ function sendProductDetailShell(req, res, next) {
     fs.readFile(filePath, 'utf8', function (err, html) {
         if (err) return next(err);
         const withBase = html.replace(/<head>/i, '<head>\n    <base href="' + baseHrefForLocale(locale) + '">');
-        const contentBlock = publicSiteDataSource.readContentBlock('product-pages');
+        const contentBlock = publicSiteDataSource.readContentBlock('product-pages', locale);
         const withSeo = renderProductDetailSeoHtml(withBase, product, locale, requestOrigin(req));
         const withBody = renderProductDetailBodyHtml(withSeo, {
             locale,
             product,
-            products: publicSiteDataSource.readProducts(),
+            products: publicSiteDataSource.readProducts(locale),
             contentBlock
         });
         const withShell = renderPublicShell(withBody, locale, req.path);
@@ -350,10 +353,10 @@ function sendProductListShell(req, res, next) {
             '<head>\n    <base href="' + baseHrefForLocale(locale) + '">' + robots);
         const withProducts = renderProductListHtml(withBase, {
             locale,
-            products: publicSiteDataSource.readProducts(),
-            taxonomy: publicSiteDataSource.readProductCategories(),
+            products: publicSiteDataSource.readProducts(locale),
+            taxonomy: publicSiteDataSource.readProductCategories(locale),
             query: req.query || {},
-            contentBlock: publicSiteDataSource.readContentBlock('product-pages'),
+            contentBlock: publicSiteDataSource.readContentBlock('product-pages', locale),
             requireSeoSchema: true
         });
         sendHtmlString(res, renderPublicShell(withProducts, locale, req.path), 200);
