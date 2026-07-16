@@ -141,6 +141,69 @@ function assertArrayIdentitySafety(db) {
     assert.notStrictEqual(structureHash(row.slug, removed), snapshot.schema.baseStructureHash);
 }
 
+function assertLegacyArrayMetadataInheritance() {
+    const body = {
+        sections: [{
+            id: 'industry-college',
+            title: 'Industry college',
+            cards: [{
+                id: 'training-base',
+                title: 'Training base',
+                text: 'English text',
+                image: 'assets/images/education/training-base.webp',
+                sort_order: 0,
+                featured: true
+            }]
+        }],
+        sectionsFr: [{
+            id: 'industry-college',
+            title: 'Collège industriel',
+            cards: [{
+                id: 'training-base',
+                title: 'Base de formation',
+                text: 'Texte français',
+                image: 'assets/images/education/training-base.webp'
+            }]
+        }]
+    };
+    const snapshot = buildContentOverlaySnapshot({
+        slug: 'education',
+        contentVersion: 26,
+        body,
+        locales: ['en', 'ar', 'fr', 'ru']
+    });
+    assert.deepStrictEqual(snapshot.blockers, [], 'missing neutral numeric/boolean array metadata must inherit safely');
+    assert.strictEqual(snapshot.localizedTargets.fr.sections[0].cards[0].sort_order, 0);
+    assert.strictEqual(snapshot.localizedTargets.fr.sections[0].cards[0].featured, true);
+    assert.strictEqual(Object.keys(snapshot.overlays.fr.values).some(function (item) { return /\/sort_order$/.test(item); }), false);
+    assert.strictEqual(Object.keys(snapshot.overlays.fr.values).some(function (item) { return /\/image$/.test(item); }), false);
+    assert.strictEqual(snapshot.schema.allowedPaths.some(function (item) { return /\/(?:sort_order|featured|image)$/.test(item); }), false);
+
+    const resourceChange = JSON.parse(JSON.stringify(body));
+    resourceChange.sectionsFr[0].cards[0].image = 'assets/images/education/unapproved.webp';
+    const resourceSnapshot = buildContentOverlaySnapshot({
+        slug: 'education',
+        contentVersion: 26,
+        body: resourceChange,
+        locales: ['en', 'ar', 'fr', 'ru']
+    });
+    assert(resourceSnapshot.blockers.some(function (blocker) {
+        return blocker.code === 'NON_TRANSLATABLE_DIFFERENCE' && blocker.locale === 'fr' && blocker.field === 'image';
+    }), 'localized resource changes must remain blocked');
+
+    const objectArrayExpansion = JSON.parse(JSON.stringify(body));
+    objectArrayExpansion.sectionsFr[0].cards.push({ id: 'extra', title: 'Extra', text: 'Extra' });
+    const expansionSnapshot = buildContentOverlaySnapshot({
+        slug: 'education',
+        contentVersion: 26,
+        body: objectArrayExpansion,
+        locales: ['en', 'ar', 'fr', 'ru']
+    });
+    assert(expansionSnapshot.blockers.some(function (blocker) {
+        return blocker.code === 'UNSAFE_ARRAY_REPLACEMENT' && blocker.locale === 'fr';
+    }), 'arbitrary object-array replacement must remain blocked');
+}
+
 function assertQueryBudgets(db, registry, sampleSlug) {
     let counter = queryCounter(db);
     const products = readRevisionLocalizedProducts('en', counter.db);
@@ -182,6 +245,7 @@ async function run() {
     const dbPath = path.join(tempDir, 'stage-c1.db');
     let db;
     try {
+        assertLegacyArrayMetadataInheritance();
         await createVerifiedSqliteBackup({ sourcePath: SOURCE_DB, backupPath: dbPath });
         db = new Database(dbPath, { fileMustExist: true });
         db.pragma('foreign_keys = ON');

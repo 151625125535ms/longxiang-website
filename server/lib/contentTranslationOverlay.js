@@ -122,6 +122,17 @@ function ensureStableArrayIds(bodyValue, slugValue) {
     return { body, assigned, blockers };
 }
 
+function inheritableNeutralArrayMetadata(value) {
+    return value === null || typeof value === 'number' || typeof value === 'boolean';
+}
+
+function inheritMissingNeutralArrayMetadata(baseItem, targetItem) {
+    Object.keys(baseItem).forEach(function (key) {
+        if (key === STABLE_ID_KEY || Object.prototype.hasOwnProperty.call(targetItem, key)) return;
+        if (inheritableNeutralArrayMetadata(baseItem[key])) targetItem[key] = baseItem[key];
+    });
+}
+
 function inheritLegacyArrayIds(baseValue, targetValue) {
     if (Array.isArray(baseValue) && Array.isArray(targetValue)) {
         const objectArrays = baseValue.length === targetValue.length
@@ -132,6 +143,7 @@ function inheritLegacyArrayIds(baseValue, targetValue) {
                 if (!item[STABLE_ID_KEY] && baseValue[index][STABLE_ID_KEY]) {
                     item[STABLE_ID_KEY] = baseValue[index][STABLE_ID_KEY];
                 }
+                inheritMissingNeutralArrayMetadata(baseValue[index], item);
                 inheritLegacyArrayIds(baseValue[index], item);
             });
         }
