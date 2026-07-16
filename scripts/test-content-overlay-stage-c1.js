@@ -18,12 +18,14 @@ const {
     ContentOverlayMigrationError,
     analyzeContentOverlayMigration,
     applyContentOverlayMigration,
-    rollbackContentOverlayMigration
+    rollbackContentOverlayMigration,
+    serializeMigratedContentBody
 } = require('../server/lib/contentOverlayMigration');
 const {
     buildContentOverlaySnapshot,
     applyOverlay,
-    structureHash
+    structureHash,
+    stripTranslationMetadata
 } = require('../server/lib/contentTranslationOverlay');
 const {
     readLocalizedProducts,
@@ -38,7 +40,8 @@ const {
 const {
     PUBLIC_SLUGS,
     readPublicContentBlock,
-    compactLocalizedContentBlock
+    compactLocalizedContentBlock,
+    compactLocalizedTree
 } = require('../server/lib/publicContentBlocks');
 const { readRevisionLocalizedContentBlock, RevisionContentError } = require('../server/lib/revisionPublicContent');
 const {
@@ -204,6 +207,32 @@ function assertLegacyArrayMetadataInheritance() {
     }), 'arbitrary object-array replacement must remain blocked');
 }
 
+function assertLegacyPatchOrderSurvivesStorage() {
+    const body = {
+        sections: [{ id: 'first-section', title: 'Base title', sort_order: 0 }],
+        sectionsPatchFr: {
+            'first-section': { title: 'Semantic-key title' },
+            index_0: { title: 'Final index-key title' }
+        }
+    };
+    const locales = ['en', 'ar', 'fr', 'ru'];
+    const before = compactLocalizedTree(body, 'fr', locales);
+    const snapshot = buildContentOverlaySnapshot({
+        slug: 'legacy-patch-order',
+        contentVersion: 2,
+        body,
+        locales
+    });
+    const persisted = JSON.parse(serializeMigratedContentBody(snapshot.bodyWithStableIds));
+    const after = compactLocalizedTree(persisted, 'fr', locales);
+    assert.strictEqual(before.sections[0].title, 'Final index-key title');
+    assert.deepStrictEqual(
+        stripTranslationMetadata(after),
+        stripTranslationMetadata(before),
+        'persisting stable IDs must preserve legacy patch precedence'
+    );
+}
+
 function assertQueryBudgets(db, registry, sampleSlug) {
     let counter = queryCounter(db);
     const products = readRevisionLocalizedProducts('en', counter.db);
@@ -246,6 +275,7 @@ async function run() {
     let db;
     try {
         assertLegacyArrayMetadataInheritance();
+        assertLegacyPatchOrderSurvivesStorage();
         await createVerifiedSqliteBackup({ sourcePath: SOURCE_DB, backupPath: dbPath });
         db = new Database(dbPath, { fileMustExist: true });
         db.pragma('foreign_keys = ON');

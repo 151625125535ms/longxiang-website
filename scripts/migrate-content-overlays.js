@@ -93,5 +93,6 @@ try {
     main();
 } catch (error) {
     console.error((error.code ? error.code + ': ' : '') + error.message);
+    if (error.details) console.error(JSON.stringify(error.details, null, 2));
     process.exitCode = 1;
 }

@@ -10,16 +10,42 @@ const {
 } = require('./contentTranslationOverlay');
 
 class ContentOverlayMigrationError extends Error {
-    constructor(code, message, status) {
+    constructor(code, message, status, details) {
         super(message);
         this.name = 'ContentOverlayMigrationError';
         this.code = code;
         this.status = status || 409;
+        this.details = details || null;
     }
 }
 
 function hash(value) {
     return crypto.createHash('sha256').update(stableJson(value)).digest('hex');
+}
+
+function jsonDifferencePaths(expected, actual, limit) {
+    const differences = [];
+    const maximum = Number(limit || 40);
+    function visit(left, right, pathValue) {
+        if (differences.length >= maximum || stableJson(left) === stableJson(right)) return;
+        if (Array.isArray(left) && Array.isArray(right)) {
+            const length = Math.max(left.length, right.length);
+            for (let index = 0; index < length && differences.length < maximum; index += 1) {
+                visit(left[index], right[index], pathValue.concat(String(index)));
+            }
+            return;
+        }
+        const leftObject = left && typeof left === 'object' && !Array.isArray(left);
+        const rightObject = right && typeof right === 'object' && !Array.isArray(right);
+        if (leftObject && rightObject) {
+            const keys = Array.from(new Set(Object.keys(left).concat(Object.keys(right)))).sort();
+            keys.forEach(function (key) { visit(left[key], right[key], pathValue.concat(key)); });
+            return;
+        }
+        differences.push('/' + pathValue.join('/'));
+    }
+    visit(expected, actual, []);
+    return differences;
 }
 
 function tableExists(db, name) {
@@ -78,27 +104,72 @@ function readSchema(db, contentBlockId, contentVersion) {
     `).get(contentBlockId, contentVersion, CONTENT_SCHEMA_VERSION) || null;
 }
 
-function migratedStateMatches(db, row, snapshot, revisions, locales, titles) {
+function migratedStateDifferences(db, row, snapshot, revisions, locales, titles) {
+    const differences = [];
     const schemaRow = readSchema(db, row.id, row.version);
-    if (!schemaRow) return false;
-    if (schemaRow.structure_hash !== snapshot.schema.baseStructureHash) return false;
-    if (stableJson(parseObject(schemaRow.schema_json, 'content translation schema')) !== stableJson(snapshot.schema)) return false;
-    return locales.every(function (locale) {
+    if (!schemaRow) return [{ code: 'SCHEMA_MISSING' }];
+    if (schemaRow.structure_hash !== snapshot.schema.baseStructureHash) {
+        differences.push({
+            code: 'SCHEMA_STRUCTURE_HASH_MISMATCH',
+            expected: snapshot.schema.baseStructureHash,
+            actual: schemaRow.structure_hash
+        });
+    }
+    const storedSchema = parseObject(schemaRow.schema_json, 'content translation schema');
+    if (stableJson(storedSchema) !== stableJson(snapshot.schema)) {
+        differences.push({
+            code: 'SCHEMA_JSON_MISMATCH',
+            expectedHash: hash(snapshot.schema),
+            actualHash: hash(storedSchema),
+            paths: jsonDifferencePaths(snapshot.schema, storedSchema)
+        });
+    }
+    locales.forEach(function (locale) {
         const revision = revisions[locale];
-        if (!revision || Number(revision.schema_version) !== CONTENT_SCHEMA_VERSION) return false;
-        if (String(revision.title || '') !== String(titles[locale] || '')) return false;
-        if (revision.base_structure_hash !== snapshot.schema.baseStructureHash) return false;
-        if (stableJson(parseObject(revision.translation_json, 'content overlay')) !== stableJson(snapshot.overlays[locale])) return false;
+        if (!revision) {
+            differences.push({ code: 'REVISION_MISSING', locale });
+            return;
+        }
+        if (Number(revision.schema_version) !== CONTENT_SCHEMA_VERSION) {
+            differences.push({ code: 'REVISION_SCHEMA_VERSION_MISMATCH', locale, expected: CONTENT_SCHEMA_VERSION, actual: Number(revision.schema_version) });
+        }
+        if (String(revision.title || '') !== String(titles[locale] || '')) {
+            differences.push({ code: 'REVISION_TITLE_MISMATCH', locale, expected: String(titles[locale] || ''), actual: String(revision.title || '') });
+        }
+        if (revision.base_structure_hash !== snapshot.schema.baseStructureHash) {
+            differences.push({ code: 'REVISION_STRUCTURE_HASH_MISMATCH', locale, expected: snapshot.schema.baseStructureHash, actual: revision.base_structure_hash });
+        }
+        const storedOverlay = parseObject(revision.translation_json, 'content overlay');
+        if (stableJson(storedOverlay) !== stableJson(snapshot.overlays[locale])) {
+            differences.push({
+                code: 'REVISION_OVERLAY_MISMATCH',
+                locale,
+                expectedHash: hash(snapshot.overlays[locale]),
+                actualHash: hash(storedOverlay),
+                paths: jsonDifferencePaths(snapshot.overlays[locale], storedOverlay)
+            });
+        }
         try {
-            return stableJson(renderLocalizedContent({
+            const actual = renderLocalizedContent({
                 neutralBody: snapshot.neutralBody,
                 schema: snapshot.schema,
-                overlays: { [locale]: parseObject(revision.translation_json, 'content overlay') }
-            }, locale)) === stableJson(stripTranslationMetadata(snapshot.localizedTargets[locale]));
+                overlays: { [locale]: storedOverlay }
+            }, locale);
+            const expected = stripTranslationMetadata(snapshot.localizedTargets[locale]);
+            if (stableJson(actual) !== stableJson(expected)) {
+                differences.push({
+                    code: 'REVISION_RENDER_MISMATCH',
+                    locale,
+                    expectedHash: hash(expected),
+                    actualHash: hash(actual),
+                    paths: jsonDifferencePaths(expected, actual)
+                });
+            }
         } catch (error) {
-            return false;
+            differences.push({ code: 'REVISION_RENDER_FAILED', locale, message: error.message });
         }
     });
+    return differences;
 }
 
 function migrationPlanHash(plan) {
@@ -109,6 +180,11 @@ function migrationPlanHash(plan) {
         blocks: plan.blocks,
         blockers: plan.blockers
     });
+}
+
+function serializeMigratedContentBody(body) {
+    // Legacy patches may contain overlapping semantic and index keys whose order defines the current output.
+    return JSON.stringify(body);
 }
 
 function analyzeContentOverlayMigration(options) {
@@ -172,8 +248,9 @@ function analyzeContentOverlayMigration(options) {
         });
         if (snapshot.blockers.length || locales.some(function (locale) { return !revisions[locale]; }) || drafts.length) return;
         if (existingSchema) {
-            if (!migratedStateMatches(db, row, snapshot, revisions, locales, titles)) {
-                blockers.push({ code: 'MIGRATED_STATE_DRIFT', contentBlockId: Number(row.id), slug: row.slug });
+            const differences = migratedStateDifferences(db, row, snapshot, revisions, locales, titles);
+            if (differences.length) {
+                blockers.push({ code: 'MIGRATED_STATE_DRIFT', contentBlockId: Number(row.id), slug: row.slug, differences });
             }
             return;
         }
@@ -192,7 +269,7 @@ function analyzeContentOverlayMigration(options) {
             },
             target: {
                 contentVersion,
-                bodyJson: stableJson(snapshot.bodyWithStableIds),
+                bodyJson: serializeMigratedContentBody(snapshot.bodyWithStableIds),
                 bodyHash: hash(snapshot.bodyWithStableIds),
                 schema: snapshot.schema,
                 overlays: snapshot.overlays,
@@ -328,7 +405,19 @@ function applyContentOverlayMigration(options) {
         });
         const after = analyzeContentOverlayMigration({ db, registry });
         if (after.blockers.length || after.blocks.length) {
-            throw new ContentOverlayMigrationError('MIGRATION_INCOMPLETE', 'Content overlay migration did not converge.', 500);
+            throw new ContentOverlayMigrationError(
+                'MIGRATION_INCOMPLETE',
+                'Content overlay migration did not converge.',
+                500,
+                {
+                    blockers: after.blockers,
+                    pendingBlocks: after.blocks.map(function (block) {
+                        return { contentBlockId: block.contentBlockId, slug: block.slug };
+                    }),
+                    summary: after.summary,
+                    planHash: after.planHash
+                }
+            );
         }
         const receipt = {
             receiptVersion: 1,
@@ -480,5 +569,6 @@ module.exports = {
     analyzeContentOverlayMigration,
     applyContentOverlayMigration,
     rollbackContentOverlayMigration,
-    migrationPlanHash
+    migrationPlanHash,
+    serializeMigratedContentBody
 };
