@@ -28,15 +28,23 @@ function run() {
     if (!dbArgument) throw new Error('Use --db=<path> with an explicit SQLite database path.');
     const dbPath = path.resolve(dbArgument);
     if (!fs.existsSync(dbPath)) throw new Error('Database does not exist: ' + dbPath);
-    if (apply && option('confirm') !== 'AR_ABOUT_SSR_PARITY') {
-        throw new Error('--apply requires --confirm=AR_ABOUT_SSR_PARITY.');
-    }
-    if (rollback && option('confirm') !== 'AR_ABOUT_SSR_PARITY_ROLLBACK') {
-        throw new Error('--rollback requires --confirm=AR_ABOUT_SSR_PARITY_ROLLBACK.');
+    if (apply && option('confirm') !== 'ABOUT_SSR_PARITY') {
+        throw new Error('--apply requires --confirm=ABOUT_SSR_PARITY.');
     }
     const receiptArgument = option('receipt');
     if ((apply || rollback) && !receiptArgument) throw new Error('Write mode requires --receipt=<path>.');
     const receiptPath = receiptArgument ? path.resolve(receiptArgument) : '';
+    let rollbackReceipt = null;
+    if (rollback) {
+        if (!fs.existsSync(receiptPath)) throw new Error('Rollback receipt does not exist.');
+        rollbackReceipt = JSON.parse(fs.readFileSync(receiptPath, 'utf8'));
+        const confirmation = option('confirm');
+        const legacyConfirmation = confirmation === 'AR_ABOUT_SSR_PARITY_ROLLBACK'
+            && rollbackReceipt.receiptVersion === 1;
+        if (confirmation !== 'ABOUT_SSR_PARITY_ROLLBACK' && !legacyConfirmation) {
+            throw new Error('--rollback requires --confirm=ABOUT_SSR_PARITY_ROLLBACK.');
+        }
+    }
     let receiptHandle = null;
     let receiptWritten = false;
     if (apply) {
@@ -44,7 +52,6 @@ function run() {
         if (!fs.existsSync(path.dirname(receiptPath))) throw new Error('Receipt directory does not exist.');
         receiptHandle = fs.openSync(receiptPath, 'wx', 0o600);
     }
-    if (rollback && !fs.existsSync(receiptPath)) throw new Error('Rollback receipt does not exist.');
 
     let db;
     try {
@@ -72,7 +79,7 @@ function run() {
             mode = 'rollback';
             result = rollbackContentTranslationParityRepair({
                 db,
-                receipt: JSON.parse(fs.readFileSync(receiptPath, 'utf8')),
+                receipt: rollbackReceipt,
                 actor: { username: 'content-parity-repair-rollback-cli' }
             });
         } else {

@@ -46,7 +46,8 @@ function safeMetadataView(value) {
 }
 
 function compactPreview(value) {
-    const text = stableJson(value);
+    const serialized = stableJson(value);
+    const text = serialized === undefined ? String(value) : serialized;
     return text.length > 240 ? text.slice(0, 237) + '...' : text;
 }
 
@@ -137,12 +138,67 @@ function approvedAboutSsrBaselineConvergence(legacyValue, revisionValue) {
     const revision = safeMetadataView(revisionValue);
     const rows = revision && revision.body && revision.body.snapshot && revision.body.snapshot.body;
     if (!Array.isArray(rows) || rows.length !== 3
-        || !rows[0] || rows[0].companyField !== 'aboutIntro'
-        || !rows[1] || rows[1].companyField !== 'aboutDetail') return '';
-    if (!legacy || !legacy.body || !legacy.body.snapshot) return '';
+        || rows.some(function (row) { return !row || typeof row !== 'object' || typeof row.text !== 'string'; })) return '';
+    const companyFieldsMatch = rows[0].companyField === 'aboutIntro'
+        && rows[1].companyField === 'aboutDetail'
+        && !rows[2].companyField;
+    const companyFieldsAbsent = rows.every(function (row) { return !row.companyField; });
+    if (!companyFieldsMatch && !companyFieldsAbsent) return '';
+    if (!legacy || !legacy.body || !legacy.body.snapshot
+        || !Array.isArray(legacy.body.snapshot.body)) return '';
     legacy.body.snapshot.body = rows;
     return hash(legacy) === hash(revision)
-        ? 'user-approved Arabic About API convergence to the current SSR baseline'
+        ? 'user-approved About API convergence to the current production SSR baseline'
+        : '';
+}
+
+function normalizeApprovedEducationSortOrder(legacyValue, revisionValue, pathValue, removedPaths) {
+    const currentPath = pathValue || '$';
+    if (Array.isArray(revisionValue)) {
+        if (!Array.isArray(legacyValue) || legacyValue.length !== revisionValue.length) return revisionValue;
+        return revisionValue.map(function (item, index) {
+            return normalizeApprovedEducationSortOrder(legacyValue[index], item, currentPath + '[' + index + ']', removedPaths);
+        });
+    }
+    if (revisionValue && typeof revisionValue === 'object') {
+        if (!legacyValue || typeof legacyValue !== 'object' || Array.isArray(legacyValue)) return revisionValue;
+        return Object.keys(revisionValue).reduce(function (out, key) {
+            const childPath = currentPath + '.' + key;
+            const missingFromLegacy = !Object.prototype.hasOwnProperty.call(legacyValue, key);
+            if (missingFromLegacy && key === 'sort_order'
+                && /^\$\.body\.sections\[\d+\]\.cards\[\d+\]\.sort_order$/.test(childPath)
+                && Number.isInteger(revisionValue[key]) && revisionValue[key] >= 0) {
+                removedPaths.push(childPath);
+                return out;
+            }
+            out[key] = normalizeApprovedEducationSortOrder(legacyValue[key], revisionValue[key], childPath, removedPaths);
+            return out;
+        }, {});
+    }
+    return revisionValue;
+}
+
+function approvedEducationSortOrderMetadata(legacyValue, revisionValue) {
+    const removedPaths = [];
+    const normalizedRevision = normalizeApprovedEducationSortOrder(
+        legacyValue,
+        revisionValue,
+        '$',
+        removedPaths
+    );
+    if (!removedPaths.length || hash(legacyValue) !== hash(normalizedRevision)) return '';
+    return 'revision adds ' + removedPaths.length + ' validated Education card sort_order field(s) only';
+}
+
+function approvedAboutSsrCompanyFieldMetadata(legacyValue, revisionValue) {
+    if (typeof legacyValue !== 'string' || typeof revisionValue !== 'string') return '';
+    const matches = revisionValue.match(/ data-company-field="(?:aboutIntro|aboutDetail)"/g) || [];
+    if (matches.length !== 2
+        || matches.indexOf(' data-company-field="aboutIntro"') === -1
+        || matches.indexOf(' data-company-field="aboutDetail"') === -1) return '';
+    const normalizedRevision = revisionValue.replace(/ data-company-field="(?:aboutIntro|aboutDetail)"/g, '');
+    return normalizedRevision === legacyValue
+        ? 'revision adds the two inert About company-field markers only'
         : '';
 }
 
@@ -250,9 +306,11 @@ function comparePublicTranslationSources(options) {
                 revision.readLocalizedContentBlock(slug, code),
                 {
                     allowRevisionMetadata: true,
-                    approvedDifference: code === 'ar' && slug === 'about-us'
+                    approvedDifference: slug === 'about-us' && ['ar', 'fr', 'ru'].indexOf(code) !== -1
                         ? approvedAboutSsrBaselineConvergence
-                        : null
+                        : code === 'fr' && slug === 'education'
+                            ? approvedEducationSortOrderMetadata
+                            : null
                 }
             );
         });
@@ -274,7 +332,16 @@ function comparePublicTranslationSources(options) {
     });
 
     staticSeoRouteDefinitions().forEach(function (route) {
-        collector.compare('ssr/static' + route.path, renderStaticRoute(route, legacy, company), renderStaticRoute(route, revision, company));
+        collector.compare(
+            'ssr/static' + route.path,
+            renderStaticRoute(route, legacy, company),
+            renderStaticRoute(route, revision, company),
+            {
+                approvedDifference: route.basePath === '/about.html' && ['fr', 'ru'].indexOf(route.locale.code) !== -1
+                    ? approvedAboutSsrCompanyFieldMetadata
+                    : null
+            }
+        );
     });
 
     const report = collector.report;
@@ -293,5 +360,8 @@ module.exports = {
     comparePublicTranslationSources,
     databaseFingerprint,
     safeMetadataView,
-    firstDifference
+    firstDifference,
+    compactPreview,
+    approvedEducationSortOrderMetadata,
+    approvedAboutSsrCompanyFieldMetadata
 };
