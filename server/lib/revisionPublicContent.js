@@ -7,10 +7,12 @@ const { PUBLIC_SLUGS, compactLocalizedTree, stripPrivateContentMetadata } = requ
 const { OVERLAY_VERSION, CONTENT_SCHEMA_VERSION, applyOverlay, structureHash } = require('./contentTranslationOverlay');
 
 class RevisionContentError extends Error {
-    constructor(code, message) {
+    constructor(code, message, status, details) {
         super(message);
         this.name = 'RevisionContentError';
         this.code = code;
+        this.status = status || 503;
+        this.details = details || null;
     }
 }
 
@@ -41,13 +43,13 @@ function readRevisionLocalizedContentBlock(slugValue, localeValue, dbValue, regi
             block.id, block.slug, block.body_json, block.version, block.updated_at,
             revision.id AS revision_id, revision.title, revision.translation_json,
             revision.schema_version, revision.base_structure_hash,
-            schema.schema_json, schema.structure_hash
+            schema.id AS schema_id, schema.schema_json, schema.structure_hash
         FROM content_blocks block
-        JOIN content_block_translations revision
+        LEFT JOIN content_block_translations revision
             ON revision.content_block_id = block.id
             AND revision.locale = ?
             AND revision.revision_state = 'published'
-        JOIN content_translation_schemas schema
+        LEFT JOIN content_translation_schemas schema
             ON schema.content_block_id = block.id
             AND schema.content_version = block.version
             AND schema.schema_version = revision.schema_version
@@ -55,6 +57,14 @@ function readRevisionLocalizedContentBlock(slugValue, localeValue, dbValue, regi
         LIMIT 1
     `).get(locale, slug);
     if (!row) return null;
+    if (row.revision_id == null || row.schema_id == null) {
+        throw new RevisionContentError(
+            'REVISION_SOURCE_NOT_READY',
+            'Published revision content is incomplete for the requested content block.',
+            503,
+            { slug, locale, revisionMissing: row.revision_id == null, schemaMissing: row.schema_id == null }
+        );
+    }
     if (Number(row.schema_version) !== CONTENT_SCHEMA_VERSION) {
         throw new RevisionContentError('SCHEMA_VERSION_MISMATCH', 'Published content revision does not use the active overlay schema.');
     }
@@ -75,7 +85,17 @@ function readRevisionLocalizedContentBlock(slugValue, localeValue, dbValue, regi
         throw new RevisionContentError('STRUCTURE_HASH_MISMATCH', 'Content structure changed after the published overlay was created.');
     }
     const overlay = parseObject(row.translation_json, 'content overlay');
-    let body = stripPrivateContentMetadata(applyOverlay(neutralBody, overlay, schema));
+    let body;
+    try {
+        body = stripPrivateContentMetadata(applyOverlay(neutralBody, overlay, schema));
+    } catch (error) {
+        throw new RevisionContentError(
+            'REVISION_SOURCE_NOT_READY',
+            'Published revision content is invalid for the active schema.',
+            503,
+            { slug, locale, cause: error.code || 'OVERLAY_APPLY_FAILED' }
+        );
+    }
     body = sanitizeBody(slug, body, db);
     body = compactLocalizedTree(body, locale, registry.entries.map(function (item) { return item.code; }));
     return {

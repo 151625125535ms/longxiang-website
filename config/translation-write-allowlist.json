@@ -2,8 +2,23 @@
   "runtimeCompatibilityWriters": [
     "server/routes/admin/products.js",
     "server/routes/admin/categories.js",
-    "server/routes/admin/certifications.js",
+    "server/routes/admin/certifications.js"
+  ],
+  "contentLifecycleWriters": [
+    "server/lib/contentBlockLifecycle.js",
+    "server/lib/contentBlockSeeds.js",
     "server/routes/admin/content-blocks.js"
+  ],
+  "translationCoreWriters": [
+    "server/lib/translationWriter.js"
+  ],
+  "controlledMigrationWriters": [
+    "server/lib/contentOverlayMigration.js",
+    "server/lib/contentTranslationParityRepair.js",
+    "server/lib/translationBackfill.js"
+  ],
+  "schemaMigrationWriters": [
+    "server/db/migrations/0005_company_identity.js"
   ],
   "neutralContentWriters": [
     "server/lib/assetReferences.js"
@@ -12,8 +27,6 @@
     "scripts/lib/product-field-safe-patch-engine.js"
   ],
   "legacyMaintenanceWriters": [
-    "server/lib/contentBlockSeeds.js",
-    "server/db/migrations/0005_company_identity.js",
     "scripts/apply-content-block-safe-patch.js",
     "scripts/fill-product-seo.js",
     "scripts/fix-seo-content-20260620.js",

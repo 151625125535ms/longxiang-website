@@ -3,6 +3,7 @@ const { authMiddleware } = require('../../middleware/auth');
 const { getDb } = require('../../lib/db');
 const { sendError } = require('./helpers');
 const { TranslationError } = require('../../lib/translationWriter');
+const { ContentBlockLifecycleError } = require('../../lib/contentBlockLifecycle');
 
 const dashboardRoutes = require('./dashboard');
 const systemRoutes = require('./system');
@@ -48,7 +49,7 @@ router.use(function (req, res) {
 router.use(function (err, req, res, next) {
     if (res.headersSent) return next(err);
 
-    if (err instanceof TranslationError) {
+    if (err instanceof TranslationError || err instanceof ContentBlockLifecycleError) {
         return sendError(res, err.status, err.code, err.message);
     }
 

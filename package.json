@@ -15,8 +15,8 @@
     "images:repair-product-links": "node scripts/repair-product-media-asset-links.js",
     "images:verify-product-links": "node scripts/repair-product-media-asset-links.js --verify",
     "images:performance": "node scripts/audit-image-performance.js",
-    "content:upgrade-inquiry": "node scripts/upgrade-inquiry-conversion-content.js",
-    "seo:fill-products": "node scripts/fill-product-seo.js",
+    "legacy:content-upgrade-inquiry": "node scripts/upgrade-inquiry-conversion-content.js --allow-archived-legacy-writer",
+    "legacy:seo-fill-products": "node scripts/fill-product-seo.js --allow-archived-legacy-writer",
     "seo:verify": "node scripts/verify-seo-i18n.js",
     "seo:product-raw": "node scripts/audit-product-detail-raw-seo.js",
     "seo:legacy-redirects": "node scripts/audit-legacy-product-redirects.js",
@@ -29,8 +29,10 @@
     "test:locale-api": "node scripts/test-locale-api-stage-a.js",
     "test:translation-stage-b": "node scripts/test-translation-stage-b.js && node scripts/test-translation-backfill-stage-b.js && node scripts/test-translation-admin-integration.js && node scripts/test-translation-admin-browser.js",
     "test:translation-stage-c1": "node scripts/test-content-overlay-stage-c1.js",
+    "test:translation-stage-ac-write": "node scripts/test-content-block-lifecycle-stage-ac.js",
     "test:acceptance:db-copy": "node scripts/run-acceptance-on-db-copy.js",
     "translations:audit-writers": "node scripts/audit-translation-write-entrypoints.js",
+    "translations:audit-parity": "node scripts/audit-public-translation-read-parity.js",
     "sitemap:generate": "node scripts/generate-sitemap.js",
     "sitemap:dry-run": "npm run sitemap:generate -- --dry-run",
     "check:js": "node --check scripts/generate-sitemap.js && node --check scripts/verify-seo-i18n.js && node --check scripts/audit-product-detail-raw-seo.js && node --check scripts/audit-legacy-product-redirects.js && node --check scripts/audit-stage3-product-search-copy.js && node --check scripts/audit-product-arabic-seo.js && node --check scripts/apply-content-block-safe-patch.js && node --check scripts/apply-product-field-safe-patch.js && node --check scripts/lib/product-arabic-seo-source.js && node --check scripts/lib/product-arabic-seo-patch-pair.js && node --check scripts/lib/product-field-safe-patch-engine.js && node --check scripts/lib/product-field-patch-policies.js && node --check scripts/generate-content-presentation-i18n.js && node scripts/generate-content-presentation-i18n.js --check && node --check scripts/generate-product-presentation-i18n.js && node scripts/generate-product-presentation-i18n.js --check && node --check js/main.js && node --check js/content-presentation-i18n.js && node --check js/content-page-presentation.js && node --check js/product-presentation-i18n.js && node --check js/product-page-presentation.js && node --check js/content-pages.js && node --check js/products-list.js && node --check js/product-detail.js && node --check js/education.js && node --check js/compare.js",
@@ -38,7 +40,7 @@
     "check:server": "node --check server/app.js && node --check server/routes/products.js && node --check server/routes/product-gallery-thumbnails.js && node --check server/lib/publicProducts.js && node --check server/lib/sqliteBackup.js && node --check server/lib/productGalleryThumbnail.js && node --check server/lib/publicProductTaxonomy.js && node --check server/lib/publicSiteDataSource.js && node --check server/lib/stage2cPublicSnapshot.js && node --check server/lib/siteEntityGraph.js && node --check server/lib/pageHeroHtmlRenderer.js && node --check server/lib/contentPageHtmlRenderer.js && node --check server/lib/productListHtmlRenderer.js && node --check server/lib/productDetailHtmlRenderer.js && node --check server/lib/productDetailSeoRenderer.js && node --check server/lib/staticPageSeoRenderer.js && node --check server/lib/legacyProductRedirect.js && node --check server/db/migrations/0006_product_arabic_seo_fields.js && node --check scripts/capture-stage2c-public-snapshot.js && node --check scripts/verify-stage2c-public-snapshot.js && node --check scripts/test-stage2c-static-content-ssr.js && node --check scripts/audit-server-rendered-content.js && node --check scripts/audit-site-entity-graph.js && node --check scripts/test-product-gallery-thumbnail.js && node --check scripts/test-product-gallery-integration.js && node --check scripts/test-product-arabic-seo-support.js && node --check scripts/test-product-arabic-seo-patch.js && node --check scripts/test-product-arabic-seo-integration.js && node --check scripts/test-product-arabic-seo-content-patch.js && node scripts/test-product-gallery-thumbnail.js && node scripts/test-stage2d-site-entity-graph.js && node scripts/test-static-page-seo-renderer.js && node scripts/test-stage2c-public-shell.js && node scripts/test-stage2c-content-page-renderer.js && node scripts/test-stage2c-product-catalog-renderer.js && node scripts/test-stage2c-product-detail-renderer.js && node scripts/test-legacy-product-redirect.js && node scripts/test-content-block-safe-patch.js && node scripts/test-product-field-safe-patch.js && node scripts/test-product-arabic-seo-support.js && node scripts/test-product-arabic-seo-patch.js && node scripts/test-product-arabic-seo-integration.js && node scripts/audit-product-arabic-seo.js && node scripts/test-product-arabic-seo-content-patch.js && node scripts/test-product-gallery-integration.js && npm run test:stage3-search-copy && npm run test:stage2c-snapshot && node scripts/test-acceptance.js",
     "check:all": "npm run seo:verify && npm run sitemap:dry-run && npm run check:js && npm run check:admin && npm run check:server",
     "start": "node server/app.js",
-    "content:upgrade-solutions": "node scripts/upgrade-solutions-content-20260621.js"
+    "legacy:content-upgrade-solutions": "node scripts/upgrade-solutions-content-20260621.js --allow-archived-legacy-writer"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

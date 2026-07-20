@@ -2,6 +2,7 @@ const express = require('express');
 const { PUBLIC_SLUGS } = require('../lib/publicContentBlocks');
 const { getRuntimePublicTranslationReadAdapter } = require('../lib/publicTranslationReadAdapter');
 const { resolveRequestedLocale, sendLocalizedJson, localizedEnvelope } = require('../lib/localizedApiResponse');
+const { RevisionContentError } = require('../lib/revisionPublicContent');
 
 const router = express.Router();
 const publicRead = getRuntimePublicTranslationReadAdapter();
@@ -24,6 +25,21 @@ router.get('/:slug', function (req, res) {
         }
         res.json(block);
     } catch (err) {
+        if (err instanceof RevisionContentError) {
+            console.error('Revision content is not ready.', {
+                slug,
+                locale: req.query.locale || null,
+                cause: err.code,
+                details: err.details || null
+            });
+            return res.status(503).json({
+                ok: false,
+                error: {
+                    code: 'REVISION_SOURCE_NOT_READY',
+                    message: 'Published revision content is not ready.'
+                }
+            });
+        }
         res.status(500).json({ error: 'Failed to read content block.' });
     }
 });

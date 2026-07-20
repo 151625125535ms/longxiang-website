@@ -1,3 +1,5 @@
+require('./lib/archived-legacy-writer-guard').assertArchivedLegacyWriterAllowed(__filename);
+
 const { getDb } = require('../server/lib/db');
 
 const BRAND = 'Longxiang Electric';

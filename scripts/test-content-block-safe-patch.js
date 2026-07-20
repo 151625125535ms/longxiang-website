@@ -136,6 +136,7 @@ function testDryRunDoesNotChangeDatabase() {
     const before = readBody(fixture.dbPath);
     const result = runNode([
         scriptPath,
+        '--allow-archived-legacy-writer',
         '--dry-run',
         '--locale', 'ru',
         '--input', fixture.inputPath,
@@ -154,6 +155,7 @@ function testApplyMergesOnlyLocalePatchAndBacksUpDatabase() {
     const fixture = createFixture();
     const result = runNode([
         scriptPath,
+        '--allow-archived-legacy-writer',
         '--apply',
         '--locale', 'ru',
         '--input', fixture.inputPath,
@@ -182,6 +184,7 @@ function testCleanBoundaryRejectsNeutralPatchPath() {
 
     const result = runNode([
         scriptPath,
+        '--allow-archived-legacy-writer',
         '--dry-run',
         '--locale', 'ru',
         '--input', fixture.inputPath,
@@ -210,6 +213,7 @@ function testCleanBoundaryRejectsNeutralAncestorOverwrite() {
 
     const result = runNode([
         scriptPath,
+        '--allow-archived-legacy-writer',
         '--dry-run',
         '--locale', 'ru',
         '--input', fixture.inputPath,
@@ -230,6 +234,7 @@ function testExpectedCurrentMismatchBlocksPatch() {
 
     const result = runNode([
         scriptPath,
+        '--allow-archived-legacy-writer',
         '--dry-run',
         '--locale', 'ru',
         '--input', fixture.inputPath,

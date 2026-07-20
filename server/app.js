@@ -4,6 +4,15 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
+const { getDb } = require('./lib/db');
+const { ensureContentBlockSeeds } = require('./lib/contentBlockSeeds');
+
+try {
+    ensureContentBlockSeeds(getDb());
+} catch (err) {
+    console.warn('WARNING: failed to ensure content block seeds: ' + err.message);
+}
+
 const { authMiddleware } = require('./middleware/auth');
 const authRoutes = require('./routes/auth');
 const productsRoutes = require('./routes/products');
@@ -16,8 +25,6 @@ const educationRoutes = require('./routes/education');
 const contentBlocksRoutes = require('./routes/content-blocks');
 const adminRoutes = require('./routes/admin/index');
 const { ensureDirectory, resolveUploadDir } = require('./lib/fileStore');
-const { getDb } = require('./lib/db');
-const { ensureContentBlockSeeds } = require('./lib/contentBlockSeeds');
 const { renderProductDetailSeoHtml } = require('./lib/productDetailSeoRenderer');
 const { localizePublicContentBlock } = require('./lib/publicContentBlocks');
 const { readPublicCompanyView } = require('./lib/publicCompanyView');
@@ -188,12 +195,6 @@ const uploadDir = resolveUploadDir();
 ensureDirectory(uploadDir);
 app.use('/uploads', express.static(uploadDir, { maxAge: '30d', fallthrough: false }));
 app.use('/media/product-gallery', productGalleryThumbnailRoutes);
-
-try {
-    ensureContentBlockSeeds(getDb());
-} catch (err) {
-    console.warn('WARNING: failed to ensure content block seeds: ' + err.message);
-}
 
 app.use(function (req, res, next) {
     const blocked = /^\/(?:data|server|scripts|tests|docs|logs|backups|node_modules|chanpince|\.tmp)(?:\/|$)|^\/package(?:-lock)?\.json$/i;

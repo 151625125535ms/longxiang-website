@@ -1,3 +1,5 @@
+require('./lib/archived-legacy-writer-guard').assertArchivedLegacyWriterAllowed(__filename);
+
 const { getDb } = require('../server/lib/db');
 
 const dryRun = process.argv.indexOf('--dry-run') !== -1;

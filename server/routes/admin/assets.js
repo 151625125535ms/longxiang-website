@@ -8,6 +8,7 @@ const { ensureDirectory, resolveUploadDir, resolveUploadPublicPath } = require('
 const { normalizeUploadedFilename } = require('../../lib/filenameEncoding');
 const { sendError, insertAuditLog } = require('./helpers');
 const assetReferences = require('../../lib/assetReferences');
+const { requestActor } = require('./translation-compat');
 
 const router = express.Router();
 const uploadDir = resolveUploadDir();
@@ -548,10 +549,14 @@ router.post('/:id/replace', function (req, res, next) {
                 data: { usage_count: usage.length, usage }
             });
         }
-        const result = db.transaction(function () {
-            return assetReferences.replaceAssetUsageReferences(db, source, target);
-        })();
-        insertAuditLog(db, req, 'asset', source.id, 'replace_references', { source, target, usage }, result);
+        const runReplacement = db.transaction(function () {
+            const result = assetReferences.replaceAssetUsageReferences(db, source, target, {
+                actor: requestActor(req)
+            });
+            insertAuditLog(db, req, 'asset', source.id, 'replace_references', { source, target, usage }, result);
+            return result;
+        });
+        const result = runReplacement.immediate();
         res.json({ ok: true, data: { source_asset_id: source.id, target_asset_id: target.id, ...result } });
     } catch (err) {
         next(err);

@@ -2,7 +2,8 @@ const express = require('express');
 const { getDb } = require('../../lib/db');
 const { sendError, insertAuditLog } = require('./helpers');
 const { syncContentBlockAssetReferences } = require('../../lib/assetReferences');
-const { syncLegacyTranslations } = require('./translation-compat');
+const { updateContentBlock, ContentBlockLifecycleError } = require('../../lib/contentBlockLifecycle');
+const { requestActor } = require('./translation-compat');
 
 const router = express.Router();
 const BATCH_ACTIONS = ['publish', 'unpublish'];
@@ -234,35 +235,28 @@ router.put('/:slug', function (req, res, next) {
             }
         }
 
-        const updateBlock = db.transaction(function () {
-            db.prepare(`
-                UPDATE content_blocks
-                SET
-                    title_en = @title_en,
-                    title_ar = @title_ar,
-                    body_json = @body_json,
-                    status = @status,
-                    version = version + 1,
-                    updated_at = @updated_at
-                WHERE slug = @slug
-            `).run({
-                slug: before.slug,
+        const result = updateContentBlock({
+            db,
+            contentBlockId: before.id,
+            expectedVersion: before.version,
+            actor: requestActor(req),
+            next: {
                 title_en: body.title_en == null ? before.title_en : String(body.title_en).trim(),
                 title_ar: body.title_ar == null ? before.title_ar : String(body.title_ar).trim(),
-                body_json: JSON.stringify(incomingBodyJson),
-                status: status || before.status,
-                updated_at: Date.now()
-            });
-
-            syncLegacyTranslations(db, req, 'content_block', before.id);
-            const after = getContentBlockBySlug(db, before.slug);
-            syncContentBlockAssetReferences(db, after.id);
-            insertAuditLog(db, req, 'content_block', before.id, 'update', before, after);
-            return after;
+                body_json: incomingBodyJson,
+                status: status || before.status
+            },
+            afterWrite: function (change) {
+                const after = getContentBlockById(db, change.after.id);
+                syncContentBlockAssetReferences(db, after.id);
+                insertAuditLog(db, req, 'content_block', before.id, 'update', before, after);
+            }
         });
-
-        res.json({ ok: true, data: updateBlock() });
+        res.json({ ok: true, data: normalizeRow(result.after) });
     } catch (err) {
+        if (err instanceof ContentBlockLifecycleError) {
+            return sendError(res, err.status, err.code, err.message);
+        }
         next(err);
     }
 });
@@ -318,24 +312,28 @@ router.post('/batch', function (req, res, next) {
         const runBatch = db.transaction(function () {
             const beforeRows = uniqueIds.map(id => getContentBlockById(db, id));
             const nextStatus = action === 'publish' ? 'published' : 'draft';
-            const now = Date.now();
-
-            db.prepare(`
-                UPDATE content_blocks
-                SET status = ?, version = version + 1, updated_at = ?
-                WHERE id IN (${placeholders})
-            `).run(nextStatus, now, ...uniqueIds);
-
             beforeRows.forEach(function (before) {
-                const after = getContentBlockById(db, before.id);
-                syncContentBlockAssetReferences(db, after.id);
-                insertAuditLog(db, req, 'content_block', before.id, action, before, after);
+                updateContentBlock({
+                    db,
+                    contentBlockId: before.id,
+                    expectedVersion: before.version,
+                    actor: requestActor(req),
+                    next: { status: nextStatus },
+                    afterWrite: function (change) {
+                        const after = getContentBlockById(db, change.after.id);
+                        syncContentBlockAssetReferences(db, after.id);
+                        insertAuditLog(db, req, 'content_block', before.id, action, before, after);
+                    }
+                });
             });
         });
 
         try {
-            runBatch();
+            runBatch.immediate();
         } catch (err) {
+            if (err instanceof ContentBlockLifecycleError) {
+                return sendError(res, err.status, err.code, err.message);
+            }
             return res.status(409).json({
                 ok: false,
                 error: { code: 'BATCH_FAILED', message: 'Batch operation failed.' }

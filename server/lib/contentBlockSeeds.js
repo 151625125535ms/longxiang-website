@@ -1,3 +1,10 @@
+const {
+    overlayLifecycleInitialized,
+    createContentBlock,
+    updateContentBlock
+} = require('./contentBlockLifecycle');
+const { syncContentBlockAssetReferences } = require('./assetReferences');
+
 const CONTENT_BLOCK_SEEDS = [
     {
         slug: 'company-identity',
@@ -589,7 +596,8 @@ function mergeSeedBody(slug, target, defaults) {
 function ensureContentBlockSeeds(db) {
     if (!db) return { inserted: 0, updated: 0, checked: 0 };
     const now = Date.now();
-    const select = db.prepare('SELECT slug, body_json FROM content_blocks WHERE slug = ?');
+    const lifecycleInitialized = overlayLifecycleInitialized(db);
+    const select = db.prepare('SELECT * FROM content_blocks WHERE slug = ?');
     const insert = db.prepare(`
         INSERT OR IGNORE INTO content_blocks
             (slug, title_en, title_ar, body_json, status, sort_order, version, created_at, updated_at)
@@ -610,30 +618,58 @@ function ensureContentBlockSeeds(db) {
             if (existing) {
                 const merged = mergeSeedBody(seed.slug, parseBodyJson(existing.body_json), seed.body_json || {});
                 if (merged.changed) {
-                    update.run({
-                        slug: seed.slug,
-                        body_json: JSON.stringify(merged.value),
-                        updated_at: now
-                    });
+                    if (lifecycleInitialized) {
+                        updateContentBlock({
+                            db,
+                            contentBlockId: existing.id,
+                            expectedVersion: existing.version,
+                            actor: { username: 'content-seed' },
+                            next: { body_json: merged.value },
+                            afterWrite: function () {
+                                syncContentBlockAssetReferences(db, existing.id);
+                            }
+                        });
+                    } else {
+                        update.run({
+                            slug: seed.slug,
+                            body_json: JSON.stringify(merged.value),
+                            updated_at: now
+                        });
+                    }
                     updated += 1;
                 }
                 return;
             }
 
-            const result = insert.run({
-                slug: seed.slug,
-                title_en: seed.title_en,
-                title_ar: seed.title_ar || '',
-                body_json: JSON.stringify(seed.body_json || {}),
-                sort_order: seed.sort_order || 0,
-                created_at: now,
-                updated_at: now
-            });
-            inserted += result.changes;
+            if (lifecycleInitialized) {
+                createContentBlock({
+                    db,
+                    actor: { username: 'content-seed' },
+                    seed: {
+                        ...seed,
+                        status: 'published'
+                    },
+                    afterWrite: function (change) {
+                        syncContentBlockAssetReferences(db, change.after.id);
+                    }
+                });
+                inserted += 1;
+            } else {
+                const result = insert.run({
+                    slug: seed.slug,
+                    title_en: seed.title_en,
+                    title_ar: seed.title_ar || '',
+                    body_json: JSON.stringify(seed.body_json || {}),
+                    sort_order: seed.sort_order || 0,
+                    created_at: now,
+                    updated_at: now
+                });
+                inserted += result.changes;
+            }
         });
     });
 
-    run();
+    run.immediate();
     return { inserted, updated, checked: CONTENT_BLOCK_SEEDS.length };
 }
 

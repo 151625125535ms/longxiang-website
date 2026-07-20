@@ -1,3 +1,5 @@
+require('./lib/archived-legacy-writer-guard').assertArchivedLegacyWriterAllowed(__filename);
+
 const path = require('path');
 const Database = require('better-sqlite3');
 

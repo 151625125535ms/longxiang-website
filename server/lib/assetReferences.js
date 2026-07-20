@@ -2,6 +2,7 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const { PROJECT_ROOT, resolveUploadDir, resolveUploadPublicPath } = require('./fileStore');
+const { overlayLifecycleInitialized, updateContentBlock } = require('./contentBlockLifecycle');
 
 const ASSET_EXTENSIONS = {
     '.jpg': 'image/jpeg',
@@ -663,7 +664,8 @@ function replaceAssetPathStrings(value, sourcePath, targetPath) {
     return { value: next, changed };
 }
 
-function replaceAssetUsageReferences(db, sourceAsset, targetAsset) {
+function replaceAssetUsageReferences(db, sourceAsset, targetAsset, options) {
+    options = options || {};
     const sourceId = sourceAsset && sourceAsset.id;
     const sourcePath = normalizeAssetPath(sourceAsset && sourceAsset.path);
     const targetId = targetAsset && targetAsset.id;
@@ -700,16 +702,29 @@ function replaceAssetUsageReferences(db, sourceAsset, targetAsset) {
     certificationIds.forEach(function (id) { syncCertificationAssetReference(db, id); });
 
     const contentBlockIds = [];
-    db.prepare("SELECT id, body_json FROM content_blocks WHERE status != 'deleted'").all().forEach(function (row) {
+    db.prepare("SELECT id, body_json, version FROM content_blocks WHERE status != 'deleted'").all().forEach(function (row) {
         const bodyJson = parseBodyJson(row.body_json);
         const result = replaceAssetPathStrings(bodyJson, sourcePath, targetPath);
         if (!result.changed) return;
-        db.prepare(`
-            UPDATE content_blocks
-            SET body_json = @body_json, version = version + 1, updated_at = @updated_at
-            WHERE id = @id
-        `).run({ id: row.id, body_json: JSON.stringify(result.value), updated_at: Date.now() });
-        syncContentBlockAssetReferences(db, row.id);
+        if (overlayLifecycleInitialized(db)) {
+            updateContentBlock({
+                db,
+                contentBlockId: row.id,
+                expectedVersion: row.version,
+                actor: options.actor,
+                next: { body_json: result.value },
+                afterWrite: function () {
+                    syncContentBlockAssetReferences(db, row.id);
+                }
+            });
+        } else {
+            db.prepare(`
+                UPDATE content_blocks
+                SET body_json = @body_json, version = version + 1, updated_at = @updated_at
+                WHERE id = @id
+            `).run({ id: row.id, body_json: JSON.stringify(result.value), updated_at: Date.now() });
+            syncContentBlockAssetReferences(db, row.id);
+        }
         contentBlockIds.push(row.id);
     });
 

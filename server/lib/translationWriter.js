@@ -1,6 +1,13 @@
 'use strict';
 
 const { loadLocaleRegistry, normalizeCode, stableJson } = require('./localeRegistry');
+const {
+    overlayLifecycleAvailable,
+    overlayLifecycleInitialized,
+    validateContentBlockRevision,
+    advanceContentBlockLegacyTitle,
+    ContentBlockLifecycleError
+} = require('./contentBlockLifecycle');
 
 class TranslationError extends Error {
     constructor(code, message, status) {
@@ -468,6 +475,11 @@ function createTranslationWriter(options) {
         if (missing.length) {
             throw new TranslationError('VALIDATION_ERROR', 'Required translation fields are empty: ' + missing.join(', '), 422);
         }
+        if (config === ENTITY_CONFIG.content_block && overlayLifecycleAvailable(db)) {
+            const revision = db.prepare('SELECT * FROM content_block_translations WHERE id = ? AND content_block_id = ?').get(revisionId, entityId);
+            validateContentBlockRevision({ db, registry, contentBlockId: entityId, revision });
+            return;
+        }
         if (config !== ENTITY_CONFIG.product) return;
         const specs = productSpecs(entityId);
         const translatedById = new Map(specValues(revisionId).map(function (item) {
@@ -487,6 +499,15 @@ function createTranslationWriter(options) {
     }
 
     function mirrorLegacy(config, entityId, locale, values, now) {
+        if (config === ENTITY_CONFIG.content_block && overlayLifecycleAvailable(db)) {
+            return advanceContentBlockLegacyTitle({
+                db,
+                registry,
+                contentBlockId: entityId,
+                locale,
+                title: values.title
+            });
+        }
         const mapping = config.legacyColumns[locale];
         if (!mapping || !Object.keys(mapping).length) return false;
         const assignments = Object.keys(mapping).map(function (field) {
@@ -498,6 +519,15 @@ function createTranslationWriter(options) {
         assignments.push('updated_at = @updated_at');
         db.prepare(`UPDATE ${config.baseTable} SET ${assignments.join(', ')} WHERE id = @id`).run(data);
         return true;
+    }
+
+    function assertLegacyContentWriteAllowed(config, base) {
+        if (config !== ENTITY_CONFIG.content_block || !overlayLifecycleInitialized(db)) return;
+        throw new ContentBlockLifecycleError(
+            'CONTENT_OVERLAY_REBASE_REQUIRED',
+            'Legacy content writes must use the content block lifecycle after Overlay activation.',
+            409
+        );
     }
 
     function saveDraft(input) {
@@ -639,6 +669,7 @@ function createTranslationWriter(options) {
         const entityId = integer(input.entityId, null);
         return immediate(db, function () {
             const base = entityRow(config, entityId);
+            assertLegacyContentWriteAllowed(config, base);
             const locales = Array.isArray(input.locales) && input.locales.length
                 ? input.locales.map(function (locale) { return localeEntry(locale).code; })
                 : registry.publicEntries.map(function (entry) { return entry.code; });
@@ -690,6 +721,7 @@ function createTranslationWriter(options) {
         const entityId = integer(input.entityId, null);
         return immediate(db, function () {
             const base = entityRow(config, entityId);
+            assertLegacyContentWriteAllowed(config, base);
             const locales = Array.isArray(input.locales) && input.locales.length
                 ? input.locales.map(function (locale) { return localeEntry(locale).code; })
                 : registry.publicEntries.map(function (entry) { return entry.code; });
