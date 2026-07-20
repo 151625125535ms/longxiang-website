@@ -69,7 +69,7 @@ function sitemapXml() {
     const urls = [];
     prefixes.forEach(function (prefix) {
         staticPaths.forEach(function (pathname) {
-            urls.push('https://www.lxenelectric.com' + (pathname === '/' ? (prefix ? prefix + '/index.html' : '/') : prefix + pathname));
+            urls.push('https://www.lxenelectric.com' + (pathname === '/' ? (prefix ? prefix + '/' : '/') : prefix + pathname));
         });
         products().forEach(function (product) {
             urls.push('https://www.lxenelectric.com' + prefix + '/products/' + product.slug);

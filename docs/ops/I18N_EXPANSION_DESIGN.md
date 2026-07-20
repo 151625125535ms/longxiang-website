@@ -29,7 +29,7 @@
 | `hreflang` | sitemap 和页面 alternate |
 | `dir` | `ltr` 或 `rtl` |
 | `pathPrefix` | URL 前缀，例如 `/fr` |
-| `homePath` | 该语言首页 URL，例如 `/fr/index.html` |
+| `homePath` | 该语言规范首页 URL，例如 `/fr/`；正式语言不得把 `index.html` 作为 canonical |
 | `fallbackLocale` | 内容缺失时的回退语言 |
 | `includeInSitemap` | 是否参与 sitemap 和 hreflang 输出 |
 
@@ -57,6 +57,7 @@
 ## 已对齐内容
 
 - `scripts/generate-sitemap.js` 从 `config/locales.json` 读取 `hreflang`、`pathPrefix`、`homePath` 和 `includeInSitemap`。
+- 当前正式语言首页固定为 `/`、`/ar/`、`/fr/`、`/ru/`；对应 `index.html` 地址只作为永久 301 兼容入口，不进入 canonical、hreflang、语言切换或 sitemap。
 - sitemap 静态页 alternate 和产品页 alternate 按已启用 sitemap 语言循环生成，不再写死 `en/ar`。
 - sitemap URL count 使用 `scripts/sitemap-count-model.js` 按当前数据库和 sitemap 语言动态计算。
 - `scripts/verify-seo-i18n.js` 从同一份配置读取 sitemap 语言列表，检查 `hreflang`、路径前缀、首页映射、`x-default` 和 planned locale 隔离。

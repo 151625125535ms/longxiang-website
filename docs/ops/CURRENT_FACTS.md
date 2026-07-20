@@ -44,6 +44,7 @@
 ## 线上 HTTP 状态
 
 - 首页：`https://www.lxenelectric.com/` 返回 `HTTP/2 200`
+- 四语规范首页为 `/`、`/ar/`、`/fr/`、`/ru/`；`/index.html` 及三种正式非英语语言的 `index.html` 首页地址永久 301 到对应规范首页，canonical、hreflang、语言切换和 sitemap 只输出规范地址。
 - sitemap：`https://www.lxenelectric.com/sitemap.xml` 返回 `HTTP/2 200`
 - robots：`Sitemap: https://www.lxenelectric.com/sitemap.xml`
 - 线上 sitemap URL 数：`184`

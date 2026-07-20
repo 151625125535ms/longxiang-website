@@ -33,7 +33,7 @@
       "hreflang": "ar",
       "dir": "rtl",
       "pathPrefix": "/ar",
-      "homePath": "/ar/index.html",
+      "homePath": "/ar/",
       "fallbackLocale": "en",
       "includeInSitemap": true
     },
@@ -44,7 +44,7 @@
       "hreflang": "fr",
       "dir": "ltr",
       "pathPrefix": "/fr",
-      "homePath": "/fr/index.html",
+      "homePath": "/fr/",
       "fallbackLocale": "en",
       "includeInSitemap": true
     },
@@ -55,7 +55,7 @@
       "hreflang": "ru",
       "dir": "ltr",
       "pathPrefix": "/ru",
-      "homePath": "/ru/index.html",
+      "homePath": "/ru/",
       "fallbackLocale": "en",
       "includeInSitemap": true
     }

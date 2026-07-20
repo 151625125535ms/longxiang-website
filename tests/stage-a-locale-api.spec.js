@@ -2,6 +2,40 @@ const { test, expect } = require('@playwright/test');
 
 const BASE = process.env.TEST_BASE || 'http://localhost:3000';
 
+test('四语首页使用规范 URL，语言切换不再生成 index.html', async ({ page, request }) => {
+    const homes = [
+        { locale: 'en', path: '/' },
+        { locale: 'ar', path: '/ar/' },
+        { locale: 'fr', path: '/fr/' },
+        { locale: 'ru', path: '/ru/' }
+    ];
+    for (const home of homes) {
+        await page.goto(BASE + home.path, { waitUntil: 'domcontentloaded' });
+        await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', BASE + home.path);
+        await expect(page.locator('.navbar .nav-logo')).toHaveAttribute('href', home.path);
+        const alternates = await page.locator('link[rel="alternate"][hreflang]').evaluateAll(function (links) {
+            return links.map(function (link) { return link.getAttribute('href'); });
+        });
+        expect(alternates).toEqual([
+            BASE + '/',
+            BASE + '/ar/',
+            BASE + '/fr/',
+            BASE + '/ru/',
+            BASE + '/'
+        ]);
+        await expect(page.locator('.language-switcher option[value="pt"]')).toHaveCount(0);
+    }
+
+    const alias = await request.get(BASE + '/fr/index.html?utm_source=playwright', { maxRedirects: 0 });
+    expect(alias.status()).toBe(301);
+    expect(alias.headers().location).toBe('/fr/?utm_source=playwright');
+
+    await page.goto(BASE + '/', { waitUntil: 'domcontentloaded' });
+    await page.selectOption('.language-switcher select', 'fr');
+    await page.waitForURL(BASE + '/fr/');
+    expect(page.url()).toBe(BASE + '/fr/');
+});
+
 test('四语产品目录使用显式 locale 轻量接口', async ({ page }) => {
     const cases = [
         { locale: 'en', path: '/products.html', dir: 'ltr' },
@@ -38,7 +72,7 @@ test('四语产品目录使用显式 locale 轻量接口', async ({ page }) => {
 
 test('首页、证书和内容页使用当前语言接口', async ({ page }) => {
     const checks = [
-        { path: '/fr/index.html', api: '/api/products?locale=fr', selector: '#featured-products-container .product-card' },
+        { path: '/fr/', api: '/api/products?locale=fr', selector: '#featured-products-container .product-card' },
         { path: '/ru/certifications.html', api: '/api/certifications?locale=ru', selector: '[data-content-page="certifications"]' },
         { path: '/ar/about.html', api: '/api/content-blocks/about-us?locale=ar', selector: '[data-content-page="about-us"]' }
     ];

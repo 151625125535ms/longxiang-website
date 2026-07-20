@@ -41,7 +41,8 @@ const {
     localizedHtmlShellPath,
     baseHrefForLocale,
     notFoundShellForRequestPath,
-    productDetailRoutePatterns
+    productDetailRoutePatterns,
+    homeRouteRedirects
 } = require('./lib/i18nRoutes');
 
 let compression = null;
@@ -251,12 +252,24 @@ function renderPublicShell(html, locale, pathname) {
     });
 }
 
+function exactPathPattern(pathname) {
+    return new RegExp('^' + String(pathname || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$');
+}
+
+function redirectTargetWithQuery(req, targetPath) {
+    const originalUrl = String(req.originalUrl || '');
+    const queryIndex = originalUrl.indexOf('?');
+    return queryIndex === -1 ? targetPath : targetPath + originalUrl.slice(queryIndex);
+}
+
+homeRouteRedirects().forEach(function (redirect) {
+    app.get(exactPathPattern(redirect.from), function (req, res) {
+        res.redirect(301, redirectTargetWithQuery(req, redirect.to));
+    });
+});
+
 staticSeoRouteDefinitions().forEach(function (route) {
-    const requestPaths = [route.path];
-    if (route.basePath === '/') {
-        requestPaths.push(route.locale.pathPrefix ? route.locale.pathPrefix + '/' : '/index.html');
-    }
-    app.get(requestPaths, function (req, res, next) {
+    app.get(route.path, function (req, res, next) {
         fs.readFile(route.filePath, 'utf8', function (err, html) {
             if (err) return next(err);
             try {

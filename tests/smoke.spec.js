@@ -65,7 +65,7 @@ async function mockContactCardData(page) {
 }
 
 test('首页加载正常', async ({ page }) => {
-    await page.goto(BASE + '/index.html');
+    await page.goto(BASE + '/');
     await expect(page).toHaveTitle(/Longxiang/i);
     await expect(page.locator('nav.navbar')).toBeVisible();
 });
@@ -112,7 +112,7 @@ test('公共数据 API 失败时服务端导航和页脚保持可用', async ({ 
 });
 
 test('首页非 Hero 产品卡使用现有专用缩略图', async ({ page }) => {
-    await page.goto(BASE + '/index.html');
+    await page.goto(BASE + '/');
     const images = page.locator('#featured-products-container .product-card-image img');
     await expect(images.first()).toBeVisible();
     const sources = await images.evaluateAll(function (items) {
@@ -126,10 +126,10 @@ test('首页非 Hero 产品卡使用现有专用缩略图', async ({ page }) => 
 
 test('四种正式语言页脚均显示中国官网绝对链接', async ({ page }) => {
     const locales = [
-        { path: '/index.html', label: 'China Website / 中国官网' },
-        { path: '/ar/index.html', label: 'الموقع الرسمي في الصين' },
-        { path: '/fr/index.html', label: 'Site officiel en Chine' },
-        { path: '/ru/index.html', label: 'Официальный сайт в Китае' }
+        { path: '/', label: 'China Website / 中国官网' },
+        { path: '/ar/', label: 'الموقع الرسمي في الصين' },
+        { path: '/fr/', label: 'Site officiel en Chine' },
+        { path: '/ru/', label: 'Официальный сайт в Китае' }
     ];
     for (const locale of locales) {
         await page.goto(BASE + locale.path);
@@ -155,7 +155,7 @@ test('中国官网跳转仅在分析同意后发送带页面上下文的 GA4 事
         }));
     });
 
-    await page.goto(BASE + '/fr/index.html');
+    await page.goto(BASE + '/fr/');
     const chinaWebsiteLink = page.locator('.footer-links a[href="https://www.lxelec.cn/"]');
     await expect(chinaWebsiteLink).toHaveCount(1);
     await expect.poll(function () {
@@ -186,7 +186,7 @@ test('未同意分析 Cookie 时不发送中国官网 GA4 事件', async ({ page
         };
     });
 
-    await page.goto(BASE + '/index.html');
+    await page.goto(BASE + '/');
     const chinaWebsiteLink = page.locator('.footer-links a[href="https://www.lxelec.cn/"]');
     await expect(chinaWebsiteLink).toHaveCount(1);
     await chinaWebsiteLink.evaluate(function (link) {
@@ -241,7 +241,7 @@ test('敏感路径返回 403', async ({ page }) => {
 });
 
 test('CSP Report-Only 头存在', async ({ page }) => {
-    const resp = await page.goto(BASE + '/index.html');
+    const resp = await page.goto(BASE + '/');
     const headers = resp.headers();
     expect(headers['content-security-policy-report-only']).toBeTruthy();
 });
@@ -317,7 +317,7 @@ test.describe('顶部公共联系方式栏', function () {
     test('桌面端顶栏滚动后保持显示并与导航统一为白底', async ({ page }) => {
         await page.setViewportSize({ width: 1440, height: 900 });
         await mockHeaderContactBarData(page);
-        await page.goto(BASE + '/index.html');
+        await page.goto(BASE + '/');
 
         const bar = page.locator('.header-contact-bar');
         const email = bar.locator('.header-contact-bar__email');
@@ -430,7 +430,7 @@ test.describe('顶部公共联系方式栏', function () {
     test('阿语页面仍保持邮箱在物理左侧、社交图标在右侧', async ({ page }) => {
         await page.setViewportSize({ width: 1024, height: 768 });
         await mockHeaderContactBarData(page);
-        await page.goto(BASE + '/ar/index.html');
+        await page.goto(BASE + '/ar/');
         await expect(page.locator('.header-contact-bar__email')).toBeVisible();
         await expect(page.locator('[data-contact-bar-social="instagram"]')).toBeVisible();
         await expect(page.locator('[data-contact-bar-social="youtube"]')).toBeVisible();
@@ -454,7 +454,7 @@ test.describe('顶部公共联系方式栏', function () {
         test(locale + ' 页面在 1024px 下显示完整且不横向溢出', async ({ page }) => {
             await page.setViewportSize({ width: 1024, height: 768 });
             await mockHeaderContactBarData(page);
-            await page.goto(BASE + '/' + locale + '/index.html');
+            await page.goto(BASE + '/' + locale + '/');
             await expect(page.locator('.header-contact-bar')).toBeVisible();
             await expect(page.locator('.header-contact-bar__email')).toHaveText('sales@longxiang.test');
             const overflow = await page.evaluate(function () {
@@ -467,7 +467,7 @@ test.describe('顶部公共联系方式栏', function () {
     test('移动端隐藏顶栏且不改变现有导航高度', async ({ page }) => {
         await page.setViewportSize({ width: 390, height: 844 });
         await mockHeaderContactBarData(page);
-        await page.goto(BASE + '/index.html');
+        await page.goto(BASE + '/');
         await expect(page.locator('.header-contact-bar')).toBeHidden();
         const navHeight = await page.locator('.navbar').evaluate(function (element) {
             return element.getBoundingClientRect().height;
@@ -494,7 +494,7 @@ test.describe('顶部公共联系方式栏', function () {
                 showEmail: false
             }
         });
-        await page.goto(BASE + '/index.html');
+        await page.goto(BASE + '/');
         await expect(page.locator('.header-contact-bar')).toHaveCount(0);
         await expect(page.locator('[data-contact-bar-social][href^="javascript:"]')).toHaveCount(0);
     });
@@ -506,7 +506,7 @@ test.describe('顶部公共联系方式栏', function () {
                 showInstagram: false
             }
         });
-        await page.goto(BASE + '/index.html');
+        await page.goto(BASE + '/');
         await expect(page.locator('.header-contact-bar__email')).toBeVisible();
         await expect(page.locator('[data-contact-bar-social="instagram"]')).toHaveCount(0);
         await expect(page.locator('[data-contact-bar-social="youtube"]')).toBeVisible();

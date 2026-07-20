@@ -28,7 +28,7 @@ function localizedHref(href, locale, extra) {
     const queryParts = parts[0].split('?');
     const clean = queryParts[0].replace(/^\.\//, '').replace(/^\/+/, '');
     const prefix = locale === 'en' ? '/' : '/' + locale + '/';
-    const path = clean === 'index.html' && locale === 'en' ? '/' : prefix + clean;
+    const path = clean === 'index.html' ? prefix : prefix + clean;
     const existing = queryParts[1] ? '?' + queryParts[1] : '';
     const appended = extra ? (extra.charAt(0) === '?' || extra.charAt(0) === '#' ? extra : '#' + extra) : '';
     return path + existing + (parts[1] ? '#' + parts[1] : '') + appended;
@@ -107,7 +107,9 @@ function renderGlobalShellHtml(html, options) {
     const version = shell.version || 1;
     const locale = options.locale || 'en';
     const nav = ((body.navigation || {}).mainLinks || []).map(function (item) { return navItemHtml(item, locale, options.pathname); }).join('');
-    let output = String(html).replace(/<div class="nav-links"[^>]*>\s*<\/div>/i, '<div class="nav-links" aria-live="polite" data-ssr-shell="true" data-shell-version="' + escapeHtml(version) + '" data-company-version="' + escapeHtml((options.company || {}).version || 1) + '">' + nav + '</div>');
+    let output = String(html).replace(/<a\s+href=["'][^"']*["']\s+class=["']nav-logo["']>/i,
+        '<a href="' + escapeHtml(localizedHref('index.html', locale)) + '" class="nav-logo">');
+    output = output.replace(/<div class="nav-links"[^>]*>\s*<\/div>/i, '<div class="nav-links" aria-live="polite" data-ssr-shell="true" data-shell-version="' + escapeHtml(version) + '" data-company-version="' + escapeHtml((options.company || {}).version || 1) + '">' + nav + '</div>');
     output = output.replace(/<div class="footer-grid"[^>]*>\s*<\/div>\s*<div class="footer-bottom">/i, '<div class="footer-grid" aria-live="polite" data-ssr-shell="true" data-shell-version="' + escapeHtml(version) + '" data-company-version="' + escapeHtml((options.company || {}).version || 1) + '">' + footerHtml(body, options.company || {}, locale) + '</div><div class="footer-bottom">');
     if (!output.includes('data-ssr-shell="true"')) throw new Error('HTML shell is missing empty SSR shell placeholders.');
     output = output.replace(/(<div class="footer-bottom"><p>)[\s\S]*?(<\/p>)/i, '$1' + escapeHtml(localized(body.footer || {}, 'copyright', locale, '')) + '$2');

@@ -151,8 +151,8 @@ test('API 新版本只更新页面字段且重复初始化不增加 Schema', asy
     expect(await page.locator(selector).textContent()).toBe(afterText);
 });
 
-test('语言首页及其目录别名不会定义独立 Organization 或 WebSite', async ({ page }) => {
-    for (const path of ['/ar/index.html', '/fr/index.html', '/ru/index.html', '/ar/', '/fr/', '/ru/']) {
+test('语言规范首页不会定义独立 Organization 或 WebSite', async ({ page }) => {
+    for (const path of ['/ar/', '/fr/', '/ru/']) {
         await page.goto(BASE + path, { waitUntil: 'domcontentloaded' });
         await page.waitForTimeout(400);
         const summary = await schemaSummary(page);

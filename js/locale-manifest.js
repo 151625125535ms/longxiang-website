@@ -31,7 +31,7 @@
                 "hreflang": "ar",
                 "dir": "rtl",
                 "pathPrefix": "/ar",
-                "homePath": "/ar/index.html",
+                "homePath": "/ar/",
                 "fallbackLocale": "en",
                 "isPublic": true,
                 "isSelectable": true,
@@ -45,7 +45,7 @@
                 "hreflang": "fr",
                 "dir": "ltr",
                 "pathPrefix": "/fr",
-                "homePath": "/fr/index.html",
+                "homePath": "/fr/",
                 "fallbackLocale": "en",
                 "isPublic": true,
                 "isSelectable": true,
@@ -59,7 +59,7 @@
                 "hreflang": "ru",
                 "dir": "ltr",
                 "pathPrefix": "/ru",
-                "homePath": "/ru/index.html",
+                "homePath": "/ru/",
                 "fallbackLocale": "en",
                 "isPublic": true,
                 "isSelectable": true,
@@ -82,6 +82,6 @@
                 "includeInSitemap": false
             }
         },
-        "hash": "196821da722785be"
+        "hash": "cd57daf4f6c14bc8"
     };
 }(window));

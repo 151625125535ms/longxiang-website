@@ -11,9 +11,9 @@ const root = path.join(__dirname, '..');
 const forbidden = ['17513354200', 'hnlxdq2003@163.com', '100 million RMB', '100 مليون يوان صيني', 'whatsapp'];
 const locales = [
     ['en', 'index.html', '/'],
-    ['ar', 'ar/index.html', '/ar/index.html'],
-    ['fr', 'fr/index.html', '/fr/index.html'],
-    ['ru', 'ru/index.html', '/ru/index.html']
+    ['ar', 'ar/index.html', '/ar/'],
+    ['fr', 'fr/index.html', '/fr/'],
+    ['ru', 'ru/index.html', '/ru/']
 ];
 
 const company = readPublicCompanyView();
@@ -56,6 +56,8 @@ locales.forEach(function ([locale, file, pathname]) {
     assert(rendered.includes('https://www.lxelec.cn/'));
     assert(rendered.includes('/js/main.js?v=20260715-locale-api'));
     assert(rendered.includes('/js/content-pages.js?v=20260715-locale-api'));
+    const homeLogoPattern = new RegExp('href="' + (locale === 'en' ? '/' : '/' + locale + '/') + '" class="nav-logo"', 'g');
+    assert((rendered.match(homeLogoPattern) || []).length >= 2, locale + ' must localize both header and footer logo links');
     const hydrationScripts = Array.from(rendered.matchAll(/src=["']([^"']*js\/(?:main|content-pages)\.js[^"']*)["']/gi)).map(function (match) { return match[1]; });
     assert(hydrationScripts.length >= 2);
     assert(hydrationScripts.every(function (src) { return src.endsWith('?v=20260715-locale-api'); }));

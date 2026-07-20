@@ -66,11 +66,24 @@ function productDetailRoutePatterns() {
     });
 }
 
+function homeRouteRedirects() {
+    return localeEntries().reduce(function (redirects, locale) {
+        const aliases = locale.pathPrefix
+            ? [locale.pathPrefix, locale.pathPrefix + '/index.html']
+            : ['/index.html'];
+        aliases.forEach(function (from) {
+            if (from !== locale.homePath) redirects.push({ from, to: locale.homePath });
+        });
+        return redirects;
+    }, []);
+}
+
 module.exports = {
     localeEntries,
     localeForRequestPath,
     localizedHtmlShellPath,
     baseHrefForLocale,
     notFoundShellForRequestPath,
-    productDetailRoutePatterns
+    productDetailRoutePatterns,
+    homeRouteRedirects
 };

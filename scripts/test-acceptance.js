@@ -360,6 +360,39 @@ async function main() {
             return '28 routes expose raw canonical, hreflang, and basic schema';
         });
 
+        await runTest('T04E2', 'legacy homepage aliases redirect once to canonical locale roots', async function () {
+            const redirects = [
+                { from: '/index.html', to: '/' },
+                { from: '/ar', to: '/ar/' },
+                { from: '/ar/index.html', to: '/ar/' },
+                { from: '/fr', to: '/fr/' },
+                { from: '/fr/index.html', to: '/fr/' },
+                { from: '/ru', to: '/ru/' },
+                { from: '/ru/index.html', to: '/ru/' }
+            ];
+            for (const redirect of redirects) {
+                const response = await request('GET', redirect.from + '?utm_source=homepage-test');
+                expectStatus(response, 301);
+                const expectedLocation = redirect.to + '?utm_source=homepage-test';
+                if (response.headers.location !== expectedLocation) {
+                    throw new Error('homepage redirect mismatch for ' + redirect.from + ': ' + response.headers.location);
+                }
+            }
+
+            for (const pathname of ['/', '/ar/', '/fr/', '/ru/']) {
+                const response = await request('GET', pathname);
+                expectStatus(response, 200);
+                const expectedCanonical = 'http://127.0.0.1:' + PORT + pathname;
+                if (!response.raw.includes('<link rel="canonical" href="' + expectedCanonical + '">')) {
+                    throw new Error('canonical homepage mismatch for ' + pathname);
+                }
+                if ((response.raw.match(/hreflang=/g) || []).length !== 5) {
+                    throw new Error('homepage hreflang count mismatch for ' + pathname);
+                }
+            }
+            return '7 aliases 301 once; 4 canonical homes return 200 with five hreflang links';
+        });
+
         await runTest('T04F', 'legacy query product URLs redirect once to clean localized products', async function () {
             const products = readPublicProducts();
             const product = products[0];
