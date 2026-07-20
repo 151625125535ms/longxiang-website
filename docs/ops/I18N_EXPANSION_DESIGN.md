@@ -147,6 +147,16 @@ node scripts/migrate-content-overlays.js --rollback --db=<database-copy> --plan-
 
 C1 的本地验收使用 SQLite 在线备份生成临时副本，连续验证 dry-run 不写库、源数据漂移阻断、apply 收敛、旧接口兼容、四语 revision 输出、稳定数组 ID、结构哈希、批量查询预算、rollback 和 reapply。生产 Schema v8 迁移、content overlay apply 及公开读取切换分别属于后续授权节点，不能由 C1 commit 自动触发。
 
+## Stage C 公开读取与 Stage A-C 收口
+
+- 生产已完成 Schema v8、四语 Overlay 迁移和 `PUBLIC_TRANSLATION_READ_SOURCE=revision` 切换；代码在环境变量缺失时仍默认 `legacy`，用于明确回退，不代表生产当前读取来源。
+- revision-native 产品、分类、证书、规格、SEO 和 content block 读取由 locale registry 判断公开资格。带 `locale` 的接口只返回当前语言规范化字段；无 `locale` 的旧接口继续保留原契约。
+- SSR 数据源、产品 presentation 和 SEO renderer 优先消费规范化字段，并保留 legacy suffix 兼容。content block presentation 对既有文字修复规则做受限兼容，不向公开对象重新注入 `*Ar/*Fr/*Ru` 字段。
+- revision readiness 不完整时，服务保持可启动，相关公开 API 和 SSR fail-closed 为 `503 REVISION_SOURCE_NOT_READY`；不得返回 `200 + data:null` 或无法解释的静默英文回退。无 locale 的旧兼容接口不因 revision readiness 失败而改变结构。
+- 产品 sitemap 资格在 revision 模式下通过一次批量 published-revision 矩阵查询生成；产品 alternate 只包含该实体已发布的公开语言，缺少默认语言 revision 时拒绝生成 sitemap。legacy 模式保持当前兼容输出。
+- synthetic locale 验收使用临时 registry 和临时数据库 published revisions，证明新增 supported 测试语言不需要增加固定产品列、固定 revision SQL、SSR suffix 分支或后台公开映射。测试语言不得进入正式配置、页面壳、生产数据、sitemap 或 hreflang。
+- Stage A-C 收口分为写入一致性和 Registry 公开读取两个本地节点。两个节点 commit/push 后只代表本地代码能力完成；必须另行部署并复验四语 API、SSR、SEO、后台写入链路和 `pt` 隔离，才可宣布正式收口。
+
 ## pt planned 边界
 
 - 不创建正式 `/pt/` 公开页面目录作为上线入口。
@@ -175,6 +185,8 @@ node --check scripts/generate-sitemap.js
 node scripts/audit-translation-write-entrypoints.js
 npm run test:translation-stage-b
 npm run test:translation-stage-c1
+npm run test:translation-stage-ac-read
+node scripts/test-public-translation-read-stage-c3a.js
 npm run test:acceptance:db-copy
 node scripts/generate-sitemap.js --dry-run
 node scripts/verify-seo-i18n.js
@@ -184,6 +196,6 @@ git diff --check
 ## 风险与治理建议
 
 - 前端运行时和 `config/locales.json` 仍存在一份静态配置重复；短期通过 `scripts/verify-seo-i18n.js` 强校验兜底，长期可评估构建脚本或服务端注入。
-- 当前公开读取仍使用固定语言字段；translation revision 与 content overlay 都是默认关闭的兼容迁移层。只有完成后续四语读取切换、观察期和旧写入口退役，才能消除双写及旧 Patch 技术债。
+- 生产公开读取已切换到 revision，但旧固定字段、旧 Patch、无 locale 旧接口和 legacy adapter 仍作为兼容与回退路径存在。Stage A-C 收口部署验收后才能标记核心结构缺陷关闭；兼容路径最终退役仍应另立观察期和删除任务，不能在本阶段直接移除。
 - 新语言上线前不要开启 `includeInSitemap`，否则 sitemap 会暴露尚未准备好的 URL。
 - 每次语言状态变化后都必须同步更新 `docs/ops/CURRENT_FACTS.md` 和本设计文档。

@@ -1,6 +1,6 @@
 # 当前事实清单
 
-更新时间：2026-07-14（Asia/Shanghai）
+更新时间：2026-07-20（Asia/Shanghai）
 用途：记录当前线上真实状态，作为后续修改、部署、SEO/i18n 调整和后台内容维护的对照基线。
 更新原则：只记录已经通过本地、GitHub、服务器或真实 HTTP 结果核验过的事实；未核验项必须明确标注。
 
@@ -18,6 +18,8 @@
 - 2026-07-14 阿语产品 SEO 代码与审批补丁已部署到 `6183858`，生产 Schema 为 v6。42 个非删除产品的阿语 SEO 标题、描述和关键词共 126 项已通过审批、dry-run、WAL 在线备份和原子 apply 完成回填。
 - v6 迁移前使用 Node 24 创建仓库外 WAL 在线备份 `/home/ubuntu/longxiang-backups/longxiang-pre-v6-20260714-080154.db`，大小 `4456448` 字节；源库和备份完整性均为 `ok`，Schema 均为 v5，产品统计均为 `57=42 published+0 draft+15 deleted`。
 - 迁移后生产旧产品列与迁移前备份的规范化 SHA-256 均为 `5c62d517e0b6c24c7f50e96e127886ca66ca4d9658ba04b28f628180f4639bf7`，确认旧产品字段未变化。
+- 生产已完成 Schema v7 translation revision、Schema v8 content overlay 和 `PUBLIC_TRANSLATION_READ_SOURCE=revision` 切换；旧固定字段、旧 Patch 和 legacy 读取仍保留为兼容与回退来源。
+- Stage A-C 收口节点 1 已在 GitHub `main` 提交；节点 2 本提交继续收口 Registry 驱动的公开读取、规范化 SSR/SEO、503 fail-closed 和 sitemap 批量发布矩阵。本轮不部署，生产仍待后续单独授权拉取并验收节点 1/2。
 
 ## 运行环境
 
@@ -47,10 +49,10 @@
 - 四语规范首页为 `/`、`/ar/`、`/fr/`、`/ru/`；`/index.html` 及三种正式非英语语言的 `index.html` 首页地址永久 301 到对应规范首页，canonical、hreflang、语言切换和 sitemap 只输出规范地址。
 - sitemap：`https://www.lxenelectric.com/sitemap.xml` 返回 `HTTP/2 200`
 - robots：`Sitemap: https://www.lxenelectric.com/sitemap.xml`
-- 线上 sitemap URL 数：`184`
+- 线上 sitemap URL 数：`200`（以生产 42 个 published 产品为准）
 - 本地 `node scripts/generate-sitemap.js --dry-run` URL 数：`184`
-- 生产 `node scripts/generate-sitemap.js --dry-run` URL 数：`184`
-- 公网 `https://www.lxenelectric.com/api/health` 返回 `HTTP 200`，`ok=true`、`sqlite=true`；v6 迁移后生产本机健康接口明确返回 `schemaVersion=6`。
+- 生产 `node scripts/generate-sitemap.js --dry-run` URL 数：`200`
+- 公网 `https://www.lxenelectric.com/api/health` 返回 `HTTP 200`，`ok=true`、`sqlite=true`；Stage C 迁移后生产 Schema 为 v8。
 - 公网 `en/ar/fr/ru` 产品详情已通过真实浏览器验收：页面成功水合，单图产品无缩略图和切换控件，阿语为 RTL，`390x844` 视口无横向溢出，未发现页面脚本错误或图片加载失败
 - 公网多图产品 `segmented-arc-quenching-surge-arrester` 已通过真实交互验收：3 张图片的缩略图点击和上下切换按钮均能更新主图、选中态与计数；四语和手机视口均通过
 
@@ -61,9 +63,11 @@
 - 当前进入 sitemap 的语言：`en`、`ar`、`fr`、`ru`
 - 当前 planned 语言：`pt`
 - `pt` 当前状态：只在 `plannedLocales` 中预留，`includeInSitemap=false`
+- 生产公开读取已使用现有 `en/ar/fr/ru` published revisions；planned `pt` 继续由 locale registry 拒绝公开，不进入公开 API、SSR、语言选择器、sitemap 或 hreflang。
+- 节点 2 本地验收新增 synthetic supported locale，证明 revision 产品、分类、证书、规格、SEO、content block、SSR 数据源和 presentation 不需要新增固定数据库列或 suffix 分支；该测试语言只存在于临时数据库和临时 registry。
 - 本地 SEO/i18n 校验：`node scripts/verify-seo-i18n.js` 通过
 - 生产 SEO/i18n 校验：使用 Node 24 运行 `node scripts/verify-seo-i18n.js` 通过
-- 生产已为 Schema v6，`products` 已有 `seo_title_ar`、`seo_description_ar`、`seo_keywords_ar` 三列。42 个 published 产品的三个字段覆盖率均为 42/42；15 个 deleted 产品不在本次回填范围。
+- 生产为 Schema v8；Schema v6 增加的 `seo_title_ar`、`seo_description_ar`、`seo_keywords_ar` 三列继续保留。42 个 published 产品的三个字段覆盖率均为 42/42；15 个 deleted 产品不在本次回填范围。
 - 生产公网已遍历验证 42 个阿语产品详情页：全部 HTTP 200，title、description、Open Graph 和 Twitter 元数据与批准内容一致；canonical、`en/ar/fr/ru/x-default` hreflang 和 index 状态正常，不输出 `<meta name="keywords">`。`seo_keywords_ar` 仍只用于后台内容管理，不进入公开产品 API。
 - 42 个非删除产品的 126 项阿语 SEO 内容已完成自动审计和独立阿语审批。生产 dry-run 为 42/42 匹配、126 项变化、0 blocker、0 error；apply 后三个字段覆盖率为 100%，其它产品字段及 15 个 deleted 产品保持不变。
 
@@ -107,7 +111,7 @@
 - 产品详情图库继续使用 `product_media` 作为唯一数据源，不新增图库字段或第二套关系；封面为 `is_cover=1, sort_order=1`，图库从 2 开始连续排序。
 - 2026-07-14 生产只读复核：42 个 published 产品中，`segmented-arc-quenching-surge-arrester` 有 3 张图片（1 张封面、2 张图库图），其余 41 个产品为单图。
 - `products` 已有 `fr`、`ru` 字段族，例如 `name_fr`、`name_ru`、`description_fr`、`description_ru`、`seo_title_fr`、`seo_title_ru`。
-- 生产 Schema v6 已应用 `0006_product_arabic_seo_fields`；42 个 published 产品的三个阿语 SEO 专用列已全部回填，15 个 deleted 产品未处理。
+- 生产 Schema v8 已包含 `0006_product_arabic_seo_fields`、Schema v7 translation revisions 和 Schema v8 content overlays；42 个 published 产品的三个阿语 SEO 专用列已全部回填，15 个 deleted 产品未处理。
 - `certifications` 已有 `fr`、`ru` 字段族。
 
 ## 图片与上传资源
@@ -168,6 +172,7 @@
 - 生产多图试点已完成技术验收，用户侧最终确认仍待完成；在扩大到其他产品前仍需逐项确认图片内容和顺序。
 - 阿语 SEO 已完成代码、Schema v6、42 产品内容审批、全量 dry-run、WAL 在线备份、批量 apply 和 42 个真实阿语页面验收。apply 前备份为 `/home/ubuntu/longxiang-backups/longxiang-arabic-seo-pre-apply-20260714-055546.db`，大小 `4464640` 字节，SHA-256 为 `11ed610994fd02c7b46bca2c63b8c9add458cb2f8dc8684e97b97f5ea1961a54`，完整性为 `ok`。本次数据 apply 不需要重启或操作 PM2。
 - 搜索引擎控制台状态本次未核验；Google Search Console、Bing Webmaster Tools 的提交和收录状态不应从代码或 sitemap 状态反推。
+- Stage A-C 收口节点 1/2 尚未部署到生产，当前只能标记为“本地实现完成、待生产部署与验收”，不能据此宣布 Stage A-C 正式收口。
 - 本清单是时间点事实，不代表永久事实。每次语言、SEO、产品数据、上传链路、部署环境发生变化后都应更新。
 
 ## 快速复核命令
@@ -182,6 +187,8 @@ node scripts/generate-sitemap.js --dry-run
 node scripts/verify-seo-i18n.js
 node scripts/audit-product-arabic-seo.js
 node scripts/test-product-arabic-seo-content-patch.js
+npm run test:translation-stage-ac-read
+node scripts/test-public-translation-read-stage-c3a.js
 npm run images:repair-product-links
 npm run images:verify-product-links
 git diff --check

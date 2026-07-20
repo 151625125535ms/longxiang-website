@@ -2,6 +2,15 @@ const fs = require('fs');
 const path = require('path');
 const Database = require('better-sqlite3');
 const { resolveDbPath } = require('../server/lib/db');
+const { loadLocaleRegistry } = require('../server/lib/localeRegistry');
+const {
+    createLocalePublicationPolicy,
+    createRevisionLocalePublicationPolicy
+} = require('../server/lib/localePublicationPolicy');
+const {
+    resolvePublicTranslationReadSource,
+    revisionReadiness
+} = require('../server/lib/publicTranslationReadAdapter');
 const {
     loadLocaleConfig,
     localeEntry,
@@ -103,8 +112,8 @@ function staticAlternates(pathname) {
     return alternateLinks(buildUrl(localizedStaticPath(basePath, DEFAULT_LOCALE)), entries);
 }
 
-function productAlternates(encodedId) {
-    const entries = SITEMAP_LOCALES.map(function (locale) {
+function productAlternates(encodedId, locales) {
+    const entries = locales.map(function (locale) {
         return {
             hreflang: locale.hreflang,
             href: buildUrl(localizedProductPath(encodedId, locale))
@@ -172,9 +181,31 @@ function makeEntry(loc, lastmod, changefreq, priority, alternates) {
     ]).join('\n');
 }
 
-function buildSitemap() {
-    const db = openReadonlyDb();
+function productPublicationMatrix(db, registry, products, source) {
+    if (source === 'revision') {
+        return createRevisionLocalePublicationPolicy({ db, registry }).publicationMatrix({
+            entityType: 'product',
+            entityIds: products.map(function (product) { return product.id; })
+        });
+    }
+    return createLocalePublicationPolicy(registry).publicationMatrix(products);
+}
+
+function buildSitemap(options) {
+    options = options || {};
+    const ownsDb = !options.db;
+    const db = options.db || openReadonlyDb();
     try {
+        const registry = options.registry || loadLocaleRegistry(LOCALE_CONFIG_PATH);
+        const source = resolvePublicTranslationReadSource(options.source == null
+            ? process.env.PUBLIC_TRANSLATION_READ_SOURCE
+            : options.source);
+        if (source === 'revision') {
+            const readiness = revisionReadiness(db, registry);
+            if (!readiness.ready) {
+                throw new Error('Cannot generate a revision sitemap while published translations are incomplete.');
+            }
+        }
         const contentUpdatedAt = readContentBlockUpdatedAt(db);
         const entries = [];
 
@@ -192,18 +223,27 @@ function buildSitemap() {
             ));
         });
 
-        readPublishedProducts(db).forEach(function (product) {
+        const products = readPublishedProducts(db);
+        const publication = productPublicationMatrix(db, registry, products, source);
+        products.forEach(function (product) {
             const id = productPublicId(product);
             if (!id) return;
             const encodedId = encodeURIComponent(id);
             const lastmod = toIsoDate(product.updated_at);
-            SITEMAP_LOCALES.forEach(function (locale) {
+            const publishedLocales = new Set(publication[product.id] || []);
+            const productLocales = SITEMAP_LOCALES.filter(function (locale) {
+                return publishedLocales.has(locale.code);
+            });
+            if (source === 'revision' && !publishedLocales.has(DEFAULT_LOCALE.code)) {
+                throw new Error('Sitemap product is missing the default-locale published revision: ' + id);
+            }
+            productLocales.forEach(function (locale) {
                 entries.push(makeEntry(
                     buildUrl(localizedProductPath(encodedId, locale)),
                     lastmod,
                     'monthly',
                     productPriority(locale),
-                    productAlternates(encodedId)
+                    productAlternates(encodedId, productLocales)
                 ));
             });
         });
@@ -213,7 +253,7 @@ function buildSitemap() {
             + entries.join('\n')
             + '\n</urlset>\n';
     } finally {
-        db.close();
+        if (ownsDb) db.close();
     }
 }
 
@@ -240,5 +280,6 @@ if (require.main === module) {
 
 module.exports = {
     buildSitemap,
+    productPublicationMatrix,
     main
 };

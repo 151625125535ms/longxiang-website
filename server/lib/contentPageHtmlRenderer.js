@@ -141,8 +141,9 @@ function renderContentPageHtml(html, options) {
     if (!SUPPORTED.has(slug)) throw new Error('Unsupported content page: ' + slug);
     if (!block || !block.body) throw new Error('Missing published content block: ' + slug);
     const config = { slug, locale, version: block.version || 0 };
+    const normalized = Boolean(block.localization && block.localization.revisionId);
     let rendered = String(html || '');
-    const hero = presentation.renderHeroFragments(slug, block.body, { locale });
+    const hero = presentation.renderHeroFragments(slug, block.body, { locale, normalized });
     rendered = renderHeroBackgroundHtml(rendered, {
         locale,
         className: slug === 'home' ? 'hero-bg' : 'page-hero',
@@ -162,7 +163,7 @@ function renderContentPageHtml(html, options) {
     if (slug === 'home') {
         rendered = patchHome(rendered, block.body, config);
     } else {
-        const bodyHtml = presentation.renderPageBody(slug, block.body, { locale });
+        const bodyHtml = presentation.renderPageBody(slug, block.body, { locale, normalized });
         rendered = replaceElementInnerHtml(rendered, 'data-content-page', slug, bodyHtml, function (tag) {
             return markContentTag(tag, config);
         });

@@ -43,6 +43,7 @@ const {
     localizedLegacyProductPath
 } = require('./lib/legacyProductRedirect');
 const { buildSitemap } = require('../scripts/generate-sitemap');
+const { isRevisionSourceNotReady } = require('./lib/localizedApiResponse');
 const {
     localeForRequestPath,
     localizedHtmlShellPath,
@@ -324,17 +325,21 @@ function sendProductDetailShell(req, res, next) {
     }
     fs.readFile(filePath, 'utf8', function (err, html) {
         if (err) return next(err);
-        const withBase = html.replace(/<head>/i, '<head>\n    <base href="' + baseHrefForLocale(locale) + '">');
-        const contentBlock = publicSiteDataSource.readContentBlock('product-pages', locale);
-        const withSeo = renderProductDetailSeoHtml(withBase, product, locale, requestOrigin(req));
-        const withBody = renderProductDetailBodyHtml(withSeo, {
-            locale,
-            product,
-            products: publicSiteDataSource.readProducts(locale),
-            contentBlock
-        });
-        const withShell = renderPublicShell(withBody, locale, req.path);
-        sendHtmlString(res, withShell, 200);
+        try {
+            const withBase = html.replace(/<head>/i, '<head>\n    <base href="' + baseHrefForLocale(locale) + '">');
+            const contentBlock = publicSiteDataSource.readContentBlock('product-pages', locale);
+            const withSeo = renderProductDetailSeoHtml(withBase, product, locale, requestOrigin(req));
+            const withBody = renderProductDetailBodyHtml(withSeo, {
+                locale,
+                product,
+                products: publicSiteDataSource.readProducts(locale),
+                contentBlock
+            });
+            const withShell = renderPublicShell(withBody, locale, req.path);
+            sendHtmlString(res, withShell, 200);
+        } catch (renderErr) {
+            next(renderErr);
+        }
     });
 }
 
@@ -362,18 +367,22 @@ function sendProductListShell(req, res, next) {
 
     fs.readFile(filePath, 'utf8', function (err, html) {
         if (err) return next(err);
-        const robots = hasProductFilterQuery(req) ? '\n    <meta name="robots" content="noindex,follow">' : '';
-        const withBase = html.replace(/<head>/i,
-            '<head>\n    <base href="' + baseHrefForLocale(locale) + '">' + robots);
-        const withProducts = renderProductListHtml(withBase, {
-            locale,
-            products: publicSiteDataSource.readProducts(locale),
-            taxonomy: publicSiteDataSource.readProductCategories(locale),
-            query: req.query || {},
-            contentBlock: publicSiteDataSource.readContentBlock('product-pages', locale),
-            requireSeoSchema: true
-        });
-        sendHtmlString(res, renderPublicShell(withProducts, locale, req.path), 200);
+        try {
+            const robots = hasProductFilterQuery(req) ? '\n    <meta name="robots" content="noindex,follow">' : '';
+            const withBase = html.replace(/<head>/i,
+                '<head>\n    <base href="' + baseHrefForLocale(locale) + '">' + robots);
+            const withProducts = renderProductListHtml(withBase, {
+                locale,
+                products: publicSiteDataSource.readProducts(locale),
+                taxonomy: publicSiteDataSource.readProductCategories(locale),
+                query: req.query || {},
+                contentBlock: publicSiteDataSource.readContentBlock('product-pages', locale),
+                requireSeoSchema: true
+            });
+            sendHtmlString(res, renderPublicShell(withProducts, locale, req.path), 200);
+        } catch (renderErr) {
+            next(renderErr);
+        }
     });
 }
 
@@ -425,6 +434,25 @@ app.get('/api/health', function (req, res) {
         timestamp: new Date().toISOString(),
         sqlite
     });
+});
+
+app.use(function (err, req, res, next) {
+    if (!isRevisionSourceNotReady(err)) return next(err);
+    console.error('Public revision source is not ready.', {
+        path: req.path,
+        cause: err.code || err.name || 'REVISION_READ_FAILED',
+        details: err.details || null
+    });
+    if (req.path.indexOf('/api/') === 0) {
+        return res.status(503).json({
+            ok: false,
+            error: {
+                code: 'REVISION_SOURCE_NOT_READY',
+                message: 'Published revision content is not ready.'
+            }
+        });
+    }
+    res.status(503).type('text/plain').send('Service temporarily unavailable.');
 });
 
 app.use('/api', function (req, res) {

@@ -55,4 +55,32 @@ function localizedEnvelope(data, locale, fallbackLocale) {
     };
 }
 
-module.exports = { resolveRequestedLocale, sendLocalizedJson, localizedEnvelope };
+function isRevisionSourceNotReady(error) {
+    return Boolean(error && (error.code === 'REVISION_SOURCE_NOT_READY'
+        || (error.name === 'RevisionContentError' && Number(error.status) === 503)));
+}
+
+function sendRevisionSourceNotReady(res, error, context) {
+    if (!isRevisionSourceNotReady(error)) return false;
+    console.error('Public revision source is not ready.', {
+        context: context || null,
+        cause: error.code || error.name || 'REVISION_READ_FAILED',
+        details: error.details || null
+    });
+    res.status(503).json({
+        ok: false,
+        error: {
+            code: 'REVISION_SOURCE_NOT_READY',
+            message: 'Published revision content is not ready.'
+        }
+    });
+    return true;
+}
+
+module.exports = {
+    resolveRequestedLocale,
+    sendLocalizedJson,
+    localizedEnvelope,
+    isRevisionSourceNotReady,
+    sendRevisionSourceNotReady
+};

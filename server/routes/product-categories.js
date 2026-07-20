@@ -1,6 +1,11 @@
 const express = require('express');
 const { getRuntimePublicTranslationReadAdapter } = require('../lib/publicTranslationReadAdapter');
-const { resolveRequestedLocale, sendLocalizedJson, localizedEnvelope } = require('../lib/localizedApiResponse');
+const {
+    resolveRequestedLocale,
+    sendLocalizedJson,
+    localizedEnvelope,
+    sendRevisionSourceNotReady
+} = require('../lib/localizedApiResponse');
 
 const router = express.Router();
 const publicRead = getRuntimePublicTranslationReadAdapter();
@@ -16,6 +21,10 @@ router.get('/', function (req, res, next) {
         }
         res.json({ ok: true, data: publicRead.readProductCategories() });
     } catch (err) {
+        if (sendRevisionSourceNotReady(res, err, {
+            route: 'product-categories.list',
+            locale: req.query.locale || null
+        })) return;
         next(err);
     }
 });

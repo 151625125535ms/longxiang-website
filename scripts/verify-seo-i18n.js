@@ -818,14 +818,28 @@ function verifyStaticHtmlRuntimeCacheVersions() {
 
 function verifyPublicApiI18nFieldMapping() {
     const productsRouteSource = readText('server/routes/products.js');
-    const productsSource = productsRouteSource + '\n' + readText('server/lib/publicProducts.js');
+    const productsSource = readText('server/lib/publicProducts.js');
     const categoriesRouteSource = readText('server/routes/product-categories.js');
-    const categoriesSource = categoriesRouteSource + '\n' + readText('server/lib/publicProductTaxonomy.js');
-    const certificationsSource = readText('server/routes/certifications.js');
+    const categoriesSource = readText('server/lib/publicProductTaxonomy.js');
+    const certificationsRouteSource = readText('server/routes/certifications.js');
+    const certificationsSource = readText('server/lib/publicCertifications.js');
+    const adapterSource = readText('server/lib/publicTranslationReadAdapter.js');
+    const localizedCatalogSource = readText('server/lib/localizedPublicCatalog.js');
 
-    assertSourceContains(productsRouteSource, /readPublicProducts\s*\(/, 'server/routes/products.js 应复用 server/lib/publicProducts.js 的公开产品列表读取。');
-    assertSourceContains(productsRouteSource, /readPublicProduct\s*\(/, 'server/routes/products.js 应复用 server/lib/publicProducts.js 的公开产品详情读取。');
-    assertSourceContains(categoriesRouteSource, /readPublicProductCategories\s*\(/, 'server/routes/product-categories.js 应复用 server/lib/publicProductTaxonomy.js 的公开分类读取。');
+    [
+        [productsRouteSource, /getRuntimePublicTranslationReadAdapter\s*\(/, '产品路由应使用统一公开翻译读取适配器。'],
+        [productsRouteSource, /readLocalizedProducts\s*\(/, '产品列表 locale 模式应使用规范化翻译读取。'],
+        [productsRouteSource, /readLocalizedProduct\s*\(/, '产品详情 locale 模式应使用规范化翻译读取。'],
+        [categoriesRouteSource, /readLocalizedProductCategories\s*\(/, '分类 locale 模式应使用规范化翻译读取。'],
+        [certificationsRouteSource, /readLocalizedCertifications\s*\(/, '证书 locale 模式应使用规范化翻译读取。'],
+        [adapterSource, /readPublicProducts\s*\(/, '无 locale 产品接口必须保留 legacy 公开读取。'],
+        [adapterSource, /readPublicProductCategories\s*\(/, '无 locale 分类接口必须保留 legacy 公开读取。'],
+        [adapterSource, /readPublicCertifications\s*\(/, '无 locale 证书接口必须保留 legacy 公开读取。'],
+        [localizedCatalogSource, /revisionLocaleContext\s*\(/, 'revision catalog 应从 locale registry 解析公开语言。'],
+        [localizedCatalogSource, /readRevisionLocalizedProducts\s*\(/, 'revision catalog 缺少动态产品读取入口。'],
+        [localizedCatalogSource, /readRevisionLocalizedProductCategories\s*\(/, 'revision catalog 缺少动态分类读取入口。'],
+        [localizedCatalogSource, /readRevisionLocalizedCertifications\s*\(/, 'revision catalog 缺少动态证书读取入口。']
+    ].forEach((check) => assertSourceContains(check[0], check[1], check[2]));
 
     [
         'nameFr', 'nameRu',

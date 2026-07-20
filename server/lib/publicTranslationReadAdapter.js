@@ -21,7 +21,9 @@ const {
     compactLocalizedTree
 } = require('./publicContentBlocks');
 const { readRevisionLocalizedContentBlock } = require('./revisionPublicContent');
-const { CONTENT_SCHEMA_VERSION, TRANSLATABLE_FIELDS } = require('./contentTranslationOverlay');
+const { CONTENT_SCHEMA_VERSION } = require('./contentTranslationOverlay');
+const { createRevisionLocalePublicationPolicy } = require('./localePublicationPolicy');
+const contentPresentationI18n = require('../../js/content-presentation-i18n');
 
 const SOURCE_ENV = 'PUBLIC_TRANSLATION_READ_SOURCE';
 const LOCALE_SUFFIX = Object.freeze({ en: '', ar: 'Ar', fr: 'Fr', ru: 'Ru' });
@@ -180,91 +182,34 @@ function readRevisionCompatibleCertifications(dbValue) {
     return applyCertificationRevisions(readPublicCertifications(db).map(clone), certificationRevisionRows(db));
 }
 
-function setLocalizedField(target, baseField, locale, value) {
-    const suffix = LOCALE_SUFFIX[locale];
-    if (suffix === undefined) return;
-    target[baseField + suffix] = value == null ? '' : value;
+function readRevisionPresentationProducts(locale, dbValue, registryValue) {
+    return readRevisionLocalizedProducts(locale, dbValue, registryValue);
 }
 
-function mergeLocalizedProduct(target, localized, locale, includeDetails) {
-    if (!target || !localized) return target;
-    ['categoryLabel', 'groupLabel', 'subCategoryLabel'].forEach(function (field) {
-        if (Object.prototype.hasOwnProperty.call(localized, field)) setLocalizedField(target, field, locale, localized[field]);
-    });
-    target.capacities = clone(localized.capacities || []);
-    target.voltages = clone(localized.voltages || []);
-    if (includeDetails) target.specs = clone(localized.specs || []);
-    return target;
+function readRevisionPresentationProduct(identifier, locale, dbValue, registryValue) {
+    return readRevisionLocalizedProduct(identifier, locale, dbValue, registryValue);
 }
 
-function readRevisionPresentationProducts(locale, dbValue) {
-    const db = dbValue || getDb();
-    const products = readRevisionCompatibleProducts(db);
-    const localized = readRevisionLocalizedProducts(locale, db);
-    const byIdentifier = new Map(localized.map(function (product) { return [String(product.id), product]; }));
-    return products.map(function (product) {
-        return mergeLocalizedProduct(product, byIdentifier.get(String(product.id)), locale, false);
-    });
-}
-
-function readRevisionPresentationProduct(identifier, locale, dbValue) {
-    const db = dbValue || getDb();
-    const product = readRevisionCompatibleProduct(identifier, db);
-    if (!product) return null;
-    const localized = readRevisionLocalizedProduct(identifier, locale, db);
-    if (!localized) {
-        throw new PublicTranslationReadError('REVISION_PRODUCT_MISSING', 'Published product revision is missing for the requested locale.', {
-            identifier: String(identifier), locale
+function applyContentPresentationCompatibility(slug, neutralValue, localizedValue, locale) {
+    if (Array.isArray(localizedValue)) {
+        return localizedValue.map(function (item, index) {
+            const neutral = Array.isArray(neutralValue) ? neutralValue[index] : undefined;
+            return applyContentPresentationCompatibility(slug, neutral, item, locale);
         });
     }
-    return mergeLocalizedProduct(product, localized, locale, true);
-}
-
-function canDecorateArrayItems(neutral, localized) {
-    return Array.isArray(neutral)
-        && Array.isArray(localized)
-        && neutral.length === localized.length
-        && neutral.every(function (item, index) {
-            return item && localized[index]
-                && typeof item === 'object'
-                && typeof localized[index] === 'object'
-                && !Array.isArray(item)
-                && !Array.isArray(localized[index]);
-        });
-}
-
-function decoratePresentationTree(neutralValue, localizedValue, locale) {
-    if (canDecorateArrayItems(neutralValue, localizedValue)) {
-        return neutralValue.map(function (item, index) {
-            return decoratePresentationTree(item, localizedValue[index], locale);
-        });
-    }
-    if (!neutralValue || typeof neutralValue !== 'object' || Array.isArray(neutralValue)
-        || !localizedValue || typeof localizedValue !== 'object' || Array.isArray(localizedValue)) {
-        return clone(neutralValue);
-    }
-    const result = clone(neutralValue);
-    const suffix = LOCALE_SUFFIX[locale];
-    Object.keys(localizedValue).forEach(function (key) {
-        const neutral = neutralValue[key];
-        const localized = localizedValue[key];
-        if (TRANSLATABLE_FIELDS.has(key)) {
-            if (canDecorateArrayItems(neutral, localized)
-                || (neutral && localized && typeof neutral === 'object' && typeof localized === 'object'
-                    && !Array.isArray(neutral) && !Array.isArray(localized))) {
-                result[key] = decoratePresentationTree(neutral, localized, locale);
-            } else if (locale === 'en') {
-                result[key] = clone(localized);
-            } else if (suffix) {
-                result[key + suffix] = clone(localized);
-            }
-            return;
-        }
-        if (canDecorateArrayItems(neutral, localized)
-            || (neutral && localized && typeof neutral === 'object' && typeof localized === 'object'
-                && !Array.isArray(neutral) && !Array.isArray(localized))) {
-            result[key] = decoratePresentationTree(neutral, localized, locale);
-        }
+    if (!localizedValue || typeof localizedValue !== 'object') return clone(localizedValue);
+    const neutral = neutralValue && typeof neutralValue === 'object' && !Array.isArray(neutralValue)
+        ? neutralValue
+        : {};
+    const result = Object.keys(localizedValue).reduce(function (out, key) {
+        out[key] = applyContentPresentationCompatibility(slug, neutral[key], localizedValue[key], locale);
+        return out;
+    }, {});
+    if (slug !== 'contact' || !result.name) return result;
+    const pack = contentPresentationI18n.CONTACT_FIELD_TEXT_FALLBACKS[locale] || {};
+    ['label', 'placeholder'].forEach(function (key) {
+        const fallback = pack[key] && pack[key][result.name];
+        if (fallback && localizedValue[key] === neutral[key]) result[key] = fallback;
     });
     return result;
 }
@@ -280,7 +225,7 @@ function readRevisionPresentationContentBlock(slug, locale, dbValue, registryVal
     const neutralBody = compactLocalizedTree(legacy.body, 'en', localeCodes);
     return {
         ...localized,
-        body: decoratePresentationTree(neutralBody, localized.body, locale)
+        body: applyContentPresentationCompatibility(slug, neutralBody, localized.body, locale)
     };
 }
 
@@ -308,8 +253,8 @@ function revisionReadiness(dbValue, registryValue) {
     const registry = registryValue || loadLocaleRegistry();
     const locales = registry.publicEntries.map(function (entry) { return entry.code; });
     const blockers = [];
-    if (!locales.length || locales.some(function (locale) { return LOCALE_SUFFIX[locale] === undefined; })) {
-        blockers.push({ code: 'UNSUPPORTED_PUBLIC_LOCALE_SET', locales });
+    if (!locales.length) {
+        blockers.push({ code: 'EMPTY_PUBLIC_LOCALE_SET', locales });
         return { ready: false, locales, blockers };
     }
     [
@@ -369,12 +314,24 @@ function revisionReadiness(dbValue, registryValue) {
     return { ready: blockers.length === 0, locales, blockers };
 }
 
-function assertRevisionReady(db, registry) {
-    const report = revisionReadiness(db, registry);
-    if (!report.ready) {
-        throw new PublicTranslationReadError('REVISION_SOURCE_NOT_READY', 'Published revision data is incomplete.', report);
-    }
-    return report;
+function findPublishedProductEntityId(db, identifierValue) {
+    const identifier = String(identifierValue || '').trim();
+    if (!identifier) return null;
+    const direct = db.prepare(`
+        SELECT id FROM products
+        WHERE status = 'published' AND (legacy_id = ? OR slug = ?)
+        LIMIT 1
+    `).get(identifier, identifier);
+    if (direct) return Number(direct.id);
+    const aliases = db.prepare(`
+        SELECT id, aliases_json FROM products
+        WHERE status = 'published' AND aliases_json IS NOT NULL AND aliases_json != ''
+    `).all();
+    const matched = aliases.find(function (row) {
+        try { return JSON.parse(row.aliases_json || '[]').map(String).indexOf(identifier) !== -1; }
+        catch (error) { return false; }
+    });
+    return matched ? Number(matched.id) : null;
 }
 
 function createPublicTranslationReadAdapter(options) {
@@ -382,8 +339,31 @@ function createPublicTranslationReadAdapter(options) {
     const db = options.db || getDb();
     const registry = options.registry || loadLocaleRegistry();
     const source = resolvePublicTranslationReadSource(options.source);
-    const readiness = source === 'revision' ? assertRevisionReady(db, registry) : null;
+    const readiness = source === 'revision' ? revisionReadiness(db, registry) : null;
+    const publicationPolicy = source === 'revision'
+        ? createRevisionLocalePublicationPolicy({ db, registry })
+        : null;
     const localeCodes = registry.entries.map(function (entry) { return entry.code; });
+    function publicLocale(localeValue) {
+        const entry = registry.get(localeValue);
+        if (!entry || !entry.isPublic) {
+            throw new PublicTranslationReadError(
+                'LOCALE_NOT_PUBLIC',
+                'Public translation reads require a supported locale.',
+                { locale: String(localeValue || '').trim().toLowerCase() }
+            );
+        }
+        return entry.code;
+    }
+    function assertSourceReady() {
+        if (source === 'revision' && !readiness.ready) {
+            throw new PublicTranslationReadError(
+                'REVISION_SOURCE_NOT_READY',
+                'Published revision data is incomplete.',
+                readiness
+            );
+        }
+    }
     return Object.freeze({
         source,
         readiness,
@@ -400,36 +380,77 @@ function createPublicTranslationReadAdapter(options) {
             return readPublicCertifications(db);
         },
         readPresentationProducts: function (locale) {
-            return source === 'revision' ? readRevisionPresentationProducts(locale, db) : readPublicProducts(db);
+            const code = publicLocale(locale);
+            assertSourceReady();
+            return source === 'revision'
+                ? readRevisionPresentationProducts(code, db, registry)
+                : readPublicProducts(db);
         },
         readPresentationProduct: function (identifier, locale) {
-            return source === 'revision' ? readRevisionPresentationProduct(identifier, locale, db) : readPublicProduct(identifier, db);
+            const code = publicLocale(locale);
+            assertSourceReady();
+            if (source !== 'revision') return readPublicProduct(identifier, db);
+            const product = readRevisionPresentationProduct(identifier, code, db, registry);
+            if (!product) return null;
+            const entityId = findPublishedProductEntityId(db, identifier);
+            const matrix = entityId == null ? {} : publicationPolicy.publicationMatrix({
+                entityType: 'product',
+                entityIds: [entityId]
+            });
+            return {
+                ...product,
+                publication: { locales: entityId == null ? [] : (matrix[entityId] || []) }
+            };
         },
-        readPresentationProductCategories: function () {
-            return source === 'revision' ? readRevisionCompatibleProductCategories(db) : readPublicProductCategories(db);
+        readPresentationProductCategories: function (locale) {
+            const code = publicLocale(locale);
+            assertSourceReady();
+            return source === 'revision'
+                ? readRevisionLocalizedProductCategories(code, db, registry)
+                : readPublicProductCategories(db);
         },
         readLocalizedProducts: function (locale) {
-            return source === 'revision' ? readRevisionLocalizedProducts(locale, db) : readLocalizedProducts(locale, db);
+            const code = publicLocale(locale);
+            assertSourceReady();
+            return source === 'revision'
+                ? readRevisionLocalizedProducts(code, db, registry)
+                : readLocalizedProducts(code, db);
         },
         readLocalizedProduct: function (identifier, locale) {
-            return source === 'revision' ? readRevisionLocalizedProduct(identifier, locale, db) : readLocalizedProduct(identifier, locale, db);
+            const code = publicLocale(locale);
+            assertSourceReady();
+            return source === 'revision'
+                ? readRevisionLocalizedProduct(identifier, code, db, registry)
+                : readLocalizedProduct(identifier, code, db);
         },
         readLocalizedProductCategories: function (locale) {
-            return source === 'revision' ? readRevisionLocalizedProductCategories(locale, db) : readLocalizedProductCategories(locale, db);
+            const code = publicLocale(locale);
+            assertSourceReady();
+            return source === 'revision'
+                ? readRevisionLocalizedProductCategories(code, db, registry)
+                : readLocalizedProductCategories(code, db);
         },
         readLocalizedCertifications: function (locale) {
-            return source === 'revision' ? readRevisionLocalizedCertifications(locale, db) : readLocalizedCertifications(locale, db);
+            const code = publicLocale(locale);
+            assertSourceReady();
+            return source === 'revision'
+                ? readRevisionLocalizedCertifications(code, db, registry)
+                : readLocalizedCertifications(code, db);
         },
         readContentBlock: function (slug) {
             return readPublicContentBlock(slug, db);
         },
         readPresentationContentBlock: function (slug, locale) {
-            if (source === 'revision') return readRevisionPresentationContentBlock(slug, locale, db, registry);
+            const code = publicLocale(locale);
+            assertSourceReady();
+            if (source === 'revision') return readRevisionPresentationContentBlock(slug, code, db, registry);
             return readPublicContentBlock(slug, db);
         },
         readLocalizedContentBlock: function (slug, locale) {
-            if (source === 'revision') return readRevisionLocalizedContentBlock(slug, locale, db, registry);
-            return compactLocalizedContentBlock(readPublicContentBlock(slug, db), locale, localeCodes);
+            const code = publicLocale(locale);
+            assertSourceReady();
+            if (source === 'revision') return readRevisionLocalizedContentBlock(slug, code, db, registry);
+            return compactLocalizedContentBlock(readPublicContentBlock(slug, db), code, localeCodes);
         }
     });
 }

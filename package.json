@@ -30,6 +30,7 @@
     "test:translation-stage-b": "node scripts/test-translation-stage-b.js && node scripts/test-translation-backfill-stage-b.js && node scripts/test-translation-admin-integration.js && node scripts/test-translation-admin-browser.js",
     "test:translation-stage-c1": "node scripts/test-content-overlay-stage-c1.js",
     "test:translation-stage-ac-write": "node scripts/test-content-block-lifecycle-stage-ac.js",
+    "test:translation-stage-ac-read": "node scripts/test-registry-public-read-stage-ac.js",
     "test:acceptance:db-copy": "node scripts/run-acceptance-on-db-copy.js",
     "translations:audit-writers": "node scripts/audit-translation-write-entrypoints.js",
     "translations:audit-parity": "node scripts/audit-public-translation-read-parity.js",

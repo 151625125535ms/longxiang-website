@@ -21,8 +21,17 @@ function localeFieldSuffix(localeCode) {
     return localeCode.charAt(0).toUpperCase() + localeCode.slice(1);
 }
 
+function isNormalizedLocalizedProduct(product, localeCode) {
+    return Boolean(product
+        && product.localization
+        && String(product.localization.requestedLocale || '').toLowerCase() === String(localeCode || '').toLowerCase());
+}
+
 function localizedProductValue(product, baseField, localeCode) {
     if (!product || !baseField) return '';
+    if (isNormalizedLocalizedProduct(product, localeCode)) {
+        return String(product[baseField] || '').trim();
+    }
     const suffix = localeFieldSuffix(localeCode);
     const localizedKey = suffix ? baseField + suffix : '';
     const localized = localizedKey ? product[localizedKey] : '';
@@ -31,6 +40,11 @@ function localizedProductValue(product, baseField, localeCode) {
 
 function exactLocalizedProductValue(product, baseField, localeCode) {
     if (!product || !baseField) return '';
+    if (isNormalizedLocalizedProduct(product, localeCode)) {
+        const fieldMeta = product.localization.fields && product.localization.fields[baseField];
+        if (fieldMeta && fieldMeta.fallbackApplied) return '';
+        return String(product[baseField] || '').trim();
+    }
     const suffix = localeFieldSuffix(localeCode);
     const key = suffix ? baseField + suffix : baseField;
     return String(product[key] || '').trim();
@@ -193,8 +207,11 @@ function stripManagedHeadTags(html) {
 
 function renderProductDetailSeoHtml(html, product, locale, origin) {
     const localeCode = locale && locale.code || 'en';
+    const publishedLocales = product && product.publication && Array.isArray(product.publication.locales)
+        ? new Set(product.publication.locales)
+        : null;
     const entries = localeEntries().filter(function (entry) {
-        return entry.includeInSitemap;
+        return entry.includeInSitemap && (!publishedLocales || publishedLocales.has(entry.code));
     });
     const defaultLocale = entries.find(function (entry) {
         return !entry.pathPrefix;
@@ -234,6 +251,7 @@ function renderProductDetailSeoHtml(html, product, locale, origin) {
 }
 
 module.exports = {
+    isNormalizedLocalizedProduct,
     localizedProductValue,
     exactLocalizedProductValue,
     productPublicIdentifier,

@@ -57,13 +57,13 @@
         return repairFrenchText(pack[trimmed] || value, locale);
     }
 
-    function localized(item, key, locale, pageSlug) {
+    function localized(item, key, locale, pageSlug, normalized) {
         if (!item) return '';
         locale = String(locale || 'en').toLowerCase();
         var direct = item[key];
-        var value = '';
-        if (direct && typeof direct === 'object' && !Array.isArray(direct) && hasValue(direct[locale])) value = direct[locale];
-        if (locale !== 'en') {
+        var value = normalized && hasValue(direct) ? direct : '';
+        if (!normalized && direct && typeof direct === 'object' && !Array.isArray(direct) && hasValue(direct[locale])) value = direct[locale];
+        if (!normalized && locale !== 'en') {
             var suffix = locale.charAt(0).toUpperCase() + locale.slice(1);
             var snake = camelToSnake(key);
             var candidates = [key + suffix, snake + '_' + locale, key + '_' + locale];
@@ -75,7 +75,7 @@
         if (Array.isArray(value)) return value.map(function (entry) { return typeof entry === 'string' ? fallbackText(entry, locale, pageSlug) : entry; });
         var contactPack = pageSlug === 'contact' && (i18n.CONTACT_FIELD_TEXT_FALLBACKS[locale] || {});
         var contactFallback = contactPack && contactPack[key] && item.name ? contactPack[key][item.name] : '';
-        if (contactFallback && (!hasValue(value) || value === direct)) return contactFallback;
+        if (!normalized && contactFallback && (!hasValue(value) || value === direct)) return contactFallback;
         return typeof value === 'string' ? fallbackText(value, locale, pageSlug) : value;
     }
 
@@ -140,14 +140,15 @@
     function context(options, pageSlug) {
         options = options || {};
         var locale = String(options.locale || 'en');
+        var normalized = options.normalized === true;
         var prefix = locale === 'en' ? '' : '../';
         return {
             locale: locale,
             isArabic: locale === 'ar',
             pageSlug: pageSlug || '',
-            localized: function (item, key) { return localized(item, key, locale, pageSlug); },
+            localized: function (item, key) { return localized(item, key, locale, pageSlug, normalized); },
             localizedList: function (item, key) {
-                var value = localized(item, key, locale, pageSlug);
+                var value = localized(item, key, locale, pageSlug, normalized);
                 return Array.isArray(value) ? value : [];
             },
             asset: function (value) {

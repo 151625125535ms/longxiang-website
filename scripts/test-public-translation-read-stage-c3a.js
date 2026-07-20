@@ -18,6 +18,7 @@ const {
     createPublicTranslationReadAdapter,
     createRuntimePublicTranslationReadAdapter
 } = require('../server/lib/publicTranslationReadAdapter');
+const { productSeoTitle } = require('../server/lib/productDetailSeoRenderer');
 const {
     comparePublicTranslationSources,
     databaseFingerprint,
@@ -108,8 +109,10 @@ function assertMissingRevisionFailsClosed(db, registry) {
     assert(row, 'missing published Arabic product revision fixture');
     db.prepare("UPDATE product_translations SET revision_state = 'draft' WHERE id = ?").run(row.id);
     try {
+        const adapter = createPublicTranslationReadAdapter({ db, registry, source: 'revision' });
+        assert.strictEqual(adapter.readiness.ready, false);
         assert.throws(function () {
-            createPublicTranslationReadAdapter({ db, registry, source: 'revision' });
+            adapter.readLocalizedProducts('ar');
         }, function (error) {
             return error instanceof PublicTranslationReadError
                 && error.code === 'REVISION_SOURCE_NOT_READY';
@@ -242,6 +245,19 @@ async function run() {
         assertSourceSwitch(db, registry);
         assertMissingRevisionFailsClosed(db, registry);
         assertQueryBudgets(db, registry);
+
+        const normalizedReader = createPublicTranslationReadAdapter({ db, registry, source: 'revision' });
+        const normalizedSample = normalizedReader.readPresentationProduct('anti-short-amorphous', 'ar');
+        const legacyReader = createPublicTranslationReadAdapter({ db, registry, source: 'legacy' });
+        const legacySample = legacyReader.readLocalizedProduct('anti-short-amorphous', 'ar');
+        const legacyPresentationSample = legacyReader.readPresentationProduct('anti-short-amorphous', 'ar');
+        assert(normalizedSample && normalizedSample.localization,
+            'revision presentation product must expose normalized localization metadata');
+        assert.strictEqual(normalizedSample.seoTitle, legacySample.seoTitle,
+            JSON.stringify({ normalizedSample, legacySample, legacyPresentationSample }, null, 2));
+        assert.strictEqual(normalizedSample.localization.fields.seoTitle.fallbackApplied, true);
+        assert(productSeoTitle(normalizedSample, 'ar').indexOf(normalizedSample.name) === 0,
+            'fallback SEO title must be rebuilt from the requested-locale product name');
 
         const beforeRepair = comparePublicTranslationSources({ db, registry });
         assert(beforeRepair.blockers.some(function (blocker) {

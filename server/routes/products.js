@@ -1,6 +1,11 @@
 const express = require('express');
 const { getRuntimePublicTranslationReadAdapter } = require('../lib/publicTranslationReadAdapter');
-const { resolveRequestedLocale, sendLocalizedJson, localizedEnvelope } = require('../lib/localizedApiResponse');
+const {
+    resolveRequestedLocale,
+    sendLocalizedJson,
+    localizedEnvelope,
+    sendRevisionSourceNotReady
+} = require('../lib/localizedApiResponse');
 
 const router = express.Router();
 const publicRead = getRuntimePublicTranslationReadAdapter();
@@ -37,6 +42,7 @@ router.get('/', function (req, res) {
         }
         res.json(result);
     } catch (err) {
+        if (sendRevisionSourceNotReady(res, err, { route: 'products.list', locale: req.query.locale || null })) return;
         res.status(500).json({ error: 'Failed to read products.' });
     }
 });
@@ -59,6 +65,11 @@ router.get('/:id', function (req, res) {
         }
         res.json(product);
     } catch (err) {
+        if (sendRevisionSourceNotReady(res, err, {
+            route: 'products.detail',
+            identifier: req.params.id,
+            locale: req.query.locale || null
+        })) return;
         res.status(500).json({ error: 'Failed to read product.' });
     }
 });
