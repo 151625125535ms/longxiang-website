@@ -19,7 +19,7 @@
 - v6 迁移前使用 Node 24 创建仓库外 WAL 在线备份 `/home/ubuntu/longxiang-backups/longxiang-pre-v6-20260714-080154.db`，大小 `4456448` 字节；源库和备份完整性均为 `ok`，Schema 均为 v5，产品统计均为 `57=42 published+0 draft+15 deleted`。
 - 迁移后生产旧产品列与迁移前备份的规范化 SHA-256 均为 `5c62d517e0b6c24c7f50e96e127886ca66ca4d9658ba04b28f628180f4639bf7`，确认旧产品字段未变化。
 - 生产已完成 Schema v7 translation revision、Schema v8 content overlay 和 `PUBLIC_TRANSLATION_READ_SOURCE=revision` 切换；旧固定字段、旧 Patch 和 legacy 读取仍保留为兼容与回退来源。
-- Stage A-C 收口节点 1（`1691a99`）和节点 2（`a1d2f064`）均已提交并部署；生产当前为 `main@a1d2f064`、Schema v8、revision 公开读取模式。四语只读验收及限定 `not-found` 后台写入 canary 已通过，旧字段、旧 Patch 和 legacy 读取继续保留。
+- Stage A-C 收口节点 1（`1691a99`）、节点 2（`a1d2f064`）和 readiness 补修（`4252182`）均已提交并部署；生产为 Schema v8、revision 公开读取模式。四语只读验收及限定 `not-found` 后台写入 canary 已通过，旧字段、旧 Patch 和 legacy 读取继续保留。
 
 ## 运行环境
 
@@ -172,7 +172,7 @@
 - 生产多图试点已完成技术验收，用户侧最终确认仍待完成；在扩大到其他产品前仍需逐项确认图片内容和顺序。
 - 阿语 SEO 已完成代码、Schema v6、42 产品内容审批、全量 dry-run、WAL 在线备份、批量 apply 和 42 个真实阿语页面验收。apply 前备份为 `/home/ubuntu/longxiang-backups/longxiang-arabic-seo-pre-apply-20260714-055546.db`，大小 `4464640` 字节，SHA-256 为 `11ed610994fd02c7b46bca2c63b8c9add458cb2f8dc8684e97b97f5ea1961a54`，完整性为 `ok`。本次数据 apply 不需要重启或操作 PM2。
 - 搜索引擎控制台状态本次未核验；Google Search Console、Bing Webmaster Tools 的提交和收录状态不应从代码或 sitemap 状态反推。
-- Stage A-C 原三个 Important 已完成生产部署和 `not-found` canary；后续复审发现启动 readiness 尚未验证结构哈希、Schema JSON 和 Overlay 有效性。该定向代码修复在部署验收前仍是待收口项，不影响当前生产四语页面，但暂缓最终架构收口结论。
+- Stage A-C 已正式收口。生产 readiness 会批量验证全部正式 content blocks 的 published revision、结构哈希、Schema JSON、translation JSON 和 Overlay 路径；部署后结果为 `ready=true`、0 blockers，legacy/revision parity 为 448 checks、0 blockers，四语代表性 API/SSR 页面与 planned `pt` 隔离均通过，部署前后数据库逻辑指纹一致。
 - 本清单是时间点事实，不代表永久事实。每次语言、SEO、产品数据、上传链路、部署环境发生变化后都应更新。
 
 ## 快速复核命令
