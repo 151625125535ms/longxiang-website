@@ -27,6 +27,7 @@
     "test:stage2c-snapshot": "node scripts/test-stage2c-public-snapshot.js",
     "test:stage3-search-copy": "node scripts/test-stage3-product-search-copy-patch.js",
     "test:locale-api": "node scripts/test-locale-api-stage-a.js",
+    "test:product-ordering": "node scripts/test-product-ordering.js",
     "test:translation-stage-b": "node scripts/test-translation-stage-b.js && node scripts/test-translation-backfill-stage-b.js && node scripts/test-translation-admin-integration.js && node scripts/test-translation-admin-browser.js",
     "test:translation-stage-c1": "node scripts/test-content-overlay-stage-c1.js",
     "test:translation-stage-ac-write": "node scripts/test-content-block-lifecycle-stage-ac.js",

@@ -61,6 +61,11 @@
         var productSearchTimer = null;
         var productPage = 1;
         var productMeta = { page: 1, pageSize: 20, total: 0 };
+        var productOrderItems = [];
+        var productOrderToken = '';
+        var productOrderDirty = false;
+        var productOrderBusy = false;
+        var draggedProductOrderId = null;
 
         var SEO_LENGTH_RULES = {
             'field-seo-title': { min: 20, max: 70, label: 'SEO 标题' },
@@ -406,6 +411,216 @@
             return null;
         }
 
+        function setProductOrderBusy(busy) {
+            productOrderBusy = !!busy;
+            var saveButton = document.getElementById('product-sort-save');
+            if (saveButton) saveButton.disabled = productOrderBusy || !productOrderDirty;
+            document.querySelectorAll('#product-sort-list button').forEach(function (button) {
+                var row = button.closest('[data-order-id]');
+                var index = row ? productOrderItems.findIndex(function (item) {
+                    return Number(item.id) === Number(row.getAttribute('data-order-id'));
+                }) : -1;
+                var direction = button.getAttribute('data-order-move');
+                var atBoundary = (direction === 'up' && index === 0)
+                    || (direction === 'down' && index === productOrderItems.length - 1);
+                button.disabled = productOrderBusy || atBoundary;
+            });
+        }
+
+        function productOrderStatus(product) {
+            var published = product.status === 'published';
+            return '<span class="badge ' + (published ? 'badge-green' : 'badge-gold') + '">' +
+                (published ? '已发布' : '草稿') + '</span>';
+        }
+
+        function renderProductOrder() {
+            var list = document.getElementById('product-sort-list');
+            var feedback = document.getElementById('product-sort-feedback');
+            var summary = document.getElementById('product-sort-summary');
+            if (!list) return;
+            if (feedback) feedback.style.display = 'none';
+            if (summary) {
+                var publishedCount = productOrderItems.filter(function (item) { return item.status === 'published'; }).length;
+                summary.textContent = '共 ' + productOrderItems.length + ' 个产品，其中 ' + publishedCount + ' 个已发布';
+            }
+            if (!productOrderItems.length) {
+                list.innerHTML = '<div class="product-sort-empty">暂无可排序产品</div>';
+                setProductOrderBusy(false);
+                return;
+            }
+
+            list.innerHTML = productOrderItems.map(function (product, index) {
+                var title = product.name_cn || product.name_en || product.model || product.legacy_id || product.slug || product.id;
+                var subtitle = product.name_cn && product.name_en ? product.name_en : (product.model || product.legacy_id || product.slug || '');
+                var thumb = product.cover_image
+                    ? '<img src="' + escapeHtml(assetPreviewSrc(product.cover_image)) + '" alt="">'
+                    : '<span class="product-sort-thumb-placeholder" aria-hidden="true"></span>';
+                return '<div class="product-sort-row" draggable="true" data-order-id="' + escapeHtml(product.id) + '">' +
+                    '<span class="product-sort-handle" aria-hidden="true">&#8942;&#8942;</span>' +
+                    '<span class="product-sort-position">' + (index + 1) + '</span>' +
+                    '<span class="product-sort-thumb">' + thumb + '</span>' +
+                    '<span class="product-sort-copy"><strong>' + escapeHtml(title) + '</strong><small>' + escapeHtml(subtitle) + '</small></span>' +
+                    productOrderStatus(product) +
+                    '<span class="product-sort-actions">' +
+                    '<button class="btn btn-icon btn-secondary" type="button" data-order-move="up" aria-label="上移 ' + escapeHtml(title) + '" title="上移"' + (index === 0 ? ' disabled' : '') + '>&#8593;</button>' +
+                    '<button class="btn btn-icon btn-secondary" type="button" data-order-move="down" aria-label="下移 ' + escapeHtml(title) + '" title="下移"' + (index === productOrderItems.length - 1 ? ' disabled' : '') + '>&#8595;</button>' +
+                    '</span></div>';
+            }).join('');
+
+            list.querySelectorAll('[data-order-move]').forEach(function (button) {
+                button.addEventListener('click', function () {
+                    var row = button.closest('[data-order-id]');
+                    moveProductOrderItem(Number(row.getAttribute('data-order-id')), button.getAttribute('data-order-move'));
+                });
+            });
+            list.querySelectorAll('[data-order-id]').forEach(function (row) {
+                row.addEventListener('dragstart', function (event) {
+                    draggedProductOrderId = Number(row.getAttribute('data-order-id'));
+                    row.classList.add('is-dragging');
+                    if (event.dataTransfer) {
+                        event.dataTransfer.effectAllowed = 'move';
+                        event.dataTransfer.setData('text/plain', String(draggedProductOrderId));
+                    }
+                });
+                row.addEventListener('dragover', function (event) {
+                    event.preventDefault();
+                    row.classList.add('is-drop-target');
+                });
+                row.addEventListener('dragleave', function () { row.classList.remove('is-drop-target'); });
+                row.addEventListener('drop', function (event) {
+                    event.preventDefault();
+                    var bounds = row.getBoundingClientRect();
+                    moveDraggedProductOrderItem(
+                        draggedProductOrderId,
+                        Number(row.getAttribute('data-order-id')),
+                        event.clientY > bounds.top + bounds.height / 2
+                    );
+                });
+                row.addEventListener('dragend', function () {
+                    draggedProductOrderId = null;
+                    row.classList.remove('is-dragging');
+                    document.querySelectorAll('#product-sort-list .is-drop-target').forEach(function (target) {
+                        target.classList.remove('is-drop-target');
+                    });
+                });
+            });
+            setProductOrderBusy(productOrderBusy);
+        }
+
+        function markProductOrderDirty() {
+            productOrderDirty = true;
+            markFormDirty();
+            renderProductOrder();
+        }
+
+        function moveProductOrderItem(productId, direction) {
+            if (productOrderBusy) return;
+            var index = productOrderItems.findIndex(function (item) { return Number(item.id) === Number(productId); });
+            var target = direction === 'up' ? index - 1 : index + 1;
+            if (index < 0 || target < 0 || target >= productOrderItems.length) return;
+            var current = productOrderItems[index];
+            productOrderItems[index] = productOrderItems[target];
+            productOrderItems[target] = current;
+            markProductOrderDirty();
+        }
+
+        function moveDraggedProductOrderItem(sourceId, targetId, placeAfter) {
+            if (productOrderBusy || !sourceId || sourceId === targetId) return;
+            var sourceIndex = productOrderItems.findIndex(function (item) { return Number(item.id) === Number(sourceId); });
+            if (sourceIndex < 0) return;
+            var moved = productOrderItems.splice(sourceIndex, 1)[0];
+            var targetIndex = productOrderItems.findIndex(function (item) { return Number(item.id) === Number(targetId); });
+            if (targetIndex < 0) {
+                productOrderItems.splice(sourceIndex, 0, moved);
+                return;
+            }
+            productOrderItems.splice(targetIndex + (placeAfter ? 1 : 0), 0, moved);
+            markProductOrderDirty();
+        }
+
+        function loadProductOrder() {
+            var feedback = document.getElementById('product-sort-feedback');
+            var list = document.getElementById('product-sort-list');
+            if (feedback) {
+                feedback.textContent = '正在加载产品顺序...';
+                feedback.className = 'product-sort-feedback';
+                feedback.style.display = '';
+            }
+            if (list) list.innerHTML = '';
+            productOrderDirty = false;
+            resetFormDirty();
+            setProductOrderBusy(true);
+            return apiRequest('/admin/products/order').then(function (response) {
+                var data = unwrapDataResponse(response) || {};
+                productOrderItems = Array.isArray(data.items) ? data.items : [];
+                productOrderToken = data.order_token || '';
+                productOrderDirty = false;
+                productOrderBusy = false;
+                renderProductOrder();
+            }).catch(function (err) {
+                productOrderBusy = false;
+                if (feedback) {
+                    feedback.textContent = '加载失败：' + err.message;
+                    feedback.className = 'product-sort-feedback is-error';
+                    feedback.style.display = '';
+                }
+                setProductOrderBusy(false);
+            });
+        }
+
+        function openProductSortModal() {
+            setActiveModalTrigger(getActiveElement());
+            resetFormDirty();
+            showModal('product-sort-modal');
+            loadProductOrder();
+        }
+
+        function closeProductSortModal() {
+            if (!productOrderDirty) {
+                resetFormDirty();
+                closeModal('product-sort-modal', true);
+                return;
+            }
+            showConfirm('放弃顺序调整', '当前产品顺序尚未保存，确定关闭吗？').then(function (confirmed) {
+                if (!confirmed) return;
+                productOrderDirty = false;
+                resetFormDirty();
+                closeModal('product-sort-modal', true);
+            });
+        }
+
+        function saveProductOrder() {
+            if (!productOrderDirty || productOrderBusy) return;
+            setProductOrderBusy(true);
+            apiRequest('/admin/products/order', {
+                method: 'PUT',
+                body: {
+                    ordered_ids: productOrderItems.map(function (item) { return Number(item.id); }),
+                    expected_order_token: productOrderToken
+                }
+            }).then(function (response) {
+                var data = unwrapDataResponse(response) || {};
+                productOrderItems = Array.isArray(data.items) ? data.items : productOrderItems;
+                productOrderToken = data.order_token || productOrderToken;
+                productOrderDirty = false;
+                productOrderBusy = false;
+                resetFormDirty();
+                showToast(data.changed ? '产品展示顺序已更新' : '产品顺序没有变化');
+                closeModal('product-sort-modal', true);
+                productPage = 1;
+                loadProducts();
+            }).catch(function (err) {
+                productOrderBusy = false;
+                setProductOrderBusy(false);
+                if (err.code === 'ORDER_CONFLICT' || err.code === 'ORDER_SCOPE_MISMATCH') {
+                    showToast(err.message, 'error');
+                    loadProductOrder();
+                    return;
+                }
+                showToast('保存产品顺序失败：' + err.message, 'error');
+            });
+        }
+
 
         function bindProductBatchButton(id, action) {
             var btn = document.getElementById(id);
@@ -489,6 +704,19 @@
                     showToast('批量导入入口已预留，当前后端未提供导入接口', 'error');
                 });
             }
+
+            var btnSortProducts = document.getElementById('btn-sort-products');
+            if (btnSortProducts) btnSortProducts.addEventListener('click', openProductSortModal);
+            var productSortSave = document.getElementById('product-sort-save');
+            if (productSortSave) productSortSave.addEventListener('click', saveProductOrder);
+            ['product-sort-close', 'product-sort-cancel'].forEach(function (id) {
+                var button = document.getElementById(id);
+                if (button) button.addEventListener('click', closeProductSortModal);
+            });
+            var productSortModal = document.getElementById('product-sort-modal');
+            if (productSortModal) productSortModal.addEventListener('click', function (event) {
+                if (event.target === productSortModal) closeProductSortModal();
+            });
 
             document.querySelectorAll('[data-product-status]').forEach(function (btn) {
                 btn.addEventListener('click', function () {
@@ -1256,6 +1484,9 @@
             clearFieldError: clearFieldError,
             saveProduct: saveProduct,
             deleteProduct: deleteProduct,
+            openProductSortModal: openProductSortModal,
+            loadProductOrder: loadProductOrder,
+            saveProductOrder: saveProductOrder,
             setProductCoverPath: setProductCoverPath,
             getProductUploadPath: getProductUploadPath,
             setProductSubmitDisabled: setProductSubmitDisabled,

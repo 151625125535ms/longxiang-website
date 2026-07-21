@@ -8,7 +8,7 @@
     <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png?v=20260615-lxdq">
     <link rel="stylesheet" href="css/admin-base.css?v=20260628-stage6">
     <link rel="stylesheet" href="css/admin-components.css?v=20260628-stage6">
-    <link rel="stylesheet" href="css/admin.css?v=20260715-translation-stage-b">
+    <link rel="stylesheet" href="css/admin.css?v=20260721-product-ordering">
 </head>
 <body>
     <div class="admin-layout" id="admin-page">
@@ -302,6 +302,10 @@
                             <button class="btn btn-secondary" id="btn-import-products" type="button">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                                 批量导入
+                            </button>
+                            <button class="btn btn-secondary" id="btn-sort-products" type="button">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><polyline points="3 8 5 6 3 4"/><polyline points="3 14 5 12 3 10"/><polyline points="3 20 5 18 3 16"/></svg>
+                                调整顺序
                             </button>
                             <button class="btn btn-secondary" id="btn-refresh-products" type="button">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"/></svg>
@@ -1196,6 +1200,27 @@
             </div>
         </div>
 
+        <div class="modal-overlay" id="product-sort-modal">
+            <div class="modal product-sort-modal" role="dialog" aria-modal="true" aria-labelledby="product-sort-title">
+                <div class="modal-header">
+                    <div>
+                        <h3 id="product-sort-title">产品展示顺序</h3>
+                        <p class="modal-subtitle">拖动产品，或使用上下按钮调整。前台只展示已发布产品，但草稿会保留未来上线位置。</p>
+                    </div>
+                    <button class="modal-close" id="product-sort-close" type="button" aria-label="关闭">×</button>
+                </div>
+                <div class="modal-body product-sort-body">
+                    <div class="product-sort-feedback" id="product-sort-feedback" role="status">正在加载产品顺序...</div>
+                    <div class="product-sort-list" id="product-sort-list" aria-label="产品展示顺序"></div>
+                </div>
+                <div class="modal-footer">
+                    <span class="product-sort-summary" id="product-sort-summary"></span>
+                    <button class="btn btn-secondary" id="product-sort-cancel" type="button">取消</button>
+                    <button class="btn btn-primary" id="product-sort-save" type="button" disabled>保存顺序</button>
+                </div>
+            </div>
+        </div>
+
         <div class="modal-overlay" id="asset-picker-modal">
             <div class="modal modal-wide asset-picker-modal" role="dialog" aria-modal="true" aria-labelledby="asset-picker-title">
                 <div class="modal-header">
@@ -1324,7 +1349,7 @@
     <script src="js/admin-api.js?v=20260628-stage6"></script>
     <script src="js/admin-ui.js?v=20260628-stage6"></script>
     <script src="js/modules/admin-inquiries.js?v=20260628-stage7b1"></script>
-    <script src="js/modules/admin-products.js?v=20260715-translation-stage-b"></script>
+    <script src="js/modules/admin-products.js?v=20260721-product-ordering"></script>
     <script src="js/modules/admin-translations.js?v=20260715-translation-stage-b-review"></script>
     <script src="js/admin.js?v=20260715-translation-stage-b-review"></script>
 </body>

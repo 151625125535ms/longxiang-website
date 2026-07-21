@@ -9,6 +9,7 @@ const { normalizeUploadedFilename } = require('../../lib/filenameEncoding');
 const { sendError, insertAuditLog } = require('./helpers');
 const { syncProductAssetReferences, deleteAssetReferences } = require('../../lib/assetReferences');
 const { deleteProductCardThumbnail, queueProductCardThumbnail } = require('../../lib/productCardThumbnail');
+const { ProductOrderingError, readProductOrder, reorderProducts } = require('../../lib/productOrdering');
 const { syncLegacyTranslations } = require('./translation-compat');
 
 const router = express.Router();
@@ -573,6 +574,47 @@ router.get('/', function (req, res, next) {
     }
 });
 
+router.get('/order', function (req, res, next) {
+    try {
+        const order = readProductOrder(getDb());
+        res.json({
+            ok: true,
+            data: {
+                items: order.items,
+                order_token: order.orderToken
+            }
+        });
+    } catch (err) {
+        next(err);
+    }
+});
+
+router.put('/order', function (req, res, next) {
+    try {
+        const db = getDb();
+        const result = reorderProducts(db, {
+            orderedIds: req.body && req.body.ordered_ids,
+            expectedOrderToken: req.body && req.body.expected_order_token,
+            recordAudit: function (beforeIds, afterIds) {
+                insertAuditLog(db, req, 'product_order', 'active', 'reorder', beforeIds, afterIds);
+            }
+        });
+        res.json({
+            ok: true,
+            data: {
+                items: result.items,
+                order_token: result.orderToken,
+                changed: result.changed
+            }
+        });
+    } catch (err) {
+        if (err instanceof ProductOrderingError) {
+            return sendError(res, err.status, err.code, err.message);
+        }
+        next(err);
+    }
+});
+
 router.get('/:id', function (req, res, next) {
     try {
         const product = getFullProduct(getDb(), req.params.id);
@@ -696,6 +738,9 @@ router.post('/', function (req, res, next) {
         const createProduct = db.transaction(function () {
             const legacyId = makeUniqueProductIdentifier(db, 'legacy_id', firstText(body.legacy_id, body.slug, nameEn), 'product');
             const slug = makeUniqueProductIdentifier(db, 'slug', firstText(body.slug, legacyId, nameEn), 'product');
+            const nextSortOrder = body.sort_order == null
+                ? db.prepare("SELECT COALESCE(MAX(sort_order), 0) + 1 AS value FROM products WHERE status != 'deleted'").get().value
+                : parseInteger(body.sort_order, 0);
             const result = db.prepare(`
                 INSERT INTO products
                     (
@@ -731,7 +776,7 @@ router.post('/', function (req, res, next) {
                 sub_category: categoryMapping.subCategory,
                 aliases_json: aliasesJson,
                 status,
-                sort_order: parseInteger(body.sort_order, 0),
+                sort_order: nextSortOrder,
                 featured: normalizeBool(body.featured, 0),
                 name_en: nameEn,
                 name_ar: body.name_ar ? String(body.name_ar).trim() : '',
@@ -772,7 +817,7 @@ router.post('/', function (req, res, next) {
             return product;
         });
 
-        const product = createProduct();
+        const product = createProduct.immediate();
         queueProductCardThumbnail(productCardThumbnailPayload(product));
         res.status(201).json({ ok: true, data: product });
     } catch (err) {

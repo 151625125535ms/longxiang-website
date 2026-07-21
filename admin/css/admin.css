@@ -3369,6 +3369,115 @@ h1, h2, h3, h4, h5, h6 {
     flex-wrap: nowrap;
 }
 
+.product-sort-modal {
+    max-width: 820px;
+}
+
+.product-sort-body {
+    padding: 0;
+}
+
+.product-sort-feedback,
+.product-sort-empty {
+    padding: 32px 24px;
+    color: var(--color-gray-500);
+    text-align: center;
+}
+
+.product-sort-feedback.is-error {
+    color: #9f1d2b;
+}
+
+.product-sort-list {
+    max-height: min(62vh, 620px);
+    overflow-y: auto;
+}
+
+.product-sort-row {
+    display: grid;
+    grid-template-columns: 26px 38px 54px minmax(0, 1fr) auto 82px;
+    align-items: center;
+    gap: 12px;
+    min-height: 74px;
+    padding: 10px 20px;
+    border-bottom: 1px solid var(--color-gray-200);
+    background: var(--color-white-pure);
+}
+
+.product-sort-row:last-child {
+    border-bottom: 0;
+}
+
+.product-sort-row.is-dragging {
+    opacity: 0.45;
+}
+
+.product-sort-row.is-drop-target {
+    box-shadow: inset 0 2px 0 var(--color-blue);
+}
+
+.product-sort-handle {
+    color: var(--color-gray-400);
+    font-size: 1.1rem;
+    cursor: grab;
+}
+
+.product-sort-position {
+    color: var(--color-gray-500);
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+}
+
+.product-sort-thumb,
+.product-sort-thumb img,
+.product-sort-thumb-placeholder {
+    width: 50px;
+    height: 50px;
+}
+
+.product-sort-thumb img,
+.product-sort-thumb-placeholder {
+    display: block;
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--radius-sm);
+    background: var(--color-gray-50);
+    object-fit: contain;
+}
+
+.product-sort-copy {
+    min-width: 0;
+}
+
+.product-sort-copy strong,
+.product-sort-copy small {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.product-sort-copy strong {
+    color: var(--color-navy);
+    font-size: 0.9rem;
+}
+
+.product-sort-copy small {
+    margin-top: 4px;
+    color: var(--color-gray-500);
+    font-size: 0.76rem;
+}
+
+.product-sort-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.product-sort-summary {
+    margin-right: auto;
+    color: var(--color-gray-500);
+    font-size: 0.8rem;
+}
+
 @media (max-width: 1180px) {
     .product-filter-panel {
         grid-template-columns: minmax(240px, 1fr) minmax(220px, 1fr);
@@ -3421,6 +3530,37 @@ h1, h2, h3, h4, h5, h6 {
     #product-batch-bar .btn {
         width: 100%;
         justify-content: center;
+    }
+
+    .product-sort-row {
+        grid-template-columns: 24px 34px 44px minmax(0, 1fr) 78px;
+        gap: 8px;
+        padding: 10px 12px;
+    }
+
+    .product-sort-row > .badge {
+        grid-column: 4;
+        justify-self: start;
+    }
+
+    .product-sort-actions {
+        grid-column: 5;
+        grid-row: 1 / span 2;
+    }
+
+    .product-sort-thumb,
+    .product-sort-thumb img,
+    .product-sort-thumb-placeholder {
+        width: 42px;
+        height: 42px;
+    }
+
+    .product-sort-modal .modal-footer {
+        flex-wrap: wrap;
+    }
+
+    .product-sort-summary {
+        flex: 1 1 100%;
     }
 }
 
