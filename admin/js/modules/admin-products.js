@@ -66,6 +66,10 @@
         var productOrderDirty = false;
         var productOrderBusy = false;
         var draggedProductOrderId = null;
+        var productOrderScope = 'all';
+        var selectedProductOrderCategoryId = '';
+        var productOrderLastMovedId = null;
+        var productOrderHighlightTimer = null;
 
         var SEO_LENGTH_RULES = {
             'field-seo-title': { min: 20, max: 70, label: 'SEO 标题' },
@@ -414,17 +418,17 @@
         function setProductOrderBusy(busy) {
             productOrderBusy = !!busy;
             var saveButton = document.getElementById('product-sort-save');
-            if (saveButton) saveButton.disabled = productOrderBusy || !productOrderDirty;
-            document.querySelectorAll('#product-sort-list button').forEach(function (button) {
-                var row = button.closest('[data-order-id]');
-                var index = row ? productOrderItems.findIndex(function (item) {
-                    return Number(item.id) === Number(row.getAttribute('data-order-id'));
-                }) : -1;
-                var direction = button.getAttribute('data-order-move');
-                var atBoundary = (direction === 'up' && index === 0)
-                    || (direction === 'down' && index === productOrderItems.length - 1);
-                button.disabled = productOrderBusy || atBoundary;
+            var hasInvalidPosition = !!document.querySelector('#product-sort-list .product-sort-position-input[aria-invalid="true"]');
+            if (saveButton) saveButton.disabled = productOrderBusy || !productOrderDirty || hasInvalidPosition;
+            document.querySelectorAll('#product-sort-list input').forEach(function (input) {
+                input.disabled = productOrderBusy;
             });
+            var categoryOptions = productOrderCategoryOptions();
+            document.querySelectorAll('[data-order-scope]').forEach(function (button) {
+                button.disabled = productOrderBusy || (button.getAttribute('data-order-scope') === 'category' && !categoryOptions.length);
+            });
+            var categorySelect = document.getElementById('product-sort-category');
+            if (categorySelect) categorySelect.disabled = productOrderBusy || !categoryOptions.length;
         }
 
         function productOrderStatus(product) {
@@ -433,45 +437,168 @@
                 (published ? '已发布' : '草稿') + '</span>';
         }
 
+        function productOrderCategoryKey(product) {
+            return product && product.category_id != null ? String(product.category_id) : '__uncategorized';
+        }
+
+        function productOrderCategoryName(product) {
+            if (!product || product.category_id == null) return '未分类';
+            return product.category_name_en || product.category_slug || ('分类 #' + product.category_id);
+        }
+
+        function productOrderCategoryPath(product) {
+            var categoryName = productOrderCategoryName(product);
+            var parentName = product && (product.parent_category_name_en || product.parent_category_slug);
+            return parentName ? parentName + ' / ' + categoryName : categoryName;
+        }
+
+        function productOrderCategoryOptions() {
+            var optionsByKey = {};
+            productOrderItems.forEach(function (product) {
+                var key = productOrderCategoryKey(product);
+                if (!optionsByKey[key]) {
+                    optionsByKey[key] = {
+                        key: key,
+                        categoryId: product.category_id,
+                        name: productOrderCategoryName(product),
+                        sortOrder: Number(product.category_sort_order || 0),
+                        parentId: product.parent_category_id,
+                        parentName: product.parent_category_name_en || product.parent_category_slug || '',
+                        parentSortOrder: Number(product.parent_category_sort_order || 0),
+                        count: 0
+                    };
+                }
+                optionsByKey[key].count += 1;
+            });
+            return Object.keys(optionsByKey).map(function (key) { return optionsByKey[key]; }).sort(function (left, right) {
+                if (left.parentSortOrder !== right.parentSortOrder) return left.parentSortOrder - right.parentSortOrder;
+                if (left.parentName !== right.parentName) return left.parentName.localeCompare(right.parentName);
+                if (left.sortOrder !== right.sortOrder) return left.sortOrder - right.sortOrder;
+                return left.name.localeCompare(right.name);
+            });
+        }
+
+        function renderProductOrderCategorySelect() {
+            var select = document.getElementById('product-sort-category');
+            var field = document.getElementById('product-sort-category-field');
+            var categoryScopeButton = document.querySelector('[data-order-scope="category"]');
+            var options = productOrderCategoryOptions();
+            if (field) field.hidden = productOrderScope !== 'category';
+            if (categoryScopeButton) categoryScopeButton.disabled = productOrderBusy || !options.length;
+            if (!select) return options;
+
+            var availableKeys = options.map(function (option) { return option.key; });
+            if (availableKeys.indexOf(selectedProductOrderCategoryId) === -1) {
+                selectedProductOrderCategoryId = availableKeys[0] || '';
+            }
+
+            var flatOptions = [];
+            var groups = [];
+            var groupsByKey = {};
+            options.forEach(function (option) {
+                var markup = '<option value="' + escapeHtml(option.key) + '">' +
+                    escapeHtml(option.name + '（' + option.count + '）') + '</option>';
+                if (!option.parentName) {
+                    flatOptions.push(markup);
+                    return;
+                }
+                var groupKey = String(option.parentId == null ? option.parentName : option.parentId);
+                if (!groupsByKey[groupKey]) {
+                    groupsByKey[groupKey] = { label: option.parentName, options: [] };
+                    groups.push(groupsByKey[groupKey]);
+                }
+                groupsByKey[groupKey].options.push(markup);
+            });
+            select.innerHTML = flatOptions.join('') + groups.map(function (group) {
+                return '<optgroup label="' + escapeHtml(group.label) + '">' + group.options.join('') + '</optgroup>';
+            }).join('');
+            select.value = selectedProductOrderCategoryId;
+            select.disabled = productOrderBusy || !options.length;
+            return options;
+        }
+
+        function visibleProductOrderItems() {
+            if (productOrderScope !== 'category') return productOrderItems.slice();
+            return productOrderItems.filter(function (product) {
+                return productOrderCategoryKey(product) === selectedProductOrderCategoryId;
+            });
+        }
+
+        function syncProductOrderScopeButtons() {
+            document.querySelectorAll('[data-order-scope]').forEach(function (button) {
+                var active = button.getAttribute('data-order-scope') === productOrderScope;
+                button.classList.toggle('active', active);
+                button.setAttribute('aria-pressed', active ? 'true' : 'false');
+            });
+        }
+
+        function revealMovedProduct() {
+            if (!productOrderLastMovedId) return;
+            var movedId = productOrderLastMovedId;
+            window.requestAnimationFrame(function () {
+                var row = document.querySelector('#product-sort-list [data-order-id="' + movedId + '"]');
+                if (!row) return;
+                row.classList.add('is-repositioned');
+                row.scrollIntoView({ block: 'nearest' });
+                clearTimeout(productOrderHighlightTimer);
+                productOrderHighlightTimer = setTimeout(function () {
+                    row.classList.remove('is-repositioned');
+                    if (productOrderLastMovedId === movedId) productOrderLastMovedId = null;
+                }, 900);
+            });
+        }
+
         function renderProductOrder() {
             var list = document.getElementById('product-sort-list');
             var feedback = document.getElementById('product-sort-feedback');
             var summary = document.getElementById('product-sort-summary');
             if (!list) return;
             if (feedback) feedback.style.display = 'none';
+            var categoryOptions = renderProductOrderCategorySelect();
+            syncProductOrderScopeButtons();
+            if (productOrderScope === 'category' && !categoryOptions.length) productOrderScope = 'all';
+            var visibleItems = visibleProductOrderItems();
             if (summary) {
-                var publishedCount = productOrderItems.filter(function (item) { return item.status === 'published'; }).length;
-                summary.textContent = '共 ' + productOrderItems.length + ' 个产品，其中 ' + publishedCount + ' 个已发布';
+                var publishedCount = visibleItems.filter(function (item) { return item.status === 'published'; }).length;
+                if (productOrderScope === 'category') {
+                    var selected = categoryOptions.find(function (option) { return option.key === selectedProductOrderCategoryId; });
+                    var categoryLabel = selected ? (selected.parentName ? selected.parentName + ' / ' + selected.name : selected.name) : '当前分类';
+                    summary.textContent = categoryLabel + '：共 ' + visibleItems.length + ' 个产品，其中 ' + publishedCount + ' 个已发布；只调整此分类内部顺序';
+                } else {
+                    summary.textContent = '全部产品：共 ' + productOrderItems.length + ' 个，其中 ' + publishedCount + ' 个已发布';
+                }
             }
-            if (!productOrderItems.length) {
-                list.innerHTML = '<div class="product-sort-empty">暂无可排序产品</div>';
+            if (!visibleItems.length) {
+                list.innerHTML = '<div class="product-sort-empty">当前范围暂无可排序产品</div>';
                 setProductOrderBusy(false);
                 return;
             }
 
-            list.innerHTML = productOrderItems.map(function (product, index) {
+            list.innerHTML = visibleItems.map(function (product, index) {
                 var title = product.name_cn || product.name_en || product.model || product.legacy_id || product.slug || product.id;
                 var subtitle = product.name_cn && product.name_en ? product.name_en : (product.model || product.legacy_id || product.slug || '');
+                var categoryPath = productOrderCategoryPath(product);
                 var thumb = product.cover_image
                     ? '<img src="' + escapeHtml(assetPreviewSrc(product.cover_image)) + '" alt="">'
                     : '<span class="product-sort-thumb-placeholder" aria-hidden="true"></span>';
-                return '<div class="product-sort-row" draggable="true" data-order-id="' + escapeHtml(product.id) + '">' +
+                return '<div class="product-sort-row" draggable="true" data-order-id="' + escapeHtml(product.id) + '" data-category-id="' + escapeHtml(productOrderCategoryKey(product)) + '">' +
                     '<span class="product-sort-handle" aria-hidden="true">&#8942;&#8942;</span>' +
-                    '<span class="product-sort-position">' + (index + 1) + '</span>' +
+                    '<span class="product-sort-position-control">' +
+                    '<input class="product-sort-position-input" type="number" min="1" max="' + visibleItems.length + '" step="1" inputmode="numeric" value="' + (index + 1) + '" aria-label="将 ' + escapeHtml(title) + ' 移动到序号" aria-invalid="false">' +
+                    '<small class="product-sort-position-error" aria-live="polite"></small></span>' +
                     '<span class="product-sort-thumb">' + thumb + '</span>' +
-                    '<span class="product-sort-copy"><strong>' + escapeHtml(title) + '</strong><small>' + escapeHtml(subtitle) + '</small></span>' +
-                    productOrderStatus(product) +
-                    '<span class="product-sort-actions">' +
-                    '<button class="btn btn-icon btn-secondary" type="button" data-order-move="up" aria-label="上移 ' + escapeHtml(title) + '" title="上移"' + (index === 0 ? ' disabled' : '') + '>&#8593;</button>' +
-                    '<button class="btn btn-icon btn-secondary" type="button" data-order-move="down" aria-label="下移 ' + escapeHtml(title) + '" title="下移"' + (index === productOrderItems.length - 1 ? ' disabled' : '') + '>&#8595;</button>' +
-                    '</span></div>';
+                    '<span class="product-sort-copy"><strong>' + escapeHtml(title) + '</strong><small>' + escapeHtml(subtitle) + '</small>' +
+                    (productOrderScope === 'all' ? '<span class="product-sort-category-label">' + escapeHtml(categoryPath) + '</span>' : '') + '</span>' +
+                    productOrderStatus(product) + '</div>';
             }).join('');
 
-            list.querySelectorAll('[data-order-move]').forEach(function (button) {
-                button.addEventListener('click', function () {
-                    var row = button.closest('[data-order-id]');
-                    moveProductOrderItem(Number(row.getAttribute('data-order-id')), button.getAttribute('data-order-move'));
+            list.querySelectorAll('.product-sort-position-input').forEach(function (input) {
+                input.addEventListener('keydown', function (event) {
+                    if (event.key !== 'Enter') return;
+                    event.preventDefault();
+                    commitProductOrderPosition(input);
                 });
+                input.addEventListener('blur', function () { commitProductOrderPosition(input); });
             });
             list.querySelectorAll('[data-order-id]').forEach(function (row) {
                 row.addEventListener('dragstart', function (event) {
@@ -505,37 +632,87 @@
                 });
             });
             setProductOrderBusy(productOrderBusy);
+            revealMovedProduct();
         }
 
-        function markProductOrderDirty() {
+        function markProductOrderDirty(movedId) {
             productOrderDirty = true;
+            productOrderLastMovedId = Number(movedId) || null;
             markFormDirty();
             renderProductOrder();
         }
 
-        function moveProductOrderItem(productId, direction) {
-            if (productOrderBusy) return;
-            var index = productOrderItems.findIndex(function (item) { return Number(item.id) === Number(productId); });
-            var target = direction === 'up' ? index - 1 : index + 1;
-            if (index < 0 || target < 0 || target >= productOrderItems.length) return;
-            var current = productOrderItems[index];
-            productOrderItems[index] = productOrderItems[target];
-            productOrderItems[target] = current;
-            markProductOrderDirty();
+        function replaceVisibleProductOrderItems(orderedVisibleItems) {
+            if (productOrderScope !== 'category') {
+                productOrderItems = orderedVisibleItems.slice();
+                return true;
+            }
+            var slots = [];
+            productOrderItems.forEach(function (product, index) {
+                if (productOrderCategoryKey(product) === selectedProductOrderCategoryId) slots.push(index);
+            });
+            if (slots.length !== orderedVisibleItems.length) return false;
+            slots.forEach(function (slot, index) { productOrderItems[slot] = orderedVisibleItems[index]; });
+            return true;
+        }
+
+        function moveProductOrderItemToIndex(productId, targetIndex) {
+            if (productOrderBusy) return false;
+            var visibleItems = visibleProductOrderItems();
+            var sourceIndex = visibleItems.findIndex(function (item) { return Number(item.id) === Number(productId); });
+            if (sourceIndex < 0 || targetIndex < 0 || targetIndex >= visibleItems.length || sourceIndex === targetIndex) return false;
+            var moved = visibleItems.splice(sourceIndex, 1)[0];
+            visibleItems.splice(targetIndex, 0, moved);
+            if (!replaceVisibleProductOrderItems(visibleItems)) return false;
+            markProductOrderDirty(productId);
+            return true;
+        }
+
+        function setProductOrderPositionError(input, message) {
+            input.setAttribute('aria-invalid', message ? 'true' : 'false');
+            var control = input.closest('.product-sort-position-control');
+            var error = control ? control.querySelector('.product-sort-position-error') : null;
+            if (error) error.textContent = message || '';
+            var saveButton = document.getElementById('product-sort-save');
+            var hasInvalidPosition = !!document.querySelector('#product-sort-list .product-sort-position-input[aria-invalid="true"]');
+            if (saveButton) saveButton.disabled = productOrderBusy || !productOrderDirty || hasInvalidPosition;
+        }
+
+        function commitProductOrderPosition(input) {
+            if (!input || productOrderBusy || input.getAttribute('data-order-committing') === 'true') return;
+            var row = input.closest('[data-order-id]');
+            if (!row) return;
+            var visibleItems = visibleProductOrderItems();
+            var productId = Number(row.getAttribute('data-order-id'));
+            var targetPosition = Number(input.value);
+            if (!Number.isInteger(targetPosition) || targetPosition < 1 || targetPosition > visibleItems.length) {
+                setProductOrderPositionError(input, '请输入 1-' + visibleItems.length);
+                return;
+            }
+            setProductOrderPositionError(input, '');
+            input.setAttribute('data-order-committing', 'true');
+            var moved = moveProductOrderItemToIndex(productId, targetPosition - 1);
+            if (!moved) {
+                var currentIndex = visibleItems.findIndex(function (item) { return Number(item.id) === productId; });
+                input.value = String(currentIndex + 1);
+                input.removeAttribute('data-order-committing');
+            }
         }
 
         function moveDraggedProductOrderItem(sourceId, targetId, placeAfter) {
             if (productOrderBusy || !sourceId || sourceId === targetId) return;
-            var sourceIndex = productOrderItems.findIndex(function (item) { return Number(item.id) === Number(sourceId); });
-            if (sourceIndex < 0) return;
-            var moved = productOrderItems.splice(sourceIndex, 1)[0];
-            var targetIndex = productOrderItems.findIndex(function (item) { return Number(item.id) === Number(targetId); });
-            if (targetIndex < 0) {
-                productOrderItems.splice(sourceIndex, 0, moved);
-                return;
-            }
-            productOrderItems.splice(targetIndex + (placeAfter ? 1 : 0), 0, moved);
-            markProductOrderDirty();
+            var visibleItems = visibleProductOrderItems();
+            var sourceIndex = visibleItems.findIndex(function (item) { return Number(item.id) === Number(sourceId); });
+            var targetIndex = visibleItems.findIndex(function (item) { return Number(item.id) === Number(targetId); });
+            if (sourceIndex < 0 || targetIndex < 0) return;
+            var moved = visibleItems.splice(sourceIndex, 1)[0];
+            if (sourceIndex < targetIndex) targetIndex -= 1;
+            var insertionIndex = targetIndex + (placeAfter ? 1 : 0);
+            insertionIndex = Math.max(0, Math.min(insertionIndex, visibleItems.length));
+            if (insertionIndex === sourceIndex) return;
+            visibleItems.splice(insertionIndex, 0, moved);
+            if (!replaceVisibleProductOrderItems(visibleItems)) return;
+            markProductOrderDirty(sourceId);
         }
 
         function loadProductOrder() {
@@ -571,6 +748,9 @@
         function openProductSortModal() {
             setActiveModalTrigger(getActiveElement());
             resetFormDirty();
+            productOrderScope = 'all';
+            selectedProductOrderCategoryId = '';
+            productOrderLastMovedId = null;
             showModal('product-sort-modal');
             loadProductOrder();
         }
@@ -707,6 +887,18 @@
 
             var btnSortProducts = document.getElementById('btn-sort-products');
             if (btnSortProducts) btnSortProducts.addEventListener('click', openProductSortModal);
+            document.querySelectorAll('[data-order-scope]').forEach(function (button) {
+                button.addEventListener('click', function () {
+                    if (productOrderBusy || button.disabled) return;
+                    productOrderScope = button.getAttribute('data-order-scope') === 'category' ? 'category' : 'all';
+                    renderProductOrder();
+                });
+            });
+            var productSortCategory = document.getElementById('product-sort-category');
+            if (productSortCategory) productSortCategory.addEventListener('change', function () {
+                selectedProductOrderCategoryId = productSortCategory.value || '';
+                renderProductOrder();
+            });
             var productSortSave = document.getElementById('product-sort-save');
             if (productSortSave) productSortSave.addEventListener('click', saveProductOrder);
             ['product-sort-close', 'product-sort-cancel'].forEach(function (id) {

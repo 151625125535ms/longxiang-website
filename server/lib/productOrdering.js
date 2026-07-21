@@ -16,7 +16,14 @@ function productOrderRows(db) {
     return db.prepare(`
         SELECT
             p.id, p.legacy_id, p.slug, p.name_cn, p.name_en, p.model,
-            p.status, p.sort_order, p.version,
+            p.status, p.sort_order, p.version, p.category_id,
+            category.slug AS category_slug,
+            category.name_en AS category_name_en,
+            category.sort_order AS category_sort_order,
+            parent.id AS parent_category_id,
+            parent.slug AS parent_category_slug,
+            parent.name_en AS parent_category_name_en,
+            parent.sort_order AS parent_category_sort_order,
             COALESCE((
                 SELECT pm.path
                 FROM product_media pm
@@ -25,6 +32,8 @@ function productOrderRows(db) {
                 LIMIT 1
             ), '') AS cover_image
         FROM products p
+        LEFT JOIN categories category ON category.id = p.category_id
+        LEFT JOIN categories parent ON parent.id = category.parent_id
         WHERE p.status != 'deleted'
         ORDER BY p.sort_order, p.id
     `).all();
@@ -32,7 +41,11 @@ function productOrderRows(db) {
 
 function productOrderToken(rows) {
     const snapshot = rows.map(function (row) {
-        return { id: Number(row.id), sort_order: Number(row.sort_order || 0) };
+        return {
+            id: Number(row.id),
+            sort_order: Number(row.sort_order || 0),
+            category_id: row.category_id == null ? null : Number(row.category_id)
+        };
     });
     return crypto.createHash('sha256').update(JSON.stringify(snapshot)).digest('hex');
 }
