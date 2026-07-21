@@ -565,6 +565,17 @@ async function main() {
         assert.strictEqual(invalidPublished.status, 503, invalidPublished.raw);
         assert.strictEqual(invalidPublished.body.error.code, 'REVISION_SOURCE_NOT_READY');
         assert.strictEqual(invalidPublished.body.error.details, undefined, 'public errors must not expose internal overlay details');
+        const { revisionReadiness } = require('../server/lib/publicTranslationReadAdapter');
+        const invalidReadiness = revisionReadiness(database);
+        assert.strictEqual(invalidReadiness.ready, false, 'restart readiness must reject an invalid published overlay');
+        assert.ok(invalidReadiness.blockers.some(function (blocker) {
+            return blocker.code === 'CONTENT_OVERLAY_REVISION_INVALID'
+                && blocker.invalid.some(function (item) {
+                    return item.entityId === contentBlockId
+                        && item.locale === 'fr'
+                        && item.cause === 'OVERLAY_PATH_NOT_ALLOWED';
+                });
+        }), 'readiness must report the invalid content block, locale and overlay cause');
         database.transaction(function () {
             database.prepare('DELETE FROM content_block_translations WHERE id = ?').run(corruptPublished);
             database.prepare("UPDATE content_block_translations SET revision_state = 'published' WHERE id = ?")
@@ -589,7 +600,6 @@ async function main() {
         assert.strictEqual(unavailable.status, 503, unavailable.raw);
         assert.strictEqual(unavailable.body.error.code, 'REVISION_SOURCE_NOT_READY');
         assert.notStrictEqual(unavailable.body.data, null, 'revision failure must not return a successful null payload');
-        const { revisionReadiness } = require('../server/lib/publicTranslationReadAdapter');
         const readiness = revisionReadiness(database);
         assert.strictEqual(readiness.ready, false, 'restart readiness must detect the same missing active schema');
         assert.ok(readiness.blockers.some(function (blocker) { return blocker.code === 'CONTENT_OVERLAY_REVISION_MISSING'; }));

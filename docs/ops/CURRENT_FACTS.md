@@ -1,6 +1,6 @@
 # 当前事实清单
 
-更新时间：2026-07-20（Asia/Shanghai）
+更新时间：2026-07-21（Asia/Shanghai）
 用途：记录当前线上真实状态，作为后续修改、部署、SEO/i18n 调整和后台内容维护的对照基线。
 更新原则：只记录已经通过本地、GitHub、服务器或真实 HTTP 结果核验过的事实；未核验项必须明确标注。
 
@@ -19,7 +19,7 @@
 - v6 迁移前使用 Node 24 创建仓库外 WAL 在线备份 `/home/ubuntu/longxiang-backups/longxiang-pre-v6-20260714-080154.db`，大小 `4456448` 字节；源库和备份完整性均为 `ok`，Schema 均为 v5，产品统计均为 `57=42 published+0 draft+15 deleted`。
 - 迁移后生产旧产品列与迁移前备份的规范化 SHA-256 均为 `5c62d517e0b6c24c7f50e96e127886ca66ca4d9658ba04b28f628180f4639bf7`，确认旧产品字段未变化。
 - 生产已完成 Schema v7 translation revision、Schema v8 content overlay 和 `PUBLIC_TRANSLATION_READ_SOURCE=revision` 切换；旧固定字段、旧 Patch 和 legacy 读取仍保留为兼容与回退来源。
-- Stage A-C 收口节点 1 已在 GitHub `main` 提交；节点 2 本提交继续收口 Registry 驱动的公开读取、规范化 SSR/SEO、503 fail-closed 和 sitemap 批量发布矩阵。本轮不部署，生产仍待后续单独授权拉取并验收节点 1/2。
+- Stage A-C 收口节点 1（`1691a99`）和节点 2（`a1d2f064`）均已提交并部署；生产当前为 `main@a1d2f064`、Schema v8、revision 公开读取模式。四语只读验收及限定 `not-found` 后台写入 canary 已通过，旧字段、旧 Patch 和 legacy 读取继续保留。
 
 ## 运行环境
 
@@ -172,7 +172,7 @@
 - 生产多图试点已完成技术验收，用户侧最终确认仍待完成；在扩大到其他产品前仍需逐项确认图片内容和顺序。
 - 阿语 SEO 已完成代码、Schema v6、42 产品内容审批、全量 dry-run、WAL 在线备份、批量 apply 和 42 个真实阿语页面验收。apply 前备份为 `/home/ubuntu/longxiang-backups/longxiang-arabic-seo-pre-apply-20260714-055546.db`，大小 `4464640` 字节，SHA-256 为 `11ed610994fd02c7b46bca2c63b8c9add458cb2f8dc8684e97b97f5ea1961a54`，完整性为 `ok`。本次数据 apply 不需要重启或操作 PM2。
 - 搜索引擎控制台状态本次未核验；Google Search Console、Bing Webmaster Tools 的提交和收录状态不应从代码或 sitemap 状态反推。
-- Stage A-C 收口节点 1/2 尚未部署到生产，当前只能标记为“本地实现完成、待生产部署与验收”，不能据此宣布 Stage A-C 正式收口。
+- Stage A-C 原三个 Important 已完成生产部署和 `not-found` canary；后续复审发现启动 readiness 尚未验证结构哈希、Schema JSON 和 Overlay 有效性。该定向代码修复在部署验收前仍是待收口项，不影响当前生产四语页面，但暂缓最终架构收口结论。
 - 本清单是时间点事实，不代表永久事实。每次语言、SEO、产品数据、上传链路、部署环境发生变化后都应更新。
 
 ## 快速复核命令

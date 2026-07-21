@@ -30,33 +30,11 @@ function sanitizeBody(slug, body, db) {
     return body;
 }
 
-function readRevisionLocalizedContentBlock(slugValue, localeValue, dbValue, registryValue) {
-    const slug = String(slugValue || '').trim();
-    const locale = String(localeValue || '').trim().toLowerCase();
-    if (!PUBLIC_SLUGS.has(slug)) return null;
-    const registry = registryValue || loadLocaleRegistry();
-    const entry = registry.get(locale);
-    if (!entry || !entry.isPublic) throw new RevisionContentError('LOCALE_NOT_PUBLIC', 'Revision content requires a supported locale.');
-    const db = dbValue || getDb();
-    const row = db.prepare(`
-        SELECT
-            block.id, block.slug, block.body_json, block.version, block.updated_at,
-            revision.id AS revision_id, revision.title, revision.translation_json,
-            revision.schema_version, revision.base_structure_hash,
-            schema.id AS schema_id, schema.schema_json, schema.structure_hash
-        FROM content_blocks block
-        LEFT JOIN content_block_translations revision
-            ON revision.content_block_id = block.id
-            AND revision.locale = ?
-            AND revision.revision_state = 'published'
-        LEFT JOIN content_translation_schemas schema
-            ON schema.content_block_id = block.id
-            AND schema.content_version = block.version
-            AND schema.schema_version = revision.schema_version
-        WHERE block.slug = ? AND block.status = 'published'
-        LIMIT 1
-    `).get(locale, slug);
-    if (!row) return null;
+function validateRevisionContentRow(row, options) {
+    options = options || {};
+    const slug = String(options.slug || row.slug || '').trim();
+    const locale = String(options.locale || row.locale || '').trim().toLowerCase();
+    const registry = options.registry || loadLocaleRegistry();
     if (row.revision_id == null || row.schema_id == null) {
         throw new RevisionContentError(
             'REVISION_SOURCE_NOT_READY',
@@ -85,9 +63,11 @@ function readRevisionLocalizedContentBlock(slugValue, localeValue, dbValue, regi
         throw new RevisionContentError('STRUCTURE_HASH_MISMATCH', 'Content structure changed after the published overlay was created.');
     }
     const overlay = parseObject(row.translation_json, 'content overlay');
-    let body;
     try {
-        body = stripPrivateContentMetadata(applyOverlay(neutralBody, overlay, schema));
+        return {
+            body: stripPrivateContentMetadata(applyOverlay(neutralBody, overlay, schema)),
+            structureHash: currentHash
+        };
     } catch (error) {
         throw new RevisionContentError(
             'REVISION_SOURCE_NOT_READY',
@@ -96,6 +76,37 @@ function readRevisionLocalizedContentBlock(slugValue, localeValue, dbValue, regi
             { slug, locale, cause: error.code || 'OVERLAY_APPLY_FAILED' }
         );
     }
+}
+
+function readRevisionLocalizedContentBlock(slugValue, localeValue, dbValue, registryValue) {
+    const slug = String(slugValue || '').trim();
+    const locale = String(localeValue || '').trim().toLowerCase();
+    if (!PUBLIC_SLUGS.has(slug)) return null;
+    const registry = registryValue || loadLocaleRegistry();
+    const entry = registry.get(locale);
+    if (!entry || !entry.isPublic) throw new RevisionContentError('LOCALE_NOT_PUBLIC', 'Revision content requires a supported locale.');
+    const db = dbValue || getDb();
+    const row = db.prepare(`
+        SELECT
+            block.id, block.slug, block.body_json, block.version, block.updated_at,
+            revision.id AS revision_id, revision.title, revision.translation_json,
+            revision.schema_version, revision.base_structure_hash,
+            schema.id AS schema_id, schema.schema_json, schema.structure_hash
+        FROM content_blocks block
+        LEFT JOIN content_block_translations revision
+            ON revision.content_block_id = block.id
+            AND revision.locale = ?
+            AND revision.revision_state = 'published'
+        LEFT JOIN content_translation_schemas schema
+            ON schema.content_block_id = block.id
+            AND schema.content_version = block.version
+            AND schema.schema_version = revision.schema_version
+        WHERE block.slug = ? AND block.status = 'published'
+        LIMIT 1
+    `).get(locale, slug);
+    if (!row) return null;
+    const validated = validateRevisionContentRow(row, { slug, locale, registry });
+    let body = validated.body;
     body = sanitizeBody(slug, body, db);
     body = compactLocalizedTree(body, locale, registry.entries.map(function (item) { return item.code; }));
     return {
@@ -110,12 +121,13 @@ function readRevisionLocalizedContentBlock(slugValue, localeValue, dbValue, regi
             sourceLocale: locale,
             fallbackApplied: false,
             revisionId: Number(row.revision_id),
-            structureHash: currentHash
+            structureHash: validated.structureHash
         }
     };
 }
 
 module.exports = {
     RevisionContentError,
+    validateRevisionContentRow,
     readRevisionLocalizedContentBlock
 };

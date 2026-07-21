@@ -20,8 +20,7 @@ const {
     compactLocalizedContentBlock,
     compactLocalizedTree
 } = require('./publicContentBlocks');
-const { readRevisionLocalizedContentBlock } = require('./revisionPublicContent');
-const { CONTENT_SCHEMA_VERSION } = require('./contentTranslationOverlay');
+const { readRevisionLocalizedContentBlock, validateRevisionContentRow } = require('./revisionPublicContent');
 const { createRevisionLocalePublicationPolicy } = require('./localePublicationPolicy');
 const contentPresentationI18n = require('../../js/content-presentation-i18n');
 
@@ -267,28 +266,50 @@ function revisionReadiness(dbValue, registryValue) {
     });
 
     const localeSelect = locales.map(function () { return 'SELECT ? AS locale'; }).join(' UNION ALL ');
-    const missingContent = db.prepare(`
+    const contentRows = db.prepare(`
         WITH required_locales AS (${localeSelect})
-        SELECT block.id AS entity_id, required_locales.locale
+        SELECT
+            block.id AS entity_id, block.slug, block.body_json, block.version,
+            required_locales.locale,
+            translation.id AS revision_id, translation.translation_json,
+            translation.schema_version, translation.base_structure_hash,
+            schema.id AS schema_id, schema.schema_json, schema.structure_hash
         FROM content_blocks block
         CROSS JOIN required_locales
         LEFT JOIN content_block_translations translation
             ON translation.content_block_id = block.id
             AND translation.locale = required_locales.locale
             AND translation.revision_state = 'published'
-            AND translation.schema_version = ?
         LEFT JOIN content_translation_schemas schema
             ON schema.content_block_id = block.id
             AND schema.content_version = block.version
             AND schema.schema_version = translation.schema_version
         WHERE block.status = 'published'
-            AND (translation.id IS NULL OR schema.id IS NULL)
         ORDER BY block.id, required_locales.locale
-        LIMIT 50
-    `).all(locales.concat([CONTENT_SCHEMA_VERSION])).map(function (row) {
-        return { entityId: Number(row.entity_id), locale: row.locale };
+    `).all(locales);
+    const missingContent = [];
+    const invalidContent = [];
+    contentRows.forEach(function (row) {
+        const identity = { entityId: Number(row.entity_id), slug: row.slug, locale: row.locale };
+        if (row.revision_id == null || row.schema_id == null) {
+            if (missingContent.length < 50) missingContent.push(identity);
+            return;
+        }
+        try {
+            validateRevisionContentRow(row, { slug: row.slug, locale: row.locale, registry });
+        } catch (error) {
+            if (invalidContent.length < 50) {
+                invalidContent.push({
+                    ...identity,
+                    cause: error && error.details && error.details.cause
+                        ? error.details.cause
+                        : (error.code || 'CONTENT_OVERLAY_VALIDATION_FAILED')
+                });
+            }
+        }
     });
     if (missingContent.length) blockers.push({ code: 'CONTENT_OVERLAY_REVISION_MISSING', entityType: 'content_block', missing: missingContent });
+    if (invalidContent.length) blockers.push({ code: 'CONTENT_OVERLAY_REVISION_INVALID', entityType: 'content_block', invalid: invalidContent });
 
     const missingSpecs = db.prepare(`
         SELECT product.id AS product_id, translation.locale, spec.id AS spec_id
