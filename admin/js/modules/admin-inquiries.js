@@ -295,15 +295,7 @@
             var openedInquiry = getOpenedInquiry();
             if (!openedInquiry || !openedInquiry.email) return;
 
-            var subject = 'Re: ' + (openedInquiry.subject || 'Your Inquiry');
-            var body = 'Dear ' + (openedInquiry.name || '') + ',\n\n\n\n---\nOriginal message:\n' + (openedInquiry.message || '');
-
-            window.open(
-                'https://mail.google.com/mail/?view=cm' +
-                '&to=' + encodeURIComponent(openedInquiry.email) +
-                '&su=' + encodeURIComponent(subject) +
-                '&body=' + encodeURIComponent(body)
-            );
+            window.open('https://mail.163.com/', '_blank', 'noopener');
 
             if (openedInquiry.status !== 'replied' && openedInquiry.status !== 'closed') {
                 var modalNotes = document.getElementById('inquiry-notes');
