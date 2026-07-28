@@ -375,11 +375,13 @@ function readLocalizedProduct(identifier, locale, dbValue, options) {
                 ON value.product_spec_id = spec.id
                 AND value.product_translation_id = ?
             WHERE spec.product_id = ?
+                AND spec.spec_group != 'archived'
             ORDER BY spec.spec_group, spec.sort_order, spec.id
         `).all(row.translation_id, productId)
         : db.prepare(`
             SELECT spec_group, spec_key, spec_value, unit
-            FROM product_specs WHERE product_id = ?
+            FROM product_specs
+            WHERE product_id = ? AND spec_group != 'archived'
             ORDER BY spec_group, sort_order, id
         `).all(productId);
     if (revisionSource) {

@@ -12,6 +12,7 @@ const stageBMigration = require('../server/db/migrations/0007_translation_revisi
 const { loadLocaleRegistry } = require('../server/lib/localeRegistry');
 const { analyzeTranslationBackfill, applyTranslationBackfill } = require('../server/lib/translationBackfill');
 const { analyzeContentOverlayMigration, applyContentOverlayMigration } = require('../server/lib/contentOverlayMigration');
+const { readRevisionLocalizedProduct } = require('../server/lib/localizedPublicCatalog');
 const {
     PublicTranslationReadError,
     resolvePublicTranslationReadSource,
@@ -119,6 +120,77 @@ function assertMissingRevisionFailsClosed(db, registry) {
         });
     } finally {
         db.prepare("UPDATE product_translations SET revision_state = 'published' WHERE id = ?").run(row.id);
+    }
+}
+
+function assertArchivedProductSpecsIgnored(db, registry) {
+    const product = db.prepare(`
+        SELECT id, legacy_id, slug
+        FROM products
+        WHERE status = 'published'
+            AND EXISTS (
+                SELECT 1 FROM product_specs
+                WHERE product_id = products.id AND spec_group = 'technical'
+            )
+        ORDER BY id
+        LIMIT 1
+    `).get();
+    assert(product, 'archived product spec regression fixture requires a published product');
+    const inserted = db.prepare(`
+        INSERT INTO product_specs
+            (product_id, spec_code, spec_group, spec_key, spec_value, sort_order, created_at, updated_at)
+        VALUES (?, 'archived-read-regression', 'archived', 'Archived regression spec', 'must not render', 999, ?, ?)
+    `).run(product.id, Date.now(), Date.now());
+    const identifier = product.slug || product.legacy_id;
+    try {
+        const revisionReader = createPublicTranslationReadAdapter({ db, registry, source: 'revision' });
+        assert.strictEqual(revisionReader.readiness.ready, true,
+            'an untranslated archived spec must not block revision readiness');
+        registry.publicEntries.forEach(function (entry) {
+            const detail = revisionReader.readPresentationProduct(identifier, entry.code);
+            assert(detail, 'revision product detail must remain readable for ' + entry.code);
+            assert(detail.specs.length > 0, 'revision product detail lost active specs for ' + entry.code);
+            assert(!detail.specs.some(function (spec) {
+                return spec[0] === 'Archived regression spec';
+            }), 'revision product detail exposed an archived spec for ' + entry.code);
+        });
+
+        const legacyReader = createPublicTranslationReadAdapter({ db, registry, source: 'legacy' });
+        const legacyDetail = legacyReader.readLocalizedProduct(identifier, 'en');
+        assert(legacyDetail, 'legacy product detail must remain readable with an archived spec');
+        assert(legacyDetail.specs.length > 0, 'legacy product detail lost active specs');
+        assert(!legacyDetail.specs.some(function (spec) {
+            return spec[0] === 'Archived regression spec';
+        }), 'legacy product detail exposed an archived spec');
+    } finally {
+        db.prepare('DELETE FROM product_specs WHERE id = ?').run(Number(inserted.lastInsertRowid));
+    }
+}
+
+function assertActiveProductSpecStillFailsClosed(db, registry) {
+    const product = db.prepare(`
+        SELECT id, legacy_id, slug
+        FROM products
+        WHERE status = 'published'
+        ORDER BY id
+        LIMIT 1
+    `).get();
+    assert(product, 'active product spec regression fixture requires a published product');
+    const inserted = db.prepare(`
+        INSERT INTO product_specs
+            (product_id, spec_code, spec_group, spec_key, spec_value, sort_order, created_at, updated_at)
+        VALUES (?, 'active-read-regression', 'technical', 'Active regression spec', 'must fail closed', 999, ?, ?)
+    `).run(product.id, Date.now(), Date.now());
+    const identifier = product.slug || product.legacy_id;
+    try {
+        assert.throws(function () {
+            readRevisionLocalizedProduct(identifier, 'en', db, registry);
+        }, function (error) {
+            return error && error.code === 'REVISION_SOURCE_NOT_READY'
+                && error.details && error.details.entityType === 'product_spec';
+        }, 'an untranslated active spec must keep revision product details fail-closed');
+    } finally {
+        db.prepare('DELETE FROM product_specs WHERE id = ?').run(Number(inserted.lastInsertRowid));
     }
 }
 
@@ -244,6 +316,8 @@ async function run() {
         assertStringAboutSsrBaseline(db, registry);
         assertSourceSwitch(db, registry);
         assertMissingRevisionFailsClosed(db, registry);
+        assertArchivedProductSpecsIgnored(db, registry);
+        assertActiveProductSpecStillFailsClosed(db, registry);
         assertQueryBudgets(db, registry);
 
         const normalizedReader = createPublicTranslationReadAdapter({ db, registry, source: 'revision' });
